@@ -14,7 +14,7 @@ local kernels = asset.syncedResource({
     Name = "Messenger Kernels",
     Type = "HttpSynchronization",
     Identifier = "messenger_spice",
-    Version = 1
+    Version = 2
 })
 
 

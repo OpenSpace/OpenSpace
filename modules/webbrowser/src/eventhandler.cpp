@@ -361,7 +361,7 @@ void EventHandler::setBrowserInstance(BrowserInstance* browserInstance) {
     _browserInstance = browserInstance;
 }
 
-void EventHandler::detachBrowser() {
+void EventHandler::resetBrowserInstance() {
     _browserInstance = nullptr;
 }
 

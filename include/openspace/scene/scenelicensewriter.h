@@ -36,10 +36,9 @@ struct SceneLicense;
 class SceneLicenseWriter : public DocumentationGenerator {
 public:
     SceneLicenseWriter(std::vector<SceneLicense> licenses);
-
-private:
     std::string generateJson() const override;
 
+private:
     const std::vector<SceneLicense>& _licenses;
 };
 

@@ -78,7 +78,6 @@ public:
     RendererImplementation rendererImplementation() const;
 
     void updateShaderPrograms();
-    void updateFade();
     void updateRenderer();
     void updateScreenSpaceRenderables();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
@@ -140,13 +139,15 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
+     * Mark that one screenshot should be taken
+     */
+    void takeScreenShot();
+
+    /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
      */
     static scripting::LuaLibrary luaLibrary();
-
-    // Temporary fade functionality
-    void startFading(int direction, float fadeDuration);
 
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
@@ -154,6 +155,8 @@ public:
     glm::mat4 globalRotation() const;
     glm::mat4 screenSpaceRotation() const;
     glm::mat4 nodeRotation() const;
+
+    uint64_t frameNumber() const;
 
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
@@ -187,10 +190,7 @@ private:
     properties::BoolProperty _showFrameNumber;
     properties::BoolProperty _disableMasterRendering;
 
-    float _globalBlackOutFactor = 1.f;
-    float _fadeDuration = 2.f;
-    float _currentFadeTime = 0.f;
-    int _fadeDirection = 0;
+    properties::FloatProperty _globalBlackOutFactor;
     properties::IntProperty _nAaSamples;
     properties::FloatProperty _hdrExposure;
     properties::FloatProperty _hdrBackground;

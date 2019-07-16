@@ -78,11 +78,13 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     // Copy the updated rectangle line by line.
     for (int y = lowerUpdatingRectBound.y; y < upperUpdatingRectBound.y; ++y) {
         int lineOffset = y * w + lowerUpdatingRectBound.x;
+        // Chromium stores image upside down compared to OpenGL, so we flip it:
+        int invLineOffset = (h - y - 1) * w + lowerUpdatingRectBound.x;
         int rectWidth = upperUpdatingRectBound.x - lowerUpdatingRectBound.x;
         std::copy(
             reinterpret_cast<const Pixel*>(buffer) + lineOffset,
             reinterpret_cast<const Pixel*>(buffer) + lineOffset + rectWidth,
-            _browserBuffer.data() + lineOffset
+            _browserBuffer.data() + invLineOffset
         );
     }
 
@@ -123,14 +125,15 @@ void WebRenderHandler::updateTexture() {
             GL_TEXTURE_2D,
             0,
             _lowerDirtyRectBound.x,
-            _lowerDirtyRectBound.y,
+            _browserBufferSize.y - _upperDirtyRectBound.y,
             _upperDirtyRectBound.x - _lowerDirtyRectBound.x,
             _upperDirtyRectBound.y - _lowerDirtyRectBound.y,
             GL_BGRA_EXT,
             GL_UNSIGNED_BYTE,
             reinterpret_cast<char*>(
                 _browserBuffer.data() +
-                _lowerDirtyRectBound.y * _browserBufferSize.x + _lowerDirtyRectBound.x
+                (_browserBufferSize.y - _upperDirtyRectBound.y) *
+                _browserBufferSize.x + _lowerDirtyRectBound.x
             )
         );
 

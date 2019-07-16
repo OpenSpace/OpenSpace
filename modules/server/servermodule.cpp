@@ -72,37 +72,30 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
 }
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    using namespace ghoul::io;
+    global::callback::preSync.emplace_back([this]() { preSync(); });
 
-    if (configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
-        ghoul::Dictionary interfaces =
-            configuration.value<ghoul::Dictionary>(KeyInterfaces);
+    if (!configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
+        return;
+    }
+    ghoul::Dictionary interfaces = configuration.value<ghoul::Dictionary>(KeyInterfaces);
 
-        for (std::string& key : interfaces.keys()) {
-            if (!interfaces.hasValue<ghoul::Dictionary>(key)) {
-                continue;
-            }
-            ghoul::Dictionary interfaceDictionary =
-                interfaces.value<ghoul::Dictionary>(key);
+    for (const std::string& key : interfaces.keys()) {
+        ghoul::Dictionary interfaceDictionary = interfaces.value<ghoul::Dictionary>(key);
 
-            std::unique_ptr<ServerInterface> serverInterface =
-                ServerInterface::createFromDictionary(interfaceDictionary);
+        std::unique_ptr<ServerInterface> serverInterface =
+            ServerInterface::createFromDictionary(interfaceDictionary);
 
 
-            if (global::windowDelegate.isMaster()) {
-                serverInterface->initialize();
-            }
-
-            _interfaceOwner.addPropertySubOwner(serverInterface.get());
-
-            if (serverInterface) {
-                _interfaces.push_back(std::move(serverInterface));
-            }
+        if (global::windowDelegate.isMaster()) {
+            serverInterface->initialize();
         }
 
-    }
+        _interfaceOwner.addPropertySubOwner(serverInterface.get());
 
-    global::callback::preSync.emplace_back([this]() { preSync(); });
+        if (serverInterface) {
+            _interfaces.push_back(std::move(serverInterface));
+        }
+    }
 }
 
 void ServerModule::preSync() {

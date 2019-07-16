@@ -138,7 +138,7 @@ void TimeManager::preSynchronization(double dt) {
     if (newTime != _lastTime) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _timeChangeCallbacks) {
+        for (const std::pair<K, V>& it : _timeChangeCallbacks) {
             it.second();
         }
     }
@@ -148,14 +148,14 @@ void TimeManager::preSynchronization(double dt) {
     {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _deltaTimeChangeCallbacks) {
+        for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
             it.second();
         }
     }
     if (_timelineChanged) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _timelineChangeCallbacks) {
+        for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
             it.second();
         }
     }
@@ -230,7 +230,7 @@ void TimeManager::progressTime(double dt) {
 
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _timeJumpCallbacks) {
+        for (const std::pair<K, V>& it : _timeJumpCallbacks) {
             it.second();
         }
         return;

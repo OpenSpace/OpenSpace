@@ -60,11 +60,6 @@ public:
     bool enqueueTileIO(const TileIndex& tileIndex);
 
     /**
-     * Get all finished jobs.
-     */
-    std::vector<RawTile> rawTiles();
-
-    /**
      * Get one finished job.
      */
     std::optional<RawTile> popFinishedRawTile();
@@ -99,6 +94,8 @@ protected:
      * to be explicitly ended.
      */
     void endUnfinishedJobs();
+
+    void clearTiles();
 
     void endEnqueuedJobs();
 

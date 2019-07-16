@@ -153,61 +153,17 @@ documentation::Documentation Configuration::Documentation = {
             "the results from previous runs) will be silently overwritten."
         },
         {
-            KeyDocumentation,
+            KeyDocumentationPath,
             new TableVerifier({
                 {
-                    KeyLuaDocumentation,
+                    KeyDocumentationPath,
                     new StringVerifier,
                     Optional::Yes,
-                    "The filename that will be created on startup containing the "
-                    "documentation of available Lua functions that can be executed in "
-                    "scene files or per console. Any existing file will be silently "
-                    "overwritten."
-                },
-                {
-                    KeyPropertyDocumentation,
-                    new StringVerifier,
-                    Optional::Yes,
-                    "The file that will be created on startup containing a list of all "
-                    "properties in the scene. Any existing file will be silently "
-                    "overwritten."
-                },
-                {
-                    KeyKeyboardShortcuts,
-                    new StringVerifier,
-                    Optional::Yes,
-                    "The file that will be created on startup containing the list of all "
-                    "keyboard bindings with their respective Lua scripts. For each key, "
-                    "it mentions which scripts will be executed in the current session."
-                },
-                {
-                    KeyDocumentation,
-                    new StringVerifier,
-                    Optional::Yes,
-                    "The file that will be created on startup containing this "
-                    "documentation. Any previous file in this location will be silently "
-                    "overwritten."
-                },
-                {
-                    KeyFactoryDocumentation,
-                    new StringVerifier,
-                    Optional::Yes,
-                    "The file that will be created on startup containing the factory "
-                    "documentation which shows the different types of objects that can "
-                    "be created in the current application configuration. Any previous "
-                    "file in this location will be silently overritten."
-                },
-                {
-                    KeyLicenseDocumentation,
-                    new StringVerifier,
-                    Optional::Yes,
-                    "The file that will be created on startup containing the scene "
-                    "license information. Any previous file in this location will be "
-                    "silently overwritten."
+                    "The path where the documentation files will be stored."
                 },
             }),
             Optional::Yes,
-            "All documentations that are generated at application startup."
+            "Right now only contains the path where the documentation is written to."
         },
         {
             KeyShutdownCountdown,

@@ -161,6 +161,11 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     _latitude.onChange([this]() { _positionIsDirty = true; });
     _fixedAltitude.onChange([this]() { _positionIsDirty = true; });
     _useFixedAltitude.onChange([this]() { _positionIsDirty = true; });
+
+    addProperty(_longitude);
+    addProperty(_latitude);
+    addProperty(_fixedAltitude);
+    addProperty(_useFixedAltitude);
 }
 
 void GlobeTranslation::fillAttachedNode() {
@@ -173,8 +178,10 @@ void GlobeTranslation::fillAttachedNode() {
             "GlobeTranslation",
             "Could not set attached node as it does not have a RenderableGlobe"
         );
-        // Reset the globe name to it's previous name
-        _globe = _attachedNode->identifier();
+        if (_attachedNode) {
+            // Reset the globe name to it's previous name
+            _globe = _attachedNode->identifier();
+        }
     }
 }
 

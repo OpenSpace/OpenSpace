@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2019                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2019                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 
@@ -45,10 +45,18 @@
 #include <locale>
 
 namespace {
-    constexpr const char* keyLabels = "Labels";
-    constexpr const char* keyLabelsFileName = "FileName";
-
     constexpr const char* _loggerCat = "GlobeLabels";
+
+    constexpr const char* KeyLabelsFileName = "FileName";
+
+    constexpr const double LabelFadeRangeConst = 1500.0;
+    constexpr const double RangeAngularCoefConst = 0.8;
+    constexpr const float MinTransparencyValueConst = 0.009f;
+
+    enum LabelRenderingAlignmentType {
+        Horizontally = 0,
+        Circularly
+    };
 
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -117,17 +125,13 @@ namespace {
         "Fade Out Starting Distance for Labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        LabelsFadeInEnabledInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo LabelsFadeInEnabledInfo = {
         "LabelsFadeInEnabled",
         "Labels fade In enabled",
         "Labels fade In enabled"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        LabelsFadeOutEnabledInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo LabelsFadeOutEnabledInfo = {
         "LabelsFadeOutEnabled",
         "Labels fade Out enabled",
         "Labels fade Out enabled"
@@ -161,98 +165,98 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
     return {
         "GlobeLabels Component",
         "globebrowsing_globelabelscomponent",
-    {
         {
-            LabelsInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsInfo.description
-        },
-        {
-            LabelsEnableInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsEnableInfo.description
-        },
-        {
-            LabelsFontSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsFontSizeInfo.description
-        },
-        {
-            LabelsMaxSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsMaxSizeInfo.description
-        },
-        {
-            LabelsMinSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsMinSizeInfo.description
-        },
-        {
-            LabelsSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsSizeInfo.description
-        },
-        {
-            LabelsMinHeightInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsMinHeightInfo.description
-        },
-        {
-            LabelsColorInfo.identifier,
-            new Vector4Verifier<float>(),
-            Optional::Yes,
-            LabelsColorInfo.description
-        },
-        {
-            LabelsFadeInStartingDistanceInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsFadeInStartingDistanceInfo.description
-        },
-        {
-            LabelsFadeOutStartingDistanceInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsFadeOutStartingDistanceInfo.description
-        },
-        {
-            LabelsFadeInEnabledInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsFadeInEnabledInfo.description
-        },
-        {
-            LabelsFadeOutEnabledInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsFadeOutEnabledInfo.description
-        },
-        {
-            LabelsDisableCullingEnabledInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsDisableCullingEnabledInfo.description
-        },
-        {
-            LabelsDistanceEPSInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsDistanceEPSInfo.description
-        },
-        {
-            LabelAlignmentOptionInfo.identifier,
-            new StringVerifier,
-            Optional::Yes,
-            LabelAlignmentOptionInfo.description
-        },
-    }
+            {
+                LabelsInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsInfo.description
+            },
+            {
+                LabelsEnableInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsEnableInfo.description
+            },
+            {
+                LabelsFontSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsFontSizeInfo.description
+            },
+            {
+                LabelsMaxSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsMaxSizeInfo.description
+            },
+            {
+                LabelsMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsMinSizeInfo.description
+            },
+            {
+                LabelsSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsSizeInfo.description
+            },
+            {
+                LabelsMinHeightInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsMinHeightInfo.description
+            },
+            {
+                LabelsColorInfo.identifier,
+                new Vector4Verifier<float>(),
+                Optional::Yes,
+                LabelsColorInfo.description
+            },
+            {
+                LabelsFadeInStartingDistanceInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsFadeInStartingDistanceInfo.description
+            },
+            {
+                LabelsFadeOutStartingDistanceInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsFadeOutStartingDistanceInfo.description
+            },
+            {
+                LabelsFadeInEnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsFadeInEnabledInfo.description
+            },
+            {
+                LabelsFadeOutEnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsFadeOutEnabledInfo.description
+            },
+            {
+                LabelsDisableCullingEnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsDisableCullingEnabledInfo.description
+            },
+            {
+                LabelsDistanceEPSInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsDistanceEPSInfo.description
+            },
+            {
+                LabelAlignmentOptionInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                LabelAlignmentOptionInfo.description
+            },
+        }
     };
 }
 
@@ -264,10 +268,14 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _labelsMinSize(LabelsMinSizeInfo, 4, 1, 100)
     , _labelsSize(LabelsSizeInfo, 2.5, 0, 30)
     , _labelsMinHeight(LabelsMinHeightInfo, 100.0, 0.0, 10000.0)
-    , _labelsColor(LabelsColorInfo, glm::vec4(1.f, 1.f, 0.f, 1.f),
-        glm::vec4(0.f), glm::vec4(1.f))
-    , _labelsFadeInDist(LabelsFadeInStartingDistanceInfo, 1E6, 1E3, 1E8)
-    , _labelsFadeOutDist(LabelsFadeOutStartingDistanceInfo, 1E4, 1, 1E7)
+    , _labelsColor(
+        LabelsColorInfo,
+        glm::vec4(1.f, 1.f, 0.f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _labelsFadeInDist(LabelsFadeInStartingDistanceInfo, 1e6, 1e3, 1e8)
+    , _labelsFadeOutDist(LabelsFadeOutStartingDistanceInfo, 1e4, 1, 1e7)
     , _labelsFadeInEnabled(LabelsFadeInEnabledInfo, false)
     , _labelsFadeOutEnabled(LabelsFadeOutEnabledInfo, false)
     , _labelsDisableCullingEnabled(LabelsDisableCullingEnabledInfo, false)
@@ -291,13 +299,13 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_labelsDisableCullingEnabled);
     addProperty(_labelsDistaneEPS);
 
-    _labelAlignmentOption.addOption(0, "Horizontally");
-    _labelAlignmentOption.addOption(1, "Circularly");
+    _labelAlignmentOption.addOption(Horizontally, "Horizontally");
+    _labelAlignmentOption.addOption(Circularly, "Circularly");
     _labelAlignmentOption = Horizontally;
     addProperty(_labelAlignmentOption);
 }
 
-void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary, 
+void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                                       globebrowsing::RenderableGlobe* globe)
 {
     documentation::testSpecificationAndThrow(
@@ -305,7 +313,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         dictionary,
         "GlobeLabelsComponent"
     );
-        
+
     _globe = globe;
 
     // Reads labels' file and build cache file if necessary
@@ -313,7 +321,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
     std::string labelsFile;
-    bool successLabels = dictionary.getValue(keyLabelsFileName, labelsFile);
+    bool successLabels = dictionary.getValue(KeyLabelsFileName, labelsFile);
     if (!successLabels) {
         return;
     }
@@ -330,10 +338,9 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         // enables the label automatically.
         _labelsEnabled = true;
     }
-         
+
     if (dictionary.hasKey(LabelsFontSizeInfo.identifier)) {
-        float fontSize = dictionary.value<float>(LabelsFontSizeInfo.identifier);
-        _labelsFontSize = fontSize;
+        _labelsFontSize = dictionary.value<float>(LabelsFontSizeInfo.identifier);
         _labelsFontSize.onChange([this]() { initializeFonts(); });
     }
 
@@ -389,7 +396,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         bool disabled = dictionary.value<bool>(
             LabelsDisableCullingEnabledInfo.identifier
         );
-        _labelsDisableCullingEnabled.set(disabled);
+        _labelsDisableCullingEnabled = disabled;
     }
 
     if (dictionary.hasKey(LabelsDistanceEPSInfo.identifier)) {
@@ -404,8 +411,11 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         if (alignment == "Horizontally") {
             _labelAlignmentOption = Horizontally;
         }
-        else {
+        else if (alignment == "Circularly" ) {
             _labelAlignmentOption = Circularly;
+        }
+        else {
+            LERROR("Unknown alignment option: " + alignment);
         }
     }
 
@@ -464,7 +474,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
         if (!csvLabelFile.is_open()) {
             return false;
         }
-        
+
         _labels.labelsArray.clear();
 
         std::string sline;
@@ -477,14 +487,14 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             std::istringstream iss(sline);
             std::string token;
             std::getline(iss, token, ',');
-            
+
             // First line is just the Header
             if (token == "Feature_Name") {
                 continue;
             }
 
             LabelEntry lEntry;
-            
+
             // Non-ascii characters aren't displayed correctly by the text
             // rendering (We don't have the non-ascii character in the texture
             // atlas)
@@ -505,16 +515,16 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             }
 
             std::getline(iss, token, ','); // Target is not used
-                
+
             std::getline(iss, token, ','); // Diameter
             lEntry.diameter = std::stof(token);
-                
+
             std::getline(iss, token, ','); // Latitude
             lEntry.latitude = std::stof(token);
-                
+
             std::getline(iss, token, ','); // Longitude
             lEntry.longitude = std::stof(token);
-                
+
             std::getline(iss, token, ','); // Coord System
             std::string coordinateSystem(token);
             std::size_t found = coordinateSystem.find("West");
@@ -525,8 +535,9 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             // Clean white spaces
             std::istringstream issFeature(lEntry.feature);
             std::getline(issFeature, token, '=');
-            if (token == "")
+            if (token.empty()) {
                 std::getline(issFeature, token, '=');
+            }
             strncpy(lEntry.feature, token.c_str(), 256);
 
             GlobeBrowsingModule* _globeBrowsingModule =
@@ -539,9 +550,8 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             );
 
             _labels.labelsArray.push_back(lEntry);
-            
         }
-       
+
         return true;
     }
     catch (const std::fstream::failure& e) {
@@ -573,7 +583,7 @@ bool GlobeLabelsComponent::loadCachedFile(const std::string& file) {
 
     fileStream.read(
         reinterpret_cast<char*>(_labels.labelsArray.data()),
-        nValues * sizeof(_labels.labelsArray[0])
+        nValues * sizeof(LabelEntry)
     );
 
     return fileStream.good();
@@ -595,8 +605,8 @@ bool GlobeLabelsComponent::saveCachedFile(const std::string& file) const {
     }
     fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-    size_t nBytes = nValues * sizeof(_labels.labelsArray[0]);
-    fileStream.write(reinterpret_cast<const char*>(&_labels.labelsArray[0]), nBytes);
+    size_t nBytes = nValues * sizeof(LabelEntry);
+    fileStream.write(reinterpret_cast<const char*>(_labels.labelsArray.data()), nBytes);
 
     return fileStream.good();
 }
@@ -612,48 +622,42 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
                     viewTransform;
     glm::dmat4 mvp = vp * _globe->modelTransform();
 
-    glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() * 
+    glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() *
                                     glm::vec4(0.f, 0.f, 0.f, 1.f));
-    glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld - 
+    glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld -
                                             data.camera.positionVec3();
     double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
 
     float varyingOpacity = 1.f;
+
+    double averageRadius = (
+        _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
+        _globe->ellipsoid().radii().z
+    ) / 3.0;
     if (_labelsFadeInEnabled) {
-        double averageRadius = (
-            _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + 
-            _globe->ellipsoid().radii().z
-            ) / 3.0;
-        glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight
-        );
+        glm::dvec2 fadeRange = glm::dvec2(averageRadius + _labelsMinHeight);
         fadeRange.x += _labelsFadeInDist;
         double a = 1.0 / (fadeRange.y - fadeRange.x);
         double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < minTransparencyValueConst) {
+        if (varyingOpacity < MinTransparencyValueConst) {
             return;
         }
     }
 
     if (_labelsFadeOutEnabled) {
-        double averageRadius = (
-            _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
-            _globe->ellipsoid().radii().z
-            ) / 3.0;
-
         glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight + labelFadeRangeConst
+            averageRadius + _labelsMinHeight + LabelFadeRangeConst
         );
         fadeRange.x += _labelsFadeOutDist;
-        double a = rangeAngularCoefConst / (fadeRange.x - fadeRange.y);
+        double a = RangeAngularCoefConst / (fadeRange.x - fadeRange.y);
         double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < minTransparencyValueConst) {
+        if (varyingOpacity < MinTransparencyValueConst) {
             return;
         }
     }
@@ -662,23 +666,14 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 }
 
 void GlobeLabelsComponent::renderLabels(const RenderData& data,
-                                        const glm::dmat4& modelViewProjectionMatrix, 
+                                        const glm::dmat4& modelViewProjectionMatrix,
                                         float distToCamera,
                                         float fadeInVariable
 ) {
-    constexpr double DIST_EPS = 6000.0;
-    constexpr double SIN_EPS = 0.001;
-
     glm::vec4 textColor = _labelsColor;
     textColor.a *= fadeInVariable;
 
-    glm::dmat4 invMP = glm::inverse(_globe->modelTransform());
-    glm::dmat4 invCombinedView = glm::inverse(data.camera.combinedViewMatrix());
-
-    glm::dvec4 cameraPosWorld = invCombinedView * glm::dvec4(0.0, 0.0, 0.0, 1.0);
-    glm::dvec3 cameraPosObj = glm::dvec3(invMP * cameraPosWorld);
-    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0); 
-    glm::dvec3 cameraLookUpObj = glm::dvec3(invMP * cameraUpVecWorld);
+    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
 
     glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
                     data.camera.combinedViewMatrix();
@@ -794,52 +789,52 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
     double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
     double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
     double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
-    double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
+    // double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
 
     // Normalize Planes
-    double invMag = 1.0 / glm::length(leftNormal);
-    leftNormal *= invMag;
-    leftDistance *= invMag;
+    const double invMagLeft = 1.0 / glm::length(leftNormal);
+    leftNormal *= invMagLeft;
+    leftDistance *= invMagLeft;
 
-    invMag = 1.0 / glm::length(rightNormal);
-    rightNormal *= invMag;
-    rightDistance *= invMag;
+    const double invMagRight = 1.0 / glm::length(rightNormal);
+    rightNormal *= invMagRight;
+    rightDistance *= invMagRight;
 
-    invMag = 1.0 / glm::length(bottomNormal);
-    bottomNormal *= invMag;
-    bottomDistance *= invMag;
+    const double invMagBottom = 1.0 / glm::length(bottomNormal);
+    bottomNormal *= invMagBottom;
+    bottomDistance *= invMagBottom;
 
-    invMag = 1.0 / glm::length(topNormal);
-    topNormal *= invMag;
-    topDistance *= invMag;
+    const double invMagTop = 1.0 / glm::length(topNormal);
+    topNormal *= invMagTop;
+    topDistance *= invMagTop;
 
-    invMag = 1.0 / glm::length(nearNormal);
-    nearNormal *= invMag;
-    nearDistance *= invMag;
+    const double invMagNear = 1.0 / glm::length(nearNormal);
+    nearNormal *= invMagNear;
+    nearDistance *= invMagNear;
 
-    invMag = 1.0 / glm::length(farNormal);
-    farNormal *= invMag;
-    farDistance *= invMag;
+    const double invMagFar = 1.0 / glm::length(farNormal);
+    farNormal *= invMagFar;
+    // farDistance *= invMagFar;
 
-    float radius = 1.0;
+    constexpr const float Radius = 1.0;
 
-    if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
+    if ((glm::dot(leftNormal, position) + leftDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(rightNormal, position) + rightDistance) < -radius) {
+    else if ((glm::dot(rightNormal, position) + rightDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(bottomNormal, position) + bottomDistance) < -radius) {
+    else if ((glm::dot(bottomNormal, position) + bottomDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(topNormal, position) + topDistance) < -radius) {
+    else if ((glm::dot(topNormal, position) + topDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
+    else if ((glm::dot(nearNormal, position) + nearDistance) < -Radius) {
         return false;
     }
     // The far plane testing is disabled because the atm has no depth.
-    /*else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
+    /*else if ((glm::dot(farNormal, position) + farDistance) < -Radius) {
     return false;
     }*/
 

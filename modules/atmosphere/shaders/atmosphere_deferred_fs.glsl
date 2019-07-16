@@ -250,11 +250,13 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Compute positions and directions in object space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
-    //dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 0.0, 1.0);
-    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 0.0, 1.0);
+
+    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 1.0, 1.0);
 
     // Clip to Object Coords
     dvec4 objectCoords = dSgctProjectionToModelTransformMatrix * clipCoords;
+
+    objectCoords /= objectCoords.w;
     
     // Planet Position in Object Space
     // JCC: Applying the inverse of the model transformation on the object postion in World 
