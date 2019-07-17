@@ -1,7 +1,6 @@
 local guiCustomization = asset.require('customization/gui')
 
 local backendHash = "84737f9785f12efbb12d2de9d511154c6215fe9c"
-
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local backend = asset.syncedResource({

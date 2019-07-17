@@ -20,17 +20,22 @@ asset.onInitialize(function ()
         openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
     end
 
-    -- Do not serve the files if we are in webgui development mode.
-    -- In that case, you have to serve the webgui manually, using `npm start`.
-    if not guiCustomization.webguiDevelopmentMode then
-        local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
-        directories[#directories + 1] = "frontend"
-        directories[#directories + 1] = frontend .. '/frontend'
-
-        openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
-    end
-
+    -- Serve the production GUI:
+    local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+    directories[#directories + 1] = "frontend"
+    directories[#directories + 1] = frontend .. '/frontend'
+    openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
     openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
+
+    if guiCustomization.webguiDevelopmentMode then
+        -- Route CEF to the deveopment version of the GUI.
+        -- This must be manually served using `npm start`
+        -- in the OpenSpace-WebGuiFrontend repository.
+        openspace.setPropertyValueSingle(
+            "Modules.CefWebGui.GuiUrl",
+            "http://127.0.0.1:4690/frontend/#/onscreen"
+        )
+    end
 
     -- The GUI contains date and simulation increment,
     -- so let's remove these from the dashboard.
