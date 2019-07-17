@@ -771,7 +771,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     });
 
     _pJumpToStartBtn.onChange([this] {
-        global::timeManager.setTimeNextFrame(_startTimes[0]);
+        global::timeManager.setTimeNextFrame(Time(_startTimes[0]));
     });
 }
 
