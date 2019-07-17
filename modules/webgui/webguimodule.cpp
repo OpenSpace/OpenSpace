@@ -281,7 +281,4 @@ void WebGuiModule::stopProcess() {
     _process = nullptr;
 }
 
-
-
-
 } // namespace openspace
