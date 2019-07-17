@@ -194,7 +194,7 @@ local Apollo11LemDescentModel = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = model.modelFolder .. "/lmremoved.obj"
+            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
         },
         ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
