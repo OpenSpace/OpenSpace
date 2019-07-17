@@ -83,7 +83,7 @@ namespace {
         "DefaultEndpoint",
         "Default Endpoint",
         "The 'default' endpoint. "
-        "The server will redirect http requests from / to /<redirect>",
+        "The server will redirect http requests from / to /<DefaultEndpoint>",
     };
 
 
@@ -270,8 +270,6 @@ void WebGuiModule::startProcess() {
         " --ws-address \"" + _address.value() + "\"" +
         " --ws-port " + std::to_string(webSocketPort) +
         " --auto-close --local";
-
-    LDEBUG(command);
 
     _process = std::make_unique<ghoul::Process>(
         command,
