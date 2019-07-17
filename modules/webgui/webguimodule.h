@@ -63,6 +63,7 @@ private:
     properties::StringProperty _entryPoint;
     properties::StringListProperty _directories;
     properties::StringListProperty _servedDirectories;
+    properties::StringProperty _defaultEndpoint;
 
     std::unordered_map<std::string, std::string> _endpoints;
 

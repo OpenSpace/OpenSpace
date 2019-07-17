@@ -30,6 +30,8 @@ asset.onInitialize(function ()
         openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
     end
 
+    openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
+
     -- The GUI contains date and simulation increment,
     -- so let's remove these from the dashboard.
     if openspace.getPropertyValue('Modules.CefWebGui.Visible') then
@@ -42,6 +44,8 @@ asset.onDeinitialize(function ()
     -- Remove the frontend endpoint
     local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
     local newDirectories;
+
+    openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
 
     for i = 0, #directories, 2 do
         if (string.find(directories[i], "frontend") == nil) then

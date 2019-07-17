@@ -78,6 +78,16 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
+        DefaultEndpointInfo =
+    {
+        "DefaultEndpoint",
+        "Default Endpoint",
+        "The 'default' endpoint. "
+        "The server will redirect http requests from / to /<redirect>",
+    };
+
+
+    constexpr openspace::properties::Property::PropertyInfo
         ServedDirectoriesInfo =
     {
         "ServedDirectories",
@@ -100,6 +110,7 @@ WebGuiModule::WebGuiModule()
     , _entryPoint(ServerProcessEntryPointInfo)
     , _directories(DirectoriesInfo)
     , _servedDirectories(ServedDirectoriesInfo)
+    , _defaultEndpoint(DefaultEndpointInfo)
     , _port(PortInfo, DefaultPort)
     , _address(AddressInfo, DefaultAddress)
     , _webSocketInterface(WebSocketInterfaceInfo, "")
@@ -108,6 +119,7 @@ WebGuiModule::WebGuiModule()
     addProperty(_entryPoint);
     addProperty(_directories);
     addProperty(_servedDirectories);
+    addProperty(_defaultEndpoint);
     addProperty(_address);
     addProperty(_port);
 }
@@ -176,6 +188,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _enabled.onChange(startOrStop);
     _entryPoint.onChange(restartIfEnabled);
     _directories.onChange(restartIfEnabled);
+    _defaultEndpoint.onChange(restartIfEnabled);
     _servedDirectories.onChange([this]() {
         std::unordered_map<std::string, std::string> newEndpoints;
         std::vector<std::string> list = _servedDirectories.value();
@@ -245,9 +258,14 @@ void WebGuiModule::startProcess() {
     }
     formattedDirectories += "]";
 
+    const std::string defaultEndpoint = _defaultEndpoint.value().empty() ?
+        "" :
+        " --redirect \"" + _defaultEndpoint.value() + "\"";
+
     const std::string command = "\"" + nodePath + "\" "
         + "\"" + absPath(_entryPoint.value()) + "\"" +
         " --directories \"" + formattedDirectories + "\"" +
+        defaultEndpoint +
         " --http-port \"" + std::to_string(_port.value()) + "\" " +
         " --ws-address \"" + _address.value() + "\"" +
         " --ws-port " + std::to_string(webSocketPort) +
