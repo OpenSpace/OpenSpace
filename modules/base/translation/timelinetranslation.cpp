@@ -72,7 +72,7 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
 
     std::vector<std::string> timeStrings = keyframes.keys();
     for (const std::string& timeString : timeStrings) {
-        const Time t = Time::convertTime(timeString);
+        const double t = Time::convertTime(timeString);
 
         std::unique_ptr<Translation> translation = 
             Translation::createFromDictionary(
@@ -80,7 +80,7 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
             );
 
         if (translation) {
-            _timeline.addKeyframe(t.j2000Seconds(), std::move(translation));
+            _timeline.addKeyframe(t, std::move(translation));
         }
     }
 }

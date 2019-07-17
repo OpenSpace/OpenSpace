@@ -72,7 +72,7 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary) {
 
     std::vector<std::string> timeStrings = keyframes.keys();
     for (const std::string& timeString : timeStrings) {
-        const Time t = Time::convertTime(timeString);
+        const double t = Time::convertTime(timeString);
 
         std::unique_ptr<Rotation> rotation = 
             Rotation::createFromDictionary(
@@ -80,7 +80,7 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary) {
             );
 
         if (rotation) {
-            _timeline.addKeyframe(t.j2000Seconds(), std::move(rotation));
+            _timeline.addKeyframe(t, std::move(rotation));
         }
     }
 }

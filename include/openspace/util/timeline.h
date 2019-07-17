@@ -44,9 +44,8 @@ struct KeyframeBase {
 */
 template <typename T>
 struct Keyframe : public KeyframeBase {
-    Keyframe(size_t i, double t, T d)
-        : KeyframeBase{ i, t }
-        , data(std::move(d)) {}
+    Keyframe(size_t i, double t, T d);
+
     Keyframe(Keyframe const&) = default;
     Keyframe(Keyframe&&) = default;
     Keyframe& operator=(Keyframe&&) = default;
@@ -60,11 +59,7 @@ struct Keyframe : public KeyframeBase {
 template <typename T>
 class Timeline {
 public:
-    Timeline() = default;
     virtual ~Timeline() = default;
-    Timeline(Timeline const&) = default;
-    Timeline(Timeline&&) = default;
-    Timeline& operator=(Timeline&&) = default;
 
     void addKeyframe(double time, const T& data);
     void addKeyframe(double time, T&& data);

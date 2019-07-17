@@ -25,6 +25,12 @@
 namespace openspace {
 
 template <typename T>
+Keyframe<T>::Keyframe(size_t i, double t, T d)
+    : KeyframeBase{ i, t }
+    , data(std::move(d))
+{}
+
+template <typename T>
 void Timeline<T>::addKeyframe(double timestamp, T&& data) {
     Keyframe<T> keyframe(++_nextKeyframeId, timestamp, std::move(data));
     const auto iter = std::upper_bound(
@@ -149,7 +155,7 @@ void Timeline<T>::removeKeyframe(size_t id) {
         std::remove_if(
             _keyframes.begin(),
             _keyframes.end(),
-            [id] (Keyframe<T> keyframe) { return keyframe.id == id; }
+            [id] (const Keyframe<T>& keyframe) { return keyframe.id == id; }
         ),
         _keyframes.end()
     );
