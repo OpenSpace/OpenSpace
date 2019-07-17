@@ -1876,9 +1876,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     scene->render(data, tasks);
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
     scene->render(data, tasks);
-    
-    glDrawBuffers(2, ColorAttachment03Array);
-    
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Transparent);
     scene->render(data, tasks);
 
