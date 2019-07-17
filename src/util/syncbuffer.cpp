@@ -35,8 +35,6 @@ SyncBuffer::SyncBuffer(size_t n)
 SyncBuffer::~SyncBuffer() {} // NOLINT
 
 void SyncBuffer::encode(const std::string& s) {
-    ghoul_assert(_encodeOffset + sizeof(char) * s.size() + sizeof(int32_t) < _n, "");
-
     int32_t anticpatedBufferSize = _encodeOffset + (sizeof(char) * s.size())
         + sizeof(int32_t);
     if (anticpatedBufferSize >= _n) {
