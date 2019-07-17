@@ -1,5 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local descentKeyframes = asset.require('./apollo11_lem_descent.asset')
+local descentRotationKeyframes = asset.require('./apollo11_lem_descent_rotation.asset')
+local model = asset.require('scene/solarsystem/missions/apollo/lem_model')
 
 asset.require('spice/base')
 
@@ -24,7 +27,7 @@ local kernels = {
     kernelsFolder .. '/apollo11_orbits_full9km.bsp',
     kernelsFolder .. '/apollo11_orbits_lm9km.bsp',
 }
-
+--landing - 1969-07-20T20:17:40
 local apolloSpiceId = "-911"
 local apolloLemSpiceId = "-911500"
 
@@ -107,81 +110,44 @@ local Apollo11MoonTrail = {
     }
 }
 
--- Uncomment if you want to follow the mock decent
--- local Apollo11LemPosition = {
---     Identifier = "Apollo11LemPosition",
---     Parent = "Moon",
---     TimeFrame = {
---         Type = "TimeFrameInterval",
---         Start = "1969 JUL 20 19:10:25.183",
---         End = "1969 JUL 20 20:17:46.183"
---     },
---     Transform = {
---         Translation = {
---             Type = "SpiceTranslation",
---             Target = apolloLemSpiceId,
---             Observer = "MOON",
---             Frame = "MOON_ME",         
---             Kernels = kernels
---         },
---     },
---     GUI = {
---         Hidden = true,
---         Name = "Apollo 11 Lunar Lander Position",
---         Path = "/Solar System/Missions/Apollo/11"
---     }
--- }
 
--- local Apollo11LunarLanderModel = {
---     Identifier = "Apollo11LunarLander",
---     Parent = Apollo11LemPosition.Identifier,
---     Transform = {
---         Rotation = {
---             Type = "StaticRotation",
---             Rotation = {0.0, 0.0, -3.1415/2}
---         },
---         Scale = {
---             Type = "StaticScale",
---             Scale = 100.0
---         }
---     },
---     TimeFrame = {
---         Type = "TimeFrameInterval",
---         Start = "1969 JUL 20 19:10:25.183",
---         End = "1969 JUL 20 20:17:46.183"
---     },
---     Renderable = {
---         Type = "RenderableModel",
---         Geometry = {
---             Type = "MultiModelGeometry",
---             GeometryFile = modelFolder .. "/lem_nasa.obj"
---         },
---         ColorTexture = modelFolder .. "/gray.png",
---         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
---     },
---     GUI = {
---         Hidden = false,
---         Name = "Apollo 11 Lunar Lander",
---         Path = "/Solar System/Missions/Apollo/11"
---     }
--- }
-
-local Apollo11LemTrail = {
-    Identifier = "Apollo11LemTrail",
-    Parent = "Moon",
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
+local lemTranslation = {
+    Type = "TimelineTranslation",
+    Keyframes = {
+         -- 20:14:30 is an arbitrary cutoff, but last 4 minutes data in descentKeyframes
+         -- begins at 20.14.40. Due to linear interpolation, we will get
+         -- a 10s linear transition to the location where the descentKeyframes start.
+        ['1969 JUL 20 20:14:30'] = {
             Type = "SpiceTranslation",
             Target = apolloLemSpiceId,
             Observer = "MOON",
             Frame = "IAU_MOON",
             Kernels = kernels
         },
-        Color = {0.780000,0.940000,0.340000 },
+        ['1969 JUL 20 20:14:40'] = {
+            Type = "TimelineTranslation",
+            Keyframes = descentKeyframes.keyframes
+        }
+    }
+}
+
+local lemRotation = {
+    Type = "TimelineRotation",
+    Keyframes = descentRotationKeyframes.keyframes
+}
+
+
+
+local Apollo11LemTrail = {
+    Identifier = "Apollo11LemTrail",
+    Parent = "Moon",
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = lemTranslation,
+        Color = { 0.780000,0.940000,0.340000 },
         StartTime = "1969 JUL 20 19:10:25.183",
         EndTime = "1969 JUL 20 20:17:46.183",
-        SampleInterval = 60,
+        SampleInterval = 2,
         EnableFade = false,
         Enabled = false,
     },
@@ -191,11 +157,91 @@ local Apollo11LemTrail = {
     }
 }
 
+local Apollo11LemPosition = {
+    Identifier = "Apollo11LemPosition",
+    Parent = "Moon",
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "1969 JUL 20 19:10:25.183"
+    },
+    Transform = {
+        Translation = lemTranslation,
+        Rotation = lemRotation
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 11 Lunar Lander Position",
+        Path = "/Solar System/Missions/Apollo/11"
+    }
+}
+--landing - 1969-07-20T20:17:40
+
+local Apollo11LemDescentModel = {
+    Identifier = "Apollo11LemDescentModel",
+    Parent = Apollo11LemPosition.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "1969 JUL 19 19:38:29.183",
+        End = "1969 JUL 20 20:17:40.0"
+    },
+    Transform = {
+         Scale = {
+            Type = "StaticScale",
+            Scale = 0.24
+        }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
+        },
+        ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
+        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 11 Descent Lem",
+        Path = "/Solar System/Missions/Apollo/11"
+    }
+}
+
+local Apollo11LemLandedModel = {
+    Identifier = "Apollo11LemLandedModel",
+    Parent = Apollo11LemPosition.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "1969 JUL 20 20:17:40.0"
+    },
+    Transform = {
+         Scale = {
+            Type = "StaticScale",
+            Scale = 0.24
+        }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
+        },
+        ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
+        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 11 Landed Lem",
+        Path = "/Solar System/Missions/Apollo/11"
+    }
+}
+
+
 local exportList = {
-    Apollo11Position, 
-    -- Apollo11LemPosition, 
+    Apollo11Position,
+    Apollo11LemPosition,
     Apollo11Model,
-    -- Apollo11LunarLanderModel,
+    Apollo11LemDescentModel,
+    Apollo11LemLandedModel,
     Apollo11MoonTrail,
     Apollo11LemTrail,
 }

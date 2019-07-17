@@ -2,12 +2,10 @@ asset.require('./base')
 
 --moonrocks.scene
 local sceneHelper = asset.require('util/scene_helper')
-
 -- local station2 = asset.require('scene/solarsystem/missions/apollo/bouldersstation2')
 -- local station6 = asset.require('scene/solarsystem/missions/apollo/bouldersstation6')
 -- local station7 = asset.require('scene/solarsystem/missions/apollo/bouldersstation7')
 asset.require('scene/solarsystem/missions/apollo/apollo11')
-asset.require('scene/solarsystem/missions/apollo/a11_lem')
 asset.require('scene/solarsystem/missions/apollo/a17_lem')
 asset.require('scene/solarsystem/missions/apollo/apollo_globebrowsing')
 asset.require('scene/solarsystem/missions/apollo/apollo_11_lem_flipbook')
@@ -37,11 +35,11 @@ local Keybindings = {
     },
     {
         Key = "F11",
-        Command = "openspace.time.setTime('1969 JUL 20 20:17:40');" .. 
+        Command = "openspace.time.setTime('1969 JUL 20 20:17:40');" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 20.11);" ..
-                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo11LemModel');" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo11LemPosition');" ..
                   "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);" ..
                   "openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', true);" ..
                   "openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', true);",
@@ -82,8 +80,11 @@ asset.onInitialize(function ()
 
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.markInterestingNodes({ "Moon", "Apollo11LemModel", "Apollo17LemModel", "Apollo11", "Apollo11LunarLander" })
-
+    openspace.markInterestingNodes({
+      "Moon", "Apollo11LemModel", "Apollo17LemModel",
+      "Apollo11", "Apollo11LunarLander",
+      -- "Station_2_Boulder2",  "Station_6_Fragment1"
+    })
     -- To enable both sites by default, uncomment these lines
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000);
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled', true);
@@ -95,12 +96,19 @@ asset.onInitialize(function ()
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_station7.BlendMode', 0.000000);
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);
-  
+
+    openspace.setPropertyValueSingle('Scene.Apollo11LemDescentModel.Renderable.RotationVector', { 273.205475,6.904110,308.712311 });
+    openspace.setPropertyValueSingle('Scene.Apollo11LemLandedModel.Renderable.RotationVector', { 273.205475,6.904110,308.712311 });
+
     openspace.globebrowsing.goToGeo(moonAsset.Moon.Identifier, 20, -60, 15000000)
 
     openspace.setPropertyValueSingle("Scene.Moon.Renderable.PerformShading", false)
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({ "Moon", "Apollo11Lem", "Apollo17Lem", "Apollo11", "Apollo11LunarLander" })
+    openspace.removeInterestingNodes({
+      "Moon", "Apollo11Lem", "Apollo17Lem",
+      "Apollo11", "Apollo11LemPosition",
+      -- "Station_6_Fragment1", "Station_6_Fragments_2_3"
+    })
 end)
