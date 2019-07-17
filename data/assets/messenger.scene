@@ -33,10 +33,11 @@ asset.onInitialize(function ()
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = "Mercury",
-        Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
-        Rotation = {0.180662, 0.021334, 0.979084, 0.091111},
+        Position = { 2.423690E11, 1.979038E11, -2.241483E10 },
+        ReferenceFrame = "Root",
+        Up = { -0.492046E0, 0.666088E0, 0.560551E0 }
     })
 end)
 

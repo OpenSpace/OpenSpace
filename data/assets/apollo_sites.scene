@@ -100,12 +100,7 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Apollo11LemDescentModel.Renderable.RotationVector', {273.205475,6.904110,308.712311}); 
     openspace.setPropertyValueSingle('Scene.Apollo11LemLandedModel.Renderable.RotationVector', {273.205475,6.904110,308.712311}); 
 
-    openspace.navigation.setCameraState({
-        Anchor = moonAsset.Moon.Identifier,
-        Position = { 0, 0, 0 },
-        Rotation = { 0, 0, 0, 0 },
-    })
-    openspace.globebrowsing.goToGeo(20, -60, 15000000)
+    openspace.globebrowsing.goToGeo(moonAsset.Moon.Identifier, 20, -60, 15000000)
 
     openspace.setPropertyValueSingle("Scene.Moon.Renderable.PerformShading", false)
 end)

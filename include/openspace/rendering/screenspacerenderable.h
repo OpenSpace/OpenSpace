@@ -82,7 +82,7 @@ protected:
 
     void draw(glm::mat4 modelTransform);
 
-    virtual void bindTexture();
+    virtual void bindTexture() = 0;
     virtual void unbindTexture();
 
     properties::BoolProperty _enabled;

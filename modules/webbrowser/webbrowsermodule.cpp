@@ -98,7 +98,7 @@ void WebBrowserModule::internalDeinitialize() {
         return;
     }
 
-    _eventHandler.detachBrowser();
+    _eventHandler.resetBrowserInstance();
 
     bool forceBrowserShutdown = true;
     for (BrowserInstance* browser : _browsers) {

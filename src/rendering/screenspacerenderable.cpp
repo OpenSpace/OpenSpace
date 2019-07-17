@@ -614,9 +614,8 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::bindTexture() {}
-
-void ScreenSpaceRenderable::unbindTexture() {}
+void ScreenSpaceRenderable::unbindTexture() {
+}
 
 
 } // namespace openspace

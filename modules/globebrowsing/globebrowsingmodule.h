@@ -53,9 +53,12 @@ public:
 
     GlobeBrowsingModule();
 
-    void goToChunk(int x, int y, int level);
-    void goToGeo(double latitude, double longitude);
-    void goToGeo(double latitude, double longitude, double altitude);
+    void goToChunk(const globebrowsing::RenderableGlobe& globe, int x, int y, int level);
+    void goToGeo(const globebrowsing::RenderableGlobe& globe,
+        double latitude, double longitude);
+
+    void goToGeo(const globebrowsing::RenderableGlobe& globe,
+        double latitude, double longitude, double altitude);
 
     glm::vec3 cartesianCoordinatesFromGeo(const globebrowsing::RenderableGlobe& globe,
         double latitude, double longitude, double altitude);
@@ -94,13 +97,17 @@ protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
 private:
-    void goToChunk(Camera& camera, const globebrowsing::TileIndex& ti, glm::vec2 uv,
-        bool doResetCameraDirection);
-    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
-        bool doResetCameraDirection);
-    void goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
-        bool doResetCameraDirection);
-    void resetCameraDirection(Camera& camera, globebrowsing::Geodetic2 geo2);
+    void goToChunk(const globebrowsing::RenderableGlobe& globe,
+        const globebrowsing::TileIndex& ti, glm::vec2 uv, bool doResetCameraDirection);
+
+    void goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
+        globebrowsing::Geodetic2 geo2, bool doResetCameraDirection);
+
+    void goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
+        globebrowsing::Geodetic3 geo3, bool doResetCameraDirection);
+
+    glm::dquat lookDownCameraRotation(const globebrowsing::RenderableGlobe& globe,
+        glm::dvec3 cameraPositionModelSpace, globebrowsing::Geodetic2 geo2);
 
     /**
      \return a comma separated list of layer group names.

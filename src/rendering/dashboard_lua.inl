@@ -48,7 +48,13 @@ int addDashboardItem(lua_State* L) {
         }
         lua_settop(L, 0);
 
-        global::dashboard.addDashboardItem(DashboardItem::createFromDictionary(d));
+        try {
+            global::dashboard.addDashboardItem(DashboardItem::createFromDictionary(d));
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC("addDashboardItem", e.what());
+            return ghoul::lua::luaError(L, "Error adding dashboard item");
+        }
 
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
