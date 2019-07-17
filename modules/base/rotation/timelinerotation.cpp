@@ -93,7 +93,7 @@ glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {
     KeyframePointer next = _timeline.firstKeyframeAfter(now, true);
 
     if (!prev && !next) {
-        return glm::mat3(0.0);
+        return glm::dmat3(0.0);
     }
     if (!prev) {
         prev = next;
@@ -108,7 +108,11 @@ glm::dmat3 TimelineRotation::matrix(const UpdateData& data) const {
     if (nextTime - prevTime > 0.0) {
         t = (now - prevTime) / (nextTime - prevTime);
     }
-    return t * next->data->matrix(data) + (1.0 - t) * prev->data->matrix(data);
+
+    const glm::dquat nextRot = glm::quat_cast(next->data->matrix(data));
+    const glm::dquat prevRot = glm::quat_cast(prev->data->matrix(data));
+
+    return glm::dmat3(glm::slerp(prevRot, nextRot, t));
 }
 
 } // namespace openspace
