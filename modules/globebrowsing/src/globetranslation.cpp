@@ -58,20 +58,21 @@ namespace {
         "globe. The default value is 0.0"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FixedAltitudeInfo = {
-        "FixedAltitude",
-        "Fixed Altitude",
-        "The altitude in meters of the location on the globe's surface. This value is "
-        "used if the 'UseFixedAltitude' property is 'true'. The default value is 10000km."
+    constexpr openspace::properties::Property::PropertyInfo AltitudeInfo = {
+        "Altitude",
+        "Altitude",
+        "The altitude in meters. "
+        "If the 'UseHeightmap' property is 'true', this is an offset from the actual "
+        "surface of the globe. If not, this is an offset from the reference ellipsoid."
+        "The default value is 0.0"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseFixedAltitudeInfo = {
-        "UseFixedAltitude",
-        "Use Fixed Altitude",
-        "If this value is 'true', the altitude specified in 'FixedAltitude' is used for "
-        "this translation. If it is 'false', the altitude will be computed based on the "
-        "height information that is available about the globe to which this translation "
-        "is attached. The default value is 'true'."
+    constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
+        "UseHeightmap",
+        "Use Heightmap",
+        "If this value is 'true', the altitude specified in 'Altitude' will be treated "
+        "as an offset from the heightmap. Otherwise, it will be an offset from the "
+        "globe's reference ellipsoid. The default value is 'false'."
     };
 } // namespace
 
@@ -81,8 +82,8 @@ documentation::Documentation GlobeTranslation::Documentation() {
     using namespace openspace::documentation;
 
     return {
-        "Spice Translation",
-        "space_translation_spicetranslation",
+        "Globe Translation",
+        "space_translation_globetranslation",
         {
             {
                 "Type",
@@ -110,16 +111,16 @@ documentation::Documentation GlobeTranslation::Documentation() {
                 LatitudeInfo.description,
             },
             {
-                FixedAltitudeInfo.identifier,
+                AltitudeInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                FixedAltitudeInfo.description
+                AltitudeInfo.description
             },
             {
-                UseFixedAltitudeInfo.identifier,
+                UseHeightmapInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
-                UseFixedAltitudeInfo.description
+                UseHeightmapInfo.description
             }
         }
     };
@@ -129,8 +130,8 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     : _globe(GlobeInfo)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
-    , _fixedAltitude(FixedAltitudeInfo, 1e8, 0.0, 1e12)
-    , _useFixedAltitude(UseFixedAltitudeInfo, false)
+    , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
+    , _useHeightmap(UseHeightmapInfo, false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -145,11 +146,11 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(LatitudeInfo.identifier)) {
         _latitude = dictionary.value<double>(LatitudeInfo.identifier);
     }
-    if (dictionary.hasKey(FixedAltitudeInfo.identifier)) {
-        _fixedAltitude = dictionary.value<double>(FixedAltitudeInfo.identifier);
+    if (dictionary.hasKey(AltitudeInfo.identifier)) {
+        _altitude = dictionary.value<double>(AltitudeInfo.identifier);
     }
-    if (dictionary.hasKey(UseFixedAltitudeInfo.identifier)) {
-        _useFixedAltitude = dictionary.value<bool>(UseFixedAltitudeInfo.identifier);
+    if (dictionary.hasKey(UseHeightmapInfo.identifier)) {
+        _useHeightmap = dictionary.value<bool>(UseHeightmapInfo.identifier);
     }
 
     _globe.onChange([this]() {
@@ -159,13 +160,13 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 
     _longitude.onChange([this]() { _positionIsDirty = true; });
     _latitude.onChange([this]() { _positionIsDirty = true; });
-    _fixedAltitude.onChange([this]() { _positionIsDirty = true; });
-    _useFixedAltitude.onChange([this]() { _positionIsDirty = true; });
+    _altitude.onChange([this]() { _positionIsDirty = true; });
+    _useHeightmap.onChange([this]() { _positionIsDirty = true; });
 
     addProperty(_longitude);
     addProperty(_latitude);
-    addProperty(_fixedAltitude);
-    addProperty(_useFixedAltitude);
+    addProperty(_altitude);
+    addProperty(_useHeightmap);
 }
 
 void GlobeTranslation::fillAttachedNode() {
@@ -195,8 +196,8 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         _positionIsDirty = true;
     }
 
-    if (!_useFixedAltitude) {
-        // If we don't use the fixed altitude, we have to compute the height every frame
+    if (_useHeightmap) {
+        // If we use the heightmap, we have to compute the height every frame
         _positionIsDirty = true;
     }
 
@@ -204,33 +205,35 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
 
-
     GlobeBrowsingModule& mod = *(global::moduleEngine.module<GlobeBrowsingModule>());
 
-    glm::vec3 pos = mod.cartesianCoordinatesFromGeo(
-        *_attachedNode,
-        _latitude,
-        _longitude,
-        _fixedAltitude
-    );
-
-    if (_useFixedAltitude) {
-        _position = glm::dvec3(pos);
-        _positionIsDirty = true;
-
-        return _position;
-    }
-    else {
-        SurfacePositionHandle h = _attachedNode->calculateSurfacePositionHandle(pos);
-
-        pos = mod.cartesianCoordinatesFromGeo(
+    if (_useHeightmap) {
+        glm::vec3 groundPos = mod.cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,
             _longitude,
-            h.heightToSurface
+            0.0
         );
 
-        _position = glm::dvec3(pos);
+        SurfacePositionHandle h =
+            _attachedNode->calculateSurfacePositionHandle(groundPos);
+
+        _position = mod.cartesianCoordinatesFromGeo(
+            *_attachedNode,
+            _latitude,
+            _longitude,
+            h.heightToSurface + _altitude
+        );
+        return _position;
+    }
+    else {
+        _position = mod.cartesianCoordinatesFromGeo(
+            *_attachedNode,
+            _latitude,
+            _longitude,
+            _altitude
+        );
+        _positionIsDirty = false;
         return _position;
     }
 }

@@ -22,56 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
-#define __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
+#ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+#define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
 
-#ifdef SYNC_USE_LIBTORRENT
-
-#include <openspace/util/resourcesynchronization.h>
-
-#include <modules/sync/torrentclient.h>
+#include <openspace/scene/translation.h>
+#include <openspace/util/timeline.h>
 
 namespace openspace {
 
-class TorrentSynchronizationJob;
+struct UpdateData;
 
-class TorrentSynchronization : public ResourceSynchronization {
+namespace documentation { struct Documentation; }
+
+class TimelineTranslation : public Translation {
 public:
-    TorrentSynchronization(const ghoul::Dictionary& dict, std::string synchronizationRoot,
-        TorrentClient& client);
+    TimelineTranslation(const ghoul::Dictionary& dictionary);
 
-    virtual ~TorrentSynchronization();
-
-    std::string directory() override;
-    void start() override;
-    void cancel() override;
-    void clear() override;
-
-    size_t nSynchronizedBytes() override;
-    size_t nTotalBytes() override;
-    bool nTotalBytesIsKnown() override;
-
+    glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();
 
 private:
-    void updateTorrentProgress(TorrentClient::TorrentProgress p);
-    std::string uniformResourceName() const;
-    bool hasSyncFile();
-    void createSyncFile();
-
-    std::atomic_bool _enabled = false;
-
-    TorrentClient::TorrentId _torrentId = 0;
-    TorrentClient::TorrentProgress _progress;
-    std::mutex _progressMutex;
-    std::string _identifier;
-    std::string _magnetLink;
-    std::string _synchronizationRoot;
-    TorrentClient& _torrentClient;
+    Timeline<std::unique_ptr<Translation>> _timeline;
 };
 
 } // namespace openspace
 
-#endif // SYNC_USE_LIBTORRENT
-
-#endif // __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__

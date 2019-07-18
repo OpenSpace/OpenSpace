@@ -10,9 +10,6 @@
 [submodule "modules/touch/ext/libTUIO11"]
 	path = modules/touch/ext/libTUIO11
 	url = https://github.com/mkalten/TUIO11_CPP
-[submodule "modules/sync/ext/libtorrent"]
-	path = modules/sync/ext/libtorrent
-	url = https://github.com/OpenSpace/libtorrent.git
 [submodule "apps/OpenSpace-MinVR/ext/minvr"]
 	path = apps/OpenSpace-MinVR/ext/minvr
 	url = https://github.com/OpenSpace/minvr

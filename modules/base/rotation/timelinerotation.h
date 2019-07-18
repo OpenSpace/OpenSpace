@@ -22,34 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
-#define __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+#ifndef __OPENSPACE_MODULE_BASE___TIMELINEROTATION___H__
+#define __OPENSPACE_MODULE_BASE___TIMELINEROTATION___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/util/timeline.h>
 
 namespace openspace {
 
-class SyncModule : public OpenSpaceModule {
+struct UpdateData;
+
+namespace documentation { struct Documentation; }
+
+class TimelineRotation : public Rotation {
 public:
-    constexpr static const char* Name = "Sync";
-
-    SyncModule();
-
-    std::string synchronizationRoot() const;
-
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
-
-    std::vector<documentation::Documentation> documentations() const override;
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    TimelineRotation(const ghoul::Dictionary& dictionary);
+    glm::dmat3 matrix(const UpdateData& data) const override;
+    static documentation::Documentation Documentation();
 
 private:
-    std::vector<std::string> _synchronizationRepositories;
-    std::string _synchronizationRoot;
+    Timeline<std::unique_ptr<Rotation>> _timeline;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMELINEROTATION___H__

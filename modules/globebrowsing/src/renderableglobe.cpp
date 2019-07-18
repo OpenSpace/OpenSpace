@@ -176,7 +176,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
-        "TargetLodScaleFactorInfo",
+        "TargetLodScaleFactor",
         "Target Level of Detail Scale Factor",
         "" // @TODO Missing documentation
     };
