@@ -14,7 +14,7 @@ local kernelsFolder = asset.syncedResource({
 })
 
 local modelFolder = asset.syncedResource({
-    Name = "Apollo Kernels",
+    Name = "Apollo Models",
     Type = "HttpSynchronization",
     Identifier = "apollo_11_models",
     Version = 1
@@ -194,7 +194,7 @@ local Apollo11LemDescentModel = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
+            GeometryFile = model.modelFolder .. "/lmremoved.obj"
         },
         ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)

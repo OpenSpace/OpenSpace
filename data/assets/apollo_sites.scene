@@ -5,10 +5,12 @@ local sceneHelper = asset.require('util/scene_helper')
 -- local station2 = asset.require('scene/solarsystem/missions/apollo/bouldersstation2')
 -- local station6 = asset.require('scene/solarsystem/missions/apollo/bouldersstation6')
 -- local station7 = asset.require('scene/solarsystem/missions/apollo/bouldersstation7')
+asset.require('scene/solarsystem/missions/apollo/apollo8')
 asset.require('scene/solarsystem/missions/apollo/apollo11')
 asset.require('scene/solarsystem/missions/apollo/a17_lem')
 asset.require('scene/solarsystem/missions/apollo/apollo_globebrowsing')
 asset.require('scene/solarsystem/missions/apollo/apollo_11_lem_flipbook')
+asset.require('scene/solarsystem/missions/apollo/insignias_map')
 
 local Keybindings = {
     {
@@ -85,8 +87,9 @@ asset.onInitialize(function ()
       "Apollo11", "Apollo11LunarLander",
       -- "Station_2_Boulder2",  "Station_6_Fragment1"
     })
+
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0);
     -- To enable both sites by default, uncomment these lines
-    -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000);
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled', true);
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', true);
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled', true);
