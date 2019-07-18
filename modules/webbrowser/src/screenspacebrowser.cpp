@@ -113,7 +113,6 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 }
 
 bool ScreenSpaceBrowser::initialize() {
-    _originalViewportSize = global::windowDelegate.currentWindowSize();
     _renderHandler->setTexture(*_texture);
 
     createShaders();
@@ -164,7 +163,6 @@ void ScreenSpaceBrowser::update() {
 
     if (_isDimensionsDirty) {
         _browserInstance->reshape(_dimensions.value());
-        _originalViewportSize = _dimensions.value();
         _isDimensionsDirty = false;
     }
 }
