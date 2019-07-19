@@ -195,15 +195,16 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
         for (int i = 0; i < list.size() - 1; i += 2) {
             newEndpoints[list[i]] = newEndpoints[list[i + 1]];
         }
-        for (const auto& e : _endpoints) {
+        for (const std::pair<const std::string, std::string>& e : _endpoints) {
             if (newEndpoints.find(e.first) == newEndpoints.end()) {
                 // This endpoint existed before but does not exist anymore.
                 notifyEndpointListeners(e.first, false);
             }
         }
-        for (const auto& e : newEndpoints) {
+        for (const std::pair<const std::string, std::string>& e : newEndpoints) {
             if (_endpoints.find(e.first) == _endpoints.end() ||
-                newEndpoints[e.first] != e.second) {
+                newEndpoints[e.first] != e.second)
+            {
                 // This endpoint exists now but did not exist before,
                 // or the directory has changed.
                 notifyEndpointListeners(e.first, true);
@@ -216,9 +217,9 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
 }
 
 void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exists) {
-    using K = const CallbackHandle;
+    using K = CallbackHandle;
     using V = EndpointCallback;
-    for (const std::pair<K, V>& it : _endpointChangeCallbacks) {
+    for (const std::pair<const K, V>& it : _endpointChangeCallbacks) {
         it.second(endpoint, exists);
     }
 }
@@ -247,7 +248,7 @@ void WebGuiModule::startProcess() {
     std::vector<std::string> directories = _directories.value();
     bool first = true;
 
-    for (std::string& str : directories) {
+    for (const std::string& str : directories) {
         if (!first) {
             formattedDirectories += ",";
         }
