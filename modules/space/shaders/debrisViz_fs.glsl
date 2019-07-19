@@ -37,7 +37,7 @@ in float vs_position_w;
 
 in float periodFraction_f;
 in float offsetPeriods;
-// in float vertexID_f;
+in float vertexID_f;
 
 // debuggers :
 // in float offset;
@@ -75,10 +75,10 @@ Fragment getFragment() {
 
 
     // to debug using colors use this if-statment.
-    // float ep = 0.001;
-    // if(vertexDistance_f < ep ){ //periodFraction < ep
-    //     frag.color = vec4(1, 0, 0, 1);
-    // }
+    float ep = 0.01;
+    if( fract(vertexID_f) < ep ){ //periodFraction < ep
+         frag.color = vec4(1, 0, 0, 1);
+    }
 
     return frag;
 }

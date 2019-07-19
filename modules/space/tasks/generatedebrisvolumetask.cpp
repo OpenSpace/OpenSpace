@@ -383,18 +383,21 @@ glm::dvec3 cartesianToSphericalCoord(glm::dvec3 position){
     //sphericalPosition.y = atan(position.y/position.x);  // theta
     //sphericalPosition.z = atan(pow(pow(position.x,2)+pow(position.y,2),0.5)/position.z);  // abs(position.x + position.y) // p
 
-    sphericalPosition.x = sqrt(pow(position.x,2)+pow(position.y,2)+pow(position.z,2));  //abs(position.x + position.y + position.z);  // r
-    //sphericalPosition.y = atan(position.y/position.x);
-    //sphericalPosition.y = atan2(position.y,position.x); // abs(position.x + position.y) // theta
-    sphericalPosition.y = acos(position.z/sphericalPosition.x);
-    sphericalPosition.z = atan2(position.y,position.x);
-    sphericalPosition.z += 3.141592;
-
+    sphericalPosition.x = sqrt(pow(position.x,2)+pow(position.y,2)+pow(position.z,2));  // r [0, MaxApogee]
+    sphericalPosition.y = acos(position.z/sphericalPosition.x);  // theta [0, pi]
+    sphericalPosition.z = atan2(position.y,position.x);  // phi [-pi, pi] -> [0, 2*pi]
+    // if(sphericalPosition.y < 0)
+        sphericalPosition.z += 3.14159265358979323846264338327950288;
     return sphericalPosition;
 }
 
 
 std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, double timeInSeconds, std::string gridType) {
+
+    float minTheta = 0.0;
+    float minPhi = 0.0;
+    float maxTheta = 0.0;
+    float maxPhi = 0.0;
 
     std::vector<glm::dvec3> positionBuffer;
     for(const auto& orbit : tleData) {
@@ -411,17 +414,39 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
         );
         // double timeInSeconds = Time::convertTime(timeStamp);
         glm::dvec3 position = keplerTranslator.debrisPos(timeInSeconds);
-        //LINFO(fmt::format("cartesian pos {} ", position));
-
+        // LINFO(fmt::format("cart: {} ", position));
+        glm::dvec3 sphPos;
         if( gridType == "Spherical"){
-            position = cartesianToSphericalCoord(position);
-           //LINFO(fmt::format("pos: {} ", position));
+            sphPos = cartesianToSphericalCoord(position);
 
+            if(sphPos.y < minTheta){
+                minTheta = sphPos.y;
+            }
+            if(sphPos.z < minPhi){
+                minPhi = sphPos.z;
+            }
+            if(sphPos.y > maxTheta){
+                maxTheta = sphPos.y;
+            }
+            if(sphPos.z > maxPhi){
+                maxPhi = sphPos.z;
+            }
+            // LINFO(fmt::format("pos: {} ", sphPos));
+            positionBuffer.push_back(sphPos);
+        
         }
-        positionBuffer.push_back(position);
+        else
+        {
+            positionBuffer.push_back(position);
+        }
+        
         
     }
-    
+    LINFO(fmt::format("max theta: {} ", maxTheta));
+    LINFO(fmt::format("max phi: {} ", maxPhi));
+    LINFO(fmt::format("min theta: {} ", minTheta));
+    LINFO(fmt::format("min phi: {} ", minPhi));
+
     return positionBuffer;
 }
 
@@ -476,30 +501,27 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, s
         return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
     }
     else if(gridType == "Spherical"){
-        
-        if(position.y >= 3.141592){
+
+        if(position.y >= 3.1415926535897932384626433832795028){
             position.y = 0;
         }
-        if(position.z >= (2 * 3.141592)){
+        if(position.z >= (2 * 3.1415926535897932384626433832795028)){
             position.z = 0;
         }
-        
-        glm::uvec3 newPosition = glm::uvec3(static_cast<int>(position.x * dim.x / (maxApogee + epsilon))// / maxApogee //+ maxApogee
-                                        ,static_cast<int>(position.y * dim.y / 3.141592)//+ maxApogee
-                                        ,static_cast<int>(position.z * dim.z / (2*3.141592)));//+ maxApogee);
-                                        
-        
-        /*
-        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
-        
-        return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
-        */
-        //LINFO(fmt::format("coords: {} ", newPosition));
-        return newPosition.z * (dim.x * dim.y) + newPosition.y * dim.x + newPosition.x;
 
+        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(position.x * dim.x / (maxApogee))
+                                                ,static_cast<int>(position.y * dim.y / (3.14159265358979323846264338327950288))
+                                                ,static_cast<int>(position.z * dim.z / (2*3.14159265358979323846264338327950288)));
+
+        
+        // LINFO(fmt::format("index coords: {} ", coordinateIndex));
+        // LINFO(fmt::format("index dim: {} ", dim));
+        // LINFO(fmt::format("index va: {} ", coordinateIndex.y * (dim.x * dim.y) + coordinateIndex.z * dim.x + coordinateIndex.x));
+
+        return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
     }
+
+    return -1;
 }
 
 double getVoxelVolume(int index, RawVolume<float>& raw, glm::uvec3 dim, float maxApogee){

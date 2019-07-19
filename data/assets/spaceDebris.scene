@@ -18,6 +18,7 @@ asset.require('util/webgui')
 
 --asset.request('scene/solarsystem/planets/earth/satellites/satellites_all')
 asset.request('scene/solarsystem/planets/earth/satellites/satellites_debris')
+--asset.request('scene/solarsystem/planets/earth/satellites/satellites_debris_old')
 
 -- Keybindings that are specific for this scene
 local Keybindings = {
