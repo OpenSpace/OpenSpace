@@ -162,15 +162,17 @@ void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initDat
     );
 }
 
-void initTexturesFromLoadedData(DefaultTileProvider& t) {
+bool initTexturesFromLoadedData(DefaultTileProvider& t) {
     if (t.asyncTextureDataProvider) {
         std::optional<RawTile> tile = t.asyncTextureDataProvider->popFinishedRawTile();
         if (tile) {
             const cache::ProviderTileKey key = { tile->tileIndex, t.uniqueIdentifier };
             ghoul_assert(!t.tileCache->exist(key), "Tile must not be existing in cache");
             t.tileCache->createTileAndPut(key, std::move(tile.value()));
+            return true;
         }
     }
+    return false;
 }
 
 
@@ -1073,7 +1075,7 @@ TileDepthTransform depthTransform(TileProvider& tp) {
 
 
 
-void update(TileProvider& tp) {
+int update(TileProvider& tp) {
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -1082,7 +1084,7 @@ void update(TileProvider& tp) {
             }
 
             t.asyncTextureDataProvider->update();
-            initTexturesFromLoadedData(t);
+            bool hasUploaded = initTexturesFromLoadedData(t);
 
             if (t.asyncTextureDataProvider->shouldBeDeleted()) {
                 t.asyncTextureDataProvider = nullptr;
@@ -1090,6 +1092,9 @@ void update(TileProvider& tp) {
                     t,
                     tileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
                 );
+            }
+            if (hasUploaded) {
+                return 1;
             }
             break;
         }
@@ -1132,6 +1137,7 @@ void update(TileProvider& tp) {
         default:
             throw ghoul::MissingCaseException();
     }
+    return 0;
 }
 
 

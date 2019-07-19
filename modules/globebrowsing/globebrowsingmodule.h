@@ -93,6 +93,11 @@ public:
     std::string wmsCacheLocation() const;
     uint64_t wmsCacheSize() const; // bytes
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    void addFrameInfo(globebrowsing::RenderableGlobe* globe, uint32_t nTilesRenderedLocal,
+        uint32_t nTilesRenderedGlobal, uint32_t nTilesUploaded);
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
@@ -134,6 +139,26 @@ private:
     std::map<std::string, Capabilities> _capabilitiesMap;
 
     std::multimap<std::string, UrlInfo> _urlList;
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    struct FrameInfo {
+        uint64_t iFrame = 0;
+        uint32_t nTilesRenderedLocal = 0;
+        uint32_t nTilesRenderedGlobal = 0;
+        uint32_t nTilesUploaded = 0;
+    };
+
+    struct {
+        std::unordered_map<
+            globebrowsing::RenderableGlobe*,
+            std::vector<FrameInfo>
+        > frames;
+
+        uint64_t lastSavedFrame = 0;
+        const uint16_t saveEveryNthFrame = 2048;
+    } _frameInfo;
+    properties::BoolProperty _saveInstrumentation;
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 };
 
 } // namespace openspace

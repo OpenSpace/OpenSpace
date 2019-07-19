@@ -47,6 +47,13 @@
 #include <numeric>
 #include <queue>
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+#include <openspace/engine/moduleengine.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+openspace::GlobeBrowsingModule* _module = nullptr;
+
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+
 namespace {
     // Global flags to modify the RenderableGlobe
     constexpr const bool LimitLevelByAvailableData = true;
@@ -595,10 +602,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyLabels)) {
         _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
     }
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _module = global::moduleEngine.module<GlobeBrowsingModule>();
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void RenderableGlobe::initializeGL() {
-
     if (!_labelsDictionary.empty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
         addPropertySubOwner(_globeLabelsComponent);
@@ -745,7 +755,11 @@ void RenderableGlobe::update(const UpdateData& data) {
         _layerManager.reset();
         _debugProperties.resetTileProviders = false;
     }
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _nUploadedTiles = _layerManager.update();
+#else
     _layerManager.update();
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_nLayersIsDirty) {
         std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
@@ -1034,6 +1048,14 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
     _localRenderer.program->deactivate();
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _module->addFrameInfo(
+        this,
+        std::min(localCount, ChunkBufferSize),
+        std::min(globalCount, ChunkBufferSize),
+        _nUploadedTiles
+    );
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {

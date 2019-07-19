@@ -274,6 +274,10 @@ private:
     // Labels
     GlobeLabelsComponent _globeLabelsComponent;
     ghoul::Dictionary _labelsDictionary;
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    int _nUploadedTiles = 0;
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 };
 
 } // namespace openspace::globebrowsing

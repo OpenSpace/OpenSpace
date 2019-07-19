@@ -48,7 +48,8 @@ struct LayerGroup : public properties::PropertyOwner {
     void deinitialize();
 
     /// Updates all layers tile providers within this group
-    void update();
+    /// Return:  Number of tiles that were updated
+    int update();
 
     Layer* addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);

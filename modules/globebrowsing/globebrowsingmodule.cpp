@@ -101,6 +101,14 @@ namespace {
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
     };
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    constexpr const openspace::properties::Property::PropertyInfo InstrumentationInfo = {
+        "SaveInstrumentationInfo",
+        "Save Instrumentation Info",
+        "If enabled, the instrumentation data is saved to disk at the end of the frame."
+    };
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+
 
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
@@ -163,12 +171,24 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
     , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    , _saveInstrumentation(InstrumentationInfo, false)
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 {
     addProperty(_wmsCacheEnabled);
     addProperty(_offlineMode);
     addProperty(_wmsCacheLocation);
     addProperty(_wmsCacheSizeMB);
     addProperty(_tileCacheSizeMB);
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _saveInstrumentation.onChange([&]() {
+        if (_saveInstrumentation) {
+            _frameInfo.lastSavedFrame = global::renderEngine.frameNumber();
+        }
+    });
+    addProperty(_saveInstrumentation);
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
@@ -234,6 +254,43 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Render
     global::callback::render.emplace_back([&]() { _tileCache->update(); });
+
+    // Postdraw
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    global::callback::postDraw.emplace_back([&]() {
+        // >= as we might have multiple frames per postDraw call (stereo rendering,
+        // fisheye, etc)
+        const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
+        const bool shouldSave = _saveInstrumentation && 
+                                global::renderEngine.frameNumber() >= next;
+        if (shouldSave) {
+            using K = const globebrowsing::RenderableGlobe*;
+            using V = std::vector<FrameInfo>;
+            for (const std::pair<K, V>& i : _frameInfo.frames) {
+                std::string filename = fmt::format(
+                    "_inst_globebrowsing_{}_{}_{}.txt",
+                    i.first->owner()->identifier(), // Owner of the renderable has a name
+                    _frameInfo.lastSavedFrame,
+                    _frameInfo.saveEveryNthFrame
+                );
+                std::ofstream file(absPath("${BIN}/" + filename));
+                for (const FrameInfo& f : i.second) {
+                    std::string line = fmt::format(
+                        "{}\t{}\t{}\t{}",
+                        f.iFrame,
+                        f.nTilesRenderedLocal,
+                        f.nTilesRenderedGlobal,
+                        f.nTilesUploaded
+                    );
+                    file << line << '\n';
+                }
+            }
+
+            _frameInfo.frames.clear();
+            _frameInfo.lastSavedFrame = global::renderEngine.frameNumber();
+        }
+    });
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     // Deinitialize
     global::callback::deinitialize.emplace_back([&]() { GdalWrapper::destroy(); });
@@ -728,5 +785,28 @@ uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
 }
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+void GlobeBrowsingModule::addFrameInfo(globebrowsing::RenderableGlobe* globe,
+                                       uint32_t nTilesRenderedLocal,
+                                       uint32_t nTilesRenderedGlobal,
+                                       uint32_t nTilesUploaded)
+{
+    auto it = _frameInfo.frames.find(globe);
+    if (it == _frameInfo.frames.end()) {
+        _frameInfo.frames[globe] = std::vector<FrameInfo>();
+        _frameInfo.frames[globe].reserve(_frameInfo.saveEveryNthFrame);
+    }
+    else {
+        it->second.push_back({
+            global::renderEngine.frameNumber(),
+            nTilesRenderedLocal,
+            nTilesRenderedGlobal,
+            nTilesUploaded
+        });
+    }
+}
+
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
 } // namespace openspace
