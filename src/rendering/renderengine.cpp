@@ -820,6 +820,7 @@ void RenderEngine::postDraw() {
         );
     }
 
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
     if (_saveFrameInformation) {
         _frameInfo.frames.push_back({
             frameNumber(),
@@ -828,8 +829,6 @@ void RenderEngine::postDraw() {
         });
     }
 
-
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
     const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
     const bool shouldSave = _saveFrameInformation && frameNumber() >= next;
     if (shouldSave) {
