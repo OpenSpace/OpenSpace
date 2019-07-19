@@ -60,14 +60,14 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
                 -- The initialization with "-" is just a placeholder.
                 -- (needed to be initialized)
                 Segments = 160,
-                EccentricityColumn = "-",
-                SemiMajorAxisColumn = "-",
-                SemiMajorAxisUnit = 1,
-                InclinationColumn = "-",
-                AscendingNodeColumn = "-",
-                ArgumentOfPeriapsisColumn = "-",
-                MeanAnomalyAtEpochColumn = "-",
-                EpochColumn = "-",
+                --EccentricityColumn = "-",
+                --SemiMajorAxisColumn = "-",
+                --SemiMajorAxisUnit = 1,
+                --InclinationColumn = "-",
+                --AscendingNodeColumn = "-",
+                --ArgumentOfPeriapsisColumn = "-",
+                --MeanAnomalyAtEpochColumn = "-",
+                --EpochColumn = "-",
                 Color = color,
                 Fade = 0.5
                 

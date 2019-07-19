@@ -49,26 +49,14 @@
 #include <math.h>
 #include <fstream>
 
-// Todo:
-// Parse epoch correctly?
-// read distances using correct unit
-// Make the linefade go from the closest vertex to the actuall position
-//         instead of to the next vertex
-
 namespace {
     constexpr const char* ProgramName = "RenderableSatellites";
     constexpr const char* _loggerCat = "SpaceDebris";
 
-    // constexpr const std::array<const char*, 6> UniformNames = {
-    //     "modelViewTransform", "projectionTransform",
-    //     "lineFade", "inGameTime", "color", "opacity"
-    // };
-
-
     static const openspace::properties::Property::PropertyInfo PathInfo = {
-    "Path",
-    "Path",
-    "The file path to the CSV file to read"
+        "Path",
+        "Path",
+        "The file path to the TLE file to read"
     };
 
     static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
@@ -77,18 +65,18 @@ namespace {
         "The number of segments to use for each orbit ellipse"
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-    "LineWidth",
-    "Line Width",
-    "This value specifies the line width of the trail if the selected rendering "
-    "method includes lines. If the rendering mode is set to Points, this value is "
-    "ignored."
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the trail if the selected rendering "
+        "method includes lines. If the rendering mode is set to Points, this value is "
+        "ignored."
     };
     constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-    "Fade",
-    "Line fade",
-    "The fading factor that is applied to the trail if the 'EnableFade' value is "
-    "'true'. If it is 'false', this setting has no effect. The higher the number, "
-    "the less fading is applied."
+        "Fade",
+        "Line fade",
+        "The fading factor that is applied to the trail if the 'EnableFade' value is "
+        "'true'. If it is 'false', this setting has no effect. The higher the number, "
+        "the less fading is applied."
 };
     
     constexpr const char* KeyFile = "Path";
@@ -516,15 +504,10 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.projection    = _programObject->uniformLocation("projectionTransform");
     _uniformCache.lineFade      = _programObject->uniformLocation("lineFade");
     _uniformCache.inGameTime    = _programObject->uniformLocation("inGameTime");
-    
     _uniformCache.color         = _programObject->uniformLocation("color");
     _uniformCache.opacity       = _programObject->uniformLocation("opacity");
 
-    _uniformCache.numberOfSegments = _programObject->uniformLocation("numberOfSegments");
-
     updateBuffers();
-
-    //ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }
@@ -572,8 +555,6 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
- 
-    _programObject->setUniform(_uniformCache.numberOfSegments, static_cast<int>(_nSegments));
 
     glLineWidth(_appearance.lineWidth);
 
@@ -585,7 +566,6 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(_vertexArray);
     for (size_t i = 0; i < nrOrbits; ++i) {
-        //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
         glDrawArrays(GL_LINE_STRIP, vertices, _nSegments + 1);
         vertices = vertices + _nSegments + 1;
     }
@@ -632,18 +612,6 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].time = static_cast<float>(timeOffset);
             _vertexBufferData[index].epoch = orbit.epoch;
             _vertexBufferData[index].period = orbit.period;
-
-            // The difference in the print below resulted in large differences, up to 0.35.
-            // LINFO(fmt::format("diff : {} ", position.x - _vertexBufferData[index].x));        
-
-            // So one idea was to make it very small before casting it to a float.            
-            // auto print = positionX-(static_cast<float>(positionX) / 10000000);
-            // LINFO(fmt::format(" smaller distance? :{}", print));
-
-
-            // LINFO(fmt::format(" x-positions float :{}", static_cast<float>(position.x)));
-            // LINFO(fmt::format(" x-positions float * 10000 :{}", static_cast<float>(position.x * 10000)));
-            // LINFO(fmt::format(" x-positions float * 10000 /10000 :{}", static_cast<float>(position.x * 10000)/10000));
 
         }
       
