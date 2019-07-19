@@ -87,10 +87,6 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     glm::vec2 windowDimensions = global::windowDelegate.currentSubwindowSize();
     _dimensions = windowDimensions;
 
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(windowDimensions, 1.0f)
-    );
-
     _renderHandler = new ScreenSpaceRenderHandler();
     _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
@@ -112,7 +108,11 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     }
 }
 
-bool ScreenSpaceBrowser::initialize() {
+bool ScreenSpaceBrowser::initializeGL() {
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+         glm::uvec3(_dimensions.value(), 1.0f)
+    );
+
     _renderHandler->setTexture(*_texture);
 
     createShaders();
@@ -122,7 +122,10 @@ bool ScreenSpaceBrowser::initialize() {
     return isReady();
 }
 
-bool ScreenSpaceBrowser::deinitialize() {
+bool ScreenSpaceBrowser::deinitializeGL() {
+    _renderHandler->setTexture(0);
+    _texture = nullptr;
+
     std::string urlString;
     _url.getStringValue(urlString);
     LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", urlString));
@@ -133,11 +136,12 @@ bool ScreenSpaceBrowser::deinitialize() {
     if (webBrowser) {
         webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();
-        return true;
+    }
+    else {
+        LWARNING("Could not find WebBrowserModule");
     }
 
-    LWARNING("Could not find WebBrowserModule");
-    return false;
+    return ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceBrowser::render() {
