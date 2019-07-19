@@ -106,10 +106,8 @@ protected:
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize;
-    UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
+    UniformCache(alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-
-    glm::vec2 _originalViewportSize;
 };
 
 } // namespace openspace

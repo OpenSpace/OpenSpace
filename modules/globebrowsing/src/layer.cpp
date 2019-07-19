@@ -341,9 +341,12 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-void Layer::update() {
+int Layer::update() {
     if (_tileProvider) {
-        tileprovider::update(*_tileProvider);
+        return tileprovider::update(*_tileProvider);
+    }
+    else {
+        return 0;
     }
 }
 

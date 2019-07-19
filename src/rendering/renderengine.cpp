@@ -144,10 +144,19 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
-        "ShowFrameNumber",
-        "Show Frame Number",
-        "If this value is enabled, the current frame number is rendered into the window."
+        "ShowFrameInformation",
+        "Show Frame Information",
+        "If this value is enabled, the current frame number and frame times are rendered "
+        "into the window."
     };
+
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    constexpr openspace::properties::Property::PropertyInfo SaveFrameInfo = {
+        "SaveFrameInformation",
+        "Save Frame Information",
+        "Saves the frame information to disk"
+    };
+#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
@@ -239,7 +248,10 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _takeScreenshot(TakeScreenshotInfo)
     , _applyWarping(ApplyWarpingInfo, false)
-    , _showFrameNumber(ShowFrameNumberInfo, false)
+    , _showFrameInformation(ShowFrameNumberInfo, false)
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    , _saveFrameInformation(SaveFrameInfo, false)
+#endif // OPENSPACE_WITH_INSTRUMENTATION
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
@@ -317,7 +329,15 @@ RenderEngine::RenderEngine()
     _takeScreenshot.onChange([this](){ _shouldTakeScreenshot = true; });
     addProperty(_takeScreenshot);
 
-    addProperty(_showFrameNumber);
+    addProperty(_showFrameInformation);
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    _saveFrameInformation.onChange([&]() {
+        if (_saveFrameInformation) {
+            _frameInfo.lastSavedFrame = frameNumber();
+        }
+    });
+    addProperty(_saveFrameInformation);
+#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     addProperty(_globalRotation);
     addProperty(_screenSpaceRotation);
@@ -415,12 +435,12 @@ void RenderEngine::initializeGL() {
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
 
-    //Set horizontal FOV value with whatever the field of view (in degrees) is of the
+    // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
 
-    constexpr const float FontSizeBig = 50.f;
-    _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
+    constexpr const float FontSizeFrameinfo = 32.f;
+    _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
     constexpr const float FontSizeTime = 15.f;
     _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
     constexpr const float FontSizeMono = 10.f;
@@ -582,13 +602,18 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         );
     }
 
-    if (_showFrameNumber) {
+    if (_showFrameInformation) {
         glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
             fontResolution().y / 3
         );
 
-        RenderFont(*_fontBig, penPosition, std::to_string(_frameNumber));
+        std::string fn = std::to_string(_frameNumber);
+        std::string dt = std::to_string(global::windowDelegate.deltaTime());
+        std::string avgDt = std::to_string(global::windowDelegate.averageDeltaTime());
+
+        std::string res = "Frame: " + fn + '\n' + "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
+        RenderFont(*_fontFrameInfo, penPosition, res);
     }
 
     ++_frameNumber;
@@ -794,6 +819,35 @@ void RenderEngine::postDraw() {
             scene()->allSceneGraphNodes()
         );
     }
+
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    if (_saveFrameInformation) {
+        _frameInfo.frames.push_back({
+            frameNumber(),
+            global::windowDelegate.deltaTime(),
+            global::windowDelegate.averageDeltaTime()
+        });
+    }
+
+    const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
+    const bool shouldSave = _saveFrameInformation && frameNumber() >= next;
+    if (shouldSave) {
+        std::string filename = fmt::format(
+            "_inst_renderengine_{}_{}.txt",
+            _frameInfo.lastSavedFrame, _frameInfo.saveEveryNthFrame
+        );
+        std::ofstream file(absPath("${BIN}/" + filename));
+        for (const FrameInfo& i : _frameInfo.frames) {
+            std::string line = fmt::format(
+                "{}\t{}\t{}", i.iFrame, i.deltaTime, i.avgDeltaTime
+            );
+            file << line << '\n';
+        }
+
+        _frameInfo.frames.clear();
+        _frameInfo.lastSavedFrame = frameNumber();
+    }
+#endif // OPENSPACE_WITH_INSTRUMENTATION
 }
 
 Scene* RenderEngine::scene() {

@@ -63,7 +63,8 @@ public:
 
     std::array<LayerGroup*, NumLayerGroups> layerGroups() const;
 
-    void update();
+    // Return:  Number of tiles updated
+    int update();
     void reset(bool includeDisabled = false);
 
     void onChange(std::function<void(Layer* l)> callback);
