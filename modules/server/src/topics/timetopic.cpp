@@ -32,7 +32,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TimeTopic";
     constexpr const char* EventKey = "event";
     constexpr const char* SubscribeEvent = "start_subscription";
     constexpr const char* UnsubscribeEvent = "stop_subscription";

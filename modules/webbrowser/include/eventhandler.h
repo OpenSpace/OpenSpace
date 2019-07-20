@@ -57,9 +57,9 @@ class BrowserInstance;
 class EventHandler {
 public:
     void initialize();
-    void setBrowser(const CefRefPtr<CefBrowser>& browser);
     void setBrowserInstance(BrowserInstance* browserInstance);
-    void detachBrowser();
+    void resetBrowserInstance();
+
     void touchPressCallback(const double x, const double y);
     void touchReleaseCallback(const double x, const double y);
     bool hasContentCallback(const double, const double);

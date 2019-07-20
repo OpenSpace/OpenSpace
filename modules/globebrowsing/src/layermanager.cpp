@@ -111,10 +111,12 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     return res;
 }
 
-void LayerManager::update() {
+int LayerManager::update() {
+    int res = 0;
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        layerGroup->update();
+        res += layerGroup->update();
     }
+    return res;
 }
 
 void LayerManager::reset(bool includeDisabled) {

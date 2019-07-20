@@ -37,6 +37,8 @@ local Station6Frag1Holder = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.80068,
             Latitude = 20.2903,
+            Altitude = -2562.6,
+            UseHeightmap = false
         }
     },
     GUI = {
@@ -54,6 +56,8 @@ local Station6Frag1Model = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.8007,
             Latitude = 20.2903,
+            Altitude = -2562.6,
+            UseHeightmap = false
         }
     },
     Transform = {
@@ -104,8 +108,8 @@ local Station6Frag2Model = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.80055,
             Latitude = 20.289808,
-            FixedAltitude = -2566.5,
-            UseFixedAltitude = true
+            Altitude = -2566.5,
+            UseHeightmap = false
         }
     },
     Renderable = {
@@ -140,8 +144,8 @@ local Station6Frag3Model = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.80053,
             Latitude = 20.29030,
-            FixedAltitude = -2563.0,
-            UseFixedAltitude = true
+            Altitude = -2563.0,
+            UseHeightMap = false
         }
     },
     Renderable = {

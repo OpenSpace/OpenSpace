@@ -233,8 +233,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // Write the current location into the floating position
     const glm::vec3 p = _translation->position({
         {},
-        data.time.j2000Seconds(),
-        0.0,
+        data.time,
+        Time(0.0),
         false
     });
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
@@ -412,8 +412,8 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             // location
             const glm::vec3 p = _translation->position({
                 {},
-                _lastPointTime,
-                0.0,
+                Time(_lastPointTime),
+                Time(0.0),
                 false
             });
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
@@ -452,8 +452,8 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             // location
             const glm::vec3 p = _translation->position({
                 {},
-                _firstPointTime,
-                0.0,
+                Time(_firstPointTime),
+                Time(0.0),
                 false
             });
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
@@ -496,7 +496,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double secondsPerPoint = _period / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; ++i) {
-        const glm::vec3 p = _translation->position({ {}, time, 0.0, false });
+        const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0), false });
         _vertexArray[i] = { p.x, p.y, p.z };
 
         time -= secondsPerPoint;

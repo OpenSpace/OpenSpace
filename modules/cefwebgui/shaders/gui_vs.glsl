@@ -31,8 +31,7 @@ uniform mat4 ortho;
 out vec2 Texcoord;
 
 void main() {
-  Texcoord = vec2(position.x + 1.0f, position.y - 1.0f) * 0.5;
-  Texcoord.y *= -1.0f;
+  Texcoord = vec2(position.x + 1.0f, position.y + 1.0f) * 0.5;
   gl_Position = vec4(position, 0.0, 1.0);
 }
 

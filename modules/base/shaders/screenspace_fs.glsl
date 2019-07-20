@@ -29,9 +29,7 @@ in vec2 vs_st;
 in vec4 vs_position;
 
 uniform sampler2D texture1;
-uniform float OcclusionDepth;
 uniform float Alpha;
-
 
 Fragment getFragment() {
     Fragment frag;

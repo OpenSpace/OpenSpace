@@ -65,7 +65,7 @@ public:
      */
     static double convertTime(const std::string& time);
 
-    Time(double secondsJ2000 = -1);
+    explicit Time(double secondsJ2000 = -1);
     Time(const Time& other) = default;
 
     /**

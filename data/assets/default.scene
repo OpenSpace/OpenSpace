@@ -1,25 +1,19 @@
 asset.require('./base')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
-    -- Jump back one day to show a complete planet
+    -- Jump back one day to be able to show complete weather data on Earth.
     openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
 
     openspace.markInterestingTimes({
     	{"Happy Birthday!", "1984 05 08"}
     })
 
+    openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
+
     openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
-
-
-    openspace.navigation.setCameraState({
-        Anchor = earthAsset.Earth.Identifier,
-        Position = { 0, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
-    })
-
-    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 end)
 
 asset.onDeinitialize(function ()

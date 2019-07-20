@@ -285,6 +285,11 @@ if (OPENSPACE_WITH_ABUFFER_RENDERER)
   target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
 endif ()
 
+option(OPENSPACE_WITH_INSTRUMENTATION "Add instrumentation options" OFF)
+if (OPENSPACE_WITH_INSTRUMENTATION)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_INSTRUMENTATION")
+endif ()
+
 
 # Just in case, create the bin directory
 add_custom_command(

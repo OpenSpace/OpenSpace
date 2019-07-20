@@ -14,7 +14,7 @@ local carpoGroup = {
     {
         Identifier = "Carpo",
         Parent = {
-            Name = parentIdentifier,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CARPO",

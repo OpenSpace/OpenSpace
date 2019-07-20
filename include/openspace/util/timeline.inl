@@ -25,13 +25,25 @@
 namespace openspace {
 
 template <typename T>
-Keyframe<T>::Keyframe(size_t i, double t, T p)
+Keyframe<T>::Keyframe(size_t i, double t, T d)
     : KeyframeBase{ i, t }
-    , data(p)
+    , data(std::move(d))
 {}
 
 template <typename T>
-void Timeline<T>::addKeyframe(double timestamp, T data) {
+void Timeline<T>::addKeyframe(double timestamp, T&& data) {
+    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, std::move(data));
+    const auto iter = std::upper_bound(
+        _keyframes.cbegin(),
+        _keyframes.cend(),
+        keyframe,
+        &compareKeyframeTimes
+    );
+    _keyframes.insert(iter, std::move(keyframe));
+}
+
+template <typename T>
+void Timeline<T>::addKeyframe(double timestamp, const T& data) {
     Keyframe<T> keyframe(++_nextKeyframeId, timestamp, data);
     const auto iter = std::upper_bound(
         _keyframes.cbegin(),
@@ -39,7 +51,7 @@ void Timeline<T>::addKeyframe(double timestamp, T data) {
         keyframe,
         &compareKeyframeTimes
     );
-    _keyframes.insert(iter, keyframe);
+    _keyframes.insert(iter, std::move(keyframe));
 }
 
 template <typename T>
@@ -143,7 +155,7 @@ void Timeline<T>::removeKeyframe(size_t id) {
         std::remove_if(
             _keyframes.begin(),
             _keyframes.end(),
-            [id] (Keyframe<T> keyframe) { return keyframe.id == id; }
+            [id] (const Keyframe<T>& keyframe) { return keyframe.id == id; }
         ),
         _keyframes.end()
     );
@@ -209,7 +221,7 @@ const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclus
     return &(*it);
 }
 
-template<typename T>
+template <typename T>
 const std::deque<Keyframe<T>>& Timeline<T>::keyframes() const {
     return _keyframes;
 }

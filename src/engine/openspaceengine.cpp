@@ -1014,8 +1014,6 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         global::renderEngine.updateScene();
-        //_navigationHandler->updateCamera(dt);
-
 
         if (_scene) {
             Camera* camera = _scene->camera();

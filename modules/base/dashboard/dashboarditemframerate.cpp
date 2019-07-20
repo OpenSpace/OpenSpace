@@ -289,7 +289,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
     );
 
     int nLines = output.empty() ? 0 :
-        (std::count(output.begin(), output.end(), '\n') + 1);
+        static_cast<int>((std::count(output.begin(), output.end(), '\n') + 1));
 
     penPosition.y -= _font->height() * static_cast<float>(nLines);
 

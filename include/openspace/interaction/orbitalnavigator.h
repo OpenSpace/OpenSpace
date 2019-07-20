@@ -39,6 +39,8 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 
+#include <optional>
+
 namespace openspace {
     class SceneGraphNode;
     class Camera;
@@ -59,6 +61,7 @@ public:
 
     Camera* camera() const;
     void setCamera(Camera* camera);
+    void clearPreviousState();
 
     void setFocusNode(const std::string& focusNode);
     void setAnchorNode(const std::string& anchorNode);
@@ -71,8 +74,11 @@ public:
     void resetNodeMovements();
 
     JoystickCameraStates& joystickStates();
+    const JoystickCameraStates& joystickStates() const;
+    
     WebsocketCameraStates& websocketStates();
-
+    const WebsocketCameraStates& websocketStates() const;
+    
     bool followingNodeRotation() const;
     const SceneGraphNode* anchorNode() const;
     const SceneGraphNode* aimNode() const;
@@ -150,10 +156,9 @@ private:
     const SceneGraphNode* _anchorNode = nullptr;
     const SceneGraphNode* _aimNode = nullptr;
 
-    glm::dvec3 _previousAnchorNodePosition;
-    glm::dquat _previousAnchorNodeRotation;
-
-    glm::dvec3 _previousAimNodePosition;
+    std::optional<glm::dvec3>_previousAnchorNodePosition;
+    std::optional<glm::dquat> _previousAnchorNodeRotation;
+    std::optional<glm::dvec3> _previousAimNodePosition;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;
