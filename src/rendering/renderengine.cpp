@@ -303,7 +303,6 @@ RenderEngine::RenderEngine()
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
-<<<<<<< HEAD
     , _tmoOwner(TMOInfo)
     , _hdrExposure(HDRExposureInfo, 1.68f, 0.01f, 10.0f)
     , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 100.0f)
@@ -315,11 +314,6 @@ RenderEngine::RenderEngine()
     , _value(ValueInfo, 1.f, 0.0f, 5.0f)
     , _lightness(LightnessInfo, 1.1f, 0.0f, 5.0f)
     , _colorSpace(ColorSpaceInfo, properties::OptionProperty::DisplayType::Dropdown)
-=======
-    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
-    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
->>>>>>> master
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
     , _globalRotation(
         GlobalRotationInfo,
@@ -338,11 +332,7 @@ RenderEngine::RenderEngine()
         glm::vec3(0.f),
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
-<<<<<<< HEAD
     )    
-=======
-    )
->>>>>>> master
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);

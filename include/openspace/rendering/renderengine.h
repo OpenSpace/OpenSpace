@@ -77,10 +77,7 @@ public:
         FILMIC, //6
         UNCHARTED, //7
         COSTA, //8
-        ADAPTIVE, //8
-        GLOBAL, //9
-        PHOTOGRAPHIC_REINHARD, //10
-        MIPMAPPING //11
+        PHOTOGRAPHIC_REINHARD, //9
     };
 
     enum class COLORSPACE {
@@ -212,7 +209,21 @@ private:
     properties::TriggerProperty _takeScreenshot;
     bool _shouldTakeScreenshot = false;
     properties::BoolProperty _applyWarping;
-    properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _showFrameInformation;
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    struct FrameInfo {
+        uint64_t iFrame;
+        double deltaTime;
+        double avgDeltaTime;
+    };
+
+    struct {
+        std::vector<FrameInfo> frames;
+        uint64_t lastSavedFrame = 0;
+        uint16_t saveEveryNthFrame = 2048;
+    } _frameInfo;
+    properties::BoolProperty _saveFrameInformation;
+#endif // OPENSPACE_WITH_INSTRUMENTATION
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
@@ -243,7 +254,7 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontBig;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
