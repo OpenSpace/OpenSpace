@@ -54,9 +54,6 @@ public:
     virtual void setGamma(float gamma) = 0;
     virtual void setMaxWhite(float maxWhite) = 0;
     virtual void setToneMapOperator(int tmOp) = 0;
-    virtual void setKey(float key) = 0;
-    virtual void setYwhite(float white) = 0;
-    virtual void setTmoSaturation(float sat) = 0;
     virtual void setHue(float hue) = 0;
     virtual void setValue(float value) = 0;
     virtual void setSaturation(float sat) = 0;

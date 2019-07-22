@@ -32,10 +32,7 @@
 #define FILMIC 6
 #define UNCHARTED 7
 #define COSTA 8
-#define ADAPTIVE 9
-#define GLOBAL 10
-#define PHOTOGRAPHIC_REINHARD 11
-#define MIPMAPPING 12
+#define PHOTOGRAPHIC_REINHARD 9
 
 const float HCV_EPSILON = 1e-10;
 const float HSL_EPSILON = 1e-10;

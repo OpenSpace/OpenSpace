@@ -197,24 +197,6 @@ namespace {
         "equivalent of an electronic image sensor."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TMOSaturationInfo = {
-        "TMOSaturation",
-        "TMO Saturation",
-        "TMO Saturation"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TMOYWhiteInfo = {
-        "TMOYWhite",
-        "Ywhite",
-        "Ywhite"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TMOKeyInfo = {
-        "TMOKey",
-        "Key",
-        "Key"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
@@ -313,9 +295,6 @@ RenderEngine::RenderEngine()
     , _hdrExposure(HDRExposureInfo, 1.68f, 0.01f, 10.0f)
     , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 100.0f)
     , _toneMapOperator(ToneMapOperatorInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _tmoKey(TMOKeyInfo, 0.18f, 0.0f, 1.0f)
-    , _tmoYwhite(TMOYWhiteInfo, 1e6f, 0.0f, 1e10f)
-    , _tmoSaturation(TMOSaturationInfo, 1.f, 0.0f, 1.0f)
     , _imageOwner(ImageInfo)
     , _gamma(GammaInfo, 0.86f, 0.01f, 5.0f)
     , _hue(HueInfo, 1.f, 0.0f, 5.0f)
@@ -385,10 +364,7 @@ RenderEngine::RenderEngine()
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::FILMIC), "Filmic");
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::UNCHARTED), "Uncharted 2");
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::COSTA), "Costa");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::ADAPTIVE), "Adaptive");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::GLOBAL), "Global");
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::PHOTOGRAPHIC_REINHARD), "Photographic Reinhard");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::MIPMAPPING), "MipMapping Global/Local Reinhard");
     _toneMapOperator.set(8);
 
     _toneMapOperator.onChange([this]() {
@@ -399,33 +375,6 @@ RenderEngine::RenderEngine()
 
     addProperty(_toneMapOperator);
     
-    _tmoKey.onChange([this]() {
-        if (_renderer) {
-            _renderer->setKey(_tmoKey);
-        }
-    });
-
-    addProperty(_tmoKey);
-
-    _tmoYwhite.onChange([this]() {
-        if (_renderer) {
-            _renderer->setYwhite(_tmoYwhite);
-        }
-    });
-
-    addProperty(_tmoYwhite);
-    
-    _tmoSaturation.onChange([this]() {
-        if (_renderer) {
-            _renderer->setTmoSaturation(_tmoSaturation);
-        }
-    });
-
-    addProperty(_tmoSaturation);
-    
-    //this->addPropertySubOwner(_tmoOwner);
-
-
     _gamma.onChange([this]() {
         if (_renderer) {
             _renderer->setGamma(_gamma);

@@ -54,14 +54,10 @@ namespace {
         "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
-    constexpr const std::array<const char*, 13> HDRUniformNames = {
+    constexpr const std::array<const char*, 12> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma", 
-        "toneMapOperator", "aveLum", "maxWhite", "Hue", "Saturation", "Value", 
+        "toneMapOperator", "maxWhite", "Hue", "Saturation", "Value", 
         "Lightness", "colorSpace", "nAaSamples"
-    };
-
-    constexpr const std::array<const char*, 4> TMOUniformNames = {
-        "hdrSampler", "key", "Ywhite", "sat"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -1374,18 +1370,6 @@ void FramebufferRenderer::setMaxWhite(float maxWhite) {
 
 void FramebufferRenderer::setToneMapOperator(int tmOp) {
     _toneMapOperator = tmOp;
-}
-
-void FramebufferRenderer::setKey(float key) {
-    _tmoKey = key;
-}
-
-void FramebufferRenderer::setYwhite(float white) {
-    _tmoYwhite = white;
-}
-
-void FramebufferRenderer::setTmoSaturation(float sat) {
-    _tmoSaturation = sat;
 }
 
 void FramebufferRenderer::setHue(float hue) {

@@ -136,9 +136,6 @@ public:
     void setGamma(float gamma) override;
     void setMaxWhite(float maxWhite) override;
     void setToneMapOperator(int tmOp) override;
-    void setKey(float key) override;
-    void setYwhite(float white) override;
-    void setTmoSaturation(float sat) override;
     void setHue(float hue) override;
     void setValue(float value) override;
     void setSaturation(float sat) override;
@@ -184,7 +181,7 @@ private:
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
     
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-                 toneMapOperator, aveLum, maxWhite, Hue, Saturation, Value, 
+                 toneMapOperator, maxWhite, Hue, Saturation, Value, 
                  Lightness, colorSpace, nAaSamples) _hdrUniformCache;
 
     GLint _defaultFBO;
@@ -212,9 +209,6 @@ private:
     float _maxWhite = 5.0f;
     int _toneMapOperator = 8;
     bool _histogramEnabled = false;
-    float _tmoKey = 0.18f;
-    float _tmoYwhite = 1e6f;
-    float _tmoSaturation = 1.0f;
     float _hue = 1.f;
     float _saturation = 1.2f;
     float _value = 1.f;

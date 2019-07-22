@@ -222,9 +222,6 @@ private:
     properties::FloatProperty _hdrExposure;
     properties::FloatProperty _maxWhite;
     properties::OptionProperty _toneMapOperator;
-    properties::FloatProperty _tmoKey;
-    properties::FloatProperty _tmoYwhite;
-    properties::FloatProperty _tmoSaturation;
     
     properties::PropertyOwner _imageOwner;
     properties::FloatProperty _gamma;
