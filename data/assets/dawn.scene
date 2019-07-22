@@ -10,10 +10,9 @@ asset.onInitialize(function ()
 
     openspace.markInterestingNodes({ "Dawn", "Ceres", "Vesta" })
 
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = DawnAsset.Dawn.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
-        Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
     })
 end)
 

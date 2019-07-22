@@ -41,15 +41,29 @@ namespace {
 
     std::string escapedLuaString(const std::string& str) {
         std::string luaString;
+
         for (const char& c : str) {
             switch (c) {
-                case '\'':
-                    luaString += "\'";
-                    break;
-                default:
-                    luaString += c;
+            case '\t':
+                luaString += "\\t"; // Replace tab with \t.
+                break;
+            case '"':
+                luaString += "\\\""; // Replace " with \".
+                break;
+            case '\\':
+                luaString += "\\\\"; // Replace \ with \\.
+                break;
+            case '\n':
+                luaString += "\\\\n"; // Replace newline with \n.
+                break;
+            case '\r':
+                luaString += "\\r"; // Replace carriage return with \r.
+                break;
+            default:
+                luaString += c;
             }
         }
+
         return luaString;
     }
 

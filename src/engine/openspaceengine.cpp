@@ -811,7 +811,6 @@ void OpenSpaceEngine::deinitialize() {
 
     ghoul::logging::LogManager::deinitialize();
 
-    ghoul::deinitialize();
     LTRACE("deinitialize(end)");
 
 
@@ -1013,8 +1012,6 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         global::renderEngine.updateScene();
-        //_navigationHandler->updateCamera(dt);
-
 
         if (_scene) {
             Camera* camera = _scene->camera();

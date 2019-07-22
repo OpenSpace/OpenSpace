@@ -165,7 +165,6 @@ private:
     GLuint _psfVao = 0;
     GLuint _psfVbo = 0;
     GLuint _psfTexture = 0;
-    GLuint _discTexture = 0;
     GLuint _convolvedTexture = 0;
 };
 

@@ -35,12 +35,6 @@ namespace {
         "All the envelopes used in the transfer function"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HistogramInfo = {
-        "Histogram",
-        "Histogram",
-        "All the data"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
         "DataUnit",

@@ -53,32 +53,69 @@ namespace {
 
     constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
-    void addScreenSpaceRenderableLocal(std::string texturePath) {
+    void addScreenSpaceRenderableLocal(std::string identifier, std::string texturePath) {
         if (!FileSys.fileExists(absPath(texturePath))) {
             LWARNING(fmt::format("Could not find image '{}'", texturePath));
             return;
         }
 
-        openspace::global::scriptEngine.queueScript(
-            fmt::format(
+        std::string script;
+        if (identifier.empty()) {
+            script = fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageLocal',\
                     TexturePath = openspace.absPath('{}')\
                 }});",
-                std::move(texturePath)
-            ),
+                texturePath
+            );
+        }
+        else {
+            script = fmt::format(
+                "openspace.addScreenSpaceRenderable({{\
+                    Type = 'ScreenSpaceImageLocal',\
+                    TexturePath = openspace.absPath('{}'),\
+                    Identifier = '{}',\
+                    Name = '{}'\
+                }});",
+                texturePath,
+                identifier,
+                identifier
+            );
+        }
+
+        openspace::global::scriptEngine.queueScript(
+            script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
-    void addScreenSpaceRenderableOnline(std::string texturePath) {
-        openspace::global::scriptEngine.queueScript(
-            fmt::format(
+    void addScreenSpaceRenderableOnline(std::string identifier, std::string texturePath) {
+        std::string script;
+        if (identifier.empty()) {
+            script = fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
-                    Type = 'ScreenSpaceImageOnline', URL = '{}'\
+                    Type = 'ScreenSpaceImageOnline',\
+                    URL = '{}'\
                 }});",
-                std::move(texturePath)
-            ),
+                texturePath
+            );
+        }
+        else {
+            script = fmt::format(
+                "openspace.addScreenSpaceRenderable({{\
+                    Type = 'ScreenSpaceImageOnline',\
+                    URL = '{}',\
+                    Identifier = '{}',\
+                    Name = '{}'\
+                }});",
+                texturePath,
+                identifier,
+                identifier
+            );
+        }
+
+        openspace::global::scriptEngine.queueScript(
+            script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
@@ -616,8 +653,15 @@ void GUI::render() {
     renderAndUpdatePropertyVisibility();
 
     static const int addImageBufferSize = 256;
+    static char identifierBuffer[addImageBufferSize];
     static char addImageLocalBuffer[addImageBufferSize];
     static char addImageOnlineBuffer[addImageBufferSize];
+
+    ImGui::InputText(
+        "Identifier for Local/Online Images",
+        identifierBuffer,
+        addImageBufferSize
+    );
 
     bool addImageLocal = ImGui::InputText(
         "Add Local Image",
@@ -626,7 +670,10 @@ void GUI::render() {
         ImGuiInputTextFlags_EnterReturnsTrue
     );
     if (addImageLocal) {
-        addScreenSpaceRenderableLocal(std::string(addImageLocalBuffer));
+        addScreenSpaceRenderableLocal(
+            std::string(identifierBuffer),
+            std::string(addImageLocalBuffer)
+        );
     }
 
     bool addImageOnline = ImGui::InputText(
@@ -637,7 +684,10 @@ void GUI::render() {
     );
 
     if (addImageOnline) {
-        addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
+        addScreenSpaceRenderableOnline(
+            std::string(identifierBuffer),
+            std::string(addImageOnlineBuffer)
+        );
     }
 
     bool addDashboard = ImGui::Button("Add New Dashboard");

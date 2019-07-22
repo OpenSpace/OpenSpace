@@ -848,7 +848,7 @@ void SessionRecording::playbackCamera() {
         pbFrame.followFocusNodeRotation = (rotationFollowing == "F");
     }
     if (_setSimulationTimeWithNextCameraKeyframe) {
-        global::timeManager.setTimeNextFrame(timeSim);
+        global::timeManager.setTimeNextFrame(Time(timeSim));
         _setSimulationTimeWithNextCameraKeyframe = false;
         _saveRenderingCurrentRecordedTime = timeRec;
     }

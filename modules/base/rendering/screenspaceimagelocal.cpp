@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
@@ -96,11 +97,30 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         setGuiName("ScreenSpaceImageLocal " + std::to_string(iIdentifier));
     }
 
-    _texturePath.onChange([this]() { _textureIsDirty = true; });
+    _texturePath.onChange([this]() {
+        if (!FileSys.fileExists(FileSys.absolutePath(_texturePath))) {
+            LWARNINGC(
+                "ScreenSpaceImageLocal",
+                fmt::format("Image {} did not exist for {}", _texturePath, _identifier)
+            );
+        }
+        else {
+            _textureIsDirty = true;
+        }
+    });
     addProperty(_texturePath);
 
     if (dictionary.hasKey(TexturePathInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TexturePathInfo.identifier);
+        std::string path = dictionary.value<std::string>(TexturePathInfo.identifier);
+        if (!FileSys.fileExists(FileSys.absolutePath(path))) {
+            LWARNINGC(
+                "ScreenSpaceImageLocal",
+                fmt::format("Image {} did not exist for {}", path, _identifier)
+            );
+        }
+        else {
+            _texturePath = path;
+        }
     }
 }
 
@@ -130,12 +150,13 @@ void ScreenSpaceImageLocal::update() {
             _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
-
     }
 }
 
 void ScreenSpaceImageLocal::bindTexture() {
-    _texture->bind();
+    if (_texture) {
+        _texture->bind();
+    }
 }
 
 } // namespace openspace

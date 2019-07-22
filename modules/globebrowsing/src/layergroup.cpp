@@ -91,15 +91,18 @@ void LayerGroup::deinitialize() {
     }
 }
 
-void LayerGroup::update() {
+int LayerGroup::update() {
+    int res = 0;
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
         if (layer->enabled()) {
-            layer->update();
+            res += layer->update();
             _activeLayers.push_back(layer.get());
         }
     }
+
+    return res;
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
