@@ -149,7 +149,7 @@ void WebGuiModule::removeEndpointChangeCallback(CallbackHandle handle) {
     );
 
     ghoul_assert(
-        it != _deltaTimeChangeCallbacks.end(),
+        it != _endpointChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
 
