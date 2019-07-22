@@ -22,10 +22,6 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('RenderEngine.ToneMapOperator', 8);
     openspace.setPropertyValueSingle('RenderEngine.Lightness', 1.1);
     openspace.setPropertyValueSingle('RenderEngine.Saturation', 1.2);
-    openspace.setPropertyValueSingle('RenderEngine.BloomThreshouldMin', 0.15);
-    openspace.setPropertyValueSingle('RenderEngine.BloomThreshouldMax', 2.0);
-    openspace.setPropertyValueSingle('RenderEngine.BloomNewColorFactor', 4.7);
-    
 end)
 
 asset.onDeinitialize(function ()

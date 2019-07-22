@@ -50,15 +50,10 @@ public:
 
     virtual void setResolution(glm::ivec2 res) = 0;
     virtual void setNAaSamples(int nAaSamples) = 0;
-    virtual void setBlurrinessLevel(int level) = 0;
     virtual void setHDRExposure(float hdrExposure) = 0;
     virtual void setGamma(float gamma) = 0;
     virtual void setMaxWhite(float maxWhite) = 0;
     virtual void setToneMapOperator(int tmOp) = 0;
-    virtual void setBloomThreMin(float minV) = 0;
-    virtual void setBloomThreMax(float maxV) = 0;
-    virtual void setBloomOrigFactor(float origFactor) = 0;
-    virtual void setBloomNewFactor(float newFactor) = 0;
     virtual void setKey(float key) = 0;
     virtual void setYwhite(float white) = 0;
     virtual void setTmoSaturation(float sat) = 0;
@@ -67,10 +62,6 @@ public:
     virtual void setSaturation(float sat) = 0;
     virtual void setLightness(float lightness) = 0;
     virtual void setColorSpace(unsigned int colorspace) = 0;
-
-    virtual void enableBloom(bool enable) = 0;
-    virtual void enableAutomaticBloom(bool enable) = 0;
-    virtual void enableHistogram(bool enable) = 0;
 
     virtual int nAaSamples() const = 0;
     virtual const std::vector<double>& mSSAPattern() const = 0;

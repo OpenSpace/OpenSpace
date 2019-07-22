@@ -26,10 +26,6 @@
 #include <#{fragmentPath}>
 
 #define exposure #{rendererData.hdrExposure}
-#define automaticBloom #{rendererData.automaticBloom}
-#define bloom_thresh_min #{rendererData.bloom_thresh_min}
-#define bloom_thresh_max #{rendererData.bloom_thresh_max}
-
 #define deltaError 0.013
 
 layout(location = 0) out vec4 _out_color_;
@@ -38,26 +34,10 @@ layout(location = 2) out vec4 gNormal;
 layout(location = 3) out vec4 filterBuffer;
 
 void main() {
-     Fragment f        = getFragment();
-     vec4 tmpOutColor  = vec4((log2(vec3(1.0) - (f.color.rgb - vec3(deltaError)))/(-exposure)), f.color.a);
-     //_out_color_     = f.color;
-     gPosition         = f.gPosition;
-     gNormal           = f.gNormal;
+    Fragment f        = getFragment();
+    _out_color_  = vec4((log2(vec3(1.0) - (f.color.rgb - vec3(deltaError)))/(-exposure)), f.color.a);
+    gPosition         = f.gPosition;
+    gNormal           = f.gNormal;
      
-     if (automaticBloom == 1) {
-        // Extract luminance
-        float Y = dot(f.color.rgb, vec3(0.299, 0.587, 0.144));
-
-        // Apply Bloom on the bloom threshold range values
-        vec3 bColor = tmpOutColor.rgb * smoothstep(bloom_thresh_min, bloom_thresh_max, Y);
-
-        filterBuffer = vec4(bColor, f.color.a);
-     } else {
-        if (f.filterFlag == 1)
-            filterBuffer = f.color;
-        else
-            filterBuffer = vec4(0);
-     }
-     _out_color_ = tmpOutColor;
-     gl_FragDepth = normalizeFloat(f.depth);
+    gl_FragDepth = normalizeFloat(f.depth);
 }

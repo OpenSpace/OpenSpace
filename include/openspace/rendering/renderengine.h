@@ -88,23 +88,6 @@ public:
         HSL
     };
 
-    struct GLDefaultState {
-        GLboolean blendEnabled;
-        GLboolean blend0Enabled;
-        GLboolean blend1Enabled;
-        GLboolean blend2Enabled;
-        GLboolean blend3Enabled;
-        GLboolean cullFaceEnabled;
-        GLboolean depthTestEnabled;
-        GLint defaultFBO;
-        GLenum blendEquationRGB;
-        GLenum blendEquationAlpha;
-        GLenum blendDestAlpha;
-        GLenum blendDestRGB;
-        GLenum blendSrcAlpha;
-        GLenum blendSrcRGB;
-    };
-    
     RenderEngine();
     ~RenderEngine();
 
@@ -191,9 +174,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    const RenderEngine::GLDefaultState& glDefaultState() const;
-    void setGLDefaultState(RenderEngine::GLDefaultState glDS);
-
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
@@ -216,8 +196,6 @@ private:
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
 
-    GLDefaultState _glDefaultState;
-
     properties::BoolProperty _doPerformanceMeasurements;
 
     std::unique_ptr<Renderer> _renderer;
@@ -239,15 +217,6 @@ private:
 
     properties::FloatProperty _globalBlackOutFactor;
     properties::IntProperty _nAaSamples;
-    
-    properties::PropertyOwner _bloomOwner;
-    properties::BoolProperty _enableBloom;
-    properties::BoolProperty _automaticBloom;
-    properties::IntProperty _bloomBlurrinessLevel;
-    properties::FloatProperty _bloomThreshouldMin;
-    properties::FloatProperty _bloomThreshouldMax;
-    properties::FloatProperty _bloomOrigColorFactor;
-    properties::FloatProperty _bloomNewColorFactor;
     
     properties::PropertyOwner _tmoOwner;
     properties::FloatProperty _hdrExposure;

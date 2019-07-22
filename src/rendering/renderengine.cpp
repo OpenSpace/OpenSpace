@@ -228,53 +228,11 @@ namespace {
         "Max value for white color [0.01-10.0] to be used by tone mapping operators." 
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BloomThreshouldMinInfo = {
-        "BloomThreshouldMin",
-        "Bloom Threshould Min Value",
-        "Min value a pixel must have to be bloomed."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BloomThreshouldMaxInfo = {
-        "BloomThreshouldMax",
-        "Bloom Threshould Max Value",
-        "Max value a pixel must have to be bloomed."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BloomOrigColorFactorInfo = {
-        "BloomOrigColorFactor",
-        "Bloom Original Color Factor Value",
-        "Bloom Original Color Factor Value."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BloomNewColorFactorInfo = {
-        "BloomNewColorFactor",
-        "Bloom New Color Factor Value",
-        "Bloom New Color Factor Value."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ToneMapOperatorInfo = {
         "ToneMapOperator",
         "ToneMap Operator",
         "ToneMap Operator is the method used to tranform the pixels using a HDR to"
         "pixels using a LDR distribution."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnableBloomInfo = {
-        "EnableBloom",
-        "Enable/Disable Bloom",
-        "Enable/Disable Bloom."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo AutomaticBloomInfo = {
-        "AutomaticBloom",
-        "Enable/Disable Automatic Bloom",
-        "Enable/Disable Automatic Bloom."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BlurrinessLevelBloomInfo = {
-        "BlurrinessLevelBloom",
-        "Increase/Decrease Bloom Blurriness Level",
-        "Increase/Decrease Bloom Blurriness Level."
     };
 
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
@@ -299,12 +257,6 @@ namespace {
         "Lightness",
         "Lightness",
         "Lightness"
-    };
-
-    openspace::properties::PropertyOwner::PropertyOwnerInfo BloomInfo = {
-        "BloomOp",
-        "Bloom Options",
-        ""
     };
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo TMOInfo = {
@@ -357,14 +309,6 @@ RenderEngine::RenderEngine()
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
-    , _bloomOwner(BloomInfo)
-    , _enableBloom(EnableBloomInfo, false)
-    , _automaticBloom(AutomaticBloomInfo, false)
-    , _bloomBlurrinessLevel(BlurrinessLevelBloomInfo, 1, 1, 3)
-    , _bloomThreshouldMin(BloomThreshouldMinInfo, 0.5, 0.0, 100.0)
-    , _bloomThreshouldMax(BloomThreshouldMaxInfo, 1.0, 0.0, 100.0)
-    , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
-    , _bloomNewColorFactor(BloomNewColorFactorInfo, 1.0, 0.0, 100.0)
     , _tmoOwner(TMOInfo)
     , _hdrExposure(HDRExposureInfo, 1.68f, 0.01f, 10.0f)
     , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 100.0f)
@@ -533,59 +477,6 @@ RenderEngine::RenderEngine()
     addProperty(_lightness);
     
     //this->addPropertySubOwner(_imageOwner);
-
-    _enableBloom.onChange([this]() {
-        if (_renderer) {
-            _renderer->enableBloom(_enableBloom);
-        }
-    });
-
-    addProperty(_enableBloom);
-
-    _automaticBloom.onChange([this]() {
-        if (_renderer) {
-            _renderer->enableAutomaticBloom(_automaticBloom);
-            _renderer->enableBloom(_automaticBloom);
-        }
-        });
-    addProperty(_automaticBloom);
-
-    _bloomBlurrinessLevel.onChange([this]() {
-        if (_renderer) {
-            _renderer->setBlurrinessLevel(_bloomBlurrinessLevel);
-        }
-        });
-    addProperty(_bloomBlurrinessLevel);
-
-    addProperty(_bloomThreshouldMin);
-    _bloomThreshouldMin.onChange([this]() {
-        if (_renderer) {
-            _renderer->setBloomThreMin(_bloomThreshouldMin);
-        }
-    });
-
-    addProperty(_bloomThreshouldMax);
-    _bloomThreshouldMax.onChange([this]() {
-        if (_renderer) {
-            _renderer->setBloomThreMax(_bloomThreshouldMax);
-        }
-    });
-
-    addProperty(_bloomOrigColorFactor);
-    _bloomOrigColorFactor.onChange([this]() {
-        if (_renderer) {
-            _renderer->setBloomOrigFactor(_bloomOrigColorFactor);
-        }
-    });
-
-    addProperty(_bloomNewColorFactor);
-    _bloomNewColorFactor.onChange([this]() {
-        if (_renderer) {
-            _renderer->setBloomNewFactor(_bloomNewColorFactor);
-        }
-    });
-    
-    //this->addPropertySubOwner(_bloomOwner);
 
     addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
@@ -1281,14 +1172,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             },
         },
     };
-}
-
-const RenderEngine::GLDefaultState& RenderEngine::glDefaultState() const {
-    return _glDefaultState;
-}
-
-void RenderEngine::setGLDefaultState(RenderEngine::GLDefaultState glDS) {
-    _glDefaultState = std::move(glDS);
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {
