@@ -53,7 +53,6 @@ public:
         const std::vector<SceneGraphNode*>& sceneNodes);
 
     void outputLogs();
-    void debrisLog();
 
     void writeData(std::ofstream& out, const std::vector<float>& data);
 

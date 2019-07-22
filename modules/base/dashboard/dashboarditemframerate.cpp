@@ -38,7 +38,6 @@
 #include <fstream>
 
 
-
 namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
@@ -259,6 +258,18 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
     const std::string output = format(frametimeType);
+    std::string theWholeText = output;
+
+
+   std::size_t startHere = theWholeText.find(":");
+   std::string fpsValue = theWholeText.substr(startHere+2, theWholeText.back());
+   std::ofstream out("../././././fpsData.txt", std::ios::app);
+
+   std::size_t negative = fpsValue.find("-");
+   if(negative == 0 ){
+   }else
+       out << fpsValue << std::endl;
+   // out.close();
 
     int nLines = output.empty() ? 0 :
         (std::count(output.begin(), output.end(), '\n') + 1);

@@ -74,8 +74,9 @@ assetHelper.registerInterestingNodes(asset, {
 })
 
 asset.onInitialize(function ()
-    --local now = openspace.time.currentWallTime()
-    local now = "2019-06-26T00:00:00" 
+    local now = openspace.time.currentWallTime()
+    --local now = "2019-06-26T00:00:00" 
+    
     -- Jump back one day to show a complete planet
     openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
 
