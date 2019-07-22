@@ -173,6 +173,7 @@ void PerformanceManager::setEnabled(bool enabled) {
     else {
         if (loggingEnabled()) {
             outputLogs();
+            debrisLog();
         }
 
         if (_performanceMemory) {
@@ -260,8 +261,8 @@ void PerformanceManager::debrisLog() {
     PerformanceLayout* layout = performanceData();
     const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _currentTick;
     
-     //for (int16_t n = 0; n < layout->nScaleGraphEntries; n++) {
-      for (int16_t n = 7; n < 12; n++) {
+    for (int16_t n = 0; n < layout->nScaleGraphEntries; n++) {
+      //for (int16_t n = 7; n < 12; n++) {
            //lol fult
         const PerformanceLayout::SceneGraphPerformanceLayout node =
             layout->sceneGraphEntries[n];

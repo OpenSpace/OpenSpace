@@ -32,9 +32,17 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
+// #include <cstring>
+#include <string.h>
+#include <stdio.h>
+#include <fstream>
+
+
+
 namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
+
 
     constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -105,6 +113,7 @@ namespace {
             "Avg. FPS: {:3.2f}",
             1.0 / openspace::global::windowDelegate.averageDeltaTime()
         );
+         
     }
 
     std::string format(openspace::DashboardItemFramerate::FrametimeType frametimeType) {

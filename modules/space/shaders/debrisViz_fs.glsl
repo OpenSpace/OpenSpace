@@ -75,10 +75,10 @@ Fragment getFragment() {
 
 
     // to debug using colors use this if-statment.
-    float ep = 0.01;
-    if( fract(vertexID_f) < ep ){ //periodFraction < ep
-         frag.color = vec4(1, 0, 0, 1);
-    }
+    // float ep = 0.01;
+    // if( fract(vertexID_f) < ep ){ //periodFraction < ep
+    //      frag.color = vec4(1, 0, 0, 1);
+    // }
 
     return frag;
 }

@@ -26,8 +26,8 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z
-layout (location = 1) in vec2 orbit_data; // 1: timeOffset, 2: epoch, 3: period
+layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: timeOffset, 
+layout (location = 1) in vec2 orbit_data; // 1: epoch, 2: period
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;

@@ -103,6 +103,8 @@ namespace openspace {
         KeplerTranslation _keplerTranslator;
         std::vector<KeplerParameters> _TLEData;
 
+        
+
         /// The backend storage for the vertex buffer object containing all points for this
         /// trail.
         std::vector<TrailVBOLayout> _vertexBufferData;

@@ -11,6 +11,7 @@ local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
 
 local objectNames = {}
+--shared.registerSatelliteGroupObjects(asset, group, tle, true)     -- if thesis project of 2019 is used
 
 asset.onInitialize(function ()
     objectNames = shared.addSatelliteGroupObjects(group, tle, false)
