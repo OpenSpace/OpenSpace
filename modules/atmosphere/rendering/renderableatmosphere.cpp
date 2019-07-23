@@ -403,6 +403,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 "Atmosphere Effects. Disabling atmosphere effects for this planet."
             );
         }
+        
+        if (atmosphereDictionary.hasKey(SunIntensityInfo.identifier)) {
+            _sunRadianceIntensity = atmosphereDictionary.value<float>(
+                                                               SunIntensityInfo.identifier
+                                                              );
+        }
 
         if (!atmosphereDictionary.getValue(
                 GroundRadianceEmittioninfo.identifier,
