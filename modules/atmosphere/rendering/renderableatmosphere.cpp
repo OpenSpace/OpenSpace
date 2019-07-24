@@ -266,6 +266,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _mieHeightScale(0.f)
     , _miePhaseConstant(0.f)
     , _sunRadianceIntensity(5.f)
+    , _mieScattExtPropCoefProp(1.f)
     , _mieExtinctionCoeff(glm::vec3(0.f))
     , _rayleighScatteringCoeff(glm::vec3(0.f))
     , _ozoneExtinctionCoeff(glm::vec3(0.f))
@@ -408,6 +409,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _sunRadianceIntensity = atmosphereDictionary.value<float>(
                                                                SunIntensityInfo.identifier
                                                               );
+        }
+        
+        if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier)) {
+            _mieScattExtPropCoefProp = atmosphereDictionary.value<float>(
+                MieScatteringExtinctionPropCoeffInfo.identifier
+                );
         }
 
         if (!atmosphereDictionary.getValue(
@@ -634,8 +641,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _mieScatteringCoeffZP.onChange(updateAtmosphere);
             addProperty(_mieScatteringCoeffZP);
 
-            _mieScatteringExtinctionPropCoefficientP =
+            _mieScatteringExtinctionPropCoefficientP = 
+                _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
                 _mieScatteringCoeff.x / _mieExtinctionCoeff.x;
+
             _mieScatteringExtinctionPropCoefficientP.onChange(updateAtmosphere);
             addProperty(_mieScatteringExtinctionPropCoefficientP);
 
