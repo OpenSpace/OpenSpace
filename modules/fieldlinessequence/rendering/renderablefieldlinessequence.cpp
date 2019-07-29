@@ -326,6 +326,10 @@ void RenderableFieldlinesSequence::initializeGL() {
                 if (!prepareForOsflsStreaming()) {
                     return;
                 }
+                if(_webFieldlines){
+                    LERROR("initializing webmanager");
+                    initializeWebManager();
+                }
             }
             else {
                 loadOsflsStatesIntoRAM(outputFolderPath);
@@ -421,22 +425,16 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 
     std::string sourceFolderPath;
 
-    if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
-
-        // If this is a web-fieldline, we don't need no sourcefolder
-        if (!_dictionary->getValue(KeyWebFieldlines, _webFieldlines)) {
-            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyWebFieldlines));
+    // try to get webfield setting, if not try to get sourcefolder setting
+    if (!_dictionary->getValue(KeyWebFieldlines, _webFieldlines)){
+        if(!_dictionary->getValue(KeySourceFolder, sourceFolderPath)){
+            LERROR(fmt::format("{}: The field {} or {} is missing.", _identifier, KeySourceFolder, KeyWebFieldlines));
             return false;
         }
-        else if (!_webFieldlines) {
-            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
-            return false;
-        }
-    }
-
-    if (_webFieldlines) {
-        initializeWebManager();
-        sourceFolderPath = _webFieldlinesManager.getDirectory();
+    }else{
+        LERROR("initializing sync-dir and downloading startset webFLman");
+        sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
+        _webFieldlinesManager.preDownload();
     }
 
     // Ensure that the source folder exists and then extract
@@ -471,9 +469,9 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
             LERROR(fmt::format(
-                "{}: {} contains no {} files",
-                _identifier, sourceFolderPath, inputFileTypeString
-            ));
+                               "{}: {} contains no {} files",
+                               _identifier, sourceFolderPath, inputFileTypeString
+                               ));
             return false;
         }
     }
@@ -485,7 +483,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         ));
         return false;
     }
-
+    
     return true;
 }
 
@@ -1182,7 +1180,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 }
 
 void RenderableFieldlinesSequence::initializeWebManager() {
-    _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, "PfssIo", _activeTriggerTimeIndex, _nStates, _sourceFiles, _startTimes);
+    _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, "PfssIo", _nStates, _sourceFiles, _startTimes);
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1192,9 +1190,10 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     const double currentTime = data.time.j2000Seconds();
     
-    // Webfieldlines is activated
+    if(_webFieldlines){
+        _webFieldlinesManager.update(); // we could also send time as a variable as we already have it
+    }
 
-    
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
 
@@ -1210,11 +1209,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
             updateActiveTriggerTimeIndex(currentTime);
-            // WebfieldlinesManager stuff!
-            if(_webFieldlines){
-                _webFieldlinesManager.update();
-                computeSequenceEndTime();
-            }
 
             if (_loadingStatesDynamically) {
                 _mustLoadNewStateFromDisk = true;

@@ -25,14 +25,62 @@
 #ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESWORKER___H__
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESWORKER___H__
 
+#include <string>
+
 namespace openspace {
     
 class WebFieldlinesWorker{
 public:
     // Constructor
     WebFieldlinesWorker() = default;
+    
+    WebFieldlinesWorker(std::string syncDir, std::string serverUrl, std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk);
+    
+    void getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb);
+    
+    // Sets the third index in _triggerTimesWeb to whether it is on disk already or not
+    // If it's on disk, get the index of the corresponding triggertime in _triggerTimesOnDisk
+    // This means the _triggerTimesOnDisk can't be sorted or shuffled. We could also use pointers instead?
+    void checkForExistingData(std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb,
+                                                   std::vector<std::pair<double, std::string>>& _triggerTimesOnDisk);
+    // Download all the steps within one window.
+    // Spawn one thread per file to download?
+    void downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes);
 
 private:
+    // POINTERS
+    std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk;
+    // Pointers end
+    
+    // The base url for the server
+    std::string _serverUrl;
+    
+    // The url of the endpoint to fetch one file based on downloadkey
+    std::string _endpointSingleDownload;
+    
+    // The directory for downloaded files. Passed down from WebFieldlinesManager.
+    std::string _syncDir;
+    
+    // File format, only .oslfs for now
+    std::string _fileEnding;
+    
+    std::string _FLType;
+    
+    
+    // Download one file to sync directory
+    std::string downloadOsfls(std::string downloadkey);
+    
+    bool fileIsOnDisk(double triggerTime);
+    
+    // HELPER FUNCTIONS
+    // Parse the data list from http request
+    void parseTriggerTimesList(std::string s, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb);
+    
+    // functions to translate the filenames to doubles
+    double triggerTimeString2Double(std::string s);
+    void triggerTimeDouble2String(double d, std::string& s);
+    
+    static bool compareTimetriggersEqual(double first, double second);
 
 };
 

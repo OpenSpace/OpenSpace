@@ -39,5 +39,112 @@ namespace {
 } // namespace
 
 namespace openspace{
+    // --------------------------- CONSTRUCTORS ---------------------------------------//
+    WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
+                                             std::vector<std::string>& _sourceFiles,
+                                             std::vector<double>& _startTimes, size_t& _nStates){
+        _window.backWidth = 3;
+        _window.forwardWidth = 3;
+        
+        _window.nTriggerTimes = static_cast<int>(_nStates);
+        
+        _triggerTimesOnDisk = std::make_shared<std::vector<std::pair<double, std::string>>>();
+        
+        for(int i = 0; i < _window.nTriggerTimes ; i++){
+            _triggerTimesOnDisk->push_back(std::make_pair(_startTimes[i], _sourceFiles[i]));
+            _window.triggerTimes.push_back(std::make_pair(_startTimes[i], _sourceFiles[i]));
+        }
+        
+        rfs_nStates = &_nStates;
+        rfs_sourceFiles = &_sourceFiles;
+        rfs_startTimes = &_startTimes;
+        
+        _nAvailableWeb = 0; // haven't downloaded that list yet
+        
+        _worker = WebFieldlinesWorker(syncDir, serverUrl, _triggerTimesOnDisk);
+        
+        
+        
+    }
+    
+    // -------------------------- PUBLIC FUNCTIONS  -----------------------------------//
+    
+    // Returns true if time is inside the current window
+    bool WebFieldlinesWindow::timeIsInWindow(double time){
+        if(time >= windowStart() && time <= windowEnd())
+            return true;
+        else return false;
+    }
+    
+    // Returns true if time is at edge of the current window,
+    // and will probably need to update window
+    bool WebFieldlinesWindow::timeIsInWindowMargin(double time, double direction){
+        int threshold = 2; // base this on speed later
+        
+        if (direction > 0){ // If time is moving forward
+            if(time >= _window.triggerTimes[_window.nTriggerTimes - threshold].first){
+                if(time > windowEnd()){
+                    LERROR("Time is outside of window in margin-check-function. This shouldn't happen.");
+                    return false;
+                }
+                return true;
+            }
+            else return false;
+        }
+        else{ // If time is moving backwards
+            if(time <= _window.triggerTimes[threshold].first){
+                if(time < windowStart()){
+                    LERROR("Time is outside of window in margin-check-function. This shouldn't happen.");
+                    return false;
+                }
+                return true;
+            }
+            else return false;
+        }
+    }
+    
+    void WebFieldlinesWindow::newWindow(double time){
+        // Find where in the list we are
+        int index = _nAvailableWeb-1;
+        while(true){
+            if(time > std::get<0>(_triggerTimesWeb[index])) break;
+            index--;
+        }
+        
+        // Make a window around that area
+        _window.triggerTimes.clear();
+        _window.nTriggerTimes = 0;
+        for(int i = index - _window.backWidth; i <= index + _window.forwardWidth; i++){
+            if(i < 0) i = 0;
+            _window.triggerTimes.push_back(std::make_pair(std::get<0>(_triggerTimesWeb[i]), std::get<1>(_triggerTimesWeb[i])));
+            _window.nTriggerTimes++;
+        }
+        LERROR("new window");
+        
+    }
+    
+    bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time){
+        if(_nAvailableWeb == 0) return false;
+        if(time >= std::get<0>(_triggerTimesWeb[0]) && time <= std::get<0>(_triggerTimesWeb[_nAvailableWeb - 1]))
+            return true;
+        else return false;
+    }
+    
+    void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
+        //_worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
+        _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
+    }
+    
+    // -------------------------- PRIVATE FUNCTIONS  -----------------------------------//
+    // Returns first trigger of window
+    double WebFieldlinesWindow::windowStart(){
+        return _window.triggerTimes[0].first;
+    }
+    // Returns last trigger of window
+    double WebFieldlinesWindow::windowEnd(){
+        return _window.triggerTimes[_window.nTriggerTimes-1].first;
+    }
+    
+    
     
 } // namespace openspace
