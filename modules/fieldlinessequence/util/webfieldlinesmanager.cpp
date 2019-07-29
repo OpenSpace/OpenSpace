@@ -48,7 +48,7 @@ namespace openspace{
         
         _flsType = fieldLineModelType;
 
-    
+        // Initialize the sliding window
         _webFieldlinesWindow = WebFieldlinesWindow(_syncDir, "http://localhost:3000/", _sourceFiles, _startTimes, _nStates);
 
         
@@ -97,20 +97,24 @@ namespace openspace{
     
     
     void WebFieldlinesManager::update(){
-        // Check time against window
         const double openspaceTime = global::timeManager.time().j2000Seconds();
         
+        // First it checks the time against the "bigger window" aka the long list of
+        // timesteps we know are available online. If it's outside that we're gonna need a new one
         if(_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime)){
             
+            // Check if in window
             if(_webFieldlinesWindow.timeIsInWindow(openspaceTime)){
                 //LERROR("we're in the window");
                 const double openspaceTimeDirection = global::timeManager.deltaTime();
+                // Check if in the edge of the window, so we can start downloading a new one
                 if(_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, openspaceTimeDirection)){
                     // get new window
                     //LERROR("in margin, new window");
                     _webFieldlinesWindow.newWindow(openspaceTime);
                 }
                 else{
+                    // If it's in the middle of the window, we can just sit back and relax
                     //LERROR("nothing happens, all gucci");
                 }
                 
@@ -144,7 +148,7 @@ namespace openspace{
 //    void WebFieldlinesManager::downloadFieldlines(){
 //        LERROR("starting download");
 //        for (int index : _filesToDownload){
-//            
+//
 //
 //            std::string downloadkey = _availableTriggertimes[index].second;
 //            double timetrigger = _availableTriggertimes[index].first;
