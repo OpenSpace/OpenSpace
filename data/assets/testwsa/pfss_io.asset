@@ -3,7 +3,7 @@ local transforms = asset.require('./transforms')
 
 local fieldlinesDirectory = asset.localResource("fl_pfss_io")
 local transferFunctions = asset.localResource("transferfunctions")
-local polarityColorTable = transferFunctions .. "/pfss_spec.txt"
+local polarityColorTable = transferFunctions .. "/openness_spec.txt"
 
 local sunRadius = 695508000
 
@@ -21,7 +21,7 @@ local fieldlines = {
             polarityColorTable
         }, 
         ColorTableRanges = {
-            { -0.6, 0.6 },
+            { -1.0, 1.0 },
         },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
@@ -29,13 +29,13 @@ local fieldlines = {
         SecondsAfter = 24*60*60,
         SimulationModel = "wsa",
         Color = {
-            Uniform = {0.1, 0.725, 0, 1}
+            Uniform = {0.725, 0.1, 0, 1}
         },
-        ColoringMethod = "Uniform",
+        ColoringMethod = "Quantity"
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA PFSS In to Out Closed Lines Step 3"
+        Name = "WSA PFSS In to Out Lines"
     },
     Transform = {
         Scale = {

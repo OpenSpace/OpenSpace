@@ -5,18 +5,18 @@ local propertyHelper = asset.require('util/property_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
-asset.require('scene/solarsystem/planets/mars/moons/phobos')
-asset.require('scene/solarsystem/planets/mars/moons/deimos')
-asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- asset.require('scene/solarsystem/planets')
+-- asset.require('scene/solarsystem/planets/mars/moons/phobos')
+-- asset.require('scene/solarsystem/planets/mars/moons/deimos')
+-- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
+-- assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
+-- asset.require('util/default_joystick')
 
-asset.require('util/webgui')
+-- asset.require('util/webgui')
 
 --asset.request('customization/globebrowsing')
 
@@ -25,31 +25,19 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local sunRadius = 695508000
 
--- The actual fieldlines
---asset.require('./bastille_day/fieldlines')
-
 -- Selected field lines + some additional field lines
--- asset.require('./testwsa/scs_oi')
--- asset.require('./testwsa/pfss_oi')
--- asset.require('./testwsa/pfss_io')
+asset.require('./testwsa/scs_oi')
+asset.require('./testwsa/pfss_oi')
+asset.require('./testwsa/pfss_io')
 
 -- Sun earth connection
--- asset.require('./testwsa/scs_oi_540')
--- asset.require('./testwsa/pfss_oi_540')
-
--- Only selected field lines
--- asset.require('./testwsa/scs_oi_boundary')
--- asset.require('./testwsa/pfss_oi_boundary')
+-- asset.require('./testwsa/sun_earth')
 
 -- Every N:th WSA field line
--- asset.require('./testwsa/scs_oi_25')
--- asset.require('./testwsa/pfss_oi_25')
-asset.require('./testwsa/pfss_io_25')
+-- asset.require('./testwsa/pfss_io_25')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
-    -- Jump to bastille day
-    --openspace.time.setTime("2000 JUL 14 08:33:37.100")
 
     -- Sun magnetogram texture testing
     openspace.time.setTime("2019 MAY 2 7:59:57.000")
