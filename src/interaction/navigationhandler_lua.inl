@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <numeric>
+#include <openspace/interaction/scriptcamerastates.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -248,6 +249,76 @@ int joystickButton(lua_State* L) {
     ghoul::lua::push(L, cmd);
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
+}
+
+int addGlobalRotation(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addGlobalRotation");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addGlobalRotation(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addLocalRotation(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addLocalRotation");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addLocalRotation(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addTruckMovement(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTruckMovement");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addTruckMovement(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addLocalRoll(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addLocalRoll");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addLocalRoll(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addGlobalRoll(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addGlobalRoll");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addGlobalRoll(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
 }
 
 } // namespace openspace::luascriptfunctions

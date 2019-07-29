@@ -31,6 +31,7 @@
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
+#include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -74,6 +75,9 @@ public:
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
+
+    ScriptCameraStates& scriptStates();
+    const ScriptCameraStates& scriptStates() const;
 
     bool followingNodeRotation() const;
     const SceneGraphNode* anchorNode() const;
@@ -146,6 +150,7 @@ private:
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
+    ScriptCameraStates _scriptStates;
 
     const SceneGraphNode* _anchorNode = nullptr;
     const SceneGraphNode* _aimNode = nullptr;

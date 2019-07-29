@@ -635,6 +635,41 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "int",
                 "Returns the script that is currently bound to be executed when the "
                 "provided button is pressed"
+            },
+            {
+                "addGlobalRotation",
+                &luascriptfunctions::addGlobalRotation,
+                {},
+                "double, double",
+                "Directly adds to the global rotation of the camera"
+            },
+            {
+                "addLocalRotation",
+                &luascriptfunctions::addLocalRotation,
+                {},
+                "double, double",
+                "Directly adds to the local rotation of the camera"
+            },
+            {
+                "addTruckMovement",
+                &luascriptfunctions::addTruckMovement,
+                {},
+                "double, double",
+                "Directly adds to the truck movement of the camera"
+            },
+            {
+                "addLocalRoll",
+                &luascriptfunctions::addLocalRoll,
+                {},
+                "double, double",
+                "Directly adds to the local roll of the camera"
+            },
+            {
+                "addGlobalRoll",
+                &luascriptfunctions::addGlobalRoll,
+                {},
+                "double, double",
+                "Directly adds to the global roll of the camera"
             }
         }
     };

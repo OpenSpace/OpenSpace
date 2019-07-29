@@ -348,6 +348,7 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
 void OrbitalNavigator::resetVelocities() {
     _mouseStates.resetVelocities();
     _joystickStates.resetVelocities();
+    _scriptStates.resetVelocities();
 }
 
 void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
@@ -355,6 +356,7 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 {
     _mouseStates.updateStateFromInput(inputState, deltaTime);
     _joystickStates.updateStateFromInput(inputState, deltaTime);
+    _scriptStates.updateStateFromInput(inputState, deltaTime);
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
@@ -871,7 +873,8 @@ glm::dquat OrbitalNavigator::roll(double deltaTime,
 {
     const glm::dquat mouseRollQuat = glm::angleAxis(
         _mouseStates.localRollVelocity().x * deltaTime +
-        _joystickStates.localRollVelocity().x * deltaTime,
+        _joystickStates.localRollVelocity().x * deltaTime +
+        _scriptStates.localRollVelocity().x * deltaTime,
         glm::dvec3(0.0, 0.0, 1.0)
     );
     return localCameraRotation * mouseRollQuat;
@@ -892,8 +895,15 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
         0.0
     ) * deltaTime);
 
+    const glm::dquat scriptRotationDiff = glm::dquat(glm::dvec3(
+        _scriptStates.localRotationVelocity().y,
+        _scriptStates.localRotationVelocity().x,
+        0.0
+    ) * deltaTime);
 
-    return localCameraRotation * joystickRotationDiff * mouseRotationDiff;
+
+    return localCameraRotation * joystickRotationDiff * mouseRotationDiff *
+           scriptRotationDiff;
 }
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     const glm::dquat& localCameraRotation)
@@ -1061,19 +1071,24 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
     const glm::dquat mouseRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_mouseStates.globalRotationVelocity().y * deltaTime,
         -_mouseStates.globalRotationVelocity().x * deltaTime,
-        0) * speedScale);
+        0.0) * speedScale);
 
     const glm::dquat joystickRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_joystickStates.globalRotationVelocity().y * deltaTime,
         -_joystickStates.globalRotationVelocity().x * deltaTime,
-        0) * speedScale
+        0.0) * speedScale
+    );
+
+    const glm::dquat scriptRotationDiffCamSpace = glm::dquat(glm::dvec3(
+        -_scriptStates.globalRotationVelocity().y * deltaTime,
+        -_scriptStates.globalRotationVelocity().x * deltaTime,
+        0.0) * speedScale
     );
 
     // Transform to world space
     const glm::dquat rotationDiffWorldSpace = globalCameraRotation *
-                                        joystickRotationDiffCamSpace *
-                                        mouseRotationDiffCamSpace *
-                                        glm::inverse(globalCameraRotation);
+        joystickRotationDiffCamSpace * scriptRotationDiffCamSpace *
+        mouseRotationDiffCamSpace * glm::inverse(globalCameraRotation);
 
     // Rotate and find the difference vector
     const glm::dvec3 rotationDiffVec3 =
@@ -1134,7 +1149,8 @@ glm::dvec3 OrbitalNavigator::translateVertically(double deltaTime,
     const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
 
     const double totalVelocity = _joystickStates.truckMovementVelocity().y +
-                                 _mouseStates.truckMovementVelocity().y;
+                                 _mouseStates.truckMovementVelocity().y +
+                                 _scriptStates.truckMovementVelocity().y;
 
     return cameraPosition - actualSurfaceToCamera * totalVelocity * deltaTime;
 }
@@ -1153,7 +1169,8 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
 
     const glm::dquat mouseCameraRollRotation = glm::angleAxis(
         _mouseStates.globalRollVelocity().x * deltaTime +
-        _joystickStates.globalRollVelocity().x * deltaTime,
+        _joystickStates.globalRollVelocity().x * deltaTime +
+        _scriptStates.globalRollVelocity().x * deltaTime,
         directionFromSurfaceToCamera
     );
     return mouseCameraRollRotation * globalCameraRotation;
@@ -1237,6 +1254,14 @@ JoystickCameraStates& OrbitalNavigator::joystickStates() {
 
 const JoystickCameraStates& OrbitalNavigator::joystickStates() const {
     return _joystickStates;
+}
+
+ScriptCameraStates& OrbitalNavigator::scriptStates() {
+    return _scriptStates;
+}
+
+const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
+    return _scriptStates;
 }
 
 } // namespace openspace::interaction

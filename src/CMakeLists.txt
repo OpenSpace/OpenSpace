@@ -54,6 +54,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
@@ -236,6 +237,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
