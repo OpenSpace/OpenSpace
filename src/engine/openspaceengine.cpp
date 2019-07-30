@@ -708,6 +708,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     bool loading = true;
     while (loading) {
+        if (_shouldAbortLoading) {
+            global::windowDelegate.terminate();
+            break;
+        }
         _loadingScreen->render();
         _assetManager->update();
 
@@ -749,6 +753,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 it = resourceSyncs.erase(it);
             }
         }
+    }
+    if (_shouldAbortLoading) {
+        _loadingScreen = nullptr;
+        return;
     }
 
     _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
@@ -1183,6 +1191,16 @@ void OpenSpaceEngine::postDraw() {
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
+    if (_loadingScreen) {
+        // If the loading screen object exists, we are currently loading and want key
+        // presses to behave differently
+        if (key == Key::Escape) {
+            _shouldAbortLoading = true;
+        }
+
+        return;
+    }
+
     using F = std::function<bool (Key, KeyModifier, KeyAction)>;
     for (const F& func : global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action);
