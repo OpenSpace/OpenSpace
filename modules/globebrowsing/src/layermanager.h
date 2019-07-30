@@ -35,6 +35,8 @@
 
 namespace ghoul { class Dictionary; }
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 class Layer;
@@ -69,6 +71,8 @@ public:
     void reset(bool includeDisabled = false);
 
     void onChange(std::function<void(Layer* l)> callback);
+
+    static documentation::Documentation Documentation();
 
 private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;

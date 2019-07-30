@@ -28,7 +28,11 @@
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/layer.h>
+#include <modules/globebrowsing/src/layeradjustment.h>
+#include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -480,6 +484,15 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     };
 
     return res;
+}
+
+std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() const {
+    return {
+        globebrowsing::Layer::Documentation(),
+        globebrowsing::LayerAdjustment::Documentation(),
+        globebrowsing::LayerManager::Documentation(),
+        GlobeLabelsComponent::Documentation()
+    };
 }
 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,

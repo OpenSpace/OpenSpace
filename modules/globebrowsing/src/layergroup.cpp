@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/src/layergroup.h>
 
 #include <modules/globebrowsing/src/layer.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -106,6 +107,14 @@ int LayerGroup::update() {
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+    documentation::TestResult res = documentation::testSpecification(
+        Layer::Documentation(),
+        layerDict
+    );
+    if (!res.success) {
+        LERROR("Error adding layer. " + ghoul::to_string(res));
+    }
+
     if (!layerDict.hasKeyAndValue<std::string>("Identifier")) {
         LERROR("'Identifier' must be specified for layer.");
         return nullptr;
