@@ -308,7 +308,7 @@ OrbitalNavigator::OrbitalNavigator()
         _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
     });
     _joystickSensitivity.onChange([&]() {
-        _joystickStates.setSensitivity(_joystickSensitivity * pow(10.0, -4));
+        _joystickStates.setSensitivity(_joystickSensitivity * 0.1);
     });
 
     addPropertySubOwner(_friction);
