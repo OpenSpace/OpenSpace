@@ -88,6 +88,10 @@ void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& laye
     _layerGroups[id]->deleteLayer(layerName);
 }
 
+LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) {
+    return *_layerGroups[groupId];
+}
+
 const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {
     return *_layerGroups[groupId];
 }

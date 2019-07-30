@@ -303,7 +303,6 @@ protected:
     /// The description for this PropertyOwner
     std::string _description;
 
-private:
     /// The owner of this PropertyOwner
     PropertyOwner* _owner = nullptr;
     /// A list of all registered Property's
