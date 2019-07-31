@@ -22,50 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#ifndef __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
+#define __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/interaction/camerainteractionstates.h>
 
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+namespace openspace::interaction {
 
-namespace openspace::documentation { struct Documentation; }
-
-namespace openspace::globebrowsing {
-
-namespace tileprovider { struct TileProvider; }
-
-class LayerAdjustment : public properties::PropertyOwner {
+class ScriptCameraStates : public CameraInteractionStates {
 public:
-    LayerAdjustment();
-    ~LayerAdjustment() = default;
+    ScriptCameraStates();
 
-    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
+    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 
-    layergroupid::AdjustmentTypeID type() const;
-
-    glm::vec3 chromaKeyColor() const;
-    float chromaKeyTolerance() const;
-
-    void onChange(std::function<void(void)> callback);
-
-    static documentation::Documentation Documentation();
+    void addLocalRotation(const glm::dvec2& delta);
+    void addGlobalRotation(const glm::dvec2& delta);
+    void addTruckMovement(const glm::dvec2& delta);
+    void addLocalRoll(const glm::dvec2& delta);
+    void addGlobalRoll(const glm::dvec2& delta);
 
 private:
-    void addVisibleProperties();
-
-    properties::Vec3Property _chromaKeyColor;
-    properties::FloatProperty _chromaKeyTolerance;
-
-    properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
-
-    std::function<void(void)> _onChangeCallback;
+    glm::dvec2 _localRotation;
+    glm::dvec2 _globalRotation;
+    glm::dvec2 _truckMovement;
+    glm::dvec2 _localRoll;
+    glm::dvec2 _globalRoll;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#endif // __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__

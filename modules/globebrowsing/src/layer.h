@@ -34,6 +34,8 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 struct LayerGroup;
@@ -71,6 +73,8 @@ public:
     glm::ivec2 tilePixelSizeDifference() const;
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
         const glm::vec2& tileUV, const glm::uvec2& resolution);
+
+    static documentation::Documentation Documentation();
 
 private:
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);

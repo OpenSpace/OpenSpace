@@ -29,6 +29,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
+#include <iomanip>
 
 namespace {
     constexpr const char* _loggerCat = "FieldlinesState";
