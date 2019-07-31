@@ -22,58 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___FLIGHTCONTROLLER_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___FLIGHTCONTROLLER_TOPIC___H__
+
+#include <modules/server/include/topics/topic.h>
 
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
-#include <ghoul/glm.h>
-#include <vector>
 
 namespace openspace::interaction {
 
-struct JoystickInputStates;
-struct WebsocketInputStates;
+    struct WebsocketInputStates;
+    struct WebsocketInputState;
+}
 
-// This class represents the global input state of interaction devices
-class InputState {
+namespace openspace {
+
+class FlightControllerTopic : public Topic {
 public:
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
+    FlightControllerTopic();
+    ~FlightControllerTopic();
 
-    // Accessors
-    const std::vector<std::pair<Key, KeyModifier>>& pressedKeys() const;
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
-    bool isKeyPressed(Key key) const;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-    const std::vector<MouseButton>& pressedMouseButtons() const;
-    glm::dvec2 mousePosition() const;
-    double mouseScrollDelta() const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
-
-    float joystickAxis(int i) const;
-    bool joystickButton(int i) const;
-
-    WebsocketInputStates& websocketInputStates();
-    float websocketAxis(int i) const;
-    bool websocketButton(int i) const;
-    bool hasWebsocketStates() const;
-    void resetWebsockets();
+    void engageAutopilot(const nlohmann::json &json);
+    void disengageAutopilot() const;
+    void handleAutopilot(const nlohmann::json &json);
 
 private:
-    // Input from keyboard
-    std::vector<std::pair<Key, KeyModifier>> _keysDown;
+    bool _isDone = false;
+    bool _autopilotEngaged;
+    nlohmann::json _payload;
+    nlohmann::json _focusNodes;
+    nlohmann::json _allNodes;
+    nlohmann::json _interestingTimes;
 
-    // Input from mouse
-    std::vector<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
+    openspace::interaction::WebsocketInputStates _inputStates;
+    openspace::interaction::WebsocketInputState _inputState;
+
+    void connect();
+    void disconnect();
+    void processInputState(const nlohmann::json& json);
+    void setFocusNodes();
+    void setInterestingTimes();
+    void updateView(const nlohmann::json& json) const;
+    void changeFocus(const nlohmann::json& json) const;
+    void setRenderableEnabled(const nlohmann::json& json) const;
+    void processLua(const nlohmann::json& json);
+    void setFriction(const nlohmann::json& json) const;
+    void setFriction(bool roll, bool rotation, bool zoom) const;
+    void setFriction(bool all) const;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__
+#endif // __OPENSPACE_MODULE_SERVER___FLIGHTCONTROLLER_TOPIC___H__

@@ -440,6 +440,20 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
     );
 }
 
+void NavigationHandler::setWebsocketAxisMapping(int axis,
+                                               WebsocketCameraStates::AxisType mapping,
+                                           WebsocketCameraStates::AxisInvert shouldInvert,
+                                     WebsocketCameraStates::AxisNormalize shouldNormalize)
+{
+    _orbitalNavigator.websocketStates().setAxisMapping(
+        axis,
+        mapping,
+        shouldInvert,
+        shouldNormalize
+    );
+}
+
+
 JoystickCameraStates::AxisInformation
 NavigationHandler::joystickAxisMapping(int axis) const
 {

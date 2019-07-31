@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <ghoul/fmt.h>
 #include <algorithm>
 
@@ -91,10 +92,13 @@ bool InputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const {
 }
 
 bool InputState::isKeyPressed(Key key) const {
-    auto it = std::find_if(_keysDown.begin(), _keysDown.end(),
+    auto it = std::find_if(
+        _keysDown.begin(),
+        _keysDown.end(),
         [key](const std::pair<Key, KeyModifier>& keyModPair) {
-        return key == keyModPair.first;
-    });
+            return key == keyModPair.first;
+        }
+    );
     return it != _keysDown.end();
 }
 
@@ -109,6 +113,26 @@ float InputState::joystickAxis(int i) const {
 
 bool InputState::joystickButton(int i) const {
     return global::joystickInputStates.button(i, JoystickAction::Press);
+}
+
+float InputState::websocketAxis(int i) const {
+    return global::websocketInputStates.axis(i);
+}
+
+bool InputState::websocketButton(int i) const {
+    return global::websocketInputStates.button(i, WebsocketAction::Press);
+}
+
+void InputState::resetWebsockets() {
+    using K = size_t;
+    using V = WebsocketInputState*;
+    for (const std::pair<const K, V>& p : global::websocketInputStates) {
+        p.second->isConnected = false;
+    }
+}
+
+bool InputState::hasWebsocketStates() const {
+    return !global::websocketInputStates.empty();
 }
 
 } // namespace openspace::interaction

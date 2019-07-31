@@ -109,6 +109,13 @@ namespace {
         "the sensitivity is the less impact a joystick motion will have."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo WebsocketSensitivityInfo = {
+        "WebsocketSensitivity",
+        "Websocket Sensitivity",
+        "Determines the sensitivity of the camera motion thorugh a websocket. The lower "
+        "the sensitivity is the less impact a webstick motion will have."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction Factor",
@@ -205,6 +212,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
+    , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
@@ -213,6 +221,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
+    , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
 {
 
     _anchor.onChange([this]() {
@@ -290,18 +299,22 @@ OrbitalNavigator::OrbitalNavigator()
     _friction.roll.onChange([&]() {
         _mouseStates.setRotationalFriction(_friction.roll);
         _joystickStates.setRotationalFriction(_friction.roll);
+        _websocketStates.setRotationalFriction(_friction.roll);
     });
     _friction.rotational.onChange([&]() {
         _mouseStates.setHorizontalFriction(_friction.rotational);
         _joystickStates.setHorizontalFriction(_friction.rotational);
+        _websocketStates.setHorizontalFriction(_friction.rotational);
     });
     _friction.zoom.onChange([&]() {
         _mouseStates.setVerticalFriction(_friction.zoom);
         _joystickStates.setVerticalFriction(_friction.zoom);
+        _websocketStates.setVerticalFriction(_friction.zoom);
     });
     _friction.friction.onChange([&]() {
         _mouseStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
         _joystickStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
+        _websocketStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
     });
 
     _mouseSensitivity.onChange([&]() {
@@ -310,6 +323,10 @@ OrbitalNavigator::OrbitalNavigator()
     _joystickSensitivity.onChange([&]() {
         _joystickStates.setSensitivity(_joystickSensitivity * 0.1);
     });
+    _websocketSensitivity.onChange([&]() {
+        _websocketStates.setSensitivity(_websocketSensitivity);
+    });
+
 
     addPropertySubOwner(_friction);
 
@@ -331,6 +348,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
+    addProperty(_websocketSensitivity);
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -356,6 +374,7 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 {
     _mouseStates.updateStateFromInput(inputState, deltaTime);
     _joystickStates.updateStateFromInput(inputState, deltaTime);
+    _websocketStates.updateStateFromInput(inputState, deltaTime);
     _scriptStates.updateStateFromInput(inputState, deltaTime);
 }
 
@@ -874,6 +893,7 @@ glm::dquat OrbitalNavigator::roll(double deltaTime,
     const glm::dquat mouseRollQuat = glm::angleAxis(
         _mouseStates.localRollVelocity().x * deltaTime +
         _joystickStates.localRollVelocity().x * deltaTime +
+        _websocketStates.localRollVelocity().x * deltaTime +
         _scriptStates.localRollVelocity().x * deltaTime,
         glm::dvec3(0.0, 0.0, 1.0)
     );
@@ -895,15 +915,20 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
         0.0
     ) * deltaTime);
 
+    const glm::dquat websocketRotationDiff = glm::dquat(glm::dvec3(
+        _websocketStates.localRotationVelocity().y,
+        _websocketStates.localRotationVelocity().x,
+        0.0
+    ) * deltaTime);
+
     const glm::dquat scriptRotationDiff = glm::dquat(glm::dvec3(
         _scriptStates.localRotationVelocity().y,
         _scriptStates.localRotationVelocity().x,
         0.0
     ) * deltaTime);
 
-
     return localCameraRotation * joystickRotationDiff * mouseRotationDiff *
-           scriptRotationDiff;
+           websocketRotationDiff * scriptRotationDiff;
 }
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     const glm::dquat& localCameraRotation)
@@ -1085,10 +1110,17 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
         0.0) * speedScale
     );
 
+    const glm::dquat websocketRotationDiffCamSpace = glm::dquat(glm::dvec3(
+        -_websocketStates.globalRotationVelocity().y * deltaTime,
+        -_websocketStates.globalRotationVelocity().x * deltaTime,
+        0) * speedScale
+    );
+
     // Transform to world space
     const glm::dquat rotationDiffWorldSpace = globalCameraRotation *
-        joystickRotationDiffCamSpace * scriptRotationDiffCamSpace *
-        mouseRotationDiffCamSpace * glm::inverse(globalCameraRotation);
+        joystickRotationDiffCamSpace * mouseRotationDiffCamSpace *
+        websocketRotationDiffCamSpace * scriptRotationDiffCamSpace *
+        glm::inverse(globalCameraRotation);
 
     // Rotate and find the difference vector
     const glm::dvec3 rotationDiffVec3 =
@@ -1150,6 +1182,7 @@ glm::dvec3 OrbitalNavigator::translateVertically(double deltaTime,
 
     const double totalVelocity = _joystickStates.truckMovementVelocity().y +
                                  _mouseStates.truckMovementVelocity().y +
+                                 _websocketStates.truckMovementVelocity().y +
                                  _scriptStates.truckMovementVelocity().y;
 
     return cameraPosition - actualSurfaceToCamera * totalVelocity * deltaTime;
@@ -1170,6 +1203,7 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
     const glm::dquat mouseCameraRollRotation = glm::angleAxis(
         _mouseStates.globalRollVelocity().x * deltaTime +
         _joystickStates.globalRollVelocity().x * deltaTime +
+        _websocketStates.globalRollVelocity().x * deltaTime +
         _scriptStates.globalRollVelocity().x * deltaTime,
         directionFromSurfaceToCamera
     );
@@ -1254,6 +1288,14 @@ JoystickCameraStates& OrbitalNavigator::joystickStates() {
 
 const JoystickCameraStates& OrbitalNavigator::joystickStates() const {
     return _joystickStates;
+}
+
+WebsocketCameraStates& OrbitalNavigator::websocketStates() {
+    return _websocketStates;
+}
+
+const WebsocketCameraStates& OrbitalNavigator::websocketStates() const {
+    return _websocketStates;
 }
 
 ScriptCameraStates& OrbitalNavigator::scriptStates() {

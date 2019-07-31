@@ -60,6 +60,8 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -203,7 +205,6 @@ if (APPLE)
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
   )
 endif ()
-
 set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/json.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
@@ -241,6 +242,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
