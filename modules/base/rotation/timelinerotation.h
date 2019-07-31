@@ -22,50 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#ifndef __OPENSPACE_MODULE_BASE___TIMELINEROTATION___H__
+#define __OPENSPACE_MODULE_BASE___TIMELINEROTATION___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/util/timeline.h>
 
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+namespace openspace {
 
-namespace openspace::documentation { struct Documentation; }
+struct UpdateData;
 
-namespace openspace::globebrowsing {
+namespace documentation { struct Documentation; }
 
-namespace tileprovider { struct TileProvider; }
-
-class LayerAdjustment : public properties::PropertyOwner {
+class TimelineRotation : public Rotation {
 public:
-    LayerAdjustment();
-    ~LayerAdjustment() = default;
-
-    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
-
-    layergroupid::AdjustmentTypeID type() const;
-
-    glm::vec3 chromaKeyColor() const;
-    float chromaKeyTolerance() const;
-
-    void onChange(std::function<void(void)> callback);
-
+    TimelineRotation(const ghoul::Dictionary& dictionary);
+    glm::dmat3 matrix(const UpdateData& data) const override;
     static documentation::Documentation Documentation();
 
 private:
-    void addVisibleProperties();
-
-    properties::Vec3Property _chromaKeyColor;
-    properties::FloatProperty _chromaKeyTolerance;
-
-    properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
-
-    std::function<void(void)> _onChangeCallback;
+    Timeline<std::unique_ptr<Rotation>> _timeline;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMELINEROTATION___H__

@@ -28,7 +28,11 @@
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/layer.h>
+#include <modules/globebrowsing/src/layeradjustment.h>
+#include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -261,7 +265,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         // >= as we might have multiple frames per postDraw call (stereo rendering,
         // fisheye, etc)
         const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
-        const bool shouldSave = _saveInstrumentation && 
+        const bool shouldSave = _saveInstrumentation &&
                                 global::renderEngine.frameNumber() >= next;
         if (shouldSave) {
             using K = const globebrowsing::RenderableGlobe*;
@@ -386,6 +390,27 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "defining the layer."
         },
         {
+            "getLayers",
+            &globebrowsing::luascriptfunctions::getLayers,
+            {},
+            "string, string",
+            "Returns the list of layers for the scene graph node specified in the first "
+            "parameter. The second parameter specifies which layer type should be "
+            "queried."
+        },
+        {
+            "moveLayer",
+            &globebrowsing::luascriptfunctions::moveLayer,
+            {},
+            "string, string, number, number",
+            "Rearranges the order of a single layer in a scene graph node. The first "
+            "parameter specifies the scene graph node, the second parameter specifies "
+            "the name of the layer group, the third parameter is the original position "
+            "of the layer that should be moved and the last parameter is the new "
+            "position. The new position may be -1 to place the layer at the top or any "
+            "large number bigger than the number of layers to place it at the bottom."
+        },
+        {
             "goToChunk",
             &globebrowsing::luascriptfunctions::goToChunk,
             {},
@@ -461,6 +486,15 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     return res;
 }
 
+std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() const {
+    return {
+        globebrowsing::Layer::Documentation(),
+        globebrowsing::LayerAdjustment::Documentation(),
+        globebrowsing::LayerManager::Documentation(),
+        GlobeLabelsComponent::Documentation()
+    };
+}
+
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     int x, int y, int level)
 {
@@ -478,7 +512,7 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
     );
 }
 
-void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe, 
+void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
                                   double latitude, double longitude, double altitude)
 {
     using namespace globebrowsing;
@@ -537,7 +571,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
         cameraPositionModelSpace
     );
-    
+
     const Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );

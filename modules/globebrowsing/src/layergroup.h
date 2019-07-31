@@ -53,6 +53,7 @@ struct LayerGroup : public properties::PropertyOwner {
 
     Layer* addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
+    void moveLayers(int oldPosition, int newPosition);
 
     /// @returns const vector of all layers
     std::vector<Layer*> layers() const;

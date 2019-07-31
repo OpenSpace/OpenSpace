@@ -86,8 +86,8 @@ public:
     struct ProgressInfo {
         float progress = 0.f;
 
-        int currentSize = -1;
-        int totalSize = -1;
+        int64_t currentSize = -1;
+        int64_t totalSize = -1;
     };
 
     void updateItem(const std::string& itemIdentifier, const std::string& itemName,

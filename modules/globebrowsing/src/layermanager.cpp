@@ -28,9 +28,27 @@
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace::globebrowsing {
+
+documentation::Documentation LayerManager::Documentation() {
+    using namespace documentation;
+    return {
+        "LayerManager",
+        "globebrowsing_layermanager",
+        {
+            {
+                "*",
+                new ReferencingVerifier("globebrowsing_layer"),
+                Optional::Yes,
+                "Specifies an individual layer"
+            }
+        }
+    };
+}
 
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
@@ -86,6 +104,10 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
 void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& layerName) {
     ghoul_assert(id != layergroupid::Unknown, "Layer group ID must be known");
     _layerGroups[id]->deleteLayer(layerName);
+}
+
+LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) {
+    return *_layerGroups[groupId];
 }
 
 const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {

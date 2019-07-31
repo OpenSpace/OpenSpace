@@ -31,6 +31,8 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <modules/debugging/rendering/debugrenderer.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
@@ -423,6 +425,57 @@ Chunk::Chunk(const TileIndex& ti)
     , surfacePatch(ti)
     , status(Status::DoNothing)
 {}
+
+documentation::Documentation RenderableGlobe::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableGlobe",
+        "globebrowsing_renderableglobe",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderableGlobe"),
+                Optional::No,
+                ""
+            },
+            {
+                KeyRadii,
+                new OrVerifier({ new DoubleVector3Verifier, new DoubleVerifier }),
+                Optional::Yes,
+                "Specifies the radii for this planet. If the Double version of this is "
+                "used, all three radii are assumed to be equal."
+            },
+            {
+                "PerformShading",
+                new BoolVerifier,
+                Optional::Yes,
+                "Specifies whether the planet should be shaded by the primary light "
+                "source or not. If it is disabled, all parts of the planet are "
+                "illuminated."
+            },
+            {
+                KeyLayers,
+                new TableVerifier({
+                    {
+                        "*",
+                        new ReferencingVerifier("globebrowsing_layermanager"),
+                        Optional::Yes,
+                        "Descriptions of the individual layer groups"
+                    }
+                }),
+                Optional::Yes,
+                "A list of all the layers that should be added"
+            },
+            {
+                KeyLabels,
+                new ReferencingVerifier("globebrowsing_globelabelscomponent"),
+                Optional::Yes,
+                "Specifies information about planetary labels that can be rendered on "
+                "the object's surface."
+            }
+        }
+    };
+}
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)

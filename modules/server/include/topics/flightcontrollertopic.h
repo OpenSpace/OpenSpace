@@ -22,50 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#ifndef __OPENSPACE_MODULE_SERVER___FLIGHTCONTROLLER_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___FLIGHTCONTROLLER_TOPIC___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <modules/server/include/topics/topic.h>
 
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+#include <openspace/interaction/websocketinputstate.h>
 
-namespace openspace::documentation { struct Documentation; }
+namespace openspace::interaction {
 
-namespace openspace::globebrowsing {
+    struct WebsocketInputStates;
+    struct WebsocketInputState;
+}
 
-namespace tileprovider { struct TileProvider; }
+namespace openspace {
 
-class LayerAdjustment : public properties::PropertyOwner {
+class FlightControllerTopic : public Topic {
 public:
-    LayerAdjustment();
-    ~LayerAdjustment() = default;
+    FlightControllerTopic();
+    ~FlightControllerTopic();
 
-    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-    layergroupid::AdjustmentTypeID type() const;
-
-    glm::vec3 chromaKeyColor() const;
-    float chromaKeyTolerance() const;
-
-    void onChange(std::function<void(void)> callback);
-
-    static documentation::Documentation Documentation();
+    void engageAutopilot(const nlohmann::json &json);
+    void disengageAutopilot() const;
+    void handleAutopilot(const nlohmann::json &json);
 
 private:
-    void addVisibleProperties();
+    bool _isDone = false;
+    bool _autopilotEngaged;
+    nlohmann::json _payload;
+    nlohmann::json _focusNodes;
+    nlohmann::json _allNodes;
+    nlohmann::json _interestingTimes;
 
-    properties::Vec3Property _chromaKeyColor;
-    properties::FloatProperty _chromaKeyTolerance;
+    openspace::interaction::WebsocketInputStates _inputStates;
+    openspace::interaction::WebsocketInputState _inputState;
 
-    properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
-
-    std::function<void(void)> _onChangeCallback;
+    void connect();
+    void disconnect();
+    void processInputState(const nlohmann::json& json);
+    void setFocusNodes();
+    void setInterestingTimes();
+    void updateView(const nlohmann::json& json) const;
+    void changeFocus(const nlohmann::json& json) const;
+    void setRenderableEnabled(const nlohmann::json& json) const;
+    void processLua(const nlohmann::json& json);
+    void setFriction(const nlohmann::json& json) const;
+    void setFriction(bool roll, bool rotation, bool zoom) const;
+    void setFriction(bool all) const;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#endif // __OPENSPACE_MODULE_SERVER___FLIGHTCONTROLLER_TOPIC___H__

@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/src/layergroup.h>
 
 #include <modules/globebrowsing/src/layer.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -106,6 +107,14 @@ int LayerGroup::update() {
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+    documentation::TestResult res = documentation::testSpecification(
+        Layer::Documentation(),
+        layerDict
+    );
+    if (!res.success) {
+        LERROR("Error adding layer. " + ghoul::to_string(res));
+    }
+
     if (!layerDict.hasKeyAndValue<std::string>("Identifier")) {
         LERROR("'Identifier' must be specified for layer.");
         return nullptr;
@@ -153,6 +162,33 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
         }
     }
     LERROR("Could not find layer " + layerName);
+}
+
+void LayerGroup::moveLayers(int oldPosition, int newPosition) {
+    oldPosition = std::max(0, oldPosition);
+    newPosition = std::min(newPosition, static_cast<int>(_layers.size()));
+
+    // We need to adjust the new position as we first delete the old position, if this
+    // position is before the new position we have reduced the size of the vector by 1 and
+    // need to adapt where we want to put the value in
+    if (oldPosition < newPosition) {
+        newPosition -= 1;
+    }
+
+    // There are two synchronous vectors that we have to update here.  The _layers vector
+    // is used to determine the order while rendering, the _subowners is the order in
+    // which the layers are shown in the UI
+    auto oldPosLayers = _layers.begin() + oldPosition;
+    std::unique_ptr<Layer> v = std::move(*oldPosLayers);
+    _layers.erase(oldPosLayers);
+    auto newPosLayers = _layers.begin() + newPosition;
+    _layers.insert(newPosLayers, std::move(v));
+
+    auto oldPosOwner = _subOwners.begin() + oldPosition;
+    PropertyOwner* owner = std::move(*oldPosOwner);
+    _subOwners.erase(oldPosOwner);
+    auto newPosOwner = _subOwners.begin() + newPosition;
+    _subOwners.insert(newPosOwner, std::move(owner));
 }
 
 std::vector<Layer*> LayerGroup::layers() const {

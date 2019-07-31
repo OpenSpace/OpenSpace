@@ -261,8 +261,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
 
             // Eye Space in SGCT to Eye Space in OS (SGCT View to OS Camera Rig)
-            glm::dmat4 dSgctEye2OSEye = glm::inverse(
-                glm::dmat4(renderData.camera.viewMatrix()));
+//            glm::dmat4 dSgctEye2OSEye = glm::inverse(
+//                glm::dmat4(renderData.camera.viewMatrix()));
 
             glm::dmat4 dSGCTViewToWorldMatrix = glm::inverse(
                 renderData.camera.combinedViewMatrix()
@@ -1508,7 +1508,7 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const glm::dmat4& MVMatrix,
     double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
     double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
     double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
-    double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
+//    double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
 
     // Normalize Planes
     double invMag = 1.0 / glm::length(leftNormal);
@@ -1533,7 +1533,7 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const glm::dmat4& MVMatrix,
 
     invMag = 1.0 / glm::length(farNormal);
     farNormal *= invMag;
-    farDistance *= invMag;
+//    farDistance *= invMag;
 
     if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
         return false;

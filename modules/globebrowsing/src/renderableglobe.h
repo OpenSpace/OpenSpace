@@ -41,6 +41,8 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 class GPULayerGroup;
@@ -110,6 +112,8 @@ public:
     const LayerManager& layerManager() const;
     LayerManager& layerManager();
     const glm::dmat4& modelTransform() const;
+
+    static documentation::Documentation Documentation();
 
 private:
     constexpr static const int MinSplitDepth = 2;

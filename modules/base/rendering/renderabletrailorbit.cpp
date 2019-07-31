@@ -233,7 +233,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // Write the current location into the floating position
     const glm::vec3 p = _translation->position({
         {},
-        data.time.now(),
+        data.time,
         Time(0.0),
         false
     });

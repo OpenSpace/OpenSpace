@@ -200,7 +200,6 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             if (button == MouseButton::Right && action == MouseAction::Press) {
                 windowingGlobals.mouseButtons |= 1 << 2;
             }
-            
             using KM = KeyModifier;
             KM mod = KM::NoModifier;
             mod |= keyboardState.modifierShift ? KM::Shift : KM::NoModifier;

@@ -31,6 +31,7 @@
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/mouse.h>
@@ -47,6 +48,7 @@ namespace openspace::scripting { struct LuaLibrary; }
 namespace openspace::interaction {
 
 struct JoystickInputStates;
+struct WebsocketInputStates;
 class KeyframeNavigator;
 class OrbitalNavigator;
 
@@ -122,9 +124,16 @@ public:
     void clearJoystickButtonCommand(int button);
     std::vector<std::string> joystickButtonCommand(int button) const;
 
+    // Websockets
+    void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
+        WebsocketCameraStates::AxisInvert shouldInvert =
+        WebsocketCameraStates::AxisInvert::No,
+        WebsocketCameraStates::AxisNormalize shouldNormalize =
+        WebsocketCameraStates::AxisNormalize::No);
+    
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
-    void saveNavigationState(const std::string& filepath, 
+    void saveNavigationState(const std::string& filepath,
         const std::string& referenceFrameIdentifier);
 
     void loadNavigationState(const std::string& filepath);

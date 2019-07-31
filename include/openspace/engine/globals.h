@@ -52,6 +52,7 @@ struct WindowDelegate;
 namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
+    struct WebsocketInputStates;
     class KeybindingManager;
     class NavigationHandler;
     class SessionRecording;
@@ -87,6 +88,7 @@ VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
 configuration::Configuration& gConfiguration();
 interaction::JoystickInputStates& gJoystickInputStates();
+interaction::WebsocketInputStates& gWebsocketInputStates();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 interaction::SessionRecording& gSessionRecording();
@@ -120,6 +122,8 @@ static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static configuration::Configuration& configuration = detail::gConfiguration();
 static interaction::JoystickInputStates& joystickInputStates =
     detail::gJoystickInputStates();
+static interaction::WebsocketInputStates& websocketInputStates =
+    detail::gWebsocketInputStates();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();
