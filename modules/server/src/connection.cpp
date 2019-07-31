@@ -115,7 +115,7 @@ void Connection::handleMessage(const std::string& message) {
         catch (const std::exception& e) {
             LERROR(e.what());
     } catch (...) {
-        if (!   isAuthorized()) {
+        if (!isAuthorized()) {
             _socket->disconnect();
             LERROR(fmt::format(
                 "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting.",

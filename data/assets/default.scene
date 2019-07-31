@@ -7,10 +7,6 @@ asset.onInitialize(function ()
     -- Jump back one day to be able to show complete weather data on Earth.
     openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
 
-    openspace.markInterestingTimes({
-    	{"Happy Birthday!", "1984 05 08"}
-    })
-
     openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
 
     openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ public:
     void handleAutopilot(const nlohmann::json &json);
 
 private:
-    bool _isDone;
+    bool _isDone = false;
     bool _autopilotEngaged;
     nlohmann::json _payload;
     nlohmann::json _focusNodes;
@@ -70,8 +70,8 @@ private:
     void setRenderableEnabled(const nlohmann::json& json) const;
     void processLua(const nlohmann::json& json);
     void setFriction(const nlohmann::json& json) const;
-    void setFriction(const bool& roll, const bool& rotation, const bool& zoom) const;
-    void setFriction(const bool& all) const;
+    void setFriction(bool roll, bool rotation, bool zoom) const;
+    void setFriction(bool all) const;
 };
 
 } // namespace openspace

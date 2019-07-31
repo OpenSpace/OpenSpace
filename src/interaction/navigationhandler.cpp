@@ -442,15 +442,15 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
 
 void NavigationHandler::setWebsocketAxisMapping(int axis,
                                                WebsocketCameraStates::AxisType mapping,
-                                               WebsocketCameraStates::AxisInvert shouldInvert,
-                                               WebsocketCameraStates::AxisNormalize shouldNormalize)
+                                           WebsocketCameraStates::AxisInvert shouldInvert,
+                                     WebsocketCameraStates::AxisNormalize shouldNormalize)
 {
     _orbitalNavigator.websocketStates().setAxisMapping(
-                                                       axis,
-                                                       mapping,
-                                                       shouldInvert,
-                                                       shouldNormalize
-                                                       );
+        axis,
+        mapping,
+        shouldInvert,
+        shouldNormalize
+    );
 }
 
 

@@ -92,10 +92,13 @@ bool InputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const {
 }
 
 bool InputState::isKeyPressed(Key key) const {
-    auto it = std::find_if(_keysDown.begin(), _keysDown.end(),
+    auto it = std::find_if(
+        _keysDown.begin(),
+        _keysDown.end(),
         [key](const std::pair<Key, KeyModifier>& keyModPair) {
-        return key == keyModPair.first;
-    });
+            return key == keyModPair.first;
+        }
+    );
     return it != _keysDown.end();
 }
 
@@ -121,10 +124,10 @@ bool InputState::websocketButton(int i) const {
 }
 
 void InputState::resetWebsockets() {
-    //if(!_websocketInputs) { return; }
-    
-    for (auto it = global::websocketInputStates.begin(); it != global::websocketInputStates.end(); ++it) {
-        it->second->isConnected = false;
+    using K = size_t;
+    using V = WebsocketInputState*;
+    for (const std::pair<const K, V>& p : global::websocketInputStates) {
+        p.second->isConnected = false;
     }
 }
 

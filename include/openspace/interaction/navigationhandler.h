@@ -126,11 +126,10 @@ public:
 
     // Websockets
     void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
-                                 WebsocketCameraStates::AxisInvert shouldInvert =
-                                 WebsocketCameraStates::AxisInvert::No,
-                                 WebsocketCameraStates::AxisNormalize shouldNormalize =
-                                 WebsocketCameraStates::AxisNormalize::No
-                                 );
+        WebsocketCameraStates::AxisInvert shouldInvert =
+        WebsocketCameraStates::AxisInvert::No,
+        WebsocketCameraStates::AxisNormalize shouldNormalize =
+        WebsocketCameraStates::AxisNormalize::No);
     
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
