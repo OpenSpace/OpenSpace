@@ -74,7 +74,7 @@ TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary) {
     for (const std::string& timeString : timeStrings) {
         const double t = Time::convertTime(timeString);
 
-        std::unique_ptr<Rotation> rotation = 
+        std::unique_ptr<Rotation> rotation =
             Rotation::createFromDictionary(
                 keyframes.value<ghoul::Dictionary>(timeString)
             );

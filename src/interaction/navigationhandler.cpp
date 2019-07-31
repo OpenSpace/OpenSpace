@@ -272,7 +272,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
     // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
     glm::dvec3 neutralView =
         glm::normalize(aimNode->worldPosition() - cameraPositionWorld);
-   
+
     glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
         glm::dvec3(0.0),
         neutralView,

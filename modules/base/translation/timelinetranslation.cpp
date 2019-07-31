@@ -74,7 +74,7 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
     for (const std::string& timeString : timeStrings) {
         const double t = Time::convertTime(timeString);
 
-        std::unique_ptr<Translation> translation = 
+        std::unique_ptr<Translation> translation =
             Translation::createFromDictionary(
                 keyframes.value<ghoul::Dictionary>(timeString)
             );
@@ -108,7 +108,7 @@ glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
     if (nextTime - prevTime > 0.0) {
         t = (now - prevTime) / (nextTime - prevTime);
     }
-    return t * next->data->position(data) + (1.0 - t) * prev->data->position(data); 
+    return t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
 }
 
 } // namespace openspace

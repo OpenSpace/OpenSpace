@@ -145,7 +145,7 @@ int getLayers(lua_State* L) {
         return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
     }
 
-    globebrowsing::layergroupid::GroupID group = 
+    globebrowsing::layergroupid::GroupID group =
         ghoul::from_string<globebrowsing::layergroupid::GroupID>(layer);
     if (group == globebrowsing::layergroupid::GroupID::Unknown) {
         return ghoul::lua::luaError(L, "Unknown layer groupd: " + layer);
@@ -166,7 +166,7 @@ int getLayers(lua_State* L) {
 
 int moveLayer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::moveLayer");
-    
+
     const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
     const std::string& layer = ghoul::lua::value<std::string>(L, 2);
     int oldPosition = ghoul::lua::value<int>(L, 3);
@@ -225,7 +225,7 @@ int goToChunk(lua_State* L) {
 }
 
 int goToGeo(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToGeo");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToGeo");
 
     // Check if the user provided a Scene graph node identifier as the first argument.
     // lua_isstring returns true for both numbers and strings, so better use !lua_isnumber

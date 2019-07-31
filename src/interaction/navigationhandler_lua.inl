@@ -52,9 +52,7 @@ int setNavigationState(lua_State* L) {
     ghoul::Dictionary navigationStateDictionary;
     ghoul::lua::luaDictionaryFromState(L, navigationStateDictionary);
 
-    using namespace openspace::documentation;
-
-    TestResult r = testSpecification(
+    openspace::documentation::TestResult r = openspace::documentation::testSpecification(
         interaction::NavigationHandler::NavigationState::Documentation(),
         navigationStateDictionary
     );
@@ -62,8 +60,7 @@ int setNavigationState(lua_State* L) {
     if (!r.success) {
         lua_settop(L, 0);
         return ghoul::lua::luaError(
-            L,
-            fmt::format("Could not set camera state: {}", ghoul::to_string(r))
+            L, fmt::format("Could not set camera state: {}", ghoul::to_string(r))
         );
     }
 

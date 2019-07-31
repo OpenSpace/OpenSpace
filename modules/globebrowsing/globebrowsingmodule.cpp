@@ -265,7 +265,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         // >= as we might have multiple frames per postDraw call (stereo rendering,
         // fisheye, etc)
         const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
-        const bool shouldSave = _saveInstrumentation && 
+        const bool shouldSave = _saveInstrumentation &&
                                 global::renderEngine.frameNumber() >= next;
         if (shouldSave) {
             using K = const globebrowsing::RenderableGlobe*;
@@ -512,7 +512,7 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
     );
 }
 
-void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe, 
+void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
                                   double latitude, double longitude, double altitude)
 {
     using namespace globebrowsing;
@@ -571,7 +571,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
         cameraPositionModelSpace
     );
-    
+
     const Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );
