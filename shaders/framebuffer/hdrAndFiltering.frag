@@ -84,16 +84,16 @@ void main() {
 
     if (colorSpace == HSL_COLOR) {
         vec3 hslColor = rgb2hsl(tColor);
-        hslColor.x *= Hue;
-        hslColor.y *= Saturation;
-        hslColor.z *= Lightness;
+        hslColor.x = (hslColor.x * Hue) > 360.f ? 360.f : (hslColor.x * Hue);
+        hslColor.y = (hslColor.y * Saturation) > 1.f ? 1.f : (hslColor.y * Saturation);
+        hslColor.z = (hslColor.z * Lightness) > 1.f ? 1.f : (hslColor.z * Lightness);
 
         finalColor = vec4(gammaCorrection(hsl2rgb(hslColor), gamma), color.a); 
     } else if (colorSpace == HSV_COLOR) {
         vec3 hsvColor = rgb2hsv(tColor);
-        hsvColor.x *= Hue;
-        hsvColor.y *= Saturation;
-        hsvColor.z *= Value;
+        hsvColor.x = (hsvColor.x * Hue) > 360.f ? 360.f : (hsvColor.x * Hue);
+        hsvColor.y = (hsvColor.y * Saturation) > 1.f ? 1.f : (hsvColor.y * Saturation);
+        hsvColor.z = (hsvColor.z * Value) > 1.f ? 1.f : (hsvColor.z * Value);
 
         finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
     }

@@ -60,9 +60,11 @@ Fragment getFragment() {
         }
 
         frag.color.a = transparencyCorrection;
-    }    
+    }
 
-
+    if (frag.color.a < 0.2f)
+        discard;
+    
     // G-Buffer
     // JCC: The depthCorrection here is a temporary tweak
     // to fix precision problems.

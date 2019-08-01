@@ -179,7 +179,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     )
 {
 
-    setRenderBin(RenderBin::Overlay);
+    setRenderBin(RenderBin::Transparent);
     addProperty(_opacity);
     //registerUpdateRenderBinFromOpacity();
 

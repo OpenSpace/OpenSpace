@@ -535,7 +535,7 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
     float sunFinalColor = smoothstep(cos(M_PI / 500.0f), cos(M_PI / 900.0f), dot(v, s)) * 
                           sunRadiance * (1.0f - irradianceFactor);
 
-    return transmittance * sunFinalColor;      
+    return transmittance * sunFinalColor;
 }
 
 void main() {
@@ -559,14 +559,8 @@ void main() {
         }
         nSamples = complex ? nAaSamples / 2 : 1;
         
-        // Performance variables:
-        //float Rt2 = Rt * Rt; // in Km
-        //float Rg2 = Rg * Rg; // in Km
-
         for (int i = 0; i < nSamples; i++) {
             // Color from G-Buffer
-            //vec4 color = texelFetch(mainColorTexture, fragCoords, i);
-            //vec4 color = vec4(-log2(vec3(1.0) - colorArray[i].rgb), colorArray[i].a);
             vec4 color = colorArray[i];
             // Ray in object space
             dRay ray;
@@ -701,7 +695,6 @@ void main() {
             bColor += texelFetch(mainColorTexture, fragCoords, f);
         }
         bColor /= float(nAaSamples);
-        //renderTarget = vec4(-log2(vec3(1.0) - bColor.rgb), bColor.a);
         renderTarget = bColor;
     }
 }
