@@ -158,12 +158,6 @@ namespace {
         "Determines whether to zoom out to an overview or not."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
-        "Orientation",
-        "Orientation",
-        "Determines whether to change the orientation of the focus node or not."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ApplyOverviewInfo = {
         "ApplyOverview",
         "Apply overview ",
@@ -174,6 +168,12 @@ namespace {
         "ApplyFlyTo",
         "Apply fly to node",
         "Triggering this property makes the camera move to the focus node."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo StoryOverviewLimitInfo = {
+        "StoryOverviewLimit",
+        "Story overview distance limit",
+        "Overview zoomed-out distance limit for the story."
     };
 #endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
@@ -253,11 +253,11 @@ OrbitalNavigator::OrbitalNavigator()
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
 #ifdef OPENSPACE_BEHAVIOR_KIOSK
-    , _flyTo(FlyToNodeInfo, true)
+    , _flyTo(FlyToNodeInfo, false)
     , _overview(OverviewInfo, false)
-    , _changeOrientation(OrientationInfo, true)
     , _applyOverview(ApplyOverviewInfo)
     , _applyFlyTo(ApplyFlyToInfo)
+    , _storyOverviewLimit(StoryOverviewLimitInfo, 1e27, 0.0f, 1e27)
 #endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -387,7 +387,9 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_velocitySensitivity);
     addProperty(_flyTo);
     addProperty(_overview);
-    addProperty(_changeOrientation);
+    addProperty(_applyOverview);
+    addProperty(_applyFlyTo);
+    addProperty(_storyOverviewLimit);
 #endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     addProperty(_useAdaptiveStereoscopicDepth);
@@ -483,21 +485,24 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     // Zoom away from the focus node until the entire scene overview is in the camera view
     if (_overview) {
-        WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
-        float overviewLimit = module.storyHandler.overviewLimit();
         _flyTo = false;
 
-        if (distFromCameraToFocus <= overviewLimit) {
-            pose.position = moveCameraAlongVector(
-                pose.position,
-                distFromCameraToFocus,
-                -camPosToAnchorPosDiff,
-                overviewLimit,
-                _flyTo
-            );
+        if (_cameraInitializedBeforeFirstStoryOverview) {
+            if (distFromCameraToFocus <= _storyOverviewLimit) {
+                pose.position = moveCameraAlongVector(
+                    pose.position,
+                    distFromCameraToFocus,
+                    -camPosToAnchorPosDiff,
+                    _storyOverviewLimit,
+                    _flyTo
+                );
+            }
+            else {
+                _overview = false;
+            }
         }
         else {
-            _overview = false;
+            _cameraInitializedBeforeFirstStoryOverview = true;
         }
     }
 #endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
@@ -642,27 +647,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     } else {
         _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
     }
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
-    // Change orientation such that the planet's north pole is upwards, i.e.
-    // the planet is oriented such that it is not tilted in an incorrect way
-    if (_changeOrientation) {
-        double longitude = 15.0;
-        double latitude = 10.0;
-
-        GlobeBrowsingModule& module = *(global::moduleEngine.module<GlobeBrowsingModule>());
-        module.goToGeo(longitude, latitude);
-        glm::dvec3 prevCamPos = _camera->positionVec3();
-
-        // Looking at the "NIGHT"-side of the focus node
-        if (glm::length(_anchorNode->worldPosition()) < glm::length(_camera->positionVec3())) {
-            module.goToGeo(longitude, latitude-180);
-            if (glm::length(prevCamPos) < glm::length(_camera->positionVec3())) {
-                module.goToGeo(longitude, latitude);
-            }
-        }
-        _changeOrientation = false;
-    }
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 }
 
 glm::dquat OrbitalNavigator::composeCameraRotation(
@@ -712,17 +696,6 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
     }
 
     _anchorNode = anchorNode;
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
-    _flyTo = true;
-
-    // If the current focusNode is a renderable globe, orientation can be set using goToGeo(),
-    // otherwise it can not
-    GlobeBrowsingModule& module = *(global::moduleEngine.module<GlobeBrowsingModule>());
-    const globebrowsing::RenderableGlobe* globe = module.castFocusNodeRenderableToGlobe();
-    if (globe) {
-        _changeOrientation = true;
-    }
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     if (_anchorNode) {
         _previousAnchorNodePosition = _anchorNode->worldPosition();

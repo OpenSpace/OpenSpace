@@ -134,9 +134,11 @@ private:
 #ifdef OPENSPACE_BEHAVIOR_KIOSK
     properties::BoolProperty _flyTo;
     properties::BoolProperty _overview;
-    properties::BoolProperty _changeOrientation;
+    //If 1st story selected, allow an additional camera update iteration before overview
+    bool _cameraInitializedBeforeFirstStoryOverview = false;
     properties::TriggerProperty _applyOverview;
     properties::TriggerProperty _applyFlyTo;
+    properties::FloatProperty _storyOverviewLimit;
 #endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
