@@ -708,6 +708,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     bool loading = true;
     while (loading) {
+        if (_shouldAbortLoading) {
+            global::windowDelegate.terminate();
+            break;
+        }
         _loadingScreen->render();
         _assetManager->update();
 
@@ -719,10 +723,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 progressInfo.progress = (*it)->progress();
 
                 if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.currentSize = static_cast<int>(
+                    progressInfo.currentSize = static_cast<uint64_t>(
                         (*it)->nSynchronizedBytes()
                     );
-                    progressInfo.totalSize = static_cast<int>(
+                    progressInfo.totalSize = static_cast<uint64_t>(
                         (*it)->nTotalBytes()
                     );
                 }
@@ -749,6 +753,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 it = resourceSyncs.erase(it);
             }
         }
+    }
+    if (_shouldAbortLoading) {
+        _loadingScreen = nullptr;
+        return;
     }
 
     _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
@@ -811,7 +819,6 @@ void OpenSpaceEngine::deinitialize() {
 
     ghoul::logging::LogManager::deinitialize();
 
-    ghoul::deinitialize();
     LTRACE("deinitialize(end)");
 
 
@@ -993,7 +1000,8 @@ void OpenSpaceEngine::preSynchronization() {
 
     global::syncEngine.preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
-        double dt = global::windowDelegate.averageDeltaTime();
+
+        double dt = global::windowDelegate.deltaTime();
 
         if (global::sessionRecording.isSavingFramesDuringPlayback()) {
             dt = global::sessionRecording.fixedDeltaTimeDuringFrameOutput();
@@ -1013,8 +1021,6 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         global::renderEngine.updateScene();
-        //_navigationHandler->updateCamera(dt);
-
 
         if (_scene) {
             Camera* camera = _scene->camera();
@@ -1186,6 +1192,16 @@ void OpenSpaceEngine::postDraw() {
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
+    if (_loadingScreen) {
+        // If the loading screen object exists, we are currently loading and want key
+        // presses to behave differently
+        if (key == Key::Escape) {
+            _shouldAbortLoading = true;
+        }
+
+        return;
+    }
+
     using F = std::function<bool (Key, KeyModifier, KeyAction)>;
     for (const F& func : global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action);

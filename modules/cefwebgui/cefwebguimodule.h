@@ -27,6 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <modules/webgui/webguimodule.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -53,6 +55,8 @@ private:
     properties::StringProperty _url;
     properties::FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
+
+    WebGuiModule::CallbackHandle _endpointCallback = -1;
 };
 
 } // namespace openspace

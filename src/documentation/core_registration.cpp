@@ -58,6 +58,9 @@ namespace openspace {
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(Mission::Documentation());
+    engine.addDocumentation(
+        interaction::NavigationHandler::NavigationState::Documentation()
+    );
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
     engine.addDocumentation(Scale::Documentation());

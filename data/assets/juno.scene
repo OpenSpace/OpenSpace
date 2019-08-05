@@ -18,10 +18,11 @@ asset.onInitialize(function ()
       28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = junoAsset.Juno.Identifier,
-        Position = { 1837386367.601345, -389860693812.834839, 714830404470.398926 },
-        Rotation = { -0.336540, 0.711402, -0.099212, 0.608937 },
+        Position = { 1.243398E8, 7.176068E7, -1.519733E7 },
+        ReferenceFrame = "Root",
+        Up = { -0.377400E0, 0.764573E0, 0.522492E0 },
     })
 end)
 

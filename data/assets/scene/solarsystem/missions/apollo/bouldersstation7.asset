@@ -34,8 +34,8 @@ local Station7BoulderHolder = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.8165882,
             Latitude = 20.2908556,
-            FixedAltitude = -2593.5,
-            UseFixedAltitude = true
+            Altitude = -2593.5,
+            UseHeightMap = true
         }
     },
     GUI = {

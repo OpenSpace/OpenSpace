@@ -31,12 +31,16 @@
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
+#include <openspace/interaction/scriptcamerastates.h>
+#include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
+
+#include <optional>
 
 namespace openspace {
     class SceneGraphNode;
@@ -58,6 +62,7 @@ public:
 
     Camera* camera() const;
     void setCamera(Camera* camera);
+    void clearPreviousState();
 
     void setFocusNode(const std::string& focusNode);
     void setAnchorNode(const std::string& anchorNode);
@@ -70,6 +75,13 @@ public:
     void resetNodeMovements();
 
     JoystickCameraStates& joystickStates();
+    const JoystickCameraStates& joystickStates() const;
+    
+    WebsocketCameraStates& websocketStates();
+    const WebsocketCameraStates& websocketStates() const;
+    
+    ScriptCameraStates& scriptStates();
+    const ScriptCameraStates& scriptStates() const;
 
     bool followingNodeRotation() const;
     const SceneGraphNode* anchorNode() const;
@@ -131,6 +143,7 @@ private:
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
+    properties::FloatProperty _websocketSensitivity;
 
     properties::BoolProperty _useAdaptiveStereoscopicDepth;
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
@@ -142,14 +155,15 @@ private:
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
+    WebsocketCameraStates _websocketStates;
+    ScriptCameraStates _scriptStates;
 
     const SceneGraphNode* _anchorNode = nullptr;
     const SceneGraphNode* _aimNode = nullptr;
 
-    glm::dvec3 _previousAnchorNodePosition;
-    glm::dquat _previousAnchorNodeRotation;
-
-    glm::dvec3 _previousAimNodePosition;
+    std::optional<glm::dvec3>_previousAnchorNodePosition;
+    std::optional<glm::dquat> _previousAnchorNodeRotation;
+    std::optional<glm::dvec3> _previousAimNodePosition;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;

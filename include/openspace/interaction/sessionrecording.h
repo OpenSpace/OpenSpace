@@ -221,7 +221,6 @@ private:
         double timestamp;
     };
     ExternInteraction _externInteract;
-    bool _isRecording = false;
     double _timestampRecordStarted = 0.0;
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;

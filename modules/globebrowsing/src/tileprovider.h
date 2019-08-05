@@ -222,8 +222,10 @@ TileDepthTransform depthTransform(TileProvider& tp);
 /**
  * This method should be called once per frame. Here, TileProviders
  * are given the opportunity to update their internal state.
+ *
+ * \return The number of tiles that have been updated in this call
  */
-void update(TileProvider& tp);
+int update(TileProvider& tp);
 
 /**
  * Provides a uniform way of all TileProviders to reload or

@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___INPUTSTATE___H__
 #define __OPENSPACE_CORE___INPUTSTATE___H__
 
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
@@ -33,6 +34,7 @@
 namespace openspace::interaction {
 
 struct JoystickInputStates;
+struct WebsocketInputStates;
 
 // This class represents the global input state of interaction devices
 class InputState {
@@ -55,6 +57,12 @@ public:
 
     float joystickAxis(int i) const;
     bool joystickButton(int i) const;
+
+    WebsocketInputStates& websocketInputStates();
+    float websocketAxis(int i) const;
+    bool websocketButton(int i) const;
+    bool hasWebsocketStates() const;
+    void resetWebsockets();
 
 private:
     // Input from keyboard

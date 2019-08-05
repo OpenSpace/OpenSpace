@@ -440,11 +440,7 @@ void LoadingScreen::render() {
                     if (info.totalSize < 1024 * 1024) { // 1MB
                         text = fmt::format(
                             "{} ({}%)\n{}/{} {}",
-                            text,
-                            p,
-                            info.currentSize,
-                            info.totalSize,
-                            "bytes"
+                            text, p, info.currentSize, info.totalSize, "bytes"
                         );
                     }
                     else {
@@ -453,11 +449,7 @@ void LoadingScreen::render() {
 
                         text = fmt::format(
                             "{} ({}%)\n{:.3f}/{:.3f} {}",
-                            text,
-                            p,
-                            curr,
-                            total,
-                            "MB"
+                            text, p, curr, total, "MB"
                         );
                     }
                 }

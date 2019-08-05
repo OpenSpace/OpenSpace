@@ -32,6 +32,8 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 namespace tileprovider { struct TileProvider; }
@@ -49,6 +51,8 @@ public:
     float chromaKeyTolerance() const;
 
     void onChange(std::function<void(void)> callback);
+
+    static documentation::Documentation Documentation();
 
 private:
     void addVisibleProperties();

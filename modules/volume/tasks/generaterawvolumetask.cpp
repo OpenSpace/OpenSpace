@@ -50,9 +50,6 @@ namespace {
     constexpr const char* KeyValueFunction = "ValueFunction";
     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
 } // namespace
 
 namespace openspace {

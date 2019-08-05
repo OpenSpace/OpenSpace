@@ -62,13 +62,14 @@ namespace openspace::performance {
 // The ghoul::SharedData block addressed by OpenSpacePerformanceMeasurementSharedData
 // will only get allocated once and contains the total number of allocated shared memory
 // blocks alongside a list of names of these blocks
-//
 
 void PerformanceManager::CreateGlobalSharedMemory() {
     static_assert(
         sizeof(GlobalMemory) == GlobalSharedMemorySize,
         "The global memory struct does not fit the allocated global memory space"
     );
+
+    ghoul::SharedMemory::remove(GlobalSharedMemoryName);
 
     if (ghoul::SharedMemory::exists(GlobalSharedMemoryName)) {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);

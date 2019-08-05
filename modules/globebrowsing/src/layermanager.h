@@ -35,6 +35,8 @@
 
 namespace ghoul { class Dictionary; }
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 class Layer;
@@ -57,16 +59,20 @@ public:
         const ghoul::Dictionary& layerDict);
     void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
 
+    LayerGroup& layerGroup(layergroupid::GroupID);
     const LayerGroup& layerGroup(layergroupid::GroupID) const;
 
     bool hasAnyBlendingLayersEnabled() const;
 
     std::array<LayerGroup*, NumLayerGroups> layerGroups() const;
 
-    void update();
+    // Return:  Number of tiles updated
+    int update();
     void reset(bool includeDisabled = false);
 
     void onChange(std::function<void(Layer* l)> callback);
+
+    static documentation::Documentation Documentation();
 
 private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;

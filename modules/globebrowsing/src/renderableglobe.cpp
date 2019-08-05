@@ -31,6 +31,8 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <modules/debugging/rendering/debugrenderer.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
@@ -46,6 +48,13 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+#include <openspace/engine/moduleengine.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+openspace::GlobeBrowsingModule* _module = nullptr;
+
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -176,7 +185,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
-        "TargetLodScaleFactorInfo",
+        "TargetLodScaleFactor",
         "Target Level of Detail Scale Factor",
         "" // @TODO Missing documentation
     };
@@ -417,6 +426,57 @@ Chunk::Chunk(const TileIndex& ti)
     , status(Status::DoNothing)
 {}
 
+documentation::Documentation RenderableGlobe::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableGlobe",
+        "globebrowsing_renderableglobe",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderableGlobe"),
+                Optional::No,
+                ""
+            },
+            {
+                KeyRadii,
+                new OrVerifier({ new DoubleVector3Verifier, new DoubleVerifier }),
+                Optional::Yes,
+                "Specifies the radii for this planet. If the Double version of this is "
+                "used, all three radii are assumed to be equal."
+            },
+            {
+                "PerformShading",
+                new BoolVerifier,
+                Optional::Yes,
+                "Specifies whether the planet should be shaded by the primary light "
+                "source or not. If it is disabled, all parts of the planet are "
+                "illuminated."
+            },
+            {
+                KeyLayers,
+                new TableVerifier({
+                    {
+                        "*",
+                        new ReferencingVerifier("globebrowsing_layermanager"),
+                        Optional::Yes,
+                        "Descriptions of the individual layer groups"
+                    }
+                }),
+                Optional::Yes,
+                "A list of all the layers that should be added"
+            },
+            {
+                KeyLabels,
+                new ReferencingVerifier("globebrowsing_globelabelscomponent"),
+                Optional::Yes,
+                "Specifies information about planetary labels that can be rendered on "
+                "the object's surface."
+            }
+        }
+    };
+}
+
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _debugProperties({
@@ -595,10 +655,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyLabels)) {
         _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
     }
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _module = global::moduleEngine.module<GlobeBrowsingModule>();
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void RenderableGlobe::initializeGL() {
-
     if (!_labelsDictionary.empty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
         addPropertySubOwner(_globeLabelsComponent);
@@ -745,7 +808,11 @@ void RenderableGlobe::update(const UpdateData& data) {
         _layerManager.reset();
         _debugProperties.resetTileProviders = false;
     }
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _nUploadedTiles = _layerManager.update();
+#else
     _layerManager.update();
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_nLayersIsDirty) {
         std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
@@ -1034,6 +1101,14 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
     _localRenderer.program->deactivate();
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _module->addFrameInfo(
+        this,
+        std::min(localCount, ChunkBufferSize),
+        std::min(globalCount, ChunkBufferSize),
+        _nUploadedTiles
+    );
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {

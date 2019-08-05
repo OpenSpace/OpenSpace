@@ -426,7 +426,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFrom
 void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     Timestep* t = timestepFromIndex(target);
     if (t) {
-        global::timeManager.setTimeNextFrame(t->metadata.time);
+        global::timeManager.setTimeNextFrame(Time(t->metadata.time));
     }
 }
 

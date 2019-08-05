@@ -12,14 +12,19 @@ local Keybindings = {
     {
         Key = "E",
         Command = "openspace.time.setPause(true);" ..
-                  "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)"..
-                  "openspace.setPropertyValue('Scene.Apollo8LaunchTrail.Renderable.Enabled', false)"..
-                  "openspace.sessionRecording.startPlayback('apollo8')",
+                  "openspace.time.setDeltaTime(1);" ..
+                  "openspace.time.setTime('1968 DEC 24 16:37:31');" ..
+                  "openspace.navigation.setNavigationState({" ..
+                  "    Anchor = 'Apollo8'," ..
+                  "    Position = { 1.494592E1, 3.236777E1, -4.171296E1 }," ..
+                  "    ReferenceFrame = 'Root'," ..
+                  "    Up = { 0.960608E0, -0.212013E0, 0.179675E0 }" ..
+                  "});" ..
+                  "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)",
         Documentation = "Jump to right before the earthrise photo",
         Name = "Set Earthrise time",
         GuiPath = "/Missions/Apollo/8",
         Local = false
-
     },
     {
         Key = "U",
@@ -115,13 +120,7 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MinimumAllowedDistance', 0.000000);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 24.0);
 
-    openspace.navigation.setCameraState({
-        Anchor = earthAsset.Earth.Identifier,
-        Position = { 0, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
-    })
-
-    openspace.globebrowsing.goToGeo(20, -60, 15000000)
+    openspace.globebrowsing.goToGeo(earthAsset.Earth.Identifier, 20, -60, 15000000)
 end)
 
 asset.onDeinitialize(function ()
