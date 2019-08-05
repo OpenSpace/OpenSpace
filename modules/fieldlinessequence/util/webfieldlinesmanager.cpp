@@ -79,7 +79,7 @@ namespace openspace{
     void WebFieldlinesManager::preDownload(){
         // for some reason the fieldlines looks f-ed up when downloaded and read fromt his endpoint???? so weird
         // could it have something to do with endianness?
-        //std::string url = "http://localhost:3000/WSA/fieldline/2019-05-02T20-00-00.000/PfssIo";
+        //std::string url = "http://localhost:3000/WSA/fieldline/WSA_Fieldlines_PFSS_IO/2019-05-02T20-00-00.000.osfls";
         std::string url = "http://localhost:3000/WSA/PfssIo2019-05-02T20-00-00.000.osfls"; // temp thing, should be the latest one
         std::string destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "2019-05-02T20-00-00.000.osfls"); // what the downloaded filename is to be
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
@@ -98,36 +98,41 @@ namespace openspace{
     
     void WebFieldlinesManager::update(){
         const double openspaceTime = global::timeManager.time().j2000Seconds();
+        const auto deltaTime = global::timeManager.deltaTime();
+        const int speedThreshhold = 10000;
         
-        // First it checks the time against the "bigger window" aka the long list of
-        // timesteps we know are available online. If it's outside that we're gonna need a new one
-        if(_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime)){
-            
-            // Check if in window
-            if(_webFieldlinesWindow.timeIsInWindow(openspaceTime)){
-                //LERROR("we're in the window");
-                const double openspaceTimeDirection = global::timeManager.deltaTime();
-                // Check if in the edge of the window, so we can start downloading a new one
-                if(_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, openspaceTimeDirection)){
+        // Hold your horses, we don't want to do anything while deltatime is too high
+        if (abs(deltaTime) < speedThreshhold){
+            // First it checks the time against the "bigger window" aka the long list of
+            // timesteps we know are available online. If it's outside that we're gonna need a new one
+            if (_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime)) {
+
+                // Check if in window
+                if (_webFieldlinesWindow.timeIsInWindow(openspaceTime)) {
+
+                    const double openspaceTimeDirection = global::timeManager.deltaTime();
+                    // Check if in the edge of the window, so we can start downloading a new one
+                    if (_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, openspaceTimeDirection)) {
+                        // get new window
+                        //LERROR("in margin, new window");
+                        _webFieldlinesWindow.newWindow(openspaceTime);
+                    }
+                    else {
+                        // If it's in the middle of the window, we can just sit back and relax
+                        // And let the worker work
+                        _webFieldlinesWindow.executeDownloadWorker();
+                    }
+
+                }
+                else {
                     // get new window
-                    //LERROR("in margin, new window");
                     _webFieldlinesWindow.newWindow(openspaceTime);
                 }
-                else{
-                    // If it's in the middle of the window, we can just sit back and relax
-                    //LERROR("nothing happens, all gucci");
-                }
-                
-            }else{
-                // get new window
-                _webFieldlinesWindow.newWindow(openspaceTime);
             }
-        }
-        else{
-            _webFieldlinesWindow.getNewTriggerTimesWebList(openspaceTime);
-        }
-        
-        
+            else {
+                _webFieldlinesWindow.getNewTriggerTimesWebList(openspaceTime);
+            }
+        }        
     }
     
     // --------------------------- PRIVATE FUNCTIONS --------------------------- //
@@ -139,37 +144,7 @@ namespace openspace{
     
     
     
-    
-    
-    
-    // --------------- OLD FUNCTIONS - some to be recycled --------------------- //
-    
-//    // dowload files specified in _filestodownload
-//    void WebFieldlinesManager::downloadFieldlines(){
-//        LERROR("starting download");
-//        for (int index : _filesToDownload){
-//
-//
-//            std::string downloadkey = _availableTriggertimes[index].second;
-//            double timetrigger = _availableTriggertimes[index].first;
-//
-//            // download fieldlines file
-//            //std::string destPath = downloadOsfls(downloadkey);
-//
-//            //add the timetrigger at the right place in the list
-//            int i = 0;
-//            if(*rfs_nStates > 0){
-//                while(timetrigger > (*rfs_startTimes)[i]){
-//                    i++;
-//                    if( i == static_cast<int>(*rfs_nStates)) break;
-//
-//                }
-//            }
-//            //rfs_sourceFiles->insert(rfs_sourceFiles->begin() + i, destPath);
-//            rfs_startTimes->insert(rfs_startTimes->begin() + i, timetrigger);
-//            (*rfs_nStates) += 1;
-//        }
-//    }
+  
 
 
 

@@ -102,6 +102,15 @@ namespace openspace{
             else return false;
         }
     }
+
+    /*  Release the worker for execution,
+        Pick up a timestep to request for download,
+        Check if that timestep is already on disk,
+        repeat until a proper timestep to download is found, and start download,
+        (( Maybe alert Root RenderableFieldlinesSequence that it may udpates _sourceFiles/_startTimes?)) */
+    void WebFieldlinesWindow::executeDownloadWorker(){
+        _worker.downloadWindow(_window.triggerTimes);
+    }
     
     void WebFieldlinesWindow::newWindow(double time){
         // Find where in the list we are
@@ -124,25 +133,28 @@ namespace openspace{
     }
     
     bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time){
+        
         if(_nAvailableWeb == 0) return false;
-        if(time >= std::get<0>(_triggerTimesWeb[0]) && time <= std::get<0>(_triggerTimesWeb[_nAvailableWeb - 1]))
+
+        if(time >= std::get<0>(_triggerTimesWeb.front()) && time <= std::get<0>(_triggerTimesWeb.back()))
             return true;
-        else return false;
+        else 
+            return false;
     }
     
     void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
-        //_worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
+        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
         _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
     }
     
     // -------------------------- PRIVATE FUNCTIONS  -----------------------------------//
     // Returns first trigger of window
     double WebFieldlinesWindow::windowStart(){
-        return _window.triggerTimes[0].first;
+        return _window.triggerTimes.front().first;
     }
     // Returns last trigger of window
     double WebFieldlinesWindow::windowEnd(){
-        return _window.triggerTimes[_window.nTriggerTimes-1].first;
+        return _window.triggerTimes.back().first;
     }
     
     

@@ -67,8 +67,15 @@ public:
     // Returns true if time is at edge of the current window,
     // and will probably need to update window
     bool timeIsInWindowMargin(double time, double direction);
+
+    // Release the worker for execution, the worker is taking care of the downloading-priorities and logic
+    void executeDownloadWorker();
     
     void newWindow(double time);
+
+    // Returns the first and last trigger of window
+    double windowStart();
+    double windowEnd();
 
 private:
     
@@ -90,6 +97,7 @@ private:
     // and indices to the respective files on disk if they exist/are downloaded
     // -1 means not downloaded
     std::vector<std::tuple<double, std::string, int>> _triggerTimesWeb;
+
     int _nAvailableWeb;
     
     // POINTERS TO RENDERABLEFIELDLIENSSEQUENCE
@@ -103,9 +111,7 @@ private:
     // PRIVATE MEMBER FUNCTIONS
     
     
-    // Returns the first and last trigger of window
-    double windowStart();
-    double windowEnd();
+
     
 
 };

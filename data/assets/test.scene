@@ -5,18 +5,18 @@ local propertyHelper = asset.require('util/property_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
--- asset.require('scene/solarsystem/planets')
+asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
--- assetHelper.requestAll(asset, 'scene/digitaluniverse')
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 -- asset.require('util/default_joystick')
 
--- asset.require('util/webgui')
+ asset.require('util/webgui')
 
 --asset.request('customization/globebrowsing')
 
@@ -26,8 +26,8 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 local sunRadius = 695508000
 
 -- Selected field lines + some additional field lines
-asset.require('./testwsa/scs_oi')
-asset.require('./testwsa/pfss_oi')
+-- asset.require('./testwsa/scs_oi')
+-- asset.require('./testwsa/pfss_oi')
 asset.require('./testwsa/pfss_io')
 
 -- Sun earth connection

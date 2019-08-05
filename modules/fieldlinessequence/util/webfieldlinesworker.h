@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESWORKER___H__
 
 #include <string>
+#include <vector>
 
 namespace openspace {
     
@@ -51,6 +52,9 @@ private:
     // POINTERS
     std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk;
     // Pointers end
+
+    // Contains a list of all the trigger times that has been downloaded already,
+    std::vector<std::pair<double, std::string>> _downloadedTriggerTimes;
     
     // The base url for the server
     std::string _serverUrl;
@@ -66,7 +70,6 @@ private:
     
     std::string _FLType;
     
-    
     // Download one file to sync directory
     std::string downloadOsfls(std::string downloadkey);
     
@@ -79,6 +82,9 @@ private:
     // functions to translate the filenames to doubles
     double triggerTimeString2Double(std::string s);
     void triggerTimeDouble2String(double d, std::string& s);
+
+    // Add a downloaded file to the list of downloaded files
+    void addToDownloadedList(std::pair<double, std::string> pair);
     
     static bool compareTimetriggersEqual(double first, double second);
 

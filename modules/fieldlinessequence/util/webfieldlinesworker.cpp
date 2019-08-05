@@ -45,24 +45,52 @@ namespace openspace{
     , _syncDir(syncDir)
     , _triggerTimesOnDisk(triggerTimesOnDisk)
     , _fileEnding(".osfls")
-    , _FLType("PfssIo"){
-        _endpointSingleDownload = _serverUrl + "/WSA/" + _FLType; // should be set by argument to be more general
+    , _FLType("WSA_Fieldlines_PFSS_IO"){
+        _endpointSingleDownload = _serverUrl + "WSA/fieldline/" + _FLType + "/"; // should be set by argument to be more general
     }
     
+    // Download all files in the current window
+    // This function starts in the middle of the window and proceeds to download all future timesteps, 
+    // then steps backwards from the middle
+    //TODO(Axel): Different behaviour depending on direction the user is moving in.
     void WebFieldlinesWorker::downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes){
-        // Check which files are already on disk
+       
+       // Want to use std::find_if to break the for_each
+       int middle = triggerTimes.size() / 2;
+       bool downloaded = false;
+       
+       // Forwards
+       std::vector<std::pair<double, std::string>>::iterator forwardIt = triggerTimes.begin();
+       std::advance(forwardIt, middle);
+       std::for_each(forwardIt, triggerTimes.end(), [this, &downloaded](auto it) {
+           if (!downloaded && !fileIsOnDisk(it.first)) {
+               downloadOsfls(it.second);
+               addToDownloadedList(it);
+               downloaded = true;
+           }
+       });
+
+       // Backwards
+       if (!downloaded) {
+           std::for_each(triggerTimes.rbegin(), triggerTimes.rend(), [this, &downloaded](auto it) {
+               if (!downloaded && !fileIsOnDisk(it.first)) {
+                   downloadOsfls(it.second);
+                   addToDownloadedList(it);
+                   downloaded = true;
+               }
+           });
+       }
     }
-    
-    bool fileIsOnDisk(double triggerTime){
-        //
-    }
-    
     
     // PUBLIC FUNCTIONS
-    void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb){
-        
+    void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>> &_triggerTimesWeb){
+        const std::string oSpaceStartTime = "2000-01-01";
         // temporary, should use parameters for real endpoint later on
-        std::string url = "http://localhost:3000/WSA/times/2019-05-02T12:00:00:00/100";
+        auto time = global::timeManager.time().ISO8601();
+        
+        std::string url = "http://localhost:3000/WSA/times/2019-05-02T12:00:00:00/50";
+        if (time.substr(0, 10) != oSpaceStartTime);
+            url = "http://localhost:3000/WSA/times/" + time + "50";
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
@@ -74,8 +102,9 @@ namespace openspace{
                        [](char c) {
                            return c;
                        });
-        
-        _triggerTimesWeb.clear(); // we don't want to save too much in memory at the same time
+
+        //_triggerTimesWeb.clear(); // we don't want to save too much in memory at the same time
+
         parseTriggerTimesList(s, _triggerTimesWeb);
         
         // sort ascending by trigger time
@@ -99,6 +128,18 @@ namespace openspace{
         }
         return destinationpath;
     }
+
+    // This function searches for triggerTime in _downloadedTriggerTimes, 
+    // to see weather a file has already been downloaded or not
+    bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime){
+        if(std::find_if(_downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(),
+            [&triggerTime](std::pair<double, std::string> const &element){
+            return element.first == triggerTime;
+        }) != _downloadedTriggerTimes.end())
+            return true;
+        else
+            return false;
+    }
     
     void WebFieldlinesWorker::checkForExistingData(std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb,
                                                               std::vector<std::pair<double, std::string>>& _triggerTimesOnDisk){
@@ -113,7 +154,7 @@ namespace openspace{
     }
     
     // PRIVATE FUNCTIONS
-    void WebFieldlinesWorker::parseTriggerTimesList(std::string s, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb){
+    void WebFieldlinesWorker::parseTriggerTimesList(std::string s, std::vector<std::tuple<double, std::string, int>> &_triggerTimesWeb){
         // Turn into stringstream to parse the comma-delimited string into vector
         std::stringstream ss(s);
         char c;
@@ -127,6 +168,7 @@ namespace openspace{
             }
             else sub += c;
         }
+
         _triggerTimesWeb.push_back(std::make_tuple(triggerTimeString2Double(sub), sub, -1));
     }
     
@@ -147,6 +189,10 @@ namespace openspace{
         s.replace(16, 1, "-");
     }
     
+    void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pair){
+        _downloadedTriggerTimes.insert(_downloadedTriggerTimes.begin(),pair);
+    }
+
     bool WebFieldlinesWorker::compareTimetriggersEqual(double first, double second){
         double eps = 100.0;
         if(first > second - eps && first < second + eps) return true;
