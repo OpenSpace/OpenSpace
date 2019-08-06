@@ -48,6 +48,13 @@ namespace openspace{
     , _FLType("WSA_Fieldlines_PFSS_IO"){
         _endpointSingleDownload = _serverUrl + "WSA/fieldline/" + _FLType + "/"; // should be set by argument to be more general
     }
+
+    // Destructor, deleting all files that were downloaded during the run.
+    WebFieldlinesWorker::~WebFieldlinesWorker() {
+        std::for_each(_downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), [&](auto it) {
+            FileSys.deleteFile(_syncDir + FileSys.PathSeparator + it.second + ".osfls");
+        });
+    }
     
     // Download all files in the current window
     // This function starts in the middle of the window and proceeds to download all future timesteps, 

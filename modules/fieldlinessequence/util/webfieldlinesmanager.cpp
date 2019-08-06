@@ -106,7 +106,6 @@ namespace openspace{
             // First it checks the time against the "bigger window" aka the long list of
             // timesteps we know are available online. If it's outside that we're gonna need a new one
             if (_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime)) {
-
                 // Check if in window
                 if (_webFieldlinesWindow.timeIsInWindow(openspaceTime)) {
 
@@ -114,7 +113,6 @@ namespace openspace{
                     // Check if in the edge of the window, so we can start downloading a new one
                     if (_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, openspaceTimeDirection)) {
                         // get new window
-                        //LERROR("in margin, new window");
                         _webFieldlinesWindow.newWindow(openspaceTime);
                     }
                     else {

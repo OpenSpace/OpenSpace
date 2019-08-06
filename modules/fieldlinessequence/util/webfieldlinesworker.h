@@ -34,6 +34,8 @@ class WebFieldlinesWorker{
 public:
     // Constructor
     WebFieldlinesWorker() = default;
+
+    ~WebFieldlinesWorker();
     
     WebFieldlinesWorker(std::string syncDir, std::string serverUrl, std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk);
     
