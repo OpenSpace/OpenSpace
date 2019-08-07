@@ -33,6 +33,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
@@ -151,6 +152,11 @@ configuration::Configuration& gConfiguration() {
 
 interaction::JoystickInputStates& gJoystickInputStates() {
     static interaction::JoystickInputStates g;
+    return g;
+}
+
+interaction::WebsocketInputStates& gWebsocketInputStates() {
+    static interaction::WebsocketInputStates g;
     return g;
 }
 

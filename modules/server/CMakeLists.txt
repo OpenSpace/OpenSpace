@@ -34,6 +34,7 @@ set(HEADER_FILES
   include/topics/authorizationtopic.h
   include/topics/bouncetopic.h
   include/topics/documentationtopic.h
+  include/topics/flightcontrollertopic.h
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
   include/topics/sessionrecordingtopic.h
@@ -56,6 +57,7 @@ set(SOURCE_FILES
   src/topics/authorizationtopic.cpp
   src/topics/bouncetopic.cpp
   src/topics/documentationtopic.cpp
+  src/topics/flightcontrollertopic.cpp
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp
   src/topics/sessionrecordingtopic.cpp

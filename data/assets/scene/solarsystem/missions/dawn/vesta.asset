@@ -20,7 +20,7 @@ local images = asset.syncedResource({
 local models = asset.syncedResource({
     Name = "Vesta Models",
     Type = "HttpSynchronization",
-    Identifier = "vesta_comet",
+    Identifier = "vesta_model",
     Version = 1
 })
 

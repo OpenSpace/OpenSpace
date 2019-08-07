@@ -45,10 +45,9 @@
 #include <locale>
 
 namespace {
-    constexpr const char* KeyLabels = "Labels";
-    constexpr const char* KeyLabelsFileName = "FileName";
-
     constexpr const char* _loggerCat = "GlobeLabels";
+
+    constexpr const char* KeyLabelsFileName = "FileName";
 
     constexpr const double LabelFadeRangeConst = 1500.0;
     constexpr const double RangeAngularCoefConst = 0.8;
@@ -671,19 +670,10 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         float distToCamera,
                                         float fadeInVariable
 ) {
-    constexpr double DIST_EPS = 6000.0;
-    constexpr double SIN_EPS = 0.001;
-
     glm::vec4 textColor = _labelsColor;
     textColor.a *= fadeInVariable;
 
-    glm::dmat4 invMP = glm::inverse(_globe->modelTransform());
-    glm::dmat4 invCombinedView = glm::inverse(data.camera.combinedViewMatrix());
-
-    glm::dvec4 cameraPosWorld = invCombinedView * glm::dvec4(0.0, 0.0, 0.0, 1.0);
-    glm::dvec3 cameraPosObj = glm::dvec3(invMP * cameraPosWorld);
     glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
-    glm::dvec3 cameraLookUpObj = glm::dvec3(invMP * cameraUpVecWorld);
 
     glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
                     data.camera.combinedViewMatrix();
@@ -799,7 +789,7 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
     double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
     double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
     double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
-    double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
+    // double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
 
     // Normalize Planes
     const double invMagLeft = 1.0 / glm::length(leftNormal);
@@ -824,7 +814,7 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
 
     const double invMagFar = 1.0 / glm::length(farNormal);
     farNormal *= invMagFar;
-    farDistance *= invMagFar;
+    // farDistance *= invMagFar;
 
     constexpr const float Radius = 1.0;
 

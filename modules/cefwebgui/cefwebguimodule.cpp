@@ -25,7 +25,6 @@
 #include <modules/cefwebgui/cefwebguimodule.h>
 
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webgui/webguimodule.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
@@ -166,7 +165,15 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     } else {
         WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
         _url = "http://127.0.0.1:" +
-            std::to_string(webGuiModule->port()) + "/#/onscreen";
+            std::to_string(webGuiModule->port()) + "/frontend/#/onscreen";
+
+        _endpointCallback = webGuiModule->addEndpointChangeCallback(
+            [this](const std::string& endpoint, bool exists) {
+                if (exists && endpoint == "frontend" && _instance) {
+                    _instance->reloadBrowser();
+                }
+            }
+        );
     }
 
     if (configuration.hasValue<float>(GuiScaleInfo.identifier)) {
@@ -204,6 +211,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::deinitializeGL.emplace_back([this]() {
+        if (_endpointCallback != -1) {
+            WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+            webGuiModule->removeEndpointChangeCallback(_endpointCallback);
+            _endpointCallback = -1;
+        }
         _enabled = false;
         startOrStopGui();
     });

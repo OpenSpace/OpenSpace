@@ -750,7 +750,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     _program->activate();
 
-    const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
     _program->setUniform(
         "screenSize",
         glm::vec2(global::renderEngine.renderingResolution())
