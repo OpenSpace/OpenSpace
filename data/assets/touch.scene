@@ -22,6 +22,10 @@ asset.onInitialize(function ()
         Position = { 58.5877, 16.1924, 20000000 }
     })
 
+    openspace.setPropertyValueSingle('Scene.Pluto.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.PlutoBarycenterTrail.Renderable.Enabled', false)
+
 end)
 
 asset.onDeinitialize(function ()
