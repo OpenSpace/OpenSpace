@@ -14,8 +14,6 @@ namespace openspace::webgui {
     public:
         StoryHandler();
 
-        void removeTags();
-        void addTags();
         float overviewLimit();
         float zoomInLimit();
 
@@ -23,8 +21,6 @@ namespace openspace::webgui {
         properties::FloatProperty _overviewLimit;
         properties::FloatProperty _zoomInLimit;
         properties::StringProperty _storyIdentifier;
-        properties::TriggerProperty _applyAddTag;
-        properties::TriggerProperty _applyRemoveTag;
         properties::StringProperty _focusNodesList;
 
     }; // namespace openspace webgui

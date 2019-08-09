@@ -22,18 +22,6 @@ namespace {
         "StoryIdentifier",
         "Contains the name for the current story."
     };
-    static const openspace::properties::Property::PropertyInfo ApplyRemoveTagInfo = {
-        "ApplyRemoveTag",
-        "ApplyRemoveTag",
-        "Triggering this property will remove the 'interesting' tag to all the nodes listed in"
-        "the focus nodes list."
-    };
-    static const openspace::properties::Property::PropertyInfo ApplyAddTagInfo = {
-        "ApplyAddTag",
-        "ApplyAddTag",
-        "Triggering this property will add the 'interesting' tag from all the nodes listed"
-        "in the focus nodes list."
-    };
     static const openspace::properties::Property::PropertyInfo FocusNodesListInfo = {
         "FocusNodesList",
         "FocusNodesList",
@@ -46,35 +34,15 @@ namespace openspace::webgui {
         , _overviewLimit(OverviewLimitInfo, 0.0)
         , _zoomInLimit(ZoomInLimitInfo, 0.0)
         , _storyIdentifier(StoryIdentifierInfo, "story_default")
-        , _applyAddTag(ApplyAddTagInfo)
-        , _applyRemoveTag(ApplyRemoveTagInfo)
         , _focusNodesList(FocusNodesListInfo, std::string(""))
 
     {
         addProperty(_overviewLimit);
         addProperty(_zoomInLimit);
         addProperty(_storyIdentifier);
-        addProperty(_applyAddTag);
-        addProperty(_applyRemoveTag);
         addProperty(_focusNodesList);
 
-        _applyAddTag.onChange([this]() {addTags(); });
-        _applyRemoveTag.onChange([this]() {removeTags(); });
     };
-
-    void StoryHandler::removeTags() {
-        openspace::global::scriptEngine.queueScript(
-            "openspace.removeInterestingNodes({" + static_cast<std::string>(_focusNodesList) + "})",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-
-    void StoryHandler::addTags() {
-        openspace::global::scriptEngine.queueScript(
-        "openspace.markInterestingStoryNodes({" + static_cast<std::string>(_focusNodesList) + "})",
-        scripting::ScriptEngine::RemoteScripting::Yes
-      );
-   };
 
     float StoryHandler::overviewLimit() {
         return _overviewLimit;
