@@ -1202,13 +1202,13 @@ namespace openspace {
                 _nStates = _startTimes.size();
                 computeSequenceEndTime();
 
-                for (int i = 0; i < _sourceFiles.size(); ++i) {
+                /*for (int i = 0; i < _sourceFiles.size(); ++i) {
                     LERROR(_sourceFiles[i]);
                 }
 
                 for (int i = 0; i < _startTimes.size(); ++i) {
                     LERROR(std::to_string(_startTimes[i]));
-                }
+                } */
 
             }
             _webFieldlinesManager.update(); // we could also send time as a variable as we already have it
@@ -1253,7 +1253,6 @@ namespace openspace {
                 _isLoadingStateFromDisk = true;
                 _mustLoadNewStateFromDisk = false;
                 std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
-                LERROR(filePath);
                 std::thread readBinaryThread([this, f = std::move(filePath)]{
                     readNewState(f);
                     });
@@ -1265,14 +1264,7 @@ namespace openspace {
 
             if (_loadingStatesDynamically) {
                 _states[0] = std::move(*_newState);
-                LERROR("_states size: " + std::to_string(_states.size()));
-                for (int i = 0; i < _sourceFiles.size(); ++i) {
-                    LERROR(_sourceFiles[i]);
-                }
 
-                for (int i = 0; i < _startTimes.size(); ++i) {
-                    LERROR(std::to_string(_startTimes[i]));
-                }
             }
 
             updateVertexPositionBuffer();
