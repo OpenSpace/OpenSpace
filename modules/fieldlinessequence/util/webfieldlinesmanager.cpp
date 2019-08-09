@@ -103,26 +103,28 @@ namespace openspace{
         
         // Hold your horses, we don't want to do anything while deltatime is too high
         if (abs(deltaTime) < speedThreshhold){
+            
             // First it checks the time against the "bigger window" aka the long list of
             // timesteps we know are available online. If it's outside that we're gonna need a new one
             if (_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime)) {
+                
                 // Check if in window
                 if (_webFieldlinesWindow.timeIsInWindow(openspaceTime)) {
 
-                    const double openspaceTimeDirection = global::timeManager.deltaTime();
                     // Check if in the edge of the window, so we can start downloading a new one
-                    if (_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, openspaceTimeDirection)) {
+                    if (_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, deltaTime)) {
                         // get new window
                         _webFieldlinesWindow.newWindow(openspaceTime);
                     }
                     else {
+                        
                         // If it's in the middle of the window, we can just sit back and relax
                         // And let the worker work
                         _webFieldlinesWindow.executeDownloadWorker();
                     }
-
                 }
                 else {
+                    
                     // get new window
                     _webFieldlinesWindow.newWindow(openspaceTime);
                 }
@@ -131,6 +133,11 @@ namespace openspace{
                 _webFieldlinesWindow.getNewTriggerTimesWebList(openspaceTime);
             }
         }        
+    }
+
+    bool WebFieldlinesManager::checkIfWindowIsReadyToLoad()
+    {
+        return _webFieldlinesWindow.workerWindowIsReady();
     }
     
     // --------------------------- PRIVATE FUNCTIONS --------------------------- //

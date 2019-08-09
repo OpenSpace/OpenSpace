@@ -50,6 +50,11 @@ public:
     // Spawn one thread per file to download?
     void downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes);
 
+    void updateRFSSourceFiles(std::vector<std::string>& _sourceFiles);
+
+    // Returns true when the worker has downloaded a window and saved the path to the files in _sourceFiles
+    bool windowIsComplete();
+
 private:
     // POINTERS
     std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk;
@@ -71,6 +76,17 @@ private:
     std::string _fileEnding;
     
     std::string _FLType;
+
+    /********************************************
+    |               USED FOR THREADS            |
+    |                                           |
+    ********************************************/
+    //std::condition_variable _workerConditional;
+    //std::mutex _workerMutex;
+
+    // TODO(Axel): Hmm, can we get around using these bools somehow? 
+    bool _readyToUpdateSourceFiles = false;
+    bool _doneUpdating = false;
     
     // Download one file to sync directory
     std::string downloadOsfls(std::string downloadkey);

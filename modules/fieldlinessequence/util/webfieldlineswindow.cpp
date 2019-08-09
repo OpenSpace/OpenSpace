@@ -110,6 +110,7 @@ namespace openspace{
         (( Maybe alert Root RenderableFieldlinesSequence that it may udpates _sourceFiles/_startTimes?)) */
     void WebFieldlinesWindow::executeDownloadWorker(){
         _worker.downloadWindow(_window.triggerTimes);
+        _worker.updateRFSSourceFiles(*rfs_sourceFiles);
     }
     
     void WebFieldlinesWindow::newWindow(double time){
@@ -133,7 +134,6 @@ namespace openspace{
     }
     
     bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time){
-        
         if(_nAvailableWeb == 0) return false;
 
         if(time >= std::get<0>(_triggerTimesWeb.front()) && time <= std::get<0>(_triggerTimesWeb.back()))
@@ -155,6 +155,11 @@ namespace openspace{
     // Returns last trigger of window
     double WebFieldlinesWindow::windowEnd(){
         return _window.triggerTimes.back().first;
+    }
+
+    bool WebFieldlinesWindow::workerWindowIsReady()
+    {
+        return _worker.windowIsComplete();
     }
     
     

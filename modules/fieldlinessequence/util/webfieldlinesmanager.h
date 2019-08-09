@@ -37,7 +37,7 @@ public:
     WebFieldlinesManager() = default;
 
     // download files specified in _filestodownload
-    void downloadFieldlines();
+    //void downloadFieldlines();
 
 
     // To replace the constructor, takes the identifier of the field line, is used for storing the field lines mainly
@@ -58,8 +58,14 @@ public:
     // Function to run in FieldLinesSequence's update loop
     void update();
 
+    // Returns wether the worker has finished downloading a window.
+    bool checkIfWindowIsReadyToLoad();
+
+    bool hasUpdated = false;
     
 private:
+
+
     std::string _syncDir;
     
     // What model is this field line derived from, may come to be the same as the identifier

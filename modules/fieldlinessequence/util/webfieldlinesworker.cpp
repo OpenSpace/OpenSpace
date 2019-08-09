@@ -56,39 +56,6 @@ namespace openspace{
         });
     }
     
-    // Download all files in the current window
-    // This function starts in the middle of the window and proceeds to download all future timesteps, 
-    // then steps backwards from the middle
-    //TODO(Axel): Different behaviour depending on direction the user is moving in.
-    void WebFieldlinesWorker::downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes){
-       
-       // Want to use std::find_if to break the for_each
-       int middle = triggerTimes.size() / 2;
-       bool downloaded = false;
-       
-       // Forwards
-       std::vector<std::pair<double, std::string>>::iterator forwardIt = triggerTimes.begin();
-       std::advance(forwardIt, middle);
-       std::for_each(forwardIt, triggerTimes.end(), [this, &downloaded](auto it) {
-           if (!downloaded && !fileIsOnDisk(it.first)) {
-               downloadOsfls(it.second);
-               addToDownloadedList(it);
-               downloaded = true;
-           }
-       });
-
-       // Backwards
-       if (!downloaded) {
-           std::for_each(triggerTimes.rbegin(), triggerTimes.rend(), [this, &downloaded](auto it) {
-               if (!downloaded && !fileIsOnDisk(it.first)) {
-                   downloadOsfls(it.second);
-                   addToDownloadedList(it);
-                   downloaded = true;
-               }
-           });
-       }
-    }
-    
     // PUBLIC FUNCTIONS
     void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>> &_triggerTimesWeb){
         const std::string oSpaceStartTime = "2000-01-01";
@@ -118,9 +85,88 @@ namespace openspace{
         std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end());
         
     }
+
+    // Download all files in the current window
+    // This function starts in the middle of the window and proceeds to download all future timesteps, 
+    // then steps backwards from the middle
+    //TODO(Axel): Different behaviour depending on direction the user is moving in.
+    void WebFieldlinesWorker::downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes) {
+
+        // Want to use std::find_if to break the for_each
+        int middle = triggerTimes.size() / 2;
+        bool downloaded = false;
+
+        // Forwards
+        std::vector<std::pair<double, std::string>>::iterator forwardIt = triggerTimes.begin();
+        std::advance(forwardIt, middle);
+        std::for_each(forwardIt, triggerTimes.end(), [this, &downloaded](auto it) {
+            if (!downloaded && !fileIsOnDisk(it.first)) {
+                downloadOsfls(it.second);
+                addToDownloadedList(it);
+                downloaded = true;
+                _doneUpdating = false;  // We now know that we have downloaded all the sets
+            }
+        });
+
+        // Backwards
+        if (!downloaded) {
+            std::for_each(triggerTimes.rbegin(), triggerTimes.rend(), [this, &downloaded](auto it) {
+                if (!downloaded && !fileIsOnDisk(it.first)) {
+                    downloadOsfls(it.second);
+                    addToDownloadedList(it);
+                    downloaded = true;
+                    _doneUpdating = false;  // We now know that we have downloaded all the sets
+                }
+            });
+        }
+
+        if (!downloaded && !_doneUpdating)
+            _readyToUpdateSourceFiles = true;
+    }
+
+    // Updates the list of available sourcefiles, owned by renderablefieldlinessequence.
+    void WebFieldlinesWorker::updateRFSSourceFiles(std::vector<std::string>& _sourceFiles) {
+        if (_readyToUpdateSourceFiles) {
+            std::vector<std::string> toInsert;
+            std::transform(_downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), std::back_inserter(toInsert), [this](auto const& pair) { return _syncDir + FileSys.PathSeparator + pair.second + ".osfls"; });
+            auto sourcePtr = _sourceFiles.begin();
+            std::for_each(toInsert.begin(), toInsert.end(), [&sourcePtr, &_sourceFiles](auto insertableElement) {
+
+                for (sourcePtr; sourcePtr != _sourceFiles.end(); sourcePtr++) {
+                    
+                    if (sourcePtr != (--_sourceFiles.end())) {
+                        if (insertableElement > *sourcePtr && insertableElement < *sourcePtr++) {
+                            _sourceFiles.insert(sourcePtr++,insertableElement);
+                            break;
+                        }
+                    }
+                    if (insertableElement < *sourcePtr) {
+                        sourcePtr = _sourceFiles.insert(sourcePtr, insertableElement);
+                        break;
+                    }
+                    if (insertableElement == *sourcePtr) {
+                        break;
+                    }    
+                }
+                if (sourcePtr == _sourceFiles.end()) {
+                    sourcePtr = _sourceFiles.insert(sourcePtr,insertableElement);
+                }
+            });
+
+            // Set flags to let anyone interested know that this has been done.
+            _readyToUpdateSourceFiles = false;
+            _doneUpdating = true;
+        }
+    }
+
+    bool WebFieldlinesWorker::windowIsComplete()
+    {
+        return _doneUpdating;
+    }
     
     std::string WebFieldlinesWorker::downloadOsfls(std::string downloadkey){
-        std::string url = _endpointSingleDownload + downloadkey + _fileEnding; // adjust this to match final endpoint
+        //std::string url = _endpointSingleDownload + downloadkey + _fileEnding; // adjust this to match final endpoint
+        std::string url = "http://localhost:3000/WSA/PfssIo2019-09-16T13-21-20.000.osfls/" + downloadkey; // temp thing, should be the latest one
         std::string destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + downloadkey + _fileEnding); // what the downloaded filename is to be
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
@@ -128,10 +174,10 @@ namespace openspace{
         ashd.start(opt);
         ashd.wait();
         if(ashd.hasSucceeded() == true ){
-            LERROR("succeeeded: " + destinationpath);
+            //LERROR("succeeeded: " + destinationpath);
         }
         if(ashd.hasFailed() == true ){
-            LERROR("failed: " + destinationpath);
+            //LERROR("failed: " + destinationpath);
         }
         return destinationpath;
     }
@@ -196,8 +242,9 @@ namespace openspace{
         s.replace(16, 1, "-");
     }
     
+    // Inserts the pair in sorted order
     void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pair){
-        _downloadedTriggerTimes.insert(_downloadedTriggerTimes.begin(),pair);
+        _downloadedTriggerTimes.insert(std::upper_bound(_downloadedTriggerTimes.begin(),_downloadedTriggerTimes.end(),pair),pair);
     }
 
     bool WebFieldlinesWorker::compareTimetriggersEqual(double first, double second){

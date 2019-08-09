@@ -77,6 +77,9 @@ public:
     double windowStart();
     double windowEnd();
 
+    // Check if the worker has downloaded a window and put all the files into _sourceFiles
+    bool workerWindowIsReady();
+
 private:
     
     // PRIVATE MEMBER VARIABLES

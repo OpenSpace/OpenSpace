@@ -40,7 +40,7 @@ asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
 
     -- Sun magnetogram texture testing
-    openspace.time.setTime("2019 MAY 2 7:59:57.000")
+    openspace.time.setTime("2019 MAY 2 09:59:57.000")
 
   
     openspace.setDefaultGuiSorting()
