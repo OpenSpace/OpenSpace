@@ -143,15 +143,13 @@ private:
     properties::FloatProperty _minimumAllowedDistance;
 
     properties::FloatProperty _velocitySensitivity;
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     properties::BoolProperty _flyTo;
     properties::BoolProperty _overview;
     //If 1st story selected, allow an additional camera update iteration before overview
     bool _cameraInitializedBeforeFirstStoryOverview = false;
     properties::TriggerProperty _applyOverview;
     properties::TriggerProperty _applyFlyTo;
-    properties::FloatProperty _storyOverviewLimit;
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
+    properties::FloatProperty _overviewLimit;
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;

@@ -1337,31 +1337,25 @@ void TouchInteraction::step(double dt) {
 
             WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
 
-#if OPENSPACE_BEHAVIOR_KIOSK
             float overviewLimit = module.storyHandler.overviewLimit();
             float zoomInLimit = module.storyHandler.zoomInLimit();
-#endif //#if OPENSPACE_BEHAVIOR_KIOSK
 
             //Apply the velocity to update camera position
             glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
             bool isZoomStepUnderDistToSurface = (length(_vel.zoom*dt) < distToSurface);
             bool willZoomStepViolatePlanetBoundaryRadius =
                 (length(centerToCamera + zoomDistanceIncrement) < planetBoundaryRadius);
-#if OPENSPACE_BEHAVIOR_KIOSK
             bool willNewPositionViolateOverviewLimit =
                 (length(centerToCamera + zoomDistanceIncrement) >= overviewLimit);
             bool willNewPositionViolateZoomInLimit =
                 (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
-#endif //#if OPENSPACE_BEHAVIOR_KIOSK
 
             if (isZoomStepUnderDistToSurface
                 && !willZoomStepViolatePlanetBoundaryRadius)
             {
-#if OPENSPACE_BEHAVIOR_KIOSK
                 if (willNewPositionViolateOverviewLimit)
                     camPos -= zoomDistanceIncrement;
                 else
-#endif //#if OPENSPACE_BEHAVIOR_KIOSK
                     camPos += zoomDistanceIncrement;
             }
             else {

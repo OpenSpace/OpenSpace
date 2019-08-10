@@ -31,7 +31,7 @@ namespace {
 
 namespace openspace::webgui {
     StoryHandler::StoryHandler() : properties::PropertyOwner({ "StoryHandler" })
-        , _overviewLimit(OverviewLimitInfo, 0.0)
+        , _overviewLimit(OverviewLimitInfo, std::numeric_limits<float>::max())
         , _zoomInLimit(ZoomInLimitInfo, 0.0)
         , _storyIdentifier(StoryIdentifierInfo, "story_default")
         , _focusNodesList(FocusNodesListInfo, std::string(""))

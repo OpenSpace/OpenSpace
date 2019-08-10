@@ -23,21 +23,12 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/orbitalnavigator.h>
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
- #include <openspace/engine/globals.h>
- #include <openspace/engine/moduleengine.h>
- #include <openspace/engine/openspaceengine.h>
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
- #include <modules/webgui/webguimodule.h>
- #include <modules/globebrowsing/globebrowsingmodule.h>
- #include <modules/globebrowsing/src/renderableglobe.h>
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
+
 
 namespace {
     constexpr const char* _loggerCat = "OrbitalNavigator";
@@ -152,7 +143,6 @@ namespace {
         "The higher the value the faster the camera will move towards the focus."
     };
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     constexpr openspace::properties::Property::PropertyInfo FlyToNodeInfo = {
         "FlyToNode",
         "Fly to focus node",
@@ -182,7 +172,6 @@ namespace {
         "Story overview distance limit",
         "Overview zoomed-out distance limit for the story."
     };
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     constexpr openspace::properties::Property::PropertyInfo
         StereoInterpolationTimeInfo = {
@@ -259,13 +248,11 @@ OrbitalNavigator::OrbitalNavigator()
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     , _flyTo(FlyToNodeInfo, false)
     , _overview(OverviewInfo, false)
     , _applyOverview(ApplyOverviewInfo)
     , _applyFlyTo(ApplyFlyToInfo)
-    , _storyOverviewLimit(StoryOverviewLimitInfo, 1e27, 0.0f, 1e27)
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
+    , _overviewLimit(StoryOverviewLimitInfo, 1e27, 0.0f, 1e27)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -328,12 +315,10 @@ OrbitalNavigator::OrbitalNavigator()
         return glm::clamp(res, 0.0, 1.0);
     });
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     addProperty(_applyOverview);
     addProperty(_applyFlyTo);
     _applyOverview.onChange([this]() { _overview = true; });
     _applyFlyTo.onChange([this]() { _flyTo = true; });
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
@@ -400,14 +385,12 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetAim);
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     addProperty(_velocitySensitivity);
     addProperty(_flyTo);
     addProperty(_overview);
     addProperty(_applyOverview);
     addProperty(_applyFlyTo);
-    addProperty(_storyOverviewLimit);
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
+    addProperty(_overviewLimit);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -468,68 +451,66 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
     };
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
-    // Calculate a position handle based on the camera position in world space
-    posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
-    //_previousAnchorNodePosition = anchorPos;
-    length(anchorDisplacement);
-    glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
-    // Distance from the camera to the focus node
-    double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos);
+    if (_flyTo || _overview) {
+        // Calculate a position handle based on the camera position in world space
+        posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
+        glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
+        double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos);
+        double limitOfFlightPath;
+        bool performIncrementalFlightStep = false;
 
-    // Get the radius of a focusNode, to be used in the case of zooming                           
-    glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
-        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-    glm::dvec3 centerToActualSurface = glm::dmat3(_anchorNode->modelTransform())
-        * centerToActualSurfaceModelSpace;
-    double planetRadius = length(centerToActualSurface);
+        // Zoom in on the focusNode and move towards it, but when the camera arrives to
+        // the focus node make it possible for the user to manually zoom in even closer
+        // or to zoom further out
+        if (_flyTo) {
+            _overview = false;
+            // Get the radius of a focusNode, to be used in the case of zooming
+            glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
+                posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+            glm::dvec3 centerToActualSurface = glm::dmat3(_anchorNode->modelTransform())
+                * centerToActualSurfaceModelSpace;
+            double planetRadius = glm::length(centerToActualSurface);
+            // The distance from the focus node's center to the camera when zoomed in,
+            // i.e. the distance limit when focus is set optimally
+            limitOfFlightPath = planetRadius * 4;
 
-    // The distance from the focus node's center to the camera when zoomed in,
-    // i.e. the distance limit when focus is set optimally
-    double focusLimit = planetRadius * 4;
+            if (distFromCameraToFocus > limitOfFlightPath) {
+                performIncrementalFlightStep = true;
+            }
+            else {
+                _flyTo = false;
+            }
+        }
+        // Zoom away from the focus node until the entire scene overview is in the camera view
+        if (_overview) {
+            _flyTo = false;
+            limitOfFlightPath = _overviewLimit;
 
-    // Zoom in on the focusNode and move towards it, but when the camera arrives to
-    // the focus node make it possible for the user to manually zoom in even closer
-    // or to zoom further out 
-    if (_flyTo) {
-        if (distFromCameraToFocus > focusLimit) {
+            if (_cameraInitializedBeforeFirstStoryOverview) {
+                if (distFromCameraToFocus <= limitOfFlightPath) {
+                    camPosToAnchorPosDiff *= -1.0;
+                    performIncrementalFlightStep = true;
+                }
+                else {
+                    _overview = false;
+                }
+            }
+            else {
+                _cameraInitializedBeforeFirstStoryOverview = true;
+            }
+        }
+
+        if (performIncrementalFlightStep) {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
                 camPosToAnchorPosDiff,
-                focusLimit,
+                limitOfFlightPath,
                 _flyTo
             );
         }
-        else {
-            _flyTo = false;
-        }
     }
-
-    // Zoom away from the focus node until the entire scene overview is in the camera view
-    if (_overview) {
-        _flyTo = false;
-
-        if (_cameraInitializedBeforeFirstStoryOverview) {
-            if (distFromCameraToFocus <= _storyOverviewLimit) {
-                pose.position = moveCameraAlongVector(
-                    pose.position,
-                    distFromCameraToFocus,
-                    -camPosToAnchorPosDiff,
-                    _storyOverviewLimit,
-                    _flyTo
-                );
-            }
-            else {
-                _overview = false;
-            }
-        }
-        else {
-            _cameraInitializedBeforeFirstStoryOverview = true;
-        }
-    }
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     const bool hasPreviousPositions =
         _previousAnchorNodePosition.has_value() &&

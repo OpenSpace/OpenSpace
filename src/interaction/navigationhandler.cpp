@@ -24,9 +24,6 @@
 
 #include <openspace/interaction/navigationhandler.h>
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
- #include <openspace/query/query.h>
-#endif
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
@@ -55,7 +52,6 @@ namespace {
     constexpr const char* KeyReferenceFrame = "ReferenceFrame";
     const double Epsilon = 1E-7;
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     constexpr const openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Origin",
@@ -63,7 +59,6 @@ namespace {
         "The camera is always focussed on this object and every interaction is relative "
         "towards this object. Any scene graph node can be the origin node."
     };
-#endif
 
     constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
@@ -162,7 +157,6 @@ openspace::interaction::NavigationHandler::NavigationState::NavigationState(
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _useKeyFrameInteraction(KeyFrameInfo, false)
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     , _origin(OriginInfo)
 {
     _origin.onChange([this]() {
@@ -180,9 +174,6 @@ NavigationHandler::NavigationHandler()
         setFocusNode(node);
         resetCameraDirection();
     });
-#else
-{
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     // Add the properties
     addProperty(_useKeyFrameInteraction);
@@ -206,7 +197,6 @@ void NavigationHandler::deinitialize() {
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
     _orbitalNavigator.setFocusNode(node);
     _camera->setPositionVec3(anchorNode()->worldPosition());
@@ -215,7 +205,6 @@ void NavigationHandler::setFocusNode(SceneGraphNode* node) {
 void NavigationHandler::resetCameraDirection() {
     _orbitalNavigator.startRetargetAnchor();
 }
-#endif
 
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;

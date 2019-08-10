@@ -81,10 +81,8 @@ public:
 
     // Mutators
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     void setFocusNode(SceneGraphNode* node);
     void resetCameraDirection();
-#endif
 
     void setNavigationStateNextFame(NavigationState state);
     void setCamera(Camera* camera);
@@ -162,9 +160,7 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
     properties::StringProperty _origin;
-#endif
 
     OrbitalNavigator _orbitalNavigator;
     KeyframeNavigator _keyframeNavigator;
