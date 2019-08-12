@@ -104,10 +104,11 @@ namespace openspace{
         // Hold your horses, we don't want to do anything while deltatime is too high
         if (abs(deltaTime) < speedThreshhold){
             
+
             // First it checks the time against the "bigger window" aka the long list of
             // timesteps we know are available online. If it's outside that we're gonna need a new one
-            if (_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime)) {
-                
+            if (_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime) && !_webFieldlinesWindow.expectedWindowIsOutOfBounds(openspaceTime)) {
+
                 // Check if in window
                 if (_webFieldlinesWindow.timeIsInWindow(openspaceTime)) {
 
@@ -115,6 +116,7 @@ namespace openspace{
                     if (_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, deltaTime)) {
                         // get new window
                         _webFieldlinesWindow.newWindow(openspaceTime);
+                        hasUpdated = false;
                     }
                     else {
                         
@@ -124,9 +126,9 @@ namespace openspace{
                     }
                 }
                 else {
-                    
                     // get new window
                     _webFieldlinesWindow.newWindow(openspaceTime);
+                    hasUpdated = false;
                 }
             }
             else {

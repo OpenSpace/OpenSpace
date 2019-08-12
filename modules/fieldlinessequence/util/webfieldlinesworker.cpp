@@ -63,6 +63,8 @@ namespace openspace{
         auto time = global::timeManager.time().ISO8601();
         
         std::string url = "http://localhost:3000/WSA/times/2019-05-02T12:00:00:00/50";
+        // This is done quite early in the startup, requesting based on Open Space start time, will result
+        // In fetching filed lines that doesnt exist, and is too far away back in time.
         if (time.substr(0, 10) != oSpaceStartTime);
             url = "http://localhost:3000/WSA/times/" + time + "50";
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
@@ -77,13 +79,13 @@ namespace openspace{
                            return c;
                        });
 
-        //_triggerTimesWeb.clear(); // we don't want to save too much in memory at the same time
+        _triggerTimesWeb.clear(); // we don't want to save too much in memory at the same time
 
         parseTriggerTimesList(s, _triggerTimesWeb);
         
         // sort ascending by trigger time
         std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end());
-        
+
     }
 
     // Download all files in the current window
@@ -104,7 +106,7 @@ namespace openspace{
                 downloadOsfls(it.second);
                 addToDownloadedList(it);
                 downloaded = true;
-                _doneUpdating = false;  // We now know that we have downloaded all the sets
+                _doneUpdating = false;
             }
         });
 
@@ -115,12 +117,13 @@ namespace openspace{
                     downloadOsfls(it.second);
                     addToDownloadedList(it);
                     downloaded = true;
-                    _doneUpdating = false;  // We now know that we have downloaded all the sets
+                    _doneUpdating = false;  
                 }
             });
         }
 
         if (!downloaded && !_doneUpdating)
+            // If reach this point, we now know that we have downloaded all the sets
             _readyToUpdateSourceFiles = true;
     }
 

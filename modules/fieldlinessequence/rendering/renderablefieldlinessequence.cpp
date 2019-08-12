@@ -1192,11 +1192,12 @@ namespace openspace {
         const double currentTime = data.time.j2000Seconds();
 
         if (_webFieldlines) {
+
             if (!_webFieldlinesManager.hasUpdated && _webFieldlinesManager.checkIfWindowIsReadyToLoad()) {
+                LERROR("Getting ready to inject stuff in to RFS");
                 _startTimes.clear();
                 extractTriggerTimesFromFileNames();
-                _webFieldlinesManager.hasUpdated = true;
-
+                
                 // _startTimes are not sorted right now, have to do something about that ->
                 std::sort(_startTimes.begin(), _startTimes.end());
                 _nStates = _startTimes.size();
@@ -1209,7 +1210,9 @@ namespace openspace {
                 for (int i = 0; i < _startTimes.size(); ++i) {
                     LERROR(std::to_string(_startTimes[i]));
                 } */
+                updateActiveTriggerTimeIndex(currentTime);
 
+                _webFieldlinesManager.hasUpdated = true;
             }
             _webFieldlinesManager.update(); // we could also send time as a variable as we already have it
         }
@@ -1219,8 +1222,8 @@ namespace openspace {
 
         // Check if current time in OpenSpace is within sequence interval
         if (isInInterval) {
-
             const size_t nextIdx = _activeTriggerTimeIndex + 1;
+
             if (
                 // true => Previous frame was not within the sequence interval
                 _activeTriggerTimeIndex < 0 ||

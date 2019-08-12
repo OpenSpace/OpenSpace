@@ -146,6 +146,24 @@ namespace openspace{
         _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
         _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
     }
+
+
+    bool WebFieldlinesWindow::workerWindowIsReady()
+    {
+        return _worker.windowIsComplete();
+    }
+
+    bool WebFieldlinesWindow::expectedWindowIsOutOfBounds(double time) {
+        auto resultForwards = std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rbegin() + _window.forwardWidth, [time](auto tuple) {
+            return time > std::get<0>(tuple);
+        });
+
+        auto resultBackwards = std::find_if(_triggerTimesWeb.begin(), _triggerTimesWeb.begin() + _window.backWidth, [time](auto tuple) {
+            return time < std::get<0>(tuple);
+        });
+
+        return resultForwards != _triggerTimesWeb.rbegin() + _window.forwardWidth || resultBackwards != _triggerTimesWeb.begin() + _window.backWidth;
+    }
     
     // -------------------------- PRIVATE FUNCTIONS  -----------------------------------//
     // Returns first trigger of window
@@ -157,10 +175,7 @@ namespace openspace{
         return _window.triggerTimes.back().first;
     }
 
-    bool WebFieldlinesWindow::workerWindowIsReady()
-    {
-        return _worker.windowIsComplete();
-    }
+
     
     
     

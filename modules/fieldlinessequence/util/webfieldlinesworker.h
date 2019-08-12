@@ -93,7 +93,12 @@ private:
     
     bool fileIsOnDisk(double triggerTime);
     
-    // HELPER FUNCTIONS
+
+    /********************************************
+    |               Helper Functions            |
+    |                                           |
+    ********************************************/
+
     // Parse the data list from http request
     void parseTriggerTimesList(std::string s, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb);
     
@@ -104,6 +109,7 @@ private:
     // Add a downloaded file to the list of downloaded files
     void addToDownloadedList(std::pair<double, std::string> pair);
     
+    // Compares two trigger times, since they are doubles, that may be weird otherwise.
     static bool compareTimetriggersEqual(double first, double second);
 
 };

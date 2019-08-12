@@ -80,6 +80,9 @@ public:
     // Check if the worker has downloaded a window and put all the files into _sourceFiles
     bool workerWindowIsReady();
 
+    // Check if the future potential window, is going to be out of bounds of the current timetriggerweb-list
+    bool expectedWindowIsOutOfBounds(double time);
+
 private:
     
     // PRIVATE MEMBER VARIABLES
@@ -113,10 +116,6 @@ private:
     
     // PRIVATE MEMBER FUNCTIONS
     
-    
-
-    
-
 };
 
 } // namespace openspace
