@@ -41,7 +41,7 @@ class RenderableVolume;
 class Camera;
 class Scene;
 
-class Renderer {    
+class Renderer {
 public:
     virtual ~Renderer() = default;
 

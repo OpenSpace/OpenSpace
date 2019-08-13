@@ -406,15 +406,14 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         }
         
         if (atmosphereDictionary.hasKey(SunIntensityInfo.identifier)) {
-            _sunRadianceIntensity = atmosphereDictionary.value<float>(
-                                                               SunIntensityInfo.identifier
-                                                              );
+            _sunRadianceIntensity =
+                atmosphereDictionary.value<float>(SunIntensityInfo.identifier);
         }
         
         if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier)) {
             _mieScattExtPropCoefProp = atmosphereDictionary.value<float>(
                 MieScatteringExtinctionPropCoeffInfo.identifier
-                );
+            );
         }
 
         if (!atmosphereDictionary.getValue(
