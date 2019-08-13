@@ -1134,8 +1134,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performDeferredTasks(tasks.deferredcasterTasks);
     }
     
-    glDrawBuffers(3, ColorAttachment012Array);
+    glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
+
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
     scene->render(data, tasks);
 

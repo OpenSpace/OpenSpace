@@ -34,9 +34,9 @@
 #define COSTA 8
 #define PHOTOGRAPHIC_REINHARD 9
 
-const float HCV_EPSILON = 1e-10;
-const float HSL_EPSILON = 1e-10;
-const float HCY_EPSILON = 1e-10;
+const float HCV_EPSILON = 1e-7;
+const float HSL_EPSILON = 1e-7;
+const float HCY_EPSILON = 1e-7;
 
 // White given by D65
 const mat3 RGB2XYZ = mat3(
