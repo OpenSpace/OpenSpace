@@ -1,0 +1,89 @@
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local assetHelper = asset.require('util/asset_helper')
+
+local satImageFolder = asset.syncedResource({
+    Name = "Satellite Image Files",
+    Type = "HttpSynchronization",
+    Identifier = "tle_satellites_images",
+    Version = 1
+})
+
+function downloadTLEFile(sceneAsset, url, name)
+    local identifier = name
+    identifier = identifier:gsub(" ", "")
+    identifier = identifier:gsub("&", "")
+    identifier = identifier:gsub("-", "")
+    return sceneAsset.syncedResource({
+        Name = "Satellite TLE Data (" .. name .. ")",
+        Type = "UrlSynchronization",
+        Identifier = "satellite_tle_data_" .. identifier,
+        Url = url
+    })
+end
+
+local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder, shouldAddDuplicates)
+     local filename = group.Url:match("([^/]+)$")
+     local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
+
+     local path = tleFolder .. "/" .. filename
+
+    function numLinesInFile(filename)
+        local ctr = 0
+        for _ in io.lines(filename) do ctr = ctr + 1 end
+        return ctr
+    end
+
+    -- Check format of a set of 3 TLE file lines and return nonzero if there is a format error
+    function isValidTLEFileFormat(lineArr)
+        function isEmpty(s) return s == nil or s == '' end
+
+        if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
+            return false
+        end
+        if string.sub(lineArr[2], 1, 2) ~= "1 " then
+            return false
+        end
+        if string.sub(lineArr[3], 1, 2) ~= "2 " then
+            return false
+        end
+        return true
+    end
+
+    function debris(title, file, color)
+        return {
+           Identifier = title,
+           Parent = transforms.EarthInertial.Identifier,
+           Renderable = {
+                Type = "RenderableSatellites",
+                Path = file,
+
+                -- The initialization with "-" is just a placeholder.
+                -- (needed to be initialized)
+                Segments = 160,
+                --EccentricityColumn = "-",
+                --SemiMajorAxisColumn = "-",
+                --SemiMajorAxisUnit = 1,
+                --InclinationColumn = "-",
+                --AscendingNodeColumn = "-",
+                --ArgumentOfPeriapsisColumn = "-",
+                --MeanAnomalyAtEpochColumn = "-",
+                --EpochColumn = "-",
+                Color = color,
+                Fade = 0.5
+                
+            },
+            GUI = {
+                Path = "/Solar System/Planets/Earth/Satellites"
+           }
+        }
+    end
+
+    local Debris = debris(filenameSansExt, path, group.TrailColor)
+    assetHelper.registerSceneGraphNodesAndExport(containingAsset, { Debris })
+end
+
+asset.export("downloadTLEFile", downloadTLEFile)
+asset.export("registerSatelliteGroupObjects", registerSatelliteGroupObjects)
+
+
+

@@ -28,8 +28,10 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/util/time.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <openspace/util/time.h>
 
 namespace openspace {
 
@@ -47,6 +49,27 @@ public:
         std::string offender;
     };
 
+    struct KeplerOrbit {
+        /// The period of the orbit in seconds
+        double period() const;
+        /// The eccentricity of the orbit in [0, 1)
+        double eccentricity;
+        /// The semi-major axis in km
+        double semiMajorAxis;
+        /// The inclination of the orbit in [0, 360]
+        double inclination;
+        /// The right ascension of the ascending node in [0, 360]
+        double ascendingNode;
+        /// The argument of periapsis in [0, 360]
+        double argumentOfPeriapsis;
+        /// The mean anomaly at the epoch in [0, 360]
+        double meanAnomalyAtEpoch;
+        /// The epoch in seconds relative to the J2000 epoch
+        double epoch;
+        /// The mass of the more massive body
+        double massiveBodyMass = 1.989E30; // Sun's mass in kg
+    };
+    
     /**
      * The constructor that retrieves the required Keplerian elements from the passed
      * \p dictionary. These values are then apssed to the setKeplerElements method for
@@ -68,6 +91,10 @@ public:
     */
     glm::dvec3 position(const UpdateData& data) const override;
 
+    // Is only used in renderableDebris so far. May rename if needed
+    glm::dvec3 debrisPos(const double& time) const;
+
+
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
      * that can be passed to the constructor.
@@ -76,11 +103,7 @@ public:
      *         be passed to the constructor
      */
     static documentation::Documentation Documentation();
-
-protected:
-    /// Default construct that initializes all the properties and member variables
-    KeplerTranslation();
-
+    
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
      * the form YYYY MM DD HH:mm:ss.
@@ -122,10 +145,18 @@ protected:
     void setKeplerElements(double eccentricity, double semiMajorAxis, double inclination,
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
+    
+    /// Default construct that initializes all the properties and member variables
+    KeplerTranslation();
 
-private:
     /// Recombutes the rotation matrix used in the update method
     void computeOrbitPlane() const;
+
+protected:
+
+
+private:
+   
 
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the

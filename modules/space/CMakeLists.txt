@@ -28,8 +28,10 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generatedebrisvolumetask.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.h
@@ -42,8 +44,10 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generatedebrisvolumetask.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.cpp

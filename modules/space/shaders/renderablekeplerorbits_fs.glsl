@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,40 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
-#define __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include <cstdint>
+uniform vec3 color;
+uniform float opacity = 1.0;
+uniform bool useLineFade;
+uniform float lineFade;
 
-namespace openspace::performance {
+in vec4 viewSpacePosition;
 
-struct PerformanceLayout {
-    constexpr static const int8_t Version = 0;
-    constexpr static const int LengthName = 256;
-    constexpr static const int NumberValues = 256;
-    constexpr static const int MaxValues = 2048;
+Fragment getFragment() {
+    Fragment frag;
+    frag.color = vec4(color, opacity);
+    frag.depth = safeLength(viewSpacePosition);
+    frag.blend = BLEND_MODE_ADDITIVE;
+    frag.gPosition = viewSpacePosition;
 
-    PerformanceLayout();
+    // There is no normal here
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
-    struct SceneGraphPerformanceLayout {
-        char name[LengthName];
-        float renderTime[NumberValues];
-        float updateRenderable[NumberValues];
-        float updateTranslation[NumberValues];
-        float updateRotation[NumberValues];
-        float updateScaling[NumberValues];
-    };
-    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues] = {};
-    int16_t nScaleGraphEntries = 0;
+    return frag;
+    
+}
 
-    struct FunctionPerformanceLayout {
-        char name[LengthName];
-        float time[NumberValues];
-    };
-    FunctionPerformanceLayout functionEntries[MaxValues] = {};
-    int16_t nFunctionEntries = 0;
-};
-
-} // namespace openspace::performance
-
-#endif // __OPENSPACE_CORE___PERFORMANCELAYOUT___H__

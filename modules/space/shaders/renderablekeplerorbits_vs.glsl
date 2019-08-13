@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,40 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
-#define __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+#version __CONTEXT__
 
-#include <cstdint>
+layout(location = 0) in vec4 vertexData;
 
-namespace openspace::performance {
+uniform dmat4 modelViewTransform;
+uniform mat4 projectionTransform;
+// uniform bool useLineFade;
+// uniform float lineFade;
+// uniform int vertexSortingMethod;
+uniform int pointSize;
 
-struct PerformanceLayout {
-    constexpr static const int8_t Version = 0;
-    constexpr static const int LengthName = 256;
-    constexpr static const int NumberValues = 256;
-    constexpr static const int MaxValues = 2048;
+out vec4 viewSpacePosition;
 
-    PerformanceLayout();
+void main() {
+    
+    dvec4 position = dvec4(vertexData.xyz, 1.0);
+    float timeOffset = vertexData.w;
 
-    struct SceneGraphPerformanceLayout {
-        char name[LengthName];
-        float renderTime[NumberValues];
-        float updateRenderable[NumberValues];
-        float updateTranslation[NumberValues];
-        float updateRotation[NumberValues];
-        float updateScaling[NumberValues];
-    };
-    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues] = {};
-    int16_t nScaleGraphEntries = 0;
-
-    struct FunctionPerformanceLayout {
-        char name[LengthName];
-        float time[NumberValues];
-    };
-    FunctionPerformanceLayout functionEntries[MaxValues] = {};
-    int16_t nFunctionEntries = 0;
-};
-
-} // namespace openspace::performance
-
-#endif // __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+    viewSpacePosition = vec4(modelViewTransform * position);
+    gl_Position = projectionTransform * viewSpacePosition;
+}

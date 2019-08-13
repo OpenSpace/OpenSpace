@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,40 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
-#define __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+#include "fragment.glsl"
+//#include "floatoperations.glsl"
 
-#include <cstdint>
+uniform vec3 color;
+uniform float opacity = 1.0;
 
-namespace openspace::performance {
+uniform float lineFade;
+// uniform int numberOfSegments;
 
-struct PerformanceLayout {
-    constexpr static const int8_t Version = 0;
-    constexpr static const int LengthName = 256;
-    constexpr static const int NumberValues = 256;
-    constexpr static const int MaxValues = 2048;
 
-    PerformanceLayout();
+in vec4 viewSpacePosition;
+in float vs_position_w;
 
-    struct SceneGraphPerformanceLayout {
-        char name[LengthName];
-        float renderTime[NumberValues];
-        float updateRenderable[NumberValues];
-        float updateTranslation[NumberValues];
-        float updateRotation[NumberValues];
-        float updateScaling[NumberValues];
-    };
-    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues] = {};
-    int16_t nScaleGraphEntries = 0;
+in float periodFraction_f;
+in float offsetPeriods;
+in float vertexID_f;
 
-    struct FunctionPerformanceLayout {
-        char name[LengthName];
-        float time[NumberValues];
-    };
-    FunctionPerformanceLayout functionEntries[MaxValues] = {};
-    int16_t nFunctionEntries = 0;
-};
+// debuggers :
+// in float offset;
+// in float epoch;
+// in float period;
+// in flat double tajm;
+Fragment getFragment() {
+    // float offsetPeriods = offset / period;
+    // This is now done in the fragment shader instead
+    // to make smooth movement between vertecies.
+    // We want vertexDistance to be double up to this point, I think. 
+    // (hence the unnessesary float to float conversion)
+    float vertexDistance = periodFraction_f - offsetPeriods;
+    float vertexDistance_f = float(vertexDistance);
+    
+    // This is the alternative way of calculating 
+    // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
+    // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
+    // float nrOfSegments_f = float(numberOfSegments);
+    // float vertexDistance = periodFraction_f - (vertexID_perOrbit/nrOfSegments_f); 
 
-} // namespace openspace::performance
+    if (vertexDistance_f < 0.0) {
+        vertexDistance_f += 1.0;
+    }
 
-#endif // __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+    float invert = 1.0 - vertexDistance_f;
+    float fade = clamp(invert * lineFade, 0.0, 1.0);
+
+    Fragment frag;
+    frag.color = vec4(color, fade * opacity);
+    frag.depth = vs_position_w;
+    frag.gPosition = viewSpacePosition;
+    frag.gNormal = vec4(1, 1, 1, 0);
+    // frag.blend = BLEND_MODE_ADDITIVE;
+
+
+    // to debug using colors use this if-statment.
+    // float ep = 0.01;
+    // if( fract(vertexID_f) < ep ){ //periodFraction < ep
+    //      frag.color = vec4(1, 0, 0, 1);
+    // }
+
+    return frag;
+}
+
+
+
+

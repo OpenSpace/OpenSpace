@@ -110,9 +110,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 
     local file = io.open(path, "r")
     assert(file, "File not found: " .. path)
-
     local obj = {}
-
     --now loop through the tle file and get each set of 3 lines
     for n = 1, numLinesInFile(path), 3 do
         local line = {

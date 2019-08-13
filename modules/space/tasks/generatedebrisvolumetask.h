@@ -21,41 +21,60 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#ifndef __OPENSPACE_MODULE_SPACE___GENERATERDEBRISVOLUMETASK___H__
+#define __OPENSPACE_MODULE_SPACE___GENERATERDEBRISVOLUMETASK___H__
 
-#ifndef __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
-#define __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+#include <openspace/util/task.h>
+#include <openspace/util/time.h>
 
-#include <cstdint>
+#include <modules/space/rendering/renderablesatellites.h>
+#include <modules/space/translation/keplertranslation.h>
 
-namespace openspace::performance {
 
-struct PerformanceLayout {
-    constexpr static const int8_t Version = 0;
-    constexpr static const int LengthName = 256;
-    constexpr static const int NumberValues = 256;
-    constexpr static const int MaxValues = 2048;
+#include <ghoul/glm.h>
 
-    PerformanceLayout();
+#include <string>
+#include <vector>
 
-    struct SceneGraphPerformanceLayout {
-        char name[LengthName];
-        float renderTime[NumberValues];
-        float updateRenderable[NumberValues];
-        float updateTranslation[NumberValues];
-        float updateRotation[NumberValues];
-        float updateScaling[NumberValues];
-    };
-    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues] = {};
-    int16_t nScaleGraphEntries = 0;
+namespace openspace {
+namespace volume {
 
-    struct FunctionPerformanceLayout {
-        char name[LengthName];
-        float time[NumberValues];
-    };
-    FunctionPerformanceLayout functionEntries[MaxValues] = {};
-    int16_t nFunctionEntries = 0;
+
+class GenerateDebrisVolumeTask : public Task {
+public:
+    GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+
+    std::string _gridType;
+
+protected:
+
+private:
+    std::string _rawVolumeOutputPath;
+    std::string _dictionaryOutputPath;
+    std::string _startTime;
+    std::string _timeStep;
+    std::string _endTime;
+    std::string _inputPath;
+    
+    glm::uvec3 _dimensions;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+
+    std::vector<KeplerParameters> _TLEDataVector;
+
+    float _maxApogee;
+
+    // not sure if it should be local function or hidden function.
+    //std::vector<KeplerParameters> readTLEFile(const std::string& filename);
+
 };
 
-} // namespace openspace::performance
 
-#endif // __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+
+} // namespace volume
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___GENERATEDEBRISVOLUMETASK___H__
