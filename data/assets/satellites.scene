@@ -4,9 +4,7 @@ asset.request('scene/solarsystem/planets/earth/satellites/satellites_all')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
-    --local now = "2019-06-26T00:00:00" 
-    
-    -- Jump back one day to show a complete planet
+    -- Jump back one day to be able to show complete weather data on Earth.
     openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
 
     openspace.addVirtualProperty(
@@ -19,9 +17,12 @@ asset.onInitialize(function ()
         nil
     )
 
-    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+    openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
+
+    openspace.markInterestingNodes({ "Earth", "Sun" })
 end)
 
 asset.onDeinitialize(function ()
+    openspace.removeInterestingNodes({ "Earth", "Sun" })
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 end)
