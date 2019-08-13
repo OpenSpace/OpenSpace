@@ -1,7 +1,6 @@
 asset.require('./base')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-asset.request('scene/solarsystem/planets/earth/satellites/satellites_debris')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()

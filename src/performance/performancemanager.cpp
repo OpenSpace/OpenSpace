@@ -174,7 +174,6 @@ void PerformanceManager::setEnabled(bool enabled) {
     else {
         if (loggingEnabled()) {
             outputLogs();
-            debrisLog();
         }
 
         if (_performanceMemory) {
@@ -211,7 +210,6 @@ void PerformanceManager::outputLogs() {
     // Log Layout values
     PerformanceLayout* layout = performanceData();
     const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _currentTick;
-
 
     // Log function performance
     for (int16_t n = 0; n < layout->nFunctionEntries; n++) {
@@ -395,7 +393,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 
         memset(layout->sceneGraphEntries[i].name, 0, PerformanceLayout::LengthName);
 #ifdef _MSC_VER
-strcpy_s(
+        strcpy_s(
             layout->sceneGraphEntries[i].name,
             node.identifier().length() + 1,
             node.identifier().c_str()

@@ -49,27 +49,6 @@ public:
         std::string offender;
     };
 
-    struct KeplerOrbit {
-        /// The period of the orbit in seconds
-        double period() const;
-        /// The eccentricity of the orbit in [0, 1)
-        double eccentricity;
-        /// The semi-major axis in km
-        double semiMajorAxis;
-        /// The inclination of the orbit in [0, 360]
-        double inclination;
-        /// The right ascension of the ascending node in [0, 360]
-        double ascendingNode;
-        /// The argument of periapsis in [0, 360]
-        double argumentOfPeriapsis;
-        /// The mean anomaly at the epoch in [0, 360]
-        double meanAnomalyAtEpoch;
-        /// The epoch in seconds relative to the J2000 epoch
-        double epoch;
-        /// The mass of the more massive body
-        double massiveBodyMass = 1.989E30; // Sun's mass in kg
-    };
-    
     /**
      * The constructor that retrieves the required Keplerian elements from the passed
      * \p dictionary. These values are then apssed to the setKeplerElements method for
@@ -91,7 +70,7 @@ public:
     */
     glm::dvec3 position(const UpdateData& data) const override;
 
-    // Is only used in renderableDebris so far. May rename if needed
+    // Is only used in renderableDebris / satellites.
     glm::dvec3 debrisPos(const double& time) const;
 
 

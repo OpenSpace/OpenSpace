@@ -303,7 +303,7 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     };
     return _orbitPlaneRotation * p;
 }
-// !!! is only used in module/space/rendering/renderablesatellites 
+
 glm::dvec3 KeplerTranslation::debrisPos(const double& time) const {
     if (_orbitPlaneDirty) {
         computeOrbitPlane();

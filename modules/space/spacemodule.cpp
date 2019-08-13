@@ -22,21 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
-
 #include <modules/space/spacemodule.h>
 
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderablerings.h>
+#include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/simplespheregeometry.h>
+//#include <modules/space/tasks/generatedebrisvolumetask.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/tletranslation.h>
 #include <modules/space/translation/horizonstranslation.h>
-#include <modules/space/tasks/generatedebrisvolumetask.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
@@ -83,9 +81,8 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     );
 
     fRenderable->registerClass<RenderableRings>("RenderableRings");
-    fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
-
+    fRenderable->registerClass<RenderableStars>("RenderableStars");
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
@@ -95,9 +92,9 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     fTranslation->registerClass<TLETranslation>("TLETranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
-    auto fTasks = FactoryManager::ref().factory<Task>();
+    /*auto fTasks = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTasks, "No task factory existed");
-    fTasks->registerClass<volume::GenerateDebrisVolumeTask>("GenerateDebrisVolumeTask");
+    fTasks->registerClass<volume::GenerateDebrisVolumeTask>("GenerateDebrisVolumeTask");*/
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
@@ -117,8 +114,8 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
         RenderableConstellationBounds::Documentation(),
         RenderableRings::Documentation(),
-        RenderableStars::Documentation(),
         RenderableSatellites::Documentation(),
+        RenderableStars::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
         KeplerTranslation::Documentation(),
@@ -130,5 +127,3 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
 }
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__

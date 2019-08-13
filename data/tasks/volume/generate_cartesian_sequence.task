@@ -18,7 +18,7 @@ for i=1,length do
 	    LowerDomainBound = {-0.5, -0.5, -0.5},
 	    UpperDomainBound = {0.5, 0.5, 0.5},
 	    ValueFunction = fn,
-	    Time = "2018-05-04T00:00:01" .. step,
+	    Time = "2018-05-04T00:00:" .. step,
 	    RawVolumeOutput = "${DATA}/assets/examples/volume/generated/cartesiansequence/" .. step .. ".rawvolume",
 	    DictionaryOutput = "${DATA}/assets/examples/volume/generated/cartesiansequence/" .. step .. ".dictionary"
 	}

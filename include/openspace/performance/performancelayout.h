@@ -33,7 +33,7 @@ struct PerformanceLayout {
     constexpr static const int8_t Version = 0;
     constexpr static const int LengthName = 256;
     constexpr static const int NumberValues = 256;
-    constexpr static const int MaxValues = 2048;
+    constexpr static const int MaxValues = 1024;
 
     PerformanceLayout();
 

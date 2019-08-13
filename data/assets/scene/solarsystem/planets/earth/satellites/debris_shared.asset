@@ -56,21 +56,9 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
            Renderable = {
                 Type = "RenderableSatellites",
                 Path = file,
-
-                -- The initialization with "-" is just a placeholder.
-                -- (needed to be initialized)
                 Segments = 160,
-                --EccentricityColumn = "-",
-                --SemiMajorAxisColumn = "-",
-                --SemiMajorAxisUnit = 1,
-                --InclinationColumn = "-",
-                --AscendingNodeColumn = "-",
-                --ArgumentOfPeriapsisColumn = "-",
-                --MeanAnomalyAtEpochColumn = "-",
-                --EpochColumn = "-",
                 Color = color,
-                Fade = 0.5
-                
+                Fade = 0.5                
             },
             GUI = {
                 Path = "/Solar System/Planets/Earth/Satellites"
@@ -84,6 +72,3 @@ end
 
 asset.export("downloadTLEFile", downloadTLEFile)
 asset.export("registerSatelliteGroupObjects", registerSatelliteGroupObjects)
-
-
-

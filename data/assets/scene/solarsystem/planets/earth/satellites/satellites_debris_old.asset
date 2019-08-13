@@ -1,5 +1,0 @@
-asset.request('./debris/debris_breezem_old')
-asset.request('./debris/debris_asat_old')
-asset.request('./debris/debris_fengyum_old')
-asset.request('./debris/debris_iridium33_old')
-asset.request('./debris/debris_kosmos2251_old')

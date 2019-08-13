@@ -1,7 +1,7 @@
 local fn =
 	"return function (x, y, z) " ..
     "    if math.sqrt(x^2 + y^2 + z^2) < 0.4 then " ..
-    "        return 1.0 " ..
+    "        return 0.8 " ..
     "    end " ..
     "    return 0.0 " ..
     "end"
