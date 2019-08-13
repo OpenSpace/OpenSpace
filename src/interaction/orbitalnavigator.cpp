@@ -366,6 +366,7 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
 void OrbitalNavigator::resetVelocities() {
     _mouseStates.resetVelocities();
     _joystickStates.resetVelocities();
+    _websocketStates.resetVelocities();
     _scriptStates.resetVelocities();
 }
 
@@ -587,10 +588,17 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
     }
+    if (_anchorNode != anchorNode) {
+        resetVelocities();
+    }
 
     _anchorNode = anchorNode;
 
     if (_anchorNode) {
+        _previousAnchorNodePosition = _anchorNode->worldPosition();
+        _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
+    }
+    else {
         _previousAnchorNodePosition.reset();
         _previousAnchorNodeRotation.reset();
     }

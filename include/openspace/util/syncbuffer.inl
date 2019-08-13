@@ -30,7 +30,11 @@ namespace openspace {
 template <typename T>
 void SyncBuffer::encode(const T& v) {
     const size_t size = sizeof(T);
-    ghoul_assert(_encodeOffset + size < _n, "");
+
+    size_t anticpatedBufferSize = _encodeOffset + size;
+    if (anticpatedBufferSize >= _n) {
+        _dataStream.resize(anticpatedBufferSize);
+    }
 
     memcpy(_dataStream.data() + _encodeOffset, &v, size);
     _encodeOffset += size;
