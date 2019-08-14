@@ -1,6 +1,7 @@
 asset.require('./base')
 
-asset.request('scene/solarsystem/planets/earth/satellites/satellites_all')
+asset.request('scene/solarsystem/planets/earth/satellites/navigation/gps')
+asset.request('scene/solarsystem/planets/earth/satellites/misc/spacestations')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()

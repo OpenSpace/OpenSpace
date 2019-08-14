@@ -57,6 +57,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/debrisViz_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/debrisViz_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl

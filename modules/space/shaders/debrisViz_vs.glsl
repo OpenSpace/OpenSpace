@@ -73,6 +73,9 @@ void main() {
     int intfrac = int(nrOfRevolutions);
     double doublefrac = double(intfrac);
     double periodFraction = nrOfRevolutions - doublefrac;
+    if (periodFraction < 0.0) {
+        periodFraction += 1.0;
+    }
     periodFraction_f = float(periodFraction);
 
     // same procedure for the current vertex
