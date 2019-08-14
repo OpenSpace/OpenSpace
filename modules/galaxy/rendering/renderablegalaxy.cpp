@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/boxgeometry.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -45,16 +46,18 @@
 #include <fstream>
 
 namespace {
-    /*constexpr const char* GlslRayCastPath  = "${MODULES}/toyvolume/shaders/rayCast.glsl";
-    constexpr const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
-    constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";*/
     constexpr const char* GlslRaycastPath =
         "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
     constexpr const char* GlslBoundsVsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds.vs";
+        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
     constexpr const char* GlslBoundsFsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds.fs";
+        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
+
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "modelMatrix", "cameraUp", "eyePosition", "cameraViewProjectionMatrix",
+        "emittanceFactor"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
@@ -77,6 +80,12 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
         "PointStepSize",
         "Point Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointScaleFactorInfo = {
+        "PointScaleFactor",
+        "Point Scale Factor",
         "" // @TODO Missing documentation
     };
 
@@ -106,14 +115,18 @@ namespace openspace {
     , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 100.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 400.f, 0.0f, 1000.0f)
-    //, _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
-    //, _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
+    , _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
+    , _pointScaleFactor(PointScaleFactorInfo, 1.f, 1.f, 64.f)
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.02f, 0.001f, 0.1f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
 {
     dictionary.getValue("StepSize", _stepSize);
     dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
     dictionary.getValue("EmissionMultiply", _emissionMultiply);
+    dictionary.getValue("PointStepSize", _pointStepSize);
+    dictionary.getValue("PointScaleFactor", _pointScaleFactor);
+    dictionary.getValue("EnabledPointsRatio", _enabledPointsRatio);
     dictionary.getValue("Translation", _translation);
     dictionary.getValue("Rotation", _rotation);
 
@@ -127,6 +140,18 @@ namespace openspace {
 
     if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
         _emissionMultiply = static_cast<float>(dictionary.value<double>(EmissionMultiplyInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<double>(PointStepSizeInfo.identifier)) {
+        _pointStepSize = static_cast<float>(dictionary.value<double>(PointStepSizeInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<double>(PointScaleFactorInfo.identifier)) {
+        _pointScaleFactor = static_cast<float>(dictionary.value<double>(PointScaleFactorInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
+        _enabledPointsRatio = static_cast<float>(dictionary.value<double>(EnabledPointsRatioInfo.identifier));
     }
 
     if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
@@ -174,7 +199,6 @@ namespace openspace {
     } else {
         LERROR("No points filename specified.");
     }
-    //pointsDictionary.getValue("Scaling", _pointScaling);
 }
 
 void RenderableGalaxy::initializeGL() {
@@ -223,13 +247,30 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_stepSize);
     addProperty(_absorptionMultiply);
     addProperty(_emissionMultiply);
-    //addProperty(_pointStepSize);
-    //addProperty(_enabledPointsRatio);
+    addProperty(_pointStepSize);
+    addProperty(_pointScaleFactor);
+    addProperty(_enabledPointsRatio);
     addProperty(_translation);
     addProperty(_rotation);
 
     // initialize points.
     if (!_pointsFilename.empty()) {
+        _pointsProgram = global::renderEngine.buildRenderProgram(
+            "Galaxy points",
+            absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
+            absPath("${MODULE_GALAXY}/shaders/points_fs.glsl"),
+            absPath("${MODULE_GALAXY}/shaders/points_ge.glsl")
+        );
+
+        ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCache, UniformNames);
+
+        _pointsProgram->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+
+        GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
+        GLint colorAttrib = _pointsProgram->attributeLocation("in_color");
+
         std::ifstream pointFile(_pointsFilename, std::ios::in);
 
         std::vector<glm::vec3> pointPositions;
@@ -251,12 +292,18 @@ void RenderableGalaxy::initializeGL() {
 
         // Read points
         float x, y, z, r, g, b, a;
-        for (size_t i = 0; i < _nPoints; ++i) {
+        for (size_t i = 0; i < static_cast<size_t>(_nPoints * 0.1) + 1; ++i) {
             std::getline(pointFile, line);
-            std::istringstream iss(line);
-            iss >> x >> y >> z >> r >> g >> b >> a;
-            maxdist = std::max(maxdist, glm::length(glm::vec3(x, y, z)));
-            pointPositions.emplace_back(x, y, z);
+            std::istringstream issp(line);
+            issp >> x >> y >> z >> r >> g >> b >> a;
+
+            //Convert klioparsec to meters
+            glm::vec3 position = glm::vec3(x, y, z);
+            position *= (openspace::distanceconstants::Parsec * 100);
+
+            maxdist = std::max(maxdist, glm::length(position));
+
+            pointPositions.emplace_back(position);
             pointColors.emplace_back(r, g, b);
         }
 
@@ -282,19 +329,6 @@ void RenderableGalaxy::initializeGL() {
             pointColors.data(),
             GL_STATIC_DRAW
         );
-
-        _pointsProgram = global::renderEngine.buildRenderProgram(
-            "Galaxy points",
-            absPath("${MODULE_GALAXY}/shaders/points.vs"),
-            absPath("${MODULE_GALAXY}/shaders/points.fs")
-        );
-
-        _pointsProgram->setIgnoreUniformLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
-        );
-
-        GLint positionAttrib = _pointsProgram->attributeLocation("inPosition");
-        GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
 
         glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
         glEnableVertexAttribArray(positionAttrib);
@@ -333,7 +367,8 @@ void RenderableGalaxy::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
 
         glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
-        _pointTransform = glm::scale(transform, _pointScaling);
+        _pointTransform = transform;
+        //_pointTransform = glm::scale(transform, _pointScaling);
 
         const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.0);
 
@@ -352,43 +387,136 @@ void RenderableGalaxy::update(const UpdateData& data) {
 }
 
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
-    RaycasterTask task { _raycaster.get(), data };
+    if (_raycaster) {
+        RaycasterTask task { _raycaster.get(), data };
 
-    const glm::vec3 position = data.camera.positionVec3();
-    const float length = safeLength(position);
-    const glm::vec3 galaxySize = _volumeSize;
+        const glm::vec3 position = data.camera.positionVec3();
+        const float length = safeLength(position);
+        const glm::vec3 galaxySize = _volumeSize;
 
-    const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
+        const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
 
-    const float lowerRampStart = maxDim * 0.02f;
-    const float lowerRampEnd = maxDim * 0.5f;
+        const float lowerRampStart = maxDim * 0.02f;
+        const float lowerRampEnd = maxDim * 0.5f;
 
-    const float upperRampStart = maxDim * 2.f;
-    const float upperRampEnd = maxDim * 10.f;
+        const float upperRampStart = maxDim * 2.f;
+        const float upperRampEnd = maxDim * 10.f;
 
-    float opacityCoefficient = 1.f;
+        float opacityCoefficient = 1.f;
 
-    if (length < lowerRampStart) {
-        opacityCoefficient = 0.f; // camera really close
-    } else if (length < lowerRampEnd) {
-        opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
-    } else if (length < upperRampStart) {
-        opacityCoefficient = 1.f; // sweet spot (max)
-    } else if (length < upperRampEnd) {
-        opacityCoefficient = 1.f - (length - upperRampStart) /
-                             (upperRampEnd - upperRampStart); //fade out
-    } else {
-        opacityCoefficient = 0;
+        if (length < lowerRampStart) {
+            opacityCoefficient = 0.f; // camera really close
+        } else if (length < lowerRampEnd) {
+            opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
+        } else if (length < upperRampStart) {
+            opacityCoefficient = 1.f; // sweet spot (max)
+        } else if (length < upperRampEnd) {
+            opacityCoefficient = 1.f - (length - upperRampStart) /
+                                 (upperRampEnd - upperRampStart); //fade out
+        } else {
+            opacityCoefficient = 0;
+        }
+
+        _opacityCoefficient = opacityCoefficient;
+        ghoul_assert(
+            _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
+            "Opacity coefficient was not between 0 and 1"
+        );
+        if (opacityCoefficient > 0) {
+            _raycaster->setOpacityCoefficient(_opacityCoefficient);
+            tasks.raycasterTasks.push_back(task);
+        }
     }
 
-    _opacityCoefficient = opacityCoefficient;
-    ghoul_assert(
-        _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
-        "Opacity coefficient was not between 0 and 1"
-    );
-    if (opacityCoefficient > 0) {
-        _raycaster->setOpacityCoefficient(_opacityCoefficient);
-        tasks.raycasterTasks.push_back(task);
+    if (_pointsProgram) {
+        // Saving current OpenGL state
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+        GLboolean depthMask;
+
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDepthMask(false);
+
+        _pointsProgram->activate();
+
+        glm::dvec3 eyePosition = glm::dvec3(
+            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
+        _pointsProgram->setUniform(_uniformCache.eyePosition, eyePosition);
+
+        glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+        _pointsProgram->setUniform(_uniformCache.cameraUp, cameraUp);
+
+        const glm::dvec3 dtranslation = glm::dvec3((double)_translation.value().x, (double)_translation.value().y, (double)_translation.value().z);
+
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
+            data.camera.combinedViewMatrix();
+
+
+        /*glm::mat4 modelMatrix = _pointTransform;
+        glm::mat4 viewMatrix = data.camera.combinedViewMatrix();
+        glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+
+        _pointsProgram->setUniform("model", modelMatrix);
+        _pointsProgram->setUniform("view", viewMatrix);
+        _pointsProgram->setUniform("projection", projectionMatrix);*/
+
+        /*glm::dmat4 modelTransform =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+            glm::dmat4(_pointTransform);
+
+        glm::mat4 modelViewTransform = viewMatrix * modelMatrix;
+
+        _pointsProgram->setUniform("modelViewTransform", modelViewTransform);
+        _pointsProgram->setUniform("viewProjection", data.camera.viewProjectionMatrix());*/
+
+        _pointsProgram->setUniform(_uniformCache.modelMatrix, modelMatrix);
+        _pointsProgram->setUniform(
+            _uniformCache.cameraViewProjectionMatrix,
+            cameraViewProjectionMatrix
+        );
+        float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
+        _pointsProgram->setUniform(_uniformCache.emittanceFactor, emittanceFactor);
+
+        /*_pointsProgram->setUniform("scaleFactor", _pointScaleFactor);
+        _pointsProgram->setUniform("emittanceFactor", emittanceFactor);*/
+
+        glBindVertexArray(_pointsVao);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
+
+        glBindVertexArray(0);
+        
+        _pointsProgram->deactivate();
+
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Restores OpenGL blending state
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+        glDepthMask(depthMask);
     }
 }
 

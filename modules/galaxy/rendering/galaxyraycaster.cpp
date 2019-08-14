@@ -35,9 +35,9 @@ namespace {
     constexpr const char* GlslRaycastPath =
         "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
     constexpr const char* GlslBoundsVsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds.vs";
+        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
     constexpr const char* GlslBoundsFsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds.fs";
+        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
 } // namespace
 
 namespace openspace {

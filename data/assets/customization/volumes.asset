@@ -11,16 +11,17 @@ local MilkyWayVolumeGalaxy = {
         StepSize = 0.01,
 		AbsorptionMultiply = 10,
 		EmissionMultiply = 100,
-		Translation = {0.17, 0, 0},
+		Translation = {0.2, 0, 0},
         Volume = {
 			Type = "Volume",
 			Filename = "${BASE}/../OpenSpaceData/Milkyway/MilkyWayRGBAVolume1024x1024x128.raw",
 			Dimensions = {1024, 1024, 128},
-			Size = {9.2E21, 9.2E21, 1.15E21}
+			Size = {1.2E21, 1.2E21, 0.15E21}
 		},
 		Points = {
 			Type = "Points",
-			Filename = "${BASE}/../OpenSpaceData/Milkyway/MilkyWayPoints.off"
+			Filename = "${BASE}/../OpenSpaceData/Milkyway/MilkyWayPoints.off",
+			Scaling = {1.0, 1.0, 1.0}
 		}
     },
     GUI = {

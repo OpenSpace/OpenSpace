@@ -22,24 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#version __CONTEXT__
 
-in vec3 vsPosition;
-in vec3 vsColor;
+//#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform float emittanceFactor;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_color;
 
+//out vec3 vs_position;
+out vec3 vs_color;
+//out float vs_screenSpaceDepth;
 
-Fragment getFragment() {
-    Fragment frag;
-	
-	float depth = pscDepth(vec4(vsPosition, 0.0));
+//uniform mat4 model;
+//uniform mat4 view;
+//uniform mat4 projection;
+//uniform float scaleFactor;
 
-    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
-    frag.color = vec4(vsColor.rgb * coefficient, 1.0);
+//uniform mat4 viewProjection;
+//uniform mat4 modelViewTransform;
 
-    frag.depth = depth;
+void main() {
+    /*vec4 worldPosition = model * vec4(in_position, 1.0);
+    worldPosition.w = 0.0;
+    vec4 position = worldPosition; //pscTransform(worldPosition, model);
+    position = pscTransform(position, mat4(1.0));
+    vs_position = position.xyz;
+    position = projection * view * position;
+    gl_Position =  position;*/
 
-    return frag;
+	/*vec4 tmp = vec4(inPosition, 0.0);
+    vsPosition = inPosition;
+    vec4 position = pscTransform(tmp, model);
+    position = projection * view * position;
+    gl_Position =  z_normalization(position);*/
+
+		//vs_position = (modelViewTransform * vec4(in_position, 1.0)).xyz;
+		//vs_position = in_position;
+		vs_color = in_color;
+
+	/*vec4 positionClipSpace = vec4(projection * view * model * vec4(in_position, 1.0));
+	vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
+    vs_screenSpaceDepth = positionScreenSpace.w;*/
+	//vs_screenSpaceDepth = 1.0;
+
+    //gl_PointSize = scaleFactor;
+    //gl_Position = positionScreenSpace;
+
+    // project the position to view space
+    //gl_Position = viewProjection * vec4(vs_position, 1.0);
+		gl_Position = vec4(in_position, 1.0);
+    //gl_Position.z = 1.0;
 }

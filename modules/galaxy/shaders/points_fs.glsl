@@ -22,32 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec4 vs_position;
+in vec3 ge_color;
+in float ge_screenSpaceDepth;
 
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inColor;
+uniform float emittanceFactor;
 
-out vec3 vsPosition;
-out vec3 vsColor;
+Fragment getFragment() {
+    Fragment frag;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    //frag.depth = vs_screenSpaceDepth;
 
+    //float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(ge_screenSpaceDepth));
+    float coefficient = exp(1.38 * log(0.2) - 2*log(ge_screenSpaceDepth));
+    frag.color = vec4(ge_color, 1.0)*emittanceFactor;
+    //frag.gPosition = vec4(vs_position, 1.0);
+    //frag.gNormal  = vec4(0.0, 0.0, 0.0, 1.0);
 
-void main() {
-    vec4 p = vec4(inPosition, 1.0);
+    //frag.color = vec4(1.0, 0.0, 0.0, 1.0);
+    //frag.depth = depth;
+    //frag.blend = BLEND_MODE_ADDITIVE;
 
-    vec4 worldPosition = model * vec4(inPosition, 1.0);
-    worldPosition.w = 0.0;
-    vec4 position = worldPosition; //pscTransform(worldPosition, model);
+    //float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(ge_screenSpaceDepth));
+    //frag.color = vec4(ge_color.rgb * coefficient, 1.0);
+    frag.depth = ge_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-
-    position = pscTransform(position, mat4(1.0));
-    vsPosition = position.xyz;    
-    position = projection * view * position;
-    gl_Position =  z_normalization(position);
-    vsColor = inColor;
+    return frag;
 }
