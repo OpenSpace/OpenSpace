@@ -412,8 +412,12 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
             orbit.period,
             orbit.epoch
         );
-        // double timeInSeconds = Time::convertTime(timeStamp);
-        glm::dvec3 position = keplerTranslator.debrisPos(timeInSeconds);
+        glm::dvec3 position = keplerTranslator.position({
+            {},
+	    Time(timeInSeconds),
+	    Time(0.0),
+	    false
+        });
         // LINFO(fmt::format("cart: {} ", position));
         glm::dvec3 sphPos;
         if( gridType == "Spherical"){

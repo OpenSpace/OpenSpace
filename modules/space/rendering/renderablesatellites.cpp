@@ -593,7 +593,12 @@ void RenderableSatellites::updateBuffers() {
             double timeOffset = orbit.period * 
                     static_cast<double>(i)/ static_cast<double>(_nSegments); 
             
-            glm::dvec3 position = _keplerTranslator.debrisPos(timeOffset + orbit.epoch); 
+            glm::dvec3 position = _keplerTranslator.position({
+                {},
+                Time(timeOffset + orbit.epoch),
+                Time(0.0),
+                false
+            });
             
             double positionX = position.x; 
             double positionY = position.y; 
