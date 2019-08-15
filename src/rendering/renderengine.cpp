@@ -277,7 +277,7 @@ RenderEngine::RenderEngine()
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 0.86f, 0.01f, 5.0f)
-    , _hue(HueInfo, 1.f, 0.0f, 5.0f)
+    , _hue(HueInfo, 180.f, 0.0f, 360.0f)
     , _saturation(SaturationInfo, 1.f, 0.0f, 2.0f)
     , _value(ValueInfo, 1.f, 0.0f, 2.0f)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
@@ -341,7 +341,8 @@ RenderEngine::RenderEngine()
 
     _hue.onChange([this]() {
         if (_renderer) {
-            _renderer->setHue(_hue);
+            float pHue = (_hue + 180.f) / 360.f;
+            _renderer->setHue(pHue);
         }
     });
 
