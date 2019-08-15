@@ -14,9 +14,7 @@ asset.onInitialize(function ()
      -- HDR / Image options:
     openspace.setPropertyValueSingle('RenderEngine.Gamma', 0.95);
     openspace.setPropertyValueSingle('RenderEngine.HDRExposure', 3.7);
-    openspace.setPropertyValueSingle('RenderEngine.ToneMapOperator', 8);
-    openspace.setPropertyValueSingle('RenderEngine.Lightness', 1.1);
-    openspace.setPropertyValueSingle('RenderEngine.Saturation', 1.2);
+    openspace.setPropertyValueSingle('RenderEngine.Saturation', 1.0);
 end)
 
 asset.onDeinitialize(function ()

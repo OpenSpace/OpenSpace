@@ -22,18 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// The next defines must being synchronized with the enum defined in file renderengine.h
-#define EXPONENTIAL 0
-#define LINEAR 1
-#define SIMPLE_REINHARD 2
-#define LUM_BASED_REINHARD 3
-#define WHITE_PRESERVING 4
-#define ROM_BIN_DA_HOUSE 5
-#define FILMIC 6
-#define UNCHARTED 7
-#define COSTA 8
-#define PHOTOGRAPHIC_REINHARD 9
-
 const float HCV_EPSILON = 1e-7;
 const float HSL_EPSILON = 1e-7;
 const float HCY_EPSILON = 1e-7;
@@ -155,27 +143,6 @@ vec3 rgb2hsl(vec3 rgb)
     return vec3(HCV.x, S, L);
 }
 
-vec3 globalToneMappingOperatorRTR(vec3 color, const float exposure, const float maxWhite, const float aveLum) {
-  // Convert color to XYZ
-  vec3 xyzCol = RGB2XYZ * color;
-
-  // Convert from XYZ to xyY
-  float xyzSum = xyzCol.x + xyzCol.y + xyzCol.z;
-  vec3 xyYCol = vec3( xyzCol.x / xyzSum, xyzCol.y / xyzSum, xyzCol.y);
-
-  // Apply the tone mapping operation to the luminance (xyYCol.z or xyzCol.y)
-  float L = (exposure * xyYCol.z) / aveLum;
-  L = (L * ( 1 + L / (maxWhite * maxWhite) )) / ( 1 + L );
-
-  // Using the new luminance, convert back to XYZ
-  xyzCol.x = (L * xyYCol.x) / (xyYCol.y);
-  xyzCol.y = L;
-  xyzCol.z = (L * (1 - xyYCol.x - xyYCol.y))/xyYCol.y;
-
-  // Convert back to RGB and send to output buffer
-  return XYZ2RGB * xyzCol;
-}
-
 vec3 exponentialToneMapping(vec3 color, const float exposure, const float gamma) {
   color *= exposure;
   
@@ -186,64 +153,7 @@ vec3 exponentialToneMapping(vec3 color, const float exposure, const float gamma)
   return color;
 }
 
-vec3 linearToneMapping(vec3 color, const float exposure) {
-  color = clamp(exposure * color, 0.f, 1.f);
-  return color;
-}
-
-vec3 simpleReinhardToneMapping(vec3 color, const float exposure) {
-  color *= exposure/(1.f + color / exposure);
-  return color;
-}
-
-vec3 lumaBasedReinhardToneMapping(vec3 color) {
-  
-  float luma = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
-  float toneMappedLuma = luma / (1.f + luma);
-  color *= toneMappedLuma / luma;
-  return color;
-}
-
-vec3 photographicReinhardToneMapping(vec3 color) {
-  return color / (color + vec3(1.0));
-}
-
-vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color, const float maxWhite) {
-  //float luma = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
-  float luma = dot(color, vec3(0.4126f, 0.9152f, 0.2722f));
-  float toneMappedLuma = luma * (1.f + luma / (maxWhite * maxWhite)) / (1.f + luma);
-  color *= toneMappedLuma / luma;
-  return color;
-}
-
-vec3 RomBinDaHouseToneMapping(vec3 color) {
-  color = exp2( -1.f / ( 2.72f * color + 0.15f ) );
-  return color;
-}
-
-vec3 filmicToneMapping(vec3 color)
-{
-  color = max(vec3(0.f), color - vec3(0.04f));
-  color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 20.f) + 0.06f);
-  return color;
-}
-
-vec3 Uncharted2ToneMapping(vec3 color, const float exposure) {
-  float A = 0.15f;
-  float B = 0.5f;
-  float C = 0.1f;
-  float D = 0.2f;
-  float E = 0.02f;
-  float F = 0.3f;
-  float W = 11.2f;
-  color *= exposure;
-  color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
-  float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
-  color /= white;
-  return color;
-}
-
-vec3 jToneMapping(vec3 color, const float exposure) {
+vec3 toneMappingOperator(vec3 color, const float exposure) {
   return 1.0 - exp2(-exposure * color);
 }
 

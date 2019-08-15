@@ -67,7 +67,6 @@ out vec4 renderTarget;
 in vec3 interpolatedNDCPos;
 
 uniform int nAaSamples;
-uniform double msaaSamplePatter[48];
 uniform int cullAtmosphere;
 
 uniform sampler2D irradianceTexture;
@@ -234,13 +233,6 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
 void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray, 
                                   out dvec4 planetPositionObjectCoords, 
                                   out dvec4 cameraPositionInObject) {
-    // ======================================
-    // ======= Avoiding Some Matrices =======
-
-    // Compute positions and directions in object space.
-    dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
-                             msaaSamplePatter[mssaSample+1]);
-
     dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 1.0, 1.0);
 
     // Clip to Object Coords

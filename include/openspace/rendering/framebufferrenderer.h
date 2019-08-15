@@ -128,23 +128,17 @@ public:
     void updateRaycastData();
     void updateDeferredcastData();
     void updateHDRAndFiltering();
-    void updateMSAASamplingPattern();
-
+    
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
     void setGamma(float gamma) override;
-    void setMaxWhite(float maxWhite) override;
-    void setToneMapOperator(int tmOp) override;
     void setHue(float hue) override;
     void setValue(float value) override;
     void setSaturation(float sat) override;
-    void setLightness(float lightness) override;
-    void setColorSpace(unsigned int colorspace) override;
-
+    
     int nAaSamples() const override;
-    const std::vector<double>& mSSAPattern() const override;
-
+    
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
     void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
@@ -181,8 +175,7 @@ private:
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
     
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-                 toneMapOperator, maxWhite, Hue, Saturation, Value, 
-                 Lightness, colorSpace, nAaSamples) _hdrUniformCache;
+                 Hue, Saturation, Value, nAaSamples) _hdrUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;
@@ -204,20 +197,14 @@ private:
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
+    
     float _hdrExposure = 3.7f;
     float _gamma = 0.95f;
     float _maxWhite = 5.0f;
-    int _toneMapOperator = 8;
-    bool _histogramEnabled = false;
     float _hue = 1.f;
-    float _saturation = 1.2f;
+    float _saturation = 1.f;
     float _value = 1.f;
-    float _lightness = 1.1f;
-    unsigned int _colorSpace = 1;
-
-    std::vector<double> _mSAAPattern;
-    std::vector<float> _histoPoints;
-
+    
     ghoul::Dictionary _rendererData;
 };
 

@@ -199,6 +199,14 @@ namespace {
         "rendering for the MSAA method."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
+       "DisableHDRPipeline",
+       "Disable HDR Rendering",
+       "If this value is enabled, the rendering will disable the HDR color handling "
+       "and the LDR color pipeline will be used. Be aware of possible over exposure "
+       "in the final colors."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR Exposure",
@@ -211,19 +219,6 @@ namespace {
         "Gamma Correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MaxWhiteInfo = {
-        "MaxWhite",
-        "Max White Value",
-        "Max value for white color [0.01-10.0] to be used by tone mapping operators." 
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ToneMapOperatorInfo = {
-        "ToneMapOperator",
-        "ToneMap Operator",
-        "ToneMap Operator is the method used to tranform the pixels using a HDR to"
-        "pixels using a LDR distribution."
     };
 
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
@@ -242,30 +237,6 @@ namespace {
         "Value",
         "Value",
         "Value"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LightnessInfo = {
-        "Lightness",
-        "Lightness",
-        "Lightness"
-    };
-
-    openspace::properties::PropertyOwner::PropertyOwnerInfo TMOInfo = {
-        "ToneMappingOp",
-        "Tone Mapping Options",
-        ""
-    };
-
-    openspace::properties::PropertyOwner::PropertyOwnerInfo ImageInfo = {
-        "ImageOp",
-        "Rendered Image Options",
-        ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorSpaceInfo = {
-        "ColorSpace",
-        "Color Space",
-        "Sets the color space for image adjusts."
     };
 
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
@@ -303,17 +274,12 @@ RenderEngine::RenderEngine()
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
-    , _tmoOwner(TMOInfo)
-    , _hdrExposure(HDRExposureInfo, 1.68f, 0.01f, 10.0f)
-    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 100.0f)
-    , _toneMapOperator(ToneMapOperatorInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _imageOwner(ImageInfo)
+    , _disableHDRPipeline(DisableHDRPipelineInfo, false)
+    , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 0.86f, 0.01f, 5.0f)
     , _hue(HueInfo, 1.f, 0.0f, 5.0f)
-    , _saturation(SaturationInfo, 1.45f, 0.0f, 5.0f)
-    , _value(ValueInfo, 1.f, 0.0f, 5.0f)
-    , _lightness(LightnessInfo, 1.1f, 0.0f, 5.0f)
-    , _colorSpace(ColorSpaceInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _saturation(SaturationInfo, 1.f, 0.0f, 2.0f)
+    , _value(ValueInfo, 1.f, 0.0f, 2.0f)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
     , _globalRotation(
         GlobalRotationInfo,
@@ -351,6 +317,13 @@ RenderEngine::RenderEngine()
     });
     addProperty(_nAaSamples);
 
+    _disableHDRPipeline.onChange([this]() {
+        if (_renderer) {
+            //_renderer->setHDRExposure(_hdrExposure);
+        }
+    });
+    addProperty(_disableHDRPipeline);
+
     
     _hdrExposure.onChange([this]() {
         if (_renderer) {
@@ -358,34 +331,6 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_hdrExposure);
-
-    _maxWhite.onChange([this]() {
-        if (_renderer) {
-            _renderer->setMaxWhite(_maxWhite);
-        }
-    });
-    
-    addProperty(_maxWhite);
-    
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::EXPONENTIAL), "Exponential");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::LINEAR), "Linear");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::SIMPLE_REINHARD), "Simple Reinhard");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::LUM_BASED_REINHARD), "Lum based Reinhard");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::WHITE_PRESERVING), "White Preserving");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::ROM_BIN_DA_HOUSE), "RomBin da House");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::FILMIC), "Filmic");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::UNCHARTED), "Uncharted 2");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::COSTA), "Costa");
-    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::PHOTOGRAPHIC_REINHARD), "Photographic Reinhard");
-    _toneMapOperator.set(8);
-
-    _toneMapOperator.onChange([this]() {
-        if (_renderer) {
-            _renderer->setToneMapOperator(_toneMapOperator);
-        }
-    });
-
-    addProperty(_toneMapOperator);
     
     _gamma.onChange([this]() {
         if (_renderer) {
@@ -393,18 +338,6 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_gamma);
-
-    _colorSpace.addOption(static_cast<int>(COLORSPACE::HSV), "HSV");
-    _colorSpace.addOption(static_cast<int>(COLORSPACE::HSL), "HSL");
-    _colorSpace.set(1);
-
-    _colorSpace.onChange([this]() {
-        if (_renderer) {
-            _renderer->setColorSpace(_colorSpace);
-        }
-    });
-
-    addProperty(_colorSpace);
 
     _hue.onChange([this]() {
         if (_renderer) {
@@ -429,15 +362,6 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_value);
-    
-    _lightness.onChange([this]() {
-        if (_renderer) {
-            _renderer->setLightness(_lightness);
-        }
-    });
-    addProperty(_lightness);
-    
-    //this->addPropertySubOwner(_imageOwner);
 
     addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);

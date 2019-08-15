@@ -65,26 +65,6 @@ public:
         Invalid
     };
 
-    // The next enum should be synchronized with the 
-    // defines in hdr.glsl file.
-    enum class ToneMapOperators {
-        EXPONENTIAL = 0,
-        LINEAR, //1
-        SIMPLE_REINHARD, //2
-        LUM_BASED_REINHARD, //3
-        WHITE_PRESERVING, //4
-        ROM_BIN_DA_HOUSE, //5
-        FILMIC, //6
-        UNCHARTED, //7
-        COSTA, //8
-        PHOTOGRAPHIC_REINHARD, //9
-    };
-
-    enum class COLORSPACE {
-        HSV = 0,
-        HSL
-    };
-
     RenderEngine();
     ~RenderEngine();
 
@@ -229,26 +209,19 @@ private:
     properties::FloatProperty _globalBlackOutFactor;
     properties::IntProperty _nAaSamples;
     
-    properties::PropertyOwner _tmoOwner;
+    properties::BoolProperty _disableHDRPipeline;
     properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _maxWhite;
-    properties::OptionProperty _toneMapOperator;
-    
-    properties::PropertyOwner _imageOwner;
     properties::FloatProperty _gamma;
 
     properties::FloatProperty _hue;
     properties::FloatProperty _saturation;
     properties::FloatProperty _value;
-    properties::FloatProperty _lightness;
-
+    
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
-
-    properties::OptionProperty _colorSpace;
     
     uint64_t _frameNumber = 0;
 

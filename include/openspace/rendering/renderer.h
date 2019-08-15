@@ -52,16 +52,10 @@ public:
     virtual void setNAaSamples(int nAaSamples) = 0;
     virtual void setHDRExposure(float hdrExposure) = 0;
     virtual void setGamma(float gamma) = 0;
-    virtual void setMaxWhite(float maxWhite) = 0;
-    virtual void setToneMapOperator(int tmOp) = 0;
     virtual void setHue(float hue) = 0;
     virtual void setValue(float value) = 0;
     virtual void setSaturation(float sat) = 0;
-    virtual void setLightness(float lightness) = 0;
-    virtual void setColorSpace(unsigned int colorspace) = 0;
-
     virtual int nAaSamples() const = 0;
-    virtual const std::vector<double>& mSSAPattern() const = 0;
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.

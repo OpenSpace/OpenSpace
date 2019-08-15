@@ -54,10 +54,9 @@ namespace {
         "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
-    constexpr const std::array<const char*, 12> HDRUniformNames = {
+    constexpr const std::array<const char*, 8> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma", 
-        "toneMapOperator", "maxWhite", "Hue", "Saturation", "Value", 
-        "Lightness", "colorSpace", "nAaSamples"
+        "Hue", "Saturation", "Value", "nAaSamples"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -385,13 +384,9 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.toneMapOperator, _toneMapOperator);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.maxWhite, _maxWhite);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Lightness, _lightness);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.colorSpace, _colorSpace);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.nAaSamples, _nAaSamples);
 
 
@@ -403,13 +398,8 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
 }
 
 void FramebufferRenderer::update() {
-    if (_dirtyMsaaSamplingPattern) {
-        updateMSAASamplingPattern();
-    }
-
     if (_dirtyResolution) {
         updateResolution();
-        updateMSAASamplingPattern();
     }
 
     if (_dirtyRaycastData) {
@@ -733,330 +723,6 @@ void FramebufferRenderer::updateHDRAndFiltering() {
     //_hdrFilteringProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
-void FramebufferRenderer::updateMSAASamplingPattern() {
-    // JCC: All code below can be replaced by
-    // void GetMultisamplefv( enum pname, uint index, float *val );
-    
-    LDEBUG("Updating MSAA Sampling Pattern");
-
-    constexpr const int GridSize = 32;
-    GLfloat step = 2.f / static_cast<GLfloat>(GridSize);
-    GLfloat sizeX = -1.f;
-    GLfloat sizeY = 1.0;
-
-    constexpr const int NVertex = 4 * 6;
-    // openPixelSizeVertexData
-    GLfloat vertexData[GridSize * GridSize * NVertex];
-
-    // @CLEANUP(abock): Is this necessary?  I was mucking about with the shader and it
-    //                  didn't make any visual difference. If it is necessary, the z and w
-    //                  components can be removed for sure since they are always 0, 1 and
-    //                  not used in the shader either
-    for (int y = 0; y < GridSize; ++y) {
-        for (int x = 0; x < GridSize; ++x) {
-            vertexData[y * GridSize * NVertex + x * NVertex] = sizeX;
-            vertexData[y * GridSize * NVertex + x * NVertex + 1] = sizeY - step;
-            vertexData[y * GridSize * NVertex + x * NVertex + 2] = 0.f;
-            vertexData[y * GridSize * NVertex + x * NVertex + 3] = 1.f;
-
-            vertexData[y * GridSize * NVertex + x * NVertex + 4] = sizeX + step;
-            vertexData[y * GridSize * NVertex + x * NVertex + 5] = sizeY;
-            vertexData[y * GridSize * NVertex + x * NVertex + 6] = 0.f;
-            vertexData[y * GridSize * NVertex + x * NVertex + 7] = 1.f;
-
-            vertexData[y * GridSize * NVertex + x * NVertex + 8] = sizeX;
-            vertexData[y * GridSize * NVertex + x * NVertex + 9] = sizeY;
-            vertexData[y * GridSize * NVertex + x * NVertex + 10] = 0.f;
-            vertexData[y * GridSize * NVertex + x * NVertex + 11] = 1.f;
-
-            vertexData[y * GridSize * NVertex + x * NVertex + 12] = sizeX;
-            vertexData[y * GridSize * NVertex + x * NVertex + 13] = sizeY - step;
-            vertexData[y * GridSize * NVertex + x * NVertex + 14] = 0.f;
-            vertexData[y * GridSize * NVertex + x * NVertex + 15] = 1.f;
-
-            vertexData[y * GridSize * NVertex + x * NVertex + 16] = sizeX + step;
-            vertexData[y * GridSize * NVertex + x * NVertex + 17] = sizeY - step;
-            vertexData[y * GridSize * NVertex + x * NVertex + 18] = 0.f;
-            vertexData[y * GridSize * NVertex + x * NVertex + 19] = 1.f;
-
-            vertexData[y * GridSize * NVertex + x * NVertex + 20] = sizeX + step;
-            vertexData[y * GridSize * NVertex + x * NVertex + 21] = sizeY;
-            vertexData[y * GridSize * NVertex + x * NVertex + 22] = 0.f;
-            vertexData[y * GridSize * NVertex + x * NVertex + 23] = 1.f;
-
-            sizeX += step;
-        }
-        sizeX = -1.f;
-        sizeY -= step;
-    }
-
-    GLuint pixelSizeQuadVAO = 0;
-    glGenVertexArrays(1, &pixelSizeQuadVAO);
-    glBindVertexArray(pixelSizeQuadVAO);
-
-    GLuint pixelSizeQuadVBO = 0;
-    glGenBuffers(1, &pixelSizeQuadVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, pixelSizeQuadVBO);
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(GLfloat) * GridSize * GridSize * NVertex,
-        vertexData,
-        GL_STATIC_DRAW
-    );
-
-    // Position
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(0);
-
-    // Saves current state
-    GLint defaultFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    // Main framebuffer
-    GLuint pixelSizeTexture = 0;
-    GLuint pixelSizeFramebuffer = 0;
-
-    glGenTextures(1, &pixelSizeTexture);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
-
-    constexpr const GLsizei OnePixel = 1;
-    glTexImage2DMultisample(
-        GL_TEXTURE_2D_MULTISAMPLE,
-        _nAaSamples,
-        GL_RGBA32F,
-        OnePixel,
-        OnePixel,
-        true
-    );
-
-    glViewport(0, 0, OnePixel, OnePixel);
-
-    glGenFramebuffers(1, &pixelSizeFramebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, pixelSizeFramebuffer);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D_MULTISAMPLE,
-        pixelSizeTexture,
-        0
-    );
-
-    GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, textureBuffers);
-
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("MSAA Sampling pattern framebuffer is not complete");
-        return;
-    }
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> pixelSizeProgram =
-        ghoul::opengl::ProgramObject::Build(
-            "OnePixel MSAA",
-            absPath("${SHADERS}/framebuffer/pixelSizeMSAA.vert"),
-            absPath("${SHADERS}/framebuffer/pixelSizeMSAA.frag")
-        );
-
-    pixelSizeProgram->activate();
-
-    // Draw sub-pixel grid
-    glEnable(GL_SAMPLE_SHADING);
-    glBindVertexArray(pixelSizeQuadVAO);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
-    glDrawArrays(GL_TRIANGLES, 0, GridSize * GridSize * 6);
-    glBindVertexArray(0);
-    glDepthMask(true);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_SAMPLE_SHADING);
-
-    pixelSizeProgram->deactivate();
-
-    // Now we render the Nx1 quad strip
-    GLuint nOneStripFramebuffer = 0;
-    GLuint nOneStripVAO = 0;
-    GLuint nOneStripVBO = 0;
-    GLuint nOneStripTexture = 0;
-
-    sizeX = -1.f;
-    step = 2.f / static_cast<GLfloat>(_nAaSamples);
-
-    std::vector<GLfloat>nOneStripVertexData(_nAaSamples * (NVertex + 12));
-
-    for (int x = 0; x < _nAaSamples; ++x) {
-        nOneStripVertexData[x * (NVertex + 12)] = sizeX;
-        nOneStripVertexData[x * (NVertex + 12) + 1] = -1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 2] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 3] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 4] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 5] = 0.f;
-
-        nOneStripVertexData[x * (NVertex + 12) + 6] = sizeX + step;
-        nOneStripVertexData[x * (NVertex + 12) + 7] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 8] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 9] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 10] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 11] = 1.f;
-
-        nOneStripVertexData[x * (NVertex + 12) + 12] = sizeX;
-        nOneStripVertexData[x * (NVertex + 12) + 13] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 14] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 15] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 16] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 17] = 0.f;
-
-        nOneStripVertexData[x * (NVertex + 12) + 18] = sizeX;
-        nOneStripVertexData[x * (NVertex + 12) + 19] = -1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 20] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 21] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 22] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 23] = 0.f;
-
-        nOneStripVertexData[x * (NVertex + 12) + 24] = sizeX + step;
-        nOneStripVertexData[x * (NVertex + 12) + 25] = -1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 26] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 27] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 28] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 29] = 1.f;
-
-        nOneStripVertexData[x * (NVertex + 12) + 30] = sizeX + step;
-        nOneStripVertexData[x * (NVertex + 12) + 31] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 32] = 0.f;
-        nOneStripVertexData[x * (NVertex + 12) + 33] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 34] = 1.f;
-        nOneStripVertexData[x * (NVertex + 12) + 35] = 1.f;
-
-        sizeX += step;
-    }
-
-    glGenVertexArrays(1, &nOneStripVAO);
-    glBindVertexArray(nOneStripVAO);
-    glGenBuffers(1, &nOneStripVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, nOneStripVBO);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(GLfloat) * _nAaSamples * (NVertex + 12),
-        nOneStripVertexData.data(),
-        GL_STATIC_DRAW
-    );
-
-    // position
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexAttribArray(0);
-
-    // texture coords
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
-    );
-    glEnableVertexAttribArray(1);
-
-    // fbo texture buffer
-    glGenTextures(1, &nOneStripTexture);
-    glBindTexture(GL_TEXTURE_2D, nOneStripTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _nAaSamples,
-        OnePixel,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    glGenFramebuffers(1, &nOneStripFramebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, nOneStripFramebuffer);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
-        nOneStripTexture,
-        0
-    );
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("nOneStrip framebuffer is not complete");
-    }
-
-    glViewport(0, 0, _nAaSamples, OnePixel);
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram =
-        ghoul::opengl::ProgramObject::Build(
-            "OneStrip MSAA",
-            absPath("${SHADERS}/framebuffer/nOneStripMSAA.vert"),
-            absPath("${SHADERS}/framebuffer/nOneStripMSAA.frag")
-        );
-
-    nOneStripProgram->activate();
-
-    ghoul::opengl::TextureUnit pixelSizeTextureUnit;
-    pixelSizeTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
-    nOneStripProgram->setUniform("pixelSizeTexture", pixelSizeTextureUnit);
-
-    // render strip
-    glDrawBuffers(1, textureBuffers);
-
-    glClearColor(0.f, 1.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glBindVertexArray(nOneStripVAO);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
-
-    for (int sample = 0; sample < _nAaSamples; ++sample) {
-        nOneStripProgram->setUniform("currentSample", sample);
-        glDrawArrays(GL_TRIANGLES, sample * 6, 6);
-    }
-    glDepthMask(true);
-    glEnable(GL_DEPTH_TEST);
-    glBindVertexArray(0);
-
-    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, _mSAAPattern);
-    // Convert back to [-1, 1] range and then scale for the current viewport size:
-    for (int d = 0; d < _nAaSamples; ++d) {
-        _mSAAPattern[d * 3] = (2.0 * _mSAAPattern[d * 3] - 1.0) /
-            static_cast<double>(viewport[1]);
-        _mSAAPattern[(d * 3) + 1] = (2.0 * _mSAAPattern[(d * 3) + 1] - 1.0) /
-            static_cast<double>(viewport[3]);
-        _mSAAPattern[(d * 3) + 2] = 0.0;
-    }
-
-    nOneStripProgram->deactivate();
-
-    // Restores default state
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-    // Deletes unused buffers
-    glDeleteFramebuffers(1, &pixelSizeFramebuffer);
-    glDeleteTextures(1, &pixelSizeTexture);
-    glDeleteBuffers(1, &pixelSizeQuadVBO);
-    glDeleteVertexArrays(1, &pixelSizeQuadVAO);
-
-    glDeleteFramebuffers(1, &nOneStripFramebuffer);
-    glDeleteTextures(1, &nOneStripTexture);
-    glDeleteBuffers(1, &nOneStripVBO);
-    glDeleteVertexArrays(1, &nOneStripVAO);
-
-    _dirtyMsaaSamplingPattern = false;
-}
-
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     // Set OpenGL default rendering state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
@@ -1297,9 +963,6 @@ void FramebufferRenderer::performDeferredTasks(
 
             deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
             
-            // 48 = 16 samples * 3 coords
-            deferredcastProgram->setUniform("msaaSamplePatter", &_mSAAPattern[0], 48);
-
             deferredcaster->preRaycast(
                 deferredcasterTask.renderData,
                 _deferredcastData[deferredcaster],
@@ -1364,15 +1027,6 @@ void FramebufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
 }
 
-void FramebufferRenderer::setMaxWhite(float maxWhite) {
-    ghoul_assert(maxWhite > 0.f, "Max White value must be greater than zero");
-    _maxWhite = maxWhite;
-}
-
-void FramebufferRenderer::setToneMapOperator(int tmOp) {
-    _toneMapOperator = tmOp;
-}
-
 void FramebufferRenderer::setHue(float hue) {
     _hue = hue;
 }
@@ -1385,20 +1039,8 @@ void FramebufferRenderer::setSaturation(float sat) {
     _saturation = sat;
 }
 
-void FramebufferRenderer::setLightness(float lightness) {
-    _lightness = lightness;
-}
-
-void FramebufferRenderer::setColorSpace(unsigned int colorspace) {
-    _colorSpace = colorspace;
-}
-
 int FramebufferRenderer::nAaSamples() const {
     return _nAaSamples;
-}
-
-const std::vector<double>& FramebufferRenderer::mSSAPattern() const {
-    return _mSAAPattern;
 }
 
 void FramebufferRenderer::updateRendererData() {
