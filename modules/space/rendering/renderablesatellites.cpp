@@ -86,8 +86,6 @@ namespace {
     
     constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNum = "LineNumber";
-
-    // LINFO("Keyfile: " + KeyFile);
 }
 
 namespace openspace {
@@ -267,7 +265,7 @@ double epochFromSubstring(const std::string& epochString) {
         const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
         // 4
-        // We need to remove additionbal leap seconds past 2000 and add them prior to
+        // We need to remove additional leap seconds past 2000 and add them prior to
         // 2000 to sync up the time zones
         const double nLeapSecondsOffset = -countLeapSeconds(
             year,
@@ -355,8 +353,12 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 }
    
     
-std::vector<KeplerParameters> RenderableSatellites::readTLEFile(const std::string& filename) {
-    ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
+void RenderableSatellites::readTLEFile(const std::string& filename) {
+    if (!FileSys.fileExists(filename)) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Satellite TLE file {} does not exist.", filename
+        ));
+    }
 
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -398,7 +400,7 @@ std::vector<KeplerParameters> RenderableSatellites::readTLEFile(const std::strin
         }
         else {
             throw ghoul::RuntimeError(fmt::format(
-                "File {} @ line {} does not have '1' header", filename // linNum + 1
+                "File {} entry {} does not have '1' header", filename, i + 1
             ));
         }
 
@@ -451,7 +453,7 @@ std::vector<KeplerParameters> RenderableSatellites::readTLEFile(const std::strin
         }
         else {
             throw ghoul::RuntimeError(fmt::format(
-                "File {} @ line {} does not have '2' header", filename  // , lineNum + 2
+                "File {} entry {} does not have '2' header", filename, i + 1
             ));
         }
 
@@ -464,35 +466,12 @@ std::vector<KeplerParameters> RenderableSatellites::readTLEFile(const std::strin
 
         _TLEData.push_back(keplerElements);
 
-    } // !for loop
+    }
     file.close();
-    return _TLEData;
-
 }
-
-/*
-RenderableSatellites::~RenderableSatellites() {
-
-}
- */  
 
 void RenderableSatellites::initialize() {
-    
-// updateBuffers();
 
-    //_path.onChange([this]() {
-    //    readTLEFile(_path);
-    //    updateBuffers();
-    //});
-    //
-    //_semiMajorAxisUnit.onChange([this]() {
-    //    readTLEFile(_path);
-    //    updateBuffers();
-    //});
-
-    //_nSegments.onChange([this]() {
-    //    updateBuffers();
-    //});
 }
 
 void RenderableSatellites::deinitialize() {
@@ -590,7 +569,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSatellites::updateBuffers() {
-    _TLEData = readTLEFile(_path);
+    readTLEFile(_path);
 
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
@@ -626,18 +605,6 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].time = static_cast<float>(timeOffset);
             _vertexBufferData[index].epoch = orbit.epoch;
             _vertexBufferData[index].period = orbit.period;
-
-            // The difference in the print below resulted in large differences, up to 0.35.
-            // LINFO(fmt::format("diff : {} ", position.x - _vertexBufferData[index].x));        
-
-            // So one idea was to make it very small before casting it to a float.            
-            // auto print = positionX-(static_cast<float>(positionX) / 10000000);
-            // LINFO(fmt::format(" smaller distance? :{}", print));
-
-
-            // LINFO(fmt::format(" x-positions float :{}", static_cast<float>(position.x)));
-            // LINFO(fmt::format(" x-positions float * 10000 :{}", static_cast<float>(position.x * 10000)));
-            // LINFO(fmt::format(" x-positions float * 10000 /10000 :{}", static_cast<float>(position.x * 10000)/10000));       
         }
       
         ++orbitindex;

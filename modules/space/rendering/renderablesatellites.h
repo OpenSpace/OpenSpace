@@ -75,22 +75,19 @@ namespace openspace {
         void update(const UpdateData& data) override;
 
         static documentation::Documentation Documentation();
-                /**
-         * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
+        /**
+         * Reads the provided TLE file and calls the KeplerTranslation::setKeplerElments
          * method with the correct values. If \p filename is a valid TLE file but contains
          * disallowed values (see KeplerTranslation::setKeplerElements), a
          * KeplerTranslation::RangeError is thrown.
          *
          * \param filename The path to the file that contains the TLE file.
-         * \param lineNum The line number in the file where the set of 3 TLE lines starts
          *
-         * \throw std::system_error if the TLE file is malformed (does not contain at least
-         *        two lines that start with \c 1 and \c 2.
-         * \throw KeplerTranslation::RangeError If the Keplerian elements are outside of
-         *        the valid range supported by Kepler::setKeplerElements
+         * \throw ghoul::RuntimeError if the TLE file does not exist or there is a 
+         *        problem with its format.
          * \pre The \p filename must exist
          */
-        std::vector<KeplerParameters> readTLEFile(const std::string& filename);
+        void readTLEFile(const std::string& filename);
 
     private:
         /// The layout of the VBOs
@@ -102,8 +99,6 @@ namespace openspace {
 
         KeplerTranslation _keplerTranslator;
         std::vector<KeplerParameters> _TLEData;
-
-        
 
         /// The backend storage for the vertex buffer object containing all points for this
         /// trail.
