@@ -35,6 +35,7 @@ struct Fragment {
     float depth;
     uint blend;
     bool forceFboRendering;
+    bool disableLDR2HDR;
 };
 
 #endif
