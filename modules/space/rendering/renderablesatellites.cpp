@@ -51,7 +51,7 @@
 
 namespace {
     constexpr const char* ProgramName = "RenderableSatellites";
-    constexpr const char* _loggerCat = "SpaceDebris";
+    constexpr const char* _loggerCat = "Satellites";
 
     static const openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
@@ -77,7 +77,12 @@ namespace {
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
         "'true'. If it is 'false', this setting has no effect. The higher the number, "
         "the less fading is applied."
-};
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+        "Color",
+        "Color",
+        "This value determines the RGB main color for the lines and points of the trail."
+    };
     
     constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNum = "LineNumber";
@@ -303,13 +308,18 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 Optional::Yes,
                 LineWidthInfo.description
             },
-
             {
                 FadeInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
                 FadeInfo.description
-            }
+            },
+            {
+                LineColorInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::No,
+                LineColorInfo.description
+            },
         }
     };
 }
@@ -333,6 +343,10 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
         static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
     _lineFade = 
         static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
+        _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+    }
 
     addPropertySubOwner(_appearance);
     addProperty(_path);

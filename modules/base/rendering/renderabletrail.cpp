@@ -177,8 +177,8 @@ RenderableTrail::Appearance::Appearance()
     : properties::PropertyOwner(AppearanceInfo)
     , lineColor(LineColorInfo, glm::vec3(1.0f, 1.0f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineFade(FadeInfo, 0.4f, 0.f, 30.f)
-    , lineWidth(LineWidthInfo, 1.1f, 1.f, 20.f)
+    , lineFade(FadeInfo, 1.f, 0.f, 30.f)
+    , lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,
@@ -201,17 +201,6 @@ RenderableTrail::Appearance::Appearance()
 
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    /*
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _useLineFade(EnableFadeInfo, true)
-    , _lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
-    , _pointSize(PointSizeInfo, 1, 1, 64)
-    , _renderingModes(
-        RenderingModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    */
 {
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
