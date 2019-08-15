@@ -1,0 +1,31 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require('./transforms')
+local NewHorizonsModel = asset.require('./model')
+
+
+
+local textures = NewHorizonsModel.NewHorizonsTextures
+local models = NewHorizonsModel.NewHorizonsModels
+
+local Labels = {
+    Identifier = "Labels",
+    Parent = NewHorizonsModel.NewHorizons.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "NEW HORIZONS",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/Labels.obj"
+        }, 
+        ColorTexture =  textures .. "/labels.png",
+        AmbientIntensity = 0.8
+    },
+    GUI = {
+        Path = "/Solar System/Missions/New Horizons"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Labels })

@@ -1,0 +1,59 @@
+-- mercurymagnetosphere.asset
+
+local assetHelper = asset.require('util/asset_helper')
+
+local localFolder = asset.syncedResource({
+    Name = "Mercury Magnetosphere",
+    Type = "HttpSynchronization",
+    Identifier = "mercury_magnetosphere",
+    Version = 1
+})
+
+
+local MercuryRadius = 2.4397E6
+
+local Magnetosphere = {   
+    Name = "Mercury Magnetosphere",
+    Identifier = "MercuryMagnetosphere",
+    Parent = "MercuryBarycenter",
+    SceneRadius = 0.8E+5,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        SourceDirectory = localFolder,
+        TransferFunction = localFolder .. "/transferfunction.txt",
+        Variable = "rho",
+        StepSize = "0.003",
+        Dimensions = {64, 64, 64},
+        GridType = "Cartesian",
+        SecondsBefore = 24*60*60*365*100,
+        SecondsAfter = 24*60*60*365*100,
+        Enabled = false
+    },
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MERCURY",
+            Observer = "MERCURY BARYCENTER",
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MERCURYSE",
+            DestinationFrame = "GALACTIC",
+            Kernels = {
+               localFolder .. "/openspace_mercury.ti"
+            }
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = MercuryRadius,
+        },
+    },
+    GUI = {
+        Name = "Mercury Magnetosphere",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Magnetosphere
+})
