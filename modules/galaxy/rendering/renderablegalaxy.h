@@ -62,15 +62,17 @@ private:
     properties::FloatProperty _stepSize;
     properties::FloatProperty _absorptionMultiply;
     properties::FloatProperty _emissionMultiply;
-    properties::FloatProperty _pointStepSize;
-    properties::FloatProperty _pointScaleFactor;
     properties::FloatProperty _enabledPointsRatio;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
 
+    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
+    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
+
     std::string _volumeFilename;
     glm::ivec3 _volumeDimensions;
     std::string _pointsFilename;
+    std::string _pointSpreadFunctionTexturePath;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
     std::unique_ptr<volume::RawVolume<glm::tvec4<GLubyte>>> _volume;
@@ -82,7 +84,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
     UniformCache(
         modelMatrix, cameraUp, eyePosition, cameraViewProjectionMatrix,
-        emittanceFactor
+        emittanceFactor, psfTexture
     ) _uniformCache;
     std::vector<float> _pointsData;
     size_t _nPoints;

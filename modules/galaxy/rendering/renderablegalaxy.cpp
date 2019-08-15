@@ -54,9 +54,9 @@ namespace {
         "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr const std::array<const char*, 6> UniformNames = {
         "modelMatrix", "cameraUp", "eyePosition", "cameraViewProjectionMatrix",
-        "emittanceFactor"
+        "emittanceFactor", "psfTexture"
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
@@ -74,18 +74,6 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
         "Emission Multiplier",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
-        "PointStepSize",
-        "Point Step Size",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PointScaleFactorInfo = {
-        "PointScaleFactor",
-        "Point Scale Factor",
         "" // @TODO Missing documentation
     };
 
@@ -115,8 +103,6 @@ namespace openspace {
     , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 100.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 400.f, 0.0f, 1000.0f)
-    , _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
-    , _pointScaleFactor(PointScaleFactorInfo, 1.f, 1.f, 64.f)
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.02f, 0.001f, 0.1f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
@@ -124,8 +110,6 @@ namespace openspace {
     dictionary.getValue("StepSize", _stepSize);
     dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
     dictionary.getValue("EmissionMultiply", _emissionMultiply);
-    dictionary.getValue("PointStepSize", _pointStepSize);
-    dictionary.getValue("PointScaleFactor", _pointScaleFactor);
     dictionary.getValue("EnabledPointsRatio", _enabledPointsRatio);
     dictionary.getValue("Translation", _translation);
     dictionary.getValue("Rotation", _rotation);
@@ -140,14 +124,6 @@ namespace openspace {
 
     if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
         _emissionMultiply = static_cast<float>(dictionary.value<double>(EmissionMultiplyInfo.identifier));
-    }
-
-    if (dictionary.hasKeyAndValue<double>(PointStepSizeInfo.identifier)) {
-        _pointStepSize = static_cast<float>(dictionary.value<double>(PointStepSizeInfo.identifier));
-    }
-
-    if (dictionary.hasKeyAndValue<double>(PointScaleFactorInfo.identifier)) {
-        _pointScaleFactor = static_cast<float>(dictionary.value<double>(PointScaleFactorInfo.identifier));
     }
 
     if (dictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
@@ -199,6 +175,15 @@ namespace openspace {
     } else {
         LERROR("No points filename specified.");
     }
+
+    std::string pointSpreadFunctionTexturePath;
+    if (pointsDictionary.getValue("Texture", pointSpreadFunctionTexturePath)) {
+        _pointSpreadFunctionTexturePath = absPath(pointSpreadFunctionTexturePath);
+        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(_pointSpreadFunctionTexturePath);
+    }
+    else {
+        LERROR("No points filename specified.");
+    }
 }
 
 void RenderableGalaxy::initializeGL() {
@@ -247,8 +232,6 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_stepSize);
     addProperty(_absorptionMultiply);
     addProperty(_emissionMultiply);
-    addProperty(_pointStepSize);
-    addProperty(_pointScaleFactor);
     addProperty(_enabledPointsRatio);
     addProperty(_translation);
     addProperty(_rotation);
@@ -261,6 +244,27 @@ void RenderableGalaxy::initializeGL() {
             absPath("${MODULE_GALAXY}/shaders/points_fs.glsl"),
             absPath("${MODULE_GALAXY}/shaders/points_ge.glsl")
         );
+
+        if (!_pointSpreadFunctionTexturePath.empty()) {
+            _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_pointSpreadFunctionTexturePath)
+            );
+
+            if (_pointSpreadFunctionTexture) {
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    absPath(_pointSpreadFunctionTexturePath)
+                ));
+                _pointSpreadFunctionTexture->uploadTexture();
+            }
+            _pointSpreadFunctionTexture->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            );
+
+            _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+                _pointSpreadFunctionTexturePath
+                );
+        }
 
         ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCache, UniformNames);
 
@@ -292,7 +296,7 @@ void RenderableGalaxy::initializeGL() {
 
         // Read points
         float x, y, z, r, g, b, a;
-        for (size_t i = 0; i < static_cast<size_t>(_nPoints * 0.1) + 1; ++i) {
+        for (size_t i = 0; i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1; ++i) {
             std::getline(pointFile, line);
             std::istringstream issp(line);
             issp >> x >> y >> z >> r >> g >> b >> a;
@@ -472,36 +476,17 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
             data.camera.combinedViewMatrix();
 
-
-        /*glm::mat4 modelMatrix = _pointTransform;
-        glm::mat4 viewMatrix = data.camera.combinedViewMatrix();
-        glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-
-        _pointsProgram->setUniform("model", modelMatrix);
-        _pointsProgram->setUniform("view", viewMatrix);
-        _pointsProgram->setUniform("projection", projectionMatrix);*/
-
-        /*glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::dmat4(_pointTransform);
-
-        glm::mat4 modelViewTransform = viewMatrix * modelMatrix;
-
-        _pointsProgram->setUniform("modelViewTransform", modelViewTransform);
-        _pointsProgram->setUniform("viewProjection", data.camera.viewProjectionMatrix());*/
-
         _pointsProgram->setUniform(_uniformCache.modelMatrix, modelMatrix);
         _pointsProgram->setUniform(
             _uniformCache.cameraViewProjectionMatrix,
             cameraViewProjectionMatrix
         );
         float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
+        ghoul::opengl::TextureUnit psfUnit;
+        psfUnit.activate();
+        _pointSpreadFunctionTexture->bind();
+        _pointsProgram->setUniform(_uniformCache.psfTexture, psfUnit);
         _pointsProgram->setUniform(_uniformCache.emittanceFactor, emittanceFactor);
-
-        /*_pointsProgram->setUniform("scaleFactor", _pointScaleFactor);
-        _pointsProgram->setUniform("emittanceFactor", emittanceFactor);*/
 
         glBindVertexArray(_pointsVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
@@ -526,38 +511,5 @@ float RenderableGalaxy::safeLength(const glm::vec3& vector) const {
     );
     return glm::length(vector / maxComponent) * maxComponent;
 }
-
-/*void RenderableGalaxy::postRender(const RenderData& data) {
-
-    _raycaster->setStepSize(_pointStepSize);
-
-    _pointsProgram->activate();
-    setPscUniforms(*_pointsProgram.get(), data.camera, data.position);
-
-    OsEng.ref().renderEngine().preRaycast(*_pointsProgram);
-
-    glm::mat4 modelMatrix = _pointTransform;
-    glm::mat4 viewMatrix = data.camera.viewMatrix();
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-
-    _pointsProgram->setUniform("model", modelMatrix);
-    _pointsProgram->setUniform("view", viewMatrix);
-    _pointsProgram->setUniform("projection", projectionMatrix);
-
-    float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
-    _pointsProgram->setUniform("emittanceFactor",  emittanceFactor);
-
-    glBindVertexArray(_pointsVao);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glDrawArrays(GL_POINTS, 0, _nPoints * _enabledPointsRatio);
-    glBindVertexArray(0);
-    glDepthMask(true);
-    glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    OsEng.ref().renderEngine().postRaycast(*_pointsProgram);
-}*/
 
 } // namespace openspace
