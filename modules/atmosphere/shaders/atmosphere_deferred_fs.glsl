@@ -413,11 +413,9 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         return finalScatteringRadiance;
     } else {
         //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
-        //return attenuation * spaceColor.rgb + finalScatteringRadiance;
-        // JCC: Review next step. I don't like it.
-        return attenuation * spaceColor.rgb +
-            1.0 * attenuation * finalScatteringRadiance +
-            (vec3(1.0) - attenuation) * finalScatteringRadiance;
+        return attenuation * spaceColor.rgb + finalScatteringRadiance;
+        // return attenuation * spaceColor.rgb +
+        // (vec3(1.0) - attenuation) * finalScatteringRadiance;
     }
     
 }
