@@ -319,7 +319,7 @@ RenderEngine::RenderEngine()
 
     _disableHDRPipeline.onChange([this]() {
         if (_renderer) {
-            //_renderer->setHDRExposure(_hdrExposure);
+            _renderer->disableHDR(_disableHDRPipeline);
         }
     });
     addProperty(_disableHDRPipeline);

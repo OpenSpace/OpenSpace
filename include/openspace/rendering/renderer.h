@@ -56,6 +56,7 @@ public:
     virtual void setValue(float value) = 0;
     virtual void setSaturation(float sat) = 0;
     virtual int nAaSamples() const = 0;
+    virtual void disableHDR(bool disable) = 0;
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.

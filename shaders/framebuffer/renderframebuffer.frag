@@ -26,6 +26,7 @@
 #include <#{fragmentPath}>
 
 #define exposure #{rendererData.hdrExposure}
+#define disableHDRPipeline #{rendererData.disableHDR}
 #define DeltaError 0.013f
 #define MaxValueColorBuffer 1E10
 
@@ -37,7 +38,8 @@ layout(location = 3) out vec4 filterBuffer;
 void main() {
     Fragment f  = getFragment();
 
-    if (f.disableLDR2HDR) {
+    // Color is already in HDR space
+    if (f.disableLDR2HDR || (disableHDRPipeline == 1)) {
         _out_color_ = f.color; 
     } else {
         _out_color_ = vec4((log2(vec3(1.0) - (f.color.rgb - vec3(DeltaError)))/(-exposure)), f.color.a); 

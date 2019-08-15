@@ -816,8 +816,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     glViewport(0, 0, _resolution.x, _resolution.y);
     
-    // Apply the selected TMO on the results and resolve the result for the default FBO
-    applyTMO(blackoutFactor);
+    if (_disableHDR) {
+        resolveMSAA(blackoutFactor);
+    }
+    else {
+        // Apply the selected TMO on the results and resolve the result for the default FBO
+        applyTMO(blackoutFactor);
+    }
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
@@ -1016,27 +1021,31 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
     _dirtyMsaaSamplingPattern = true;
 }
 
+void FramebufferRenderer::disableHDR(bool disable) {
+    _disableHDR = std::move(disable);
+}
+
 void FramebufferRenderer::setHDRExposure(float hdrExposure) {
     ghoul_assert(hdrExposure > 0.f, "HDR exposure must be greater than zero");
-    _hdrExposure = hdrExposure;
+    _hdrExposure = std::move(hdrExposure);
     updateRendererData();
 }
 
 void FramebufferRenderer::setGamma(float gamma) {
     ghoul_assert(gamma > 0.f, "Gamma value must be greater than zero");
-    _gamma = gamma;
+    _gamma = std::move(gamma);
 }
 
 void FramebufferRenderer::setHue(float hue) {
-    _hue = hue;
+    _hue = std::move(hue);
 }
 
 void FramebufferRenderer::setValue(float value) {
-    _value = value;
+    _value = std::move(value);
 }
 
 void FramebufferRenderer::setSaturation(float sat) {
-    _saturation = sat;
+    _saturation = std::move(sat);
 }
 
 int FramebufferRenderer::nAaSamples() const {
@@ -1047,6 +1056,7 @@ void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("hdrExposure", std::to_string(_hdrExposure));
+    dict.setValue("disableHDR", std::to_string(_disableHDR));
     _rendererData = dict;
     global::renderEngine.setRendererData(dict);
 }

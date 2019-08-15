@@ -138,6 +138,7 @@ public:
     void setSaturation(float sat) override;
     
     int nAaSamples() const override;
+    void disableHDR(bool disable) override;
     
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
@@ -197,6 +198,7 @@ private:
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
+    bool _disableHDR = false;
     
     float _hdrExposure = 3.7f;
     float _gamma = 0.95f;
