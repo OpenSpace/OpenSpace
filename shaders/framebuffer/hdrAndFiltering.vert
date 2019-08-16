@@ -22,29 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+#version __CONTEXT__
 
-#include <openspace/scene/translation.h>
-#include <openspace/util/timeline.h>
+layout(location = 0) in vec4 position;
+out vec2 texCoord;
 
-namespace openspace {
-
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class TimelineTranslation : public Translation {
-public:
-    TimelineTranslation(const ghoul::Dictionary& dictionary);
-
-    glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
-
-private:
-    Timeline<std::unique_ptr<Translation>> _timeline;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+void main() {
+    texCoord = 0.5 + position.xy * 0.5;
+    gl_Position = position;
+}

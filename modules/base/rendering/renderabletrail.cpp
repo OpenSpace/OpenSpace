@@ -178,8 +178,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
         properties::OptionProperty::DisplayType::Dropdown
     )
 {
+
+    setRenderBin(RenderBin::Overlay);
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
@@ -289,7 +290,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     if (usingFramebufferRenderer) {
         glDepthMask(false);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
     const bool renderLines = (_renderingModes == RenderingModeLines) |

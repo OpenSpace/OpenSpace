@@ -22,29 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+#version __CONTEXT__
 
-#include <openspace/scene/translation.h>
-#include <openspace/util/timeline.h>
+#include "hdr.glsl"
 
-namespace openspace {
+#define HSV_COLOR 0u
+#define HSL_COLOR 1u
 
-struct UpdateData;
+layout (location = 0) out vec4 finalColor;
 
-namespace documentation { struct Documentation; }
+uniform float hdrExposure;
+uniform float blackoutFactor;
+uniform float gamma;
+uniform float Hue;
+uniform float Saturation;
+uniform float Value;
+uniform float Lightness;
+uniform int nAaSamples;
 
-class TimelineTranslation : public Translation {
-public:
-    TimelineTranslation(const ghoul::Dictionary& dictionary);
+uniform sampler2DMS hdrFeedingTexture;
 
-    glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
+in vec2 texCoord;
 
-private:
-    Timeline<std::unique_ptr<Translation>> _timeline;
-};
+void main() {
+    vec4 color = vec4(0.0);
 
-} // namespace openspace
+    // Resolving...
+    for (int i = 0; i < nAaSamples; i++) {
+        color += texelFetch(hdrFeedingTexture, ivec2(gl_FragCoord), i);
+    }
 
-#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+    color /= nAaSamples;
+    color.rgb *= blackoutFactor;
+    
+    // Applies TMO
+    vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
+    
+    // Color control
+    vec3 hsvColor = rgb2hsv(tColor);
+    hsvColor.x = (hsvColor.x * Hue) > 360.f ? 360.f : (hsvColor.x * Hue);
+    hsvColor.y = (hsvColor.y * Saturation) > 1.f ? 1.f : (hsvColor.y * Saturation);
+    hsvColor.z = (hsvColor.z * Value) > 1.f ? 1.f : (hsvColor.z * Value);
+
+    // Gamma Correction
+    finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
+}
