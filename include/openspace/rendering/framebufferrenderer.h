@@ -109,6 +109,11 @@ private:
         GLuint _hdrFilteringTexture;
     } HDRBuffers;
 
+    typedef struct {
+        GLuint _fxaaFramebuffer;
+        GLuint _fxaaTexture;
+    } FXAABuffers;
+
 public:
     typedef std::map<
         VolumeRaycaster*,
@@ -128,6 +133,7 @@ public:
     void updateRaycastData();
     void updateDeferredcastData();
     void updateHDRAndFiltering();
+    void updateFXAA();
     
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
@@ -138,6 +144,7 @@ public:
     void setSaturation(float sat) override;
     
     int nAaSamples() const override;
+    void enableFXAA(bool enable) override;
     void disableHDR(bool disable) override;
     
     void update() override;
@@ -159,6 +166,7 @@ public:
 private:
     void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor);
+    void applyFXAA();
     
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
@@ -171,12 +179,13 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
+
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
-    
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
                  Hue, Saturation, Value, nAaSamples) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;
@@ -188,6 +197,7 @@ private:
     GBuffers _gBuffers;
     PingPongBuffers _pingPongBuffers;
     HDRBuffers _hdrBuffers;
+    FXAABuffers _fxaaBuffers;
     
     unsigned int _pingPongIndex = 0u;
 
@@ -198,11 +208,11 @@ private:
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
+    bool _enableFXAA = false;
     bool _disableHDR = false;
     
     float _hdrExposure = 3.7f;
     float _gamma = 0.95f;
-    float _maxWhite = 5.0f;
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;

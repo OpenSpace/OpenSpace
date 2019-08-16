@@ -253,6 +253,12 @@ namespace {
         "The blackout factor of the rendering. This can be used for fading in or out the "
         "rendering window"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
+        "FXAA",
+        "Enable FXAA",
+        "Enable FXAA"
+    };
 } // namespace
 
 
@@ -274,6 +280,7 @@ RenderEngine::RenderEngine()
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
+    , _enableFXAA(FXAAInfo, false)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 0.86f, 0.01f, 5.0f)
@@ -316,6 +323,13 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_nAaSamples);
+
+    _enableFXAA.onChange([this]() {
+        if (_renderer) {
+            _renderer->enableFXAA(_enableFXAA);
+        }
+        });
+    addProperty(_enableFXAA);
 
     _disableHDRPipeline.onChange([this]() {
         if (_renderer) {

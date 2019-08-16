@@ -209,6 +209,8 @@ private:
     properties::FloatProperty _globalBlackOutFactor;
     properties::IntProperty _nAaSamples;
     
+    properties::BoolProperty _enableFXAA;
+
     properties::BoolProperty _disableHDRPipeline;
     properties::FloatProperty _hdrExposure;
     properties::FloatProperty _gamma;

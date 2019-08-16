@@ -22,64 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RENDERER___H__
-#define __OPENSPACE_CORE___RENDERER___H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
-#include <vector>
+layout(location = 0) in vec4 position;
+out vec2 texCoord;
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
-namespace openspace {
-
-class RenderableVolume;
-class Camera;
-class Scene;
-
-class Renderer {
-public:
-    virtual ~Renderer() = default;
-
-    virtual void initialize() = 0;
-    virtual void deinitialize() = 0;
-
-    virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(int nAaSamples) = 0;
-    virtual void setHDRExposure(float hdrExposure) = 0;
-    virtual void setGamma(float gamma) = 0;
-    virtual void setHue(float hue) = 0;
-    virtual void setValue(float value) = 0;
-    virtual void setSaturation(float sat) = 0;
-    virtual int nAaSamples() const = 0;
-    virtual void enableFXAA(bool enable) = 0;
-    virtual void disableHDR(bool disable) = 0;
-
-    /**
-    * Set raycasting uniforms on the program object, and setup raycasting.
-    */
-    virtual void preRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-    /**
-    * Tear down raycasting for the specified program object.
-    */
-    virtual void postRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-
-    virtual void update() = 0;
-
-    virtual void render(Scene* scene, Camera* camera, float blackoutFactor) = 0;
-    /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
-     */
-    virtual void updateRendererData() = 0;
-};
-
-} // openspace
-
-#endif // __OPENSPACE_CORE___RENDERER___H__
+void main() {
+    texCoord = 0.5 + position.xy * 0.5;
+    gl_Position = position;
+}

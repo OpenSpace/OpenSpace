@@ -59,6 +59,10 @@ namespace {
         "Hue", "Saturation", "Value", "nAaSamples"
     };
 
+    constexpr const std::array<const char*, 2> FXAAUniformNames = {
+        "renderedTexture", "inverseScreenSize"
+    };
+
     constexpr const char* ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer.frag";
     constexpr const char* RaycastFragmentShaderPath =
@@ -148,6 +152,10 @@ void FramebufferRenderer::initialize() {
     // HDR / Filtering Buffers
     glGenFramebuffers(1, &_hdrBuffers._hdrFilteringFramebuffer);
     glGenTextures(1, &_hdrBuffers._hdrFilteringTexture);
+
+    // FXAA Buffers
+    glGenFramebuffers(1, &_fxaaBuffers._fxaaFramebuffer);
+    glGenTextures(1, &_fxaaBuffers._fxaaTexture);
 
     // Allocate Textures/Buffers Memory
     updateResolution();
@@ -266,9 +274,27 @@ void FramebufferRenderer::initialize() {
         LERROR("HDR/Filtering framebuffer is not complete");
     }
 
+    //===================================//
+    //==========  FXAA Buffers  =========//
+    //===================================//
+    glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers._fxaaFramebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        _fxaaBuffers._fxaaTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("FXAA framebuffer is not complete");
+    }
+
     // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
     // Building programs
     updateHDRAndFiltering();
+    updateFXAA();
     updateDeferredcastData();
 
     _dirtyMsaaSamplingPattern = true;
@@ -292,6 +318,11 @@ void FramebufferRenderer::initialize() {
         _hdrUniformCache, 
         HDRUniformNames
     );
+    ghoul::opengl::updateUniformLocations(
+        *_fxaaProgram,
+        _fxaaUniformCache,
+        FXAAUniformNames
+    );
 
     global::raycasterManager.addListener(*this);
     global::deferredcasterManager.addListener(*this);
@@ -307,12 +338,14 @@ void FramebufferRenderer::deinitialize() {
     glDeleteFramebuffers(1, &_gBuffers._framebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
     glDeleteFramebuffers(1, &_hdrBuffers._hdrFilteringFramebuffer);
+    glDeleteFramebuffers(1, &_fxaaBuffers._fxaaFramebuffer);
     glDeleteFramebuffers(1, &_pingPongBuffers.framebuffer);
 
     glDeleteTextures(1, &_gBuffers._colorTexture);
     glDeleteTextures(1, &_gBuffers._depthTexture);
 
     glDeleteTextures(1, &_hdrBuffers._hdrFilteringTexture);
+    glDeleteTextures(1, &_fxaaBuffers._fxaaTexture);
     glDeleteTextures(1, &_gBuffers._positionTexture);
     glDeleteTextures(1, &_gBuffers._normalTexture);
     
@@ -397,6 +430,40 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->deactivate();
 }
 
+void FramebufferRenderer::applyFXAA() {
+    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
+    std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
+
+    if (doPerformanceMeasurements) {
+        perfInternal = std::make_unique<performance::PerformanceMeasurement>(
+            "FramebufferRenderer::render::FXAA"
+            );
+    }
+
+    _fxaaProgram->activate();
+
+    ghoul::opengl::TextureUnit renderedTextureUnit;
+    renderedTextureUnit.activate();
+    glBindTexture(
+        GL_TEXTURE_2D,
+        _fxaaBuffers._fxaaTexture
+    );
+
+    _fxaaProgram->setUniform(
+        _fxaaUniformCache.renderedTexture,
+        renderedTextureUnit
+    );
+
+    glm::vec2 inverseScreenSize(1.f/_resolution.x, 1.f/_resolution.y);
+    _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, inverseScreenSize);
+
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    _fxaaProgram->deactivate();
+}
+
 void FramebufferRenderer::update() {
     if (_dirtyResolution) {
         updateResolution();
@@ -426,6 +493,16 @@ void FramebufferRenderer::update() {
             *_hdrFilteringProgram,
             _hdrUniformCache,
             HDRUniformNames
+        );
+    }
+
+    if (_fxaaProgram->isDirty()) {
+        _fxaaProgram->rebuildFromFile();
+
+        ghoul::opengl::updateUniformLocations(
+            *_fxaaProgram,
+            _fxaaUniformCache,
+            FXAAUniformNames
         );
     }
 
@@ -540,6 +617,24 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D,
         0,
         GL_RGBA32F,
+        _resolution.x,
+        _resolution.y,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // FXAA
+    glBindTexture(GL_TEXTURE_2D, _fxaaBuffers._fxaaTexture);
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
         _resolution.x,
         _resolution.y,
         0,
@@ -723,6 +818,17 @@ void FramebufferRenderer::updateHDRAndFiltering() {
     //_hdrFilteringProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
+void FramebufferRenderer::updateFXAA() {
+    _fxaaProgram = ghoul::opengl::ProgramObject::Build(
+        "FXAA Program",
+        absPath("${SHADERS}/framebuffer/fxaa.vert"),
+        absPath("${SHADERS}/framebuffer/fxaa.frag")
+    );
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    //_fxaaProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_fxaaProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+}
+
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     // Set OpenGL default rendering state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
@@ -811,9 +917,15 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
     
-    // When applying the TMO, the result is saved to the default FBO to be displayed
-    // by the Operating System. Also, the resolve procedure is executed in this step.
-    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    if (_enableFXAA) {
+        glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers._fxaaFramebuffer);
+    }
+    else {
+        // When applying the TMO, the result is saved to the default FBO to be displayed
+        // by the Operating System. Also, the resolve procedure is executed in this step.
+        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    }
+    
     glViewport(0, 0, _resolution.x, _resolution.y);
     
     if (_disableHDR) {
@@ -823,6 +935,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // Apply the selected TMO on the results and resolve the result for the default FBO
         applyTMO(blackoutFactor);
     }
+
+    if (_enableFXAA) {
+        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+        applyFXAA();
+    }
+    
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
@@ -1050,6 +1168,10 @@ void FramebufferRenderer::setSaturation(float sat) {
 
 int FramebufferRenderer::nAaSamples() const {
     return _nAaSamples;
+}
+
+void FramebufferRenderer::enableFXAA(bool enable) {
+    _enableFXAA = std::move(enable);
 }
 
 void FramebufferRenderer::updateRendererData() {
