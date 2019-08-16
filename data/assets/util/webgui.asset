@@ -20,12 +20,22 @@ asset.onInitialize(function ()
         openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
     end
 
-    -- Serve the production GUI:
+    -- Disable the server, add production gui endpoint, and restart server.
+    -- The temporary disabling avoids restarting the server on each property change.
+    -- TODO: Add a trigger property to the module to restart the server "manually"
+    -- and remove automatic restart on each property change,
+    -- since frequent restarting seems to be unstable on mac.
+
+    local enabled = openspace.getPropertyValue("Modules.WebGui.ServerProcessEnabled")
+    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
+
     local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
     directories[#directories + 1] = "frontend"
     directories[#directories + 1] = frontend .. '/frontend'
+
     openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
     openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
+    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
 
     if guiCustomization.webguiDevelopmentMode then
         -- Route CEF to the development version of the GUI.

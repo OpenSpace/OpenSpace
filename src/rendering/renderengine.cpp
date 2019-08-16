@@ -472,7 +472,7 @@ void RenderEngine::updateScene() {
     const Time& integrateFromTime = global::timeManager.integrateFromTime();
 
     _scene->update({
-        { glm::dvec3(0.0), glm::dmat3(11.), 1.0 },
+        { glm::dvec3(0.0), glm::dmat3(1.0), 1.0 },
         currentTime,
         integrateFromTime,
         _doPerformanceMeasurements
