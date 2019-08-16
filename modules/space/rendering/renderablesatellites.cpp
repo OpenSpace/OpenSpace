@@ -506,12 +506,17 @@ void RenderableSatellites::initializeGL() {
 }
     
 void RenderableSatellites::deinitializeGL() {
-    
-    SpaceModule::ProgramObjectManager.release(ProgramName);
-    
     glDeleteBuffers(1, &_vertexBuffer);
     //glDeleteBuffers(1, &_indexBuffer);
     glDeleteVertexArrays(1, &_vertexArray);
+
+    SpaceModule::ProgramObjectManager.release(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine.removeRenderProgram(p);
+        }
+    );
+    _programObject = nullptr;
 }
 
     
