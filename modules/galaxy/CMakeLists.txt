@@ -44,6 +44,9 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/galaxyraycast.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_ge.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/raycasterbounds_fs.glsl

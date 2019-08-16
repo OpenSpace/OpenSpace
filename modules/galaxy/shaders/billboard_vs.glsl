@@ -24,32 +24,13 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_color;
 
-out vec4 vs_position;
 out vec3 vs_color;
-out float vs_screenSpaceDepth;
-
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
-
-const double PARSEC = 3.08567756E16;
 
 void main() {
-	  vs_position = vec4(in_position, 1.0);
-		dvec4 dpos = dvec4(vs_position);
-		dpos.xyz *= 8.0;
-		dpos = modelMatrix * dpos;
-		dpos /= PARSEC;
-		//It lies about 8 kpc from the center on what is known as the Orion Arm of the Milky Way
-    dpos.x += 8000;
-
-		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
-
 		vs_color = in_color;
-		vs_screenSpaceDepth = positionScreenSpace.w;
-		gl_Position = positionScreenSpace;
+
+		gl_Position = vec4(in_position, 1.0);
 }

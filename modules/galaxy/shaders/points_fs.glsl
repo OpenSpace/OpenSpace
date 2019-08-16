@@ -25,27 +25,19 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
-uniform sampler2D psfTexture;
 uniform float emittanceFactor;
 
 in vec4 vs_position;
-in vec2 psfCoords;
-in vec3 ge_color;
-in float ge_screenSpaceDepth;
+in vec3 vs_color;
+in float vs_screenSpaceDepth;
 
 Fragment getFragment() {
     Fragment frag;
 
-    //float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(ge_screenSpaceDepth));
-    vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
-    vec4 fullColor = vec4(ge_color*textureColor.a, textureColor.a);
-    fullColor.a *= emittanceFactor;
-    if (fullColor.a == 0) {
-        discard;
-    }
+    vec4 fullColor = vec4(vs_color, emittanceFactor);
     frag.color = fullColor;
 
-    frag.depth = ge_screenSpaceDepth;
+    frag.depth = vs_screenSpaceDepth;
     frag.gPosition = vs_position;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 

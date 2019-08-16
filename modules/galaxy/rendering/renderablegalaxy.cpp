@@ -54,9 +54,24 @@ namespace {
         "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    constexpr const std::array<const char*, 6> UniformNames = {
-        "modelMatrix", "cameraUp", "eyePosition", "cameraViewProjectionMatrix",
-        "emittanceFactor", "psfTexture"
+    constexpr const std::array<const char*, 3> UniformNamesPoints = {
+        "modelMatrix", "cameraViewProjectionMatrix", "emittanceFactor"
+    };
+    constexpr const std::array<const char*, 6> UniformNamesBillboards = {
+        "modelMatrix", "cameraViewProjectionMatrix", "emittanceFactor",
+        "cameraUp", "eyePosition", "psfTexture"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
+        "VolumeRenderingEnabled",
+        "Volume Rendering",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
+        "StarRenderingEnabled",
+        "Star Rendering",
+        "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
@@ -89,6 +104,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
+        "StarRenderingMethod",
+        "Star Rendering Method",
+        "This value determines which rendering method is used for visualization of the stars."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
         "NEnabledPointsRatio",
         "Enabled points",
@@ -100,19 +121,33 @@ namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
+    , _starRenderingEnabled(StarRenderingEnabledInfo, true)
     , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 100.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 400.f, 0.0f, 1000.0f)
-    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.02f, 0.001f, 0.1f)
+    , _starRenderingMethod(StarRenderingMethodInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
 {
+    dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
+    dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
     dictionary.getValue("StepSize", _stepSize);
     dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
     dictionary.getValue("EmissionMultiply", _emissionMultiply);
+    dictionary.getValue("StarRenderingMethod", _starRenderingMethod);
     dictionary.getValue("EnabledPointsRatio", _enabledPointsRatio);
     dictionary.getValue("Translation", _translation);
     dictionary.getValue("Rotation", _rotation);
+
+    if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
+        _volumeRenderingEnabled = dictionary.value<bool>(VolumeRenderingEnabledInfo.identifier);
+    }
+
+    if (dictionary.hasKeyAndValue<bool>(StarRenderingEnabledInfo.identifier)) {
+        _starRenderingEnabled = static_cast<bool>(StarRenderingEnabledInfo.identifier);
+    }
 
     if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
@@ -124,6 +159,22 @@ namespace openspace {
 
     if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
         _emissionMultiply = static_cast<float>(dictionary.value<double>(EmissionMultiplyInfo.identifier));
+    }
+
+    _starRenderingMethod.addOptions({
+       { 0, "Points" },
+       { 1, "Billboards" }
+        });
+    if (dictionary.hasKey(StarRenderingMethodInfo.identifier)) {
+        const std::string starRenderingMethod = dictionary.value<std::string>(
+            StarRenderingMethodInfo.identifier
+            );
+        if (starRenderingMethod == "Points") {
+            _starRenderingMethod = 0;
+        }
+        else if (starRenderingMethod == "Billboards") {
+            _starRenderingMethod = 1;
+        }
     }
 
     if (dictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
@@ -229,9 +280,12 @@ void RenderableGalaxy::initializeGL() {
 
     onEnabledChange(onChange);
 
+    addProperty(_volumeRenderingEnabled);
+    addProperty(_starRenderingEnabled);
     addProperty(_stepSize);
     addProperty(_absorptionMultiply);
     addProperty(_emissionMultiply);
+    addProperty(_starRenderingMethod);
     addProperty(_enabledPointsRatio);
     addProperty(_translation);
     addProperty(_rotation);
@@ -241,8 +295,13 @@ void RenderableGalaxy::initializeGL() {
         _pointsProgram = global::renderEngine.buildRenderProgram(
             "Galaxy points",
             absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
-            absPath("${MODULE_GALAXY}/shaders/points_fs.glsl"),
-            absPath("${MODULE_GALAXY}/shaders/points_ge.glsl")
+            absPath("${MODULE_GALAXY}/shaders/points_fs.glsl")
+        );
+        _billboardsProgram = global::renderEngine.buildRenderProgram(
+            "Galaxy billboard",
+            absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
+            absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
+            absPath("${MODULE_GALAXY}/shaders/billboard_ge.glsl")
         );
 
         if (!_pointSpreadFunctionTexturePath.empty()) {
@@ -266,7 +325,8 @@ void RenderableGalaxy::initializeGL() {
                 );
         }
 
-        ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints, UniformNamesPoints);
+        ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards, UniformNamesBillboards);
 
         _pointsProgram->setIgnoreUniformLocationError(
             ghoul::opengl::ProgramObject::IgnoreError::Yes
@@ -391,7 +451,8 @@ void RenderableGalaxy::update(const UpdateData& data) {
 }
 
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
-    if (_raycaster) {
+    // Render the volume
+    if (_raycaster && _volumeRenderingEnabled) {
         RaycasterTask task { _raycaster.get(), data };
 
         const glm::vec3 position = data.camera.positionVec3();
@@ -432,6 +493,18 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
+    // Render the stars
+    if (_starRenderingEnabled) {
+        if (_starRenderingMethod == 1) {
+            renderBillboards(data);
+        }
+        else {
+            renderPoints(data);
+        }
+    }
+}
+
+void RenderableGalaxy::renderPoints(const RenderData& data) {
     if (_pointsProgram) {
         // Saving current OpenGL state
         GLenum blendEquationRGB;
@@ -453,18 +526,9 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
+        glDisable(GL_DEPTH_TEST);
 
         _pointsProgram->activate();
-
-        glm::dvec3 eyePosition = glm::dvec3(
-            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-        );
-        _pointsProgram->setUniform(_uniformCache.eyePosition, eyePosition);
-
-        glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-        _pointsProgram->setUniform(_uniformCache.cameraUp, cameraUp);
-
-        const glm::dvec3 dtranslation = glm::dvec3((double)_translation.value().x, (double)_translation.value().y, (double)_translation.value().z);
 
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -476,25 +540,99 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
             data.camera.combinedViewMatrix();
 
-        _pointsProgram->setUniform(_uniformCache.modelMatrix, modelMatrix);
+        _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelMatrix);
         _pointsProgram->setUniform(
-            _uniformCache.cameraViewProjectionMatrix,
+            _uniformCachePoints.cameraViewProjectionMatrix,
             cameraViewProjectionMatrix
         );
+
         float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
-        ghoul::opengl::TextureUnit psfUnit;
-        psfUnit.activate();
-        _pointSpreadFunctionTexture->bind();
-        _pointsProgram->setUniform(_uniformCache.psfTexture, psfUnit);
-        _pointsProgram->setUniform(_uniformCache.emittanceFactor, emittanceFactor);
+        _pointsProgram->setUniform(_uniformCachePoints.emittanceFactor, emittanceFactor);
 
         glBindVertexArray(_pointsVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
 
         glBindVertexArray(0);
-        
+
         _pointsProgram->deactivate();
 
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Restores OpenGL blending state
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+        glDepthMask(depthMask);
+    }
+}
+
+void RenderableGalaxy::renderBillboards(const RenderData& data) {
+    if (_billboardsProgram) {
+        // Saving current OpenGL state
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+        GLboolean depthMask;
+
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDepthMask(false);
+        glDisable(GL_DEPTH_TEST);
+
+        _billboardsProgram->activate();
+
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
+            data.camera.combinedViewMatrix();
+
+        _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelMatrix);
+        _billboardsProgram->setUniform(
+            _uniformCacheBillboards.cameraViewProjectionMatrix,
+            cameraViewProjectionMatrix
+        );
+
+        float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
+        _billboardsProgram->setUniform(_uniformCacheBillboards.emittanceFactor, emittanceFactor);
+
+        glm::dvec3 eyePosition = glm::dvec3(
+            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
+        _billboardsProgram->setUniform(_uniformCacheBillboards.eyePosition, eyePosition);
+
+        glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+        _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
+
+        ghoul::opengl::TextureUnit psfUnit;
+        psfUnit.activate();
+        _pointSpreadFunctionTexture->bind();
+        _billboardsProgram->setUniform(_uniformCacheBillboards.psfTexture, psfUnit);
+
+        glBindVertexArray(_pointsVao);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
+
+        glBindVertexArray(0);
+
+        _billboardsProgram->deactivate();
+
+        glEnable(GL_DEPTH_TEST);
         glDepthMask(true);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

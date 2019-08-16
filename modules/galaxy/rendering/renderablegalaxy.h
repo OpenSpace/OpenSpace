@@ -29,6 +29,7 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/optionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -55,13 +56,18 @@ public:
     void update(const UpdateData& data) override;
 
 private:
+    void renderPoints(const RenderData& data);
+    void renderBillboards(const RenderData& data);
     float safeLength(const glm::vec3& vector) const;
 
     glm::vec3 _volumeSize;
     glm::vec3 _pointScaling;
+    properties::BoolProperty _volumeRenderingEnabled;
+    properties::BoolProperty _starRenderingEnabled;
     properties::FloatProperty _stepSize;
     properties::FloatProperty _absorptionMultiply;
     properties::FloatProperty _emissionMultiply;
+    properties::OptionProperty _starRenderingMethod;
     properties::FloatProperty _enabledPointsRatio;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
@@ -82,10 +88,14 @@ private:
     float _opacityCoefficient;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;
     UniformCache(
-        modelMatrix, cameraUp, eyePosition, cameraViewProjectionMatrix,
-        emittanceFactor, psfTexture
-    ) _uniformCache;
+        modelMatrix, cameraViewProjectionMatrix, emittanceFactor
+    ) _uniformCachePoints;
+    UniformCache(
+        modelMatrix, cameraViewProjectionMatrix, emittanceFactor,
+        cameraUp, eyePosition, psfTexture
+    ) _uniformCacheBillboards;
     std::vector<float> _pointsData;
     size_t _nPoints;
     GLuint _pointsVao;

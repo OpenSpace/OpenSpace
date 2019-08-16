@@ -22,34 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform sampler2D psfTexture;
+uniform float emittanceFactor;
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_color;
+in vec4 vs_position;
+in vec2 psfCoords;
+in vec3 ge_color;
+in float ge_screenSpaceDepth;
 
-out vec4 vs_position;
-out vec3 vs_color;
-out float vs_screenSpaceDepth;
+Fragment getFragment() {
+    Fragment frag;
 
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
+    vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
+    vec4 fullColor = vec4(ge_color*textureColor.a, textureColor.a);
+    fullColor.a *= emittanceFactor;
+    if (fullColor.a == 0) {
+        discard;
+    }
+    frag.color = fullColor;
 
-const double PARSEC = 3.08567756E16;
+    frag.depth = ge_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-void main() {
-	  vs_position = vec4(in_position, 1.0);
-		dvec4 dpos = dvec4(vs_position);
-		dpos.xyz *= 8.0;
-		dpos = modelMatrix * dpos;
-		dpos /= PARSEC;
-		//It lies about 8 kpc from the center on what is known as the Orion Arm of the Milky Way
-    dpos.x += 8000;
-
-		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
-
-		vs_color = in_color;
-		vs_screenSpaceDepth = positionScreenSpace.w;
-		gl_Position = positionScreenSpace;
+    return frag;
 }
