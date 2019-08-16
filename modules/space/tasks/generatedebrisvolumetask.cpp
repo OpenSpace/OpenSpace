@@ -414,9 +414,9 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
         );
         glm::dvec3 position = keplerTranslator.position({
             {},
-	    Time(timeInSeconds),
-	    Time(0.0),
-	    false
+            Time(timeInSeconds),
+            Time(0.0),
+            false
         });
         // LINFO(fmt::format("cart: {} ", position));
         glm::dvec3 sphPos;
