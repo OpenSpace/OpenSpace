@@ -54,11 +54,11 @@ namespace {
         "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    constexpr const std::array<const char*, 3> UniformNamesPoints = {
-        "modelMatrix", "cameraViewProjectionMatrix", "emittanceFactor"
+    constexpr const std::array<const char*, 2> UniformNamesPoints = {
+        "modelMatrix", "cameraViewProjectionMatrix"
     };
-    constexpr const std::array<const char*, 6> UniformNamesBillboards = {
-        "modelMatrix", "cameraViewProjectionMatrix", "emittanceFactor",
+    constexpr const std::array<const char*, 5> UniformNamesBillboards = {
+        "modelMatrix", "cameraViewProjectionMatrix",
         "cameraUp", "eyePosition", "psfTexture"
     };
 
@@ -546,9 +546,6 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
             cameraViewProjectionMatrix
         );
 
-        float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
-        _pointsProgram->setUniform(_uniformCachePoints.emittanceFactor, emittanceFactor);
-
         glBindVertexArray(_pointsVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
 
@@ -608,9 +605,6 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
             _uniformCacheBillboards.cameraViewProjectionMatrix,
             cameraViewProjectionMatrix
         );
-
-        float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
-        _billboardsProgram->setUniform(_uniformCacheBillboards.emittanceFactor, emittanceFactor);
 
         glm::dvec3 eyePosition = glm::dvec3(
             glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)

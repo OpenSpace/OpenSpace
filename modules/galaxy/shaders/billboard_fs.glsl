@@ -26,7 +26,6 @@
 #include "floatoperations.glsl"
 
 uniform sampler2D psfTexture;
-uniform float emittanceFactor;
 
 in vec4 vs_position;
 in vec2 psfCoords;
@@ -38,7 +37,6 @@ Fragment getFragment() {
 
     vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
     vec4 fullColor = vec4(ge_color*textureColor.a, textureColor.a);
-    fullColor.a *= emittanceFactor;
     if (fullColor.a == 0) {
         discard;
     }

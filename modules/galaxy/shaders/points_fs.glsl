@@ -25,8 +25,6 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
-uniform float emittanceFactor;
-
 in vec4 vs_position;
 in vec3 vs_color;
 in float vs_screenSpaceDepth;
@@ -34,7 +32,7 @@ in float vs_screenSpaceDepth;
 Fragment getFragment() {
     Fragment frag;
 
-    vec4 fullColor = vec4(vs_color, emittanceFactor);
+    vec4 fullColor = vec4(vs_color, 1.0);
     frag.color = fullColor;
 
     frag.depth = vs_screenSpaceDepth;
