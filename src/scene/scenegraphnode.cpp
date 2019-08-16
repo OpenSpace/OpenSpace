@@ -662,18 +662,18 @@ void SceneGraphNode::getScreenSpaceData(RenderData& newData) {
             SurfacePositionHandle posHandle = calculateSurfacePositionHandle(cam.positionVec3());
             glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface + posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
             glm::dvec3 centerToActualSurface = glm::dmat3(this->modelTransform()) * centerToActualSurfaceModelSpace;
-            double planetRadius = length(centerToActualSurface);
+            double nodeRadius = length(centerToActualSurface);
 
             // Distance from the camera to the node
-            double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - planetRadius;
+            double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
 
             // Fix to limit the update of properties
             if (distFromCamToNode < _visibilityDistance) {
                  if (!_screenVisibility) {
                     _screenVisibility.setValue(true);
                  }
-                // Calculate the planet radius to screensize pixels
-                glm::dvec3 radiusPos = worldPos + (planetRadius * normalize(cam.lookUpVectorWorldSpace()));
+                // Calculate the node radius to screensize pixels
+                glm::dvec3 radiusPos = worldPos + (nodeRadius * normalize(cam.lookUpVectorWorldSpace()));
                 glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
                 glm::dvec3 ndc2 = clipSpaceRadius / clipSpaceRadius.w;
                 glm::ivec2 radiusScreenSpacePosition = glm::ivec2((ndc2.x + 1) * res.x / 2, (ndc2.y + 1) * res.y / 2);
