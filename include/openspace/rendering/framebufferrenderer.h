@@ -204,8 +204,7 @@ private:
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
-    bool _dirtyMsaaSamplingPattern;
-
+    
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
     bool _enableFXAA = false;

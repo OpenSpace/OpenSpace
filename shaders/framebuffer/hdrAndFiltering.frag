@@ -40,19 +40,12 @@ uniform float Value;
 uniform float Lightness;
 uniform int nAaSamples;
 
-uniform sampler2DMS hdrFeedingTexture;
+uniform sampler2D hdrFeedingTexture;
 
 in vec2 texCoord;
 
 void main() {
-    vec4 color = vec4(0.0);
-
-    // Resolving...
-    for (int i = 0; i < nAaSamples; i++) {
-        color += texelFetch(hdrFeedingTexture, ivec2(gl_FragCoord), i);
-    }
-
-    color /= nAaSamples;
+    vec4 color = texture(hdrFeedingTexture, texCoord);
     color.rgb *= blackoutFactor;
     
     // Applies TMO

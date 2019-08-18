@@ -33,7 +33,6 @@
 layout(location = 0) out vec4 _out_color_;
 layout(location = 1) out vec4 gPosition;
 layout(location = 2) out vec4 gNormal;
-layout(location = 3) out vec4 filterBuffer;
 
 void main() {
     Fragment f  = getFragment();
