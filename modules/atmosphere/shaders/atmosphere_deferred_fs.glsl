@@ -615,7 +615,7 @@ void main() {
                 pixelDepth                *= 0.001;
                 positionObjectsCoords.xyz *= 0.001;
                 
-                if (dot(position.xyz, vec3(1.0)) > 0.0 && (pixelDepth < offset)) {
+                if (pixelDepth < offset) {
                     // ATM Occluded - Something in fron of ATM.
                     atmosphereFinalColor += color;
                 } else {
