@@ -202,7 +202,6 @@ private:
     
     float _hdrExposure = 3.7f;
     float _gamma = 0.95f;
-    float _maxWhite = 5.0f;
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;
