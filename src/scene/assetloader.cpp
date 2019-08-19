@@ -286,12 +286,12 @@ void AssetLoader::unloadAsset(Asset* asset) {
     for (int ref : _onInitializationFunctionRefs[asset]) {
        luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
-    _onInitializationFunctionRefs.clear();
+    _onInitializationFunctionRefs[asset].clear();
 
     for (int ref : _onDeinitializationFunctionRefs[asset]) {
         luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
-    _onDeinitializationFunctionRefs.clear();
+    _onDeinitializationFunctionRefs[asset].clear();
 
     for (const auto& it : _onDependencyInitializationFunctionRefs[asset]) {
         for (int ref : it.second) {
