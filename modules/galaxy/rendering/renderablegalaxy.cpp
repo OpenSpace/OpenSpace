@@ -177,10 +177,6 @@ namespace openspace {
         }
     }
 
-    if (dictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
-        _enabledPointsRatio = static_cast<float>(dictionary.value<double>(EnabledPointsRatioInfo.identifier));
-    }
-
     if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
         _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
     }
@@ -225,6 +221,10 @@ namespace openspace {
         _pointsFilename = absPath(pointsFilename);
     } else {
         LERROR("No points filename specified.");
+    }
+
+    if (pointsDictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
+        _enabledPointsRatio = static_cast<float>(pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier));
     }
 
     std::string pointSpreadFunctionTexturePath;
