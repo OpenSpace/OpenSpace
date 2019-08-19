@@ -207,7 +207,7 @@ private:
     
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
-    bool _enableFXAA = false;
+    bool _enableFXAA = true;
     bool _disableHDR = false;
     
     float _hdrExposure = 3.7f;

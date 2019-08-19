@@ -30,6 +30,9 @@
 #define SUBPIXEL_QUALITY 0.75f
 
 const float[12] QUALITY = {1.f, 1.f, 1.f, 1.f, 1.f, 1.5f, 2.f, 2.f, 2.f, 2.f, 4.f, 8.f};
+// const float[24] QUALITY = {2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 12.f, 12.f, 12.f, 12.f, 14.f, 18.f,
+//                             18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 
+//                             18.f, 18.f};
 
 layout (location = 0) out vec4 aaFinalColor;
 
@@ -38,8 +41,9 @@ uniform sampler2D renderedTexture;
 
 in vec2 texCoord;
 
+// Relative luminance
 float rgb2luma(vec3 rgb){
-    return sqrt(dot(rgb, vec3(0.299, 0.587, 0.114)));
+    return dot(vec3(0.2126, 0.7152, 0.0722), rgb);
 }
 
 void main() {
