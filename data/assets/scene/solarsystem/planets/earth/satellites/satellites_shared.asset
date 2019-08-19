@@ -58,7 +58,7 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
                 Path = file,
                 Segments = 160,
                 Color = color,
-                Fade = 0.5                
+                Fade = 0.5
             },
             --Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
             GUI = {

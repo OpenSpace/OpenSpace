@@ -4,7 +4,7 @@ local shared = asset.require('../satellites_shared')
 local group = {
     Title = "SpaceStations",
     Url = "http://celestrak.com/NORAD/elements/stations.txt",
-    TrailColor = { 1.0, 1.0, 0.0 }
+    TrailColor = { 0.9, 0.1, 0.0 }
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
