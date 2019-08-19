@@ -21,17 +21,12 @@
   * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
   * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
   ****************************************************************************************/
-#include <fstream>
-#include <chrono>
-#include <vector> 
 
 #include <modules/space/rendering/renderablesatellites.h>
+
 #include <modules/space/translation/keplertranslation.h>
-#include <modules/space/translation/TLEtranslation.h>
+#include <modules/space/translation/tletranslation.h>
 #include <modules/space/spacemodule.h>
-
-#include <modules/base/basemodule.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
@@ -39,15 +34,15 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <chrono>
 #include <math.h>
 #include <fstream>
+#include <vector> 
 
 namespace {
     constexpr const char* ProgramName = "RenderableSatellites";
@@ -317,7 +312,7 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 new DoubleVector3Verifier,
                 Optional::No,
                 LineColorInfo.description
-            },
+            }
         }
     };
 }
@@ -333,14 +328,11 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
          Documentation(),
          dictionary,
          "RenderableSatellites"
-         );
+        );
 
-    _path =
-        dictionary.value<std::string>(PathInfo.identifier);
-    _nSegments =
-        static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _lineFade = 
-        static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
+    _path = dictionary.value<std::string>(PathInfo.identifier);
+    _nSegments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+    _lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
 
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
@@ -364,16 +356,15 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     file.open(filename);
 
-    __int64 numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
+    std::streamoff numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
                                    std::istreambuf_iterator<char>(), '\n' );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
     // 3 because a TLE has 3 lines per element/ object.
-    __int64 numberOfObjects = numberOfLines/3;
+    std::streamoff numberOfObjects = numberOfLines / 3;
 
     std::string line = "-";
-    for (__int64 i = 0; i < numberOfObjects; i++) {
-
+    for (std::streamoff i = 0; i < numberOfObjects; i++) {
         std::getline(file, line); // get rid of title
         
         KeplerParameters keplerElements;
@@ -470,14 +461,6 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
     file.close();
 }
 
-void RenderableSatellites::initialize() {
-
-}
-
-void RenderableSatellites::deinitialize() {
-    
-}
- 
 void RenderableSatellites::initializeGL() {
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
@@ -493,21 +476,19 @@ void RenderableSatellites::initializeGL() {
        }
    );
     
-    _uniformCache.modelView     = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection    = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.lineFade      = _programObject->uniformLocation("lineFade");
-    _uniformCache.inGameTime    = _programObject->uniformLocation("inGameTime");
-    _uniformCache.color         = _programObject->uniformLocation("color");
-    _uniformCache.opacity       = _programObject->uniformLocation("opacity");
+    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
+    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
+    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    _uniformCache.inGameTime = _programObject->uniformLocation("inGameTime");
+    _uniformCache.color = _programObject->uniformLocation("color");
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
 
     updateBuffers();
-
     setRenderBin(Renderable::RenderBin::Overlay);
 }
     
 void RenderableSatellites::deinitializeGL() {
     glDeleteBuffers(1, &_vertexBuffer);
-    //glDeleteBuffers(1, &_indexBuffer);
     glDeleteVertexArrays(1, &_vertexArray);
 
     SpaceModule::ProgramObjectManager.release(
@@ -519,25 +500,17 @@ void RenderableSatellites::deinitializeGL() {
     _programObject = nullptr;
 }
 
-    
 bool RenderableSatellites::isReady() const {
-    _programObject->activate();
-
-    return true;
-}
-
-void RenderableSatellites::update(const UpdateData& data) { 
+    return _programObject != nullptr;
 }
 
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     if (_TLEData.empty())
         return;
-    _inGameTime = data.time.j2000Seconds();
 
     _programObject->activate();
-
     _programObject->setUniform(_uniformCache.opacity, _opacity);
-    _programObject->setUniform(_uniformCache.inGameTime, _inGameTime);
+    _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
 
 
     glm::dmat4 modelTransform =

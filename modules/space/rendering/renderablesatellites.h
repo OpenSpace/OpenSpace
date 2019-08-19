@@ -22,26 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
-#define __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
 
 #include <openspace/rendering/renderable.h>
 
 #include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/translation/keplertranslation.h>
-
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/objectmanager.h>
-
-#include <glm/glm.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec2.hpp>
+#include <ghoul/opengl/programobject.h>
 
 namespace openspace {
 
+class RenderableSatellites : public Renderable {
+public:
+    RenderableSatellites(const ghoul::Dictionary& dictionary);
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+
+    static documentation::Documentation Documentation();
+    /**
+        * Reads the provided TLE file and calls the KeplerTranslation::setKeplerElments
+        * method with the correct values. If \p filename is a valid TLE file but contains
+        * disallowed values (see KeplerTranslation::setKeplerElements), a
+        * KeplerTranslation::RangeError is thrown.
+        *
+        * \param filename The path to the file that contains the TLE file.
+        *
+        * \throw ghoul::RuntimeError if the TLE file does not exist or there is a 
+        *        problem with its format.
+        * \pre The \p filename must exist
+        */
+    void readTLEFile(const std::string& filename);
+
+private:
     struct Vertex {
         glm::vec3 position;
         glm::vec3 color;
@@ -60,82 +81,49 @@ namespace openspace {
         double period = 0.0;
     };
 
-    class RenderableSatellites : public Renderable {
-    public:
-        RenderableSatellites(const ghoul::Dictionary& dictionary);
-
-        void initialize() override;
-        void deinitialize() override;
-        void initializeGL() override;
-        void deinitializeGL() override;
-
-        bool isReady() const override;
-
-        void render(const RenderData& data, RendererTasks& rendererTask) override;
-        void update(const UpdateData& data) override;
-
-        static documentation::Documentation Documentation();
-        /**
-         * Reads the provided TLE file and calls the KeplerTranslation::setKeplerElments
-         * method with the correct values. If \p filename is a valid TLE file but contains
-         * disallowed values (see KeplerTranslation::setKeplerElements), a
-         * KeplerTranslation::RangeError is thrown.
-         *
-         * \param filename The path to the file that contains the TLE file.
-         *
-         * \throw ghoul::RuntimeError if the TLE file does not exist or there is a 
-         *        problem with its format.
-         * \pre The \p filename must exist
-         */
-        void readTLEFile(const std::string& filename);
-
-    private:
-        /// The layout of the VBOs
-        struct TrailVBOLayout {
-            float x, y, z, time;
-            double epoch, period; 
-        };
-        // static_assert(sizeof(struct TrailVBOLayout)==4*sizeof(float)+2*sizeof(double),"Implementation error!");
-
-        KeplerTranslation _keplerTranslator;
-        std::vector<KeplerParameters> _TLEData;
-
-        /// The backend storage for the vertex buffer object containing all points for this
-        /// trail.
-        std::vector<TrailVBOLayout> _vertexBufferData;
-
-        /// The index array that is potentially used in the draw call. If this is empty, no
-        /// element draw call is used.
-        std::vector<unsigned int> _indexBufferData;
-
-        GLuint _vertexArray;
-        GLuint _vertexBuffer;
-        GLuint _indexBuffer;
-
-        //GLuint _vaoTest; // vertexArrayObject
-        //GLuint _vboTest; // vertextBufferObject
-        //GLuint _eboTest; // elementBufferObject/ indexBufferObject       
-
-        void updateBuffers();
-
-        ghoul::opengl::ProgramObject* _programObject;
-
-        properties::StringProperty _path;
-        properties::UIntProperty _nSegments;
-
-        properties::DoubleProperty _lineFade;
-
-        RenderableTrail::Appearance _appearance;
-
-        glm::vec3 _position;
-
-        double _inGameTime = 0.0;
-
-        UniformCache(modelView, projection, lineFade, inGameTime, color, opacity, numberOfSegments)
-            _uniformCache;
-
+    /// The layout of the VBOs
+    struct TrailVBOLayout {
+        float x, y, z, time;
+        double epoch, period; 
     };
 
-}
-#endif // __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
+    KeplerTranslation _keplerTranslator;
+    std::vector<KeplerParameters> _TLEData;
+
+    /// The backend storage for the vertex buffer object containing all points for this
+    /// trail.
+    std::vector<TrailVBOLayout> _vertexBufferData;
+
+    /// The index array that is potentially used in the draw call. If this is empty, no
+    /// element draw call is used.
+    std::vector<unsigned int> _indexBufferData;
+
+    GLuint _vertexArray;
+    GLuint _vertexBuffer;
+    GLuint _indexBuffer;
+
+    //GLuint _vaoTest; // vertexArrayObject
+    //GLuint _vboTest; // vertextBufferObject
+    //GLuint _eboTest; // elementBufferObject/ indexBufferObject       
+
+    void updateBuffers();
+
+    ghoul::opengl::ProgramObject* _programObject;
+
+    properties::StringProperty _path;
+    properties::UIntProperty _nSegments;
+
+    properties::DoubleProperty _lineFade;
+
+    RenderableTrail::Appearance _appearance;
+
+    glm::vec3 _position;
+
+    UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
+        numberOfSegments) _uniformCache;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
 
