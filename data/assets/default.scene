@@ -1,4 +1,5 @@
 asset.require('./base')
+asset.require('examples/volume/toyvolume')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 

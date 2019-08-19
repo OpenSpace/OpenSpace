@@ -49,13 +49,11 @@ public:
     virtual void deinitialize() = 0;
 
     virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(int nAaSamples) = 0;
     virtual void setHDRExposure(float hdrExposure) = 0;
     virtual void setGamma(float gamma) = 0;
     virtual void setHue(float hue) = 0;
     virtual void setValue(float value) = 0;
     virtual void setSaturation(float sat) = 0;
-    virtual int nAaSamples() const = 0;
     virtual void enableFXAA(bool enable) = 0;
     virtual void disableHDR(bool disable) = 0;
 

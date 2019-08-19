@@ -50,13 +50,13 @@
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
-    constexpr const std::array<const char*, 3> UniformNames = {
-        "mainColorTexture", "blackoutFactor", "nAaSamples"
+    constexpr const std::array<const char*, 2> UniformNames = {
+        "mainColorTexture", "blackoutFactor"
     };
 
-    constexpr const std::array<const char*, 8> HDRUniformNames = {
+    constexpr const std::array<const char*, 7> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma", 
-        "Hue", "Saturation", "Value", "nAaSamples"
+        "Hue", "Saturation", "Value"
     };
 
     constexpr const std::array<const char*, 2> FXAAUniformNames = {
@@ -316,7 +316,6 @@ void FramebufferRenderer::initialize() {
 
     // Default GL State for Blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -358,23 +357,6 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
                                                  DeferredcasterListener::IsAttached)
 {
     _dirtyDeferredcastData = true;
-}
-
-void FramebufferRenderer::resolveMSAA(float blackoutFactor) {
-    _resolveProgram->activate();
-
-    ghoul::opengl::TextureUnit mainColorTextureUnit;
-    mainColorTextureUnit.activate();
-
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._colorTexture);
-    _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
-    _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
-    _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
-    glBindVertexArray(_screenQuad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    _resolveProgram->deactivate();
 }
 
 void FramebufferRenderer::applyTMO(float blackoutFactor) {
@@ -1005,7 +987,6 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindTexture(GL_TEXTURE_2D, _gBuffers._depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
-            raycastProgram->setUniform("nAaSamples", _nAaSamples);
             raycastProgram->setUniform("windowSize", static_cast<glm::vec2>(_resolution));
 
             glDisable(GL_DEPTH_TEST);
@@ -1119,21 +1100,6 @@ void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _dirtyResolution = true;
 }
 
-void FramebufferRenderer::setNAaSamples(int nAaSamples) {
-    ghoul_assert(
-        nAaSamples >= 1 && nAaSamples <= 8,
-        "Number of AA samples has to be between 1 and 8"
-    );
-    _nAaSamples = nAaSamples;
-    if (_nAaSamples == 0) {
-        _nAaSamples = 1;
-    }
-    if (_nAaSamples > 8) {
-        LERROR("Framebuffer renderer does not support more than 8 MSAA samples.");
-        _nAaSamples = 8;
-    }
-}
-
 void FramebufferRenderer::disableHDR(bool disable) {
     _disableHDR = std::move(disable);
 }
@@ -1159,10 +1125,6 @@ void FramebufferRenderer::setValue(float value) {
 
 void FramebufferRenderer::setSaturation(float sat) {
     _saturation = std::move(sat);
-}
-
-int FramebufferRenderer::nAaSamples() const {
-    return _nAaSamples;
 }
 
 void FramebufferRenderer::enableFXAA(bool enable) {
