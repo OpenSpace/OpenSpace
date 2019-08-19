@@ -30,7 +30,17 @@ in vec4 viewPosition;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(modelPosition + 0.5, 1.0);
+    //Early ray termination on black parts of the data
+    /*vec3 normalizedPos = (modelPosition*2.0)-1.0;
+    if(abs(modelPosition.x) > 0.9 || abs(modelPosition.y) > 0.9){
+      frag.color = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    else{*/
+      vec3 pos = modelPosition + 0.5;
+      //vec3 posClamp = clamp(pos, vec3(0.0), vec3(1.0));
+      frag.color = vec4(pos, 1.0);
+    //}
+
     frag.depth = safeLength(viewPosition);
     return frag;
 }

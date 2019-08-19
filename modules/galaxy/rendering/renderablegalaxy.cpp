@@ -54,8 +54,8 @@ namespace {
         "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    constexpr const std::array<const char*, 2> UniformNamesPoints = {
-        "modelMatrix", "cameraViewProjectionMatrix"
+    constexpr const std::array<const char*, 3> UniformNamesPoints = {
+        "modelMatrix", "cameraViewProjectionMatrix", "eyePosition"
     };
     constexpr const std::array<const char*, 5> UniformNamesBillboards = {
         "modelMatrix", "cameraViewProjectionMatrix",
@@ -111,7 +111,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
-        "NEnabledPointsRatio",
+        "EnabledPointsRatio",
         "Enabled points",
         "" // @TODO Missing documentation
     };
@@ -254,7 +254,7 @@ void RenderableGalaxy::initializeGL() {
         GL_RGBA,
         GL_UNSIGNED_BYTE,
         ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Clamp);
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge);
 
     _texture->setPixelData(reinterpret_cast<char*>(
         _volume->data()),
@@ -545,6 +545,11 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
             _uniformCachePoints.cameraViewProjectionMatrix,
             cameraViewProjectionMatrix
         );
+
+        glm::dvec3 eyePosition = glm::dvec3(
+            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
+        _pointsProgram->setUniform(_uniformCachePoints.eyePosition, eyePosition);
 
         glBindVertexArray(_pointsVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));

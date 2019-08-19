@@ -28,11 +28,13 @@
 in vec4 vs_position;
 in vec3 vs_color;
 in float vs_screenSpaceDepth;
+in float vs_starBrightness;
 
 Fragment getFragment() {
     Fragment frag;
 
-    vec4 fullColor = vec4(vs_color, 1.0);
+    vec3 extinction = exp(vec3(0.6, 0.2, 0.3)-vs_color);
+    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness, 1.0);
     frag.color = fullColor;
 
     frag.depth = vs_screenSpaceDepth;

@@ -35,22 +35,21 @@ void sample#{id}(vec3 samplePos,
   inout vec3 accumulatedAlpha,
   inout float maxStepSize)
   {
-    //Speed up and border edge artifact fix
-    vec3 normalizedPos = (samplePos*2.0)-1.0;
-    if(abs(normalizedPos.x) > 0.8 || abs(normalizedPos.y) > 0.8){
-      //accumulatedAlpha = vec3(0.0);
-      return;
-    }
-
     vec3 aspect = aspect#{id};
     maxStepSize = maxStepSize#{id} / length(dir / aspect);
 
-    vec4 sampledColor = texture(galaxyTexture#{id}, samplePos.xyz);
+    //Early ray termination on black parts of the data
+    vec3 normalizedPos = (samplePos*2.0)-1.0;
+    if(abs(normalizedPos.x) > 0.8 || abs(normalizedPos.y) > 0.8){
+        return;
+    }
 
     float STEP_SIZE = maxStepSize#{id}*0.5;
     //float STEP_SIZE = 1 / 256.0;
 
     vec3 alphaTint = vec3(0.3, 0.54, 0.85);
+
+    vec4 sampledColor = texture(galaxyTexture#{id}, samplePos.xyz);
 
     // Source textures currently are square-rooted to avoid dithering in the shadows.
     // So square them back

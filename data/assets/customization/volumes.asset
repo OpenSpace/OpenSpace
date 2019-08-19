@@ -28,7 +28,7 @@ local MilkyWayVolumeGalaxy = {
 		Points = {
 			Type = "Points",
 			Filename = data .. "/MilkyWayPoints.off",
-			Scaling = {1.0, 1.0, 1.0},
+			EnabledPointsRatio = 0.3,
 			Texture = data .. "/halo.png"
 		}
     },

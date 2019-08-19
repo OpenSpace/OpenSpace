@@ -56,7 +56,9 @@ void main() {
     vec2 texCoord = vec2(gl_FragCoord.xy / windowSize);
 
     vec4 exitColorTexture = texture(exitColorTexture, texCoord);
-    if (exitColorTexture.a < 1.0) {
+
+    // if we don't have an exit, discard the ray
+    if (exitColorTexture.a < 1.0 || exitColorTexture.rgb == vec3(0.0)) {
         discard;
     }
 
@@ -69,6 +71,10 @@ void main() {
     vec3 entryPos;
     float entryDepth;
     getEntry(entryPos, entryDepth);
+    // if we don't have an entry, discard the ray
+    if (entryPos == vec3(0.0)) {
+        discard;
+    }
 
     vec3 position = entryPos;
     vec3 diff = exitPos - entryPos;
