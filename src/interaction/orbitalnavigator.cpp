@@ -701,8 +701,7 @@ void OrbitalNavigator::setRetargetInterpolationTime(float durationInSeconds) {
     _retargetInterpolationTime = durationInSeconds;
 }
 
-bool OrbitalNavigator::shouldFollowAnchorRotation() const
-{
+bool OrbitalNavigator::shouldFollowAnchorRotation() const {
     if (!_anchorNode) {
         return false;
     }
