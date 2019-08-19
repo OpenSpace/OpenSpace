@@ -22,22 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#version __CONTEXT__
 
-in vec3 vsPosition;
-in vec3 vsColor;
+layout(location = 0) in vec4 vertPosition;
 
-uniform float emittanceFactor;
+out vec3 modelPosition;
+out vec4 viewPosition;
+
+uniform mat4 viewProjection;
+uniform mat4 modelViewTransform;
 
 
-Fragment getFragment() {
-    Fragment frag;
+void main() {
+    modelPosition = vertPosition.xyz;
+    viewPosition = modelViewTransform*vertPosition;
 
-    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
-    frag.color = vec4(vsColor.rgb * coefficient, 1.0);
-
-    frag.depth = pscDepth(vec4(vsPosition, 0.0));
-
-    return frag;
+    // project the position to view space
+    gl_Position = viewProjection * viewPosition;
+    gl_Position.z = 0.0;
 }

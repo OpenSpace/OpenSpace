@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/boxgeometry.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -45,10 +46,33 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* GlslRayCastPath  = "${MODULES}/toyvolume/shaders/rayCast.glsl";
-    constexpr const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
-    constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
+    constexpr const char* GlslRaycastPath =
+        "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+    constexpr const char* GlslBoundsVsPath =
+        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
+    constexpr const char* GlslBoundsFsPath =
+        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
+
+    constexpr const std::array<const char*, 3> UniformNamesPoints = {
+        "modelMatrix", "cameraViewProjectionMatrix", "eyePosition"
+    };
+    constexpr const std::array<const char*, 5> UniformNamesBillboards = {
+        "modelMatrix", "cameraViewProjectionMatrix",
+        "cameraUp", "eyePosition", "psfTexture"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
+        "VolumeRenderingEnabled",
+        "Volume Rendering",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
+        "StarRenderingEnabled",
+        "Star Rendering",
+        "" // @TODO Missing documentation
+    };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
@@ -56,9 +80,15 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
-        "PointStepSize",
-        "Point Step Size",
+    constexpr openspace::properties::Property::PropertyInfo AbsorptionMultiplyInfo = {
+        "AbsorptionMultiply",
+        "Absorption Multiplier",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
+        "EmissionMultiply",
+        "Emission Multiplier",
         "" // @TODO Missing documentation
     };
 
@@ -74,8 +104,14 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
+        "StarRenderingMethod",
+        "Star Rendering Method",
+        "This value determines which rendering method is used for visualization of the stars."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
-        "NEnabledPointsRatio",
+        "EnabledPointsRatio",
         "Enabled points",
         "" // @TODO Missing documentation
     };
@@ -85,15 +121,69 @@ namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize(StepSizeInfo, 0.012f, 0.0005f, 0.05f)
-    , _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
-    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
+    , _starRenderingEnabled(StarRenderingEnabledInfo, true)
+    , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
+    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 100.0f)
+    , _emissionMultiply(EmissionMultiplyInfo, 400.f, 0.0f, 1000.0f)
+    , _starRenderingMethod(StarRenderingMethodInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
+    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
-    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
 {
+    dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
+    dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
+    dictionary.getValue("StepSize", _stepSize);
+    dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
+    dictionary.getValue("EmissionMultiply", _emissionMultiply);
+    dictionary.getValue("StarRenderingMethod", _starRenderingMethod);
+    dictionary.getValue("EnabledPointsRatio", _enabledPointsRatio);
     dictionary.getValue("Translation", _translation);
     dictionary.getValue("Rotation", _rotation);
-    dictionary.getValue("StepSize", _stepSize);
+
+    if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
+        _volumeRenderingEnabled = dictionary.value<bool>(VolumeRenderingEnabledInfo.identifier);
+    }
+
+    if (dictionary.hasKeyAndValue<bool>(StarRenderingEnabledInfo.identifier)) {
+        _starRenderingEnabled = static_cast<bool>(StarRenderingEnabledInfo.identifier);
+    }
+
+    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+        _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<double>(AbsorptionMultiplyInfo.identifier)) {
+        _absorptionMultiply = static_cast<float>(dictionary.value<double>(AbsorptionMultiplyInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
+        _emissionMultiply = static_cast<float>(dictionary.value<double>(EmissionMultiplyInfo.identifier));
+    }
+
+    _starRenderingMethod.addOptions({
+       { 0, "Points" },
+       { 1, "Billboards" }
+        });
+    if (dictionary.hasKey(StarRenderingMethodInfo.identifier)) {
+        const std::string starRenderingMethod = dictionary.value<std::string>(
+            StarRenderingMethodInfo.identifier
+            );
+        if (starRenderingMethod == "Points") {
+            _starRenderingMethod = 0;
+        }
+        else if (starRenderingMethod == "Billboards") {
+            _starRenderingMethod = 1;
+        }
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
+        _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(RotationInfo.identifier)) {
+        _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
+    }
 
     if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Volume")) {
         LERROR("No volume dictionary specified.");
@@ -132,7 +222,19 @@ namespace openspace {
     } else {
         LERROR("No points filename specified.");
     }
-    pointsDictionary.getValue("Scaling", _pointScaling);
+
+    if (pointsDictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
+        _enabledPointsRatio = static_cast<float>(pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier));
+    }
+
+    std::string pointSpreadFunctionTexturePath;
+    if (pointsDictionary.getValue("Texture", pointSpreadFunctionTexturePath)) {
+        _pointSpreadFunctionTexturePath = absPath(pointSpreadFunctionTexturePath);
+        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(_pointSpreadFunctionTexturePath);
+    }
+    else {
+        LERROR("No points filename specified.");
+    }
 }
 
 void RenderableGalaxy::initializeGL() {
@@ -140,7 +242,7 @@ void RenderableGalaxy::initializeGL() {
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect /= std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
 
-    volume::RawVolumeReader<glm::tvec4<GLfloat>> reader(
+    volume::RawVolumeReader<glm::tvec4<GLubyte>> reader(
         _volumeFilename,
         _volumeDimensions
     );
@@ -149,10 +251,10 @@ void RenderableGalaxy::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
         _volumeDimensions,
         ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA32F,
-        GL_FLOAT,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
         ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Clamp);
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge);
 
     _texture->setPixelData(reinterpret_cast<char*>(
         _volume->data()),
@@ -178,91 +280,131 @@ void RenderableGalaxy::initializeGL() {
 
     onEnabledChange(onChange);
 
+    addProperty(_volumeRenderingEnabled);
+    addProperty(_starRenderingEnabled);
     addProperty(_stepSize);
-    addProperty(_pointStepSize);
+    addProperty(_absorptionMultiply);
+    addProperty(_emissionMultiply);
+    addProperty(_starRenderingMethod);
+    addProperty(_enabledPointsRatio);
     addProperty(_translation);
     addProperty(_rotation);
-    addProperty(_enabledPointsRatio);
 
     // initialize points.
-    std::ifstream pointFile(_pointsFilename, std::ios::in | std::ios::binary);
+    if (!_pointsFilename.empty()) {
+        _pointsProgram = global::renderEngine.buildRenderProgram(
+            "Galaxy points",
+            absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
+            absPath("${MODULE_GALAXY}/shaders/points_fs.glsl")
+        );
+        _billboardsProgram = global::renderEngine.buildRenderProgram(
+            "Galaxy billboard",
+            absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
+            absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
+            absPath("${MODULE_GALAXY}/shaders/billboard_ge.glsl")
+        );
 
-    std::vector<glm::vec3> pointPositions;
-    std::vector<glm::vec3> pointColors;
+        if (!_pointSpreadFunctionTexturePath.empty()) {
+            _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_pointSpreadFunctionTexturePath)
+            );
 
-    int64_t nPoints;
-    pointFile.seekg(0, std::ios::beg); // read heder.
-    pointFile.read(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
+            if (_pointSpreadFunctionTexture) {
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    absPath(_pointSpreadFunctionTexturePath)
+                ));
+                _pointSpreadFunctionTexture->uploadTexture();
+            }
+            _pointSpreadFunctionTexture->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            );
 
-    _nPoints = static_cast<size_t>(nPoints);
+            _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+                _pointSpreadFunctionTexturePath
+                );
+        }
 
-    size_t nFloats = _nPoints * 7;
+        ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints, UniformNamesPoints);
+        ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards, UniformNamesBillboards);
 
-    std::vector<float> pointData(nFloats);
-    pointFile.seekg(sizeof(int64_t), std::ios::beg); // read past heder.
-    pointFile.read(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
-    pointFile.close();
+        _pointsProgram->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
 
-    float maxdist = 0;
+        GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
+        GLint colorAttrib = _pointsProgram->attributeLocation("in_color");
 
-    for (size_t i = 0; i < _nPoints; ++i) {
-        float x = pointData[i * 7 + 0];
-        float y = pointData[i * 7 + 1];
-        float z = pointData[i * 7 + 2];
-        float r = pointData[i * 7 + 3];
-        float g = pointData[i * 7 + 4];
-        float b = pointData[i * 7 + 5];
-        maxdist = std::max(maxdist, glm::length(glm::vec3(x, y, z)));
-        //float a = pointData[i * 7 + 6];  alpha is not used.
+        std::ifstream pointFile(_pointsFilename, std::ios::in);
 
-        pointPositions.emplace_back(x, y, z);
-        pointColors.emplace_back(r, g, b);
+        std::vector<glm::vec3> pointPositions;
+        std::vector<glm::vec3> pointColors;
+        int64_t nPoints;
+
+        // Read header for OFF (Object File Format)
+        std::string line;
+        std::getline(pointFile, line);
+
+        // Read point count
+        std::getline(pointFile, line);
+        std::istringstream iss(line);
+        iss >> nPoints;
+
+        // Prepare point reading
+        _nPoints = static_cast<size_t>(nPoints);  
+        float maxdist = 0;
+
+        // Read points
+        float x, y, z, r, g, b, a;
+        for (size_t i = 0; i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1; ++i) {
+            std::getline(pointFile, line);
+            std::istringstream issp(line);
+            issp >> x >> y >> z >> r >> g >> b >> a;
+
+            //Convert klioparsec to meters
+            glm::vec3 position = glm::vec3(x, y, z);
+            position *= (openspace::distanceconstants::Parsec * 100);
+
+            maxdist = std::max(maxdist, glm::length(position));
+
+            pointPositions.emplace_back(position);
+            pointColors.emplace_back(r, g, b);
+        }
+
+        pointFile.close();
+
+        std::cout << maxdist << std::endl;
+
+        glGenVertexArrays(1, &_pointsVao);
+        glGenBuffers(1, &_positionVbo);
+        glGenBuffers(1, &_colorVbo);
+
+        glBindVertexArray(_pointsVao);
+        glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
+        glBufferData(GL_ARRAY_BUFFER,
+            pointPositions.size() * sizeof(glm::vec3),
+            pointPositions.data(),
+            GL_STATIC_DRAW
+        );
+
+        glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
+        glBufferData(GL_ARRAY_BUFFER,
+            pointColors.size() * sizeof(glm::vec3),
+            pointColors.data(),
+            GL_STATIC_DRAW
+        );
+
+        glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
+        glEnableVertexAttribArray(positionAttrib);
+        glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
+        glEnableVertexAttribArray(colorAttrib);
+        glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
-
-    std::cout << maxdist << std::endl;
-
-    glGenVertexArrays(1, &_pointsVao);
-    glGenBuffers(1, &_positionVbo);
-    glGenBuffers(1, &_colorVbo);
-
-    glBindVertexArray(_pointsVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glBufferData(GL_ARRAY_BUFFER,
-        pointPositions.size() * sizeof(glm::vec3),
-        pointPositions.data(),
-        GL_STATIC_DRAW
-    );
-
-    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glBufferData(GL_ARRAY_BUFFER,
-        pointColors.size() * sizeof(glm::vec3),
-        pointColors.data(),
-        GL_STATIC_DRAW
-    );
-
-    _pointsProgram = global::renderEngine.buildRenderProgram(
-        "Galaxy points",
-        absPath("${MODULE_GALAXY}/shaders/points.vs"),
-        absPath("${MODULE_GALAXY}/shaders/points.fs")
-    );
-
-    _pointsProgram->setIgnoreUniformLocationError(
-        ghoul::opengl::ProgramObject::IgnoreError::Yes
-    );
-
-    GLint positionAttrib = _pointsProgram->attributeLocation("inPosition");
-    GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
-
-    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void RenderableGalaxy::deinitializeGL() {
@@ -289,9 +431,10 @@ void RenderableGalaxy::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
 
         glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
-        _pointTransform = glm::scale(transform, _pointScaling);
+        _pointTransform = transform;
+        //_pointTransform = glm::scale(transform, _pointScaling);
 
-        const glm::vec4 translation = glm::vec4(_translation.value(), 0.0);
+        const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.0);
 
         // Todo: handle floating point overflow, to actually support translation.
 
@@ -301,49 +444,201 @@ void RenderableGalaxy::update(const UpdateData& data) {
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
         _raycaster->setModelTransform(volumeTransform);
-        // @EMIL: is this correct? ---abock
+        _raycaster->setAbsorptionMultiplier(_absorptionMultiply);
+        _raycaster->setEmissionMultiplier(_emissionMultiply);
         _raycaster->setTime(data.time.j2000Seconds());
     }
 }
 
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
-    RaycasterTask task { _raycaster.get(), data };
+    // Render the volume
+    if (_raycaster && _volumeRenderingEnabled) {
+        RaycasterTask task { _raycaster.get(), data };
 
-    const glm::vec3 position = data.camera.positionVec3();
-    const float length = safeLength(position);
-    const glm::vec3 galaxySize = _volumeSize;
+        const glm::vec3 position = data.camera.positionVec3();
+        const float length = safeLength(position);
+        const glm::vec3 galaxySize = _volumeSize;
 
-    const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
+        const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
 
-    const float lowerRampStart = maxDim * 0.02f;
-    const float lowerRampEnd = maxDim * 0.5f;
+        const float lowerRampStart = maxDim * 0.02f;
+        const float lowerRampEnd = maxDim * 0.5f;
 
-    const float upperRampStart = maxDim * 2.f;
-    const float upperRampEnd = maxDim * 10.f;
+        const float upperRampStart = maxDim * 2.f;
+        const float upperRampEnd = maxDim * 10.f;
 
-    float opacityCoefficient = 1.f;
+        float opacityCoefficient = 1.f;
 
-    if (length < lowerRampStart) {
-        opacityCoefficient = 0.f; // camera really close
-    } else if (length < lowerRampEnd) {
-        opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
-    } else if (length < upperRampStart) {
-        opacityCoefficient = 1.f; // sweet spot (max)
-    } else if (length < upperRampEnd) {
-        opacityCoefficient = 1.f - (length - upperRampStart) /
-                             (upperRampEnd - upperRampStart); //fade out
-    } else {
-        opacityCoefficient = 0;
+        if (length < lowerRampStart) {
+            opacityCoefficient = 0.f; // camera really close
+        } else if (length < lowerRampEnd) {
+            opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
+        } else if (length < upperRampStart) {
+            opacityCoefficient = 1.f; // sweet spot (max)
+        } else if (length < upperRampEnd) {
+            opacityCoefficient = 1.f - (length - upperRampStart) /
+                                 (upperRampEnd - upperRampStart); //fade out
+        } else {
+            opacityCoefficient = 0;
+        }
+
+        _opacityCoefficient = opacityCoefficient;
+        ghoul_assert(
+            _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
+            "Opacity coefficient was not between 0 and 1"
+        );
+        if (opacityCoefficient > 0) {
+            _raycaster->setOpacityCoefficient(_opacityCoefficient);
+            tasks.raycasterTasks.push_back(task);
+        }
     }
 
-    _opacityCoefficient = opacityCoefficient;
-    ghoul_assert(
-        _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
-        "Opacity coefficient was not between 0 and 1"
-    );
-    if (opacityCoefficient > 0) {
-        _raycaster->setOpacityCoefficient(_opacityCoefficient);
-        tasks.raycasterTasks.push_back(task);
+    // Render the stars
+    if (_starRenderingEnabled) {
+        if (_starRenderingMethod == 1) {
+            renderBillboards(data);
+        }
+        else {
+            renderPoints(data);
+        }
+    }
+}
+
+void RenderableGalaxy::renderPoints(const RenderData& data) {
+    if (_pointsProgram) {
+        // Saving current OpenGL state
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+        GLboolean depthMask;
+
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDepthMask(false);
+        glDisable(GL_DEPTH_TEST);
+
+        _pointsProgram->activate();
+
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
+            data.camera.combinedViewMatrix();
+
+        _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelMatrix);
+        _pointsProgram->setUniform(
+            _uniformCachePoints.cameraViewProjectionMatrix,
+            cameraViewProjectionMatrix
+        );
+
+        glm::dvec3 eyePosition = glm::dvec3(
+            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
+        _pointsProgram->setUniform(_uniformCachePoints.eyePosition, eyePosition);
+
+        glBindVertexArray(_pointsVao);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
+
+        glBindVertexArray(0);
+
+        _pointsProgram->deactivate();
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Restores OpenGL blending state
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+        glDepthMask(depthMask);
+    }
+}
+
+void RenderableGalaxy::renderBillboards(const RenderData& data) {
+    if (_billboardsProgram) {
+        // Saving current OpenGL state
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+        GLboolean depthMask;
+
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDepthMask(false);
+        glDisable(GL_DEPTH_TEST);
+
+        _billboardsProgram->activate();
+
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
+            data.camera.combinedViewMatrix();
+
+        _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelMatrix);
+        _billboardsProgram->setUniform(
+            _uniformCacheBillboards.cameraViewProjectionMatrix,
+            cameraViewProjectionMatrix
+        );
+
+        glm::dvec3 eyePosition = glm::dvec3(
+            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
+        _billboardsProgram->setUniform(_uniformCacheBillboards.eyePosition, eyePosition);
+
+        glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+        _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
+
+        ghoul::opengl::TextureUnit psfUnit;
+        psfUnit.activate();
+        _pointSpreadFunctionTexture->bind();
+        _billboardsProgram->setUniform(_uniformCacheBillboards.psfTexture, psfUnit);
+
+        glBindVertexArray(_pointsVao);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
+
+        glBindVertexArray(0);
+
+        _billboardsProgram->deactivate();
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Restores OpenGL blending state
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+        glDepthMask(depthMask);
     }
 }
 
@@ -353,38 +648,5 @@ float RenderableGalaxy::safeLength(const glm::vec3& vector) const {
     );
     return glm::length(vector / maxComponent) * maxComponent;
 }
-
-/*void RenderableGalaxy::postRender(const RenderData& data) {
-
-    _raycaster->setStepSize(_pointStepSize);
-
-    _pointsProgram->activate();
-    setPscUniforms(*_pointsProgram.get(), data.camera, data.position);
-
-    OsEng.ref().renderEngine().preRaycast(*_pointsProgram);
-
-    glm::mat4 modelMatrix = _pointTransform;
-    glm::mat4 viewMatrix = data.camera.viewMatrix();
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-
-    _pointsProgram->setUniform("model", modelMatrix);
-    _pointsProgram->setUniform("view", viewMatrix);
-    _pointsProgram->setUniform("projection", projectionMatrix);
-
-    float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
-    _pointsProgram->setUniform("emittanceFactor",  emittanceFactor);
-
-    glBindVertexArray(_pointsVao);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(false);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glDrawArrays(GL_POINTS, 0, _nPoints * _enabledPointsRatio);
-    glBindVertexArray(0);
-    glDepthMask(true);
-    glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    OsEng.ref().renderEngine().postRaycast(*_pointsProgram);
-}*/
 
 } // namespace openspace

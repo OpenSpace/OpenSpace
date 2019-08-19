@@ -29,7 +29,13 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/optionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
+
+namespace ghoul::opengl {
+    class ProgramObject;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -40,7 +46,7 @@ struct RenderData;
 
 class RenderableGalaxy : public Renderable {
 public:
-    RenderableGalaxy(const ghoul::Dictionary& dictionary);
+    explicit RenderableGalaxy(const ghoul::Dictionary& dictionary);
     virtual ~RenderableGalaxy() = default;
 
     void initializeGL() override;
@@ -50,28 +56,47 @@ public:
     void update(const UpdateData& data) override;
 
 private:
+    void renderPoints(const RenderData& data);
+    void renderBillboards(const RenderData& data);
     float safeLength(const glm::vec3& vector) const;
 
     glm::vec3 _volumeSize;
     glm::vec3 _pointScaling;
+    properties::BoolProperty _volumeRenderingEnabled;
+    properties::BoolProperty _starRenderingEnabled;
     properties::FloatProperty _stepSize;
-    properties::FloatProperty _pointStepSize;
+    properties::FloatProperty _absorptionMultiply;
+    properties::FloatProperty _emissionMultiply;
+    properties::OptionProperty _starRenderingMethod;
+    properties::FloatProperty _enabledPointsRatio;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
-    properties::FloatProperty _enabledPointsRatio;
+
+    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
+    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
     std::string _volumeFilename;
     glm::ivec3 _volumeDimensions;
     std::string _pointsFilename;
+    std::string _pointSpreadFunctionTexturePath;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
-    std::unique_ptr<volume::RawVolume<glm::tvec4<GLfloat>>> _volume;
+    std::unique_ptr<volume::RawVolume<glm::tvec4<GLubyte>>> _volume;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     glm::mat4 _pointTransform;
     glm::vec3 _aspect;
     float _opacityCoefficient;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;
+    UniformCache(
+        modelMatrix, cameraViewProjectionMatrix, eyePosition
+    ) _uniformCachePoints;
+    UniformCache(
+        modelMatrix, cameraViewProjectionMatrix,
+        cameraUp, eyePosition, psfTexture
+    ) _uniformCacheBillboards;
+    std::vector<float> _pointsData;
     size_t _nPoints;
     GLuint _pointsVao;
     GLuint _positionVbo;

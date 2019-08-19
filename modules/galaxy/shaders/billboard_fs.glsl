@@ -22,32 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform sampler2D psfTexture;
 
-in vec3 inPosition;
-in vec3 inColor;
+in vec4 vs_position;
+in vec2 psfCoords;
+in vec3 ge_color;
+in float ge_screenSpaceDepth;
 
-out vec3 vsPosition;
-out vec3 vsColor;
+Fragment getFragment() {
+    Fragment frag;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
+    vec4 fullColor = vec4(ge_color*textureColor.a, textureColor.a);
+    if (fullColor.a == 0) {
+        discard;
+    }
+    frag.color = fullColor;
 
+    frag.depth = ge_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-void main() {
-    vec4 p = vec4(inPosition, 1.0);
-
-    vec4 worldPosition = model * vec4(inPosition, 1.0);
-    worldPosition.w = 0.0;
-    vec4 position = worldPosition; //pscTransform(worldPosition, model);
-
-
-    position = pscTransform(position, mat4(1.0));
-    vsPosition = position.xyz;    
-    position = projection * view * position;
-    gl_Position =  z_normalization(position);
-    vsColor = inColor;
+    return frag;
 }

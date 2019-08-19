@@ -27,6 +27,7 @@ asset.require('util/default_joystick')
 asset.require('util/webgui')
 
 asset.request('customization/globebrowsing')
+asset.request('customization/volumes')
 
 -- Keybindings that are specific for this scene
 local Keybindings = {

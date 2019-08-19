@@ -22,22 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
+#include "floatoperations.glsl"
 
-in vec3 vPosition;
-in vec4 worldPosition;
-
-uniform uint blendMode;
-
+in vec4 vs_position;
+in vec3 vs_color;
+in float vs_screenSpaceDepth;
+in float vs_starBrightness;
 
 Fragment getFragment() {
-    vec4 position = worldPosition;
-    float depth = pscDepth(position);
-
     Fragment frag;
-    frag.color = vec4((vPosition + 0.5), 1.0);
-    frag.depth = depth;
-    frag.blend = blendMode;
+
+    vec3 extinction = exp(vec3(0.6, 0.2, 0.3)-vs_color);
+    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness, 1.0);
+    frag.color = fullColor;
+
+    frag.depth = vs_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+
     return frag;
 }
