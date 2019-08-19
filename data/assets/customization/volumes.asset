@@ -3,26 +3,33 @@
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
+local data = asset.syncedResource({
+    Name = "Milkyway Volume Data",
+    Type = "HttpSynchronization",
+    Identifier = "milkyway_volume_data",
+    Version = 1
+})
+
 local MilkyWayVolumeGalaxy = {
     Identifier = "Milky Way Volume",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableGalaxy",
         StepSize = 0.01,
-		AbsorptionMultiply = 10,
-		EmissionMultiply = 100,
+		AbsorptionMultiply = 75,
+		EmissionMultiply = 200,
 		Translation = {0.2, 0, 0},
         Volume = {
 			Type = "Volume",
-			Filename = "${BASE}/../OpenSpaceData/Milkyway/MilkyWayRGBAVolume1024x1024x128.raw",
+			Filename = data .. "/MilkyWayRGBAVolume1024x1024x128.raw",
 			Dimensions = {1024, 1024, 128},
 			Size = {1.2E21, 1.2E21, 0.15E21}
 		},
 		Points = {
 			Type = "Points",
-			Filename = "${BASE}/../OpenSpaceData/Milkyway/MilkyWayPoints.off",
+			Filename = data .. "/MilkyWayPoints.off",
 			Scaling = {1.0, 1.0, 1.0},
-			Texture = "${BASE}/../OpenSpaceData/Milkyway/halo.png"
+			Texture = data .. "/halo.png"
 		}
     },
     GUI = {
