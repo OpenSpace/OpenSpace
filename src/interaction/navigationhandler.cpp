@@ -414,7 +414,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
 void NavigationHandler::saveNavigationState(const std::string& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
-    const SceneGraphNode* referenceFrame = _orbitalNavigator.followingNodeRotation() ?
+    const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
         sceneGraph()->root();
 
