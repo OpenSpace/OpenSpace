@@ -79,9 +79,6 @@ void main() {
     vec3 direction = normalize(diff);
     float raycastDepth = length(diff);
 
-    int i, j;
-    float tmp;
-
     float geoDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), 0).x);
     float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.0, 1.0);
     raycastDepth = geoRatio * raycastDepth;
@@ -102,11 +99,14 @@ void main() {
     vec3 accumulatedAlpha = vec3(0.0);
 
 
-    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
-         accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
-        if (currentDepth + nextStepSize * jitterFactor > raycastDepth) {
-            aaOpacity -= opacityDecay;
-        }
+    for (steps = 0; 
+        (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
+         accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; 
+         ++steps) 
+    {
+        // if (currentDepth + nextStepSize * jitterFactor > raycastDepth) {
+        //     aaOpacity -= opacityDecay;
+        // }
         bool shortStepSize = nextStepSize < raycastDepth / 10000000000.0;
 
         if (shortStepSize) {
