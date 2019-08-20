@@ -680,7 +680,7 @@ void SceneGraphNode::getScreenSpaceData(RenderData& newData) {
                 glm::dvec2 radiusInScreenSpace = screenSpacePosition - radiusScreenSpacePosition;
                 double screenSpaceRadius = length(radiusInScreenSpace);
 
-                double zoomThreshold = 0.5, moveThreshold = 1, radiusThreshold = 2;
+                double zoomThreshold = 0.1, moveThreshold = 1, radiusThreshold = 2;
 
                 if (abs(_screenSizeRadius - screenSpaceRadius) > radiusThreshold) {
                     _screenSizeRadius.setValue(screenSpaceRadius);
