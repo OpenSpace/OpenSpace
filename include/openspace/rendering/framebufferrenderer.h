@@ -136,14 +136,12 @@ public:
     void updateFXAA();
     
     void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
     void setGamma(float gamma) override;
     void setHue(float hue) override;
     void setValue(float value) override;
     void setSaturation(float sat) override;
     
-    int nAaSamples() const override;
     void enableFXAA(bool enable) override;
     void disableHDR(bool disable) override;
     
@@ -164,7 +162,6 @@ public:
         DeferredcasterListener::IsAttached isAttached) override;
 
 private:
-    void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor);
     void applyFXAA();
     
@@ -182,9 +179,9 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
 
-    UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
+    UniformCache(mainColorTexture, blackoutFactor) _uniformCache;
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-                 Hue, Saturation, Value, nAaSamples) _hdrUniformCache;
+                 Hue, Saturation, Value) _hdrUniformCache;
     UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
 
     GLint _defaultFBO;

@@ -26,7 +26,7 @@
 
 uniform sampler2D exitColorTexture;
 uniform sampler2D exitDepthTexture;
-uniform sampler2DMS mainDepthTexture;
+uniform sampler2D mainDepthTexture;
 
 uniform bool insideRaycaster;
 uniform vec3 cameraPosInRaycaster;
@@ -46,9 +46,6 @@ out vec4 finalColor;
 
 #define ALPHA_LIMIT 0.99
 #define RAYCAST_MAX_STEPS 1000
-#define MAX_AA_SAMPLES 8
-
-uniform int nAaSamples;
 
 #include <#{getEntryPath}>
 
@@ -76,25 +73,12 @@ void main() {
     vec3 direction = normalize(diff);
     float raycastDepth = length(diff);
 
-    float raycastDepths[MAX_AA_SAMPLES];
-
     int i, j;
     float tmp;
 
-    for (i = 0; i < nAaSamples; i++) {
-        float geoDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
-        float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.0, 1.0);
-        raycastDepths[i] = geoRatio * raycastDepth;
-    }
-
-    for(i = 1; i < nAaSamples; ++i) {
-        tmp = raycastDepths[i];
-        for(j = i; j > 0 && tmp < raycastDepths[j - 1]; --j) {
-            raycastDepths[j] = raycastDepths[j-1];
-        }
-        raycastDepths[j] = tmp;
-    }
-
+    float geoDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), 0).x);
+    float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.0, 1.0);
+    raycastDepth = geoRatio * raycastDepth;
 
     float currentDepth = 0.0;
     // todo: shorten depth if geometry is intersecting!
@@ -106,20 +90,20 @@ void main() {
 
     float aaOpacity = 1.0;
     int sampleIndex = 0;
-    float opacityDecay = 1.0 / nAaSamples;
+    float opacityDecay = 1.0;
 
     vec3 accumulatedColor = vec3(0.0);
     vec3 accumulatedAlpha = vec3(0.0);
 
 
-    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
-        while (sampleIndex < nAaSamples && currentDepth + nextStepSize * jitterFactor > raycastDepths[sampleIndex]) {
-            sampleIndex++;
+    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
+         accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
+        if (currentDepth + nextStepSize * jitterFactor > raycastDepth) {
             aaOpacity -= opacityDecay;
         }
         bool shortStepSize = nextStepSize < raycastDepth / 10000000000.0;
 
-        if (sampleIndex >= nAaSamples || shortStepSize) {
+        if (shortStepSize) {
             break;
         }
 
@@ -139,7 +123,7 @@ void main() {
 
         previousJitterDistance = currentStepSize - jitteredStepSize;
 
-        float maxStepSize = raycastDepths[nAaSamples - 1] - currentDepth;
+        float maxStepSize = raycastDepth - currentDepth;
 
         nextStepSize = min(nextStepSize, maxStepSize);
 

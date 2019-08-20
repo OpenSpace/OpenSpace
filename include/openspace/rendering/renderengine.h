@@ -207,7 +207,6 @@ private:
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
-    properties::IntProperty _nAaSamples;
     
     properties::BoolProperty _enableFXAA;
 
