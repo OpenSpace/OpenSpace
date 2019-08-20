@@ -65,10 +65,7 @@ namespace {
 
 namespace openspace::interaction {
 
-
-ghoul::Dictionary
-    openspace::interaction::NavigationHandler::NavigationState::dictionary() const
-{
+ghoul::Dictionary NavigationHandler::NavigationState::dictionary() const {
     ghoul::Dictionary cameraDict;
     cameraDict.setValue(KeyPosition, position);
     cameraDict.setValue(KeyAnchor, anchor);
@@ -93,9 +90,7 @@ ghoul::Dictionary
     return cameraDict;
 }
 
-openspace::interaction::NavigationHandler::NavigationState::NavigationState(
-    const ghoul::Dictionary& dictionary)
-{
+NavigationHandler::NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
     const bool hasAnchor = dictionary.hasValue<std::string>(KeyAnchor);
     const bool hasPosition = dictionary.hasValue<glm::dvec3>(KeyPosition);
     if (!hasAnchor || !hasPosition) {
@@ -129,14 +124,12 @@ openspace::interaction::NavigationHandler::NavigationState::NavigationState(
     }
 }
 
-openspace::interaction::NavigationHandler::NavigationState::NavigationState(
-    std::string anchor,
-    std::string aim,
-    std::string referenceFrame,
-    glm::dvec3 position,
-    std::optional<glm::dvec3> up,
-    double yaw,
-    double pitch)
+NavigationHandler::NavigationState::NavigationState(std::string anchor, std::string aim,
+                                                    std::string referenceFrame,
+                                                    glm::dvec3 position,
+                                                    std::optional<glm::dvec3> up,
+                                                    double yaw,
+                                                    double pitch)
     : anchor(std::move(anchor))
     , aim(std::move(aim))
     , referenceFrame(std::move(referenceFrame))
@@ -332,7 +325,7 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
 }
 
 NavigationHandler::NavigationState NavigationHandler::navigationState(
-    const SceneGraphNode& referenceFrame) const
+                                               const SceneGraphNode& referenceFrame) const
 {
     const SceneGraphNode* anchor = _orbitalNavigator.anchorNode();
     const SceneGraphNode* aim = _orbitalNavigator.aimNode();
@@ -375,7 +368,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
 }
 
 void NavigationHandler::saveNavigationState(const std::string& filepath,
-    const std::string& referenceFrameIdentifier)
+                                            const std::string& referenceFrameIdentifier)
 {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
@@ -429,9 +422,9 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 }
 
 void NavigationHandler::setJoystickAxisMapping(int axis,
-    JoystickCameraStates::AxisType mapping,
-    JoystickCameraStates::AxisInvert shouldInvert,
-    JoystickCameraStates::AxisNormalize shouldNormalize)
+                                               JoystickCameraStates::AxisType mapping,
+                                            JoystickCameraStates::AxisInvert shouldInvert,
+                                      JoystickCameraStates::AxisNormalize shouldNormalize)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
         axis,
@@ -442,9 +435,9 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
 }
 
 void NavigationHandler::setWebsocketAxisMapping(int axis,
-    WebsocketCameraStates::AxisType mapping,
-    WebsocketCameraStates::AxisInvert shouldInvert,
-    WebsocketCameraStates::AxisNormalize shouldNormalize)
+                                                WebsocketCameraStates::AxisType mapping,
+                                           WebsocketCameraStates::AxisInvert shouldInvert,
+                                     WebsocketCameraStates::AxisNormalize shouldNormalize)
 {
     _orbitalNavigator.websocketStates().setAxisMapping(
         axis,
@@ -456,7 +449,7 @@ void NavigationHandler::setWebsocketAxisMapping(int axis,
 
 
 JoystickCameraStates::AxisInformation
-    NavigationHandler::joystickAxisMapping(int axis) const
+NavigationHandler::joystickAxisMapping(int axis) const
 {
     return _orbitalNavigator.joystickStates().axisMapping(axis);
 }
@@ -470,9 +463,9 @@ float NavigationHandler::joystickAxisDeadzone(int axis) const {
 }
 
 void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
-    JoystickAction action,
-    JoystickCameraStates::ButtonCommandRemote remote,
-    std::string documentation)
+                                                  JoystickAction action,
+                                         JoystickCameraStates::ButtonCommandRemote remote,
+                                                                std::string documentation)
 {
     _orbitalNavigator.joystickStates().bindButtonCommand(
         button,
