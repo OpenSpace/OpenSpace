@@ -34,8 +34,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/triggerproperty.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-
 namespace ghoul {
     class Dictionary;
     class SharedMemory;

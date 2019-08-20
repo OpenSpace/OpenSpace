@@ -275,7 +275,7 @@ RenderEngine::RenderEngine()
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 0.86f, 0.01f, 5.0f)
+    , _gamma(GammaInfo, 0.95f, 0.01f, 5.0f)
     , _hue(HueInfo, 180.f, 0.0f, 360.0f)
     , _saturation(SaturationInfo, 1.f, 0.0f, 2.0f)
     , _value(ValueInfo, 1.f, 0.0f, 2.0f)
@@ -297,7 +297,7 @@ RenderEngine::RenderEngine()
         glm::vec3(0.f),
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
-    )    
+    )
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -318,7 +318,7 @@ RenderEngine::RenderEngine()
 
     _disableHDRPipeline.onChange([this]() {
         if (_renderer) {
-            _renderer->disableHDR(_disableHDRPipeline);
+            _renderer->setDisableHDR(_disableHDRPipeline);
         }
     });
     addProperty(_disableHDRPipeline);
