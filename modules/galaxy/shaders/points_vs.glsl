@@ -47,17 +47,11 @@ void main() {
 		double distanceToStar = length((dpos.xyz - eyePosition));
 		vs_starBrightness = clamp(float(8000*PARSEC/distanceToStar), 0.0, 1.0);
 
-		// Discard stars if we are not seing the milky way volume
-		if(length(vec3(0.0)-eyePosition)<780*PARSEC){
-			vs_starBrightness = 0.0;
-		}
-		else{
-			dpos.xyz *= 8.0;
-			dpos = modelMatrix * dpos;
-			dpos /= PARSEC;
-			//It lies about 8 kpc from the center on what is known as the Orion Arm of the Milky Way
-			dpos.x += 8000;
-		}
+		dpos.xyz *= 8.0;
+		dpos = modelMatrix * dpos;
+		dpos /= PARSEC;
+		//It lies about 8 kpc from the center on what is known as the Orion Arm of the Milky Way
+		dpos.x += 8000;
 
 		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
 		vs_color = in_color;

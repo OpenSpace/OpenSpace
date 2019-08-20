@@ -30,11 +30,13 @@ in vec3 vs_color;
 in float vs_screenSpaceDepth;
 in float vs_starBrightness;
 
+uniform float opacityCoefficient;
+
 Fragment getFragment() {
     Fragment frag;
 
     vec3 extinction = exp(vec3(0.6, 0.2, 0.3)-vs_color);
-    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness, 1.0);
+    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*opacityCoefficient, 1.0);
     frag.color = fullColor;
 
     frag.depth = vs_screenSpaceDepth;

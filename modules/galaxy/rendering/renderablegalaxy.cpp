@@ -54,8 +54,9 @@ namespace {
         "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    constexpr const std::array<const char*, 3> UniformNamesPoints = {
-        "modelMatrix", "cameraViewProjectionMatrix", "eyePosition"
+    constexpr const std::array<const char*, 4> UniformNamesPoints = {
+        "modelMatrix", "cameraViewProjectionMatrix", "eyePosition",
+        "opacityCoefficient"
     };
     constexpr const std::array<const char*, 5> UniformNamesBillboards = {
         "modelMatrix", "cameraViewProjectionMatrix",
@@ -468,7 +469,6 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         const float upperRampEnd = maxDim * 10.f;
 
         float opacityCoefficient = 1.f;
-
         if (length < lowerRampStart) {
             opacityCoefficient = 0.f; // camera really close
         } else if (length < lowerRampEnd) {
@@ -494,7 +494,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     // Render the stars
-    if (_starRenderingEnabled) {
+    if (_starRenderingEnabled && _opacityCoefficient > 0.f) {
         if (_starRenderingMethod == 1) {
             renderBillboards(data);
         }
@@ -550,6 +550,7 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
             glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
         );
         _pointsProgram->setUniform(_uniformCachePoints.eyePosition, eyePosition);
+        _pointsProgram->setUniform(_uniformCachePoints.opacityCoefficient, _opacityCoefficient);
 
         glBindVertexArray(_pointsVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));

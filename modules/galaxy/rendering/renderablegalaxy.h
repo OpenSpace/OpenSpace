@@ -90,7 +90,8 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;
     UniformCache(
-        modelMatrix, cameraViewProjectionMatrix, eyePosition
+        modelMatrix, cameraViewProjectionMatrix, eyePosition,
+        opacityCoefficient
     ) _uniformCachePoints;
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix,
