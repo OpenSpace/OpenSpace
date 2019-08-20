@@ -67,12 +67,14 @@ protected:
     virtual void bindTexture();
     virtual void unbindTexture();
 
+protected:
+    properties::OptionProperty _blendMode;
+
 private:
     void createPlane();
 
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
-    properties::OptionProperty _blendMode;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
 

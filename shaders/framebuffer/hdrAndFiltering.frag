@@ -24,20 +24,46 @@
 
 #version __CONTEXT__
 
+#include "hdr.glsl"
+
+#define HSV_COLOR 0u
+#define HSL_COLOR 1u
+
 layout (location = 0) out vec4 finalColor;
 
+uniform float hdrExposure;
 uniform float blackoutFactor;
+uniform float gamma;
+uniform float Hue;
+uniform float Saturation;
+uniform float Value;
+uniform float Lightness;
 uniform int nAaSamples;
-uniform sampler2DMS mainColorTexture;
+
+uniform sampler2DMS hdrFeedingTexture;
+
+in vec2 texCoord;
 
 void main() {
     vec4 color = vec4(0.0);
+
+    // Resolving...
     for (int i = 0; i < nAaSamples; i++) {
-        color += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+        color += texelFetch(hdrFeedingTexture, ivec2(gl_FragCoord), i);
     }
 
     color /= nAaSamples;
     color.rgb *= blackoutFactor;
-     
-    finalColor = vec4(color.rgb, 1.0);
+    
+    // Applies TMO
+    vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
+    
+    // Color control
+    vec3 hsvColor = rgb2hsv(tColor);
+    hsvColor.x = (hsvColor.x * Hue) > 360.f ? 360.f : (hsvColor.x * Hue);
+    hsvColor.y = (hsvColor.y * Saturation) > 1.f ? 1.f : (hsvColor.y * Saturation);
+    hsvColor.z = (hsvColor.z * Value) > 1.f ? 1.f : (hsvColor.z * Value);
+
+    // Gamma Correction
+    finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
 }

@@ -206,15 +206,21 @@ private:
 
     properties::FloatProperty _globalBlackOutFactor;
     properties::IntProperty _nAaSamples;
+    
+    properties::BoolProperty _disableHDRPipeline;
     properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
+
+    properties::FloatProperty _hue;
+    properties::FloatProperty _saturation;
+    properties::FloatProperty _value;
+    
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
-
+    
     uint64_t _frameNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;

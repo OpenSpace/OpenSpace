@@ -96,6 +96,7 @@ protected:
     properties::FloatProperty _opacity;
     properties::StringProperty _renderableType;
 
+    void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
 private:

@@ -46,8 +46,6 @@ Fragment getFragment() {
     frag.depth = vs_positionScreenSpace.w;
     frag.blend = BLEND_MODE_ADDITIVE;
 
-    vec4 depthCorrection = vec4(0.0, 0.0, 100.0, 0.0);
-
     if (renderPhase == RenderPhasePoints) {
         // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
         // smoothstep to gradually decrease the alpha on the edges of the point
@@ -60,13 +58,9 @@ Fragment getFragment() {
         }
 
         frag.color.a = transparencyCorrection;
-    }    
+    }
 
-
-    // G-Buffer
-    // JCC: The depthCorrection here is a temporary tweak
-    // to fix precision problems.
-    frag.gPosition = vs_gPosition + depthCorrection;
+    frag.gPosition = vs_gPosition;
 
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);

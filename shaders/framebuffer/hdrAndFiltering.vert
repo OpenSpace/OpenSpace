@@ -24,20 +24,10 @@
 
 #version __CONTEXT__
 
-layout (location = 0) out vec4 finalColor;
-
-uniform float blackoutFactor;
-uniform int nAaSamples;
-uniform sampler2DMS mainColorTexture;
+layout(location = 0) in vec4 position;
+out vec2 texCoord;
 
 void main() {
-    vec4 color = vec4(0.0);
-    for (int i = 0; i < nAaSamples; i++) {
-        color += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
-    }
-
-    color /= nAaSamples;
-    color.rgb *= blackoutFactor;
-     
-    finalColor = vec4(color.rgb, 1.0);
+    texCoord = 0.5 + position.xy * 0.5;
+    gl_Position = position;
 }
