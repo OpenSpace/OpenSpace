@@ -68,6 +68,37 @@ namespace {
     constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
+    const GLenum ColorAttachment0Array[1] = {
+        GL_COLOR_ATTACHMENT0
+    };
+
+    const GLenum ColorAttachment1Array[1] = {
+       GL_COLOR_ATTACHMENT1
+    };
+
+    const GLenum ColorAttachment01Array[2] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1
+    };
+
+    const GLenum ColorAttachment03Array[2] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT3
+    };
+
+    const GLenum ColorAttachment012Array[3] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1,
+       GL_COLOR_ATTACHMENT2
+    };
+
+    const GLenum ColorAttachment0123Array[4] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1,
+       GL_COLOR_ATTACHMENT2,
+       GL_COLOR_ATTACHMENT3
+    };
+
     void saveTextureToMemory(GLenum attachment, int width, int height,
                              std::vector<double>& memory)
     {
@@ -128,15 +159,15 @@ void FramebufferRenderer::initialize() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     // GBuffers
-    glGenTextures(1, &_gBuffers._colorTexture);
-    glGenTextures(1, &_gBuffers._depthTexture);
-    glGenTextures(1, &_gBuffers._positionTexture);
-    glGenTextures(1, &_gBuffers._normalTexture);
-    glGenFramebuffers(1, &_gBuffers._framebuffer);
+    glGenTextures(1, &_gBuffers.colorTexture);
+    glGenTextures(1, &_gBuffers.depthTexture);
+    glGenTextures(1, &_gBuffers.positionTexture);
+    glGenTextures(1, &_gBuffers.normalTexture);
+    glGenFramebuffers(1, &_gBuffers.framebuffer);
 
     // PingPong Buffers
     // The first pingpong buffer shares the color texture with the renderbuffer:
-    _pingPongBuffers.colorTexture[0] = _gBuffers._colorTexture;
+    _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
     glGenTextures(1, &_pingPongBuffers.colorTexture[1]);
     glGenFramebuffers(1, &_pingPongBuffers.framebuffer);
     
@@ -158,33 +189,33 @@ void FramebufferRenderer::initialize() {
     //==============================//
     //=====  GBuffers Buffers  =====//
     //==============================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers._framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _gBuffers._colorTexture,
+        _gBuffers.colorTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _gBuffers._positionTexture,
+        _gBuffers.positionTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT2,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _gBuffers._normalTexture,
+        _gBuffers.normalTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _gBuffers._depthTexture,
+        _gBuffers.depthTexture,
         0
     );
 
@@ -215,7 +246,7 @@ void FramebufferRenderer::initialize() {
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _gBuffers._depthTexture,
+        _gBuffers.depthTexture,
         0
     );
 
@@ -304,17 +335,17 @@ void FramebufferRenderer::initialize() {
 void FramebufferRenderer::deinitialize() {
     LINFO("Deinitializing FramebufferRenderer");
 
-    glDeleteFramebuffers(1, &_gBuffers._framebuffer);
+    glDeleteFramebuffers(1, &_gBuffers.framebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
     glDeleteFramebuffers(1, &_hdrBuffers._hdrFilteringFramebuffer);
     glDeleteFramebuffers(1, &_pingPongBuffers.framebuffer);
 
-    glDeleteTextures(1, &_gBuffers._colorTexture);
-    glDeleteTextures(1, &_gBuffers._depthTexture);
+    glDeleteTextures(1, &_gBuffers.colorTexture);
+    glDeleteTextures(1, &_gBuffers.depthTexture);
 
     glDeleteTextures(1, &_hdrBuffers._hdrFilteringTexture);
-    glDeleteTextures(1, &_gBuffers._positionTexture);
-    glDeleteTextures(1, &_gBuffers._normalTexture);
+    glDeleteTextures(1, &_gBuffers.positionTexture);
+    glDeleteTextures(1, &_gBuffers.normalTexture);
     
     glDeleteTextures(1, &_pingPongBuffers.colorTexture[1]);
 
@@ -346,7 +377,7 @@ void FramebufferRenderer::resolveMSAA(float blackoutFactor) {
     ghoul::opengl::TextureUnit mainColorTextureUnit;
     mainColorTextureUnit.activate();
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._colorTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.colorTexture);
     _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
     _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
     _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
@@ -481,7 +512,7 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._colorTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.colorTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -491,7 +522,7 @@ void FramebufferRenderer::updateResolution() {
         GL_TRUE
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._positionTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.positionTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -501,7 +532,7 @@ void FramebufferRenderer::updateResolution() {
         GL_TRUE
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._normalTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.normalTexture);
 
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
@@ -512,7 +543,7 @@ void FramebufferRenderer::updateResolution() {
         GL_TRUE
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._depthTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.depthTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -751,7 +782,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }    
 
     // deferred g-buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers._framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
     glDrawBuffers(3, ColorAttachment012Array);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -839,7 +870,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             exitProgram->deactivate();
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers._framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glm::vec3 cameraPosition;
         bool isCameraInside = raycaster->isCameraInside(
             raycasterTask.renderData,
@@ -885,7 +916,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
             ghoul::opengl::TextureUnit mainDepthTextureUnit;
             mainDepthTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._depthTexture);
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
@@ -952,7 +983,7 @@ void FramebufferRenderer::performDeferredTasks(
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
             mainPositionTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._positionTexture);
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.positionTexture);
             deferredcastProgram->setUniform(
                 "mainPositionTexture",
                 mainPositionTextureUnit
@@ -960,7 +991,7 @@ void FramebufferRenderer::performDeferredTasks(
 
             ghoul::opengl::TextureUnit mainNormalTextureUnit;
             mainNormalTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._normalTexture);
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers.normalTexture);
             deferredcastProgram->setUniform(
                 "mainNormalTexture",
                 mainNormalTextureUnit
@@ -1021,7 +1052,7 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
     _dirtyMsaaSamplingPattern = true;
 }
 
-void FramebufferRenderer::disableHDR(bool disable) {
+void FramebufferRenderer::setDisableHDR(bool disable) {
     _disableHDR = std::move(disable);
 }
 

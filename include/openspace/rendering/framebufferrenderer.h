@@ -59,65 +59,6 @@ struct UpdateStructures;
 class FramebufferRenderer : public Renderer, public RaycasterListener,
                             public DeferredcasterListener
 {
-private:
-    inline static const GLenum ColorAttachment0Array[1] = {
-       GL_COLOR_ATTACHMENT0
-    };
-
-    inline static const GLenum ColorAttachment1Array[1] = {
-       GL_COLOR_ATTACHMENT1
-    };
-
-    inline static const GLenum ColorAttachment01Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1
-    };
-
-    inline static const GLenum ColorAttachment03Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT3
-    };
-
-    inline static const GLenum ColorAttachment012Array[3] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1,
-       GL_COLOR_ATTACHMENT2
-    };
-
-    inline static const GLenum ColorAttachment0123Array[4] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1,
-       GL_COLOR_ATTACHMENT2,
-       GL_COLOR_ATTACHMENT3
-    };
-
-    typedef struct {
-        GLuint _colorTexture;
-        GLuint _positionTexture;
-        GLuint _normalTexture;
-        GLuint _depthTexture;
-        GLuint _framebuffer;
-    } GBuffers;
-
-    typedef struct {
-        GLuint framebuffer;
-        GLuint colorTexture[2];
-    } PingPongBuffers;
- 
-    typedef struct {
-        GLuint _hdrFilteringFramebuffer;
-        GLuint _hdrFilteringTexture;
-    } HDRBuffers;
-
-public:
-    typedef std::map<
-        VolumeRaycaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
-    > RaycasterProgObjMap;
-    typedef std::map<
-        Deferredcaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
-    > DeferredcasterProgObjMap;
 public:
     virtual ~FramebufferRenderer() = default;
 
@@ -138,7 +79,7 @@ public:
     void setSaturation(float sat) override;
     
     int nAaSamples() const override;
-    void disableHDR(bool disable) override;
+    void setDisableHDR(bool disable) override;
     
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
@@ -157,10 +98,18 @@ public:
         DeferredcasterListener::IsAttached isAttached) override;
 
 private:
+    using RaycasterProgObjMap = std::map<
+        VolumeRaycaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    >;
+    using DeferredcasterProgObjMap = std::map<
+        Deferredcaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    >;
+
     void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor);
     
-private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
     RaycasterProgObjMap _raycastPrograms;
@@ -176,7 +125,7 @@ private:
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
     
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-                 Hue, Saturation, Value, nAaSamples) _hdrUniformCache;
+        Hue, Saturation, Value, nAaSamples) _hdrUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;
@@ -185,9 +134,23 @@ private:
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
 
-    GBuffers _gBuffers;
-    PingPongBuffers _pingPongBuffers;
-    HDRBuffers _hdrBuffers;
+    struct {
+        GLuint colorTexture;
+        GLuint positionTexture;
+        GLuint normalTexture;
+        GLuint depthTexture;
+        GLuint framebuffer;
+    } _gBuffers;
+
+    struct {
+        GLuint framebuffer;
+        GLuint colorTexture[2];
+    } _pingPongBuffers;
+
+    struct {
+        GLuint _hdrFilteringFramebuffer;
+        GLuint _hdrFilteringTexture;
+    } _hdrBuffers;
     
     unsigned int _pingPongIndex = 0u;
 
