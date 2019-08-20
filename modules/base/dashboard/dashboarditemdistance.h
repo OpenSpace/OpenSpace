@@ -75,7 +75,6 @@ private:
     properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
-    properties::BoolProperty _storyStyleActive;
 
     Component _source;
     Component _destination;

@@ -264,10 +264,8 @@ private:
     * position.
     */
     glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
-                                     const double distFromCameraToFocus,
-                                     const glm::dvec3 camPosToCenterPosDiff,
-                                     const double focusLimit,
-                                     const bool flyTo) const;
+        double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
+        double focusLimit, bool flyTo) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor

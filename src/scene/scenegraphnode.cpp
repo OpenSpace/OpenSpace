@@ -22,21 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
 #include "scenegraphnode_doc.inl"
 
 namespace {
@@ -52,27 +50,35 @@ namespace {
 
     constexpr const char* KeyTimeFrame = "TimeFrame";
 
-    static const openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
+    {
+        "ComputeScreenSpaceData",
+        "Screen Space Data",
+        "If this value is set to 'true', the screenspace-based properties are calculated "
+        "at regular intervals. If these values are set to 'false', they are not updated."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
         "" // @TODO Missing documentation
@@ -258,7 +264,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
-    result->test = std::chrono::high_resolution_clock::now();
+    result->_lastUpdate = std::chrono::high_resolution_clock::now();
     return result;
 }
 
@@ -272,12 +278,16 @@ SceneGraphNode::SceneGraphNode()
         std::make_unique<StaticRotation>(),
         std::make_unique<StaticScale>()
     }
-    ,_screenSpacePosition(properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1,-1)))
-    ,_screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
-    ,_distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
-    ,_screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
-    ,_visibilityDistance(properties::FloatProperty(VisibilityDistanceInfo, 6e+10))
+    , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
+    , _screenSpacePosition(
+        properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
+    )
+    , _screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
+    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
+    , _screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
+    , _visibilityDistance(properties::FloatProperty(VisibilityDistanceInfo, 6e10f))
 {
+    addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
     addProperty(_screenVisibility);
     addProperty(_distFromCamToNode);
@@ -490,6 +500,9 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         auto start = std::chrono::high_resolution_clock::now();
 
         _renderable->render(newData, tasks);
+        if (_computeScreenSpaceValues) {
+            computeScreenSpaceData(newData);
+        }
 
         glFinish();
         auto end = std::chrono::high_resolution_clock::now();
@@ -497,7 +510,9 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
     else {
         _renderable->render(newData, tasks);
-        getScreenSpaceData(newData);
+        if (_computeScreenSpaceValues) {
+            computeScreenSpaceData(newData);
+        }
     }
 }
 
@@ -631,80 +646,88 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     }
 }
 
-void SceneGraphNode::getScreenSpaceData(RenderData& newData) {
-    //Purposely slow the update rate of screen space position in order to reduce the
+void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
+    // Purposely slow the update rate of screen space position in order to reduce the
     // effects of jittering in the position of information icon markers in web gui.
     auto now = std::chrono::high_resolution_clock::now();
-    if ((now - test) < std::chrono::milliseconds(100)) {
+    if ((now - _lastUpdate) < std::chrono::milliseconds(100)) {
         return;
     }
-    test = now;
+    _lastUpdate = now;
 
-   
-    std::vector<std::string> tags = this->tags();
-    const std::string tag = "Story.Interesting";
+    // Calculate ndc
+    const Camera& cam = newData.camera;
+    const glm::dvec3& worldPos = _worldPositionCached;
+    const glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) *
+                                 cam.combinedViewMatrixNoScale() * glm::vec4(worldPos, 1.0);
+    const glm::dvec2 worldPosNDC = glm::dvec2(clipSpace / clipSpace.w);
 
-    if (std::find(tags.begin(), tags.end(), tag) != tags.end()) {
+    const bool visible = worldPosNDC.x >= -1.0 && worldPosNDC.x <= 1.0 &&
+                         worldPosNDC.y >= -1.0 && worldPosNDC.y <= 1.0 && clipSpace.z > 0;
 
-        // Calculate ndc
-        Camera cam = newData.camera;
-        glm::dvec3 worldPos = this->_worldPositionCached;
-        glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrixNoScale() * glm::vec4(worldPos, 1.0);
-        glm::dvec3 ndc = clipSpace / clipSpace.w;
+    // If not on the screen, we want to reset it or don't update it
+    if (!visible) {
+        _screenVisibility = false;
+        return;
+    }
 
-         // If the object is not in the screen, we dont want to consider it at all
-        if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0 && clipSpace.z > 0) {
+    glm::ivec2 res = global::windowDelegate.currentWindowSize();
+    
+    // Get the radius of node
+    SurfacePositionHandle posHandle = calculateSurfacePositionHandle(cam.positionVec3());
+    glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
+                       posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+    glm::dvec3 centerToActualSurface = glm::dmat3(this->modelTransform()) *
+                                       centerToActualSurfaceModelSpace;
+    double nodeRadius = length(centerToActualSurface);
 
-            glm::ivec2 res = global::windowDelegate.currentWindowSize();
-            glm::ivec2 screenSpacePosition = glm::ivec2((ndc.x + 1) * res.x / 2, (ndc.y + 1) * res.y / 2);
+    // Distance from the camera to the node
+    double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
 
-            // Get the radius of node
-            SurfacePositionHandle posHandle = calculateSurfacePositionHandle(cam.positionVec3());
-            glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface + posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-            glm::dvec3 centerToActualSurface = glm::dmat3(this->modelTransform()) * centerToActualSurfaceModelSpace;
-            double nodeRadius = length(centerToActualSurface);
+    // Fix to limit the update of properties
+    if (distFromCamToNode >= _visibilityDistance) {
+        _screenVisibility = false;
+        return;
+    }
 
-            // Distance from the camera to the node
-            double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
+    _screenVisibility = true;
 
-            // Fix to limit the update of properties
-            if (distFromCamToNode < _visibilityDistance) {
-                 if (!_screenVisibility) {
-                    _screenVisibility.setValue(true);
-                 }
-                // Calculate the node radius to screensize pixels
-                glm::dvec3 radiusPos = worldPos + (nodeRadius * normalize(cam.lookUpVectorWorldSpace()));
-                glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
-                glm::dvec3 ndc2 = clipSpaceRadius / clipSpaceRadius.w;
-                glm::ivec2 radiusScreenSpacePosition = glm::ivec2((ndc2.x + 1) * res.x / 2, (ndc2.y + 1) * res.y / 2);
-                glm::dvec2 radiusInScreenSpace = screenSpacePosition - radiusScreenSpacePosition;
-                double screenSpaceRadius = length(radiusInScreenSpace);
+    // Calculate the node radius to screensize pixels
+    const glm::dvec3 lookUp = normalize(cam.lookUpVectorWorldSpace());
+    const glm::dvec3 radiusPos = worldPos + (nodeRadius * lookUp);
+    const glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) *
+                                    cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
+    const glm::dvec3 radiusNDC = clipSpaceRadius / clipSpaceRadius.w;
 
-                double zoomThreshold = 0.1, moveThreshold = 1, radiusThreshold = 2;
+    const glm::ivec2 centerScreenSpace = glm::ivec2(
+        (worldPosNDC.x + 1.0) * res.x / 2,
+        (worldPosNDC.y + 1.0) * res.y / 2
+    );
+    const glm::ivec2 radiusScreenSpace = glm::ivec2(
+        (radiusNDC.x + 1.0) * res.x / 2,
+        (radiusNDC.y + 1.0) * res.y / 2
+    );
+    const double screenSpaceRadius = length(
+        glm::vec2(centerScreenSpace) - glm::vec2(radiusScreenSpace)
+    );
 
-                if (abs(_screenSizeRadius - screenSpaceRadius) > radiusThreshold) {
-                    _screenSizeRadius.setValue(screenSpaceRadius);
-                }
-                if (abs(_distFromCamToNode - distFromCamToNode) > (zoomThreshold * distFromCamToNode)) {
-                    _distFromCamToNode.setValue(distFromCamToNode);
-                }
-                if (abs(static_cast<glm::ivec2>(_screenSpacePosition).x - screenSpacePosition.x) > moveThreshold ||
-                    abs(static_cast<glm::ivec2>(_screenSpacePosition).y - screenSpacePosition.y) > moveThreshold) {
-                    _screenSpacePosition.setValue(screenSpacePosition);
-                }
-            }
-            else {
-                if (_screenVisibility) {
-                    _screenVisibility.setValue(false);
-                }
-            }
-        }
-        // If not on the screen, we want to reset it or don't update it
-        else {
-            if(_screenVisibility) {
-                _screenVisibility.setValue(false);
-            }
-        }
+    constexpr const double RadiusThreshold = 2.0;
+    const double r = abs(_screenSizeRadius - screenSpaceRadius);
+    if (r > RadiusThreshold) {
+        _screenSizeRadius = screenSpaceRadius;
+    }
+
+    constexpr const double ZoomThreshold = 0.1;
+    const double d = abs(_distFromCamToNode - distFromCamToNode);
+    if (d > (ZoomThreshold * distFromCamToNode)) {
+        _distFromCamToNode = distFromCamToNode;
+    }
+
+    constexpr const double MoveThreshold = 1.0;
+    const glm::ivec2 ssp = _screenSpacePosition;
+    const glm::dvec2 c = glm::abs(ssp - centerScreenSpace);
+    if (c.x > MoveThreshold || c.y > MoveThreshold) {
+        _screenSpacePosition = centerScreenSpace;
     }
 }
 
@@ -878,13 +901,13 @@ Renderable* SceneGraphNode::renderable() {
     return _renderable.get();
 }
 
-SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
-    if (this->identifier() == identifier) {
+SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
+    if (identifier() == id) {
         return this;
     }
     else {
         for (std::unique_ptr<SceneGraphNode>& it : _children) {
-            SceneGraphNode* tmp = it->childNode(identifier);
+            SceneGraphNode* tmp = it->childNode(id);
             if (tmp) {
                 return tmp;
             }

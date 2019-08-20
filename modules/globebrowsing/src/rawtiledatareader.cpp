@@ -445,7 +445,6 @@ void RawTileDataReader::initialize() {
     GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
 
     std::string content = _datasetFilePath;
-
     if (module.isWMSCachingEnabled()) {
         std::string c;
         if (FileSys.fileExists(_datasetFilePath)) {

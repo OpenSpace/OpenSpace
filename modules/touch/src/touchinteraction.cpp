@@ -1335,10 +1335,12 @@ void TouchInteraction::step(double dt) {
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
 
-            WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
+            // @TODO (abock 2019-08-20)  This is a dependency that we should get rid of.
+            // The Touch module shouldn't need to know abot the WebGUI module
+            const WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
 
-            float overviewLimit = module.storyHandler.overviewLimit();
-            float zoomInLimit = module.storyHandler.zoomInLimit();
+            float overviewLimit = module.storyHandler().overviewLimit();
+            float zoomInLimit = module.storyHandler().zoomInLimit();
 
             //Apply the velocity to update camera position
             glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
@@ -1350,13 +1352,14 @@ void TouchInteraction::step(double dt) {
             bool willNewPositionViolateZoomInLimit =
                 (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
 
-            if (isZoomStepUnderDistToSurface
-                && !willZoomStepViolatePlanetBoundaryRadius)
+            if (isZoomStepUnderDistToSurface && !willZoomStepViolatePlanetBoundaryRadius)
             {
-                if (willNewPositionViolateOverviewLimit)
+                if (willNewPositionViolateOverviewLimit) {
                     camPos -= zoomDistanceIncrement;
-                else
+                }
+                else {
                     camPos += zoomDistanceIncrement;
+                }
             }
             else {
 #ifdef TOUCH_DEBUG_PROPERTIES

@@ -26,11 +26,12 @@
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/vector/ivec2property.h>
+
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
@@ -110,8 +111,6 @@ public:
     void clearDependencies();
     void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
 
-    void getScreenSpaceData(RenderData& newData);
-
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const;
 
@@ -154,6 +153,7 @@ private:
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
+    void computeScreenSpaceData(RenderData& newData);
 
     std::atomic<State> _state = State::Loaded;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
@@ -192,17 +192,18 @@ private:
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;
 
+    properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
+    std::chrono::high_resolution_clock::time_point _lastUpdate;
+
 #ifdef Debugging_Core_SceneGraphNode_Indices
     int index = 0;
     static int nextIndex;
 #endif // Debugging_Core_SceneGraphNode_Indices
-
-    std::chrono::high_resolution_clock::time_point test;
 };
 
 } // namespace openspace

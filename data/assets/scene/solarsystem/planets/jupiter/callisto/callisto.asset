@@ -29,10 +29,6 @@ local Callisto = {
             Target = "CALLISTO",
             Observer = "JUPITER BARYCENTER",
             Kernels = kernel
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1
         }
     },
     Renderable = {

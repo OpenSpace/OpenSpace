@@ -29,7 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
-
 namespace {
     constexpr const char* _loggerCat = "OrbitalNavigator";
 
@@ -465,7 +464,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
         glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
         double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos);
-        double limitOfFlightPath;
+        double limitOfFlightPath = 0.0;
         bool performIncrementalFlightStep = false;
 
         // Zoom in on the focusNode and move towards it, but when the camera arrives to
@@ -657,7 +656,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->setScaling(
             _stereoscopicDepthOfFocusSurface /
             static_cast<float>(_currentCameraToSurfaceDistance)
-
         );
     } else {
         _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
@@ -1290,10 +1288,10 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 }
 
 glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
-                                             const double distFromCameraToFocus,
-                                             const glm::dvec3 camPosToAnchorPosDiff,
-                                             const double focusLimit,
-                                             const bool flyTo) const
+                                                   double distFromCameraToFocus,
+                                                  const glm::dvec3& camPosToAnchorPosDiff,
+                                                                        double focusLimit,
+                                                                         bool flyTo) const
 {
     double velocityFactor = 0;
     const double focusLimitBuffer = 0.1;
@@ -1302,14 +1300,14 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
     // camera movement towards the focus node
     if (flyTo) {
         velocityFactor = (1 - ((focusLimit * (1.0 - focusLimitBuffer))
-	    / distFromCameraToFocus));
+        / distFromCameraToFocus));
     }
     else {
         velocityFactor = (1 - (distFromCameraToFocus
-	    / (focusLimit * (1.0 + focusLimitBuffer))));
+        / (focusLimit * (1.0 + focusLimitBuffer))));
     }
     velocityFactor *= _velocitySensitivity;
-    velocityFactor = (double)((int)(velocityFactor * 1000)) / 1000;
+    velocityFactor = floor(velocityFactor * 1000) / 1000;
 
     // Return the updated camera position
     return camPos - velocityFactor * camPosToAnchorPosDiff;

@@ -26,15 +26,15 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
 set(OPENSPACE_HEADER_FILES
-    webguimodule.h
-    storyhandler.h
-    )
+  webguimodule.h
+  storyhandler.h
+)
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
-    webguimodule.cpp
-    storyhandler.cpp
-    )
+  webguimodule.cpp
+  storyhandler.cpp
+)
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

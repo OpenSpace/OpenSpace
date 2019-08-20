@@ -26,12 +26,12 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include "storyhandler.h"
 
-#include <openspace/properties/stringproperty.h>
+#include <modules/webgui/storyhandler.h>
 #include <openspace/properties/stringlistproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/misc/process.h>
 #include <memory>
 #include <vector>
@@ -51,7 +51,7 @@ public:
     CallbackHandle addEndpointChangeCallback(EndpointCallback cb);
     void removeEndpointChangeCallback(CallbackHandle);
 
-    webgui::StoryHandler storyHandler;
+    const webgui::StoryHandler& storyHandler() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -73,6 +73,8 @@ private:
     properties::IntProperty _port;
     properties::StringProperty _address;
     properties::StringProperty _webSocketInterface;
+
+    webgui::StoryHandler _storyHandler;
 
     std::vector<std::pair<CallbackHandle, EndpointCallback>> _endpointChangeCallbacks;
     int _nextCallbackHandle = 0;

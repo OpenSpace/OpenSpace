@@ -43,7 +43,7 @@ asset.onInitialize(function ()
         -- in the OpenSpace-WebGuiFrontend repository.
         openspace.setPropertyValueSingle(
             "Modules.CefWebGui.GuiUrl",
-            "http:localhost:4690/frontend/#/ontouch"
+            "http://127.0.0.1:4690/frontend/#/ontouch"
         )
     end
 
