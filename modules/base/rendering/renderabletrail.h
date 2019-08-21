@@ -182,7 +182,8 @@ private:
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
+        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase,
+        resolution) _uniformCache;
 };
 
 } // namespace openspace

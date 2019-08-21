@@ -28,6 +28,7 @@ in vec4 vs_positionScreenSpace;
 in vec4 vs_gPosition;
 in float fade;
 in float v_pointSize;
+in vec2 lineCenterArray;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -59,6 +60,18 @@ Fragment getFragment() {
 
         frag.color.a = transparencyCorrection;
     }
+
+    double distanceCenter = length(lineCenterArray - vec2(gl_FragCoord.xy));
+    double lineWidth = 1E20;//4.0;
+    float blendFactor = 1.5;
+    //if (distanceCenter > lineWidth) {
+    // if (distanceCenter > 1E20) {
+    //     frag.color = vec4(1.0, 0.0, 0.0, 1.0);
+    //     //frag.color.w = 0;
+    // } else {
+        frag.color.w = pow( float((lineWidth - distanceCenter) / lineWidth), blendFactor);
+        //frag.color.w = 1.0;
+    //}
 
     frag.gPosition = vs_gPosition;
 

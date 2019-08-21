@@ -38,10 +38,10 @@ namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr const std::array<const char*, 13> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase"
+        "renderPhase", "resolution"
     };
 
     // The possible values for the _renderingModes property
@@ -301,6 +301,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     }
 
+    /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
+    _programObject->setUniform(_uniformCache.resolution, resolution);*/
+
     static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
         // Fragile! Keep in sync with shader
         { RenderInformation::VertexSorting::NewestFirst, 0 },
@@ -351,6 +354,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         p->setUniform(c.idOffset, offset);
 
         p->setUniform(c.nVertices, nVertices);
+
+        glm::ivec2 resolution = global::renderEngine.renderingResolution();
+        p->setUniform(c.resolution, resolution);
 
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and
