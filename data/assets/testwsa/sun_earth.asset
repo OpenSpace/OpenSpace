@@ -2,9 +2,10 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
 local transferFunctions = asset.localResource("transferfunctions")
-local polarityColorTable = transferFunctions .. "/polarity_spec.txt"
-local sunearthColorTable = transferFunctions .. "/sun_earth_spec.txt"
 local fieldlinesDirectory = asset.localResource("fl_sun_earth")
+local polarityColorTable = transferFunctions .. "/polarity_spec.txt"
+local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
+
 
 local sunRadius = 695508000
 
@@ -20,7 +21,7 @@ local fieldlines = {
         InputFileType = "osfls",
         ColorTablePaths = {
             polarityColorTable,
-            sunearthColorTable
+            subEarthLevelColorTable
         },
         ColorTableRanges = {
             { 0.0, 1.0 },
