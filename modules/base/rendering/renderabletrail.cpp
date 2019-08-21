@@ -367,6 +367,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         glBindVertexArray(info._vaoID);
         if (renderLines) {
+            glEnable(GL_LINE_SMOOTH);
+            glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
             p->setUniform(c.renderPhase, RenderPhaseLines);
             // Subclasses of this renderer might be using the index array or might now be
             // so we check if there is data available and if there isn't, we use the
@@ -386,6 +388,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                     reinterpret_cast<void*>(info.first * sizeof(unsigned int))
                 );
             }
+            glDisable(GL_LINE_SMOOTH);
         }
         if (renderPoints) {
             // Subclasses of this renderer might be using the index array or might now be
