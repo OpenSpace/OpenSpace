@@ -55,6 +55,12 @@ public:
     // Returns true when the worker has downloaded a window and saved the path to the files in _sourceFiles
     bool windowIsComplete();
 
+    // This is to set the updating flag false, use it once rednerablefieldlinessequence is notified of the ready update
+    void flagUpdated();
+
+    // Notifies the worker that a new window is ready
+    void newWindowToDownload();
+
 private:
     // POINTERS
     std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk;
@@ -87,6 +93,7 @@ private:
     // TODO(Axel): Hmm, can we get around using these bools somehow? 
     bool _readyToUpdateSourceFiles = false;
     bool _doneUpdating = false;
+    bool _newWindow = false;
     
     // Download one file to sync directory
     std::string downloadOsfls(std::string downloadkey);

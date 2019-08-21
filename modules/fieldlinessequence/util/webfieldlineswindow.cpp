@@ -42,7 +42,7 @@ namespace openspace{
     // --------------------------- CONSTRUCTORS ---------------------------------------//
     WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                                              std::vector<std::string>& _sourceFiles,
-                                             std::vector<double>& _startTimes, size_t& _nStates){
+                                             std::vector<double>& _startTimes, size_t& _nStates, size_t apiID){
         _window.backWidth = 3;
         _window.forwardWidth = 3;
         
@@ -63,7 +63,7 @@ namespace openspace{
         
         _worker = WebFieldlinesWorker(syncDir, serverUrl, _triggerTimesOnDisk);
         
-        
+        LERROR(std::to_string(apiID));
         
     }
     
@@ -130,7 +130,7 @@ namespace openspace{
             _window.nTriggerTimes++;
         }
         LERROR("new window");
-        
+        _worker.newWindowToDownload();
     }
     
     bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time){
@@ -143,6 +143,7 @@ namespace openspace{
     }
     
     void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
+
         _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
         _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
     }
@@ -163,6 +164,10 @@ namespace openspace{
         });
 
         return resultForwards != _triggerTimesWeb.rbegin() + _window.forwardWidth || resultBackwards != _triggerTimesWeb.begin() + _window.backWidth;
+    }
+
+    void WebFieldlinesWindow::rfsHasUpdated() {
+        _worker.flagUpdated();
     }
     
     // -------------------------- PRIVATE FUNCTIONS  -----------------------------------//

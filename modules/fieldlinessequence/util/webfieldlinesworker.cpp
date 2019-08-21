@@ -65,7 +65,7 @@ namespace openspace{
         std::string url = "http://localhost:3000/WSA/times/2019-05-02T12:00:00:00/50";
         // This is done quite early in the startup, requesting based on Open Space start time, will result
         // In fetching filed lines that doesnt exist, and is too far away back in time.
-        if (time.substr(0, 10) != oSpaceStartTime);
+        if (time.substr(0, 10) != oSpaceStartTime)
             url = "http://localhost:3000/WSA/times/" + time + "50";
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
         HttpRequest::RequestOptions opt = {};
@@ -122,9 +122,13 @@ namespace openspace{
             });
         }
 
-        if (!downloaded && !_doneUpdating)
+        if (!downloaded && !_doneUpdating && _newWindow) {
             // If reach this point, we now know that we have downloaded all the sets
             _readyToUpdateSourceFiles = true;
+            _newWindow = false;
+        }
+
+            
     }
 
     // Updates the list of available sourcefiles, owned by renderablefieldlinessequence.
@@ -136,10 +140,10 @@ namespace openspace{
             std::for_each(toInsert.begin(), toInsert.end(), [&sourcePtr, &_sourceFiles](auto insertableElement) {
 
                 for (sourcePtr; sourcePtr != _sourceFiles.end(); sourcePtr++) {
-                    
+
                     if (sourcePtr != (--_sourceFiles.end())) {
                         if (insertableElement > *sourcePtr && insertableElement < *sourcePtr++) {
-                            _sourceFiles.insert(sourcePtr++,insertableElement);
+                            _sourceFiles.insert(sourcePtr++, insertableElement);
                             break;
                         }
                     }
@@ -149,10 +153,10 @@ namespace openspace{
                     }
                     if (insertableElement == *sourcePtr) {
                         break;
-                    }    
+                    }
                 }
                 if (sourcePtr == _sourceFiles.end()) {
-                    sourcePtr = _sourceFiles.insert(sourcePtr,insertableElement);
+                    sourcePtr = _sourceFiles.insert(sourcePtr, insertableElement);
                 }
             });
 
@@ -160,11 +164,21 @@ namespace openspace{
             _readyToUpdateSourceFiles = false;
             _doneUpdating = true;
         }
+ 
     }
 
     bool WebFieldlinesWorker::windowIsComplete()
     {
         return _doneUpdating;
+    }
+
+    void WebFieldlinesWorker::flagUpdated() {
+        _doneUpdating = false;
+    }
+
+    void WebFieldlinesWorker::newWindowToDownload()
+    {
+        _newWindow = true;
     }
     
     std::string WebFieldlinesWorker::downloadOsfls(std::string downloadkey){

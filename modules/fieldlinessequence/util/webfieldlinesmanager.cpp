@@ -36,24 +36,49 @@
 namespace {
     constexpr const char* _loggerCat = "FieldlinesSequence[ Web FLs Manager ]";
     
-} // namespace
+} // namepace
+
 
 namespace openspace{
+
+
     
     
     // --------------------------- PUBLIC FUNCTIONS --------------------------- //
     void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, std::string fieldLineModelType, size_t& _nStates, std::vector<std::string>& _sourceFiles,
                                                               std::vector<double>& _startTimes)
     {
-        
-        _flsType = fieldLineModelType;
+        if (_connected) {
+            _flsType = fieldLineModelType;
 
-        // Initialize the sliding window
-        _webFieldlinesWindow = WebFieldlinesWindow(_syncDir, "http://localhost:3000/", _sourceFiles, _startTimes, _nStates);
+            // Initialize the sliding window
+            _webFieldlinesWindow = WebFieldlinesWindow(_syncDir, "http://localhost:3000/", _sourceFiles, _startTimes, _nStates, convertIdentifierToID(identifier));
 
-        
-        LERROR("WebFieldlinesManager initialized");
-        
+
+            LERROR("WebFieldlinesManager initialized " + identifier);
+        }        
+    }
+
+    bool WebFieldlinesManager::checkConnectionToServer() {
+        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/");
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        mmryDld.download(opt);
+        std::string s = "";
+        std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
+            [](char c) {
+            return c;
+        });
+        if (s == "You are at ROOT") {
+            _connected = true;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool WebFieldlinesManager::isConnected() {
+        return _connected;
     }
     
     // Make sure that the sync directory exists
@@ -141,19 +166,27 @@ namespace openspace{
     {
         return _webFieldlinesWindow.workerWindowIsReady();
     }
+
+    void WebFieldlinesManager::resetWorker() {
+        _webFieldlinesWindow.rfsHasUpdated();
+    }
     
     // --------------------------- PRIVATE FUNCTIONS --------------------------- //
     
+    FieldLineType WebFieldlinesManager::convertIdentifierToID(std::string identifier) {
+        std::map<std::string, FieldLineType> string2ID{
+            {"WSA_Fieldlines_Sun_Earth_Connection",WSA_Fieldlines_Sun_Earth_Connection},
+            {"WSA_Fieldlines_SCS_OI",WSA_Fieldlines_SCS_OI},
+            {"WSA_Fieldlines_PFSS_IO",WSA_Fieldlines_PFSS_IO},
+            {"WSA_Fieldlines_PFSS_OI",WSA_Fieldlines_PFSS_OI}
+        };
+        if (auto found = string2ID.find(identifier); found != string2ID.end()) {
+            return found->second;
+        }
+        else
+            return FieldLineType::ID_NOT_FOUND;
+    }
     
-    
-    
-    
-    
-    
-    
-  
-
-
 
     std::string WebFieldlinesManager::getDirectory(){
         return _syncDir;

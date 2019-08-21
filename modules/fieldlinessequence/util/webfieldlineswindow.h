@@ -45,6 +45,23 @@ struct Window {
     // Number of elements in window
     int nTriggerTimes;
 };
+
+    /***********************************************************************************************
+                                        DataID, DataDescription
+
+        '1176', 'WSA 4.5 field line trace from the Earth through the WSA model (SCS and PFSS)'
+
+        '1177', 'WSA 4.5 field line trace from the SCS outer boundary to the source surface'
+
+        '1178', 'WSA 4.5 field line trace from the solar surface to the source surface'
+
+        '1179', 'WSA 4.5 field line trace from the source surface to the solar surface'
+
+        '1180', 'WSA 4.5 output fit file'
+
+        '1181', 'WSA 4.5 velocity output fits file'
+
+    ***********************************************************************************************/
     
 class WebFieldlinesWindow{
 public:
@@ -54,7 +71,7 @@ public:
     // If files existed on disk already
     WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                         std::vector<std::string>& _sourceFiles,
-                        std::vector<double>& _startTimes, size_t& _nStates);
+                        std::vector<double>& _startTimes, size_t& _nStates, size_t apiID);
     
     // PUBLIC MEMBER FUNCTIONS
     bool timeIsInTriggerTimesWebList(double time);
@@ -82,6 +99,9 @@ public:
 
     // Check if the future potential window, is going to be out of bounds of the current timetriggerweb-list
     bool expectedWindowIsOutOfBounds(double time);
+
+    // Calling the functioh in worker that renderable fieldlinessequence has updated.
+	void rfsHasUpdated();
 
 private:
     

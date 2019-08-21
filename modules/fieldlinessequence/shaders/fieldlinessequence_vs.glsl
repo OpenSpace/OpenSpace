@@ -104,9 +104,9 @@ void main() {
         if(in_color_scalar < 0){
             direction = -1;
         }
-        bool isParticle = usingParticles && isPartOfParticle(time * direction, gl_VertexID,
+        bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
                                                                     particleSize,
-                                                                    particleSpeed,
+                                                                    particleSpeed + int(pow(in_color_scalar,2)) / 10000,
                                                                     particleSpacing);
 
         if (isParticle) {

@@ -70,6 +70,8 @@ private:
     
     int _counter = 0;
 
+    bool _activeConnection = false;
+
     // The _working atomic, is used to notify if a thread is being used and is currently being worked on
     std::atomic_bool _working = false;
 

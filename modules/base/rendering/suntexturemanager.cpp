@@ -46,121 +46,126 @@ SunTextureManager::SunTextureManager()
 {
     _syncDir = absPath("${BASE}/sync/magnetograms") + ghoul::filesystem::FileSystem::PathSeparator;
 }
-void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
-{
-    std::string currentTime = getOpenSpaceDateTime();
+void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture) {
     
+    // If server is dead, we are not going to do anything
+    if (_activeConnection){
 
-    if (_textureToUpload.empty() && currentTime != _activeTextureDate && (_textureListGPU.find(currentTime) != _textureListGPU.end()))
-    {
-        _textureToUpload = currentTime;
-    }
-    if ((global::timeManager.deltaTime() * _direction) < 0)
-    {
-        _textureToUpload = "";
-    }
 
-    _direction = global::timeManager.deltaTime();
+            std::string currentTime = getOpenSpaceDateTime();
 
-    switch (_stage)
-    {
-    //This stage just checks what the next image applied should be,
-    case 0:
-    {
-        _current = getOpenSpaceDateTime();
 
-        if (!_textureToUpload.empty())
+        if (_textureToUpload.empty() && currentTime != _activeTextureDate && (_textureListGPU.find(currentTime) != _textureListGPU.end()))
         {
-            _stage = 3;
-            break;
+            _textureToUpload = currentTime;
         }
-        if (_counter % 150 == 0 && !_working && !_dldthread.joinable())
+        if ((global::timeManager.deltaTime() * _direction) < 0)
         {
-            _dldthread = std::thread([=] { getNextTexture(_current, 1.0f, &_next); });
+            _textureToUpload = "";
         }
-        if (!_working && _dldthread.joinable())
+
+        _direction = global::timeManager.deltaTime();
+
+        switch (_stage)
         {
-            _dldthread.join();
-            if (_next != "Not found!")
+            //This stage just checks what the next image applied should be,
+        case 0:
+        {
+            _current = getOpenSpaceDateTime();
+
+            if (!_textureToUpload.empty())
             {
-                if (std::find(_textureListDisk.begin(), _textureListDisk.end(), _next) == _textureListDisk.end())
+                _stage = 3;
+                break;
+            }
+            if (_counter % 150 == 0 && !_working && !_dldthread.joinable())
+            {
+                _dldthread = std::thread([=] { getNextTexture(_current, 1.0f, &_next); });
+            }
+            if (!_working && _dldthread.joinable())
+            {
+                _dldthread.join();
+                if (_next != "Not found!")
                 {
-                    // We didn't find it on disk, proceed to download
-                    _stage = 1;
-                }
-                else
-                {
-                    if (_textureListGPU.find("20" + parseMagnetogramDate(_next).substr(0, 10)) == _textureListGPU.end())
+                    if (std::find(_textureListDisk.begin(), _textureListDisk.end(), _next) == _textureListDisk.end())
                     {
-                        // Found on disk but not on GPU, proceed to upload to GPU
-                        _stage = 2;
+                        // We didn't find it on disk, proceed to download
+                        _stage = 1;
                     }
                     else
                     {
-                        // Found on disk, and on the GPU, all we wanted, all week was to swap the texture
-                        _stage = 3;
+                        if (_textureListGPU.find("20" + parseMagnetogramDate(_next).substr(0, 10)) == _textureListGPU.end())
+                        {
+                            // Found on disk but not on GPU, proceed to upload to GPU
+                            _stage = 2;
+                        }
+                        else
+                        {
+                            // Found on disk, and on the GPU, all we wanted, all week was to swap the texture
+                            _stage = 3;
+                        }
                     }
                 }
             }
-        }
 
-        break;
-    }
-    case 1:
-    {
-        //LERROR("in case 1");
-        if (!_working && !_dldthread.joinable())
+            break;
+        }
+        case 1:
         {
-            _dldthread = std::thread([=] { downloadTexture(_next); });
-        }
+            //LERROR("in case 1");
+            if (!_working && !_dldthread.joinable())
+            {
+                _dldthread = std::thread([=] { downloadTexture(_next); });
+            }
 
-        if (!_working && _dldthread.joinable())
+            if (!_working && _dldthread.joinable())
+            {
+                _dldthread.join();
+                _textureListDisk.push_back(_next);
+                _stage = 2;
+            }
+            break;
+        }
+        case 2:
         {
-            _dldthread.join();
-            _textureListDisk.push_back(_next);
-            _stage = 2;
-        }
-        break;
-    }
-    case 2:
-    {
 
-        if (!_working && !_dldthread.joinable())
+            if (!_working && !_dldthread.joinable())
+            {
+                _dldthread = std::thread([=] { processTextureFromName(_next, &_fitsImageToUpload, &_dateIDToUpload); });
+            }
+
+            if (!_working && _dldthread.joinable())
+            {
+                _dldthread.join();
+                //LERROR(std::to_string(_textureListGPU.size()));
+                uploadTexture(_fitsImageToUpload, _dateIDToUpload);
+                _fitsImageToUpload.clear();
+                _dateIDToUpload.clear();
+                _stage = 3;
+            }
+
+            break;
+        }
+        case 3:
         {
-            _dldthread = std::thread([=] { processTextureFromName(_next, &_fitsImageToUpload, &_dateIDToUpload); });
+            //LERROR("in case 3");
+            if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())))
+            {
+                _textureListGPU[_activeTextureDate] = std::move(texture);
+                texture = std::move(_textureListGPU[_textureToUpload]);
+                _activeTextureDate = _textureToUpload;
+                _textureToUpload = "";
+            }
+            _stage = 0;
+
+            break;
+        }
+        default:
+            break;
         }
 
-        if (!_working && _dldthread.joinable())
-        {
-            _dldthread.join();
-            //LERROR(std::to_string(_textureListGPU.size()));
-            uploadTexture(_fitsImageToUpload, _dateIDToUpload);
-            _fitsImageToUpload.clear();
-            _dateIDToUpload.clear();
-            _stage = 3;
-        }
-
-        break;
+        _counter++;
     }
-    case 3:
-    {
-        //LERROR("in case 3");
-        if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())))
-        {
-            _textureListGPU[_activeTextureDate] = std::move(texture);
-            texture = std::move(_textureListGPU[_textureToUpload]);
-            _activeTextureDate = _textureToUpload;
-            _textureToUpload = "";
-        }
-        _stage = 0;
-
-        break;
-    }
-    default:
-        break;
-    }
-
-    _counter++;
 }
 
 void SunTextureManager::startDownloadTexture(std::string textureId)
@@ -236,15 +241,22 @@ void SunTextureManager::startUploadTextures()
 // Scans directory and append all FILENAMES to the _textureListDisk member vector
 void SunTextureManager::checkFilesInDirectory()
 {
-    // Creating a deep copy of the filevector, so we can do whatever we want with it
-    std::vector<std::string> temp = ghoul::filesystem::Directory(_syncDir).readFiles();
-    _textureListDisk.clear();
-    std::copy(temp.begin(), temp.end(), std::back_inserter(_textureListDisk));
-    // To match both Mac and PC
-    std::transform(begin(_textureListDisk), end(_textureListDisk), begin(_textureListDisk), [](std::string s) -> std::string { if (s.find("\\") != std::string::npos) return s.substr(s.rfind("\\") + 1); else return s.substr(s.rfind("/") + 1); });
+    // We don't want to do anything if the server is not alive, flag it disconnected.
+    if (checkServerAliveness()) {
+        _activeConnection = true;
+        // Creating a deep copy of the filevector, so we can do whatever we want with it
+        std::vector<std::string> temp = ghoul::filesystem::Directory(_syncDir).readFiles();
+        _textureListDisk.clear();
+        std::copy(temp.begin(), temp.end(), std::back_inserter(_textureListDisk));
+        // To match both Mac and PC
+        std::transform(begin(_textureListDisk), end(_textureListDisk), begin(_textureListDisk), [](std::string s) -> std::string { if (s.find("\\") != std::string::npos) return s.substr(s.rfind("\\") + 1); else return s.substr(s.rfind("/") + 1); });
 
-    //remove annoying mac file. might want to use a different strategy here
-    _textureListDisk.erase(std::remove(_textureListDisk.begin(), _textureListDisk.end(), ".DS_STORE"), _textureListDisk.end());
+        //remove annoying mac file. might want to use a different strategy here
+        _textureListDisk.erase(std::remove(_textureListDisk.begin(), _textureListDisk.end(), ".DS_STORE"), _textureListDisk.end());
+    }
+    else {
+        LERROR("No connection to the magnetogram server could be made.");
+    }
 }
 
 void SunTextureManager::uploadTexture(std::vector<float> imagedata, std::string id)
