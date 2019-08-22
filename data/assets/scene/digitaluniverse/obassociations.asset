@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "OB Associations Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_obassociations_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {

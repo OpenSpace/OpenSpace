@@ -121,10 +121,8 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
 
-    UniformCache(mainColorTexture, blackoutFactor) _uniformCache;
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
                  Hue, Saturation, Value) _hdrUniformCache;
     UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;

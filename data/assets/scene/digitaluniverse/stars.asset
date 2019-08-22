@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Stars Speck Files",
     Type = "HttpSynchronization",
     Identifier = "stars_du",
-    Version = 1
+    Version = 3
 })
 
 local colorLUT = asset.syncedResource({
