@@ -42,7 +42,7 @@ uniform sampler2D renderedTexture;
 in vec2 texCoord;
 
 // Relative luminance
-float rgb2luma(vec3 rgb){
+float getLum(vec3 rgb){
     return dot(vec3(0.2126, 0.7152, 0.0722), rgb);
 }
 
@@ -54,14 +54,14 @@ void main() {
     // ============================
 
     // Luma at the current fragment
-    float lumaCenter = rgb2luma(colorCenter.rgb);
+    float lumaCenter = getLum(colorCenter.rgb);
 
     // Luma at the four direct neighbours of the current fragment.
-    float lumaDown = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(0,-1)).rgb);
-    float lumaUp = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(0,1)).rgb);
-    float lumaLeft = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(-1,0)).rgb);
-    float lumaRight = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(1,0)).rgb);
-
+    float lumaDown  = getLum(textureOffset(renderedTexture, texCoord, ivec2(0,-1)).rgb);
+    float lumaUp    = getLum(textureOffset(renderedTexture, texCoord, ivec2(0,1)).rgb);
+    float lumaLeft  = getLum(textureOffset(renderedTexture, texCoord, ivec2(-1,0)).rgb);
+    float lumaRight = getLum(textureOffset(renderedTexture, texCoord, ivec2(1,0)).rgb);
+    
     // Find the maximum and minimum luma around the current fragment.
     float lumaMin = min(lumaCenter, min(min(lumaDown, lumaUp), min(lumaLeft, lumaRight)));
     float lumaMax = max(lumaCenter, max(max(lumaDown, lumaUp), max(lumaLeft, lumaRight)));
@@ -71,7 +71,7 @@ void main() {
 
     // If the luma variation is lower that a threshold (or if we are in a really dark area), 
     // we are not on an edge, don't perform any AA.
-    if (lumaRange < max(EDGE_THRESHOLD_MIN,lumaMax * EDGE_THRESHOLD_MAX)) {
+    if (lumaRange < max(EDGE_THRESHOLD_MIN, lumaMax * EDGE_THRESHOLD_MAX)) {
         aaFinalColor = colorCenter;
         return;
     }
@@ -80,10 +80,10 @@ void main() {
     // Estimating the gradient:
     // ============================
     // Query the 4 remaining corners lumas.
-    float lumaDownLeft = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(-1,-1)).rgb);
-    float lumaUpRight = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(1,1)).rgb);
-    float lumaUpLeft = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(-1,1)).rgb);
-    float lumaDownRight = rgb2luma(textureOffset(renderedTexture, texCoord, ivec2(1,-1)).rgb);
+    float lumaDownLeft = getLum(textureOffset(renderedTexture, texCoord, ivec2(-1,-1)).rgb);
+    float lumaUpRight = getLum(textureOffset(renderedTexture, texCoord, ivec2(1,1)).rgb);
+    float lumaUpLeft = getLum(textureOffset(renderedTexture, texCoord, ivec2(-1,1)).rgb);
+    float lumaDownRight = getLum(textureOffset(renderedTexture, texCoord, ivec2(1,-1)).rgb);
 
     // Combine the four edges lumas (using intermediary variables for future computations 
     // with the same values).
@@ -91,10 +91,10 @@ void main() {
     float lumaLeftRight = lumaLeft + lumaRight;
 
     // Same for corners
-    float lumaLeftCorners = lumaDownLeft + lumaUpLeft;
-    float lumaDownCorners = lumaDownLeft + lumaDownRight;
+    float lumaLeftCorners  = lumaDownLeft + lumaUpLeft;
+    float lumaDownCorners  = lumaDownLeft + lumaDownRight;
     float lumaRightCorners = lumaDownRight + lumaUpRight;
-    float lumaUpCorners = lumaUpRight + lumaUpLeft;
+    float lumaUpCorners    = lumaUpRight + lumaUpLeft;
 
     // Compute an estimation of the gradient along the horizontal and vertical axis.
     float edgeHorizontal = abs(-2.0 * lumaLeft + lumaLeftCorners) + 
@@ -111,6 +111,7 @@ void main() {
     // Select the two neighboring texels lumas in the opposite direction to the local edge.
     float luma1 = isHorizontal ? lumaDown : lumaLeft;
     float luma2 = isHorizontal ? lumaUp : lumaRight;
+    
     // Compute gradients in this direction.
     float gradient1 = luma1 - lumaCenter;
     float gradient2 = luma2 - lumaCenter;
@@ -156,8 +157,8 @@ void main() {
 
     // Read the lumas at both current extremities of the exploration segment, 
     // and compute the delta wrt to the local average luma.
-    float lumaEnd1 = rgb2luma(texture(renderedTexture, uv1).rgb);
-    float lumaEnd2 = rgb2luma(texture(renderedTexture, uv2).rgb);
+    float lumaEnd1 = getLum(texture(renderedTexture, uv1).rgb);
+    float lumaEnd2 = getLum(texture(renderedTexture, uv2).rgb);
     lumaEnd1 -= lumaLocalAverage;
     lumaEnd2 -= lumaLocalAverage;
 
@@ -181,12 +182,12 @@ void main() {
         for (int i = 2; i < ITERATIONS; i++) {
             // If needed, read luma in 1st direction, compute delta.
             if (!reached1) {
-                lumaEnd1 = rgb2luma(texture(renderedTexture, uv1).rgb);
+                lumaEnd1 = getLum(texture(renderedTexture, uv1).rgb);
                 lumaEnd1 = lumaEnd1 - lumaLocalAverage;
             }
             // If needed, read luma in opposite direction, compute delta.
             if (!reached2) {
-                lumaEnd2 = rgb2luma(texture(renderedTexture, uv2).rgb);
+                lumaEnd2 = getLum(texture(renderedTexture, uv2).rgb);
                 lumaEnd2 = lumaEnd2 - lumaLocalAverage;
             }
             // If the luma deltas at the current extremities is larger than 
