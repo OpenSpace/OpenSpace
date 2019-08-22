@@ -92,6 +92,9 @@ public:
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float opacity);
 
+    float hdrExposure() const;
+    bool isHdrDisabled() const;
+
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
     void removeScreenSpaceRenderable(const std::string& identifier);

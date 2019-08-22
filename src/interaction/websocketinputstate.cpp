@@ -26,6 +26,7 @@
 
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/stringconversion.h>
+#include <algorithm>
 #include <map>
 #include <numeric>
 
