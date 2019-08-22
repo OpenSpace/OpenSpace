@@ -500,7 +500,9 @@ void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
-        { "windowHeight" , res.y }
+        { "windowHeight" , res.y },
+        { "hdrExposure", global::renderEngine.hdrExposure() },
+        { "disableHDR", global::renderEngine.isHdrDisabled() }
     };
 
     dict.setValue("rendererData", rendererData);
