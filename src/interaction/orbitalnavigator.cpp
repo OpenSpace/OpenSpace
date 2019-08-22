@@ -369,7 +369,7 @@ void OrbitalNavigator::resetVelocities() {
     _websocketStates.resetVelocities();
     _scriptStates.resetVelocities();
 
-    if (shouldFollowAnchorRotation()) {
+    if (shouldFollowAnchorRotation(_camera->positionVec3())) {
         _followRotationInterpolator.end();
     }
     else {
@@ -459,6 +459,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     anchorNodeRotationDiff = interpolateRotationDifferential(
         deltaTime,
         _followRotationInterpolationTime,
+        pose.position,
         anchorNodeRotationDiff
     );
 
@@ -701,7 +702,8 @@ void OrbitalNavigator::setRetargetInterpolationTime(float durationInSeconds) {
     _retargetInterpolationTime = durationInSeconds;
 }
 
-bool OrbitalNavigator::shouldFollowAnchorRotation() const {
+bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const
+{
     if (!_anchorNode) {
         return false;
     }
@@ -709,7 +711,7 @@ bool OrbitalNavigator::shouldFollowAnchorRotation() const {
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dmat4 inverseModelTransform = _anchorNode->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
-        glm::dvec4(_camera->positionVec3(), 1.0));
+        glm::dvec4(cameraPosition, 1.0));
 
     const SurfacePositionHandle positionHandle =
         _anchorNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
@@ -719,7 +721,7 @@ bool OrbitalNavigator::shouldFollowAnchorRotation() const {
     ) * _followAnchorNodeRotationDistance;
 
     const double distanceToCamera =
-        glm::distance(_camera->positionVec3(), _anchorNode->worldPosition());
+        glm::distance(cameraPosition, _anchorNode->worldPosition());
 
     return distanceToCamera < maximumDistanceForRotation;
 }
@@ -1277,10 +1279,12 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
                                                                  double interpolationTime,
+                                                          const glm::dvec3 cameraPosition,
                                                            const glm::dquat& rotationDiff)
 {
     // Interpolate with a negative delta time if distance is too large to follow
-    const double interpolationSign = shouldFollowAnchorRotation() ? 1.0 : -1.0;
+    const double interpolationSign =
+        shouldFollowAnchorRotation(cameraPosition) ? 1.0 : -1.0;
 
     _followRotationInterpolator.setInterpolationTime(static_cast<float>(
         interpolationTime
