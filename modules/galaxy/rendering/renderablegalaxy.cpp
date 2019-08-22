@@ -454,7 +454,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     // Render the volume
     if (_raycaster && _volumeRenderingEnabled) {
-        RaycasterTask task { _raycaster.get(), data };
+        RaycasterTask task{ _raycaster.get(), data };
 
         const glm::vec3 position = data.camera.positionVec3();
         const float length = safeLength(position);
@@ -530,9 +530,13 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
 
         _pointsProgram->activate();
 
+        glm::dmat4 rotMatrix = glm::rotate(glm::dmat4(1.0), 3.1415926, glm::dvec3(1.0, 0.0, 0.0)) *
+            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
+            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0));
+
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
+            glm::dmat4(data.modelTransform.rotation) * rotMatrix *
             glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
         glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
@@ -596,9 +600,13 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 
         _billboardsProgram->activate();
 
+        glm::dmat4 rotMatrix = glm::rotate(glm::dmat4(1.0), 3.1415926, glm::dvec3(1.0, 0.0, 0.0)) *
+            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
+            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0));
+
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
+            glm::dmat4(data.modelTransform.rotation) * rotMatrix *
             glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
         glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());

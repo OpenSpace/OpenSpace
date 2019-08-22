@@ -19,6 +19,7 @@ local MilkyWayVolumeGalaxy = {
 		AbsorptionMultiply = 75,
 		EmissionMultiply = 200,
 		Translation = {0.2, 0, 0},
+        Rotation = {3.1415926, 3.1248, 4.45741},
         Volume = {
 			Type = "Volume",
 			Filename = data .. "/MilkyWayRGBAVolume1024x1024x128.raw",
