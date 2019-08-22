@@ -42,7 +42,8 @@ namespace openspace{
     // --------------------------- CONSTRUCTORS ---------------------------------------//
     WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                                              std::vector<std::string>& _sourceFiles,
-                                             std::vector<double>& _startTimes, size_t& _nStates, size_t apiID){
+                                             std::vector<double>& _startTimes, size_t& _nStates, size_t apiID):
+                                             _apiID(apiID){
         _window.backWidth = 3;
         _window.forwardWidth = 3;
         
@@ -62,9 +63,7 @@ namespace openspace{
         _nAvailableWeb = 0; // haven't downloaded that list yet
         
         _worker = WebFieldlinesWorker(syncDir, serverUrl, _triggerTimesOnDisk);
-        
-        LERROR(std::to_string(apiID));
-        
+                
     }
     
     // -------------------------- PUBLIC FUNCTIONS  -----------------------------------//
@@ -144,7 +143,7 @@ namespace openspace{
     
     void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
 
-        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
+        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb, _apiID);
         _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
     }
 

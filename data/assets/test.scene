@@ -1,15 +1,16 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
+local renderableHelper = asset.require('util/renderable_helper')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
+-- asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -25,10 +26,15 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local sunRadius = 695508000
 
+local earthRadius = 6371
+
 -- Selected field lines + some additional field lines
 -- asset.require('./testwsa/scs_oi')
 -- asset.require('./testwsa/pfss_oi')
 asset.require('./testwsa/pfss_io')
+
+-- Parker Solar Probe
+-- asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
 
 -- Sun earth connection
 -- asset.require('./testwsa/sun_earth')
@@ -36,13 +42,98 @@ asset.require('./testwsa/pfss_io')
 -- Every N:th WSA field line
 -- asset.require('./testwsa/pfss_io_25')
 
+local Keybindings = {
+    {
+        Key = "m",
+        Command = renderableHelper.toggle('Scene.PspMarker'),
+        Documentation = "Toggles wether the parker solar probe marker is active or not",
+        Name = "Toggle Parker solar probe marker",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "p",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'PspPosition');" ..
+        "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
+        Documentation = "Set the target to parker solar probe",
+        Name = "Anchor at Parker solar probe, Aim at the sun",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "o",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');" ..
+        "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
+        Documentation = "Set the target to the Sun",
+        Name = "Anchor to the sun, target the probe",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "i",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');" ..
+        "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
+        Documentation = "Set the target to Earth",
+        Name = "Anchor to Earth, target the Sun",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "n",
+        Command = renderableHelper.toggle('Scene.WSA_Fieldlines_PFSS_IO') ..
+        renderableHelper.toggle('Scene.WSA_Fieldlines_PFSS_OI') ..
+        renderableHelper.toggle('Scene.WSA_Fieldlines_SCS_OI') ..
+        renderableHelper.toggle('Scene.WSA_Fieldlines_Sun_Earth_Connection'),
+        Documentation = "Toggle all fieldlines in the scene",
+        Name = "Toggle all field lines",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "z",
+        Command = "openspace.time.setTime('2017 SEP 1 00:00:00.000')",
+        Documentation = "Jump to 1 September 2017",
+        Name = "Jump to 2017",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "x", 
+        Command = "openspace.time.setTime('2021 APR 28 00:00:00.000')",
+        Documentation = "Jump to 1 September 2017",
+        Name = "Jump to 2017",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "b",
+        Command = renderableHelper.toggle('Scene.WSA_Fieldlines_Sun_Earth_Connection'),
+        Documentation = "Toggle ballerina skirt",
+        Name = "Toggle Sub Earth connection",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "v",
+        Command = renderableHelper.toggle('Scene.WSA_Fieldlines_PFSS_IO'),
+        Documentation = "Toggle PFSS in to out model",
+        Name = "Toggle PFSS in to out model",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+}
+
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
-
+    sceneHelper.bindKeys(Keybindings)
     -- Sun magnetogram texture testing
-    openspace.time.setTime("2019 MAY 2 09:59:57.000")
+    openspace.time.setTime("2017 SEP 2 10:00:00.000")
+    
+    -- Set different deltatimes
+    sceneHelper.setDeltaTimeKeys({
+        1, 3600, 430000
+    })
 
-  
     openspace.setDefaultGuiSorting()
 
     --openspace.globebrowsing.loadWMSServersFromFile(
@@ -60,7 +151,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Sun", "Moon" --, "MAS_MHD_Fieldlines"
+        "Earth", "Sun", "Moon", "PspPosition" --, "MAS_MHD_Fieldlines"
     })
 
     openspace.setPropertyValue("Scene.Sun.Renderable.Enabled", true)

@@ -39,7 +39,7 @@ public:
     
     WebFieldlinesWorker(std::string syncDir, std::string serverUrl, std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk);
     
-    void getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb);
+    void getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb, size_t id);
     
     // Sets the third index in _triggerTimesWeb to whether it is on disk already or not
     // If it's on disk, get the index of the corresponding triggertime in _triggerTimesOnDisk

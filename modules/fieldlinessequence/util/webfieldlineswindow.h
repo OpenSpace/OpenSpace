@@ -106,7 +106,8 @@ public:
 private:
     
     // PRIVATE MEMBER VARIABLES
-    
+    size_t _apiID;
+
     // Sliding download window
     Window _window;
     

@@ -31,11 +31,12 @@
 #include <ghoul/filesystem/file.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 
 
 namespace {
     constexpr const char* _loggerCat = "FieldlinesSequence[ Web FLs Worker ]";
-    
+    using json = nlohmann::json;
 } // namespace
 
 namespace openspace{
@@ -57,16 +58,21 @@ namespace openspace{
     }
     
     // PUBLIC FUNCTIONS
-    void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>> &_triggerTimesWeb){
+    void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>> &_triggerTimesWeb, size_t id){
         const std::string oSpaceStartTime = "2000-01-01";
         // temporary, should use parameters for real endpoint later on
         auto time = global::timeManager.time().ISO8601();
+        Time maxTime;
+        Time minTime;
+
+        maxTime.setTime(time);
+        maxTime.advanceTime(48000);
         
-        std::string url = "http://localhost:3000/WSA/times/2019-05-02T12:00:00:00/50";
+        std::string url = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=" + std::to_string(id) + "&time.min=" + time + "&time.max=" + maxTime.ISO8601();
         // This is done quite early in the startup, requesting based on Open Space start time, will result
         // In fetching filed lines that doesnt exist, and is too far away back in time.
-        if (time.substr(0, 10) != oSpaceStartTime)
-            url = "http://localhost:3000/WSA/times/" + time + "50";
+        //if (time.substr(0, 10) != oSpaceStartTime)
+        //    url = "http://localhost:3000/WSA/times/" + time + "50";
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
@@ -74,16 +80,32 @@ namespace openspace{
         
         // Put the results in a string
         std::string s;
+        
         std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
                        [](char c) {
                            return c;
                        });
 
+
+        auto res = json::parse(s);
+        
+        const std::string dataID = "dataID";
+        const std::string files = "files";
+        const std::string timeMax = "time.max";
+        const std::string timeMin = "time.min";
+        std::vector<std::string> urlList;
+        std::vector<std::string> timeList;
+        
+
+        for (auto& elem : res[files]) {
+            timeList.push_back(elem["timestamp"]);
+            urlList.push_back(elem["url"]);
+        }
+  
+        // NEXT: Combine lists
+
         _triggerTimesWeb.clear(); // we don't want to save too much in memory at the same time
 
-        parseTriggerTimesList(s, _triggerTimesWeb);
-        
-        // sort ascending by trigger time
         std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end());
 
     }
