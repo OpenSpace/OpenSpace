@@ -104,10 +104,7 @@ namespace openspace {
 
 class Scene;
 
-OpenSpaceEngine::OpenSpaceEngine()
-    : _scene(nullptr)
-    , _loadingScreen(nullptr)
-{
+OpenSpaceEngine::OpenSpaceEngine() {
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -164,19 +161,20 @@ void OpenSpaceEngine::registerPathTokens() {
             ghoul::filesystem::FileSystem::TokenClosingBraces;
         LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
 
-        const bool override = (fullKey == "${BASE}");
-        if (override) {
+        const bool overrideBase = (fullKey == "${BASE}");
+        if (overrideBase) {
             LINFO(fmt::format("Overriding base path with '{}'", path.second));
         }
+
+        const bool overrideTemporary = (fullKey == "${TEMPORARY}");
 
         using Override = ghoul::filesystem::FileSystem::Override;
         FileSys.registerPathToken(
             std::move(fullKey),
             std::move(path.second),
-            Override(override)
+            Override(overrideBase || overrideTemporary)
         );
     }
-
     LTRACE("OpenSpaceEngine::initialize(end)");
 }
 

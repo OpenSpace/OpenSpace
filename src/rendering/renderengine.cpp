@@ -654,14 +654,24 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         );
 
         std::string fn = std::to_string(_frameNumber);
+        WindowDelegate::Frustum frustum = global::windowDelegate.frustumMode();
+        std::string fr = [](WindowDelegate::Frustum frustum) -> std::string {
+            switch (frustum) {
+                case WindowDelegate::Frustum::Mono: return "";
+                case WindowDelegate::Frustum::LeftEye: return "(left)";
+                case WindowDelegate::Frustum::RightEye: return "(right)";
+            }
+        }(frustum);
+
+        std::string sgFn = std::to_string(global::windowDelegate.swapGroupFrameNumber());
         std::string dt = std::to_string(global::windowDelegate.deltaTime());
         std::string avgDt = std::to_string(global::windowDelegate.averageDeltaTime());
 
-        std::string res = "Frame: " + fn + '\n' + "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
+        std::string res = "Frame: " + fn + ' ' + fr + '\n' +
+                          "Swap group frame: " + sgFn + '\n' +
+                          "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
         RenderFont(*_fontFrameInfo, penPosition, res);
     }
-
-    ++_frameNumber;
 
     if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         std::vector<ScreenSpaceRenderable*> ssrs;
@@ -844,6 +854,8 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
+    ++_frameNumber;
+
     if (_shouldTakeScreenshot) {
         // We only create the directory here, as we don't want to spam the users
         // screenshot folder everytime we start OpenSpace even when we are not taking any
@@ -921,6 +933,14 @@ float RenderEngine::globalBlackOutFactor() {
 
 void RenderEngine::setGlobalBlackOutFactor(float opacity) {
     _globalBlackOutFactor = opacity;
+}
+
+float RenderEngine::hdrExposure() const {
+    return _hdrExposure;
+}
+
+bool RenderEngine::isHdrDisabled() const {
+    return _disableHDRPipeline;
 }
 
 /**
