@@ -183,7 +183,7 @@ private:
 
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
         vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase,
-        resolution) _uniformCache;
+        resolution, lineWidth) _uniformCache;
 };
 
 } // namespace openspace
