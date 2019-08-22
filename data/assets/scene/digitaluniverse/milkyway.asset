@@ -40,7 +40,8 @@ local sphere = {
         Orientation = "Inside",
         UseAdditiveBlending = true,
         MirrorTexture = true,
-        FadeOutThreshold = 0.025
+        FadeOutThreshold = 0.025,
+        Background = true
     },
     GUI = {
         Name = "Milky Way Sphere",

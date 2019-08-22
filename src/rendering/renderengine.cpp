@@ -199,6 +199,14 @@ namespace {
         "rendering for the MSAA method."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
+       "DisableHDRPipeline",
+       "Disable HDR Rendering",
+       "If this value is enabled, the rendering will disable the HDR color handling "
+       "and the LDR color pipeline will be used. Be aware of possible over exposure "
+       "in the final colors."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR Exposure",
@@ -206,18 +214,29 @@ namespace {
         "equivalent of an electronic image sensor."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
-        "Background Exposure",
-        "BackgroundExposure",
-        "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor for the background image."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HueInfo = {
+        "Hue",
+        "Hue",
+        "Hue"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SaturationInfo = {
+        "Saturation",
+        "Saturation",
+        "Saturation"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ValueInfo = {
+        "Value",
+        "Value",
+        "Value"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
@@ -255,9 +274,12 @@ RenderEngine::RenderEngine()
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
-    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
-    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _disableHDRPipeline(DisableHDRPipelineInfo, false)
+    , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
+    , _gamma(GammaInfo, 0.95f, 0.01f, 5.0f)
+    , _hue(HueInfo, 180.f, 0.0f, 360.0f)
+    , _saturation(SaturationInfo, 1.f, 0.0f, 2.0f)
+    , _value(ValueInfo, 1.f, 0.0f, 2.0f)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
     , _globalRotation(
         GlobalRotationInfo,
@@ -295,26 +317,52 @@ RenderEngine::RenderEngine()
     });
     addProperty(_nAaSamples);
 
+    _disableHDRPipeline.onChange([this]() {
+        if (_renderer) {
+            _renderer->setDisableHDR(_disableHDRPipeline);
+        }
+    });
+    addProperty(_disableHDRPipeline);
+
+    
     _hdrExposure.onChange([this]() {
         if (_renderer) {
             _renderer->setHDRExposure(_hdrExposure);
         }
     });
     addProperty(_hdrExposure);
-
-    _hdrBackground.onChange([this]() {
-        if (_renderer) {
-            _renderer->setHDRBackground(_hdrBackground);
-        }
-    });
-    addProperty(_hdrBackground);
-
+    
     _gamma.onChange([this]() {
         if (_renderer) {
             _renderer->setGamma(_gamma);
         }
     });
     addProperty(_gamma);
+
+    _hue.onChange([this]() {
+        if (_renderer) {
+            float pHue = (_hue + 180.f) / 360.f;
+            _renderer->setHue(pHue);
+        }
+    });
+
+    addProperty(_hue);
+    
+    _saturation.onChange([this]() {
+        if (_renderer) {
+            _renderer->setSaturation(_saturation);
+        }
+    });
+
+    addProperty(_saturation);
+    
+    _value.onChange([this]() {
+        if (_renderer) {
+            _renderer->setValue(_value);
+        }
+    });
+
+    addProperty(_value);
 
     addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
@@ -609,14 +657,24 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         );
 
         std::string fn = std::to_string(_frameNumber);
+        WindowDelegate::Frustum frustum = global::windowDelegate.frustumMode();
+        std::string fr = [](WindowDelegate::Frustum frustum) -> std::string {
+            switch (frustum) {
+                case WindowDelegate::Frustum::Mono: return "";
+                case WindowDelegate::Frustum::LeftEye: return "(left)";
+                case WindowDelegate::Frustum::RightEye: return "(right)";
+            }
+        }(frustum);
+
+        std::string sgFn = std::to_string(global::windowDelegate.swapGroupFrameNumber());
         std::string dt = std::to_string(global::windowDelegate.deltaTime());
         std::string avgDt = std::to_string(global::windowDelegate.averageDeltaTime());
 
-        std::string res = "Frame: " + fn + '\n' + "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
+        std::string res = "Frame: " + fn + ' ' + fr + '\n' +
+                          "Swap group frame: " + sgFn + '\n' +
+                          "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
         RenderFont(*_fontFrameInfo, penPosition, res);
     }
-
-    ++_frameNumber;
 
     if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         std::vector<ScreenSpaceRenderable*> ssrs;
@@ -799,6 +857,8 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
+    ++_frameNumber;
+
     if (_shouldTakeScreenshot) {
         // We only create the directory here, as we don't want to spam the users
         // screenshot folder everytime we start OpenSpace even when we are not taking any

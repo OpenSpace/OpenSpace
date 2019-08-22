@@ -85,6 +85,8 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         "RenderablePlaneImageLocal"
     );
 
+    addProperty(_blendMode);
+
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 

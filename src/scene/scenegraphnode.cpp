@@ -157,10 +157,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_transform.translation.get());
         LDEBUG(fmt::format(
             "Successfully created ephemeris for '{}'", result->identifier()
         ));
+    }
+    if (result->_transform.translation) {
+        result->addPropertySubOwner(result->_transform.translation.get());
     }
 
     if (dictionary.hasKey(KeyTransformRotation)) {
@@ -173,10 +175,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_transform.rotation.get());
         LDEBUG(fmt::format(
             "Successfully created rotation for '{}'", result->identifier()
         ));
+    }
+    if (result->_transform.rotation) {
+        result->addPropertySubOwner(result->_transform.rotation.get());
     }
 
     if (dictionary.hasKey(KeyTransformScale)) {
@@ -189,8 +193,10 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
+    }
+    if (result->_transform.scale) {
+        result->addPropertySubOwner(result->_transform.scale.get());
     }
 
     if (dictionary.hasKey(KeyTimeFrame)) {

@@ -1038,6 +1038,19 @@ void setSgctDelegateFunctions() {
         sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(0);
         w->setHorizFieldOfView(hFovDeg);
     };
+    sgctDelegate.frustumMode = []() {
+        using FM = sgct_core::Frustum::FrustumMode;
+        switch (sgct::Engine::instance()->getCurrentFrustumMode()) {
+            case FM::MonoEye: return WindowDelegate::Frustum::Mono;
+            case FM::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
+            case FM::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+        }
+    };
+    sgctDelegate.swapGroupFrameNumber = []() {
+        unsigned int fn = 0;
+        sgct::Engine::instance()->getCurrentWindowPtr()->getSwapGroupFrameNumber(fn);
+        return static_cast<uint64_t>(fn);
+    };
 }
 
 int main(int argc, char** argv) {

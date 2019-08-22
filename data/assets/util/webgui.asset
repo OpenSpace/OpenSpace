@@ -58,12 +58,14 @@ end)
 asset.onDeinitialize(function ()
     -- Remove the frontend endpoint
     local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
-    local newDirectories;
+    local newDirectories = {};
 
     openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
 
     for i = 0, #directories, 2 do
-        if (string.find(directories[i], "frontend") == nil) then
+        -- @TODO(abock, 2019-08-20) The explicit check for directories[i] is a workaround
+        -- for an error that was otherwise thrown when directories[i] was nil
+        if (directories[i] and string.find(directories[i], "frontend") == nil) then
             newDirectories[#newDirectories + 1] = directories[i]
             newDirectories[#newDirectories + 1] = directories[i + 1]
         end
