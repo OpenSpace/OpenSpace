@@ -189,10 +189,6 @@ local Mercury = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_MERCURY",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {
