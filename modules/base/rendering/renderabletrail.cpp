@@ -202,7 +202,6 @@ RenderableTrail::Appearance::Appearance()
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 {
-
     setRenderBin(RenderBin::Overlay);
     addProperty(_opacity);
 
@@ -212,35 +211,28 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_translation.get());
 
     _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
-    addProperty(_appearance.lineColor);
 
     if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
         _appearance.useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
     }
-    addProperty(_appearance.useLineFade);
 
     if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
-        _appearance.lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
+        _appearance.lineFade = static_cast<float>(
+            dictionary.value<double>(FadeInfo.identifier)
+        );
     }
-    addProperty(_appearance.lineFade);
 
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
         _appearance.lineWidth = static_cast<float>(dictionary.value<double>(
             LineWidthInfo.identifier
         ));
     }
-    addProperty(_appearance.lineWidth);
 
     if (dictionary.hasKeyAndValue<double>(PointSizeInfo.identifier)) {
-        _appearance.pointSize = static_cast<int>(dictionary.value<double>(PointSizeInfo.identifier));
+        _appearance.pointSize = static_cast<int>(
+            dictionary.value<double>(PointSizeInfo.identifier)
+        );
     }
-    addProperty(_appearance.pointSize);
-
-    _appearance.renderingModes.addOptions({
-        { RenderingModeLines, "Lines" },
-        { RenderingModePoints, "Points" },
-        { RenderingModeLinesPoints, "Lines+Points" }
-    });
 
     // This map is not accessed out of order as long as the Documentation is adapted
     // whenever the map changes. The documentation will check for valid values
@@ -252,7 +244,8 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     else {
         _appearance.renderingModes = RenderingModeLines;
     }
-    addProperty(_appearance.renderingModes);
+
+    addPropertySubOwner(_appearance);
 }
 
 void RenderableTrail::initializeGL() {
@@ -331,7 +324,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     }
 
     auto render = [renderLines, renderPoints, p = _programObject, &data,
-                   &modelTransform, pointSize = _appearance.pointSize.value(), c = _uniformCache]
+                   &modelTransform, pointSize = _appearance.pointSize.value(),
+                   c = _uniformCache]
                   (RenderInformation& info, int nVertices, int offset)
     {
         // We pass in the model view transformation matrix as double in order to maintain

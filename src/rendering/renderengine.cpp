@@ -940,6 +940,14 @@ void RenderEngine::setGlobalBlackOutFactor(float opacity) {
     _globalBlackOutFactor = opacity;
 }
 
+float RenderEngine::hdrExposure() const {
+    return _hdrExposure;
+}
+
+bool RenderEngine::isHdrDisabled() const {
+    return _disableHDRPipeline;
+}
+
 /**
  * Build a program object for rendering with the used renderer
  */

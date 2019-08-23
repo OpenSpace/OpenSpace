@@ -1131,7 +1131,7 @@ int main(int argc, char** argv) {
         "evaluated before it is passed to OpenSpace."
     ));
 
-    // setCommandLine returns a referece to the vector that will be filled later
+    // setCommandLine returns a reference to the vector that will be filled later
     const std::vector<std::string>& sgctArguments = parser.setCommandLine(
         { argv, argv + argc }
     );
