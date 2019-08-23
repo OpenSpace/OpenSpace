@@ -29,8 +29,8 @@ uniform sampler2D psfTexture;
 
 in vec4 vs_position;
 in vec2 psfCoords;
-in vec3 ge_color;
-in float ge_screenSpaceDepth;
+flat in vec3 ge_color;
+flat in float ge_screenSpaceDepth;
 
 Fragment getFragment() {
     Fragment frag;
