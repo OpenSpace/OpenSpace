@@ -35,6 +35,10 @@ namespace {
 
 namespace openspace {
 
+VersionChecker::~VersionChecker() {
+    cancel();
+}
+
 void VersionChecker::requestLatestVersion(const std::string& url) {
     HttpRequest::RequestOptions opt;
     opt.requestTimeoutSeconds = 0;
