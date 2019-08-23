@@ -53,7 +53,9 @@ void main() {
     vec2 texCoord = vec2(gl_FragCoord.xy / windowSize);
 
     vec4 exitColorTexture = texture(exitColorTexture, texCoord);
-    if (exitColorTexture.a < 1.0) {
+
+    // if we don't have an exit, discard the ray
+    if (exitColorTexture.a < 1.0 || exitColorTexture.rgb == vec3(0.0)) {
         discard;
     }
 
@@ -66,15 +68,16 @@ void main() {
     vec3 entryPos;
     float entryDepth;
     getEntry(entryPos, entryDepth);
+    // if we don't have an entry, discard the ray
+    if (entryPos == vec3(0.0)) {
+        discard;
+    }
 
     vec3 position = entryPos;
     vec3 diff = exitPos - entryPos;
 
     vec3 direction = normalize(diff);
     float raycastDepth = length(diff);
-
-    int i, j;
-    float tmp;
 
     float geoDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), 0).x);
     float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.0, 1.0);
@@ -96,11 +99,14 @@ void main() {
     vec3 accumulatedAlpha = vec3(0.0);
 
 
-    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
-         accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
-        if (currentDepth + nextStepSize * jitterFactor > raycastDepth) {
-            aaOpacity -= opacityDecay;
-        }
+    for (steps = 0; 
+        (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
+         accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; 
+         ++steps) 
+    {
+        // if (currentDepth + nextStepSize * jitterFactor > raycastDepth) {
+        //     aaOpacity -= opacityDecay;
+        // }
         bool shortStepSize = nextStepSize < raycastDepth / 10000000000.0;
 
         if (shortStepSize) {

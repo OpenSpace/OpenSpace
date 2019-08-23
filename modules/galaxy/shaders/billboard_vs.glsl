@@ -24,16 +24,13 @@
 
 #version __CONTEXT__
 
-in vec4 position;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_color;
 
-out vec2 texCoord;
-out vec3 vPosition;
-out vec4 worldPosition;
+out vec3 vs_color;
 
 void main() {
-    gl_Position = position;
-    texCoord = 0.5 + position.xy * 0.5;
+		vs_color = in_color;
 
-    vPosition = position.xyz;
-    worldPosition = position;
+		gl_Position = vec4(in_position, 1.0);
 }

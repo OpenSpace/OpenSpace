@@ -568,8 +568,18 @@ void main() {
             // Fragments positions into G-Buffer are written in SGCT Eye Space (View plus Camera Rig Coords)
             // when using their positions later, one must convert them to the planet's coords
             
+            // =======================
             // Get data from G-Buffer
-            vec4 normal   = texture(mainNormalTexture, texCoord);
+            // =======================
+
+            // Normal is stored in SGCT View Space and transformed to the current object space
+            vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, texCoord);
+            dvec4 normalViewSpace = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
+            dvec4 normalWorldSpace = dSGCTViewToWorldMatrix * normalViewSpace;
+            vec4 normal = vec4(dInverseModelTransformMatrix * normalWorldSpace);
+            normal.xyz = normalize(normal.xyz);
+            normal.w = normalViewSpaceAndWaterReflectance.w;
+
             // Data in the mainPositionTexture are written in view space (view plus camera rig)
             vec4 position = texture(mainPositionTexture, texCoord);
 

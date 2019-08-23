@@ -22,22 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-layout (location = 0) out vec4 finalColor;
+uniform sampler2D psfTexture;
 
-uniform float blackoutFactor;
-uniform int nAaSamples;
-uniform sampler2DMS mainColorTexture;
+in vec4 vs_position;
+in vec2 psfCoords;
+in vec3 ge_color;
+in float ge_screenSpaceDepth;
 
-void main() {
-    vec4 color = vec4(0.0);
-    for (int i = 0; i < nAaSamples; i++) {
-        color += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+Fragment getFragment() {
+    Fragment frag;
+
+    vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
+    vec4 fullColor = vec4(ge_color*textureColor.a, textureColor.a);
+    if (fullColor.a == 0) {
+        discard;
     }
+    frag.color = fullColor;
 
-    color /= nAaSamples;
-    color.rgb *= blackoutFactor;
-     
-    finalColor = vec4(color.rgb, 1.0);
+    frag.depth = ge_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+
+    return frag;
 }

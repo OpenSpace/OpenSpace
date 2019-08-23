@@ -50,10 +50,6 @@
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
-    constexpr const std::array<const char*, 2> UniformNames = {
-        "mainColorTexture", "blackoutFactor"
-    };
-
     constexpr const std::array<const char*, 7> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma", 
         "Hue", "Saturation", "Value"
@@ -320,17 +316,6 @@ void FramebufferRenderer::initialize() {
     // Sets back to default FBO
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
 
-    _resolveProgram = ghoul::opengl::ProgramObject::Build(
-        "Framebuffer Resolve",
-        absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
-        absPath("${SHADERS}/framebuffer/resolveframebuffer.frag")
-    );
-
-    ghoul::opengl::updateUniformLocations(
-        *_resolveProgram, 
-        _uniformCache, 
-        UniformNames
-    );
     ghoul::opengl::updateUniformLocations(
         *_hdrFilteringProgram, 
         _hdrUniformCache, 
@@ -475,15 +460,6 @@ void FramebufferRenderer::update() {
         updateDeferredcastData();
     }
 
-    if (_resolveProgram->isDirty()) {
-        _resolveProgram->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(
-            *_resolveProgram,
-            _uniformCache,
-            UniformNames
-        );
-    }
-    
     if (_hdrFilteringProgram->isDirty()) {
         _hdrFilteringProgram->rebuildFromFile();
 

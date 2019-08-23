@@ -24,30 +24,20 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+layout(location = 0) in vec4 vertPosition;
 
-in vec3 inPosition;
-in vec3 inColor;
+out vec3 modelPosition;
+out vec4 viewPosition;
 
-out vec3 vsPosition;
-out vec3 vsColor;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 viewProjection;
+uniform mat4 modelViewTransform;
 
 
 void main() {
-    vec4 p = vec4(inPosition, 1.0);
+    modelPosition = vertPosition.xyz;
+    viewPosition = modelViewTransform*vertPosition;
 
-    vec4 worldPosition = model * vec4(inPosition, 1.0);
-    worldPosition.w = 0.0;
-    vec4 position = worldPosition; //pscTransform(worldPosition, model);
-
-
-    position = pscTransform(position, mat4(1.0));
-    vsPosition = position.xyz;    
-    position = projection * view * position;
-    gl_Position =  z_normalization(position);
-    vsColor = inColor;
+    // project the position to view space
+    gl_Position = viewProjection * viewPosition;
+    gl_Position.z = 0.0;
 }

@@ -23,21 +23,26 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "floatoperations.glsl"
 
-in vec3 vsPosition;
-in vec3 vsColor;
+in vec4 vs_position;
+in vec3 vs_color;
+in float vs_screenSpaceDepth;
+in float vs_starBrightness;
 
-uniform float emittanceFactor;
-
+uniform float opacityCoefficient;
 
 Fragment getFragment() {
     Fragment frag;
 
-    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
-    frag.color = vec4(vsColor.rgb * coefficient, 1.0);
+    float multipliedOpacityCoefficient = clamp(opacityCoefficient*opacityCoefficient*20.0, 0.0, 1.0);
+    vec3 extinction = exp(vec3(0.6, 0.2, 0.3)-vs_color);
+    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*multipliedOpacityCoefficient, 1.0);
+    frag.color = fullColor;
 
-    frag.depth = pscDepth(vec4(vsPosition, 0.0));
+    frag.depth = vs_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
     return frag;
 }
