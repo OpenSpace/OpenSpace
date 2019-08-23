@@ -192,13 +192,6 @@ namespace {
         "direction for tilted display systems in clustered immersive environments."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AaSamplesInfo = {
-        "AaSamples",
-        "Number of Anti-aliasing samples",
-        "This value determines the number of anti-aliasing samples to be used in the "
-        "rendering for the MSAA method."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
        "DisableHDRPipeline",
        "Disable HDR Rendering",
@@ -253,6 +246,12 @@ namespace {
         "The blackout factor of the rendering. This can be used for fading in or out the "
         "rendering window"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
+        "FXAA",
+        "Enable FXAA",
+        "Enable FXAA"
+    };
 } // namespace
 
 
@@ -273,7 +272,7 @@ RenderEngine::RenderEngine()
 #endif // OPENSPACE_WITH_INSTRUMENTATION
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
-    , _nAaSamples(AaSamplesInfo, 4, 1, 8)
+    , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
     , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 0.95f, 0.01f, 5.0f)
@@ -310,12 +309,12 @@ RenderEngine::RenderEngine()
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
 
-    _nAaSamples.onChange([this](){
+    _enableFXAA.onChange([this]() {
         if (_renderer) {
-            _renderer->setNAaSamples(_nAaSamples);
+            _renderer->enableFXAA(_enableFXAA);
         }
-    });
-    addProperty(_nAaSamples);
+        });
+    addProperty(_enableFXAA);
 
     _disableHDRPipeline.onChange([this]() {
         if (_renderer) {
@@ -456,8 +455,6 @@ void RenderEngine::initialize() {
 
 void RenderEngine::initializeGL() {
     LTRACE("RenderEngine::initializeGL(begin)");
-
-    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
 
     std::string renderingMethod = global::configuration.renderingMethod;
     if (renderingMethod == "ABuffer") {
@@ -1086,7 +1083,7 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
 
     _renderer = std::move(renderer);
     _renderer->setResolution(renderingResolution());
-    _renderer->setNAaSamples(_nAaSamples);
+    _renderer->enableFXAA(true);
     _renderer->setHDRExposure(_hdrExposure);
     _renderer->initialize();
 }

@@ -69,16 +69,16 @@ public:
     void updateRaycastData();
     void updateDeferredcastData();
     void updateHDRAndFiltering();
+    void updateFXAA();
     
     void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
     void setGamma(float gamma) override;
     void setHue(float hue) override;
     void setValue(float value) override;
     void setSaturation(float sat) override;
     
-    int nAaSamples() const override;
+    void enableFXAA(bool enable) override;
     void setDisableHDR(bool disable) override;
     
     void update() override;
@@ -109,6 +109,7 @@ private:
 
     void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor);
+    void applyFXAA();
     
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -120,12 +121,13 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
-    UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
-    
+    std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
+
+    UniformCache(mainColorTexture, blackoutFactor) _uniformCache;
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-        Hue, Saturation, Value, nAaSamples) _hdrUniformCache;
+                 Hue, Saturation, Value) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;
@@ -148,19 +150,24 @@ private:
     } _pingPongBuffers;
 
     struct {
-        GLuint _hdrFilteringFramebuffer;
-        GLuint _hdrFilteringTexture;
+        GLuint hdrFilteringFramebuffer;
+        GLuint hdrFilteringTexture;
     } _hdrBuffers;
     
+    struct {
+        GLuint fxaaFramebuffer;
+        GLuint fxaaTexture;
+    } _fxaaBuffers;
+
     unsigned int _pingPongIndex = 0u;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
-    bool _dirtyMsaaSamplingPattern;
-
+    
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
+    bool _enableFXAA = true;
     bool _disableHDR = false;
     
     float _hdrExposure = 3.7f;
