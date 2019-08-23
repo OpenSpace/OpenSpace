@@ -178,7 +178,7 @@ RenderableTrail::Appearance::Appearance()
     , lineColor(LineColorInfo, glm::vec3(1.0f, 1.0f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,

@@ -27,7 +27,7 @@
 in float vs_positionDepth;
 in vec4 vs_gPosition;
 in float fade;
-in vec2 mathLine;
+noperspective in vec2 mathLine;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -63,17 +63,13 @@ Fragment getFragment() {
 
     double distanceCenter = length(mathLine - vec2(gl_FragCoord.xy));
     double dLW = double(lineWidth);
-    float blendFactor = 1.5;
+    float blendFactor = 20;
+    
     if (distanceCenter > dLW) {
-        frag.color = vec4(1.0, 0.0, 0.0, 1.0);
-        //frag.color.a = 0;
+        frag.color.a = 0.0;
     } else {
         frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
-        //frag.color.a = 1.0;
     }
-
-    // if (distanceCenter > 3.0)
-    //     frag.color = vec4(0.0, 1.0, 0.0, 1.0);
 
     frag.gPosition = vs_gPosition;
 
