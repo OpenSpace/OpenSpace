@@ -41,7 +41,10 @@ public:
         int patch;
     };
 
+    ~VersionChecker();
+
     void requestLatestVersion(const std::string& url);
+    void cancel();
     bool hasLatestVersionInfo();
     SemanticVersion latestVersion();
 

@@ -65,7 +65,7 @@ int progressCallback(void* userData, int64_t nTotalDownloadBytes,
     HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
     return r->_onProgress(
         HttpRequest::Progress{
-            true,
+            nTotalDownloadBytes > 0,
             static_cast<size_t>(nTotalDownloadBytes),
             static_cast<size_t>(nDownloadedBytes)
         }
