@@ -60,7 +60,8 @@ asset.onDeinitialize(function ()
     local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
     local newDirectories = {};
 
-    openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
+    -- @TODO(maci, 2019-08-23) see message below
+    --openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
 
     for i = 0, #directories, 2 do
         -- @TODO(abock, 2019-08-20) The explicit check for directories[i] is a workaround
@@ -70,5 +71,8 @@ asset.onDeinitialize(function ()
             newDirectories[#newDirectories + 1] = directories[i + 1]
         end
     end
-    openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
+    -- @TODO(maci, 2019-08-23) setting this value on exit was causing the server to restart
+    -- on macos, which in turn, stopped the application from exiting. 
+    -- need to address in webguimodule.cpp
+    --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
