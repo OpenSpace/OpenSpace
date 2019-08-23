@@ -790,7 +790,7 @@ void RenderEngine::renderEndscreen() {
     );
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.boundingBox.x / 2,
-        fontResolution().y / 2- size.boundingBox.y / 2
+        fontResolution().y / 2 - size.boundingBox.y / 2
     );
     RenderFont(*_fontDate, penPosition, "Shutting down");
 }
@@ -833,9 +833,11 @@ void RenderEngine::renderDashboard() {
             "Main Dashboard::render"
         );
     }
+
+    glm::vec2 dashboardStart = global::dashboard.getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
-        10.f,
-        fontResolution().y - global::luaConsole.currentHeight()
+        dashboardStart.x,
+        dashboardStart.y + fontResolution().y - global::luaConsole.currentHeight()
     );
 
     global::dashboard.render(penPosition);
