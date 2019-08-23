@@ -15,6 +15,7 @@ asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
+asset.request('scene/milkyway/milkyway/volume')
 
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
@@ -26,7 +27,6 @@ asset.require('util/default_joystick')
 -- Load web gui
 asset.require('util/webgui')
 
-asset.request('customization/globebrowsing')
 asset.request('customization/volumes')
 
 -- Keybindings that are specific for this scene

@@ -108,7 +108,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
         "Star Rendering Method",
-        "This value determines which rendering method is used for visualization of the stars."
+        "This value determines which rendering method is used for visualization of the "
+        "stars."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
@@ -127,7 +128,10 @@ namespace openspace {
     , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 100.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 400.f, 0.0f, 1000.0f)
-    , _starRenderingMethod(StarRenderingMethodInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _starRenderingMethod(
+        StarRenderingMethodInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
@@ -143,7 +147,9 @@ namespace openspace {
     dictionary.getValue("Rotation", _rotation);
 
     if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
-        _volumeRenderingEnabled = dictionary.value<bool>(VolumeRenderingEnabledInfo.identifier);
+        _volumeRenderingEnabled = dictionary.value<bool>(
+            VolumeRenderingEnabledInfo.identifier
+            );
     }
 
     if (dictionary.hasKeyAndValue<bool>(StarRenderingEnabledInfo.identifier)) {
@@ -155,21 +161,25 @@ namespace openspace {
     }
 
     if (dictionary.hasKeyAndValue<double>(AbsorptionMultiplyInfo.identifier)) {
-        _absorptionMultiply = static_cast<float>(dictionary.value<double>(AbsorptionMultiplyInfo.identifier));
+        _absorptionMultiply = static_cast<float>(
+            dictionary.value<double>(AbsorptionMultiplyInfo.identifier)
+        );
     }
 
     if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
-        _emissionMultiply = static_cast<float>(dictionary.value<double>(EmissionMultiplyInfo.identifier));
+        _emissionMultiply = static_cast<float>(
+            dictionary.value<double>(EmissionMultiplyInfo.identifier)
+        );
     }
 
     _starRenderingMethod.addOptions({
-       { 0, "Points" },
-       { 1, "Billboards" }
-        });
+        { 0, "Points" },
+        { 1, "Billboards" }
+    });
     if (dictionary.hasKey(StarRenderingMethodInfo.identifier)) {
         const std::string starRenderingMethod = dictionary.value<std::string>(
             StarRenderingMethodInfo.identifier
-            );
+        );
         if (starRenderingMethod == "Points") {
             _starRenderingMethod = 0;
         }
@@ -195,13 +205,15 @@ namespace openspace {
     std::string volumeFilename;
     if (volumeDictionary.getValue("Filename", volumeFilename)) {
         _volumeFilename = absPath(volumeFilename);
-    } else {
+    }
+    else {
         LERROR("No volume filename specified.");
     }
     glm::vec3 volumeDimensions;
     if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
         _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
-    } else {
+    }
+    else {
         LERROR("No volume dimensions specified.");
     }
     glm::vec3 volumeSize;
@@ -220,18 +232,23 @@ namespace openspace {
     std::string pointsFilename;
     if (pointsDictionary.getValue("Filename", pointsFilename)) {
         _pointsFilename = absPath(pointsFilename);
-    } else {
+    }
+    else {
         LERROR("No points filename specified.");
     }
 
     if (pointsDictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
-        _enabledPointsRatio = static_cast<float>(pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier));
+        _enabledPointsRatio = static_cast<float>(
+            pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier)
+            );
     }
 
     std::string pointSpreadFunctionTexturePath;
     if (pointsDictionary.getValue("Texture", pointSpreadFunctionTexturePath)) {
         _pointSpreadFunctionTexturePath = absPath(pointSpreadFunctionTexturePath);
-        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(_pointSpreadFunctionTexturePath);
+        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+            _pointSpreadFunctionTexturePath
+        );
     }
     else {
         LERROR("No points filename specified.");
@@ -326,8 +343,16 @@ void RenderableGalaxy::initializeGL() {
                 );
         }
 
-        ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints, UniformNamesPoints);
-        ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards, UniformNamesBillboards);
+        ghoul::opengl::updateUniformLocations(
+            *_pointsProgram,
+            _uniformCachePoints,
+            UniformNamesPoints
+        );
+        ghoul::opengl::updateUniformLocations(
+            *_billboardsProgram,
+            _uniformCacheBillboards,
+            UniformNamesBillboards
+        );
 
         _pointsProgram->setIgnoreUniformLocationError(
             ghoul::opengl::ProgramObject::IgnoreError::Yes
@@ -357,7 +382,10 @@ void RenderableGalaxy::initializeGL() {
 
         // Read points
         float x, y, z, r, g, b, a;
-        for (size_t i = 0; i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1; ++i) {
+        for (size_t i = 0;
+             i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1;
+             ++i)
+        {
             std::getline(pointFile, line);
             std::istringstream issp(line);
             issp >> x >> y >> z >> r >> g >> b >> a;
@@ -472,7 +500,8 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         if (length < lowerRampStart) {
             opacityCoefficient = 0.f; // camera really close
         } else if (length < lowerRampEnd) {
-            opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
+            opacityCoefficient = (length - lowerRampStart) /
+                                 (lowerRampEnd - lowerRampStart);
         } else if (length < upperRampStart) {
             opacityCoefficient = 1.f; // sweet spot (max)
         } else if (length < upperRampEnd) {
@@ -530,9 +559,13 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
 
         _pointsProgram->activate();
 
-        glm::dmat4 rotMatrix = glm::rotate(glm::dmat4(1.0), 3.1415926, glm::dvec3(1.0, 0.0, 0.0)) *
-            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
-            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0));
+        glm::dmat4 rotMatrix = glm::rotate(
+            glm::dmat4(1.0),
+            glm::pi<double>(),
+            glm::dvec3(1.0, 0.0, 0.0)) *
+                glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
+                glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
+        );
 
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -551,10 +584,14 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
         );
 
         glm::dvec3 eyePosition = glm::dvec3(
-            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+            glm::inverse(data.camera.combinedViewMatrix()) *
+            glm::dvec4(0.0, 0.0, 0.0, 1.0)
         );
         _pointsProgram->setUniform(_uniformCachePoints.eyePosition, eyePosition);
-        _pointsProgram->setUniform(_uniformCachePoints.opacityCoefficient, _opacityCoefficient);
+        _pointsProgram->setUniform(
+            _uniformCachePoints.opacityCoefficient,
+            _opacityCoefficient
+        );
 
         glBindVertexArray(_pointsVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
@@ -600,9 +637,13 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 
         _billboardsProgram->activate();
 
-        glm::dmat4 rotMatrix = glm::rotate(glm::dmat4(1.0), 3.1415926, glm::dvec3(1.0, 0.0, 0.0)) *
-            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
-            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0));
+        glm::dmat4 rotMatrix = glm::rotate(
+            glm::dmat4(1.0),
+            glm::pi<double>(),
+            glm::dvec3(1.0, 0.0, 0.0)) *
+                glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
+                glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
+        );
 
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -621,7 +662,8 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
         );
 
         glm::dvec3 eyePosition = glm::dvec3(
-            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+            glm::inverse(data.camera.combinedViewMatrix()) *
+            glm::dvec4(0.0, 0.0, 0.0, 1.0)
         );
         _billboardsProgram->setUniform(_uniformCacheBillboards.eyePosition, eyePosition);
 
