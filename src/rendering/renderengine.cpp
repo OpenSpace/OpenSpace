@@ -309,6 +309,12 @@ RenderEngine::RenderEngine()
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
 
+    // @TODO (maci 2019-08-23) disabling FXAA on
+    // MacOS for now until we have fix or MSAA option.
+#ifdef __APPLE__
+    _enableFXAA = false;
+#endif
+
     _enableFXAA.onChange([this]() {
         if (_renderer) {
             _renderer->enableFXAA(_enableFXAA);
@@ -935,6 +941,14 @@ void RenderEngine::setGlobalBlackOutFactor(float opacity) {
     _globalBlackOutFactor = opacity;
 }
 
+float RenderEngine::hdrExposure() const {
+    return _hdrExposure;
+}
+
+bool RenderEngine::isHdrDisabled() const {
+    return _disableHDRPipeline;
+}
+
 /**
  * Build a program object for rendering with the used renderer
  */
@@ -1075,7 +1089,7 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
 
     _renderer = std::move(renderer);
     _renderer->setResolution(renderingResolution());
-    _renderer->enableFXAA(true);
+    _renderer->enableFXAA(_enableFXAA);
     _renderer->setHDRExposure(_hdrExposure);
     _renderer->initialize();
 }

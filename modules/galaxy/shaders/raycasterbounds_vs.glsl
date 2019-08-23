@@ -24,16 +24,20 @@
 
 #version __CONTEXT__
 
-in vec4 position;
+layout(location = 0) in vec4 vertPosition;
 
-out vec2 texCoord;
-out vec3 vPosition;
-out vec4 worldPosition;
+out vec3 modelPosition;
+out vec4 viewPosition;
+
+uniform mat4 viewProjection;
+uniform mat4 modelViewTransform;
+
 
 void main() {
-    gl_Position = position;
-    texCoord = 0.5 + position.xy * 0.5;
+    modelPosition = vertPosition.xyz;
+    viewPosition = modelViewTransform*vertPosition;
 
-    vPosition = position.xyz;
-    worldPosition = position;
+    // project the position to view space
+    gl_Position = viewProjection * viewPosition;
+    gl_Position.z = 0.0;
 }

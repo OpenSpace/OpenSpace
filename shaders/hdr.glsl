@@ -41,7 +41,7 @@ const mat3 XYZ2RGB = mat3(
 
 // Gamma correction for linear RGB to sRGB
 // See wiki: https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
-const float gammaF(const float u) {
+float gammaF(const float u) {
     if (u < 0.0031308) {
         return 12.92 * u;
     } else {

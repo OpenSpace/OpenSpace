@@ -22,32 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "floatoperations.glsl"
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec3 modelPosition;
+in vec4 viewPosition;
 
-in vec3 inPosition;
-in vec3 inColor;
+Fragment getFragment() {
+    Fragment frag;
+    //Early ray termination on black parts of the data
+    /*vec3 normalizedPos = (modelPosition*2.0)-1.0;
+    if(abs(modelPosition.x) > 0.9 || abs(modelPosition.y) > 0.9){
+      frag.color = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    else{*/
+      vec3 pos = modelPosition + 0.5;
+      //vec3 posClamp = clamp(pos, vec3(0.0), vec3(1.0));
+      frag.color = vec4(pos, 1.0);
+    //}
 
-out vec3 vsPosition;
-out vec3 vsColor;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-
-void main() {
-    vec4 p = vec4(inPosition, 1.0);
-
-    vec4 worldPosition = model * vec4(inPosition, 1.0);
-    worldPosition.w = 0.0;
-    vec4 position = worldPosition; //pscTransform(worldPosition, model);
-
-
-    position = pscTransform(position, mat4(1.0));
-    vsPosition = position.xyz;    
-    position = projection * view * position;
-    gl_Position =  z_normalization(position);
-    vsColor = inColor;
+    frag.depth = safeLength(viewPosition);
+    return frag;
 }

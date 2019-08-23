@@ -22,25 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec4 vs_position;
+in vec3 vs_color;
+in float vs_screenSpaceDepth;
+in float vs_starBrightness;
 
-layout(location = 0) in vec4 vertPosition;
+uniform float opacityCoefficient;
 
-out vec3 vPosition;
-out vec4 worldPosition;
+Fragment getFragment() {
+    Fragment frag;
 
-uniform mat4 viewProjection;
-uniform mat4 modelTransform;
+    float multipliedOpacityCoefficient = clamp(opacityCoefficient*opacityCoefficient*20.0, 0.0, 1.0);
+    vec3 extinction = exp(vec3(0.6, 0.2, 0.3)-vs_color);
+    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*multipliedOpacityCoefficient, 1.0);
+    frag.color = fullColor;
 
+    frag.depth = vs_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-void main() {
-    vPosition = vertPosition.xyz;
-
-    worldPosition = modelTransform * vec4(vertPosition.xyz, 1.0);
-    worldPosition.w = 0.0;
-    vec4 position = pscTransform(worldPosition, mat4(1.0));
-
-    gl_Position =  z_normalization(viewProjection * position);
+    return frag;
 }
