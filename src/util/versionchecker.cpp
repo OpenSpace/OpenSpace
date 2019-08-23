@@ -53,6 +53,15 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     _request->start(opt);
 }
 
+void VersionChecker::cancel() {
+    if (!_request) {
+        return;
+    }
+    _request->cancel();
+    _request->wait();
+    _request = nullptr;
+}
+
  bool VersionChecker::hasLatestVersionInfo() {
     if (_latestVersion.has_value()) {
         return true;

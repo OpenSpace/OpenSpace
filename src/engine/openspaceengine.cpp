@@ -806,6 +806,7 @@ void OpenSpaceEngine::deinitialize() {
         );
     }
     global::sessionRecording.deinitialize();
+    global::versionChecker.cancel();
 
     global::deinitialize();
 

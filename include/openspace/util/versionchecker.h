@@ -42,6 +42,7 @@ public:
     };
 
     void requestLatestVersion(const std::string& url);
+    void cancel();
     bool hasLatestVersionInfo();
     SemanticVersion latestVersion();
 
