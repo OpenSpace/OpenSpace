@@ -633,7 +633,7 @@ void FramebufferRenderer::updateResolution() {
         _resolution.y,
         0,
         GL_RGBA,
-        GL_FLOAT,
+        GL_BYTE,
         nullptr
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
