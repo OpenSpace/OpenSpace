@@ -42,16 +42,14 @@ namespace openspace{
     // --------------------------- CONSTRUCTORS ---------------------------------------//
     WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                                              std::vector<std::string>& _sourceFiles,
-                                             std::vector<double>& _startTimes, size_t& _nStates){
+                                             std::vector<double>& _startTimes, size_t& _nStates, int apiID):
+                                             _apiID(apiID){
         _window.backWidth = 3;
         _window.forwardWidth = 3;
         
         _window.nTriggerTimes = static_cast<int>(_nStates);
         
-        _triggerTimesOnDisk = std::make_shared<std::vector<std::pair<double, std::string>>>();
-        
         for(int i = 0; i < _window.nTriggerTimes ; i++){
-            _triggerTimesOnDisk->push_back(std::make_pair(_startTimes[i], _sourceFiles[i]));
             _window.triggerTimes.push_back(std::make_pair(_startTimes[i], _sourceFiles[i]));
         }
         
@@ -61,10 +59,8 @@ namespace openspace{
         
         _nAvailableWeb = 0; // haven't downloaded that list yet
         
-        _worker = WebFieldlinesWorker(syncDir, serverUrl, _triggerTimesOnDisk);
-        
-        
-        
+        _worker = WebFieldlinesWorker(syncDir, serverUrl);
+                
     }
     
     // -------------------------- PUBLIC FUNCTIONS  -----------------------------------//
@@ -117,33 +113,40 @@ namespace openspace{
         // Find where in the list we are
         int index = _nAvailableWeb-1;
         while(true){
-            if(time > std::get<0>(_triggerTimesWeb[index])) break;
+            if(time > (_triggerTimesWeb[index].first)) break;
             index--;
         }
+
+        // Should do the same as above?
+        //std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rend(), [time](auto it) {
+        //    if (time > it.first)
+        //        return true;
+        //})
         
         // Make a window around that area
         _window.triggerTimes.clear();
         _window.nTriggerTimes = 0;
         for(int i = index - _window.backWidth; i <= index + _window.forwardWidth; i++){
             if(i < 0) i = 0;
-            _window.triggerTimes.push_back(std::make_pair(std::get<0>(_triggerTimesWeb[i]), std::get<1>(_triggerTimesWeb[i])));
+            _window.triggerTimes.push_back(std::make_pair(_triggerTimesWeb[i].first, _triggerTimesWeb[i].second));
             _window.nTriggerTimes++;
         }
         LERROR("new window");
-        
+        _worker.newWindowToDownload();
     }
     
     bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time){
         if(_nAvailableWeb == 0) return false;
 
-        if(time >= std::get<0>(_triggerTimesWeb.front()) && time <= std::get<0>(_triggerTimesWeb.back()))
+        if(time >= (_triggerTimesWeb.front().first) && time <= (_triggerTimesWeb.back().first))
             return true;
         else 
             return false;
     }
     
     void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
-        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
+
+        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb, _apiID);
         _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
     }
 
@@ -154,15 +157,19 @@ namespace openspace{
     }
 
     bool WebFieldlinesWindow::expectedWindowIsOutOfBounds(double time) {
-        auto resultForwards = std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rbegin() + _window.forwardWidth, [time](auto tuple) {
-            return time > std::get<0>(tuple);
+        auto resultForwards = std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rbegin() + _window.forwardWidth, [time](auto pair) {
+            return time > pair.first;
         });
 
-        auto resultBackwards = std::find_if(_triggerTimesWeb.begin(), _triggerTimesWeb.begin() + _window.backWidth, [time](auto tuple) {
-            return time < std::get<0>(tuple);
+        auto resultBackwards = std::find_if(_triggerTimesWeb.begin(), _triggerTimesWeb.begin() + _window.backWidth, [time](auto pair) {
+            return time < pair.first;
         });
 
         return resultForwards != _triggerTimesWeb.rbegin() + _window.forwardWidth || resultBackwards != _triggerTimesWeb.begin() + _window.backWidth;
+    }
+
+    void WebFieldlinesWindow::rfsHasUpdated() {
+        _worker.flagUpdated();
     }
     
     // -------------------------- PRIVATE FUNCTIONS  -----------------------------------//

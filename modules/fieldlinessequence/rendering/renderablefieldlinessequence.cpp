@@ -436,6 +436,7 @@ namespace openspace {
             LERROR("initializing sync-dir and downloading startset webFLman");
             sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
             _webFieldlinesManager.preDownload();
+
         }
 
         // Ensure that the source folder exists and then extract
@@ -1181,7 +1182,7 @@ namespace openspace {
     }
 
     void RenderableFieldlinesSequence::initializeWebManager() {
-        _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, "PfssIo", _nStates, _sourceFiles, _startTimes);
+        _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, _nStates, _sourceFiles, _startTimes);
     }
 
     void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1191,28 +1192,20 @@ namespace openspace {
 
         const double currentTime = data.time.j2000Seconds();
 
+
         if (_webFieldlines) {
 
             if (!_webFieldlinesManager.hasUpdated && _webFieldlinesManager.checkIfWindowIsReadyToLoad()) {
-                LERROR("Getting ready to inject stuff in to RFS");
                 _startTimes.clear();
                 extractTriggerTimesFromFileNames();
                 
                 // _startTimes are not sorted right now, have to do something about that ->
                 std::sort(_startTimes.begin(), _startTimes.end());
                 _nStates = _startTimes.size();
-                computeSequenceEndTime();
-
-                /*for (int i = 0; i < _sourceFiles.size(); ++i) {
-                    LERROR(_sourceFiles[i]);
-                }
-
-                for (int i = 0; i < _startTimes.size(); ++i) {
-                    LERROR(std::to_string(_startTimes[i]));
-                } */
-                updateActiveTriggerTimeIndex(currentTime);
 
                 _webFieldlinesManager.hasUpdated = true;
+                _webFieldlinesManager.notifyUpdate = true;
+                _webFieldlinesManager.resetWorker();
             }
             _webFieldlinesManager.update(); // we could also send time as a variable as we already have it
         }
@@ -1242,13 +1235,22 @@ namespace openspace {
                     _needsUpdate = true;
                     _activeStateIndex = _activeTriggerTimeIndex;
                 }
-            } // else {we're still in same state as previous frame (no changes needed)}
+            } 
+
+
+            // else {we're still in same state as previous frame (no changes needed)}
         }
         else {
             // Not in interval => set everything to false
             _activeTriggerTimeIndex = -1;
             _mustLoadNewStateFromDisk = false;
             _needsUpdate = false;
+        }
+
+        if (_webFieldlines && _webFieldlinesManager.notifyUpdate) {
+            updateActiveTriggerTimeIndex(currentTime);
+            computeSequenceEndTime();
+            _webFieldlinesManager.notifyUpdate = false;
         }
 
         if (_mustLoadNewStateFromDisk) {
@@ -1314,7 +1316,6 @@ namespace openspace {
     // Reading state from disk. Must be thread safe!
     void RenderableFieldlinesSequence::readNewState(const std::string& filePath) {
         _newState = std::make_unique<FieldlinesState>();
-        LERROR("Creating new state: " + filePath);
         if (_newState->loadStateFromOsfls(filePath)) {
             _newStateIsReady = true;
         }

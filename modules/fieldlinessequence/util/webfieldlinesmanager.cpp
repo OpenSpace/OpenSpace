@@ -36,24 +36,45 @@
 namespace {
     constexpr const char* _loggerCat = "FieldlinesSequence[ Web FLs Manager ]";
     
-} // namespace
+} // namepace
+
 
 namespace openspace{
+
+
     
     
     // --------------------------- PUBLIC FUNCTIONS --------------------------- //
-    void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, std::string fieldLineModelType, size_t& _nStates, std::vector<std::string>& _sourceFiles,
+    void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, size_t& _nStates, std::vector<std::string>& _sourceFiles,
                                                               std::vector<double>& _startTimes)
     {
-        
-        _flsType = fieldLineModelType;
-
         // Initialize the sliding window
-        _webFieldlinesWindow = WebFieldlinesWindow(_syncDir, "http://localhost:3000/", _sourceFiles, _startTimes, _nStates);
+        _webFieldlinesWindow = WebFieldlinesWindow(_syncDir, "http://localhost:3000/", _sourceFiles, _startTimes, _nStates, convertIdentifierToID(identifier));
 
-        
-        LERROR("WebFieldlinesManager initialized");
-        
+        LINFO("WebFieldlinesManager initialized " + identifier);     
+
+    }
+
+    bool WebFieldlinesManager::checkConnectionToServer() {
+        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/");
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        mmryDld.download(opt);
+        std::string s = "";
+        std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
+            [](char c) {
+            return c;
+        });
+        if (s == "You are at ROOT") {
+            _connected = true;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool WebFieldlinesManager::isConnected() {
+        return _connected;
     }
     
     // Make sure that the sync directory exists
@@ -77,11 +98,10 @@ namespace openspace{
     // the start latest line
     // this could be used to test the connection too
     void WebFieldlinesManager::preDownload(){
-        // for some reason the fieldlines looks f-ed up when downloaded and read fromt his endpoint???? so weird
-        // could it have something to do with endianness?
-        //std::string url = "http://localhost:3000/WSA/fieldline/WSA_Fieldlines_PFSS_IO/2019-05-02T20-00-00.000.osfls";
-        std::string url = "http://localhost:3000/WSA/PfssIo2019-05-02T20-00-00.000.osfls"; // temp thing, should be the latest one
-        std::string destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "2019-05-02T20-00-00.000.osfls"); // what the downloaded filename is to be
+        // Download a dataset that we know exists, hopefully the API could send the latest entry of that dataset
+        // TODO(Axel): Change this endpoint to be dynamic for each dataset 
+        std::string url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA4.5/WSA4.5_fieldlines/trace_pfss_intoout/2017/09/2017-09-28T00-23-22.000.osfls";
+        std::string destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "2017-09-28T00-23-22.000.osfls"); // what the downloaded filename is to be
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
@@ -141,19 +161,27 @@ namespace openspace{
     {
         return _webFieldlinesWindow.workerWindowIsReady();
     }
+
+    void WebFieldlinesManager::resetWorker() {
+        _webFieldlinesWindow.rfsHasUpdated();
+    }
     
     // --------------------------- PRIVATE FUNCTIONS --------------------------- //
     
+    FieldLineType WebFieldlinesManager::convertIdentifierToID(std::string identifier) {
+        std::map<std::string, FieldLineType> string2ID{
+            {"WSA_Fieldlines_Sub_Earth_Track",WSA_Fieldlines_Sub_Earth_Track},
+            {"WSA_Fieldlines_SCS_OI",WSA_Fieldlines_SCS_OI},
+            {"WSA_Fieldlines_PFSS_IO",WSA_Fieldlines_PFSS_IO},
+            {"WSA_Fieldlines_PFSS_OI",WSA_Fieldlines_PFSS_OI}
+        };
+        if (auto found = string2ID.find(identifier); found != string2ID.end()) {
+            return found->second;
+        }
+        else
+            return FieldLineType::ID_NOT_FOUND;
+    }
     
-    
-    
-    
-    
-    
-    
-  
-
-
 
     std::string WebFieldlinesManager::getDirectory(){
         return _syncDir;

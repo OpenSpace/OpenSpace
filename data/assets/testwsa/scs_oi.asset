@@ -15,6 +15,7 @@ local fieldlines = {
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
+        WebFieldlines = true,
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
