@@ -168,18 +168,6 @@ void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
     }
 }
 
-void SunTextureManager::startDownloadTexture(std::string textureId)
-{
-    std::string url = "http://localhost:3000/get/" + textureId;
-    std::string destinationpath = absPath(_syncDir + textureId);
-    AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, absPath(destinationpath), HttpFileDownload::Overwrite::Yes);
-    HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 0;
-    ashd.start(opt);
-    ashd.wait();
-    //LERROR("Texture " + textureId + " downloaded to disk to " + destinationpath);
-}
-
 //  The same as startDownloadTexture, but uses lock_guard and flags _working
 void SunTextureManager::downloadTexture(std::string textureId)
 {
@@ -192,23 +180,10 @@ void SunTextureManager::downloadTexture(std::string textureId)
     opt.requestTimeoutSeconds = 0;
     ashd.start(opt);
     ashd.wait();
-    //LERROR("Texture " + textureId + " downloaded to disk to " + destinationpath);
+    LERROR("Texture " + textureId + " downloaded to disk to " + destinationpath);
     _working = false;
 }
 
-std::string SunTextureManager::checkNextTextureId(std::string current, float dir)
-{
-    SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/getmenextfitsimage/" + current + "/" + std::to_string(dir));
-    HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 0;
-    mmryDld.download(opt);
-    std::string s;
-    std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
-                   [](char c) {
-                       return c;
-                   });
-    return s;
-}
 
 void SunTextureManager::getNextTexture(std::string current, float dir, std::string *toReturn)
 {
@@ -225,18 +200,13 @@ void SunTextureManager::getNextTexture(std::string current, float dir, std::stri
                    [](char c) {
                        return c;
                    });
+    LERROR("Next is " +  s );
     *toReturn = std::move(s);
-    //LERROR("Texture mrzqs190511t1514c2217_226.fits.gz downloaded to disk");
+    
     _working = false;
 }
 
-void SunTextureManager::startUploadTextures()
-{
 
-    checkFilesInDirectory();
-
-    uploadTexturesFromList(_textureListDisk);
-}
 
 // Scans directory and append all FILENAMES to the _textureListDisk member vector
 void SunTextureManager::checkFilesInDirectory()
@@ -261,8 +231,9 @@ void SunTextureManager::checkFilesInDirectory()
 
 void SunTextureManager::uploadTexture(std::vector<float> imagedata, std::string id)
 {
-    //LERROR("laddar upp texture till GPU med id: " + id);
-    auto textureFits = std::make_unique<ghoul::opengl::Texture>(std::move(imagedata.data()), glm::vec3(360, 180, 1), ghoul::opengl::Texture::Format::Red, GL_R32F, GL_FLOAT);
+    LERROR("laddar upp texture till GPU med id: " + id);
+    //auto textureFits = std::make_unique<ghoul::opengl::Texture>(std::move(imagedata.data()), glm::vec3(360, 180, 1), ghoul::opengl::Texture::Format::Red, GL_R32F, GL_FLOAT);
+    auto textureFits = std::make_unique<ghoul::opengl::Texture>(std::move(imagedata.data()), glm::vec3(180, 90, 1), ghoul::opengl::Texture::Format::RGB, GL_RGB32F, GL_FLOAT);
     textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     textureFits->uploadTexture();
     //textureFits->setName(id);
@@ -270,6 +241,7 @@ void SunTextureManager::uploadTexture(std::vector<float> imagedata, std::string 
     _textureQueueGPU.push(id);
     _textureListGPU[id] = std::move(textureFits);
     trimGPUList();
+    
 }
 
 void SunTextureManager::processTextureFromName(std::string filename, std::vector<float> *imagedata, std::string *id)
@@ -277,71 +249,105 @@ void SunTextureManager::processTextureFromName(std::string filename, std::vector
     _working = true;
     std::lock_guard<std::mutex> guard(_GPUListBlock);
     FitsFileReader fitsFileReader(false);
+    
+    // Since WSA has more HDUs than the primary one, we want to force use of the primary HDU,
+    // so that fitsfilereader won't default to the extension HDUs.
+    fitsFileReader.forceUsePHDU();
 
     const auto tempBild = fitsFileReader.readImageFloat(_syncDir + filename);
+    //const auto tempBild = fitsFileReader.readImageFloat("/Users/shuy/Offline-dokument/fieldlines_python/WSA_OUT/wsa_201707010528R000_gong.fits");
+    
+    
 
-    *id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("DATE"));
+    //*id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("DATE"));
+    
+    *id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("OBSTIME"));
+    
+    // FOR TESTING
+    //*id = "2019-05-02T11:14:00";
 
-    const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
-    const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
-    const int long0 = *fitsFileReader.readHeaderValueFloat("LONG0");
+    //const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
+    //const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
+    //const int long0 = *fitsFileReader.readHeaderValueFloat("LONG0");
     //const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
+    int long0 = *fitsFileReader.readHeaderValueFloat("CARRLONG");
+    long0 = long0/2;
+    
+    //fitsFileReader.~FitsFileReader();
+    
+    
+    
+    /**** REGULAR NOMRALISATION *****/
+//    float maxvalue = 0;
+//    float minvalue = 17;
+//    for (int i = 64800; i < 81000; i++)
+//    {
+//        float actual_value =tempBild->contents[i];
+//        if(maxvalue < actual_value) maxvalue = actual_value;
+//        if(minvalue > actual_value) minvalue = actual_value;
+//    }
+//    for (int i = 64800; i < 81000; i++)
+//    {
+//        float actual_value =tempBild->contents[i];
+//        float c =(actual_value - minvalue) / (maxvalue - minvalue);
+//
+//        imagedata->push_back(c); // Normalized
+//        //imagedata->push_back((c + stdvalue) / stdvalue); // Standard Deviation
+//
+//    }
+    
 
-    for (float c : tempBild->contents)
+    
+    /**** REGULAR NOMRALISATION *****/
+    float maxvalue = 0;
+    float minvalue = 17;
+    for (int i = 64800; i < 81000; i++)
     {
-        imagedata->push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
-        //imagedata->push_back((c + stdvalue) / stdvalue); // Standard Deviation
+        float actual_value =tempBild->contents[i];
+        if(maxvalue < actual_value) maxvalue = actual_value;
+        if(minvalue > actual_value) minvalue = actual_value;
     }
-    for (int i = 0; i < 180; i++)
+    for (int i = 64800; i < 81000; i++)
     {
-        std::rotate(imagedata->begin() + (i * 360), imagedata->begin() + ((i * 360) + (360 - long0)), imagedata->begin() + (i * 360) + 359);
-    }
+        
+        float actual_value =tempBild->contents[i];
+        float r, g, b;
+        float norm_abs_value =  abs(actual_value)/maxvalue;
+        
+        if(actual_value == 0){
+            r = 1.0f;
+            b = 1.0f;
+            g = 1.0f;
+        }
+        else if(actual_value > 0){
+            r = 1.0f;
+            g = 1 + log(1 - norm_abs_value);
+            b = 1 + log(1 - norm_abs_value);
+        }else {
+            r = 1 + log(1 - norm_abs_value);
+            g = 1 + log(1 - norm_abs_value);
+            b = 1.0f;
+        }
+        
+        imagedata->push_back(r);
+        imagedata->push_back(g);
+        imagedata->push_back(b);
+        
+        }
+
+    
+    
+    
+//    for (int i = 0; i < 90; i++)
+//    {
+//        std::rotate(imagedata->begin() + (i * 180), imagedata->begin() + ((i * 180) + (180 - long0)), imagedata->begin() + (i * 180) + 179);
+//    }
+    
+    LERROR(std::to_string(imagedata->size()));
 
     _working = false;
 }
 
-void SunTextureManager::uploadTexturesFromList(std::vector<std::string> &filelist)
-{
-
-    for (const auto &entry : filelist)
-    {
-        uploadTextureFromName(entry);
-    }
-    //LERROR("Laddat upp texturerna till GPU:n");
-}
-
-void SunTextureManager::uploadTextureFromName(std::string filename)
-{
-    FitsFileReader fitsFileReader(false);
-    const auto tempBild = fitsFileReader.readImageFloat(_syncDir + filename);
-
-    std::string dateID = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("DATE"));
-
-    const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
-    const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
-    const int long0 = *fitsFileReader.readHeaderValueFloat("LONG0");
-    const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
-    std::vector<float> fitsImage;
-    for (float c : tempBild->contents)
-    {
-        //fitsImage.push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
-        fitsImage.push_back((c + stdvalue) / stdvalue); // Standard Deviation
-    }
-    for (int i = 0; i < 180; i++)
-    {
-        std::rotate(fitsImage.begin() + (i * 360), fitsImage.begin() + ((i * 360) + (360 - long0)), fitsImage.begin() + (i * 360) + 359);
-    }
-
-    //LERROR("laddar upp texture till GPU med id: " + dateID + "från filväg " + absPath(_syncDir + filename));
-    auto textureFits = std::make_unique<ghoul::opengl::Texture>(std::move(fitsImage.data()), glm::vec3(360, 180, 1), ghoul::opengl::Texture::Format::Red, GL_R32F, GL_FLOAT);
-
-    textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-    textureFits->uploadTexture();
-    textureFits->setName(dateID);
-    _textureQueueGPU.push(dateID);
-    _textureListGPU[dateID] = std::move(textureFits);
-    trimGPUList();
-}
 
 std::string SunTextureManager::getOpenSpaceDateTime()
 {
@@ -394,10 +400,10 @@ void SunTextureManager::trimGPUList()
 
         std::string dateId = _textureQueueGPU.front();
         _textureQueueGPU.pop();
-        //LERROR("popped dateId : " + dateId);
-        _textureListGPU.at(dateId).release();
+        LERROR("popped dateId : " + dateId);
+        //_textureListGPU.at(dateId).release(); // TODO: Kommentera tillbaka!
         //BaseModule::TextureManager.release(_textureListGPU.at(dateId).get());
-        _textureListGPU.erase(dateId);
+        //_textureListGPU.erase(dateId);        // TODO: Kommentera tillbaka!
     }
 }
 

@@ -76,6 +76,7 @@ public:
     std::shared_ptr<float> readHeaderValueFloat(const std::string key);
     
     std::shared_ptr<std::string> readHeaderValueString(const std::string key);
+    
 
 
     /**
@@ -104,6 +105,8 @@ public:
      * per star. Reads data in pre-defined order based on AMNH's star data files.
      */
     std::vector<float> readSpeckFile(const std::string& filePath, int& nRenderValues);
+    
+    void forceUsePHDU();
 
 private:
     std::unique_ptr<CCfits::FITS> _infile;
@@ -114,6 +117,8 @@ private:
     const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::PHDU& image);
     template<typename T>
     const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
+    
+    bool _usePrimaryHDUOverride = false;
 
     mutable std::mutex _mutex;
 };

@@ -52,7 +52,8 @@ namespace openspace {
     }
     
     bool FitsFileReader::isPrimaryHDU() {
-        return _infile->extension().empty();
+        if( _usePrimaryHDUOverride ) return true;
+        else return _infile->extension().empty();
     }
     
     template <typename T>
@@ -70,6 +71,10 @@ namespace openspace {
         }
         
         return nullptr;
+    }
+    
+    void FitsFileReader::forceUsePHDU(){
+        _usePrimaryHDUOverride = true;
     }
     
     std::shared_ptr<ImageData<float>> FitsFileReader::readImageFloat(const std::string& path) {
