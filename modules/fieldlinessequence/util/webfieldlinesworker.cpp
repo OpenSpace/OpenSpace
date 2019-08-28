@@ -42,16 +42,16 @@ namespace openspace{
     // CONSTRUCTOR
     WebFieldlinesWorker::WebFieldlinesWorker(std::string syncDir, std::string serverUrl)
     : _serverUrl(serverUrl)
-    , _syncDir(syncDir)
-    , _fileEnding(".osfls"){
+    , _syncDir(syncDir){
         _endpointSingleDownload = _serverUrl + "WSA/fieldline/"; // should be set by argument to be more general [DEPRICATED FOR NOW, DO WE NEED THIS?]
     }
 
     // Destructor, deleting all files that were downloaded during the run.
     WebFieldlinesWorker::~WebFieldlinesWorker() {
         // Cancel any potential download
-        _downloading->cancel();
-        // Remova all files downloaded
+        if(_downloading && _downloading->hasStarted())
+            _downloading->cancel();
+        // Remova all files
         std::for_each(_downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), [&](auto it) {
             FileSys.deleteFile(_syncDir + FileSys.PathSeparator + it.second);
         });

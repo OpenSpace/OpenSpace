@@ -87,9 +87,6 @@ private:
     // The directory for downloaded files. Passed down from WebFieldlinesManager.
     std::string _syncDir;
     
-    // File format, only .oslfs for now
-    std::string _fileEnding;
-
     // TODO(Axel): Hmm, can we get around using these bools somehow? 
     bool _readyToUpdateSourceFiles = false;
     bool _doneUpdating = false;
