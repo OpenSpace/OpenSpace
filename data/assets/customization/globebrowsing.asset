@@ -40,6 +40,7 @@ local vrt_folders = {
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
         openspace.absPath('${BASE}/../OpenSpaceData/Moon'),
+        openspace.absPath('${BASE}/../OpenSpaceData/Apollo'),
         ''
     },
     Mercury = {

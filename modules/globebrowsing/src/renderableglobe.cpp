@@ -761,8 +761,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(
             *_localRenderer.program,
             _localRenderer.uniformCache,
-            { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalModelSpace",
-              "patchNormalCameraSpace" }
+            { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalCameraSpace" }
         );
     }
 
@@ -1024,27 +1023,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         );
     }
 
-    if (_generalProperties.useAccurateNormals &&
-        !_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty())
-    {
-        // This should not be needed once the light calculations for the atmosphere
-        // is performed in view space..
-        _localRenderer.program->setUniform(
-            "invViewModelTransform",
-            glm::inverse(
-                glm::mat4(data.camera.combinedViewMatrix()) *
-                glm::mat4(_cachedModelTransform)
-            )
-        );
-        _globalRenderer.program->setUniform(
-            "invViewModelTransform",
-            glm::inverse(
-                glm::mat4(data.camera.combinedViewMatrix()) *
-                glm::mat4(_cachedModelTransform)
-            )
-        );
-    }
-
     constexpr const int ChunkBufferSize = 2048;
     std::array<const Chunk*, ChunkBufferSize> global;
     int globalCount = 0;
@@ -1274,6 +1252,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     // TODO: Patch normal can be calculated for all corners and then linearly
     // interpolated on the GPU to avoid cracks for high altitudes.
+    // JCC: Camera space includes the SGCT View transformation.
     const glm::vec3 patchNormalCameraSpace = normalize(
         cross(
             cornersCameraSpace[Quad::SOUTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST],
@@ -1281,19 +1260,6 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         )
     );
 
-    // In order to improve performance, lets use the normal in object space (model space)
-    // for deferred rendering.
-    const glm::vec3 patchNormalModelSpace = normalize(
-        cross(
-            cornersModelSpace[Quad::SOUTH_EAST] - cornersModelSpace[Quad::SOUTH_WEST],
-            cornersModelSpace[Quad::NORTH_EAST] - cornersModelSpace[Quad::SOUTH_WEST]
-        )
-    );
-
-    program.setUniform(
-        _localRenderer.uniformCache.patchNormalModelSpace,
-        patchNormalModelSpace
-    );
     program.setUniform(
         _localRenderer.uniformCache.patchNormalCameraSpace,
         patchNormalCameraSpace
@@ -1598,8 +1564,7 @@ void RenderableGlobe::recompileShaders() {
     ghoul::opengl::updateUniformLocations(
         *_localRenderer.program,
         _localRenderer.uniformCache,
-        { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalModelSpace",
-          "patchNormalCameraSpace" }
+        { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalCameraSpace" }
     );
 
 

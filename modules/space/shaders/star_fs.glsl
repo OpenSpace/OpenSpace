@@ -104,6 +104,7 @@ Fragment getFragment() {
     frag.depth     = gs_screenSpaceDepth;
     frag.gPosition = vs_position;
     frag.gNormal   = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.disableLDR2HDR = true;
     
     return frag;
 }

@@ -23,21 +23,28 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "floatoperations.glsl"
 
-in vec3 vsPosition;
-in vec3 vsColor;
+uniform sampler2D psfTexture;
 
-uniform float emittanceFactor;
-
+in vec4 vs_position;
+in vec2 psfCoords;
+flat in vec3 ge_color;
+flat in float ge_screenSpaceDepth;
 
 Fragment getFragment() {
     Fragment frag;
 
-    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
-    frag.color = vec4(vsColor.rgb * coefficient, 1.0);
+    vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
+    vec4 fullColor = vec4(ge_color*textureColor.a, textureColor.a);
+    if (fullColor.a == 0) {
+        discard;
+    }
+    frag.color = fullColor;
 
-    frag.depth = pscDepth(vec4(vsPosition, 0.0));
+    frag.depth = ge_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
     return frag;
 }

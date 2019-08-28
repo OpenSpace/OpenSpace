@@ -84,10 +84,11 @@ Fragment getFragment() {
         frag.color.rgb = diffuseAlbedo;
     }
 
-    frag.color.a    = opacity;
-    frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vs_positionCameraSpace;
-    frag.gNormal    = vec4(vs_normalViewSpace, 1.0);
+    frag.color.a        = opacity;
+    frag.depth          = vs_screenSpaceDepth;
+    frag.gPosition      = vs_positionCameraSpace;
+    frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
+    frag.disableLDR2HDR = true;
 
 
     return frag;
