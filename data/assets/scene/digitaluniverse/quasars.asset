@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Quasars Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_quasars_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -26,11 +26,13 @@ local object = {
         File = speck .. "/quasars.speck",
         Texture = textures .. "/point3.png",
         Unit = "Mpc",
-        ScaleFactor = 537.31,
+        ScaleFactor = 542.75,
         -- Fade in value in the same unit as "Unit"
         FadeInDistances = { 1000.0, 10000.0 },
         BillboardMaxSize = 30.0,
         BillboardMinSize = 0.0,
+        BillboardMaxSize = 11.1,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Path = "/Universe"

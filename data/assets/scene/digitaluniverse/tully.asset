@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Tully Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_tully_speck",
-    Version = 2
+    Version = 3
 })
 
 local tullyPoints = {
@@ -23,12 +23,12 @@ local tullyPoints = {
         Enabled = true,
         Color = { 1.0, 0.4, 0.2 },
         Transparency = 0.99,
-        ScaleFactor = 502.77,
+        ScaleFactor = 501.37,
         File = speck .. "/tully.speck",
         Texture = textures .. "/point3.png",
-        ColorMap = speck .. "/lss.cmap",
-        ColorOption = { "prox5Mpc" },
-        ColorRange = { { 1.0, 80.0 } },
+        ColorMap = speck .. "/tully.cmap",
+        ColorOption = { "proximity" },
+        ColorRange = { { 1.0, 30.0 } },
         LabelFile = speck .. "/tully.label",
         TextColor = { 0.7, 0.7, 0.7, 1.0 },
         TextSize = 20.50,
@@ -43,10 +43,11 @@ local tullyPoints = {
         -- Fade in value in the same unit as "Unit"
         FadeInDistances = { 0.05, 1.0 },
         -- Max size in pixels
-        BillboardMaxSize = 50.0,
+        BillboardMaxSize = 8.22,
         BillboardMinSize = 0.0,
-        CorrectionSizeEndDistance = 22.0,
-        CorrectionSizeFactor = 10.45
+        --CorrectionSizeEndDistance = 22.0,
+        --CorrectionSizeFactor = 10.45
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Tully Galaxies",

@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "OB Associations Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_obassociations_speck",
-    Version = 2
+    Version = 3
 })
 
 local object = {
@@ -21,8 +21,11 @@ local object = {
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
-        Color = { 0.0, 0.0, 1.0 },
-        Transparency = 0.5,
+        --Color = { 0.0, 0.0, 1.0 },
+        Color = { 1.0, 1.0, 1.0 },
+        ColorMap = speck .. "/ob.cmap",
+        ColorOption = { "arm" },
+        Transparency = 0.25,
         File = speck .. "/ob.speck",
         Texture = textures .. "/point4.png",
         PolygonSides = 7,
@@ -32,7 +35,9 @@ local object = {
         TextSize = 17.0,
         TextMinSize = 5.76,
         TextMaxSize = 30.0,
-        Unit = "pc"
+        Unit = "pc",
+        --BillboardMaxSize = 21.0,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "OB Associations",

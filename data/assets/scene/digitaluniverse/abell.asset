@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Abell Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_abell_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -23,7 +23,7 @@ local object = {
         Enabled = false,
         Color = { 1.0, 0.4, 0.2 },
         Transparency = 1.0,
-        ScaleFactor = 525.0,
+        --ColorMap = speck .. "/abell.cmap",
         File = speck .. "/abell.speck",
         Texture = textures .. "/point3.png",
         LabelFile = speck .. "/abell.label",
@@ -36,7 +36,10 @@ local object = {
             -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
             0.67314530211,    0.73127116582,  0.11008126223, 0.0,
             0.0,              0.0,            0.0,           1.0
-        }
+        },
+        ScaleFactor = 520.0,
+        BillboardMaxSize = 7.0,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Abell Galaxy Clusters",

@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "HII Regions Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_h2regions_speck",
-    Version = 2
+    Version = 3
 })
 
 local object = {
@@ -22,17 +22,19 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 0.0, 0.5, 1.0 },
-        Transparency = 0.35,
+        Transparency = 1.0,
         File = speck .. "/h2.speck",
         Texture = textures .."/point4.png",
         PolygonSides = 6,
         LabelFile = speck .. "/h2.label",
         TextColor = { 0.5, 0.5, 0.5, 1.0 },
-        ScaleFactor = 420,
+        ScaleFactor = 425,
         TextSize = 17.25,
         TextMinSize = 10.0,
         TextMinSize = 30.0,
-        Unit = "pc"
+        Unit = "pc",
+        BillboardMaxSize = 25.0,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "HII Regions",

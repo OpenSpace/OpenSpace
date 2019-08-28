@@ -64,6 +64,7 @@ Fragment getFragment() {
     // with the ATM.
     frag.gPosition  = vec4(-1e32, -1e32, -1e32, 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+    //frag.disableLDR2HDR = true;
 
 
     return frag;

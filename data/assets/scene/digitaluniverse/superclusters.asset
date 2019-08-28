@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Galaxy Superclusters Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_superclusters_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -30,7 +30,11 @@ local object = {
         ScaleFactor = 531.0,
         TextSize = 22.44,
         TextMinSize = 8.0,
-        Unit = "Mpc"
+        Unit = "Mpc",
+        DrawElements = false,
+        DrawLabels = true,
+        --BillboardMaxSize = 7.2,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Galaxy Superclusters",

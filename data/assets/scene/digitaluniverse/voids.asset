@@ -6,7 +6,7 @@ local speck = asset.syncedResource({
     Name = "Voids Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_voids_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {

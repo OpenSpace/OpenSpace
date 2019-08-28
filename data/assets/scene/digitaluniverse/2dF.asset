@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "2dF Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_2dF_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -25,11 +25,13 @@ local object = {
         Transparency = 1.0,
         File = speck .. "/2dF.speck",
         Texture = textures .. "/point3.png",
-        ColorMap = speck .. "/lss.cmap",
-        ColorOption = { "redshift", "prox5Mpc" },
-        ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
+        ColorMap = speck .. "/2dF.cmap",
+        ColorOption = { "redshift", "proximity" },
+        ColorRange = { { 0.0, 0.075 }, { 1.0, 25.0 } },
         Unit = "Mpc",
-        ScaleFactor = 508.0
+        ScaleFactor = 520.0,
+        BillboardMaxSize = 4.7,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "2dF Galaxies",

@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Supernova Remnants Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_supernovaremnants_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -28,13 +28,15 @@ local object = {
         PolygonSides = 7,
         LabelFile = speck .. "/snr.label",
         TextColor = { 0.6, 0.3, 0.0, 1.0 },
-        ScaleFactor = 440.08,
+        ScaleFactor = 471.8,
         TextSize = 17.5,
         TextMinSize = 8.0,
         TextMaxSize = 30.0,
-        CorrectionSizeEndDistance = 17.5,
-        CorrectionSizeFactor = 13.96,
-        Unit = "pc"
+        --CorrectionSizeEndDistance = 17.5,
+        --CorrectionSizeFactor = 13.96,
+        Unit = "pc",
+        BillboardMaxSize = 7.2,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Supernova Remnants",

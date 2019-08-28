@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Open Clusters Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_openclusters_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -32,7 +32,9 @@ local object = {
         TextSize = 16.68,
         TextMinSize = 4.5,
         TextMaxSize = 30.0,
-        Unit = "pc"
+        Unit = "pc",
+        BillboardMaxSize = 20.22,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Open Star Clusters",

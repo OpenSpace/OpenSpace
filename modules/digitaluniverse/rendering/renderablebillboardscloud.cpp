@@ -160,7 +160,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
-        "This value determines which paramenter is used default color of the "
+        "This value determines which paramenter is used for default color of the "
         "astronomical objects."
     };
 
@@ -1496,9 +1496,17 @@ void RenderableBillboardsCloud::createDataSlice() {
     std::vector<float> colorBins;
     if (_hasColorMapFile) {
         colorMapInUse = _variableDataPositionMap[_colorOptionString];
-        glm::vec2 currentColorRange = _colorRangeData[_colorOption.value()];
-        float colorMapBinSize = (currentColorRange.y - currentColorRange.x) /
-                                static_cast<float>(_colorMapData.size());
+        glm::vec2 currentColorRange;
+        float colorMapBinSize;
+        if (!_colorRangeData.empty()) {
+            currentColorRange = _colorRangeData[_colorOption.value()];
+            colorMapBinSize = (currentColorRange.y - currentColorRange.x) /
+                static_cast<float>(_colorMapData.size());
+        }
+        else {
+            colorMapBinSize = 1.f;
+        }
+        
         float bin = colorMapBinSize;
         for (size_t i = 0; i < _colorMapData.size(); ++i) {
             colorBins.push_back(bin);
@@ -1506,7 +1514,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         }
     }
 
-    float biggestCoord = -1.0f;
+    float biggestCoord = -1.f;
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
         glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(
             _fullData[i + 0],
