@@ -6,11 +6,11 @@ local renderableHelper = asset.require('util/renderable_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
--- asset.require('scene/solarsystem/planets')
+asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
--- assetHelper.requestAll(asset, 'scene/digitaluniverse')
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -29,15 +29,15 @@ local sunRadius = 695508000
 local earthRadius = 6371
 
 -- Selected field lines + some additional field lines
--- asset.require('./testwsa/scs_oi')
--- asset.require('./testwsa/pfss_oi')
+asset.require('./testwsa/scs_oi')
+asset.require('./testwsa/pfss_oi')
 asset.require('./testwsa/pfss_io')
 
 -- Parker Solar Probe
 -- asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
 
 -- Sun earth connection
--- asset.require('./testwsa/sun_earth')
+asset.require('./testwsa/sub_earth')
 
 -- Every N:th WSA field line
 -- asset.require('./testwsa/pfss_io_25')

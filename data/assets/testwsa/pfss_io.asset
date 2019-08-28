@@ -3,7 +3,7 @@ local transforms = asset.require('./transforms')
 
 local fieldlinesDirectory = asset.localResource("fl_pfss_io")
 local transferFunctions = asset.localResource("transferfunctions")
-local polarityColorTable = transferFunctions .. "/openness_spec.txt"
+local opennessColorTable = transferFunctions .. "/openness_spec.txt"
 
 local sunRadius = 695508000
 
@@ -13,16 +13,16 @@ local fieldlines = {
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
-        -- SourceFolder = fieldlinesDirectory,
+        SourceFolder = fieldlinesDirectory,
         WebFieldlines = true,
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
         ColorTablePaths = {
-            polarityColorTable
+            opennessColorTable
         }, 
         ColorTableRanges = {
-            { -1.0, 1.0 },
+            { 0.0, 2.0 }
         },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,

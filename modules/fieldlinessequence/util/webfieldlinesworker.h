@@ -27,6 +27,7 @@
 
 #include <string>
 #include <vector>
+#include <openspace/util/httprequest.h>
 
 namespace openspace {
     
@@ -35,11 +36,13 @@ public:
     // Constructor
     WebFieldlinesWorker() = default;
 
+    WebFieldlinesWorker& operator=(WebFieldlinesWorker&&) = default;
+
     ~WebFieldlinesWorker();
     
-    WebFieldlinesWorker(std::string syncDir, std::string serverUrl, std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk);
+    WebFieldlinesWorker(std::string syncDir, std::string serverUrl);
     
-    void getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb, size_t id);
+    void getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::pair<double, std::string>>& _triggerTimesWeb, int id);
     
     // Sets the third index in _triggerTimesWeb to whether it is on disk already or not
     // If it's on disk, get the index of the corresponding triggertime in _triggerTimesOnDisk
@@ -62,9 +65,15 @@ public:
     void newWindowToDownload();
 
 private:
-    // POINTERS
-    std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk;
-    // Pointers end
+
+    // This list is the keep all the started downloads alive between frames, the second argument is a pair, used for identifying which download it is
+    std::vector<AsyncHttpFileDownload> _downloadList;
+    std::vector<std::pair<double,std::string>> _downloadListIdentifier;
+
+    std::unique_ptr<AsyncHttpFileDownload> _downloading;
+
+    // Might need this l8r
+    std::pair<double, std::string> _latestDownload;
 
     // Contains a list of all the trigger times that has been downloaded already,
     std::vector<std::pair<double, std::string>> _downloadedTriggerTimes;
@@ -80,27 +89,23 @@ private:
     
     // File format, only .oslfs for now
     std::string _fileEnding;
-    
-    std::string _FLType;
-
-    /********************************************
-    |               USED FOR THREADS            |
-    |                                           |
-    ********************************************/
-    //std::condition_variable _workerConditional;
-    //std::mutex _workerMutex;
 
     // TODO(Axel): Hmm, can we get around using these bools somehow? 
     bool _readyToUpdateSourceFiles = false;
     bool _doneUpdating = false;
     bool _newWindow = false;
+
+
+    bool _readyToDownload = true;
+    bool _noEmptyResponses = true;
+    unsigned int _strikes = 0;
+    std::pair<double, double> acceptableToStartRequestingAgain = std::make_pair(0.0, 0.0);
     
     // Download one file to sync directory
-    std::string downloadOsfls(std::string downloadkey);
+    std::string downloadOsfls(std::pair<double, std::string> downloadKey);
     
     bool fileIsOnDisk(double triggerTime);
     
-
     /********************************************
     |               Helper Functions            |
     |                                           |

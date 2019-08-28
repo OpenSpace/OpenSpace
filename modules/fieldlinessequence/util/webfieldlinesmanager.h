@@ -30,7 +30,7 @@
 #include <string>
 
 enum FieldLineType {
-    WSA_Fieldlines_Sun_Earth_Connection = 1176,
+    WSA_Fieldlines_Sub_Earth_Track = 1176,
     WSA_Fieldlines_SCS_OI = 1177,
     WSA_Fieldlines_PFSS_IO = 1178,
     WSA_Fieldlines_PFSS_OI = 1179,
@@ -45,14 +45,10 @@ public:
     // Constructor
     WebFieldlinesManager() = default;
 
-    // download files specified in _filestodownload
-    //void downloadFieldlines();
-    
-
     // To replace the constructor, takes the identifier of the field line, is used for storing the field lines mainly
     // Also takes a second parameter containing the name of the field line model used.
     // These may in the future be the same.
-    void initializeWebFieldlinesManager(std::string identifier, std::string fieldLineModelType, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
+    void initializeWebFieldlinesManager(std::string identifier, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
 
 	bool checkConnectionToServer();
 
@@ -60,7 +56,6 @@ public:
     bool isConnected();
     
     std::string initializeSyncDirectory(std::string identifier);
-    
     
     // Temporary function - this should be moved to the worker. It's to download
     // the start lines if the directory is empty or launching for the first time
@@ -87,16 +82,12 @@ private:
     bool _connected = false;
 
     std::string _syncDir;
-    
-    // What model is this field line derived from, may come to be the same as the identifier
-    std::string _flsType;
-    
+        
     // The datastructure for managing the interval of fieldline sets to be downloaded
     WebFieldlinesWindow _webFieldlinesWindow;
     
     // Converts a string to id used in api request.
     FieldLineType convertIdentifierToID(std::string identifier);
-
 };
 
 

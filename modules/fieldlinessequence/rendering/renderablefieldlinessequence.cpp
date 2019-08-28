@@ -433,15 +433,10 @@ namespace openspace {
             }
         }
         else {
-            
-            if (_webFieldlinesManager.checkConnectionToServer()) {
-                LERROR("initializing sync-dir and downloading startset webFLman");
-                sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
-                _webFieldlinesManager.preDownload();
-            }
-            else {
-                LERROR("Unable to establish connection with fieldline provider");
-            }
+            LERROR("initializing sync-dir and downloading startset webFLman");
+            sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
+            _webFieldlinesManager.preDownload();
+
         }
 
         // Ensure that the source folder exists and then extract
@@ -1187,7 +1182,7 @@ namespace openspace {
     }
 
     void RenderableFieldlinesSequence::initializeWebManager() {
-        _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, "PfssIo", _nStates, _sourceFiles, _startTimes);
+        _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, _nStates, _sourceFiles, _startTimes);
     }
 
     void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1198,7 +1193,7 @@ namespace openspace {
         const double currentTime = data.time.j2000Seconds();
 
 
-        if (_webFieldlines && _webFieldlinesManager.isConnected()) {
+        if (_webFieldlines) {
 
             if (!_webFieldlinesManager.hasUpdated && _webFieldlinesManager.checkIfWindowIsReadyToLoad()) {
                 _startTimes.clear();
@@ -1207,17 +1202,6 @@ namespace openspace {
                 // _startTimes are not sorted right now, have to do something about that ->
                 std::sort(_startTimes.begin(), _startTimes.end());
                 _nStates = _startTimes.size();
-
-
-                /*for (int i = 0; i < _sourceFiles.size(); ++i) {
-                    LERROR(_sourceFiles[i]);
-                }
-
-                for (int i = 0; i < _startTimes.size(); ++i) {
-                    LERROR(std::to_string(_startTimes[i]));
-                } */
-
-                //updateActiveTriggerTimeIndex(currentTime);
 
                 _webFieldlinesManager.hasUpdated = true;
                 _webFieldlinesManager.notifyUpdate = true;
@@ -1263,7 +1247,7 @@ namespace openspace {
             _needsUpdate = false;
         }
 
-        if (_webFieldlines && _webFieldlinesManager.isConnected() && _webFieldlinesManager.notifyUpdate) {
+        if (_webFieldlines && _webFieldlinesManager.notifyUpdate) {
             updateActiveTriggerTimeIndex(currentTime);
             computeSequenceEndTime();
             _webFieldlinesManager.notifyUpdate = false;

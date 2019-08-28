@@ -71,8 +71,11 @@ public:
     // If files existed on disk already
     WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                         std::vector<std::string>& _sourceFiles,
-                        std::vector<double>& _startTimes, size_t& _nStates, size_t apiID);
+                        std::vector<double>& _startTimes, size_t& _nStates, int apiID);
     
+    // Copy constructor
+    WebFieldlinesWindow& operator=(WebFieldlinesWindow&&) = default;
+
     // PUBLIC MEMBER FUNCTIONS
     bool timeIsInTriggerTimesWebList(double time);
     
@@ -113,17 +116,12 @@ private:
     
     // The worker that handles downloads
     WebFieldlinesWorker _worker;
-    
-    // Keeps track of the files available on disk
-    // Shared ptr because WebfieldWorker has the same copy
-    // (Still unsure if this is the best way)
-    std::shared_ptr<std::vector<std::pair<double, std::string>>> _triggerTimesOnDisk;
-    
+        
     // This is a long list of everything available online,
     // they are tuples of 3; double is timetrigger, string is donwload key, int is index to where it is on disk
     // and indices to the respective files on disk if they exist/are downloaded
     // -1 means not downloaded
-    std::vector<std::tuple<double, std::string, int>> _triggerTimesWeb;
+    std::vector<std::pair<double, std::string>> _triggerTimesWeb;
 
     int _nAvailableWeb;
     
