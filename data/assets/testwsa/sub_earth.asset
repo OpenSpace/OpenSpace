@@ -39,7 +39,7 @@ local fieldlines = {
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA Sun-Earth Connection"
+        Name = "WSA Sub-Satellite Points"
     },
     Transform = {
         Scale = {
