@@ -41,9 +41,6 @@ namespace {
 
 namespace openspace{
 
-
-    
-    
     // --------------------------- PUBLIC FUNCTIONS --------------------------- //
     void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, size_t& _nStates, std::vector<std::string>& _sourceFiles,
                                                               std::vector<double>& _startTimes)
@@ -53,24 +50,6 @@ namespace openspace{
 
         LINFO("WebFieldlinesManager initialized " + identifier);     
 
-    }
-
-    bool WebFieldlinesManager::checkConnectionToServer() {
-        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/");
-        HttpRequest::RequestOptions opt = {};
-        opt.requestTimeoutSeconds = 0;
-        mmryDld.download(opt);
-        std::string s = "";
-        std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
-            [](char c) {
-            return c;
-        });
-        if (s == "You are at ROOT") {
-            _connected = true;
-            return true;
-        }
-        else
-            return false;
     }
 
     bool WebFieldlinesManager::isConnected() {
@@ -97,10 +76,28 @@ namespace openspace{
     // Temporary function - this should be moved to the worker. It's to download
     // the start latest line
     // this could be used to test the connection too
-    void WebFieldlinesManager::preDownload(){
+    void WebFieldlinesManager::preDownload(std::string dUrl){
         // Download a dataset that we know exists, hopefully the API could send the latest entry of that dataset
         // TODO(Axel): Change this endpoint to be dynamic for each dataset 
-        std::string url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA4.5/WSA4.5_fieldlines/trace_pfss_intoout/2017/09/2017-09-28T00-23-22.000.osfls";
+        int ID = std::stoi(dUrl.substr(dUrl.size() - 4));
+        std::string type = "";
+        switch (ID)
+        {
+        case 1176:
+            type = "trace_sun_earth";
+            break;
+        case 1177:
+            type = "trace_scs_outtoin";
+            break;
+        case 1178:
+            type = "trace_pfss_intoout";
+            break;
+        case 1179:
+            type = "trace_pfss_outtoin";
+            break;
+        }
+
+        std::string url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA4.5/WSA4.5_fieldlines/" + type + "/2017/09/2017-09-28T00-23-22.000.osfls";
         std::string destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "2017-09-28T00-23-22.000.osfls"); // what the downloaded filename is to be
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
@@ -112,6 +109,7 @@ namespace openspace{
         }
         if(ashd.hasFailed() == true ){
             LERROR("failed: " + destinationpath);
+            
         }
     }
     

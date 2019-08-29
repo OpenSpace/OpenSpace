@@ -55,7 +55,7 @@ namespace {
     // [STRING] should be path to folder containing the input files
     constexpr const char* KeySourceFolder = "SourceFolder";
     // [BOOLEAN] should specify whether field line data should be fetched online or not
-    constexpr const char* KeyWebFieldlines = "WebFieldlines";
+    constexpr const char* KeyDynamicWebContent = "DynamicWebContent";
 
     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
     // [STRING] Path to a .txt file containing seed points
@@ -326,7 +326,7 @@ namespace openspace {
                 if (!prepareForOsflsStreaming()) {
                     return;
                 }
-                if (_webFieldlines) {
+                if (_dynamicWebContent) {
                     LERROR("initializing webmanager");
                     initializeWebManager();
                 }
@@ -425,18 +425,24 @@ namespace openspace {
 
         std::string sourceFolderPath;
 
-        // try to get webfield setting, if not try to get sourcefolder setting
-        if (!_dictionary->getValue(KeyWebFieldlines, _webFieldlines)) {
+        // Try to get dynamicwebcontent setting, if not try to get sourcefolder setting
+        if (!_dictionary->getValue(KeyDynamicWebContent, _dynWebContentUrl)) {
             if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
-                LERROR(fmt::format("{}: The field {} or {} is missing.", _identifier, KeySourceFolder, KeyWebFieldlines));
+                LERROR(fmt::format("{}: The field {} or {} is missing.", _identifier, KeySourceFolder, KeyDynamicWebContent));
                 return false;
             }
         }
         else {
-            LERROR("initializing sync-dir and downloading startset webFLman");
-            sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
-            _webFieldlinesManager.preDownload();
-
+            if (!_dynWebContentUrl.empty()) {
+                _dynamicWebContent = true;
+                LINFO("Initializing sync-directory and downloading a startset");
+                sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
+                _webFieldlinesManager.preDownload(_dynWebContentUrl);
+            }
+            else {
+                LERROR(fmt::format("{}: The field {} is missing a url", _identifier, KeyDynamicWebContent));
+                return false;
+            }
         }
 
         // Ensure that the source folder exists and then extract
@@ -1193,7 +1199,7 @@ namespace openspace {
         const double currentTime = data.time.j2000Seconds();
 
 
-        if (_webFieldlines) {
+        if (_dynamicWebContent) {
 
             if (!_webFieldlinesManager.hasUpdated && _webFieldlinesManager.checkIfWindowIsReadyToLoad()) {
                 _startTimes.clear();
@@ -1247,7 +1253,7 @@ namespace openspace {
             _needsUpdate = false;
         }
 
-        if (_webFieldlines && _webFieldlinesManager.notifyUpdate) {
+        if (_dynamicWebContent && _webFieldlinesManager.notifyUpdate) {
             updateActiveTriggerTimeIndex(currentTime);
             computeSequenceEndTime();
             _webFieldlinesManager.notifyUpdate = false;

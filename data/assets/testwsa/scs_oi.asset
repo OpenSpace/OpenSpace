@@ -15,7 +15,8 @@ local fieldlines = {
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
-        WebFieldlines = true,
+        -- Dynamic web content wants a url with a unique id where the data may be fetched.
+        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1177",
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",

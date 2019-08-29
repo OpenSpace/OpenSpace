@@ -87,9 +87,11 @@ private:
     // True when new state is loaded or user change which quantity used for masking out
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
-    // Stated weather the field lines are fetched on demand from the web or not, default
-    // is false.
-    bool _webFieldlines = false;
+    // Stated weather the asset is fetching dynamic web content,
+    // The URL to the content is specifiec in the string below,
+    bool _dynamicWebContent = false;
+    // URL to the dynamic web content.
+    std::string _dynWebContentUrl = "";
 
     // --------------------------------- NUMERICALS ----------------------------------- //
     // Active index of _states. If(==-1)=>no state available for current time. Always the

@@ -1,28 +1,32 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_pfss_io")
 local transferFunctions = asset.localResource("transferfunctions")
-local opennessColorTable = transferFunctions .. "/openness_spec.txt"
+local fieldlinesDirectory = asset.localResource("fl_sub_earth")
+local polarityColorTable = transferFunctions .. "/polarity_spec.txt"
+local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
+
 
 local sunRadius = 695508000
 
 -- Fieldlies from json
 local fieldlines = {
-    Identifier = "WSA_Fieldlines_PFSS_IO",
+    Identifier = "WSA_Fieldlines_Sub_Earth_Track",
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
         -- Dynamic web content wants a url with a unique id where the data may be fetched.
-        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1178",
+        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1176",
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
         ColorTablePaths = {
-            opennessColorTable
-        }, 
+            polarityColorTable,
+            subEarthLevelColorTable
+        },
         ColorTableRanges = {
+            { 0.0, 1.0 },
             { 0.0, 2.0 }
         },
         LoadAtRuntime = true,
@@ -33,11 +37,11 @@ local fieldlines = {
         Color = {
             Uniform = {0.725, 0.1, 0, 1}
         },
-        ColoringMethod = "Quantity"
+        ColoringMethod = "Quantity",
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA PFSS In to Out Lines"
+        Name = "WSA Sub-Earth track"
     },
     Transform = {
         Scale = {
