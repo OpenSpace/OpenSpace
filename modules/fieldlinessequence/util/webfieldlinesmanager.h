@@ -50,8 +50,6 @@ public:
     // These may in the future be the same.
     void initializeWebFieldlinesManager(std::string identifier, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
 
-	bool checkConnectionToServer();
-
     // Returns true or false, wether a successful connection to the field line-providing server has been establish
     bool isConnected();
     
@@ -59,7 +57,7 @@ public:
     
     // Temporary function - this should be moved to the worker. It's to download
     // the start lines if the directory is empty or launching for the first time
-    void preDownload();
+    void preDownload(std::string dUrl);
 
     // Returns the sync directory
     std::string getDirectory();

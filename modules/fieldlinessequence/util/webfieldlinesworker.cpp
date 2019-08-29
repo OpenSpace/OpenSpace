@@ -41,20 +41,24 @@ namespace {
 namespace openspace{
     // CONSTRUCTOR
     WebFieldlinesWorker::WebFieldlinesWorker(std::string syncDir, std::string serverUrl)
-    : _serverUrl(serverUrl)
-    , _syncDir(syncDir){
+    : _syncDir(syncDir), _serverUrl(serverUrl) {
         _endpointSingleDownload = _serverUrl + "WSA/fieldline/"; // should be set by argument to be more general [DEPRICATED FOR NOW, DO WE NEED THIS?]
     }
 
     // Destructor, deleting all files that were downloaded during the run.
     WebFieldlinesWorker::~WebFieldlinesWorker() {
         // Cancel any potential download
-        if(_downloading && _downloading->hasStarted())
-            _downloading->cancel();
-        // Remova all files
-        std::for_each(_downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), [&](auto it) {
-            FileSys.deleteFile(_syncDir + FileSys.PathSeparator + it.second);
-        });
+        if (_downloading && _downloading->hasStarted())
+            _downloading->wait();
+        // Remove all files
+        std::vector<std::string> temp = ghoul::filesystem::Directory(_syncDir).readFiles();
+        // Sneaky check, just want to make sure it is only deleting fieldlines for now
+        if (temp.back().substr(temp.back().size() - 5) == "osfls" && temp.front().substr(temp.front().size() - 5) == "osfls") {
+            std::for_each(temp.begin(), temp.end(), [&](auto it) {
+                FileSys.deleteFile(it);
+            });
+        }
+
     }
     
     // PUBLIC FUNCTIONS
@@ -111,7 +115,7 @@ namespace openspace{
             if (_triggerTimesWeb.size() == 0) // We got an empty response
                 _strikes++;
 
-            if (_strikes % 3 == 0){ // We have got 3 strikes, no more requests for you, Mr.Sir.
+            if (_strikes % 2 == 0){ // We have got 2 strikes, no more requests for you, Mr.Sir.
                 _noEmptyResponses = false;
                 acceptableToStartRequestingAgain = std::make_pair(minTime.j2000Seconds(), maxTime.j2000Seconds());
             } 
@@ -132,6 +136,8 @@ namespace openspace{
         bool downloaded = false;
         bool oneUpdate = false;
 
+        // May be interesting to keep something like this, if it will be possible to use a list of 
+        // AsyncHttpFileDownloads
         /*if (auto index = std::find_if(_downloadList.begin(), _downloadList.end(), [](auto element) {
             return element.first->hasSucceeded();
         }); index != _downloadList.end()) {
@@ -176,10 +182,11 @@ namespace openspace{
 
         }
 
-        if (!downloaded && !_doneUpdating && _newWindow && _readyToDownload || oneUpdate) {
+        if ((!downloaded && !_doneUpdating && _newWindow && _readyToDownload) || oneUpdate) {
             // If reach this point, we now know that we have downloaded all the sets
             _readyToUpdateSourceFiles = true;
-            _newWindow = false;
+            if(!oneUpdate)
+                _newWindow = false;
             oneUpdate = false;
         }
         
