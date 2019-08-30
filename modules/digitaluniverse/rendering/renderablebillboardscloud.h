@@ -103,6 +103,7 @@ private:
     bool _hasSpriteTexture = false;
     bool _spriteTextureIsDirty = true;
     bool _hasColorMapFile = false;
+    bool _isColorMapExact = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
 
@@ -141,6 +142,7 @@ private:
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
         screenSize, spriteTexture, hasColormap, enabledRectSizeControl
     ) _uniformCache;
+    
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;
@@ -153,10 +155,10 @@ private:
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
     std::vector<glm::vec4> _colorMapData;
+    std::vector<glm::vec2> _colorRangeData;
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
-    std::vector<glm::vec2> _colorRangeData;
 
     int _nValuesPerAstronomicalObject = 0;
 

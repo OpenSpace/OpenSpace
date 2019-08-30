@@ -32,6 +32,6 @@ in vec4 in_colormap;
 out vec4 colorMap;
 
 void main() {
-    colorMap = in_colormap;
-    gl_Position = vec4(in_position);
+    colorMap    = in_colormap;
+    gl_Position = in_position;
 }

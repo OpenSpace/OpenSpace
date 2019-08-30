@@ -106,6 +106,20 @@ namespace {
         "The path to the color map file of the astronomical object."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ExactColorMapInfo = {
+        "ExactColorMap",
+        "Exact Color Map File",
+        "Set a 1 to 1 relationship between the color index variable and the colormap"
+        " entrered value."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
+        "ColorRange",
+        "Color Range",
+        "This value determines the colormap ranges for the color parameters of the "
+        "astronomical objects."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo PolygonSidesInfo = {
         "PolygonSides",
         "Polygon Sides",
@@ -164,12 +178,6 @@ namespace {
         "astronomical objects."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
-        "ColorRange",
-        "Color Range",
-        "This value determines the color ranges for the color parameter of the "
-        "astronomical objects."
-    };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
@@ -274,6 +282,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new StringVerifier,
                 Optional::Yes,
                 ColorMapInfo.description
+            },
+            {
+                ExactColorMapInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                ExactColorMapInfo.description
             },
             {
                 PolygonSidesInfo.identifier,
@@ -521,6 +535,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
                 );
             }
         }
+        
+        if (dictionary.hasKey(ExactColorMapInfo.identifier)) {
+            _isColorMapExact = dictionary.value<bool>(ExactColorMapInfo.identifier);
+        }
     }
     else if (dictionary.hasKey(keyColor)) {
         _pointColor = dictionary.value<glm::vec3>(keyColor);
@@ -617,13 +635,16 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _correctionSizeFactor = static_cast<float>(
             dictionary.value<double>(CorrectionSizeFactorInfo.identifier)
         );
+
+        addProperty(_correctionSizeFactor);
     }
-    addProperty(_correctionSizeFactor);
+    
 
     if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
         _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
+        addProperty(_pixelSizeControl);
     }
-    addProperty(_pixelSizeControl);
+    
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -1161,7 +1182,7 @@ bool RenderableBillboardsCloud::loadLabelData() {
 }
 
 bool RenderableBillboardsCloud::readSpeckFile() {
-    std::ifstream file(_speckFile);
+    std::fstream file{ _speckFile };
     if (!file.good()) {
         LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
         return false;
@@ -1195,7 +1216,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
         {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
-            file.seekg(position);
+            file.seekg(position, file.beg);
             break;
         }
 
@@ -1221,6 +1242,8 @@ bool RenderableBillboardsCloud::readSpeckFile() {
     }
 
     _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
+
+
 
     do {
         std::vector<float> values(_nValuesPerAstronomicalObject);
@@ -1288,6 +1311,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         std::stringstream str(line);
 
         glm::vec4 color;
+        // Each color in the colormap must be defined as (R,G,B,A)
         for (int j = 0; j < 4; ++j) {
             str >> color[j];
         }
@@ -1491,28 +1515,18 @@ void RenderableBillboardsCloud::createDataSlice() {
         _slicedData.reserve(4 * (_fullData.size() / _nValuesPerAstronomicalObject));
     }
 
-    // Generate the color bins for the colomap
-    int colorMapInUse = 0;
-    std::vector<float> colorBins;
-    if (_hasColorMapFile) {
-        colorMapInUse = _variableDataPositionMap[_colorOptionString];
-        glm::vec2 currentColorRange;
-        float colorMapBinSize;
-        if (!_colorRangeData.empty()) {
-            currentColorRange = _colorRangeData[_colorOption.value()];
-            colorMapBinSize = (currentColorRange.y - currentColorRange.x) /
-                static_cast<float>(_colorMapData.size());
-        }
-        else {
-            colorMapBinSize = 1.f;
-        }
-        
-        float bin = colorMapBinSize;
-        for (size_t i = 0; i < _colorMapData.size(); ++i) {
-            colorBins.push_back(bin);
-            bin += colorMapBinSize;
-        }
+    // which datavar in use for the index color
+    int colorMapInUse = _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
+    
+    float minColorIdx = std::numeric_limits<float>::max();
+    float maxColorIdx = std::numeric_limits<float>::min();
+    
+    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
+        float colorIdx = _fullData[i + 3 + colorMapInUse];
+        maxColorIdx = colorIdx >= maxColorIdx ? colorIdx : maxColorIdx;
+        minColorIdx = colorIdx < minColorIdx ? colorIdx : minColorIdx;
     }
+
 
     float biggestCoord = -1.f;
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
@@ -1529,20 +1543,34 @@ void RenderableBillboardsCloud::createDataSlice() {
                 _slicedData.push_back(position[j]);
                 biggestCoord = biggestCoord < position[j] ? position[j] : biggestCoord;
             }
-            // Finds from which bin to get the color.
-            // Note: the first color in the colormap file
-            // is the outliers color.
-            glm::vec4 itemColor;
+
+            // Note: if exact colormap option is not selected, the first color and the
+            // last color in the colormap file are the outliers colors.
             float variableColor = _fullData[i + 3 + colorMapInUse];
-            int c = static_cast<int>(colorBins.size() - 1);
-            while (variableColor < colorBins[c]) {
-                --c;
-                if (c == 0) {
-                    break;
-                }
+            int colorIndex = 0;
+
+            float cmax, cmin;
+            if (_colorRangeData.empty()) {
+                cmax = maxColorIdx; // Max value of datavar used for the index color
+                cmin = minColorIdx; // Min value of datavar used for the index color
+            }
+            else {
+                glm::vec2 currentColorRange = _colorRangeData[_colorOption.value()];
+                cmax = currentColorRange.y;
+                cmin = currentColorRange.x;
             }
 
-            int colorIndex = c == static_cast<int>(colorBins.size() - 1) ? 0 : c + 1;
+            if (_isColorMapExact) {
+                colorIndex = variableColor + cmin;
+            }
+            else {
+                float ncmap = static_cast<float>(_colorMapData.size());
+                float normalization = ((cmax != cmin) && (ncmap > 2)) ? 
+                                      (ncmap - 2) / (cmax - cmin) : 0;
+                colorIndex = (variableColor - cmin) * normalization + 1;
+                colorIndex = colorIndex < 0 ? 0 : colorIndex;
+                colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
+            }
 
             for (int j = 0; j < 4; ++j) {
                 _slicedData.push_back(_colorMapData[colorIndex][j]);
