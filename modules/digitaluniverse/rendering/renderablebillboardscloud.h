@@ -104,6 +104,7 @@ private:
     bool _spriteTextureIsDirty = true;
     bool _hasColorMapFile = false;
     bool _isColorMapExact = false;
+    bool _hasDatavarSize = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
 
@@ -122,6 +123,7 @@ private:
     properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
+    properties::OptionProperty _datavarSizeOption;
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _billboardMaxSize;
@@ -140,7 +142,7 @@ private:
     UniformCache(cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup,
         renderOption, minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
-        screenSize, spriteTexture, hasColormap, enabledRectSizeControl
+        screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
     
     std::shared_ptr<ghoul::fontrendering::Font> _font;
@@ -149,6 +151,7 @@ private:
     std::string _colorMapFile;
     std::string _labelFile;
     std::string _colorOptionString;
+    std::string _datavarSizeOptionString;
 
     Unit _unit = Parsec;
 
@@ -159,6 +162,7 @@ private:
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
+    std::unordered_map<int, std::string> _optionConversionSizeMap;
 
     int _nValuesPerAstronomicalObject = 0;
 

@@ -28,10 +28,13 @@
 
 in vec4 in_position;
 in vec4 in_colormap;
+in float in_dvarScaling;
 
-out vec4 colorMap;
+flat out vec4 colorMap;
+flat out float dvarScaling;
 
 void main() {
     colorMap    = in_colormap;
+    dvarScaling = in_dvarScaling;
     gl_Position = in_position;
 }

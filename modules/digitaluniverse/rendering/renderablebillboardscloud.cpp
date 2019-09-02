@@ -56,12 +56,12 @@ namespace {
     constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
     constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
 
-    constexpr const std::array<const char*, 19> UniformNames = {
+    constexpr const std::array<const char*, 20> UniformNames = {
         "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
         "renderOption", "minBillboardSize", "maxBillboardSize",
         "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
-        "hasColorMap", "enabledRectSizeControl"
+        "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
     constexpr const char* KeyFile = "File";
@@ -178,6 +178,12 @@ namespace {
         "astronomical objects."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
+        "SizeOption",
+        "Size Option Variable",
+        "This value determines which paramenter (datavar) is used for scaling "
+        "of the astronomical objects."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
@@ -338,6 +344,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 ColorOptionInfo.description
             },
             {
+                SizeOptionInfo.identifier,
+                new StringListVerifier,
+                Optional::Yes,
+                SizeOptionInfo.description
+            },
+            {
                 ColorRangeInfo.identifier,
                 new Vector2ListVerifier<float>,
                 Optional::Yes,
@@ -400,7 +412,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(
         ColorInfo,
-        glm::vec3(1.f, 0.4f, 0.2f),
+        glm::vec3(1.f, 1.0f, 1.0f),
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(1.0f, 1.0f, 1.0f)
     )
@@ -418,6 +430,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _datavarSizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _fadeInDistance(
         FadeInDistancesInfo,
         glm::vec2(0.f),
@@ -555,6 +568,28 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
     addProperty(_scaleFactor);
 
+    if (dictionary.hasKey(SizeOptionInfo.identifier)) {
+        ghoul::Dictionary sizeOptionDataDic = dictionary.value<ghoul::Dictionary>(
+            SizeOptionInfo.identifier
+            );
+        for (int i = 0; i < static_cast<int>(sizeOptionDataDic.size()); ++i) {
+            std::string datavarSizeInUseName(
+                sizeOptionDataDic.value<std::string>(std::to_string(i + 1))
+            );
+            _datavarSizeOption.addOption(i, datavarSizeInUseName);
+            _optionConversionSizeMap.insert({ i, datavarSizeInUseName });
+            _datavarSizeOptionString = datavarSizeInUseName;
+        }
+
+        _datavarSizeOption.onChange([&]() {
+            _dataIsDirty = true;
+            _datavarSizeOptionString = _optionConversionSizeMap[_datavarSizeOption.value()];
+            });
+        addProperty(_datavarSizeOption);
+
+        _hasDatavarSize = true;
+    }    
+
     if (dictionary.hasKey(PolygonSidesInfo.identifier)) {
         _polygonSides = static_cast<int>(
             dictionary.value<double>(PolygonSidesInfo.identifier)
@@ -657,7 +692,7 @@ void RenderableBillboardsCloud::initialize() {
         throw ghoul::RuntimeError("Error loading data");
     }
 
-    if (!_colorOptionString.empty()) {
+    if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
         // Following DU behavior here. The last colormap variable
         // entry is the one selected by default.
         _colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
@@ -803,6 +838,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.correctionSizeFactor, _correctionSizeFactor);
 
     _program->setUniform(_uniformCache.enabledRectSizeControl, _pixelSizeControl);
+
+    _program->setUniform(_uniformCache.hasDvarScaling, _hasDatavarSize);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -1015,12 +1052,40 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         );
         GLint positionAttrib = _program->attributeLocation("in_position");
 
-        if (_hasColorMapFile) {
-            /*const size_t nAstronomicalObjects = _fullData.size() /
-            _nValuesPerAstronomicalObject;
-            const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-            GLsizei stride = static_cast<GLsizei>(sizeof(float) * nValues);*/
+        if (_hasColorMapFile && _hasDatavarSize) {
+            glEnableVertexAttribArray(positionAttrib);
+            glVertexAttribPointer(
+                positionAttrib,
+                4,
+                GL_FLOAT,
+                GL_FALSE,
+                sizeof(float) * 9,
+                nullptr
+            );
 
+            GLint colorMapAttrib = _program->attributeLocation("in_colormap");
+            glEnableVertexAttribArray(colorMapAttrib);
+            glVertexAttribPointer(
+                colorMapAttrib,
+                4,
+                GL_FLOAT,
+                GL_FALSE,
+                sizeof(float) * 9,
+                reinterpret_cast<void*>(sizeof(float) * 4)
+            );
+
+            GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
+            glEnableVertexAttribArray(dvarScalingAttrib);
+            glVertexAttribPointer(
+                dvarScalingAttrib,
+                1,
+                GL_FLOAT,
+                GL_FALSE,
+                sizeof(float) * 9,
+                reinterpret_cast<void*>(sizeof(float) * 8)
+            );
+        } 
+        else if (_hasColorMapFile) {
             glEnableVertexAttribArray(positionAttrib);
             glVertexAttribPointer(
                 positionAttrib,
@@ -1039,6 +1104,28 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 GL_FLOAT,
                 GL_FALSE,
                 sizeof(float) * 8,
+                reinterpret_cast<void*>(sizeof(float) * 4)
+            );
+        }
+        else if (_hasDatavarSize) {
+            glEnableVertexAttribArray(positionAttrib);
+            glVertexAttribPointer(
+                positionAttrib,
+                4,
+                GL_FLOAT,
+                GL_FALSE,
+                sizeof(float) * 8,
+                nullptr
+            );
+
+            GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
+            glEnableVertexAttribArray(dvarScalingAttrib);
+            glVertexAttribPointer(
+                dvarScalingAttrib,
+                1,
+                GL_FLOAT,
+                GL_FALSE,
+                sizeof(float) * 5,
                 reinterpret_cast<void*>(sizeof(float) * 4)
             );
         }
@@ -1515,9 +1602,23 @@ void RenderableBillboardsCloud::createDataSlice() {
         _slicedData.reserve(4 * (_fullData.size() / _nValuesPerAstronomicalObject));
     }
 
-    // which datavar in use for the index color
+    // what datavar in use for the index color
     int colorMapInUse = _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
     
+    // what datavar in use for the size scaling (if present)
+    int sizeScalingInUse = _hasDatavarSize ? 
+        _variableDataPositionMap[_datavarSizeOptionString] : -1;
+
+    auto addDatavarSizeScalling = [&](size_t i, int datavarInUse) {
+        _slicedData.push_back(_fullData[i + 3 + datavarInUse]);
+    };
+
+    auto addPosition = [&](const glm::vec4 &pos) {
+        for (int j = 0; j < 4; ++j) {
+            _slicedData.push_back(pos[j]);
+        }
+    };
+
     float minColorIdx = std::numeric_limits<float>::max();
     float maxColorIdx = std::numeric_limits<float>::min();
     
@@ -1527,7 +1628,6 @@ void RenderableBillboardsCloud::createDataSlice() {
         minColorIdx = colorIdx < minColorIdx ? colorIdx : minColorIdx;
     }
 
-
     float biggestCoord = -1.f;
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
         glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(
@@ -1536,6 +1636,8 @@ void RenderableBillboardsCloud::createDataSlice() {
             _fullData[i + 2],
             1.0
         );
+        // W-normalization
+        transformedPos /= transformedPos.w;
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
 
         if (_hasColorMapFile) {
@@ -1546,7 +1648,7 @@ void RenderableBillboardsCloud::createDataSlice() {
 
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
-            float variableColor = _fullData[i + 3 + colorMapInUse];
+            int variableColor = static_cast<int>(_fullData[i + 3 + colorMapInUse]);
             int colorIndex = 0;
 
             float cmax, cmin;
@@ -1575,11 +1677,17 @@ void RenderableBillboardsCloud::createDataSlice() {
             for (int j = 0; j < 4; ++j) {
                 _slicedData.push_back(_colorMapData[colorIndex][j]);
             }
+
+            if (_hasDatavarSize) {
+                addDatavarSizeScalling(i, sizeScalingInUse);
+            }
+        }
+        else if (_hasDatavarSize) {
+            addDatavarSizeScalling(i, sizeScalingInUse);
+            addPosition(position);
         }
         else {
-            for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(position[j]);
-            }
+            addPosition(position);
         }
     }
     _fadeInDistance.setMaxValue(glm::vec2(10.0f * biggestCoord));

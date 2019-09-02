@@ -24,7 +24,7 @@
 
 #include "fragment.glsl"
 
-in vec4 gs_colorMap;
+flat in vec4 gs_colorMap;
 in float vs_screenSpaceDepth;
 in vec2 texCoord;
 in float ta;
