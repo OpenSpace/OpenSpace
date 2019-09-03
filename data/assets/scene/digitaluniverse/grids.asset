@@ -566,15 +566,15 @@ local plane20Gly = {
 
 local sunOrbit = {
     Identifier = "SunOrbit",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    --Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
-        Color = { 1.0, 0.0, 0.0 },
+        Color = { 1.0, 0.65, 0.0 },
         Transparency = 1.0,
         ScaleFactor = 1.0,
         File = speck .. "/starorbits-Sun.speck",
-        MeshColor = {{ 1.0, 0.0, 0.0 }},
+        MeshColor = {{ 1.0, 0.65, 0.0 }},
         --LabelFile = speck .. "/1ld.label",
         TextColor = { 0.0, 0.2, 0.5, 1.0 },
         TextSize = 10.3,
@@ -584,7 +584,31 @@ local sunOrbit = {
     },
     GUI = {
         Name = "Sun Orbit",
-        Path = "/Other/Grids"
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+local barnardsOrbit = {
+    Identifier = "BarnardsOrbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = {1.0, 1.0, 1.0},
+        Transparency = 1.0,
+        ScaleFactor = 1.0,
+        File = speck .. "/starorbits-BarnardsStar.speck",
+        MeshColor = {{0.39, 0.58, 0.93}},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "Barnards Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
     }
 }
 
@@ -592,5 +616,6 @@ local sunOrbit = {
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic,
     galacticLabels, plane1ld, plane1lm, plane1ly, plane10ly, plane100ly, plane1kly,
-    plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly, sunOrbit
+    plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly, sunOrbit,
+    barnardsOrbit
 })

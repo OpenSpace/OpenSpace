@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Tully Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_tully_speck",
-    Version = 3
+    Version = 2
 })
 
 local tullyPoints = {
@@ -22,12 +22,14 @@ local tullyPoints = {
         Type = "RenderableBillboardsCloud",
         Enabled = true,
         Color = { 1.0, 0.4, 0.2 },
-        Transparency = 0.99,
-        ScaleFactor = 507.9,
+        Opacity = 0.99,
+        ScaleFactor = 500.0,
         File = speck .. "/tully.speck",
         Texture = textures .. "/point3.png",
-        ColorMap = speck .. "/tully.cmap",
-        ColorOption = { "proximity" },
+        --ColorMap = speck .. "/tully.cmap",
+        ColorMap = speck .. "/lss.cmap",
+        --ColorOption = { "proximity" },
+        ColorOption = { "prox5Mpc" },
         ColorRange = { { 1.0, 30.0 } },
         LabelFile = speck .. "/tully.label",
         TextColor = { 0.7, 0.7, 0.7, 1.0 },

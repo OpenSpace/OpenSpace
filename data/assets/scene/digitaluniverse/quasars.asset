@@ -22,11 +22,11 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = true,
         Color = { 1.0, 0.4, 0.2 },
-        Transparency = 1.0,
+        Opacity = 0.95,
         File = speck .. "/quasars.speck",
         Texture = textures .. "/point3.png",
         Unit = "Mpc",
-        ScaleFactor = 542.75,
+        ScaleFactor = 540.9,
         -- Fade in value in the same unit as "Unit"
         FadeInDistances = { 1000.0, 10000.0 },
         BillboardMaxSize = 30.0,

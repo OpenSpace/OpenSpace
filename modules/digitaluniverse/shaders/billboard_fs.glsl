@@ -29,7 +29,7 @@ in float vs_screenSpaceDepth;
 in vec2 texCoord;
 in float ta;
 
-uniform float alphaValue;
+uniform float alphaValue; // opacity
 uniform vec3 color;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;

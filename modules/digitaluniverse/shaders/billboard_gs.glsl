@@ -146,11 +146,12 @@ void main() {
             scaledRight *= correctionScale;
             scaledUp    *= correctionScale;
         
-        } else {            
+        } else {
+            // linear alpha decay
             if (sizes.x < 2.0f * minBillboardSize) {
                 float maxVar = 2.0f * minBillboardSize;
                 float minVar = minBillboardSize;
-                float var    = (sizes.y + sizes.x);    
+                float var    = (sizes.y + sizes.x);
                 ta = ( (var - minVar)/(maxVar - minVar) );
                 if (ta == 0.0f)
                     return;
