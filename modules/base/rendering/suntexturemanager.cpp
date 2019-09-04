@@ -152,6 +152,8 @@ void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
             if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())))
             {
                 _textureListGPU[_activeTextureDate] = std::move(texture);
+                LERROR(_textureToUpload);
+                LERROR("at " + currentTime);
                 texture = std::move(_textureListGPU[_textureToUpload]);
                 _activeTextureDate = _textureToUpload;
                 _textureToUpload = "";
@@ -180,7 +182,7 @@ void SunTextureManager::downloadTexture(std::string textureId)
     opt.requestTimeoutSeconds = 0;
     ashd.start(opt);
     ashd.wait();
-    LERROR("Texture " + textureId + " downloaded to disk to " + destinationpath);
+    //LERROR("Texture " + textureId + " downloaded to disk to " + destinationpath);
     _working = false;
 }
 
@@ -200,7 +202,7 @@ void SunTextureManager::getNextTexture(std::string current, float dir, std::stri
                    [](char c) {
                        return c;
                    });
-    LERROR("Next is " +  s );
+    //LERROR("Next is " +  s );
     *toReturn = std::move(s);
     
     _working = false;
@@ -231,8 +233,7 @@ void SunTextureManager::checkFilesInDirectory()
 
 void SunTextureManager::uploadTexture(std::vector<float> imagedata, std::string id)
 {
-    LERROR("laddar upp texture till GPU med id: " + id);
-    //auto textureFits = std::make_unique<ghoul::opengl::Texture>(std::move(imagedata.data()), glm::vec3(360, 180, 1), ghoul::opengl::Texture::Format::Red, GL_R32F, GL_FLOAT);
+    //LERROR("laddar upp texture till GPU med id: " + id);
     auto textureFits = std::make_unique<ghoul::opengl::Texture>(std::move(imagedata.data()), glm::vec3(180, 90, 1), ghoul::opengl::Texture::Format::RGB, GL_RGB32F, GL_FLOAT);
     textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     textureFits->uploadTexture();
@@ -255,95 +256,61 @@ void SunTextureManager::processTextureFromName(std::string filename, std::vector
     fitsFileReader.forceUsePHDU();
 
     const auto tempBild = fitsFileReader.readImageFloat(_syncDir + filename);
-    //const auto tempBild = fitsFileReader.readImageFloat("/Users/shuy/Offline-dokument/fieldlines_python/WSA_OUT/wsa_201707010528R000_gong.fits");
-    
-    
-
-    //*id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("DATE"));
+    //const auto fitsValues = fitsFileReader.readImageFloat("/Users/shuy/Offline-dokument/TEST FILER/solarmax/output/WSA_OUT/wsa_201308170804R000_gong.fits");
     
     *id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("OBSTIME"));
     
-    // FOR TESTING
-    //*id = "2019-05-02T11:14:00";
-
-    //const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
-    //const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
-    //const int long0 = *fitsFileReader.readHeaderValueFloat("LONG0");
-    //const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
-    int long0 = *fitsFileReader.readHeaderValueFloat("CARRLONG");
-    long0 = long0/2;
+    LERROR("processed texture: " + *id);
     
-    //fitsFileReader.~FitsFileReader();
-    
-    
-    
-    /**** REGULAR NOMRALISATION *****/
-//    float maxvalue = 0;
-//    float minvalue = 17;
-//    for (int i = 64800; i < 81000; i++)
-//    {
-//        float actual_value =tempBild->contents[i];
-//        if(maxvalue < actual_value) maxvalue = actual_value;
-//        if(minvalue > actual_value) minvalue = actual_value;
-//    }
-//    for (int i = 64800; i < 81000; i++)
-//    {
-//        float actual_value =tempBild->contents[i];
-//        float c =(actual_value - minvalue) / (maxvalue - minvalue);
-//
-//        imagedata->push_back(c); // Normalized
-//        //imagedata->push_back((c + stdvalue) / stdvalue); // Standard Deviation
-//
-//    }
-    
+    const int long0 = *fitsFileReader.readHeaderValueFloat("CARRLONG"); // Longitude leading edge of map header value
+    const std::string wsaMapType = *fitsFileReader.readHeaderValueString("OBSER"); // Obsertory header value
 
     
-    /**** REGULAR NOMRALISATION *****/
-    float maxvalue = 0;
-    float minvalue = 17;
-    for (int i = 64800; i < 81000; i++)
+    std::vector<std::vector<float>> rgbLayers;
+    float r, g, b;
+    
+    std::valarray<float> magnetogram = fitsValues->contents[std::slice(64800, 16200, 1)];
+    float maxvalue = magnetogram.max();
+
+    
+    float damper = 1.0;
+    float multiplyer = 20.0f; // good for wsa gong
+
+    for (float mapvalue : magnetogram)
     {
-        float actual_value =tempBild->contents[i];
-        if(maxvalue < actual_value) maxvalue = actual_value;
-        if(minvalue > actual_value) minvalue = actual_value;
+        float norm_abs_value =  abs(mapvalue)/maxvalue;
+
+        r = 0.0f, g = 0.0f, b = 0.0f;
+        if(mapvalue != 0.0f){
+            float colorIntensity = damper*log(1 + multiplyer*norm_abs_value);
+            if (wsaMapType.compare("agong") == 0 )
+                colorIntensity = norm_abs_value;
+            
+            if(mapvalue < 0)
+                r = colorIntensity;
+            else
+                b = colorIntensity;
+        }
+        std::vector<float> rgb = {r,g,b};
+        rgbLayers.push_back(rgb);
+
     }
-    for (int i = 64800; i < 81000; i++)
-    {
-        
-        float actual_value =tempBild->contents[i];
-        float r, g, b;
-        float norm_abs_value =  abs(actual_value)/maxvalue;
-        
-        if(actual_value == 0){
-            r = 1.0f;
-            b = 1.0f;
-            g = 1.0f;
-        }
-        else if(actual_value > 0){
-            r = 1.0f;
-            g = 1 + log(1 - norm_abs_value);
-            b = 1 + log(1 - norm_abs_value);
-        }else {
-            r = 1 + log(1 - norm_abs_value);
-            g = 1 + log(1 - norm_abs_value);
-            b = 1.0f;
-        }
-        
-        imagedata->push_back(r);
-        imagedata->push_back(g);
-        imagedata->push_back(b);
-        
-        }
 
+
+    int shift = (360 - long0) /2; // shift with leading edge value and divide by two to match resolution (180)
     
     
+    for(int i = 0; i < 90; i++)
+    {
+        std::rotate(rgbLayers.begin() + (i * 180), rgbLayers.begin() + (i * 180) +  shift, rgbLayers.begin() + (i * 180)+ 179 );
+        for(int j = 0; j <180; j++){
+            int index = i* 180 + j;
+            imagedata->push_back(rgbLayers[index][0]);
+            imagedata->push_back(rgbLayers[index][1]);
+            imagedata->push_back(rgbLayers[index][2]);
+        }
     
-//    for (int i = 0; i < 90; i++)
-//    {
-//        std::rotate(imagedata->begin() + (i * 180), imagedata->begin() + ((i * 180) + (180 - long0)), imagedata->begin() + (i * 180) + 179);
-//    }
-    
-    LERROR(std::to_string(imagedata->size()));
+    }
 
     _working = false;
 }
@@ -400,7 +367,7 @@ void SunTextureManager::trimGPUList()
 
         std::string dateId = _textureQueueGPU.front();
         _textureQueueGPU.pop();
-        LERROR("popped dateId : " + dateId);
+        //LERROR("popped dateId : " + dateId);
         //_textureListGPU.at(dateId).release(); // TODO: Kommentera tillbaka!
         //BaseModule::TextureManager.release(_textureListGPU.at(dateId).get());
         //_textureListGPU.erase(dateId);        // TODO: Kommentera tillbaka!

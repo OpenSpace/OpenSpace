@@ -1,9 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 local HNMKernel = asset.localResource("kernels/HNM.tf")
-local GSMKernel = asset.localResource("kernels/GSM.ti")
+
+
 
 local HNMReferenceFrame = {
     Identifier = "HNMReferenceFrame",
@@ -21,21 +21,20 @@ local HNMReferenceFrame = {
     }
 }
 
-local GSMReferenceFrame = {
-    Identifier = "GSMReferenceFrame",
-    Parent = earthTransforms.EarthBarycenter.Identifier,
+local TransformGONG = {
+    Identifier = "TransformGONG",
+    Parent = HNMReferenceFrame.Identifier,
     Transform = {
         Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "GSM",
-            DestinationFrame = "GALACTIC",
-            Kernels = GSMKernel
+            Type = "StaticRotation",
+            Rotation = {0, 0, 2.09439510239} -- 120 degrees
         }
     },
     GUI = {
-        Name = "GSM Reference Frame"
+        Name = "Transform GONG fieldlines (w Rotation Offset)"
     }
+    
 }
 
-local objects = { HNMReferenceFrame, GSMReferenceFrame }
+local objects = { HNMReferenceFrame, TransformGONG }
 assetHelper.registerSceneGraphNodesAndExport(asset, objects)
