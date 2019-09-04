@@ -42,7 +42,8 @@ namespace openspace{
     // CONSTRUCTOR
     WebFieldlinesWorker::WebFieldlinesWorker(std::string syncDir, std::string serverUrl)
     : _syncDir(syncDir), _serverUrl(serverUrl) {
-        _endpointSingleDownload = _serverUrl + "WSA/fieldline/"; // should be set by argument to be more general [DEPRICATED FOR NOW, DO WE NEED THIS?]
+        // Maybe to be used
+        _endpointSingleDownload = _serverUrl; // should be set by argument to be more general [DEPRICATED FOR NOW, DO WE NEED THIS?]
     }
 
     // Destructor, deleting all files that were downloaded during the run.
@@ -58,11 +59,10 @@ namespace openspace{
                 FileSys.deleteFile(it);
             });
         }
-
     }
     
     // PUBLIC FUNCTIONS
-    void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double start, double end, std::vector<std::pair<double, std::string>> &_triggerTimesWeb, int id){
+    void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime, double endTime, std::vector<std::pair<double, std::string>> &_triggerTimesWeb){
 
         if (global::timeManager.time().j2000Seconds() < acceptableToStartRequestingAgain.first || global::timeManager.time().j2000Seconds() > acceptableToStartRequestingAgain.second) {
             _noEmptyResponses = true;
@@ -73,7 +73,7 @@ namespace openspace{
             auto time = global::timeManager.time().ISO8601();
             Time maxTime;
             Time minTime;
-            const int timeSpann = 86400; // The timespann we would like to request (in seconds) [ 1 day = 86400, 1 week = 604800 ]
+            const int timeSpann = 2*86400; // The timespann we would like to request (in seconds) [ 1 day = 86400, 1 week = 604800 ]
             const std::string dataID = "dataID";
             const std::string files = "files";
             std::string stringResult;
@@ -85,7 +85,7 @@ namespace openspace{
             maxTime.advanceTime(timeSpann);
             minTime.advanceTime(-timeSpann);
 
-            std::string url = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=" + std::to_string(id) + "&time.min=" + minTime.ISO8601() + "&time.max=" + maxTime.ISO8601();
+            std::string url = _serverUrl + "&time.min=" + minTime.ISO8601() + "&time.max=" + maxTime.ISO8601();
             SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
             HttpRequest::RequestOptions opt = {};
             opt.requestTimeoutSeconds = 0;
@@ -118,26 +118,24 @@ namespace openspace{
             if (_strikes % 2 == 0){ // We have got 2 strikes, no more requests for you, Mr.Sir.
                 _noEmptyResponses = false;
                 acceptableToStartRequestingAgain = std::make_pair(minTime.j2000Seconds(), maxTime.j2000Seconds());
-            } 
-                
+            }     
         }
     }
 
     // Download all files in the current window
     // This function starts in the middle of the window and proceeds to download all future timesteps, 
     // then steps backwards from the middle
-    //TODO(Axel): Different behaviour depending on direction the user is moving in.
+    //TODO(Axel): Different behaviour depending on direction the user is moving in, might be wanted?
     void WebFieldlinesWorker::downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes) {
         
-        // Limit the number of concurrent downloads
-
-        // Want to use std::find_if to break the for_each
+        // Helper variables
         int middle = triggerTimes.size() / 2;
         bool downloaded = false;
         bool oneUpdate = false;
 
         // May be interesting to keep something like this, if it will be possible to use a list of 
         // AsyncHttpFileDownloads
+        
         /*if (auto index = std::find_if(_downloadList.begin(), _downloadList.end(), [](auto element) {
             return element.first->hasSucceeded();
         }); index != _downloadList.end()) {
@@ -147,6 +145,7 @@ namespace openspace{
             _downloadList.erase(index);
         }
         else { */
+
         if (_downloading && _downloading->hasSucceeded() && _newWindow) {
             _downloading->wait();
             addToDownloadedList(_latestDownload);
@@ -171,7 +170,7 @@ namespace openspace{
 
             // Backwards
             if (!downloaded) {
-                std::for_each(triggerTimes.rbegin(), triggerTimes.rend(), [this, &downloaded](auto it) {
+                std::for_each(triggerTimes.rbegin() + middle, triggerTimes.rend(), [this, &downloaded](auto it) {
                     if (!downloaded && !fileIsOnDisk(it.first)) {
                         downloadOsfls(it);
                         downloaded = true;
@@ -179,7 +178,6 @@ namespace openspace{
                     }
                 });
             }
-
         }
 
         if ((!downloaded && !_doneUpdating && _newWindow && _readyToDownload) || oneUpdate) {
@@ -189,7 +187,6 @@ namespace openspace{
                 _newWindow = false;
             oneUpdate = false;
         }
-        
     }
 
     // Updates the list of available sourcefiles, owned by renderablefieldlinessequence.
@@ -228,8 +225,7 @@ namespace openspace{
  
     }
 
-    bool WebFieldlinesWorker::windowIsComplete()
-    {
+    bool WebFieldlinesWorker::windowIsComplete(){
         return _doneUpdating;
     }
 
@@ -237,8 +233,7 @@ namespace openspace{
         _doneUpdating = false;
     }
 
-    void WebFieldlinesWorker::newWindowToDownload()
-    {
+    void WebFieldlinesWorker::newWindowToDownload(){
         _newWindow = true;
     }
     

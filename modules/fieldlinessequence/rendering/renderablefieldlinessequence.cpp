@@ -1188,7 +1188,7 @@ namespace openspace {
     }
 
     void RenderableFieldlinesSequence::initializeWebManager() {
-        _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, _nStates, _sourceFiles, _startTimes);
+        _webFieldlinesManager.initializeWebFieldlinesManager(_identifier,_dynWebContentUrl, _nStates, _sourceFiles, _startTimes);
     }
 
     void RenderableFieldlinesSequence::update(const UpdateData& data) {

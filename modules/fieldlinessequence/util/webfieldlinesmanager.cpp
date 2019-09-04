@@ -42,14 +42,13 @@ namespace {
 namespace openspace{
 
     // --------------------------- PUBLIC FUNCTIONS --------------------------- //
-    void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, size_t& _nStates, std::vector<std::string>& _sourceFiles,
+    void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, std::string url, size_t& _nStates, std::vector<std::string>& _sourceFiles,
                                                               std::vector<double>& _startTimes)
     {
         // Initialize the sliding window
-        _webFieldlinesWindow = WebFieldlinesWindow(_syncDir, "http://localhost:3000/", _sourceFiles, _startTimes, _nStates, convertIdentifierToID(identifier));
+        _webFieldlinesWindow = WebFieldlinesWindow(_syncDir, url, _sourceFiles, _startTimes, _nStates, convertIdentifierToID(identifier));
 
-        LINFO("WebFieldlinesManager initialized " + identifier);     
-
+        LTRACE("WebFieldlinesManager initialized " + identifier);     
     }
 
     bool WebFieldlinesManager::isConnected() {
@@ -77,8 +76,7 @@ namespace openspace{
     // the start latest line
     // this could be used to test the connection too
     void WebFieldlinesManager::preDownload(std::string dUrl){
-        // Download a dataset that we know exists, hopefully the API could send the latest entry of that dataset
-        // TODO(Axel): Change this endpoint to be dynamic for each dataset 
+
         int ID = std::stoi(dUrl.substr(dUrl.size() - 4));
         std::string type = "";
         switch (ID)
@@ -95,22 +93,26 @@ namespace openspace{
         case 1179:
             type = "trace_pfss_outtoin";
             break;
+        case 1180:
+            type = "WSA_OUT";
+            break;
         }
-
+        // TODO(Axel): Change this endpoint to be dynamic for each dataset 
         std::string url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA4.5/WSA4.5_fieldlines/" + type + "/2017/09/2017-09-28T00-23-22.000.osfls";
         std::string destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "2017-09-28T00-23-22.000.osfls"); // what the downloaded filename is to be
+        
+        /* For experimentation with suntexturemanager */
+        if (ID == 1180) {
+            url = "https://iswa.ccmc.gsfc.nasa.gov/iswa_data_tree/model/solar/WSA4.5/" + type + "/2017/09/wsa_201709280023R000_gong.fits";
+            destinationpath = absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + "wsa_201709280023R000_gong.fits"); // what the downloaded filename is to be
+        }
+        /* End of experiment */
+
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
         ashd.start(opt);
         ashd.wait();
-        if(ashd.hasSucceeded() == true ){
-            LERROR("succeeeded: " + destinationpath);
-        }
-        if(ashd.hasFailed() == true ){
-            LERROR("failed: " + destinationpath);
-            
-        }
     }
     
     
