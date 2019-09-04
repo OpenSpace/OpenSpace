@@ -255,7 +255,7 @@ void SunTextureManager::processTextureFromName(std::string filename, std::vector
     // so that fitsfilereader won't default to the extension HDUs.
     fitsFileReader.forceUsePHDU();
 
-    const auto tempBild = fitsFileReader.readImageFloat(_syncDir + filename);
+    const auto fitsValues = fitsFileReader.readImageFloat(_syncDir + filename);
     //const auto fitsValues = fitsFileReader.readImageFloat("/Users/shuy/Offline-dokument/TEST FILER/solarmax/output/WSA_OUT/wsa_201308170804R000_gong.fits");
     
     *id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("OBSTIME"));
