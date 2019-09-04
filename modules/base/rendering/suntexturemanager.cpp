@@ -280,16 +280,34 @@ void SunTextureManager::processTextureFromName(std::string filename, std::vector
     {
         float norm_abs_value =  abs(mapvalue)/maxvalue;
 
-        r = 0.0f, g = 0.0f, b = 0.0f;
+        //r = 1.0f, g = 1.0f, b = 1.0f; // white
+        //r = 0.0f, g = 0.0f, b = 0.0f; // black
+        r = 0.5f, g = 0.5f, b = 0.5f; // gray
         if(mapvalue != 0.0f){
             float colorIntensity = damper*log(1 + multiplyer*norm_abs_value);
             if (wsaMapType.compare("agong") == 0 )
                 colorIntensity = norm_abs_value;
             
             if(mapvalue < 0)
-                r = colorIntensity;
-            else
-                b = colorIntensity;
+            {
+                //r = colorIntensity; //black
+                //g = 1.0 - colorIntensity; // white
+                //b = 1.0 - colorIntensity; // white
+                r = colorIntensity*0.5 + 0.5;
+                g = colorIntensity*0.5 + 0.5;
+                b = colorIntensity*0.5 + 0.5;
+            }
+            
+            else{
+                //b = colorIntensity; // black
+                //r = 1.0 - colorIntensity; // white
+                //g = 1.0 - colorIntensity; // white
+                r = 1.0 - (colorIntensity*0.5 + 0.5); // gray
+                g = 1.0 - (colorIntensity*0.5 + 0.5); // gray
+                b = 1.0 - (colorIntensity*0.5 + 0.5); // gray
+
+            }
+            
         }
         std::vector<float> rgb = {r,g,b};
         rgbLayers.push_back(rgb);
