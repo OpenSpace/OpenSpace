@@ -60,6 +60,7 @@ uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
 const double PARSEC = 3.08567756E16;
+//const double PARSEC = 3.08567782E16;
 
 const vec2 corners[4] = vec2[4](
     vec2(0.0, 0.0),
@@ -81,12 +82,12 @@ void main() {
     vs_position = gl_in[0].gl_Position; // in object space
     
     // JCC: Don't display the Sun for now.
-    if ((vs_position.x == 0.0) &&
-        (vs_position.y == 0.0) &&
-        (vs_position.z == 0.0))
-    {
-        return;
-    }
+    // if ((vs_position.x == 0.0) &&
+    //     (vs_position.y == 0.0) &&
+    //     (vs_position.z == 0.0))
+    // {
+    //     return;
+    // }
     
     vs_position = gl_in[0].gl_Position; // in object space
     dvec4 dpos  = modelMatrix * dvec4(vs_position); 

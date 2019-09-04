@@ -77,7 +77,7 @@ local tullyImages = {
         },
         Unit = "Mpc",
         -- Fade in value in the same unit as "Unit"
-        FadeInDistances = {0.05, 0.1},
+        FadeInDistances = {0.001, 0.05010},
         PlaneMinSize = 5.0
     },
     GUI = {

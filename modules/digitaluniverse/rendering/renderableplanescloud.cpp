@@ -708,12 +708,14 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
-        double distCamera = glm::length(data.camera.positionVec3());
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        distCamera /= scale;
         const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        //const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
+        const float a = 1.f / ((fadeRange.y - fadeRange.x));
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const float funcValue = static_cast<float>(a * distCamera + b);
-        fadeInVariable *= std::min(funcValue, 1.f);
+        const float funcValue = a * distCamera + b;
+        fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
 
         if (funcValue < 0.01f) {
             return;

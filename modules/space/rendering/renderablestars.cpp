@@ -1392,10 +1392,17 @@ void RenderableStars::readSpeckFile() {
     float minLumValue = std::numeric_limits<float>::max();
     float maxLumValue = std::numeric_limits<float>::min();
 
+    bool first = true;
     do {
         std::vector<float> values(_nValuesPerStar);
 
-        std::getline(file, line);
+        if (!first) {
+            std::getline(file, line);
+        }
+        else {
+            first = false;
+        }
+        
         std::stringstream str(line);
 
         for (int i = 0; i < _nValuesPerStar; ++i) {
