@@ -105,6 +105,7 @@ public:
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
     void triggerPlaybackStart();
+    void stopPlayback();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
 

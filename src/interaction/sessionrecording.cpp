@@ -170,8 +170,8 @@ bool SessionRecording::startRecording(const std::string& filename) {
 
     //Record the current delta time so this is preserved in recording
     double currentDeltaTime = global::timeManager.deltaTime();
-    std::string scriptCommandForInitializingDeltaTime = "openspace.time.setDeltaTime(";
-    scriptCommandForInitializingDeltaTime << currentDeltaTime << ");";
+    std::string scriptCommandForInitializingDeltaTime =
+        "openspace.time.setDeltaTime(" + std::to_string(currentDeltaTime) + ");";
     saveScriptKeyframe(scriptCommandForInitializingDeltaTime);
 
     LINFO("Session recording started");
@@ -360,6 +360,7 @@ void SessionRecording::stopPlayback() {
 
 void SessionRecording::cleanUpPlayback() {
     global::navigationHandler.stopPlayback();
+    global::timeManager.stopPlayback();
 
     Camera* camera = global::navigationHandler.camera();
     ghoul_assert(camera != nullptr, "Camera must not be nullptr");

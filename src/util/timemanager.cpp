@@ -103,6 +103,10 @@ TimeManager::TimeManager()
 }
 
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
+    if (_playbackModeEnabled) {
+        return;
+    }
+
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const double now = global::windowDelegate.applicationTime();
@@ -275,8 +279,7 @@ void TimeManager::progressTime(double dt) {
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
-        _playbackModeEnabled = false;
-    }
+        }
 
     if (hasPastKeyframes) {
         _latestConsumedTimestamp = lastPastKeyframe->timestamp;
@@ -456,6 +459,10 @@ void TimeManager::triggerPlaybackStart() {
     _playbackModeEnabled = true;
 }
 
+void TimeManager::stopPlayback() {
+    _playbackModeEnabled = false;
+}
+
 void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
     const auto it = std::find_if(
         _timeJumpCallbacks.begin(),
@@ -520,7 +527,7 @@ double TimeManager::targetDeltaTime() const {
 
 void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolationDuration)
 {
-    if (newDeltaTime == _targetDeltaTime) {
+    if (newDeltaTime == _targetDeltaTime || _playbackModeEnabled) {
         return;
     }
 
