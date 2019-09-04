@@ -102,8 +102,7 @@ namespace openspace{
     /*  Release the worker for execution,
         Pick up a timestep to request for download,
         Check if that timestep is already on disk,
-        repeat until a proper timestep to download is found, and start download,
-        (( Maybe alert Root RenderableFieldlinesSequence that it may udpates _sourceFiles/_startTimes?)) */
+        repeated until a proper timestep to download is found, and start download */
     void WebFieldlinesWindow::executeDownloadWorker(){
         _worker.downloadWindow(_window.triggerTimes);
         _worker.updateRFSSourceFiles(*rfs_sourceFiles);
@@ -111,21 +110,16 @@ namespace openspace{
     
     void WebFieldlinesWindow::newWindow(double time){
         // Find where in the list we are
-        int index = _nAvailableWeb-1;
-        while(true){
-            if(time > (_triggerTimesWeb[index].first)) break;
-            index--;
-        }
+        auto it = std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rend(), [time](auto element) {
+            if (time > element.first) return true;
+        });
 
-        // Should do the same as above?
-        //std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rend(), [time](auto it) {
-        //    if (time > it.first)
-        //        return true;
-        //})
-        
-        // Make a window around that area
+        const int index = static_cast<int>(std::distance(it, _triggerTimesWeb.rend())) - 1;
+
         _window.triggerTimes.clear();
         _window.nTriggerTimes = 0;
+        // This should be safe, because in the manager, it is checked wether the current position is within
+        // the boundaries with respect to back & forward width
         for(int i = index - _window.backWidth; i <= index + _window.forwardWidth; i++){
             if(i < 0) i = 0;
             _window.triggerTimes.push_back(std::make_pair(_triggerTimesWeb[i].first, _triggerTimesWeb[i].second));
@@ -146,7 +140,7 @@ namespace openspace{
     
     void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
 
-        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb, _apiID);
+        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
         _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
     }
 
