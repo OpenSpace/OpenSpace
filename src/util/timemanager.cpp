@@ -103,10 +103,6 @@ TimeManager::TimeManager()
 }
 
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
-    if (_playbackModeEnabled) {
-        return;
-    }
-
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const double now = global::windowDelegate.applicationTime();
@@ -279,7 +275,7 @@ void TimeManager::progressTime(double dt) {
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
-        }
+    }
 
     if (hasPastKeyframes) {
         _latestConsumedTimestamp = lastPastKeyframe->timestamp;
@@ -527,7 +523,7 @@ double TimeManager::targetDeltaTime() const {
 
 void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolationDuration)
 {
-    if (newDeltaTime == _targetDeltaTime || _playbackModeEnabled) {
+    if (newDeltaTime == _targetDeltaTime) {
         return;
     }
 
