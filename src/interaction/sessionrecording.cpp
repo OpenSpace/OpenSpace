@@ -168,14 +168,15 @@ bool SessionRecording::startRecording(const std::string& filename) {
     }
     _recordFile << '\n';
 
+    _timestampRecordStarted = global::windowDelegate.applicationTime();
+
     //Record the current delta time so this is preserved in recording
     double currentDeltaTime = global::timeManager.deltaTime();
     std::string scriptCommandForInitializingDeltaTime =
-        "openspace.time.setDeltaTime(" + std::to_string(currentDeltaTime) + ");";
+        "openspace.time.setDeltaTime(" + std::to_string(currentDeltaTime) + ")";
     saveScriptKeyframe(scriptCommandForInitializingDeltaTime);
 
     LINFO("Session recording started");
-    _timestampRecordStarted = global::windowDelegate.applicationTime();
 
     return true;
 }
