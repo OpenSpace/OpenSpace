@@ -464,6 +464,13 @@ void ScriptEngine::addBaseLibrary() {
                 "true, then the compressed file will be deleted after the decompression "
                  "is finished."
             },
+            {
+                "saveLastChangeToProfile",
+                &luascriptfunctions::saveLastChangeToProfile,
+                {},
+                "",
+                "This function saves the last script log action into the profile "
+            },
         }
     };
     addLibrary(lib);
