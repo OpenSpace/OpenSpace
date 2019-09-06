@@ -16,6 +16,13 @@ local speck = asset.syncedResource({
     Version = 3
 })
 
+local sunspeck = asset.syncedResource({
+    Name = "Stars Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "sunstar_du",
+    Version = 1
+})
+
 local colorLUT = asset.syncedResource({
     Name = "Stars Color Table",
     Type = "HttpSynchronization",
@@ -40,4 +47,23 @@ local stars = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { stars })
+local sunstar = {
+    Identifier = "SunStar",
+    Renderable = {
+        Type = "RenderableStars",
+        File = sunspeck .. "/sunstar.speck",
+        Texture = textures .. "/halo.png",
+        --ShapeTexture = textures .. "/disc.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        MagnitudeExponent = 6.2,
+        SizeComposition = "Distance Modulus",
+        RenderMethod = "Texture Based", -- or PSF
+        FadeInDistances = {0.0001, 0.1}
+    },
+    GUI = {
+        Name = "Sun",
+        Path = "/Milky Way/Stars"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { stars, sunstar })

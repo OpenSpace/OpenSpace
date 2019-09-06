@@ -69,6 +69,8 @@ namespace {
     constexpr const int PsfMethodSpencer = 0;
     constexpr const int PsfMethodMoffat = 1;
 
+    constexpr double PARSEC = 0.308567756E17;
+
     struct CommonDataLayout {
         std::array<float, 3> position;
         float value;
@@ -276,6 +278,20 @@ namespace {
         "Beta",
         "Moffat's Beta Constant."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+        "FadeInDistances",
+        "Fade-In Start and End Distances",
+        "These values determine the initial and final distances from the center of "
+        "our galaxy from which the astronomical object will start and end "
+        "fading-in."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+        "DisableFadeIn",
+        "Disable Fade-in effect",
+        "Enables/Disables the Fade-in effect."
+    };
 }  // namespace
 
 namespace openspace {
@@ -374,6 +390,18 @@ documentation::Documentation RenderableStars::Documentation() {
                 Optional::No,
                 SizeCompositionOptionInfo.description
             },
+            {
+                FadeInDistancesInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FadeInDistancesInfo.description
+            },
+            {
+                DisableFadeInInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInInfo.description
+            },
         }
     };
 }
@@ -425,6 +453,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
     , _parametersOwner(ParametersOwnerOptionInfo)
     , _moffatMethodOwner(MoffatMethodOptionInfo)
+    , _fadeInDistance(
+        FadeInDistancesInfo,
+        glm::vec2(0.f),
+        glm::vec2(0.f),
+        glm::vec2(100.f)
+    )
+    , _disableFadeInDistance(DisableFadeInInfo, true)
 {
     using File = ghoul::filesystem::File;
 
@@ -634,6 +669,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_userProvidedTextureOwner);
     addPropertySubOwner(_parametersOwner);
     addPropertySubOwner(_moffatMethodOwner);
+
+    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        _fadeInDistance = v;
+        _disableFadeInDistance = false;
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
+    }
 }
 
 RenderableStars::~RenderableStars() {}
@@ -944,7 +987,22 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.radiusCent, _radiusCent);
     _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
 
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    float fadeInVariable = 1.f;
+    if (!_disableFadeInDistance) {
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        const glm::vec2 fadeRange = _fadeInDistance;
+        const float a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
+        const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        const float funcValue = a * distCamera + b;
+        fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
+
+        _program->setUniform(_uniformCache.alphaValue, _alphaValue * fadeInVariable);
+    }
+    else {
+        _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    }
+
+    
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
