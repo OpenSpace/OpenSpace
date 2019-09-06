@@ -298,7 +298,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10000.f)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -598,6 +598,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
             continue;
         }
 
+        // We only bind a new texture when it is needed
         if (currentTextureIndex != pAMapItem.first) {
             _textureMap[pAMapItem.first]->bind();
             currentTextureIndex = pAMapItem.first;
@@ -992,6 +993,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
     _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
 
     do {
+
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
@@ -999,6 +1001,11 @@ bool RenderablePlanesCloud::readSpeckFile() {
         }
 
         if (line.empty()) {
+            std::getline(file, line);
+            continue;
+        }
+        else if (line[0] == '#') {
+            std::getline(file, line);
             continue;
         }
 
