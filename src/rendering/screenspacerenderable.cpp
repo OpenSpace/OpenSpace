@@ -42,8 +42,8 @@ namespace {
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyTag = "Tag";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
-        "OcclusionDepth", "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -451,7 +451,6 @@ bool ScreenSpaceRenderable::initialize() {
 }
 
 bool ScreenSpaceRenderable::initializeGL() {
-    _originalViewportSize = global::windowDelegate.currentWindowResolution();
     createShaders();
     return isReady();
 }
@@ -501,7 +500,9 @@ void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
-        { "windowHeight" , res.y }
+        { "windowHeight" , res.y },
+        { "hdrExposure", global::renderEngine.hdrExposure() },
+        { "disableHDR", global::renderEngine.isHdrDisabled() }
     };
 
     dict.setValue("rendererData", rendererData);
@@ -523,15 +524,9 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
     float textureRatio =
         static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
-    float scalingRatioX = _originalViewportSize.x / resolution.x;
-    float scalingRatioY = _originalViewportSize.y / resolution.y;
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(
-            _scale * scalingRatioX,
-            _scale * scalingRatioY * textureRatio,
-            1.f
-        )
+        glm::vec3(_scale, _scale * textureRatio, 1.f)
     );
 
     // Simulate orthographic projection by distance to plane.
@@ -614,9 +609,8 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::bindTexture() {}
-
-void ScreenSpaceRenderable::unbindTexture() {}
+void ScreenSpaceRenderable::unbindTexture() {
+}
 
 
 } // namespace openspace

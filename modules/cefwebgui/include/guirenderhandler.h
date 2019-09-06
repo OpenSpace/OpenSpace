@@ -39,8 +39,8 @@ public:
     GUIRenderHandler();
     virtual ~GUIRenderHandler();
 
-    void draw();
-    void render();
+    void draw() override;
+    void render() override;
 
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;

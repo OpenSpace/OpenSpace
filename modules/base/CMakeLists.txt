@@ -54,8 +54,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rotation/timelinerotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/constantrotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
@@ -66,6 +65,10 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/suntexturemanager.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.h
+  
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -99,8 +102,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rotation/timelinerotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/constantrotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp
@@ -111,6 +113,9 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/suntexturemanager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -32,6 +32,8 @@
 namespace openspace {
 
 struct WindowDelegate {
+    enum class Frustum { Mono, LeftEye, RightEye };
+
     void (*terminate)() = [](){};
 
     void (*setBarrier)(bool enabled) = [](bool) {};
@@ -121,6 +123,10 @@ struct WindowDelegate {
 
     GLProcAddress (*openGLProcedureAddress)(const char*) =
         [](const char*) -> GLProcAddress { return []() {}; };
+
+    Frustum (*frustumMode)() = []() { return Frustum::Mono; };
+
+    uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 };
 
 } // namespace openspace

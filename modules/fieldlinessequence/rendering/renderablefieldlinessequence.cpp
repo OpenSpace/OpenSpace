@@ -818,24 +818,27 @@ namespace openspace {
         });
 
         _pJumpToStartBtn.onChange([this] {
-            global::timeManager.setTimeNextFrame(_startTimes[0]);
+            global::timeManager.setTimeNextFrame(openspace::Time( _startTimes[0]));
         });
     }
 
-    // Calculate expected end time.
-    void RenderableFieldlinesSequence::computeSequenceEndTime() {
-        if (_nStates > 1) {
-            const double lastTriggerTime = _startTimes[_nStates - 1];
-            const double sequenceDuration = lastTriggerTime - _startTimes[0];
-            const double averageStateDuration = sequenceDuration /
-                (static_cast<double>(_nStates) - 1.0);
-            _sequenceEndTime = lastTriggerTime + averageStateDuration;
-        }
-        else {
-            // If there's just one state it should never disappear!
-            _sequenceEndTime = DBL_MAX;
-        }
+
+
+// Calculate expected end time.
+void RenderableFieldlinesSequence::computeSequenceEndTime() {
+    if (_nStates > 1) {
+        const double lastTriggerTime = _startTimes[_nStates - 1];
+        const double sequenceDuration = lastTriggerTime - _startTimes[0];
+        const double averageStateDuration = sequenceDuration /
+            (static_cast<double>(_nStates) - 1.0);
+        _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
+    else {
+        // If there's just one state it should never disappear!
+        _sequenceEndTime = DBL_MAX;
+    }
+}
+
 
     void RenderableFieldlinesSequence::setModelDependentConstants() {
         const fls::Model simulationModel = _states[0].model();

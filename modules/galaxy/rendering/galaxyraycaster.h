@@ -71,14 +71,20 @@ public:
     void setTime(double time);
     void setStepSize(float stepSize);
     void setOpacityCoefficient(float opacityCoefficient);
+    void setAbsorptionMultiplier(float absorptionMultiply);
+    void setEmissionMultiplier(float emissionMultiply);
 
 private:
+    glm::dmat4 modelViewTransform(const RenderData& data);
+
     BoxGeometry _boundingBox;
     float _stepSize;
     glm::mat4 _modelTransform;
     glm::vec3 _aspect;
     double _time;
     float _opacityCoefficient;
+    float _absorptionMultiply;
+    float _emissionMultiply; 
     ghoul::opengl::Texture& _texture;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
 

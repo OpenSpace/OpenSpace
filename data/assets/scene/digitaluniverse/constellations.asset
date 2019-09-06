@@ -6,7 +6,7 @@ local speck = asset.syncedResource({
     Name = "Constellation Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_constellations_speck",
-    Version = 1
+    Version = 2
 })
 
 local constellationsExtragalactic = {

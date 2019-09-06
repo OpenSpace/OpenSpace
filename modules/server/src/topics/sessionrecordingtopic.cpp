@@ -27,7 +27,6 @@
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/query/query.h>
-#include <openspace/interaction/sessionrecording.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -46,9 +45,7 @@ using nlohmann::json;
 
 namespace openspace {
 
-SessionRecordingTopic::SessionRecordingTopic()
-    : _lastState(interaction::SessionRecording::SessionState::Idle)
-{
+SessionRecordingTopic::SessionRecordingTopic() {
     LDEBUG("Starting new SessionRecording state subscription");
 }
 
@@ -63,14 +60,11 @@ bool SessionRecordingTopic::isDone() const {
 }
 
 void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
-    using SessionRecording = openspace::interaction::SessionRecording;
-
     const std::string event = json.at(EventKey).get<std::string>();
-    if (event != SubscribeEvent &&
-        event != UnsubscribeEvent &&
+    if (event != SubscribeEvent && event != UnsubscribeEvent &&
         event != RefreshEvent)
     {
-        LERROR("Unsupported event.");
+        LERROR("Unsupported event");
         _isDone = true;
         return;
     }
@@ -103,19 +97,17 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
 
     sendJsonData();
 
-    if (event == SubscribeEvent) {
-        if (_sendState) {
-            _stateCallbackHandle = global::sessionRecording.addStateChangeCallback(
-                [this]() {
-                    SessionRecording::SessionState currentState =
+    if (event == SubscribeEvent && _sendState) {
+        _stateCallbackHandle = global::sessionRecording.addStateChangeCallback(
+            [this]() {
+                interaction::SessionRecording::SessionState currentState =
                     global::sessionRecording.state();
-                    if (currentState != _lastState) {
-                       sendJsonData();
-                       _lastState = currentState;
-                    }
+                if (currentState != _lastState) {
+                    sendJsonData();
+                    _lastState = currentState;
                 }
-            );
-        }
+            }
+        );
     }
 }
 
@@ -126,22 +118,22 @@ void SessionRecordingTopic::sendJsonData() {
         SessionRecording::SessionState state = global::sessionRecording.state();
         std::string stateString;
         switch (state) {
-        case SessionRecording::SessionState::Recording:
-            stateString = "recording";
-            break;
-        case SessionRecording::SessionState::Playback:
-            stateString = "playing";
-            break;
-        default:
-            stateString = "idle";
-            break;
+            case SessionRecording::SessionState::Recording:
+                stateString = "recording";
+                break;
+            case SessionRecording::SessionState::Playback:
+                stateString = "playing";
+                break;
+            default:
+                stateString = "idle";
+                break;
         }
         stateJson[StateKey] = stateString;
     };
     if (_sendFiles) {
         stateJson[FilesKey] = global::sessionRecording.playbackList();
     }
-    if (stateJson.size() > 0) {
+    if (!stateJson.empty()) {
         _connection->sendJson(wrappedPayload(stateJson));
     }
 }

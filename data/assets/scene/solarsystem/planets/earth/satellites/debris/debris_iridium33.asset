@@ -1,10 +1,10 @@
 local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local shared = asset.require('../debris_shared')
 
 local group = {
     Title = "Iridium 33 Debris",
     Url = "http://www.celestrak.com/NORAD/elements/iridium-33-debris.txt",
-    TrailColor = { 0.25, 0.35, 0.45 }
+    TrailColor = { 0.8, 0.0, 0.3 }
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
@@ -12,12 +12,4 @@ local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 
 local objectNames = {}
 
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, true)
-end)
-
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
-end)
+shared.registerSatelliteGroupObjects(asset, group, tle, true)

@@ -33,6 +33,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
@@ -48,6 +49,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/versionchecker.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
@@ -128,6 +130,11 @@ TimeManager& gTimeManager() {
     return g;
 }
 
+VersionChecker& gVersionChecker() {
+    static VersionChecker g;
+    return g;
+}
+
 VirtualPropertyManager& gVirtualPropertyManager() {
     static VirtualPropertyManager g;
     return g;
@@ -145,6 +152,11 @@ configuration::Configuration& gConfiguration() {
 
 interaction::JoystickInputStates& gJoystickInputStates() {
     static interaction::JoystickInputStates g;
+    return g;
+}
+
+interaction::WebsocketInputStates& gWebsocketInputStates() {
+    static interaction::WebsocketInputStates g;
     return g;
 }
 

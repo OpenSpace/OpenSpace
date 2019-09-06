@@ -42,7 +42,7 @@ namespace {
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this plane. This image has to be square."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "RenderableType",
         "RenderableType",
@@ -76,42 +76,42 @@ namespace openspace {
     }
     
     RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
-    , _texturePath(TextureInfo)
+        : RenderablePlane(dictionary)
+        , _texturePath(TextureInfo)
     {
         documentation::testSpecificationAndThrow(
-                                                 Documentation(),
-                                                 dictionary,
-                                                 "RenderablePlaneImageLocal"
-                                                 );
-        
+            Documentation(),
+            dictionary,
+            "RenderablePlaneImageLocal"
+        );
+
+        addProperty(_blendMode);
+
         _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-        
+
         addProperty(_texturePath);
         _texturePath.onChange([this]() {loadTexture(); });
         _textureFile->setCallback(
-                                  [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-                                  );
-        
+            [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+        );
+
         if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
             std::string renderType = dictionary.value<std::string>(
-                                                                   RenderableTypeInfo.identifier
-                                                                   );
+                RenderableTypeInfo.identifier
+                );
             if (renderType == "Background") {
                 setRenderBin(Renderable::RenderBin::Background);
-            } else if (renderType == "Opaque") {
+            }
+            else if (renderType == "Opaque") {
                 setRenderBin(Renderable::RenderBin::Opaque);
             }
             else if (renderType == "Transparent") {
                 setRenderBin(Renderable::RenderBin::Transparent);
             }
-            else if (renderType == "Overlay") {
-                setRenderBin(Renderable::RenderBin::Overlay);
+            else {
+                setRenderBin(Renderable::RenderBin::Opaque);
             }
-        }
-        else {
-            setRenderBin(Renderable::RenderBin::Opaque);
         }
     }
     

@@ -28,24 +28,15 @@
 #include <ghoul/fmt.h>
 #include <sstream>
 
-namespace {
-    constexpr const char* MainTemplateFilename = "${WEB}/scenelicense/main.hbs";
-    constexpr const char* SceneLicenseTemplateFilename =
-                                                   "${WEB}/scenelicense/scenelicense.hbs";
-    constexpr const char* JsFilename = "${WEB}/scenelicense/script.js";
-} // namespace
-
 namespace openspace {
 
 SceneLicenseWriter::SceneLicenseWriter(std::vector<SceneLicense> licenses)
     : DocumentationGenerator(
-        "Documentation",
-        "sceneLicenses",
+        "Scene Licenses",
+        "sceneLicense",
         {
-            { "sceneLicenseTemplate",  SceneLicenseTemplateFilename },
-            { "mainTemplate", MainTemplateFilename }
-        },
-        JsFilename
+            { "sceneLicenseTemplate",  "${WEB}/documentation/scenelicense.hbs" }
+        }
     )
     , _licenses(std::move(licenses))
 {}

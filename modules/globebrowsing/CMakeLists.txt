@@ -109,6 +109,11 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
+option(OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION "Instrumentation for GlobeBrowsing Performance" OFF)
+if (OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION)
+  target_compile_definitions(openspace-module-globebrowsing INTERFACE "OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION")
+endif ()
+
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)
