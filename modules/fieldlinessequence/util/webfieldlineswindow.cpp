@@ -109,9 +109,9 @@ namespace openspace{
     }
     
     void WebFieldlinesWindow::newWindow(double time){
-        // Find where in the list we are
+
         auto it = std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rend(), [time](auto element) {
-            if (time > element.first) return true;
+            return time > element.first;
         });
 
         const int index = static_cast<int>(std::distance(it, _triggerTimesWeb.rend())) - 1;
@@ -125,7 +125,7 @@ namespace openspace{
             _window.triggerTimes.push_back(std::make_pair(_triggerTimesWeb[i].first, _triggerTimesWeb[i].second));
             _window.nTriggerTimes++;
         }
-        LERROR("new window");
+
         _worker.newWindowToDownload();
     }
     

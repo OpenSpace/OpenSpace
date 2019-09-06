@@ -322,12 +322,10 @@ namespace openspace {
         case SourceFileType::Osfls:
             extractOsflsInfoFromDictionary();
             if (_loadingStatesDynamically) {
-                //LERROR("Loading dynamically: " + _identifier);
                 if (!prepareForOsflsStreaming()) {
                     return;
                 }
                 if (_dynamicWebContent) {
-                    LERROR("initializing webmanager");
                     initializeWebManager();
                 }
             }
@@ -818,7 +816,7 @@ namespace openspace {
         });
 
         _pJumpToStartBtn.onChange([this] {
-            global::timeManager.setTimeNextFrame(openspace::Time( _startTimes[0]));
+            global::timeManager.setTimeNextFrame(openspace::Time(_startTimes[0]));
         });
     }
 

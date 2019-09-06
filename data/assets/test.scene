@@ -154,11 +154,8 @@ asset.onInitialize(function ()
         "Earth", "Sun", "Moon", "PspPosition" --, "MAS_MHD_Fieldlines"
     })
 
-    openspace.setPropertyValue("Scene.Sun.Renderable.Enabled", true)
-    openspace.setPropertyValue("Scene.SunGlare.Renderable.Enabled", false)
-
     -- Place by the sun
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = sunAsset.Sun.Identifier,
         Position = { 40*sunRadius, 40*sunRadius, 0 },
         Rotation = { 0.0, 0.0, 0.7, 0.0 },

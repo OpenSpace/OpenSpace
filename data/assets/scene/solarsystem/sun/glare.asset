@@ -9,6 +9,7 @@ local SunGlare = {
     Identifier = "SunGlare",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
+        Enabled = false,
         Type = "RenderablePlaneImageLocal",
         Size = 1.3*10^10.5,
         Origin = "Center",
