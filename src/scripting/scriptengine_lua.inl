@@ -377,4 +377,71 @@ int unzipFile(lua_State* L) {
     return 0;
 }
 
+/**
+ * \ingroup LuaScripts
+ * saveLastChangeToProfile(string):
+ * Saves the last entry from the script log to the current profile
+ */
+int saveLastChangeToProfile(lua_State* L) {
+    std::string asset = global::configuration.asset;
+    std::string logFilePath = absPath(global::configuration.scriptLog);
+    std::ifstream logfile(logFilePath);
+    std::string actualLastLine;
+    std::string lastLine;
+    std::string line;
+    //add check for log file
+    if (!logfile.good()) {
+        ghoul::lua::push(L, fmt::format("Could not open scriptlog '{}'", logFilePath));
+        printInternal(ghoul::logging::LogLevel::Error, L);
+    }
+    while (std::getline (logfile,line)) {
+        actualLastLine = lastLine;
+        lastLine=line;
+    }
+
+    std::string dataString = "${ASSETS}/";
+    std::string assetPath = absPath(fmt::format("{}{}.scene", dataString, asset));
+    std::string tempAssetPath = absPath(fmt::format("{}{}.scene.tmp", dataString, asset));
+    std::string strReplace = "--customizations";
+    std::string strNew = fmt::format("{}\n{}",strReplace, actualLastLine);
+    std::ifstream filein(assetPath);
+    std::ofstream fileout(tempAssetPath);
+    if(!filein) {
+        ghoul::lua::push(L, fmt::format("Could not open profile '{}'", assetPath));
+        printInternal(ghoul::logging::LogLevel::Error, L);
+    }
+    if(!fileout) {
+        ghoul::lua::push(L, fmt::format("Could not open tmp profile '{}'", tempAssetPath));
+        printInternal(ghoul::logging::LogLevel::Error, L);
+    }
+
+    bool found = false;
+    while(std::getline (filein, line)) {
+        if(line == strReplace){
+            line = strNew;
+            found = true;
+        }
+        line += "\n";
+        fileout << line;
+    }
+    filein.close();
+    fileout.close();
+    if (found) {
+        int success = rename(tempAssetPath.c_str(), assetPath.c_str());
+        if (success != 0) {
+            std::string error = fmt::format("Error renaming file {} to {}",
+            tempAssetPath, assetPath);
+            ghoul::lua::push(L, error);
+            printInternal(ghoul::logging::LogLevel::Error, L);
+            return -1;
+        }
+        FileSys.deleteFile(tempAssetPath);
+        return 0;
+    } else {
+        ghoul::lua::push(L, "can not save to built in profiles");
+        printInternal(ghoul::logging::LogLevel::Error, L);
+        return -1;
+    }
+}
+
 } // namespace openspace::luascriptfunctions
