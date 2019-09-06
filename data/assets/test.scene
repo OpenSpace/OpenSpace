@@ -31,16 +31,16 @@ local earthRadius = 6371
 -- Selected field lines + some additional field lines
 asset.require('./testwsa/scs_oi')
 asset.require('./testwsa/pfss_oi')
---asset.require('./testwsa/pfss_io')
-
--- Parker Solar Probe
--- asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
-
+asset.require('./testwsa/pfss_io')
 -- Sun earth connection
 --asset.require('./testwsa/sub_earth')
 
--- Every N:th WSA field line
--- asset.require('./testwsa/pfss_io_25')
+-- Parker Solar Probe asset package
+asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
+--asset.require('./testwsa/psp_pfss_io')
+--asset.require('./testwsa/psp_pfss_oi')
+--asset.require('./testwsa/psp_scs_oi')
+-- asset.require('./testwsa/psp_sub_satellite')
 
 local Keybindings = {
     {

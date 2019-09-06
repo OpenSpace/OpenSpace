@@ -1,0 +1,64 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+
+
+local ParkerSolarProbeTrail = {
+    Identifier = "ParkerSolarProbeTrail",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = "C:/Users/skollber/Downloads/parker_20180812-20191231.dat"
+        },
+        Color = { 0.9, 0.9, 0.0 },
+        StartTime = "2018 AUG 12 12:00:00",
+        EndTime = "2025 Aug 31 09:11:00",
+        Period = 365.242,
+        SampleInterval = 1000,
+        TimeStampSubsampleFactor = 1
+    },
+    GUI = {
+        Name = "'Parker Solar Probe Trail",
+        Path = "/Solar System/Missions"
+    }
+}
+
+local PspPosition = {
+    Identifier = "PspPosition",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = "C:/Users/skollber/Downloads/parker_20180812-20191231.dat"
+        },
+    },
+    GUI = {
+        Name = "Parker Solar Probe",
+        Path = "/Solar System/Missions/Parker Solar Probe Position",
+        hidden = true
+    }
+}
+
+
+
+local PspMarker = {
+    Identifier = "PspMarker",
+    Parent = PspPosition.Identifier,
+    Renderable = {
+        Type = "RenderablePlaneImageLocal",
+        Enabled = false,
+        Size = 3.0E8,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/OpenSpace_dev/OpenSpace/data/assets/scene/solarsystem/missions/parkersolarprobe/marker.png",
+        BlendMode = "Additive"
+    },
+    GUI = {
+        Name = "Parker Solar Probe Marker",
+        Path = "/Solar System/Missions/Parker Solar Probe Marker"
+    }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { ParkerSolarProbeTrail, PspPosition, PspMarker })

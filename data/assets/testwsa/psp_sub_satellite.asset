@@ -1,0 +1,54 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+
+local transferFunctions = asset.localResource("transferfunctions")
+local fieldlinesDirectory = asset.localResource("fl_sub_earth")
+local polarityColorTable = transferFunctions .. "/polarity_spec.txt"
+local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
+
+
+local sunRadius = 695508000
+
+-- Fieldlies from json
+local fieldlines = {
+    Identifier = "PSP_WSA_Fieldlines_Sub_Satellite",
+    Parent = transforms.HNMReferenceFrame.Identifier, -- Use this for ADAPT GONG (Parker Solar Probe endpoints)
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        SourceFolder = fieldlinesDirectory,
+        -- Dynamic web content wants a url with a unique id where the data may be fetched.
+        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1192",
+        FlowEnabled = false,
+        AlphaBlendlingEnabled = false,
+        InputFileType = "osfls",
+        ColorTablePaths = {
+            polarityColorTable,
+            subEarthLevelColorTable
+        },
+        ColorTableRanges = {
+            { 0.0, 1.0 },
+            { 0.0, 2.0 }
+        },
+        LoadAtRuntime = true,
+        ScaleToMeters = 1.0,
+        SecondsBefore = 24*60*60,
+        SecondsAfter = 24*60*60,
+        SimulationModel = "wsa",
+        Color = {
+            Uniform = {0.725, 0.1, 0, 1}
+        },
+        ColoringMethod = "Quantity",
+    },
+    GUI = {
+        Path = "/Solar System/Heliosphere",
+        Name = "WSA Sub-PSP track"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = sunRadius
+        },
+    }
+} 
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })

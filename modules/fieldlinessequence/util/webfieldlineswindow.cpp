@@ -42,8 +42,8 @@ namespace openspace{
     // --------------------------- CONSTRUCTORS ---------------------------------------//
     WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                                              std::vector<std::string>& _sourceFiles,
-                                             std::vector<double>& _startTimes, size_t& _nStates, int apiID):
-                                             _apiID(apiID){
+                                             std::vector<double>& _startTimes, size_t& _nStates)
+                                             {
         _window.backWidth = 3;
         _window.forwardWidth = 3;
         
