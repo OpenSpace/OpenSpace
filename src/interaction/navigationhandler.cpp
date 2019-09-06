@@ -52,14 +52,6 @@ namespace {
     constexpr const char* KeyReferenceFrame = "ReferenceFrame";
     const double Epsilon = 1E-7;
 
-    constexpr const openspace::properties::Property::PropertyInfo OriginInfo = {
-        "Origin",
-        "Origin",
-        "The name of the scene graph node that is the origin of the camera interaction. "
-        "The camera is always focussed on this object and every interaction is relative "
-        "towards this object. Any scene graph node can be the origin node."
-    };
-
     constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
@@ -150,24 +142,7 @@ NavigationHandler::NavigationState::NavigationState(std::string anchor, std::str
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _useKeyFrameInteraction(KeyFrameInfo, false)
-    , _origin(OriginInfo)
 {
-    _origin.onChange([this]() {
-        if (_origin.value().empty()) {
-            return;
-        }
-        
-        SceneGraphNode* node = sceneGraphNode(_origin.value());
-        if (!node) {
-            LWARNING(fmt::format(
-                "Could not find a node in scenegraph called '{}'", _origin.value()
-            ));
-            return;
-        }
-        setFocusNode(node);
-        resetCameraDirection();
-    });
-
     // Add the properties
     addProperty(_useKeyFrameInteraction);
     addPropertySubOwner(_orbitalNavigator);

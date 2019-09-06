@@ -174,10 +174,10 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo
         StereoInterpolationTimeInfo = {
-        "StereoInterpolationTime",
-        "Stereo interpolation time",
-        "The time to interpolate to a new stereoscopic depth "
-        "when the anchor node is changed."
+            "StereoInterpolationTime",
+            "Stereo interpolation time",
+            "The time to interpolate to a new stereoscopic depth "
+            "when the anchor node is changed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo

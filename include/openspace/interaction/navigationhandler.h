@@ -160,8 +160,6 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    properties::StringProperty _origin;
-
     OrbitalNavigator _orbitalNavigator;
     KeyframeNavigator _keyframeNavigator;
 
