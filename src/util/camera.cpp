@@ -139,19 +139,6 @@ float Camera::maxFov() const {
     return _maxFov;
 }
 
-const glm::dmat4& Camera::combinedViewMatrixNoScale() const {
-    if (_cachedCombinedViewMatrixNoScale.isDirty) {
-        glm::dmat4 cameraTranslation =
-            glm::inverse(glm::translate(glm::dmat4(1.0), static_cast<glm::dvec3>(_position)));
-        _cachedCombinedViewMatrixNoScale.datum =
-            glm::dmat4(sgctInternal.viewMatrix()) *
-            glm::dmat4(viewRotationMatrix()) *
-            cameraTranslation;
-        _cachedCombinedViewMatrixNoScale.isDirty = true;
-    }
-    return _cachedCombinedViewMatrixNoScale.datum;
-}
-
 float Camera::sinMaxFov() const {
     if (_cachedSinMaxFov.isDirty) {
         _cachedSinMaxFov.datum = sin(_maxFov);

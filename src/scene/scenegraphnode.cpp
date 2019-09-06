@@ -665,7 +665,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     const Camera& cam = newData.camera;
     const glm::dvec3& worldPos = _worldPositionCached;
     const glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) *
-                                 cam.combinedViewMatrixNoScale() * glm::vec4(worldPos, 1.0);
+                                 cam.combinedViewMatrix() * glm::vec4(worldPos, 1.0);
     const glm::dvec2 worldPosNDC = glm::dvec2(clipSpace / clipSpace.w);
 
     const bool visible = worldPosNDC.x >= -1.0 && worldPosNDC.x <= 1.0 &&

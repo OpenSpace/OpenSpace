@@ -167,7 +167,6 @@ private:
     mutable Cached<glm::dmat4> _cachedViewRotationMatrix;
     mutable Cached<glm::dmat4> _cachedViewScaleMatrix;
     mutable Cached<glm::dmat4> _cachedCombinedViewMatrix;
-    mutable Cached<glm::dmat4> _cachedCombinedViewMatrixNoScale;
     mutable Cached<float> _cachedSinMaxFov;
 
     mutable std::mutex _mutex;
