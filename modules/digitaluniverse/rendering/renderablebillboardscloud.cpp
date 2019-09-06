@@ -1282,7 +1282,6 @@ bool RenderableBillboardsCloud::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::streampos position = file.tellg();
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
@@ -1301,9 +1300,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
             line.substr(0, 10) != "polyorivar" &&
             line.substr(0, 10) != "maxcomment")
         {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position, file.beg);
+            // Started reading data
             break;
         }
 
@@ -1333,10 +1330,6 @@ bool RenderableBillboardsCloud::readSpeckFile() {
 
 
     do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
-        std::getline(file, line);
-
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
@@ -1344,16 +1337,25 @@ bool RenderableBillboardsCloud::readSpeckFile() {
         }
 
         if (line.empty()) {
+            std::getline(file, line);
+            continue;
+        }
+        else if (line[0] == '#') {
+            std::getline(file, line);
             continue;
         }
 
         std::stringstream str(line);
+        std::vector<float> values(_nValuesPerAstronomicalObject);
 
         for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
             str >> values[i];
         }
 
         _fullData.insert(_fullData.end(), values.begin(), values.end());
+
+        // reads new line
+        std::getline(file, line);
     } while (!file.eof());
 
     return true;
