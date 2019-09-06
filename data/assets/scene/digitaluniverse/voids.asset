@@ -14,6 +14,7 @@ local object = {
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
+        DrawElements = false,
         DrawLabels = true,
         Color = { 1.0, 1.0, 1.0 },
         Opacity = 0.65,
