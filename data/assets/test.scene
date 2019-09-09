@@ -6,7 +6,7 @@ local renderableHelper = asset.require('util/renderable_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
+-- asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
@@ -17,11 +17,14 @@ asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 -- asset.require('util/default_joystick')
 
+-- DEBUG
+asset.require('./testwsa/debugcoordaxes');
+
  asset.require('util/webgui')
 
 --asset.request('customization/globebrowsing')
 
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+-- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local sunRadius = 695508000
@@ -32,8 +35,6 @@ local earthRadius = 6371
 asset.require('./testwsa/scs_oi')
 asset.require('./testwsa/pfss_oi')
 asset.require('./testwsa/pfss_io')
--- Sun earth connection
-asset.require('./testwsa/sub_earth')
 
 -- Parker Solar Probe asset package
 asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
@@ -42,6 +43,9 @@ asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_tr
 --asset.require('./testwsa/psp_scs_oi')
 -- asset.require('./testwsa/psp_sub_satellite')
 
+
+-- Sub-Earth track
+asset.require('./testwsa/sub_earth')
 
 local Keybindings = {
     {
@@ -153,7 +157,7 @@ asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
     sceneHelper.bindKeys(Keybindings)
     -- Sun magnetogram texture testing
-    openspace.time.setTime("2017 SEP 2 10:00:00.000")
+    openspace.time.setTime("2017 JUL 1 10:00:00.000")
     
     -- Set different deltatimes
     sceneHelper.setDeltaTimeKeys({
