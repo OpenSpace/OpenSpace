@@ -198,7 +198,10 @@ private:
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
-    std::chrono::high_resolution_clock::time_point _lastUpdate;
+    
+    // This variable is used for the rate-limiting of the screenspace positions (if they
+    // are calculated when _computeScreenSpaceValues is true)
+    std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     int index = 0;

@@ -36,6 +36,3 @@ Thumbs.db
 customization.lua
 # The COMMIT info is generated everytime CMake is run
 COMMIT.md
-screenshots
-*.idea/
-cache_gdal/

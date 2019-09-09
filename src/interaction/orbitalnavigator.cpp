@@ -166,10 +166,10 @@ namespace {
         "Triggering this property makes the camera move to the focus node."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StoryOverviewLimitInfo = {
-        "StoryOverviewLimit",
-        "Story overview distance limit",
-        "Overview zoomed-out distance limit for the story."
+    constexpr openspace::properties::Property::PropertyInfo OverviewLimitInfo = {
+        "OverviewLimit",
+        "Overview distance limit",
+        "Overview zoomed-out distance limit."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -247,11 +247,11 @@ OrbitalNavigator::OrbitalNavigator()
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
-    , _flyTo(FlyToNodeInfo, false)
-    , _overview(OverviewInfo, false)
+    , _isFlyingTo(FlyToNodeInfo, false)
+    , _isInOverview(OverviewInfo, false)
     , _applyOverview(ApplyOverviewInfo)
     , _applyFlyTo(ApplyFlyToInfo)
-    , _overviewLimit(StoryOverviewLimitInfo, 1e27, 0.0f, 1e27)
+    , _overviewLimit(OverviewLimitInfo, 1e27, 0.0f, 1e27)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -314,10 +314,8 @@ OrbitalNavigator::OrbitalNavigator()
         return glm::clamp(res, 0.0, 1.0);
     });
 
-    addProperty(_applyOverview);
-    addProperty(_applyFlyTo);
-    _applyOverview.onChange([this]() { _overview = true; });
-    _applyFlyTo.onChange([this]() { _flyTo = true; });
+    _applyOverview.onChange([this]() { _isInOverview = true; });
+    _applyFlyTo.onChange([this]() { _isFlyingTo = true; });
 
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
@@ -385,8 +383,8 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_velocitySensitivity);
-    addProperty(_flyTo);
-    addProperty(_overview);
+    addProperty(_isFlyingTo);
+    addProperty(_isInOverview);
     addProperty(_applyOverview);
     addProperty(_applyFlyTo);
     addProperty(_overviewLimit);
@@ -459,8 +457,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->rotationQuaternion()
     };
 
-    if (_flyTo || _overview) {
+    if (_isFlyingTo || _isInOverview) {
         // Calculate a position handle based on the camera position in world space
+
+        // Even though this function is called SurfacePosition handle, it will treat non-
+        // planetary objects the same. The surface position will be the point on the
+        // bounding sphere of the object
         posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
         glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
         double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos);
@@ -470,28 +472,33 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // Zoom in on the focusNode and move towards it, but when the camera arrives to
         // the focus node make it possible for the user to manually zoom in even closer
         // or to zoom further out
-        if (_flyTo) {
-            _overview = false;
+        if (_isFlyingTo) {
+            _isInOverview = false;
             // Get the radius of a focusNode, to be used in the case of zooming
-            glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
+            glm::dvec3 centerToActualSurfaceModelSpace =
+                posHandle.centerToReferenceSurface +
                 posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
             glm::dvec3 centerToActualSurface = glm::dmat3(_anchorNode->modelTransform())
                 * centerToActualSurfaceModelSpace;
             double planetRadius = glm::length(centerToActualSurface);
+
+            // This factor is used to enlarge the planet radius to achieve a more
+            // pleasant framing
+            constexpr const double RadiusScaleFactor = 4.0;
             // The distance from the focus node's center to the camera when zoomed in,
             // i.e. the distance limit when focus is set optimally
-            limitOfFlightPath = planetRadius * 4;
+            limitOfFlightPath = planetRadius * RadiusScaleFactor;
 
             if (distFromCameraToFocus > limitOfFlightPath) {
                 performIncrementalFlightStep = true;
             }
             else {
-                _flyTo = false;
+                _isFlyingTo = false;
             }
         }
-        // Zoom away from the focus node until the entire scene overview is in the camera view
-        if (_overview) {
-            _flyTo = false;
+        // Zoom away from the focus node until the scene overview is in the camera view
+        if (_isInOverview) {
+            _isFlyingTo = false;
             limitOfFlightPath = _overviewLimit;
 
             if (_cameraInitializedBeforeFirstStoryOverview) {
@@ -500,7 +507,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
                     performIncrementalFlightStep = true;
                 }
                 else {
-                    _overview = false;
+                    _isInOverview = false;
                 }
             }
             else {
@@ -514,7 +521,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
                 distFromCameraToFocus,
                 camPosToAnchorPosDiff,
                 limitOfFlightPath,
-                _flyTo
+                _isFlyingTo
             );
         }
     }
@@ -647,7 +654,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         if (_directlySetStereoDistance) {
             _currentCameraToSurfaceDistance = targetCameraToSurfaceDistance;
             _directlySetStereoDistance = false;
-        } else {
+        }
+        else {
             _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
                 deltaTime,
                 _currentCameraToSurfaceDistance,
@@ -658,7 +666,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             _stereoscopicDepthOfFocusSurface /
             static_cast<float>(_currentCameraToSurfaceDistance)
         );
-    } else {
+    }
+    else {
         _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
     }
 }
@@ -1295,24 +1304,22 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
                                                                         double focusLimit,
                                                                          bool flyTo) const
 {
-    double velocityFactor = 0;
-    const double focusLimitBuffer = 0.1;
+    double velocity = 0;
+    constexpr const double FocusLimitEps = 0.1;
 
     // Calculate and truncate the factor which determines the velocity of the 
     // camera movement towards the focus node
     if (flyTo) {
-        velocityFactor = (1 - ((focusLimit * (1.0 - focusLimitBuffer))
-        / distFromCameraToFocus));
+        velocity = (1 - ((focusLimit * (1.0 - FocusLimitEps)) / distFromCameraToFocus));
     }
     else {
-        velocityFactor = (1 - (distFromCameraToFocus
-        / (focusLimit * (1.0 + focusLimitBuffer))));
+        velocity = (1 - (distFromCameraToFocus / (focusLimit * (1.0 + FocusLimitEps))));
     }
-    velocityFactor *= _velocitySensitivity;
-    velocityFactor = floor(velocityFactor * 1000) / 1000;
+    velocity *= _velocitySensitivity;
+    velocity = floor(velocity * 1000) / 1000;
 
     // Return the updated camera position
-    return camPos - velocityFactor * camPosToAnchorPosDiff;
+    return camPos - velocity * camPosToAnchorPosDiff;
 }
 
 glm::dvec3 OrbitalNavigator::followAnchorNodeRotation(const glm::dvec3& cameraPosition,

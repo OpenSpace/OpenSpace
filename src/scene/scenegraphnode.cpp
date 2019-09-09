@@ -270,7 +270,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
-    result->_lastUpdate = std::chrono::high_resolution_clock::now();
+    result->_lastScreenSpaceUpdateTime = std::chrono::high_resolution_clock::now();
     return result;
 }
 
@@ -656,10 +656,10 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     // Purposely slow the update rate of screen space position in order to reduce the
     // effects of jittering in the position of information icon markers in web gui.
     auto now = std::chrono::high_resolution_clock::now();
-    if ((now - _lastUpdate) < std::chrono::milliseconds(100)) {
+    if ((now - _lastScreenSpaceUpdateTime) < std::chrono::milliseconds(100)) {
         return;
     }
-    _lastUpdate = now;
+    _lastScreenSpaceUpdateTime = now;
 
     // Calculate ndc
     const Camera& cam = newData.camera;

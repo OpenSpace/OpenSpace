@@ -5,6 +5,7 @@ if not has_touch then
 end
 
 asset.require('./base')
+asset.require('util/webgui')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
@@ -26,6 +27,11 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', false)
     openspace.setPropertyValueSingle('Scene.PlutoBarycenterTrail.Renderable.Enabled', false)
 
+    -- Currently we only serve ontouch on the development UI branch, hence the 4690
+    openspace.setPropertyValueSingle(
+        "Modules.CefWebGui.GuiUrl",
+        "http://127.0.0.1:4690/frontend/#/ontouch"
+    )
 end)
 
 asset.onDeinitialize(function ()

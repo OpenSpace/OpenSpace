@@ -144,8 +144,8 @@ private:
     properties::FloatProperty _minimumAllowedDistance;
 
     properties::FloatProperty _velocitySensitivity;
-    properties::BoolProperty _flyTo;
-    properties::BoolProperty _overview;
+    properties::BoolProperty _isFlyingTo;
+    properties::BoolProperty _isInOverview;
     //If 1st story selected, allow an additional camera update iteration before overview
     bool _cameraInitializedBeforeFirstStoryOverview = false;
     properties::TriggerProperty _applyOverview;
