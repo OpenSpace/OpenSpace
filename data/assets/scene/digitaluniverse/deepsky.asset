@@ -1,7 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
 
-
-
 local textures = asset.syncedResource({
     Name = "Deep Sky Objects Textures",
     Type = "HttpSynchronization",
@@ -73,7 +71,5 @@ local deepSkyImages = {
         Path = "/Universe/Galaxies"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { deepSkyPoints, deepSkyImages })
