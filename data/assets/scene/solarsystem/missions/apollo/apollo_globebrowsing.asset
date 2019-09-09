@@ -1,0 +1,37 @@
+--apollo_globebrowsing.asset
+
+
+local heightmaps = asset.syncedResource({
+    Name = "Apollo Globebrowsing Heightmaps",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_globebrowsing_heightmaps",
+    Version = 1
+})
+
+local basemaps = asset.syncedResource({
+    Name = "Apollo Globebrowsing Basemaps",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_globebrowsing_basemaps",
+    Version = 1
+})
+
+local naclighting = asset.syncedResource({
+    Name = "Apollo Globebrowsing NAC Lighting",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_globebrowsing_naclighting",
+    Version = 1
+})
+
+local stations = asset.syncedResource({
+    Name = "Apollo 17 Globebrowsing Stations",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_17_stations",
+    Version = 1
+})
+
+asset.onInitialize(function ()
+    openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, "Moon")
+    openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps, "Moon")
+    openspace.globebrowsing.addBlendingLayersFromDirectory(naclighting, "Moon")
+    openspace.globebrowsing.addBlendingLayersFromDirectory(stations, "Moon")
+end)

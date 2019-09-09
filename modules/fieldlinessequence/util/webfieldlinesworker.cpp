@@ -123,15 +123,16 @@ namespace openspace{
     }
 
     // Download all files in the current window
-    // This function starts in the middle of the window and proceeds to download all future timesteps, 
-    // then steps backwards from the middle
+    // This function starts usually in the middle of the window and proceeds to download all future timesteps, 
+    // then steps backwards from the startingpoint
     //TODO(Axel): Different behaviour depending on direction the user is moving in, might be wanted?
     void WebFieldlinesWorker::downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes) {
         
         // Helper variables
-        int middle = triggerTimes.size() / 2;
+        int startingPoint = triggerTimes.size() / 2;
         bool downloaded = false;
         bool oneUpdate = false;
+        bool fastDownload = global::timeManager.deltaTime() > 1800.0;
 
         // May be interesting to keep something like this, if it will be possible to use a list of 
         // AsyncHttpFileDownloads
@@ -146,20 +147,23 @@ namespace openspace{
         }
         else { */
 
+        if (fastDownload) startingPoint = triggerTimes.size() - 1;
+
+
         if (_downloading && _downloading->hasSucceeded() && _newWindow) {
             _downloading->wait();
             addToDownloadedList(_latestDownload);
             _readyToDownload = true;
             // This is to trigger one update of the fieldline timestamp that the user is currently on,
             // while the rest of them will be downloaded in the background, and updated once ready
-            if (_latestDownload.second == triggerTimes[middle].second)
+            if (_latestDownload.second == triggerTimes[startingPoint].second)
                 oneUpdate = true;
         }
 
         if (_readyToDownload) {
             // Forwards
             std::vector<std::pair<double, std::string>>::iterator forwardIt = triggerTimes.begin();
-            std::advance(forwardIt, middle);
+            std::advance(forwardIt, startingPoint);
             std::for_each(forwardIt, triggerTimes.end(), [this, &downloaded](auto it) {
                 if (!downloaded && !fileIsOnDisk(it.first)) {
                     downloadOsfls(it);
@@ -168,9 +172,10 @@ namespace openspace{
                 }
             });
 
+
             // Backwards
             if (!downloaded) {
-                std::for_each(triggerTimes.rbegin() + middle, triggerTimes.rend(), [this, &downloaded](auto it) {
+                std::for_each(triggerTimes.rbegin(), triggerTimes.rend(), [this, &downloaded](auto it) {
                     if (!downloaded && !fileIsOnDisk(it.first)) {
                         downloadOsfls(it);
                         downloaded = true;

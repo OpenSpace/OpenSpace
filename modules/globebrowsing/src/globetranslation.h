@@ -49,8 +49,8 @@ private:
     properties::StringProperty _globe;
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _latitude;
-    properties::DoubleProperty _fixedAltitude;
-    properties::BoolProperty _useFixedAltitude;
+    properties::DoubleProperty _altitude;
+    properties::BoolProperty _useHeightmap;
 
     RenderableGlobe* _attachedNode = nullptr;
 

@@ -35,10 +35,9 @@ asset.onInitialize(function ()
 
     openspace.markInterestingNodes({ "Gaia" })
 
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = earthAsset.Earth.Identifier,
         Position = { 1000000000000.0, 1000000000000.0, 1000000000000.0 },
-        Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
     })
 end)
 

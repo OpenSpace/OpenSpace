@@ -147,7 +147,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _ozoneHeightScale(0.f)
     , _mieHeightScale(0.f)
     , _miePhaseConstant(0.f)
-    , _sunRadianceIntensity(50.0f)
+    , _sunRadianceIntensity(5.f)
     , _rayleighScatteringCoeff(glm::vec3(0.f))
     , _ozoneExtinctionCoeff(glm::vec3(0.f))
     , _mieScatteringCoeff(glm::vec3(0.f))
@@ -261,8 +261,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
 
             // Eye Space in SGCT to Eye Space in OS (SGCT View to OS Camera Rig)
-            glm::dmat4 dSgctEye2OSEye = glm::inverse(
-                glm::dmat4(renderData.camera.viewMatrix()));
+//            glm::dmat4 dSgctEye2OSEye = glm::inverse(
+//                glm::dmat4(renderData.camera.viewMatrix()));
 
             glm::dmat4 dSGCTViewToWorldMatrix = glm::inverse(
                 renderData.camera.combinedViewMatrix()
@@ -276,30 +276,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             glm::dmat4 dInverseProjection = glm::inverse(
                 glm::dmat4(renderData.camera.projectionMatrix()));
 
-            // SGCT Projection to OS Camera Before Rotation
-            glm::dmat4 dProjectionToTmpRotTransformMatrix =
-                glm::mat4_cast(
-                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-                ) *
-                dSgctEye2OSEye *
-                glm::inverse(renderData.camera.viewScaleMatrix()) *
+            glm::dmat4 inverseWholeMatrixPipeline =
+                inverseModelMatrix *
+                dSGCTViewToWorldMatrix *
                 dInverseProjection;
 
-            // SGCT Projection to World Space
-            glm::dmat4 dSgctProjectionToWorldTransformMatrix(
-                dProjectionToTmpRotTransformMatrix
-            );
-            double* mSource = glm::value_ptr(dSgctProjectionToWorldTransformMatrix);
-
-            mSource[12] += renderData.camera.eyePositionVec3().x;
-            mSource[13] += renderData.camera.eyePositionVec3().y;
-            mSource[14] += renderData.camera.eyePositionVec3().z;
-            mSource[15] = 1.0;
-
-
-            // SGCT Projection to Object Space
-            glm::dmat4 inverseWholeMatrixPipeline = inverseModelMatrix *
-                dSgctProjectionToWorldTransformMatrix;
             program.setUniform(_uniformCache2.dSgctProjectionToModelTransformMatrix,
                 inverseWholeMatrixPipeline);
 
@@ -1527,7 +1508,7 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const glm::dmat4& MVMatrix,
     double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
     double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
     double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
-    double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
+//    double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
 
     // Normalize Planes
     double invMag = 1.0 / glm::length(leftNormal);
@@ -1552,7 +1533,7 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const glm::dmat4& MVMatrix,
 
     invMag = 1.0 / glm::length(farNormal);
     farNormal *= invMag;
-    farDistance *= invMag;
+//    farDistance *= invMag;
 
     if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
         return false;

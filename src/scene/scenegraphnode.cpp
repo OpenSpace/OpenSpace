@@ -123,10 +123,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_transform.translation.get());
         LDEBUG(fmt::format(
             "Successfully created ephemeris for '{}'", result->identifier()
         ));
+    }
+    if (result->_transform.translation) {
+        result->addPropertySubOwner(result->_transform.translation.get());
     }
 
     if (dictionary.hasKey(KeyTransformRotation)) {
@@ -139,10 +141,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_transform.rotation.get());
         LDEBUG(fmt::format(
             "Successfully created rotation for '{}'", result->identifier()
         ));
+    }
+    if (result->_transform.rotation) {
+        result->addPropertySubOwner(result->_transform.rotation.get());
     }
 
     if (dictionary.hasKey(KeyTransformScale)) {
@@ -155,8 +159,10 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
+    }
+    if (result->_transform.scale) {
+        result->addPropertySubOwner(result->_transform.scale.get());
     }
 
     if (dictionary.hasKey(KeyTimeFrame)) {
@@ -374,14 +380,14 @@ void SceneGraphNode::update(const UpdateData& data) {
     }
     UpdateData newUpdateData = data;
 
-    _worldRotationCached = calculateWorldRotation();
-    _worldScaleCached = calculateWorldScale();
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
     _worldPositionCached = calculateWorldPosition();
+    _worldRotationCached = calculateWorldRotation();
+    _worldScaleCached = calculateWorldScale();
 
-    newUpdateData.modelTransform.translation = worldPosition();
-    newUpdateData.modelTransform.rotation = worldRotationMatrix();
-    newUpdateData.modelTransform.scale = worldScale();
+    newUpdateData.modelTransform.translation = _worldPositionCached;
+    newUpdateData.modelTransform.rotation = _worldRotationCached;
+    newUpdateData.modelTransform.scale = _worldScaleCached;
 
     glm::dmat4 translation = glm::translate(
         glm::dmat4(1.0),
@@ -655,7 +661,7 @@ bool SceneGraphNode::hasGuiHintHidden() const {
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        const glm::dvec3 wp = _parent->calculateWorldPosition();
+        const glm::dvec3 wp = _parent->worldPosition();
         const glm::dmat3 wrot = _parent->worldRotationMatrix();
         const double ws = _parent->worldScale();
         const glm::dvec3 p = position();
@@ -684,7 +690,7 @@ bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _parent->calculateWorldRotation() * rotationMatrix();
+        return _parent->worldRotationMatrix() * rotationMatrix();
     }
     else {
         return rotationMatrix();
@@ -694,7 +700,7 @@ glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
 double SceneGraphNode::calculateWorldScale() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _parent->calculateWorldScale() * scale();
+        return _parent->worldScale() * scale();
     }
     else {
         return scale();

@@ -55,6 +55,13 @@ namespace {
         "This value determines the units in which the frame time is displayed."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ClearCacheInfo = {
+        "ClearCache",
+        "Clear Cache",
+        "Clears the cache of this DashboardItemFramerate item. If the selected option "
+        "does not use any caching, this trigger does not do anything."
+    };
+
     constexpr const char* ValueDtAvg = "Average Deltatime";
     constexpr const char* ValueDtExtremes = "Deltatime extremes";
     constexpr const char* ValueDtStandardDeviation = "Deltatime standard deviation";
@@ -70,11 +77,14 @@ namespace {
         );
     }
 
-    std::string formatDtExtremes() {
+    std::string formatDtExtremes(double minFrametimeCache, double maxFrametimeCache) {
         return fmt::format(
-            "Frametimes between: {:.2f} and {:.2f} ms",
+            "Last frametimes between: {:.2f} and {:.2f} ms\n"
+            "Overall between: {:.2f} and {:.2f} ms",
             openspace::global::windowDelegate.minDeltaTime() * 1000.0,
-            openspace::global::windowDelegate.maxDeltaTime() * 1000.0
+            openspace::global::windowDelegate.maxDeltaTime() * 1000.0,
+            minFrametimeCache,
+            maxFrametimeCache
         );
     }
 
@@ -107,13 +117,15 @@ namespace {
         );
     }
 
-    std::string format(openspace::DashboardItemFramerate::FrametimeType frametimeType) {
+    std::string format(openspace::DashboardItemFramerate::FrametimeType frametimeType,
+                       double minFrametimeCache, double maxFrametimeCache)
+    {
         using namespace openspace;
         switch (frametimeType) {
             case DashboardItemFramerate::FrametimeType::DtTimeAvg:
                 return formatDt();
             case DashboardItemFramerate::FrametimeType::DtTimeExtremes:
-                return formatDtExtremes();
+                return formatDtExtremes(minFrametimeCache, maxFrametimeCache);
             case DashboardItemFramerate::FrametimeType::DtStandardDeviation:
                 return formatDtStandardDeviation();
             case DashboardItemFramerate::FrametimeType::DtCoefficientOfVariation:
@@ -171,6 +183,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _clearCache(ClearCacheInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -243,16 +256,40 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     }
     addProperty(_frametimeType);
 
+    _clearCache.onChange([this]() {
+        _shouldClearCache = true;
+    });
+    addProperty(_clearCache);
+
     _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
+    if (_shouldClearCache) {
+        _minDeltaTimeCache = 1.0;
+        _maxDeltaTimeCache = -1.0;
+        _shouldClearCache = false;
+    }
+
+    _minDeltaTimeCache = std::min(
+        _minDeltaTimeCache,
+        global::windowDelegate.minDeltaTime() * 1000.0
+    );
+    _maxDeltaTimeCache = std::max(
+        _maxDeltaTimeCache,
+        global::windowDelegate.maxDeltaTime() * 1000.0
+    );
+
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
-    const std::string output = format(frametimeType);
+    const std::string output = format(
+        frametimeType,
+        _minDeltaTimeCache,
+        _maxDeltaTimeCache
+    );
 
     int nLines = output.empty() ? 0 :
-        (std::count(output.begin(), output.end(), '\n') + 1);
+        static_cast<int>((std::count(output.begin(), output.end(), '\n') + 1));
 
     penPosition.y -= _font->height() * static_cast<float>(nLines);
 
@@ -265,7 +302,11 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 
 glm::vec2 DashboardItemFramerate::size() const {
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
-    const std::string output = format(frametimeType);
+    const std::string output = format(
+        frametimeType,
+        _minDeltaTimeCache,
+        _maxDeltaTimeCache
+    );
 
     if (output.empty()) {
         return { 0.f, 0.f };

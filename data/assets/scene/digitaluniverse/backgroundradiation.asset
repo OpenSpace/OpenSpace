@@ -21,7 +21,7 @@ local wmap = {
     Transform = {
         Rotation = {
             Type = "StaticRotation",
-            Rotation = {0, 0, 3.14159265359}
+            Rotation = { 0, 0, 3.14159265359 }
         }
     },
     Renderable = {
@@ -47,7 +47,7 @@ local cbe = {
     Transform = {
         Rotation = {
             Type = "StaticRotation",
-            Rotation = {0, 0, 3.14159265359}
+            Rotation = { 0, 0, 3.14159265359 }
         }
     },
     Renderable = {
@@ -73,7 +73,7 @@ local planck = {
     Transform = {
         Rotation = {
             Type = "StaticRotation",
-            Rotation = {0, 0, 3.14159265359}
+            Rotation = { 0, 0, 3.14159265359 }
         }
     },
     Renderable = {
@@ -93,6 +93,128 @@ local planck = {
     }
 }
 
+local multiverse_planck_1 = {
+    Identifier = "PlanckMultiverse1",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 0.0, 0.0, 2000E23}
+        },
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = { 0, 0, 3.14159265359 }
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphere",
+        Enabled = false,
+        Size = 3975.41417036064E23,
+        Segments = 80,
+        Opacity = 0.3,
+        Texture = textures .. "/cmb4k.jpg",
+        Orientation = "Both",
+        MirrorTexture = true,
+        UseAdditiveBlending = true,
+        FadeInThreshold = 0.4
+    },
+    GUI = {
+        Name = "Planck Multiverse 1",
+        Path = "/Universe/Cosmic Microwave Background"
+    }
+}
+
+local multiverse_planck_2 = {
+    Identifier = "PlanckMultiverse2",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 2500E23, 0.0, 2000E23}
+        },
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = { 0, 0, 3.14159265359 }
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphere",
+        Enabled = false,
+        Size = 3975.41417036064E23,
+        Segments = 80,
+        Opacity = 0.3,
+        Texture = textures .. "/cmb4k.jpg",
+        Orientation = "Both",
+        MirrorTexture = true,
+        UseAdditiveBlending = true,
+        FadeInThreshold = 0.4
+    },
+    GUI = {
+        Name = "Planck Multiverse 2",
+        Path = "/Universe/Cosmic Microwave Background"
+    }
+}
+
+local multiverse_planck_3 = {
+    Identifier = "PlanckMultiverse3",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 2500E23, 5000E23, 2000E23}
+        },
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = { 0, 0, 3.14159265359 }
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphere",
+        Enabled = false,
+        Size = 3975.41417036064E23,
+        Segments = 80,
+        Opacity = 0.3,
+        Texture = textures .. "/cmb4k.jpg",
+        Orientation = "Both",
+        MirrorTexture = true,
+        UseAdditiveBlending = true,
+        FadeInThreshold = 0.4
+    },
+    GUI = {
+        Name = "Planck Multiverse 3",
+        Path = "/Universe/Cosmic Microwave Background"
+    }
+}
+
+local multiverse_planck_4 = {
+    Identifier = "PlanckMultiverse4",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 0.0, 10000E23, 0.0 }
+        },
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = { 0, 0, 3.14159265359 }
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphere",
+        Enabled = false,
+        Size = 3975.41417036064E23,
+        Segments = 80,
+        Opacity = 0.3,
+        Texture = textures .. "/cmb4k.jpg",
+        Orientation = "Both",
+        MirrorTexture = true,
+        UseAdditiveBlending = true,
+        FadeInThreshold = 0.4
+    },
+    GUI = {
+        Name = "Planck Multiverse 4",
+        Path = "/Universe/Cosmic Microwave Background"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { wmap, cbe, planck })
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    wmap, cbe, planck, multiverse_planck_1, multiverse_planck_2, multiverse_planck_3,
+    multiverse_planck_4
+})

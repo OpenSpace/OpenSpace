@@ -1,0 +1,28 @@
+asset.require('./base')
+
+--asset.request('scene/solarsystem/planets/earth/satellites/satellites_all')
+asset.request('scene/solarsystem/planets/earth/satellites/satellites_debris')
+
+asset.onInitialize(function ()
+    local now = openspace.time.currentWallTime()
+    --local now = "2019-06-26T00:00:00" 
+    
+    -- Jump back one day to show a complete planet
+    openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "Scene.*Trail.Renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
+end)

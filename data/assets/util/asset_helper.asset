@@ -42,6 +42,29 @@ local registerSceneGraphNodes = function (sceneAsset, nodes, override)
     end)
 end
 
+
+local registerScreenSpaceRenderables = function (sceneAsset, renderables, override)
+    override = override or false
+    if not override then
+        if tableLength(renderables) == 0 then
+            openspace.printWarning(sceneAsset.filePath .. ": Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            return
+        end
+    end
+
+    sceneAsset.onInitialize(function ()
+        for i, node in ipairs(renderables) do
+            openspace.addScreenSpaceRenderable(node)
+        end
+    end)
+    sceneAsset.onDeinitialize(function ()
+        for i = #renderables, 1, -1 do
+            renderable = renderables[i]
+            openspace.removeScreenSpaceRenderable(renderable.Identifier)
+        end
+    end)
+end
+
 local registerDashboardItems = function (dashboardAsset, items)
     dashboardAsset.onInitialize(
         function ()
@@ -142,10 +165,44 @@ local getDefaultLightSources = function (solarSystemBarycenterIdentifier)
 end
 
 
+local createModelPart = function (parent, sunLightSourceNode, models, geometry, texture, performShading)
+    local lightSources = {}
+    if performShading then
+        lightSources[1] = {
+            Type = "SceneGraphLightSource",
+            Identifier = "Sun",
+            Node = sunLightSourceNode,
+            Intensity = 1.0
+        }
+    end
+    return {
+        Identifier = parent .. "-" .. geometry,
+        Parent = parent,
+        Renderable = {
+            Type = "RenderableModel",
+            Geometry = {
+                Type = "MultiModelGeometry",
+                GeometryFile =  models .. "/" .. geometry .. ".obj"
+            },
+            ColorTexture = models .. "/" .. texture,
+            LightSources = lightSources,
+            PerformShading = performShading,
+            DisableFaceCulling = true 
+        },
+        GUI = {
+            Hidden = true
+        }
+    }
+end
+
+
+
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
+asset.export("registerScreenSpaceRenderables", registerScreenSpaceRenderables)
 asset.export("registerSpiceKernels", registerSpiceKernels)
 asset.export("registerDashboardItems", registerDashboardItems)
 asset.export("requireAll", requireAll)
 asset.export("requestAll", requestAll)
 asset.export("getDefaultLightSources", getDefaultLightSources)
+asset.export("createModelPart", createModelPart)

@@ -32,7 +32,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TimeTopic";
     constexpr const char* EventKey = "event";
     constexpr const char* SubscribeEvent = "start_subscription";
     constexpr const char* UnsubscribeEvent = "stop_subscription";
@@ -80,7 +79,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
             sendCurrentTime();
         }
     });
-    
+
     _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback([this]() {
         // Throttle by last update,
         // but force update if pause state or target delta changes.

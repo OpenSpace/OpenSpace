@@ -386,8 +386,7 @@ std::string SunTextureManager::parseMagnetogramDate(std::string name)
     return dateID;
 }
 
-bool SunTextureManager::checkServerAliveness()
-{
+bool SunTextureManager::checkServerAliveness() {
     SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/");
     HttpRequest::RequestOptions opt = {};
     opt.requestTimeoutSeconds = 0;
@@ -400,8 +399,7 @@ bool SunTextureManager::checkServerAliveness()
     return s == "You are at ROOT";
 }
 
-void SunTextureManager::trimGPUList()
-{
+void SunTextureManager::trimGPUList() {
     if (_textureQueueGPU.size() > _maxTexturesOnGPU)
     {
 

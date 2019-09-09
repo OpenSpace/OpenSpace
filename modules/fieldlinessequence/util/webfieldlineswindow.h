@@ -71,7 +71,7 @@ public:
     // If files existed on disk already
     WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                         std::vector<std::string>& _sourceFiles,
-                        std::vector<double>& _startTimes, size_t& _nStates, int apiID);
+                        std::vector<double>& _startTimes, size_t& _nStates);
     
     // Copy constructor
     WebFieldlinesWindow& operator=(WebFieldlinesWindow&&) = default;
@@ -109,7 +109,6 @@ public:
 private:
     
     // PRIVATE MEMBER VARIABLES
-    size_t _apiID;
 
     // Sliding download window
     Window _window;

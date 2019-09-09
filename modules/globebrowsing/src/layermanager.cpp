@@ -28,9 +28,27 @@
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace::globebrowsing {
+
+documentation::Documentation LayerManager::Documentation() {
+    using namespace documentation;
+    return {
+        "LayerManager",
+        "globebrowsing_layermanager",
+        {
+            {
+                "*",
+                new ReferencingVerifier("globebrowsing_layer"),
+                Optional::Yes,
+                "Specifies an individual layer"
+            }
+        }
+    };
+}
 
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
@@ -88,6 +106,10 @@ void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& laye
     _layerGroups[id]->deleteLayer(layerName);
 }
 
+LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) {
+    return *_layerGroups[groupId];
+}
+
 const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {
     return *_layerGroups[groupId];
 }
@@ -111,10 +133,12 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     return res;
 }
 
-void LayerManager::update() {
+int LayerManager::update() {
+    int res = 0;
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        layerGroup->update();
+        res += layerGroup->update();
     }
+    return res;
 }
 
 void LayerManager::reset(bool includeDisabled) {

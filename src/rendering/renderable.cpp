@@ -177,6 +177,10 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     };
 }
 
+bool Renderable::renderedWithDesiredData() const {
+    return true;
+}
+
 Renderable::RenderBin Renderable::renderBin() const {
     return _renderBin;
 }
@@ -205,6 +209,15 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
     _enabled.onChange([this, c = std::move(callback)]() {
         c(isEnabled());
     });
+}
+
+void Renderable::setRenderBinFromOpacity() {
+    if (_opacity > 0.f && _opacity < 1.f) {
+        setRenderBin(Renderable::RenderBin::Transparent);
+    }
+    else {
+        setRenderBin(Renderable::RenderBin::Opaque);
+    }
 }
 
 void Renderable::registerUpdateRenderBinFromOpacity() {

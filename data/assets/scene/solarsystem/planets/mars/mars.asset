@@ -2,6 +2,7 @@ local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
+local labelsPath = asset.require('./mars_labels').LabelsPath
 
 
 
@@ -24,6 +25,7 @@ local color_layers = {
         FilePath = mapServiceConfigs .. "/Utah/Mars_Color.wms",
         Enabled = true,
         Fallback =  {
+            Identifier = "Mars_Texture",
             Name = "Mars Texture",
             FilePath = textures .. "/mars.jpg",
             Enabled = true
@@ -34,6 +36,7 @@ local color_layers = {
         Name = "MOC WA Color [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Color.wms",
         Fallback =  {
+            Identifier = "Mars_Texture",
             Name = "Mars Texture",
             FilePath = textures .. "/mars.jpg",
             Enabled = true
@@ -50,11 +53,6 @@ local color_layers = {
         FilePath = mapServiceConfigs .. "/LiU/MDIM.wms"
     },
     {
-        Identifier = "Viking_MDIM_AWS",
-        Name = "Viking MDIM [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/Mdim.wms"
-    },
-    {
         Identifier = "MOLA_Pseudo_Color_Utah",
         Name = "MOLA Pseudo Color [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/Mola_PseudoColor.wms"
@@ -63,11 +61,6 @@ local color_layers = {
         Identifier = "MOLA_Pseudo_Color_Sweden",
         Name = "MOLA Pseudo Color [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Mola_PseudoColor.wms"
-    },
-    {
-        Identifier = "MOLA_Pseudo_Color_AWS",
-        Name = "MOLA Pseudo Color [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/Mola_PseudoColor.wms"
     },
     {
         Identifier = "MOLA_HRSC_Utah",
@@ -92,12 +85,6 @@ local color_layers = {
         BlendMode = "Color"
     },
     {
-        Identifier = "Themis_IR_Day_AWS",
-        Name = "Themis IR Day [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Day.wms",
-        BlendMode = "Color"
-    },
-    {
         Identifier = "Themis_IR_Night_Utah",
         Name = "Themis IR Night [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Night.wms",
@@ -110,12 +97,6 @@ local color_layers = {
         BlendMode = "Color"
     },
     {
-        Identifier = "Themis_IR_Night_AWS",
-        Name = "Themis IR Night [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Night.wms",
-        BlendMode = "Color"
-    },
-    {
         Identifier = "CTX_Mosaic_Utah",
         Name = "CTX Mosaic [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
@@ -125,12 +106,6 @@ local color_layers = {
         Identifier = "CTX_Mosaic_Sweden",
         Name = "CTX Mosaic [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "CTX_Mosaic_AWS",
-        Name = "CTX Mosaic [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/CTX.wms",
         BlendMode = "Color"
     }
 }
@@ -167,12 +142,6 @@ local height_layers = {
         FilePath = mapServiceConfigs .. "/Utah/Mola_Elevation.wms",
         Enabled = true,
         TilePixelSize = 90
-    },
-    {
-        Identifier = "Mola_AWS",
-        Name = "Mola Elevation [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/Mola_Elevation.wms",
-        TilePixelSize = 90
     }
 }
 
@@ -198,6 +167,22 @@ local Mars = {
             ColorLayers = color_layers,
             Overlays = overlay_layers,
             HeightLayers = height_layers
+        },
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/mars.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 14.0,
+            LabelsSize = 8.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 500000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = {1.0, 1.0, 0.0, 1.0}
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
@@ -205,7 +190,5 @@ local Mars = {
         Path = "/Solar System/Planets/Mars"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mars })

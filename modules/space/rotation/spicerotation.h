@@ -28,6 +28,7 @@
 #include <openspace/scene/rotation.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/scene/timeframe.h>
 
 namespace openspace {
 
@@ -45,6 +46,7 @@ public:
 private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
+    std::unique_ptr<TimeFrame> _timeFrame;
 };
 
 } // namespace openspace

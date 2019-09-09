@@ -93,8 +93,8 @@ private:
     //properties::StringProperty _shapeTexturePath;
     //std::unique_ptr<ghoul::opengl::Texture> _shapeTexture;
     //std::unique_ptr<ghoul::filesystem::File> _shapeTextureFile;
-        
-    properties::OptionProperty _colorOption;        
+
+    properties::OptionProperty _colorOption;
     properties::OptionProperty _otherDataOption;
     properties::StringProperty _otherDataColorMapPath;
     properties::Vec2Property _otherDataRange;
@@ -103,7 +103,7 @@ private:
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-        
+
     properties::FloatProperty _alphaValue;
     properties::OptionProperty _psfMethodOption;
     properties::OptionProperty _psfMultiplyOption;
@@ -126,13 +126,13 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelMatrix, cameraUp, cameraViewProjectionMatrix, 
-        colorOption, magnitudeExponent, eyePosition, psfParamConf, 
-        lumCent, radiusCent, brightnessCent, colorTexture, 
-        alphaValue, psfTexture, otherDataTexture, otherDataRange, 
+        modelMatrix, cameraUp, cameraViewProjectionMatrix,
+        colorOption, magnitudeExponent, eyePosition, psfParamConf,
+        lumCent, radiusCent, brightnessCent, colorTexture,
+        alphaValue, psfTexture, otherDataTexture, otherDataRange,
         filterOutOfRange
     ) _uniformCache;
-       
+
     bool _speckFileIsDirty = true;
     bool _pointSpreadFunctionTextureIsDirty = true;
     bool _colorTextureIsDirty = true;
@@ -145,7 +145,7 @@ private:
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
-        
+
     int _nValuesPerStar = 0;
     std::string _queuedOtherData;
     std::vector<std::string> _dataNames;
@@ -165,7 +165,6 @@ private:
     GLuint _psfVao = 0;
     GLuint _psfVbo = 0;
     GLuint _psfTexture = 0;
-    GLuint _discTexture = 0;
     GLuint _convolvedTexture = 0;
 };
 

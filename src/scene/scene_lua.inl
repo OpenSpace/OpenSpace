@@ -362,6 +362,14 @@ int property_setValue(lua_State* L) {
 }
 
 int property_setValueSingle(lua_State* L) {
+    const int n = lua_gettop(L);
+    if (n == 3) {
+        // If we pass three arguments, the third one is the interpolation factor and the
+        // user did not specify an easing factor, so we have to add that manually before
+        // adding the single optimization
+        ghoul::lua::push(L, ghoul::nameForEasingFunction(ghoul::EasingFunction::Linear));
+    }
+
     ghoul::lua::push(L, "single");
     return property_setValue(L);
 }
@@ -547,7 +555,7 @@ int removeSceneGraphNode(lua_State* L) {
     }
 
     // Add all the children
-    std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode = 
+    std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode =
         [&markNode](SceneGraphNode* node, std::vector<SceneGraphNode*>& markedList)
     {
         std::vector<SceneGraphNode*> children = node->children();

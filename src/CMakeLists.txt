@@ -54,11 +54,14 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -69,7 +72,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
   ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
   ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/binaryproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -194,6 +196,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
 
 if (APPLE)
@@ -202,7 +205,6 @@ if (APPLE)
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
   )
 endif ()
-
 set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/json.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
@@ -236,9 +238,12 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
@@ -248,7 +253,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemeasurement.h
   ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
   ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/binaryproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -386,6 +390,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h

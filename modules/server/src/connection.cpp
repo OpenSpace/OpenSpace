@@ -27,6 +27,7 @@
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
+#include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
@@ -64,6 +65,7 @@ namespace {
     constexpr const char* TimeTopicKey = "time";
     constexpr const char* TriggerPropertyTopicKey = "trigger";
     constexpr const char* BounceTopicKey = "bounce";
+    constexpr const char* FlightControllerTopicKey = "flightcontroller";
 } // namespace
 
 namespace openspace {
@@ -95,6 +97,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
     _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
     _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
+    _topicFactory.registerClass<FlightControllerTopic>(FlightControllerTopicKey);
     _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
 }
 
@@ -125,8 +128,8 @@ void Connection::handleMessage(const std::string& message) {
                 message.begin(),
                 message.end(),
                 sanitizedString.begin(),
-                [](const unsigned char& c) {
-                    return std::isprint(c) ? c : ' ';
+                [](wchar_t c) {
+                    return std::isprint(c, std::locale("")) ? c : ' ';
                 }
             );
             LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));

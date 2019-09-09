@@ -79,6 +79,8 @@ public:
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                                 const glm::dvec3& targetModelSpace) const;
 
+    virtual bool renderedWithDesiredData() const;
+
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);
     bool matchesRenderBinMask(int binMask);
@@ -94,6 +96,7 @@ protected:
     properties::FloatProperty _opacity;
     properties::StringProperty _renderableType;
 
+    void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
 private:

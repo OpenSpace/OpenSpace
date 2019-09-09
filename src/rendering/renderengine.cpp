@@ -47,6 +47,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -143,10 +144,19 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
-        "ShowFrameNumber",
-        "Show Frame Number",
-        "If this value is enabled, the current frame number is rendered into the window."
+        "ShowFrameInformation",
+        "Show Frame Information",
+        "If this value is enabled, the current frame number and frame times are rendered "
+        "into the window."
     };
+
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    constexpr openspace::properties::Property::PropertyInfo SaveFrameInfo = {
+        "SaveFrameInformation",
+        "Save Frame Information",
+        "Saves the frame information to disk"
+    };
+#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
@@ -182,11 +192,12 @@ namespace {
         "direction for tilted display systems in clustered immersive environments."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AaSamplesInfo = {
-        "AaSamples",
-        "Number of Anti-aliasing samples",
-        "This value determines the number of anti-aliasing samples to be used in the "
-        "rendering for the MSAA method."
+    constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
+       "DisableHDRPipeline",
+       "Disable HDR Rendering",
+       "If this value is enabled, the rendering will disable the HDR color handling "
+       "and the LDR color pipeline will be used. Be aware of possible over exposure "
+       "in the final colors."
     };
 
     constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
@@ -196,18 +207,29 @@ namespace {
         "equivalent of an electronic image sensor."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
-        "Background Exposure",
-        "BackgroundExposure",
-        "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor for the background image."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HueInfo = {
+        "Hue",
+        "Hue",
+        "Hue"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SaturationInfo = {
+        "Saturation",
+        "Saturation",
+        "Saturation"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ValueInfo = {
+        "Value",
+        "Value",
+        "Value"
     };
 
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
@@ -216,6 +238,19 @@ namespace {
         "Adjusts the degrees of the horizontal field of view. The vertical field of "
         "view will be automatically adjusted to match, according to the current "
         "aspect ratio."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GlobalBlackoutFactorInfo = {
+        "BlackoutFactor",
+        "Blackout Factor",
+        "The blackout factor of the rendering. This can be used for fading in or out the "
+        "rendering window"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
+        "FXAA",
+        "Enable FXAA",
+        "Enable FXAA"
     };
 } // namespace
 
@@ -231,12 +266,20 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _takeScreenshot(TakeScreenshotInfo)
     , _applyWarping(ApplyWarpingInfo, false)
-    , _showFrameNumber(ShowFrameNumberInfo, false)
+    , _showFrameInformation(ShowFrameNumberInfo, false)
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    , _saveFrameInformation(SaveFrameInfo, false)
+#endif // OPENSPACE_WITH_INSTRUMENTATION
     , _disableMasterRendering(DisableMasterInfo, false)
-    , _nAaSamples(AaSamplesInfo, 4, 1, 8)
-    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
-    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
+    , _enableFXAA(FXAAInfo, true)
+    , _disableHDRPipeline(DisableHDRPipelineInfo, false)
+    , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
+    , _gamma(GammaInfo, 0.95f, 0.01f, 5.0f)
+    , _hue(HueInfo, 180.f, 0.0f, 360.0f)
+    , _saturation(SaturationInfo, 1.f, 0.0f, 2.0f)
+    , _value(ValueInfo, 1.f, 0.0f, 2.0f)
+    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
     , _globalRotation(
         GlobalRotationInfo,
         glm::vec3(0.f),
@@ -255,7 +298,6 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
-    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -267,27 +309,34 @@ RenderEngine::RenderEngine()
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
 
-    _nAaSamples.onChange([this](){
+    // @TODO (maci 2019-08-23) disabling FXAA on
+    // MacOS for now until we have fix or MSAA option.
+#ifdef __APPLE__
+    _enableFXAA = false;
+#endif
+
+    _enableFXAA.onChange([this]() {
         if (_renderer) {
-            _renderer->setNAaSamples(_nAaSamples);
+            _renderer->enableFXAA(_enableFXAA);
+        }
+        });
+    addProperty(_enableFXAA);
+
+    _disableHDRPipeline.onChange([this]() {
+        if (_renderer) {
+            _renderer->setDisableHDR(_disableHDRPipeline);
         }
     });
-    addProperty(_nAaSamples);
+    addProperty(_disableHDRPipeline);
 
+    
     _hdrExposure.onChange([this]() {
         if (_renderer) {
             _renderer->setHDRExposure(_hdrExposure);
         }
     });
     addProperty(_hdrExposure);
-
-    _hdrBackground.onChange([this]() {
-        if (_renderer) {
-            _renderer->setHDRBackground(_hdrBackground);
-        }
-    });
-    addProperty(_hdrBackground);
-
+    
     _gamma.onChange([this]() {
         if (_renderer) {
             _renderer->setGamma(_gamma);
@@ -295,19 +344,53 @@ RenderEngine::RenderEngine()
     });
     addProperty(_gamma);
 
+    _hue.onChange([this]() {
+        if (_renderer) {
+            float pHue = (_hue + 180.f) / 360.f;
+            _renderer->setHue(pHue);
+        }
+    });
+
+    addProperty(_hue);
+    
+    _saturation.onChange([this]() {
+        if (_renderer) {
+            _renderer->setSaturation(_saturation);
+        }
+    });
+
+    addProperty(_saturation);
+    
+    _value.onChange([this]() {
+        if (_renderer) {
+            _renderer->setValue(_value);
+        }
+    });
+
+    addProperty(_value);
+
+    addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
 
     _horizFieldOfView.onChange([this]() {
-        global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+        if (global::windowDelegate.isMaster()) {
+            global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+        }
     });
     addProperty(_horizFieldOfView);
 
-    _takeScreenshot.onChange([this](){
-        _shouldTakeScreenshot = true;
-    });
+    _takeScreenshot.onChange([this](){ _shouldTakeScreenshot = true; });
     addProperty(_takeScreenshot);
 
-    addProperty(_showFrameNumber);
+    addProperty(_showFrameInformation);
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    _saveFrameInformation.onChange([&]() {
+        if (_saveFrameInformation) {
+            _frameInfo.lastSavedFrame = frameNumber();
+        }
+    });
+    addProperty(_saveFrameInformation);
+#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     addProperty(_globalRotation);
     addProperty(_screenSpaceRotation);
@@ -379,8 +462,6 @@ void RenderEngine::initialize() {
 void RenderEngine::initializeGL() {
     LTRACE("RenderEngine::initializeGL(begin)");
 
-    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
-
     std::string renderingMethod = global::configuration.renderingMethod;
     if (renderingMethod == "ABuffer") {
         using Version = ghoul::systemcapabilities::Version;
@@ -405,12 +486,12 @@ void RenderEngine::initializeGL() {
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
 
-    //Set horizontal FOV value with whatever the field of view (in degrees) is of the
+    // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
 
-    constexpr const float FontSizeBig = 50.f;
-    _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
+    constexpr const float FontSizeFrameinfo = 32.f;
+    _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
     constexpr const float FontSizeTime = 15.f;
     _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
     constexpr const float FontSizeMono = 10.f;
@@ -442,7 +523,7 @@ void RenderEngine::updateScene() {
     const Time& integrateFromTime = global::timeManager.integrateFromTime();
 
     _scene->update({
-        { glm::dvec3(0.0), glm::dmat3(11.), 1.0 },
+        { glm::dvec3(0.0), glm::dmat3(1.0), 1.0 },
         currentTime,
         integrateFromTime,
         _doPerformanceMeasurements
@@ -539,42 +620,8 @@ glm::mat4 RenderEngine::nodeRotation() const {
     return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
 
-void RenderEngine::updateFade() {
-    // Temporary fade funtionality
-    constexpr const float FadedIn = 1.0;
-    constexpr const float FadedOut = 0.0;
-    // Don't restart the fade if you've already done it in that direction
-    const bool isFadedIn = (_fadeDirection > 0 && _globalBlackOutFactor == FadedIn);
-    const bool isFadedOut = (_fadeDirection < 0 && _globalBlackOutFactor == FadedOut);
-    if (isFadedIn || isFadedOut) {
-        _fadeDirection = 0;
-    }
-
-    if (_fadeDirection != 0) {
-        if (_currentFadeTime > _fadeDuration) {
-            _globalBlackOutFactor = _fadeDirection > 0 ? FadedIn : FadedOut;
-            _fadeDirection = 0;
-        }
-        else {
-            if (_fadeDirection < 0) {
-                _globalBlackOutFactor = glm::smoothstep(
-                    1.f,
-                    0.f,
-                    _currentFadeTime / _fadeDuration
-                );
-            }
-            else {
-                _globalBlackOutFactor = glm::smoothstep(
-                    0.f,
-                    1.f,
-                    _currentFadeTime / _fadeDuration
-                );
-            }
-            _currentFadeTime += static_cast<float>(
-                global::windowDelegate.averageDeltaTime()
-            );
-        }
-    }
+uint64_t RenderEngine::frameNumber() const {
+    return _frameNumber;
 }
 
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
@@ -606,16 +653,31 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         );
     }
 
-    if (_showFrameNumber) {
+    if (_showFrameInformation) {
         glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
             fontResolution().y / 3
         );
 
-        RenderFont(*_fontBig, penPosition, std::to_string(_frameNumber));
-    }
+        std::string fn = std::to_string(_frameNumber);
+        WindowDelegate::Frustum frustum = global::windowDelegate.frustumMode();
+        std::string fr = [](WindowDelegate::Frustum frustum) -> std::string {
+            switch (frustum) {
+                case WindowDelegate::Frustum::Mono: return "";
+                case WindowDelegate::Frustum::LeftEye: return "(left)";
+                case WindowDelegate::Frustum::RightEye: return "(right)";
+            }
+        }(frustum);
 
-    ++_frameNumber;
+        std::string sgFn = std::to_string(global::windowDelegate.swapGroupFrameNumber());
+        std::string dt = std::to_string(global::windowDelegate.deltaTime());
+        std::string avgDt = std::to_string(global::windowDelegate.averageDeltaTime());
+
+        std::string res = "Frame: " + fn + ' ' + fr + '\n' +
+                          "Swap group frame: " + sgFn + '\n' +
+                          "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
+        RenderFont(*_fontFrameInfo, penPosition, res);
+    }
 
     if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         std::vector<ScreenSpaceRenderable*> ssrs;
@@ -798,6 +860,8 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
+    ++_frameNumber;
+
     if (_shouldTakeScreenshot) {
         // We only create the directory here, as we don't want to spam the users
         // screenshot folder everytime we start OpenSpace even when we are not taking any
@@ -818,6 +882,35 @@ void RenderEngine::postDraw() {
             scene()->allSceneGraphNodes()
         );
     }
+
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    if (_saveFrameInformation) {
+        _frameInfo.frames.push_back({
+            frameNumber(),
+            global::windowDelegate.deltaTime(),
+            global::windowDelegate.averageDeltaTime()
+        });
+    }
+
+    const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
+    const bool shouldSave = _saveFrameInformation && frameNumber() >= next;
+    if (shouldSave) {
+        std::string filename = fmt::format(
+            "_inst_renderengine_{}_{}.txt",
+            _frameInfo.lastSavedFrame, _frameInfo.saveEveryNthFrame
+        );
+        std::ofstream file(absPath("${BIN}/" + filename));
+        for (const FrameInfo& i : _frameInfo.frames) {
+            std::string line = fmt::format(
+                "{}\t{}\t{}", i.iFrame, i.deltaTime, i.avgDeltaTime
+            );
+            file << line << '\n';
+        }
+
+        _frameInfo.frames.clear();
+        _frameInfo.lastSavedFrame = frameNumber();
+    }
+#endif // OPENSPACE_WITH_INSTRUMENTATION
 }
 
 Scene* RenderEngine::scene() {
@@ -848,10 +941,12 @@ void RenderEngine::setGlobalBlackOutFactor(float opacity) {
     _globalBlackOutFactor = opacity;
 }
 
-void RenderEngine::startFading(int direction, float fadeDuration) {
-    _fadeDirection = direction;
-    _fadeDuration = fadeDuration;
-    _currentFadeTime = 0.f;
+float RenderEngine::hdrExposure() const {
+    return _hdrExposure;
+}
+
+bool RenderEngine::isHdrDisabled() const {
+    return _disableHDRPipeline;
 }
 
 /**
@@ -964,6 +1059,13 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 /**
+  * Mark that one screenshot should be taken
+*/
+void RenderEngine::takeScreenShot() {
+    _shouldTakeScreenshot = true;
+}
+
+/**
  * Set raycasting uniforms on the program object, and setup raycasting.
  */
 void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
@@ -987,7 +1089,7 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
 
     _renderer = std::move(renderer);
     _renderer->setResolution(renderingResolution());
-    _renderer->setNAaSamples(_nAaSamples);
+    _renderer->enableFXAA(_enableFXAA);
     _renderer->setHDRExposure(_hdrExposure);
     _renderer->initialize();
 }
@@ -1002,27 +1104,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 {},
                 "string",
                 "Sets the renderer (ABuffer or FrameBuffer)"
-            },
-            {
-                "toggleFade",
-                &luascriptfunctions::toggleFade,
-                {},
-                "number",
-                "Toggles fading in or out"
-            },
-            {
-                "fadeIn",
-                &luascriptfunctions::fadeIn,
-                {},
-                "number",
-                ""
-            },
-            {
-                "fadeOut",
-                &luascriptfunctions::fadeOut,
-                {},
-                "number",
-                ""
             },
             {
                 "addScreenSpaceRenderable",
@@ -1219,10 +1300,29 @@ void RenderEngine::renderVersionInformation() {
         return;
     }
 
+    std::string versionString = OPENSPACE_VERSION_STRING_FULL;
+
+    if (global::versionChecker.hasLatestVersionInfo()) {
+        VersionChecker::SemanticVersion latestVersion =
+            global::versionChecker.latestVersion();
+
+        VersionChecker::SemanticVersion currentVersion {
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH
+        };
+        if (currentVersion < latestVersion) {
+            versionString += fmt::format(
+                " [Available: {}.{}.{}]",
+                latestVersion.major, latestVersion.minor, latestVersion.patch
+            );
+        }
+    }
+
     using FR = ghoul::fontrendering::FontRenderer;
     const FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        OPENSPACE_VERSION_STRING_FULL
+        versionString
     );
 
     const FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
@@ -1236,7 +1336,7 @@ void RenderEngine::renderVersionInformation() {
             fontResolution().x - versionBox.boundingBox.x - 10.f,
             5.f
         ),
-        OPENSPACE_VERSION_STRING_FULL,
+        versionString,
         glm::vec4(0.5, 0.5, 0.5, 1.f)
     );
 

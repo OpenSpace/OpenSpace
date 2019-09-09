@@ -13,63 +13,87 @@ asset.require('scene/solarsystem/missions/rosetta/rosetta')
 local Keybindings = {
     {
         Key = "a",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', '67P')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on '67P'.",
+        Name = "Focus on 67P",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
     {
         Key = "s",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Rosetta')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Rosetta'",
+        Name = "Focus on Rosetta",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
     {
         Key = "F5",
         Command = "openspace.time.setTime('2014-08-01T03:05:18.101')",
         Documentation = "Jumps to the time of initial approach of Rosetta to 67P.",
+        Name = "Set initial approach time",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
     {
         Key = "F6",
         Command = "openspace.time.setTime('2014-11-12T08:20:00.00')",
         Documentation = "Jumps to the time when the Philae lander is released.",
+        Name = "Set lander release time",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
     {
         Key = "F8",
-        Command = "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.clearAllProjections', true)",
+        Command = "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true)",
         Documentation = "Removes all image projections from 67P.",
+        Name = "Clear 67P projections",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
-    {
-        Key = "q",
-        Command = propertyHelper.invert('Scene.SunMarker.Renderable.Enabled'),
-        Documentation = "Toggles the visibility of the text marking the location of the Sun.",
-        Local = false
-    },
+    -- {
+    --     Key = "q",
+    --     Command = propertyHelper.invert('Scene.SunMarker.Renderable.Enabled'),
+    --     Documentation = "Toggles the visibility of the text marking the location of the Sun.",
+    --     Name = "Toggle Sun marker",
+    --     GuiPath = "/Missions/Rosetta",
+    --     Local = false
+    -- },
     {
         Key = "e",
         Command = renderableHelper.toggle('Scene.JupiterTrail') .. renderableHelper.toggle('Scene.SaturnTrail') ..
                   renderableHelper.toggle('Scene.UranusTrail') .. renderableHelper.toggle('Scene.NeptuneTrail'),
         Documentation = "Toggles the visibility of all trails further from the Sun than 67P.",
+        Name = "Toggle outer planetary trails",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
     {
         Key = "i",
         Command = renderableHelper.toggle('Scene.ImagePlaneRosetta'),
         Documentation = "Toggles the visibility of the free floating image plane.",
+        Name = "Toggle image plane",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
     {
-        Key = "f",
+        Key = "g",
         Command = renderableHelper.toggle('Scene.PhilaeTrail'),
         Documentation = "Toggles the visibility of Philae's trail.",
+        Name = "Toggle Philae trail",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     },
     {
         Key = "p",
-        Command = propertyHelper.invert('Scene.67P.Renderable.ProjectionComponent.performProjection'),
+        Command = propertyHelper.invert('Scene.67P.Renderable.ProjectionComponent.PerformProjection'),
         Documentation = "Enables or disables the image projection on 67P.",
+        Name = "Toggle 67P projection",
+        GuiPath = "/Missions/Rosetta",
         Local = false
     }
 }
@@ -110,13 +134,16 @@ asset.onInitialize(function ()
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = Comet67PAsset.Comet67P.Identifier,
-        Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
-        Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
+        ReferenceFrame = "Root",
+        Position = { -7.294781E5 , -6.657894E5, 2.509047E6 },
+        Up = { 0.146529E0, 0.944727E0, 0.293290E0 }
     })
 
     openspace.setPropertyValue('Scene.67P.Renderable.PerformShading', false);
+    openspace.setPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled', false);
+
 end)
 
 asset.onDeinitialize(function ()

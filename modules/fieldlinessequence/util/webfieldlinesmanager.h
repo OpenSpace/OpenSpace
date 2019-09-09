@@ -29,17 +29,8 @@
 #include <vector>
 #include <string>
 
-enum FieldLineType {
-    WSA_Fieldlines_Sub_Earth_Track = 1176,
-    WSA_Fieldlines_SCS_OI = 1177,
-    WSA_Fieldlines_PFSS_IO = 1178,
-    WSA_Fieldlines_PFSS_OI = 1179,
-    ID_NOT_FOUND = 0,
-};
-
 namespace openspace {
 
-    
 class WebFieldlinesManager{
 public:
     // Constructor
@@ -84,8 +75,6 @@ private:
     // The datastructure for managing the interval of fieldline sets to be downloaded
     WebFieldlinesWindow _webFieldlinesWindow;
     
-    // Converts a string to id used in api request.
-    FieldLineType convertIdentifierToID(std::string identifier);
 };
 
 

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SERVER___SESSION_RECORDING_TOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+
 #include <openspace/interaction/sessionrecording.h>
 
 namespace openspace {
@@ -39,7 +40,7 @@ public:
     bool isDone() const override;
 
 private:
-    const int UnsetOnChangeHandle = -1;
+    static const int UnsetOnChangeHandle = -1;
 
     bool _sendState;
     bool _sendFiles;
@@ -47,7 +48,8 @@ private:
     // Provides the idle/recording/playback state int value in json message
     void sendJsonData();
 
-    interaction::SessionRecording::SessionState _lastState;
+    interaction::SessionRecording::SessionState _lastState =
+        interaction::SessionRecording::SessionState::Idle;
     int _stateCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
 };
