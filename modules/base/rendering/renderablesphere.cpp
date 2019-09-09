@@ -301,8 +301,10 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         }
     }
 
-    _sunTexMgr.checkFilesInDirectory();
-
+    //_sunTexMgr.checkFilesInDirectory();
+//    if(_texturePath.fullyQualifiedIdentifier() == "Scene.Sun.Renderable.Texture"){
+//     _sunTexMgr.loadWSATexture(_texture);
+//    }
 }
 
 bool RenderableSphere::isReady() const {
@@ -327,6 +329,10 @@ void RenderableSphere::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     loadTexture();
+    
+    if(_texturePath.fullyQualifiedIdentifier() == "Scene.Sun.Renderable.Texture"){
+        _sunTexMgr.loadWSATexture(_texture);
+    }
 }
 
 void RenderableSphere::deinitializeGL() {
@@ -419,9 +425,9 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
     
     
-    if(_texturePath.fullyQualifiedIdentifier() == "Scene.Sun.Renderable.Texture"){
-        _sunTexMgr.update(_texture);
-    }
+//    if(_texturePath.fullyQualifiedIdentifier() == "Scene.Sun.Renderable.Texture"){
+//        _sunTexMgr.update(_texture);
+//    }
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

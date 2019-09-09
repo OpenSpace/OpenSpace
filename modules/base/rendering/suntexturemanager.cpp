@@ -46,6 +46,15 @@ SunTextureManager::SunTextureManager()
 {
     _syncDir = absPath("${BASE}/sync/magnetograms") + ghoul::filesystem::FileSystem::PathSeparator;
 }
+    
+    
+void SunTextureManager::loadWSATexture(std::unique_ptr<ghoul::opengl::Texture>& texture){
+    processTextureFromName("", &_fitsImageToUpload, &_dateIDToUpload);
+    texture = uploadAndReturnTexture(_fitsImageToUpload, _dateIDToUpload);
+    
+}
+    
+    
 void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture) {
     
     // If server is dead, we are not going to do anything
@@ -244,6 +253,18 @@ void SunTextureManager::uploadTexture(std::vector<float> imagedata, std::string 
     trimGPUList();
     
 }
+    
+std::unique_ptr<ghoul::opengl::Texture> SunTextureManager::uploadAndReturnTexture(std::vector<float> imagedata, std::string id)
+{
+    //LERROR("laddar upp texture till GPU med id: " + id);
+    auto textureFits = std::make_unique<ghoul::opengl::Texture>(std::move(imagedata.data()), glm::vec3(180, 90, 1), ghoul::opengl::Texture::Format::RGB, GL_RGB32F, GL_FLOAT);
+    textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
+    textureFits->uploadTexture();
+    //textureFits->setName(id);
+    //textureFits->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    return textureFits;
+    
+}
 
 void SunTextureManager::processTextureFromName(std::string filename, std::vector<float> *imagedata, std::string *id)
 {
@@ -255,12 +276,13 @@ void SunTextureManager::processTextureFromName(std::string filename, std::vector
     // so that fitsfilereader won't default to the extension HDUs.
     fitsFileReader.forceUsePHDU();
 
-    const auto fitsValues = fitsFileReader.readImageFloat(_syncDir + filename);
-    //const auto fitsValues = fitsFileReader.readImageFloat("/Users/shuy/Offline-dokument/TEST FILER/solarmax/output/WSA_OUT/wsa_201308170804R000_gong.fits");
+    //const auto fitsValues = fitsFileReader.readImageFloat(_syncDir + filename);
+    const std::string hardcodedpath = absPath("${BASE}/data/wsa_201308170804R000_gong.fits");
+    const auto fitsValues = fitsFileReader.readImageFloat(hardcodedpath);
     
     *id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("OBSTIME"));
     
-    LERROR("processed texture: " + *id);
+    //LERROR("processed texture: " + *id);
     
     const int long0 = *fitsFileReader.readHeaderValueFloat("CARRLONG"); // Longitude leading edge of map header value
     const std::string wsaMapType = *fitsFileReader.readHeaderValueString("OBSER"); // Obsertory header value
@@ -293,9 +315,9 @@ void SunTextureManager::processTextureFromName(std::string filename, std::vector
                 //r = colorIntensity; //black
                 //g = 1.0 - colorIntensity; // white
                 //b = 1.0 - colorIntensity; // white
-                r = colorIntensity*0.5 + 0.5;
-                g = colorIntensity*0.5 + 0.5;
-                b = colorIntensity*0.5 + 0.5;
+                r = colorIntensity*0.5 + 0.5; // gray
+                g = colorIntensity*0.5 + 0.5; // gray
+                b = colorIntensity*0.5 + 0.5; // gray
             }
             
             else{

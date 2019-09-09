@@ -47,6 +47,8 @@ public:
     void initialDownload(std::unique_ptr<ghoul::opengl::Texture>& texture);
     void checkFilesInDirectory();
     void getNextTexture(std::string current, float dir, std::string * toReturn);
+    
+    void loadWSATexture(std::unique_ptr<ghoul::opengl::Texture>& texture);
 
 private:
     
@@ -65,6 +67,11 @@ private:
     std::string checkNextTextureId(std::string current, float dir);
 
     std::string getOpenSpaceDateTime();
+    
+    
+    
+    std::unique_ptr<ghoul::opengl::Texture> uploadAndReturnTexture(std::vector<float> imagedata, std::string id);
+    
     
     std::string _syncDir;
     
