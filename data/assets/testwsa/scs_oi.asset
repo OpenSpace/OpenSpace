@@ -29,6 +29,10 @@ local fieldlines = {
             { -1.0, 1.0 },
             { 0.0, 1.0 },
         },
+        MaskingRanges = {
+            { -10000.0, 10000.0 },
+            { 1.0, 1.0 },
+        },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,

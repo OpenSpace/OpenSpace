@@ -10,7 +10,7 @@ asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -33,7 +33,7 @@ asset.require('./testwsa/scs_oi')
 asset.require('./testwsa/pfss_oi')
 asset.require('./testwsa/pfss_io')
 -- Sun earth connection
---asset.require('./testwsa/sub_earth')
+asset.require('./testwsa/sub_earth')
 
 -- Parker Solar Probe asset package
 asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
@@ -42,9 +42,10 @@ asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_tr
 --asset.require('./testwsa/psp_scs_oi')
 -- asset.require('./testwsa/psp_sub_satellite')
 
+
 local Keybindings = {
     {
-        Key = "m",
+        Key = "j",
         Command = renderableHelper.toggle('Scene.PspMarker'),
         Documentation = "Toggles wether the parker solar probe marker is active or not",
         Name = "Toggle Parker solar probe marker",
@@ -79,11 +80,11 @@ local Keybindings = {
         Local = false
     },
     {
-        Key = "n",
+        Key = "k",
         Command = renderableHelper.toggle('Scene.WSA_Fieldlines_PFSS_IO') ..
         renderableHelper.toggle('Scene.WSA_Fieldlines_PFSS_OI') ..
         renderableHelper.toggle('Scene.WSA_Fieldlines_SCS_OI') ..
-        renderableHelper.toggle('Scene.WSA_Fieldlines_Sun_Earth_Connection'),
+        renderableHelper.toggle('Scene.WSA_Fieldlines_Sub_Earth_Track'),
         Documentation = "Toggle all fieldlines in the scene",
         Name = "Toggle all field lines",
         GuiPath = "/Parker Solar Probe",
@@ -118,6 +119,31 @@ local Keybindings = {
         Command = renderableHelper.toggle('Scene.WSA_Fieldlines_PFSS_IO'),
         Documentation = "Toggle PFSS in to out model",
         Name = "Toggle PFSS in to out model",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "n",
+        Command = renderableHelper.toggle('Scene.WSA_Fieldlines_PFSS_OI'),
+        Documentation = "Toggle PFSS out to in model",
+        Name = "Toggle PFSS out to in model",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "m",
+        Command = renderableHelper.toggle('Scene.WSA_Fieldlines_SCS_OI'),
+        Documentation = "Toggle SCS out to in model",
+        Name = "Toggle SCS out to in model",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "l", 
+        Command = "openspace.setPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.Masking.maskingQuantity', 1);" ..
+        "openspace.setPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled', not openspace.getPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled'))",
+        Documentation = "Toggle SCS out to in model",
+        Name = "Toggle SCS out to in model",
         GuiPath = "/Parker Solar Probe",
         Local = false
     },
