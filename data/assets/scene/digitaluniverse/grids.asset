@@ -7,7 +7,7 @@ local speck = asset.syncedResource({
     Name = "Grids Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_grids_speck",
-    Version = 2
+    Version = 3
 })
 
 local radio = {

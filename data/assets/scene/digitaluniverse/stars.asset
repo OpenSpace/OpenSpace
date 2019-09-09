@@ -13,13 +13,13 @@ local speck = asset.syncedResource({
     Name = "Stars Speck Files",
     Type = "HttpSynchronization",
     Identifier = "stars_du",
-    Version = 3
+    Version = 4
 })
 
 local sunspeck = asset.syncedResource({
     Name = "Stars Speck Files",
     Type = "HttpSynchronization",
-    Identifier = "sunstar_du",
+    Identifier = "digitaluniverse_sunstar_speck",
     Version = 1
 })
 
