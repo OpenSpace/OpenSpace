@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Local Dwarfs Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_localdwarfs_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,19 +22,23 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 0.5, 1.0, 0.2 },
-        Transparency = 0.3,
-        File = speck .. "/localdwarfs.speck",
+        ColorMap = speck .. "/localgroup.cmap",
+        ColorOption = { "association" },
+        Opacity = 0.3,
+        File = speck .. "/localgroup.speck",
         Texture = textures .. "/point4.png",
         PolygonSides = 12,
-        LabelFile = speck .. "/localdwarfs.label",
+        LabelFile = speck .. "/localgroup.label",
         TextColor = { 0.3, 0.3, 1.0, 1.0 },
-        ScaleFactor = 478,
+        ScaleFactor = 465,
         TextSize = 18.3,
         TextMinSize = 7.3,
-        Unit = "Mpc"
+        Unit = "Mpc",
+        BillboardMaxSize = 20.0,
+        EnablePixelSizeControl = true
     },
     GUI = {
-        Name = "Local Dwarf Galaxies",
+        Name = "Local Group",
         Path = "/Universe/Galaxies"
     }
 }

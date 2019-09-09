@@ -61,7 +61,7 @@ local Moon = {
                     Name = "Uvvis Hybrid [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms",
                     Settings = {
-                        Gamma = 0.75
+                        Gamma = 0.75,
                         Multiplier = 1.5
                     }
                 },
@@ -70,7 +70,7 @@ local Moon = {
                     Name = "Uvvis Hybrid [Sweden]",
                     FilePath = mapServiceConfigs .. "/LiU/Uvvis_Hybrid.wms",
                     Settings = {
-                        Gamma = 0.75
+                        Gamma = 0.75,
                         Multiplier = 1.5
                     }
                 },

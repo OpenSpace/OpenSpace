@@ -6,7 +6,7 @@ local speck = asset.syncedResource({
     Name = "Voids Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_voids_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -14,11 +14,12 @@ local object = {
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
+        DrawElements = false,
         DrawLabels = true,
         Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.65,
+        Opacity = 0.65,
         LabelFile = speck .. "/voids.label",
-        TextColor = { 0.0, 0.4, 0.7, 1.0 },
+        TextColor = { 0.296, 0.629, 1.0, 1.0 },
         TextSize = 20.9,
         TextMinSize = 8.0,
         Unit = "Mpc"
