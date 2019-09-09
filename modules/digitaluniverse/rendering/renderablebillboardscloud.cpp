@@ -448,16 +448,14 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
         _hasSpeckFile = true;
-
-        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
-        addProperty(_drawElements);
     }
 
     if (dictionary.hasKey(DrawElementsInfo.identifier)) {
         _drawElements = dictionary.value<bool>(DrawElementsInfo.identifier);
-        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
-        addProperty(_drawElements);
     }
+
+    _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+    addProperty(_drawElements);
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
