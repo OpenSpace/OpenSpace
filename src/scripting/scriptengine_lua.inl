@@ -402,8 +402,8 @@ int saveLastChangeToProfile(lua_State* L) {
     std::string dataString = "${ASSETS}/";
     std::string assetPath = absPath(fmt::format("{}{}.scene", dataString, asset));
     std::string tempAssetPath = absPath(fmt::format("{}{}.scene.tmp", dataString, asset));
-    std::string strReplace = "--customizations";
-    std::string strNew = fmt::format("{}\n{}",strReplace, actualLastLine);
+    std::string strReplace = "--customizationsend";
+    std::string strNew = fmt::format("{}\n{}",actualLastLine, strReplace);
     std::ifstream filein(assetPath);
     std::ofstream fileout(tempAssetPath);
     if(!filein) {
