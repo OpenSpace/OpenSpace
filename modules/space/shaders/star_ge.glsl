@@ -80,16 +80,6 @@ float bvToKelvin(float bv) {
 
 void main() {
     vs_position = gl_in[0].gl_Position; // in object space
-    
-    // JCC: Don't display the Sun for now.
-    // if ((vs_position.x == 0.0) &&
-    //     (vs_position.y == 0.0) &&
-    //     (vs_position.z == 0.0))
-    // {
-    //     return;
-    // }
-    
-    vs_position = gl_in[0].gl_Position; // in object space
     dvec4 dpos  = modelMatrix * dvec4(vs_position); 
 
     dvec4 clipTestPos = cameraViewProjectionMatrix * dpos;
@@ -113,13 +103,15 @@ void main() {
         double distanceToStar      = length((dpos.xyz - eyePosition));  
         double apparentBrightness  = pSize * luminosity / (distanceToStar);
         scaleMultiply              = apparentBrightness;
-    } else if (psfParamConf == 1) {
+    }
+    else if (psfParamConf == 1) {
         float L_over_Lsun = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMagAppMag.z);
         float starTemperature = bvToKelvin(ge_bvLumAbsMagAppMag.x);
         float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);
         scaleMultiply = ((lumCent * (ge_bvLumAbsMagAppMag.y + 5E9)) + 
                         (radiusCent * double(starRadius))) * pow(10.0, magnitudeExponent);
-    } else if (psfParamConf == 2) {
+    }
+    else if (psfParamConf == 2) {
         double luminosity              = double(1.0 - ge_bvLumAbsMagAppMag.y);
         double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);
         double apparentBrightness      = luminosity / distanceToStarInParsecs;
@@ -131,10 +123,12 @@ void main() {
                                          (radiusCent * double(starRadius)) + 
                                          (brightnessCent * apparentBrightness * 5E15)) * 
                                          pow(10.0, magnitudeExponent);
-    } else if (psfParamConf == 3) {
+    }
+    else if (psfParamConf == 3) {
         float absMag = ge_bvLumAbsMagAppMag.z;
         scaleMultiply = (-absMag + 35.f) * pow(10.0, magnitudeExponent + 8.5f);
-    } else if (psfParamConf == 4) {
+    }
+    else if (psfParamConf == 4) {
         float absMag = vs_bvLumAbsMagAppMag[0].z;
         double distanceToStarInMeters = length(dpos.xyz - eyePosition);
         double distanceToCenterInMeters = length(eyePosition);
@@ -152,7 +146,8 @@ void main() {
         //scaleMultiply = appMag * pow(10.0, magnitudeExponent + 8.5f);
         scaleMultiply = exp((-30.0 - appMag) * 0.45) * pow(10.0, magnitudeExponent + 8.f);
         //scaleMultiply = pow(10.0, (appMag - absMag)*(1.0/5.0) + 1.0) * pow(10.0, magnitudeExponent + 3.f);
-    } else if (psfParamConf == 5) {
+    }
+    else if (psfParamConf == 5) {
         float absMag = ge_bvLumAbsMagAppMag.z;
         scaleMultiply = exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5f) * 2000;
     }

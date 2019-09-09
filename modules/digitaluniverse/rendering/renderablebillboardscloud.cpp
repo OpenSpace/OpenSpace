@@ -410,12 +410,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
-    , _pointColor(
-        ColorInfo,
-        glm::vec3(1.f, 1.0f, 1.0f),
-        glm::vec3(0.f, 0.f, 0.f),
-        glm::vec3(1.0f, 1.0f, 1.0f)
-    )
+    , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
     , _textColor(
         TextColorInfo,
@@ -1276,7 +1271,7 @@ bool RenderableBillboardsCloud::loadLabelData() {
 }
 
 bool RenderableBillboardsCloud::readSpeckFile() {
-    std::fstream file{ _speckFile };
+    std::ifstream file(_speckFile);
     if (!file.good()) {
         LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
         return false;
