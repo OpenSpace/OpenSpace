@@ -229,6 +229,18 @@ namespace {
         "Minimum radius for picking in NDC coordinates",
         "" // @TODO Missing documentation
     };
+
+    constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
+        "ZoomOutLimit",
+        "Zoom Out Limit",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
+        "ZoomInLimit",
+        "ZoomInLimit",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 using namespace TUIO;
@@ -258,6 +270,8 @@ TouchInteraction::TouchInteraction()
         0.25f
     )
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
+    , _zoomOutLimit(ZoomOutLimitInfo, std::numeric_limits<float>::max(), 1000.0f, std::numeric_limits<float>::max())
+    , _zoomInLimit(ZoomInLimitInfo, 1000.0f, 0.0f, std::numeric_limits<float>::max())
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
@@ -323,6 +337,8 @@ TouchInteraction::TouchInteraction()
     addProperty(_zoomSensitivityProportionalDist);
     addProperty(_zoomSensitivityDistanceThreshold);
     addProperty(_zoomBoundarySphereMultiplier);
+    addProperty(_zoomInLimit);
+    addProperty(_zoomOutLimit);
     addProperty(_constTimeDecay_secs);
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
@@ -1335,29 +1351,26 @@ void TouchInteraction::step(double dt) {
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
 
-            // @TODO (abock 2019-08-20)  This is a dependency that we should get rid of.
-            // The Touch module shouldn't need to know abot the WebGUI module
-            const WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
-
-            float overviewLimit = module.storyHandler().overviewLimit();
-            float zoomInLimit = module.storyHandler().zoomInLimit();
+            double zoomOutLimit = _zoomOutLimit.value();
+            double zoomInLimit = std::max(planetBoundaryRadius, static_cast<double>(_zoomInLimit.value()));
 
             //Apply the velocity to update camera position
             glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
             bool isZoomStepUnderDistToSurface = (length(_vel.zoom*dt) < distToSurface);
             bool willZoomStepViolatePlanetBoundaryRadius =
                 (length(centerToCamera + zoomDistanceIncrement) < planetBoundaryRadius);
-            bool willNewPositionViolateOverviewLimit =
-                (length(centerToCamera + zoomDistanceIncrement) >= overviewLimit);
+
+            bool willNewPositionViolateZoomOutLimit =
+                (length(centerToCamera + zoomDistanceIncrement) >= zoomOutLimit);
             bool willNewPositionViolateZoomInLimit =
                 (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
 
             if (isZoomStepUnderDistToSurface && !willZoomStepViolatePlanetBoundaryRadius)
             {
-                if (willNewPositionViolateOverviewLimit) {
+                if (willNewPositionViolateZoomOutLimit) {
                     camPos -= zoomDistanceIncrement;
                 }
-                else {
+                else if(!willNewPositionViolateZoomInLimit){
                     camPos += zoomDistanceIncrement;
                 }
             }

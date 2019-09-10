@@ -34,6 +34,7 @@ namespace {
 
     constexpr const double AngleEpsilon = 1E-7;
     constexpr const double DistanceRatioAimThreshold = 1E-4;
+    constexpr const double FlightDestinationFactor = 1E-4;
 
     constexpr const openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -438,10 +439,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
 
         // Make the approximation delta size depending on the flight distance
-        double approximation_delta = _flightDestinationDistance.value() * 0.001;
+        double arrivalThreshold = _flightDestinationDistance.value() * FlightDestinationFactor;
 
-        // Fly towards the flight destination distance. When getting closer than approximation_delta terminate the flight
-        if (abs(distFromCameraToFocus - _flightDestinationDistance.value()) > approximation_delta) {
+        // Fly towards the flight destination distance. When getting closer than arrivalThreshold terminate the flight
+        if (abs(distFromCameraToFocus - _flightDestinationDistance.value()) > arrivalThreshold) {
 
             pose.position = moveCameraAlongVector(
                 pose.position,

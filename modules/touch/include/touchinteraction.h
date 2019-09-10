@@ -208,6 +208,8 @@ private:
     properties::FloatProperty _zoomSensitivityProportionalDist;
     properties::FloatProperty _zoomSensitivityDistanceThreshold;
     properties::FloatProperty _zoomBoundarySphereMultiplier;
+    properties::FloatProperty _zoomInLimit;
+    properties::FloatProperty _zoomOutLimit;
     properties::FloatProperty _inputStillThreshold;
     properties::FloatProperty _centroidStillThreshold;
     properties::BoolProperty  _panEnabled;

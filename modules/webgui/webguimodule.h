@@ -27,7 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <modules/webgui/storyhandler.h>
 #include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -51,8 +50,6 @@ public:
     CallbackHandle addEndpointChangeCallback(EndpointCallback cb);
     void removeEndpointChangeCallback(CallbackHandle);
 
-    const webgui::StoryHandler& storyHandler() const;
-
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
@@ -73,8 +70,6 @@ private:
     properties::IntProperty _port;
     properties::StringProperty _address;
     properties::StringProperty _webSocketInterface;
-
-    webgui::StoryHandler _storyHandler;
 
     std::vector<std::pair<CallbackHandle, EndpointCallback>> _endpointChangeCallbacks;
     int _nextCallbackHandle = 0;

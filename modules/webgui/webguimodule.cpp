@@ -117,7 +117,6 @@ WebGuiModule::WebGuiModule()
 {
     addProperty(_enabled);
     addProperty(_entryPoint);
-    addPropertySubOwner(_storyHandler);
     addProperty(_directories);
     addProperty(_servedDirectories);
     addProperty(_defaultEndpoint);
@@ -156,11 +155,6 @@ void WebGuiModule::removeEndpointChangeCallback(CallbackHandle handle) {
 
     _endpointChangeCallbacks.erase(it);
 }
-
-const webgui::StoryHandler& WebGuiModule::storyHandler() const {
-    return _storyHandler;
-}
-
 
 void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     if (configuration.hasValue<int>(PortInfo.identifier)) {
