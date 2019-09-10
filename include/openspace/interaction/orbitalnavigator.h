@@ -142,15 +142,11 @@ private:
 
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
+    properties::FloatProperty _flightDestinationDistance;
+    properties::BoolProperty _applyLinearFlight;
+    
 
     properties::FloatProperty _velocitySensitivity;
-    properties::BoolProperty _flyTo;
-    properties::BoolProperty _overview;
-    //If 1st story selected, allow an additional camera update iteration before overview
-    bool _cameraInitializedBeforeFirstStoryOverview = false;
-    properties::TriggerProperty _applyOverview;
-    properties::TriggerProperty _applyFlyTo;
-    properties::FloatProperty _overviewLimit;
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
@@ -265,7 +261,7 @@ private:
     */
     glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
         double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
-        double focusLimit, bool flyTo) const;
+        double focusLimit) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor

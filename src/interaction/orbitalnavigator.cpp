@@ -142,34 +142,16 @@ namespace {
         "The higher the value the faster the camera will move towards the focus."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlyToNodeInfo = {
-        "FlyToNode",
-        "Fly to focus node",
-        "Determines whether to fly to the focus node or just focus on it."
+    constexpr openspace::properties::Property::PropertyInfo ApplyLinearFlightInfo = {
+        "ApplyLinearFlight",
+        "Apply Linear Flight",
+        "This property makes the camera move to the specified distance 'FlightDestinationDistance' while facing the anchor"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OverviewInfo = {
-        "Overview",
-        "Overview",
-        "Determines whether to zoom out to an overview or not."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ApplyOverviewInfo = {
-        "ApplyOverview",
-        "Apply overview ",
-        "Triggering this property makes the camera move to an overview."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ApplyFlyToInfo = {
-        "ApplyFlyTo",
-        "Apply fly to node",
-        "Triggering this property makes the camera move to the focus node."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo StoryOverviewLimitInfo = {
-        "StoryOverviewLimit",
-        "Story overview distance limit",
-        "Overview zoomed-out distance limit for the story."
+    constexpr openspace::properties::Property::PropertyInfo FlightDestinationDistanceInfo = {
+        "FlightDestinationDistance",
+        "Flight Destination Distance",
+        "The final distance we want to fly to, with regards to the anchor node."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -247,11 +229,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
-    , _flyTo(FlyToNodeInfo, false)
-    , _overview(OverviewInfo, false)
-    , _applyOverview(ApplyOverviewInfo)
-    , _applyFlyTo(ApplyFlyToInfo)
-    , _overviewLimit(StoryOverviewLimitInfo, 1e27, 0.0f, 1e27)
+    , _applyLinearFlight(ApplyLinearFlightInfo, false)
+    , _flightDestinationDistance(FlightDestinationDistanceInfo, 2e8f, 0.0f, 1e10f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -314,10 +293,6 @@ OrbitalNavigator::OrbitalNavigator()
         return glm::clamp(res, 0.0, 1.0);
     });
 
-    addProperty(_applyOverview);
-    addProperty(_applyFlyTo);
-    _applyOverview.onChange([this]() { _overview = true; });
-    _applyFlyTo.onChange([this]() { _flyTo = true; });
 
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
@@ -385,11 +360,8 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_velocitySensitivity);
-    addProperty(_flyTo);
-    addProperty(_overview);
-    addProperty(_applyOverview);
-    addProperty(_applyFlyTo);
-    addProperty(_overviewLimit);
+    addProperty(_flightDestinationDistance);
+    addProperty(_applyLinearFlight);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -459,63 +431,28 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->rotationQuaternion()
     };
 
-    if (_flyTo || _overview) {
+    if (_applyLinearFlight) {
         // Calculate a position handle based on the camera position in world space
-        posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
         glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
-        double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos);
-        double limitOfFlightPath = 0.0;
-        bool performIncrementalFlightStep = false;
+        // Use the boundingsphere to get an approximate distance to the surface of the node
+        double nodeRadius = static_cast<double>(_anchorNode->boundingSphere());
+        double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
 
-        // Zoom in on the focusNode and move towards it, but when the camera arrives to
-        // the focus node make it possible for the user to manually zoom in even closer
-        // or to zoom further out
-        if (_flyTo) {
-            _overview = false;
-            // Get the radius of a focusNode, to be used in the case of zooming
-            glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
-                posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-            glm::dvec3 centerToActualSurface = glm::dmat3(_anchorNode->modelTransform())
-                * centerToActualSurfaceModelSpace;
-            double planetRadius = glm::length(centerToActualSurface);
-            // The distance from the focus node's center to the camera when zoomed in,
-            // i.e. the distance limit when focus is set optimally
-            limitOfFlightPath = planetRadius * 4;
+        // Make the approximation delta size depending on the flight distance
+        double approximation_delta = _flightDestinationDistance.value() * 0.001;
 
-            if (distFromCameraToFocus > limitOfFlightPath) {
-                performIncrementalFlightStep = true;
-            }
-            else {
-                _flyTo = false;
-            }
-        }
-        // Zoom away from the focus node until the entire scene overview is in the camera view
-        if (_overview) {
-            _flyTo = false;
-            limitOfFlightPath = _overviewLimit;
+        // Fly towards the flight destination distance. When getting closer than approximation_delta terminate the flight
+        if (abs(distFromCameraToFocus - _flightDestinationDistance.value()) > approximation_delta) {
 
-            if (_cameraInitializedBeforeFirstStoryOverview) {
-                if (distFromCameraToFocus <= limitOfFlightPath) {
-                    camPosToAnchorPosDiff *= -1.0;
-                    performIncrementalFlightStep = true;
-                }
-                else {
-                    _overview = false;
-                }
-            }
-            else {
-                _cameraInitializedBeforeFirstStoryOverview = true;
-            }
-        }
-
-        if (performIncrementalFlightStep) {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
                 camPosToAnchorPosDiff,
-                limitOfFlightPath,
-                _flyTo
+                _flightDestinationDistance
             );
+        }
+        else {
+            _applyLinearFlight.setValue(false);
         }
     }
 
@@ -1290,27 +1227,20 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 }
 
 glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
-                                                   double distFromCameraToFocus,
+                                                  double distFromCameraToFocus,
                                                   const glm::dvec3& camPosToAnchorPosDiff,
-                                                                        double focusLimit,
-                                                                         bool flyTo) const
+                                                  double focusLimit) const
 {
-    double velocityFactor = 0;
-    const double focusLimitBuffer = 0.1;
+    // This factor adapts the velocity so it slows down when getting closer
+    // to our final destination i.e focus limit
+    double velocityFactor = 0.0;
 
-    // Calculate and truncate the factor which determines the velocity of the 
-    // camera movement towards the focus node
-    if (flyTo) {
-        velocityFactor = (1 - ((focusLimit * (1.0 - focusLimitBuffer))
-        / distFromCameraToFocus));
-    }
-    else {
-        velocityFactor = (1 - (distFromCameraToFocus
-        / (focusLimit * (1.0 + focusLimitBuffer))));
+    if (focusLimit < distFromCameraToFocus) { // When flying towards anchor
+        velocityFactor = 1.0 - focusLimit / distFromCameraToFocus;
+    } else { // When flying away from anchor
+        velocityFactor = (distFromCameraToFocus / (focusLimit)) - 1.0;
     }
     velocityFactor *= _velocitySensitivity;
-    velocityFactor = floor(velocityFactor * 1000) / 1000;
-
     // Return the updated camera position
     return camPos - velocityFactor * camPosToAnchorPosDiff;
 }

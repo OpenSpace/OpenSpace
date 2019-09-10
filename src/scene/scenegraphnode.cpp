@@ -680,12 +680,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     glm::ivec2 res = global::windowDelegate.currentWindowSize();
     
     // Get the radius of node
-    SurfacePositionHandle posHandle = calculateSurfacePositionHandle(cam.positionVec3());
-    glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
-                       posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-    glm::dvec3 centerToActualSurface = glm::dmat3(this->modelTransform()) *
-                                       centerToActualSurfaceModelSpace;
-    double nodeRadius = length(centerToActualSurface);
+    double nodeRadius = static_cast<double>(this->boundingSphere());
 
     // Distance from the camera to the node
     double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
