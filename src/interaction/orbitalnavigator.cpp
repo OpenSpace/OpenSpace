@@ -293,7 +293,6 @@ OrbitalNavigator::OrbitalNavigator()
         return glm::clamp(res, 0.0, 1.0);
     });
 
-
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
     // exponentially decreasing value but we want to be able to control it. Either as
@@ -584,7 +583,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         if (_directlySetStereoDistance) {
             _currentCameraToSurfaceDistance = targetCameraToSurfaceDistance;
             _directlySetStereoDistance = false;
-        } else {
+        }
+        else {
             _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
                 deltaTime,
                 _currentCameraToSurfaceDistance,
@@ -595,7 +595,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             _stereoscopicDepthOfFocusSurface /
             static_cast<float>(_currentCameraToSurfaceDistance)
         );
-    } else {
+    }
+    else {
         _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
     }
 }
@@ -1233,16 +1234,18 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
 {
     // This factor adapts the velocity so it slows down when getting closer
     // to our final destination i.e focus limit
-    double velocityFactor = 0.0;
+    double velocity = 0.0;
 
     if (focusLimit < distFromCameraToFocus) { // When flying towards anchor
-        velocityFactor = 1.0 - focusLimit / distFromCameraToFocus;
+        velocity = 1.0 - focusLimit / distFromCameraToFocus;
     } else { // When flying away from anchor
-        velocityFactor = (distFromCameraToFocus / (focusLimit)) - 1.0;
+        velocity = (distFromCameraToFocus / (focusLimit)) - 1.0;
     }
-    velocityFactor *= _velocitySensitivity;
+    velocity *= _velocitySensitivity;
+    velocity = floor(velocity * 1000) / 1000;
+
     // Return the updated camera position
-    return camPos - velocityFactor * camPosToAnchorPosDiff;
+    return camPos - velocity * camPosToAnchorPosDiff;
 }
 
 glm::dvec3 OrbitalNavigator::followAnchorNodeRotation(const glm::dvec3& cameraPosition,
