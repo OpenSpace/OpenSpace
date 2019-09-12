@@ -34,12 +34,7 @@ local fieldlines = {
         },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
-        SecondsBefore = 24*60*60,
-        SecondsAfter = 24*60*60,
         SimulationModel = "wsa",
-        Color = {
-            Uniform = {0, 0.725, 0.75, 1}
-        },
         ColoringMethod = "Quantity",
     },
     GUI = {

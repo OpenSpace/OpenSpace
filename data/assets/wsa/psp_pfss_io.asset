@@ -1,47 +1,36 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_pfss_oi")
 local transferFunctions = asset.localResource("transferfunctions")
-local windSpeedPolarityColorTable = transferFunctions .. "/polarity_spec.txt"
-local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"
+local opennessColorTable = transferFunctions .. "/openness_spec.txt"
 
 local sunRadius = 695508000
 
 -- Fieldlies from json
 local fieldlines = {
-    Identifier = "WSA_Fieldlines_PFSS_OI",
-    Parent = transforms.TransformGONG.Identifier, -- Use this for regular GONG (Main fieldline endpoints)
-    -- Parent = transforms.HNMReferenceFrame.Identifier, -- Use this for ADAPT GONG (Parker Solar Probe endpoints)
+    Identifier = "PSP_WSA_Fieldlines_PFSS_IO",
+    Parent = transforms.HNMReferenceFrame.Identifier, -- Use this for ADAPT GONG (Parker Solar Probe endpoints)
     Renderable = {
         Type = "RenderableFieldlinesSequence",
-        SourceFolder = fieldlinesDirectory,
         -- Dynamic web content wants a url with a unique id where the data may be fetched.
-        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1179",
+        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1194",
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
         ColorTablePaths = {
-            windSpeedPolarityColorTable,
-            currentSheetColorTable
+            opennessColorTable
         }, 
         ColorTableRanges = {
-            { -1.0, 1.0 },
-            { 0.0, 1.0 },
+            { 0.0, 2.0 }
         },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
-        SecondsBefore = 24*60*60,
-        SecondsAfter = 24*60*60,
         SimulationModel = "wsa",
-        Color = {
-            Uniform = {0.725, 0.1, 0, 1}
-        },
         ColoringMethod = "Quantity"
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA PFSS Out to In Filled Boundary Lines"
+        Name = "PSP WSA PFSS In to Out Lines"
     },
     Transform = {
         Scale = {

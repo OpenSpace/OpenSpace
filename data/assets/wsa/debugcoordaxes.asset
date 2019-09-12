@@ -1,0 +1,15 @@
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local debugHelper = asset.require('util/debug_helper')
+
+transformsFieldlines = asset.require('testwsa/transforms')
+
+local sunRadius = 6.957E8
+
+
+
+
+debugHelper.registerCartesianAxes(asset, {
+    Parent = transforms.SunIAU.Identifier,
+    Scale = sunRadius * 1.5
+})
+

@@ -18,9 +18,9 @@ asset.require('util/default_dashboard')
 -- asset.require('util/default_joystick')
 
 -- DEBUG
--- asset.require('./testwsa/debugcoordaxes');
+asset.require('./testwsa/debugcoordaxes');
 
- asset.require('util/webgui')
+--asset.require('util/webgui')
 
 --asset.request('customization/globebrowsing')
 
@@ -32,20 +32,21 @@ local sunRadius = 695508000
 local earthRadius = 6371
 
 -- Selected field lines + some additional field lines
-asset.require('./testwsa/scs_oi')
-asset.require('./testwsa/pfss_oi')
-asset.require('./testwsa/pfss_io')
+asset.require('./wsa/scs_oi')
+asset.require('./wsa/pfss_oi')
+asset.require('./wsa/pfss_io')
+-- Sub-Earth track
+asset.require('./wsa/sub_earth')
 
 -- Parker Solar Probe asset package
-asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
--- asset.require('./testwsa/psp_pfss_io')
--- asset.require('./testwsa/psp_pfss_oi')
--- asset.require('./testwsa/psp_scs_oi')
--- asset.require('./testwsa/psp_sub_satellite')
+--asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
+--asset.require('./wsa/psp_pfss_io')
+--asset.require('./wsa/psp_pfss_oi')
+--asset.require('./wsa/psp_scs_oi')
+-- asset.require('./wsa/psp_sub_satellite')
 
 
--- Sub-Earth track
--- asset.require('./testwsa/sub_earth')
+
 
 local Keybindings = {
     {

@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_scs_oi")
+local fieldlinesDirectory = asset.localResource("fl_pfss_oi")
 local transferFunctions = asset.localResource("transferfunctions")
 local windSpeedPolarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"
@@ -10,13 +10,14 @@ local sunRadius = 695508000
 
 -- Fieldlies from json
 local fieldlines = {
-    Identifier = "PSP_WSA_Fieldlines_SCS_OI",
-    Parent = transforms.HNMReferenceFrame.Identifier, -- Use this for ADAPT GONG (Parker Solar Probe endpoints)
+    Identifier = "WSA_Fieldlines_PFSS_OI",
+    Parent = transforms.TransformGONG.Identifier, -- Use this for regular GONG (Main fieldline endpoints)
+    -- Parent = transforms.HNMReferenceFrame.Identifier, -- Use this for ADAPT GONG (Parker Solar Probe endpoints)
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
         -- Dynamic web content wants a url with a unique id where the data may be fetched.
-        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1193",
+        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1179",
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
@@ -30,17 +31,12 @@ local fieldlines = {
         },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
-        SecondsBefore = 24*60*60,
-        SecondsAfter = 24*60*60,
         SimulationModel = "wsa",
-        Color = {
-            Uniform = {0, 0.725, 0.75, 1}
-        },
-        ColoringMethod = "Quantity",
+        ColoringMethod = "Quantity"
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "PSP WSA SCS Out to In Filled Boundary Lines"
+        Name = "WSA PFSS Out to In Filled Boundary Lines"
     },
     Transform = {
         Scale = {
