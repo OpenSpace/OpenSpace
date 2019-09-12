@@ -19,12 +19,11 @@ asset.require('util/default_dashboard')
 
 -- DEBUG
 asset.require('./testwsa/debugcoordaxes');
+asset.require('util/webgui')
 
---asset.require('util/webgui')
+asset.request('customization/globebrowsing')
 
---asset.request('customization/globebrowsing')
-
--- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local sunRadius = 695508000
