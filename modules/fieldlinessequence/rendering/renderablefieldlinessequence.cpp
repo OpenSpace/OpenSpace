@@ -625,7 +625,7 @@ namespace openspace {
         extractTriggerTimesFromFileNames();
         FieldlinesState newState;
         if (!newState.loadStateFromOsfls(_sourceFiles[0])) {
-            LERROR("The provided .osfls files seem to be corrupt!");
+            LERROR("The provided .osfls files seem to be corrupt: " + _sourceFiles[0]);
             return false;
         }
         _states.push_back(newState);

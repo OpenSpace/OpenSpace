@@ -156,21 +156,19 @@ namespace openspace{
 
             // First it checks the time against the "bigger window" aka the long list of
             // timesteps we know are available online. If it's outside that we're gonna need a new one
-            if (_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime) && !_webFieldlinesWindow.expectedWindowIsOutOfBounds(openspaceTime)) {
+            if (_webFieldlinesWindow.timeIsInTriggerTimesWebList(openspaceTime) && !_webFieldlinesWindow.expectedWindowIsOutOfBounds(openspaceTime) || _webFieldlinesWindow.checkWorkerEdgeMode()){
 
                 // Check if in window
-                if (_webFieldlinesWindow.timeIsInWindow(openspaceTime)) {
+                if (_webFieldlinesWindow.edgeWindowReady() || _webFieldlinesWindow.timeIsInWindow(openspaceTime)) {
 
                     // Check if in the edge of the window, so we can start downloading a new one
-                    if (_webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, deltaTime)) {
+                    if (!_webFieldlinesWindow.edgeWindowReady() && _webFieldlinesWindow.timeIsInWindowMargin(openspaceTime, deltaTime)) {
                         // get new window
                         _webFieldlinesWindow.newWindow(openspaceTime);
                         hasUpdated = false;
                     }
                     else {
-                        
-                        // If it's in the middle of the window, we can just sit back and relax
-                        // And let the worker work
+                        // If it's in the middle of the window, we can just sit back and relax and let the worker work
                         _webFieldlinesWindow.executeDownloadWorker();
                     }
                 }

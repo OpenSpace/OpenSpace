@@ -6,11 +6,11 @@ local renderableHelper = asset.require('util/renderable_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
--- asset.require('scene/solarsystem/planets')
+asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
--- assetHelper.requestAll(asset, 'scene/digitaluniverse')
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -18,7 +18,7 @@ asset.require('util/default_dashboard')
 -- asset.require('util/default_joystick')
 
 -- DEBUG
-asset.require('./testwsa/debugcoordaxes');
+-- asset.require('./testwsa/debugcoordaxes');
 
  asset.require('util/webgui')
 
@@ -38,14 +38,14 @@ asset.require('./testwsa/pfss_io')
 
 -- Parker Solar Probe asset package
 asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
---asset.require('./testwsa/psp_pfss_io')
---asset.require('./testwsa/psp_pfss_oi')
---asset.require('./testwsa/psp_scs_oi')
+-- asset.require('./testwsa/psp_pfss_io')
+-- asset.require('./testwsa/psp_pfss_oi')
+-- asset.require('./testwsa/psp_scs_oi')
 -- asset.require('./testwsa/psp_sub_satellite')
 
 
 -- Sub-Earth track
-asset.require('./testwsa/sub_earth')
+-- asset.require('./testwsa/sub_earth')
 
 local Keybindings = {
     {
@@ -104,15 +104,15 @@ local Keybindings = {
     },
     {
         Key = "x", 
-        Command = "openspace.time.setTime('2021 APR 28 00:00:00.000')",
-        Documentation = "Jump to 1 September 2017",
-        Name = "Jump to 2017",
+        Command = "openspace.time.setTime('2018 NOV 1 00:00:00.000')",
+        Documentation = "Jump to 1 November 2018",
+        Name = "Jump to 1 November 2018",
         GuiPath = "/Parker Solar Probe",
         Local = false
     },
     {
         Key = "b",
-        Command = renderableHelper.toggle('Scene.WSA_Fieldlines_Sun_Earth_Connection'),
+        Command = renderableHelper.toggle('Scene.WSA_Fieldlines_Sub_Earth_Track'),
         Documentation = "Toggle ballerina skirt",
         Name = "Toggle Sub Earth connection",
         GuiPath = "/Parker Solar Probe",
@@ -144,11 +144,34 @@ local Keybindings = {
     },
     {
         Key = "l", 
-        Command = "openspace.setPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.Masking.maskingQuantity', 1);" ..
-        "openspace.setPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled', not openspace.getPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled'))",
-        Documentation = "Toggle SCS out to in model",
-        Name = "Toggle SCS out to in model",
+        Command = "openspace.setPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.Masking.maskingQuantity', 1)" ..
+        "openspace.setPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled', not openspace.getPropertyValue('Scene.WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled'))" ..
+        "openspace.setPropertyValue('Scene.WSA_Fieldlines_PFSS_OI.Renderable.Masking.maskingQuantity', 1)" ..
+        "openspace.setPropertyValue('Scene.WSA_Fieldlines_PFSS_OI.Renderable.maskingEnabled', not openspace.getPropertyValue('Scene.WSA_Fieldlines_PFSS_OI.Renderable.maskingEnabled'));" ..
+        "openspace.setPropertyValue('Scene.PSP_WSA_Fieldlines_SCS_OI.Renderable.Masking.maskingQuantity', 1)" ..
+        "openspace.setPropertyValue('Scene.PSP_WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled', not openspace.getPropertyValue('Scene.PSP_WSA_Fieldlines_SCS_OI.Renderable.maskingEnabled'))" ..
+        "openspace.setPropertyValue('Scene.PSP_WSA_Fieldlines_PFSS_OI.Renderable.Masking.maskingQuantity', 1)" ..
+        "openspace.setPropertyValue('Scene.PSP_WSA_Fieldlines_PFSS_OI.Renderable.maskingEnabled', not openspace.getPropertyValue('Scene.PSP_WSA_Fieldlines_PFSS_OI.Renderable.maskingEnabled'));",
+        Documentation = "Toggle current sheet in all out to in models",
+        Name = "Toggle current sheet in all out to in models",
         GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+        {
+        Key = "h", 
+        Command = "openspace.setPropertyValue('Scene.WSA_Fieldlines_Sub_Earth_Track.Renderable.Masking.maskingQuantity', 1)" ..
+                "openspace.setPropertyValue('Scene.WSA_Fieldlines_Sub_Earth_Track.Renderable.maskingEnabled', true);",
+        Documentation = "Show only one layer of sub earth track",
+        Name = "Toggle sub satellite layers",
+        GuiPath = "/Parker Solar Probe",
+        Local = false
+    },
+    {
+        Key = "Shift+g",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');" ..
+        "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+        "openspace.globebrowsing.goToGeo(38.995412,-76.857665)",
+        Documentation = "Sets the focus of the camera on 'Goddard'",
         Local = false
     },
 }

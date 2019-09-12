@@ -80,7 +80,6 @@ namespace openspace{
         if (direction > 0){ // If time is moving forward
             if(time >= _window.triggerTimes[_window.nTriggerTimes - threshold].first){
                 if(time > windowEnd()){
-                    LERROR("Time is outside of window in margin-check-function. This shouldn't happen.");
                     return false;
                 }
                 return true;
@@ -90,7 +89,6 @@ namespace openspace{
         else{ // If time is moving backwards
             if(time <= _window.triggerTimes[threshold].first){
                 if(time < windowStart()){
-                    LERROR("Time is outside of window in margin-check-function. This shouldn't happen.");
                     return false;
                 }
                 return true;
@@ -106,6 +104,7 @@ namespace openspace{
     void WebFieldlinesWindow::executeDownloadWorker(){
         _worker.downloadWindow(_window.triggerTimes);
         _worker.updateRFSSourceFiles(*rfs_sourceFiles);
+        _edgeWindowReady = false;
     }
     
     void WebFieldlinesWindow::newWindow(double time){
@@ -115,23 +114,27 @@ namespace openspace{
         });
 
         const int index = static_cast<int>(std::distance(it, _triggerTimesWeb.rend())) - 1;
-
         _window.triggerTimes.clear();
         _window.nTriggerTimes = 0;
+
         // This should be safe, because in the manager, it is checked wether the current position is within
         // the boundaries with respect to back & forward width
-        for(int i = index - _window.backWidth; i <= index + _window.forwardWidth; i++){
-            if(i < 0) i = 0;
+        for(int i = std::max(index - _window.backWidth,0); i <= std::min(index + _window.forwardWidth, static_cast<int>(_triggerTimesWeb.size() -1)); i++){
             _window.triggerTimes.push_back(std::make_pair(_triggerTimesWeb[i].first, _triggerTimesWeb[i].second));
             _window.nTriggerTimes++;
         }
 
+        if (_worker.edgeMode())
+            _edgeWindowReady = true;
+        
         _worker.newWindowToDownload();
     }
     
     bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time){
+        // There are no files to compare with, just going to be false.
         if(_nAvailableWeb == 0) return false;
 
+        // Most cases, we are currently in the middle of a bunch of datasets, if we are not, lets get some new ones.
         if(time >= (_triggerTimesWeb.front().first) && time <= (_triggerTimesWeb.back().first))
             return true;
         else 
@@ -139,7 +142,6 @@ namespace openspace{
     }
     
     void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
-
         _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
         _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
     }
@@ -164,6 +166,14 @@ namespace openspace{
 
     void WebFieldlinesWindow::rfsHasUpdated() {
         _worker.flagUpdated();
+    }
+
+    bool WebFieldlinesWindow::checkWorkerEdgeMode(){
+        return _worker.edgeMode();
+    }
+
+    bool WebFieldlinesWindow::edgeWindowReady(){
+        return _edgeWindowReady;
     }
     
     // -------------------------- PRIVATE FUNCTIONS  -----------------------------------//

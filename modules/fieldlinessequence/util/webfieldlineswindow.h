@@ -106,6 +106,13 @@ public:
     // Calling the functioh in worker that renderable fieldlinessequence has updated.
 	void rfsHasUpdated();
 
+    // Returns true if big window is fetching files from the end or beginning of a data segment
+    // Returns false if not.
+    bool checkWorkerEdgeMode();
+
+    // Returns true if edge-window is ready
+    bool edgeWindowReady();
+
 private:
     
     // PRIVATE MEMBER VARIABLES
@@ -115,6 +122,7 @@ private:
     
     // The worker that handles downloads
     WebFieldlinesWorker _worker;
+    bool _edgeWindowReady = false;
         
     // This is a long list of everything available online,
     // they are tuples of 3; double is timetrigger, string is donwload key, int is index to where it is on disk

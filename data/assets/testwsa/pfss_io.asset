@@ -7,7 +7,6 @@ local opennessColorTable = transferFunctions .. "/openness_spec.txt"
 
 local sunRadius = 695508000
 
--- Fieldlies from json
 local fieldlines = {
     Identifier = "WSA_Fieldlines_PFSS_IO",
     Parent = transforms.TransformGONG.Identifier, -- Use this for regular GONG (Main fieldline endpoints)

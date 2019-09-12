@@ -330,9 +330,9 @@ void RenderableSphere::initializeGL() {
 
     loadTexture();
     
-    if(_texturePath.fullyQualifiedIdentifier() == "Scene.Sun.Renderable.Texture"){
+    /*if(_texturePath.fullyQualifiedIdentifier() == "Scene.Sun.Renderable.Texture"){
         _sunTexMgr.loadWSATexture(_texture);
-    }
+    } */
 }
 
 void RenderableSphere::deinitializeGL() {

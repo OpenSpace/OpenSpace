@@ -64,12 +64,16 @@ public:
     // Notifies the worker that a new window is ready
     void newWindowToDownload();
 
+    // If the current window is on the edge of a datasets, but if there are some file in that window, it is still desired to download it.
+    bool edgeMode();
+
 private:
 
     // This list is the keep all the started downloads alive between frames, the second argument is a pair, used for identifying which download it is
     std::vector<AsyncHttpFileDownload> _downloadList;
     std::vector<std::pair<double,std::string>> _downloadListIdentifier;
 
+    // Asynchttpdownloader worker.
     std::unique_ptr<AsyncHttpFileDownload> _downloading;
 
     // Might need this l8r
@@ -91,10 +95,10 @@ private:
     bool _readyToUpdateSourceFiles = false;
     bool _doneUpdating = false;
     bool _newWindow = false;
-
-
     bool _readyToDownload = true;
-    bool _noEmptyResponses = true;
+    bool _noMoreRequests = false;
+    bool _bigWindowHasData = false;
+    bool _downloadedSomething = false;
     unsigned int _strikes = 0;
     std::pair<double, double> acceptableToStartRequestingAgain = std::make_pair(0.0, 0.0);
     

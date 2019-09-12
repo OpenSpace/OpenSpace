@@ -64,12 +64,8 @@ namespace openspace{
     // PUBLIC FUNCTIONS
     void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime, double endTime, std::vector<std::pair<double, std::string>> &_triggerTimesWeb){
 
-        if (global::timeManager.time().j2000Seconds() < acceptableToStartRequestingAgain.first || global::timeManager.time().j2000Seconds() > acceptableToStartRequestingAgain.second) {
-            _noEmptyResponses = true;
-        }
-
         // We don't want to keep sending request, if we just get empty responses.
-        if (_noEmptyResponses) {
+        if (!_noMoreRequests) {
             auto time = global::timeManager.time().ISO8601();
             Time maxTime;
             Time minTime;
@@ -97,13 +93,13 @@ namespace openspace{
             });
 
             auto res = json::parse(stringResult);
+            auto temp = std::move(_triggerTimesWeb);
+            _triggerTimesWeb.clear(); // Clear old big window
 
             for (auto& elem : res[files]) {
                 timeList.push_back(elem["timestamp"]);
                 urlList.push_back(elem["url"]);
             }
-
-            _triggerTimesWeb.clear(); // Clear old big window
 
             // Just want to make sure there is no error in the parsing, so taking the smallest dimension, but should be the same
             for (int i = 0; i < std::min(timeList.size(), urlList.size()); i++) {
@@ -112,11 +108,12 @@ namespace openspace{
 
             std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end()); // If by any chance it would not sort in properly
 
-            if (_triggerTimesWeb.size() == 0) // We got an empty response
+            if (_triggerTimesWeb.size() == 0 || std::equal(temp.begin(),temp.end(),_triggerTimesWeb.begin(), _triggerTimesWeb.end())) // We got an empty response or the same response twice, stahp it
                 _strikes++;
 
             if (_strikes % 2 == 0){ // We have got 2 strikes, no more requests for you, Mr.Sir.
-                _noEmptyResponses = false;
+                _bigWindowHasData = (_triggerTimesWeb.size() > 0);
+                _noMoreRequests = true;
                 acceptableToStartRequestingAgain = std::make_pair(minTime.j2000Seconds(), maxTime.j2000Seconds());
             }     
         }
@@ -134,22 +131,9 @@ namespace openspace{
         bool oneUpdate = false;
         bool fastDownload = global::timeManager.deltaTime() > 1800.0;
 
-        // May be interesting to keep something like this, if it will be possible to use a list of 
-        // AsyncHttpFileDownloads
-        
-        /*if (auto index = std::find_if(_downloadList.begin(), _downloadList.end(), [](auto element) {
-            return element.first->hasSucceeded();
-        }); index != _downloadList.end()) {
-            // There is a successful download
-            index->first->wait();
-            addToDownloadedList(index->second);
-            _downloadList.erase(index);
-        }
-        else { */
-
         if (fastDownload) startingPoint = triggerTimes.size() - 1;
 
-
+        // Is there a download thread to be joined and added to the list?
         if (_downloading && _downloading->hasSucceeded() && _newWindow) {
             _downloading->wait();
             addToDownloadedList(_latestDownload);
@@ -172,7 +156,6 @@ namespace openspace{
                 }
             });
 
-
             // Backwards
             if (!downloaded) {
                 std::for_each(triggerTimes.rbegin(), triggerTimes.rend(), [this, &downloaded](auto it) {
@@ -185,7 +168,7 @@ namespace openspace{
             }
         }
 
-        if ((!downloaded && !_doneUpdating && _newWindow && _readyToDownload) || oneUpdate) {
+        if ((!downloaded && !_doneUpdating && _newWindow && _readyToDownload && _downloadedSomething) || oneUpdate && _downloadedSomething) {
             // If reach this point, we now know that we have downloaded all the sets
             _readyToUpdateSourceFiles = true;
             if(!oneUpdate)
@@ -240,10 +223,19 @@ namespace openspace{
 
     void WebFieldlinesWorker::newWindowToDownload(){
         _newWindow = true;
+        _downloadedSomething = false;
+    }
+
+    bool WebFieldlinesWorker::edgeMode(){
+        if (global::timeManager.time().j2000Seconds() < acceptableToStartRequestingAgain.first || global::timeManager.time().j2000Seconds() > acceptableToStartRequestingAgain.second) {
+            _noMoreRequests = false;
+            _bigWindowHasData = false;
+        }
+        return _noMoreRequests && _bigWindowHasData;
     }
     
     std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKey){
-
+        _downloadedSomething = true;
         _latestDownload = downloadKey;
         // YYYY-MM-DDTHH-MM-SS.sss.osfls - Might change
         const int fileNameLength = 29;
