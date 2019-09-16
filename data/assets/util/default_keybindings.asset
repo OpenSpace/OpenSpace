@@ -11,14 +11,6 @@ local Keybindings = {
         Local = true
     },
     {
-        Key = "F4",
-        Name = "Show Performance Measurements",
-        Command = propertyHelper.invert("RenderEngine.PerformanceMeasurements"),
-        Documentation = "Toogles performance measurements that shows rendering time informations.",
-        GuiPath = "/Native GUI",
-        Local = true
-    },
-    {
         Key = "ESC",
         Name = "Toggle Shutdown",
         Command = "openspace.toggleShutdown()",
