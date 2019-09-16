@@ -427,6 +427,7 @@ int saveLastChangeToProfile(lua_State* L) {
     filein.close();
     fileout.close();
     if (found) {
+        FileSys.deleteFile(assetPath);
         int success = rename(tempAssetPath.c_str(), assetPath.c_str());
         if (success != 0) {
             std::string error = fmt::format("Error renaming file {} to {}",
