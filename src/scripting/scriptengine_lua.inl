@@ -399,6 +399,12 @@ int saveLastChangeToProfile(lua_State* L) {
         lastLine=line;
     }
 
+    if (actualLastLine.find("openspace.setPropertyValue") == std::string::npos) {
+        ghoul::lua::push(L, "Only property value changes can be saved.");
+        printInternal(ghoul::logging::LogLevel::Error, L);
+        return -1;
+    }
+
     std::string dataString = "${ASSETS}/";
     std::string assetPath = absPath(fmt::format("{}{}.scene", dataString, asset));
     std::string tempAssetPath = absPath(fmt::format("{}{}.scene.tmp", dataString, asset));
