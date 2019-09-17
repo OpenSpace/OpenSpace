@@ -85,6 +85,13 @@ namespace {
     };
     constexpr const char* KeyFixedBoundingSphere = "FixedBoundingSphere";
 
+    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
+        "BoundingSphere",
+        "Bounding Sphere",
+        "The bounding sphere of the scene graph node. This can be the "
+        "bounding sphere of a renderable or a fixed bounding sphere. "
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
         "Gui Path",
