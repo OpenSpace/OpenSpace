@@ -25,8 +25,6 @@
 #include <openspace/engine/globals.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
-#include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webgui/webguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/globals.h>
@@ -40,6 +38,7 @@
 #include <ghoul/misc/invariants.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/updatestructures.h>
 
 #include <glm/gtx/quaternion.hpp>
 
@@ -233,13 +232,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
         "ZoomOutLimit",
         "Zoom Out Limit",
-        "" // @TODO Missing documentation
+        "The maximum distance you are allowed to navigate away from the anchor. "
+        "This should always be larger than the zoom in value if you want to be able "
+        "to zoom. Defaults to maximum allowed double."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
         "ZoomInLimit",
-        "ZoomInLimit",
-        "" // @TODO Missing documentation
+        "Zoom In Limit",
+        "The minimum distance from the anchor that you are allowed to navigate to. "
+        "Its purpose is to limit zooming in on a node. If this value is not set it "
+        "defaults to the surface of the current anchor. "
     };
 } // namespace
 
@@ -270,8 +273,8 @@ TouchInteraction::TouchInteraction()
         0.25f
     )
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
-    , _zoomOutLimit(ZoomOutLimitInfo, std::numeric_limits<float>::max(), 1000.0f, std::numeric_limits<float>::max())
-    , _zoomInLimit(ZoomInLimitInfo, 1000.0f, 0.0f, std::numeric_limits<float>::max())
+    , _zoomOutLimit(ZoomOutLimitInfo, std::numeric_limits<double>::max(), 1000.0f, std::numeric_limits<double>::max())
+    , _zoomInLimit(ZoomInLimitInfo, -1.0f, 0.0f, std::numeric_limits<double>::max())
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
@@ -691,7 +694,8 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         if (c != list.end()) {
              // normalized -1 to 1 coordinates on screen
             screenPoints.emplace_back(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5));
-        } else {
+        }
+        else {
             global::moduleEngine.module<ImGUIModule>()->touchInput = {
                 true,
                 glm::dvec2(0.0, 0.0),
@@ -1148,7 +1152,8 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                         static_cast<float>(_zoomSensitivityExponential)
                     );
                 }
-            } else {
+            }
+            else {
                 zoomFactor = 1.0;
             }
             _vel.zoom = zoomFactor * _zoomSensitivityProportionalDist *
@@ -1301,7 +1306,6 @@ void TouchInteraction::step(double dt) {
         dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();
 
         double boundingSphere = anchor->boundingSphere();
-        dvec3 centerToBoundingSphere;
         double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
         _currentRadius = boundingSphere /
                          std::max(distance * _projectionScaleFactor, 1.0);
@@ -1345,32 +1349,65 @@ void TouchInteraction::step(double dt) {
             globalCamRot = normalize(quat_cast(inverse(lookAtMatrix)));
         }
         { // Zooming
-            centerToBoundingSphere = -directionToCenter * boundingSphere;
-            centerToCamera = camPos - centerPos;
-            double planetBoundaryRadius = length(centerToBoundingSphere);
-            planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
-            double distToSurface = length(centerToCamera - planetBoundaryRadius);
 
-            double zoomOutLimit = _zoomOutLimit.value();
-            double zoomInLimit = std::max(planetBoundaryRadius, static_cast<double>(_zoomInLimit.value()));
+            // This is a rough estimate of the node surface
+            double zoomInBounds = boundingSphere * _zoomBoundarySphereMultiplier;
+
+            // If nobody has set another zoom in limit, use the default zoom in bounds
+            if (_zoomInLimit.value() < 0) {
+                _zoomInLimit.setValue(zoomInBounds);
+            }
+            else if (_zoomInLimit.value() < zoomInBounds) {
+                // If zoom in limit is less than the estimated node radius we need to 
+                // make sure we do not get too close to possible height maps
+                SurfacePositionHandle posHandle = anchor->calculateSurfacePositionHandle(camPos);
+                glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
+                    posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+                glm::dvec3 centerToActualSurface = glm::dmat3(anchor->modelTransform()) *
+                    centerToActualSurfaceModelSpace;
+                double nodeRadius = length(centerToActualSurface);
+
+                // Because of heightmaps we should make sure we do not go through the surface
+                if (_zoomInLimit.value() < nodeRadius) {
+#ifdef TOUCH_DEBUG_PROPERTIES
+                    LINFO(fmt::format(
+                        "{}: Zoom In Limit should be larger than anchor center to surface, setting it to {}",
+                        _loggerCat, zoomInBounds);
+#endif
+                    _zoomInLimit.setValue(zoomInBounds);
+                }     
+            }
+           
+            // Make sure zoom in limit is not larger than zoom out limit
+            if (_zoomInLimit.value() > _zoomOutLimit.value()) {
+               LWARNING(fmt::format(
+                   "{}: Zoom In Limit should be smaller than Zoom Out Limit", 
+                    _loggerCat, _zoomOutLimit.value()
+               ));
+            }
 
             //Apply the velocity to update camera position
             glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
-            bool isZoomStepUnderDistToSurface = (length(_vel.zoom*dt) < distToSurface);
-            bool willZoomStepViolatePlanetBoundaryRadius =
-                (length(centerToCamera + zoomDistanceIncrement) < planetBoundaryRadius);
+            double newPosDistance = length(centerToCamera + zoomDistanceIncrement);
+            double currentPosDistance = length(centerToCamera);
 
-            bool willNewPositionViolateZoomOutLimit =
-                (length(centerToCamera + zoomDistanceIncrement) >= zoomOutLimit);
-            bool willNewPositionViolateZoomInLimit =
-                (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
+            // Possible with other navigations performed outside touch interaction
+            bool currentPosViolatingZoomOutLimit = (currentPosDistance >= _zoomOutLimit.value());
+            bool willNewPositionViolateZoomOutLimit = (newPosDistance >= _zoomOutLimit.value());
+            bool willNewPositionViolateZoomInLimit = (newPosDistance < _zoomInLimit.value());
 
-            if (isZoomStepUnderDistToSurface && !willZoomStepViolatePlanetBoundaryRadius)
-            {
-                if (willNewPositionViolateZoomOutLimit) {
-                    camPos -= zoomDistanceIncrement;
-                }
-                else if(!willNewPositionViolateZoomInLimit){
+            if(!willNewPositionViolateZoomInLimit && !willNewPositionViolateZoomOutLimit){
+                camPos += zoomDistanceIncrement;
+            }
+            else if (currentPosViolatingZoomOutLimit) {
+#ifdef TOUCH_DEBUG_PROPERTIES
+                LINFO(fmt::format(
+                    "{}: You are outside zoom out {} limit, only zoom in allowed",
+                    _loggerCat, _zoomOutLimit.value());
+#endif
+                // Only allow zooming in if you are outside the zoom out limit
+                if (newPosDistance < currentPosDistance)
+                {
                     camPos += zoomDistanceIncrement;
                 }
             }
@@ -1567,7 +1604,8 @@ void TouchInteraction::setFocusNode(const SceneGraphNode* focusNode) {
         global::navigationHandler.orbitalNavigator().setAnchorNode(
             focusNode->identifier()
         );
-    } else {
+    }
+    else {
         global::navigationHandler.orbitalNavigator().setAnchorNode("");
     }
 }

@@ -284,7 +284,8 @@ OrbitalNavigator::OrbitalNavigator()
     _retargetAim.onChange([this]() {
         if (_aimNode && _aimNode != _anchorNode) {
             startRetargetAim();
-        } else {
+        }
+        else {
             startRetargetAnchor();
         }
     });
@@ -1231,19 +1232,19 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
                                                   double distFromCameraToFocus,
                                                   const glm::dvec3& camPosToAnchorPosDiff,
-                                                  double focusLimit) const
+                                                  double destination) const
 {
     // This factor adapts the velocity so it slows down when getting closer
-    // to our final destination i.e focus limit
+    // to our final destination
     double velocity = 0.0;
 
-    if (focusLimit < distFromCameraToFocus) { // When flying towards anchor
-        velocity = 1.0 - focusLimit / distFromCameraToFocus;
-    } else { // When flying away from anchor
-        velocity = (distFromCameraToFocus / (focusLimit)) - 1.0;
+    if (destination < distFromCameraToFocus) { // When flying towards anchor
+        velocity = 1.0 - destination / distFromCameraToFocus;
+    }
+    else { // When flying away from anchor
+        velocity = distFromCameraToFocus / destination - 1.0;
     }
     velocity *= _velocitySensitivity;
-    velocity = floor(velocity * 1000) / 1000;
 
     // Return the updated camera position
     return camPos - velocity * camPosToAnchorPosDiff;
