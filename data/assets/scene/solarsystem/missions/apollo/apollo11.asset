@@ -196,6 +196,7 @@ local Apollo11LemDescentModel = {
             Type = "MultiModelGeometry",
             GeometryFile = model.modelFolder .. "/lmremoved.obj"
         },
+        SpecularIntensity = 0.0,
         ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
     },
@@ -225,6 +226,7 @@ local Apollo11LemLandedModel = {
             Type = "MultiModelGeometry",
             GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
         },
+        SpecularIntensity = 0.0,
         ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
     },

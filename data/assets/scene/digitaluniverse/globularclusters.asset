@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Globular Clusters Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_globularclusters_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,17 +22,19 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 0.8, 0.8, 0.0 },
-        Transparency = 0.35,
+        Opacity = 1.0,
         File = speck .. "/gc.speck",
         Texture = textures .. "/point4.png",
         PolygonSides = 5,
         LabelFile = speck .. "/gc.label",
         TextColor = { 0.5, 0.5, 0.0, 1.0 },
         ScaleFactor = 440.0,
-        TextSize = 17.5,
+        TextSize = 18.6,
         TextMinSize = 10.0,
-        TextMaxSize = 30.0,
-        Unit = "pc"
+        TextMaxSize = 14.4,
+        Unit = "pc",
+        BillboardMaxSize = 13.5,
+        EnablePixelSizeControl = true,
     },
     GUI = {
         Name = "Globular Clusters",

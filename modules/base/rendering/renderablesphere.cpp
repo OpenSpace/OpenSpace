@@ -295,6 +295,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
             setRenderBin(Renderable::RenderBin::Background);
         }
     }
+
+    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {

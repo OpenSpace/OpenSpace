@@ -47,9 +47,13 @@ uniform float correctionSizeEndDistance;
 
 uniform bool enabledRectSizeControl;
 
-in vec4 colorMap[];
+uniform bool hasDvarScaling;
 
-out vec4 gs_colorMap;
+flat in vec4 colorMap[];
+flat in float dvarScaling[];
+
+flat out vec4 gs_colorMap;
+
 out vec2 texCoord;
 out float vs_screenSpaceDepth;
 out float ta;
@@ -65,11 +69,11 @@ const vec2 corners[4] = vec2[4](
 
 
 void main() {
-    ta          = 1.0f;
-    vec4 pos    = gl_in[0].gl_Position; // in object space
-    gs_colorMap = colorMap[0];
-
-    double unit = PARSEC;
+    ta             = 1.0f;
+    vec4 pos       = gl_in[0].gl_Position; // in object space
+    gs_colorMap    = colorMap[0];
+    
+    double unit    = PARSEC;
 
     // Must be the same as the enum in RenderableBillboardsCloud.h
     if (pos.w == 1.f) {
@@ -91,8 +95,11 @@ void main() {
     dpos = modelMatrix * dpos;
 
     double scaleMultiply = exp(scaleFactor * 0.10);
+    scaleMultiply        = hasDvarScaling ? dvarScaling[0] * scaleMultiply : scaleMultiply;
+    
     dvec3 scaledRight    = dvec3(0.0);
     dvec3 scaledUp       = dvec3(0.0);
+    
     vec4 initialPosition, secondPosition, thirdPosition, crossCorner;
   
     if (renderOption == 0) {
@@ -139,11 +146,12 @@ void main() {
             scaledRight *= correctionScale;
             scaledUp    *= correctionScale;
         
-        } else {            
+        } else {
+            // linear alpha decay
             if (sizes.x < 2.0f * minBillboardSize) {
                 float maxVar = 2.0f * minBillboardSize;
                 float minVar = minBillboardSize;
-                float var    = (sizes.y + sizes.x);    
+                float var    = (sizes.y + sizes.x);
                 ta = ( (var - minVar)/(maxVar - minVar) );
                 if (ta == 0.0f)
                     return;

@@ -4,10 +4,10 @@
         <Display swapInterval="0" />
     </Settings>
     <Node address="localhost" port="20401">
-        <Window fullScreen="false" name="OpenSpace">
+        <Window fullScreen="true" numberOfSamples="4" name="OpenSpace">
             <Stereo type="none" />
-            <Size x="1280" y="720" />
-            <Pos x="50" y="50" />
+            <Size x="1920" y="1080" />
+            <Pos x="0" y="0" />
             <Viewport tracked="true">
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
@@ -17,15 +17,6 @@
                 </PlanarProjection>
             </Viewport>
         </Window>
-        <Window fullScreen="false" name="GUI" tags="GUI">
-            <Stereo type="none" />
-            <Size x="1280" y="720" />
-            <Pos x="50" y="50" />
-            <Viewport>
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-            </Viewport>
-        </Window>       
     </Node>
     <User eyeSeparation="0.065">
         <Pos x="0.0" y="0.0" z="0.0" />
