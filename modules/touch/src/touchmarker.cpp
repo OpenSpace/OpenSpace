@@ -131,7 +131,7 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);  // When included this line makes the webgui disappear at touch interaction
         glBindVertexArray(_quad);
         glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
 

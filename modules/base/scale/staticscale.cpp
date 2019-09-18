@@ -58,7 +58,7 @@ double StaticScale::scaleValue(const UpdateData&) const {
     return _scaleValue;
 }
 
-StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6) {
+StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.0, 0.1, 100) {
     addProperty(_scaleValue);
 
     _scaleValue.onChange([this]() {

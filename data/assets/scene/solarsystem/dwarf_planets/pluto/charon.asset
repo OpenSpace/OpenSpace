@@ -20,10 +20,6 @@ local Charon = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_CHARON",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {

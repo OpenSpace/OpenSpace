@@ -32,6 +32,7 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -208,6 +209,8 @@ private:
     properties::FloatProperty _zoomSensitivityProportionalDist;
     properties::FloatProperty _zoomSensitivityDistanceThreshold;
     properties::FloatProperty _zoomBoundarySphereMultiplier;
+    properties::DoubleProperty _zoomInLimit;
+    properties::DoubleProperty _zoomOutLimit;
     properties::FloatProperty _inputStillThreshold;
     properties::FloatProperty _centroidStillThreshold;
     properties::BoolProperty  _panEnabled;

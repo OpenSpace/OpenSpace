@@ -14,12 +14,6 @@ local mapServiceConfigsPath = asset.localResource("map_service_configs")
 local Earth = {
     Identifier = "Earth",
     Parent = transforms.EarthIAU.Identifier,
-    Transform = {
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
-        }
-    },
     Renderable = {
         Type = "RenderableGlobe",
         Radii = earthEllipsoid,

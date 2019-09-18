@@ -54,6 +54,12 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
+        "BoundingSphere",
+        "Bounding Sphere",
+        "The size of the bounding sphere radius."
+    };
+
 } // namespace
 
 namespace openspace {
@@ -109,6 +115,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
+    , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
 {
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
@@ -144,6 +151,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         _renderableType = dictionary.value<std::string>(RenderableTypeInfo.identifier);
     }
     addProperty(_renderableType);
+    addProperty(_boundingSphere);
 }
 
 void Renderable::initialize() {}
@@ -159,11 +167,12 @@ void Renderable::update(const UpdateData&) {}
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
-    _boundingSphere = boundingSphere;
+
+    _boundingSphere.setValue(boundingSphere);
 }
 
 float Renderable::boundingSphere() const {
-    return _boundingSphere;
+    return _boundingSphere.value();
 }
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(

@@ -64,6 +64,8 @@ public:
     void setCamera(Camera* camera);
     void clearPreviousState();
 
+    SceneGraphNode* focusNode() const;
+    void setFocusNode(const SceneGraphNode* focusNode);
     void setFocusNode(const std::string& focusNode);
     void setAnchorNode(const std::string& anchorNode);
     void setAimNode(const std::string& aimNode);
@@ -118,7 +120,6 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setFocusNode(const SceneGraphNode* focusNode);
     void setAnchorNode(const SceneGraphNode* anchorNode);
     void setAimNode(const SceneGraphNode* aimNode);
 
@@ -141,7 +142,11 @@ private:
 
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
+    properties::FloatProperty _flightDestinationDistance;
+    properties::BoolProperty _applyLinearFlight;
+    
 
+    properties::FloatProperty _velocitySensitivity;
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
@@ -245,6 +250,18 @@ private:
     glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
+
+    /**
+    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the focusLimit.
+    * The velocity of the zooming depend on distFromCameraToFocus and the final frame
+    * where the camera stops moving depends on the distance set in the variable focusLimit.
+    * The bool determines whether to move/fly towards the focus node or away from it.
+    * \returns a new position of the camera, closer to the focusLimit than the previous 
+    * position.
+    */
+    glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
+        double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
+        double destination) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor

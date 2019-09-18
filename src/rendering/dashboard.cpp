@@ -37,6 +37,12 @@ namespace {
         "If this value is 'false', this dashboard will be invisible, regardless of the "
         "state of the individual components"
     };
+    constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
+        "StartPositionOffset",
+        "Start Position Offset",
+        "A 2D vector controlling where the dashboard rendering starts."
+        "Adding an offset in x and y-direction on screen"
+    };
 } // namespace
 
 namespace openspace {
@@ -44,8 +50,12 @@ namespace openspace {
 Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
+    , _startPositionOffset(
+        properties::IVec2Property(StartPositionOffsetInfo, glm::ivec2(10, -10))
+    )
 {
     addProperty(_isEnabled);
+    addProperty(_startPositionOffset);
 }
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
@@ -127,6 +137,10 @@ void Dashboard::render(glm::vec2& penPosition) {
         }
     }
 }
+
+glm::vec2 Dashboard::getStartPositionOffset() {
+    return _startPositionOffset.value();
+};
 
 scripting::LuaLibrary Dashboard::luaLibrary() {
     return {
