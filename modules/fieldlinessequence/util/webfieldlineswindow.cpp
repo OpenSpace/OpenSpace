@@ -34,160 +34,176 @@
 
 
 namespace {
-    constexpr const char* _loggerCat = "FieldlinesSequence[ Web FLs Window ]";
+    constexpr const char* _loggerCat = "WebFieldlinesWindow";
     
 } // namespace
 
 namespace openspace{
-    // --------------------------- CONSTRUCTORS ---------------------------------------//
-    WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
-                                             std::vector<std::string>& _sourceFiles,
-                                             std::vector<double>& _startTimes, size_t& _nStates)
-                                             {
-        _window.backWidth = 3;
-        _window.forwardWidth = 3;
+
+WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
+                                                std::vector<std::string>& _sourceFiles,
+                                    std::vector<double>& _startTimes, size_t& _nStates)
+{
+    _window.backWidth = 3;
+    _window.forwardWidth = 3;
         
-        _window.nTriggerTimes = static_cast<int>(_nStates);
+    _window.nTriggerTimes = static_cast<int>(_nStates);
         
-        for(int i = 0; i < _window.nTriggerTimes ; i++){
-            _window.triggerTimes.push_back(std::make_pair(_startTimes[i], _sourceFiles[i]));
-        }
-        
-        rfs_nStates = &_nStates;
-        rfs_sourceFiles = &_sourceFiles;
-        rfs_startTimes = &_startTimes;
-        
-        _nAvailableWeb = 0; // haven't downloaded that list yet
-        
-        _worker = WebFieldlinesWorker(syncDir, serverUrl);
-                
+    for(int i = 0; i < _window.nTriggerTimes ; i++){
+        _window.triggerTimes.push_back(
+            std::make_pair(_startTimes[i], _sourceFiles[i])
+        );
     }
+        
+    rfs_nStates = &_nStates;
+    rfs_sourceFiles = &_sourceFiles;
+    rfs_startTimes = &_startTimes;
+        
+    _nAvailableWeb = 0; // haven't downloaded that list yet
+        
+    _worker = WebFieldlinesWorker(syncDir, serverUrl);
+                
+}
+       
+// Returns true if time is inside the current window
+bool WebFieldlinesWindow::timeIsInWindow(double time) {
+    return time >= windowStart() && time <= windowEnd();
+}
     
-    // -------------------------- PUBLIC FUNCTIONS  -----------------------------------//
-    
-    // Returns true if time is inside the current window
-    bool WebFieldlinesWindow::timeIsInWindow(double time){
-        if(time >= windowStart() && time <= windowEnd())
+// Returns true if time is at edge of the current window,
+// and will probably need to update window
+bool WebFieldlinesWindow::timeIsInWindowMargin(double time, double direction) {
+    const int threshold = 2; // base this on speed later
+        
+    if (direction > 0){ // If time is moving forward
+        if (time >= _window.triggerTimes[_window.nTriggerTimes - threshold].first) {
+            if (time > windowEnd()) {
+                return false;
+            }
             return true;
+        }
         else return false;
     }
-    
-    // Returns true if time is at edge of the current window,
-    // and will probably need to update window
-    bool WebFieldlinesWindow::timeIsInWindowMargin(double time, double direction){
-        int threshold = 2; // base this on speed later
-        
-        if (direction > 0){ // If time is moving forward
-            if(time >= _window.triggerTimes[_window.nTriggerTimes - threshold].first){
-                if(time > windowEnd()){
-                    return false;
-                }
-                return true;
+    else{ // If time is moving backwards
+        if (time <= _window.triggerTimes[threshold].first){
+            if (time < windowStart()) {
+                return false;
             }
-            else return false;
-        }
-        else{ // If time is moving backwards
-            if(time <= _window.triggerTimes[threshold].first){
-                if(time < windowStart()){
-                    return false;
-                }
-                return true;
-            }
-            else return false;
-        }
-    }
-
-    /*  Release the worker for execution,
-        Pick up a timestep to request for download,
-        Check if that timestep is already on disk,
-        repeated until a proper timestep to download is found, and start download */
-    void WebFieldlinesWindow::executeDownloadWorker(){
-        _worker.downloadWindow(_window.triggerTimes);
-        _worker.updateRFSSourceFiles(*rfs_sourceFiles);
-        _edgeWindowReady = false;
-    }
-    
-    void WebFieldlinesWindow::newWindow(double time){
-
-        auto it = std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rend(), [time](auto element) {
-            return time > element.first;
-        });
-
-        const int index = static_cast<int>(std::distance(it, _triggerTimesWeb.rend())) - 1;
-        _window.triggerTimes.clear();
-        _window.nTriggerTimes = 0;
-
-        // This should be safe, because in the manager, it is checked wether the current position is within
-        // the boundaries with respect to back & forward width
-        for(int i = std::max(index - _window.backWidth,0); i <= std::min(index + _window.forwardWidth, static_cast<int>(_triggerTimesWeb.size() -1)); i++){
-            _window.triggerTimes.push_back(std::make_pair(_triggerTimesWeb[i].first, _triggerTimesWeb[i].second));
-            _window.nTriggerTimes++;
-        }
-
-        if (_worker.edgeMode())
-            _edgeWindowReady = true;
-        
-        _worker.newWindowToDownload();
-    }
-    
-    bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time){
-        // There are no files to compare with, just going to be false.
-        if(_nAvailableWeb == 0) return false;
-
-        // Most cases, we are currently in the middle of a bunch of datasets, if we are not, lets get some new ones.
-        if(time >= (_triggerTimesWeb.front().first) && time <= (_triggerTimesWeb.back().first))
             return true;
-        else 
-            return false;
+        }
+        else return false;
     }
+}
+
+/*
+    Release the worker for execution,
+    Pick up a timestep to request for download,
+    Check if that timestep is already on disk,
+    repeated until a proper timestep to download is found, and start download
+*/
+void WebFieldlinesWindow::executeDownloadWorker() {
+    _worker.downloadWindow(_window.triggerTimes);
+    _worker.updateRFSSourceFiles(*rfs_sourceFiles);
+    _edgeWindowReady = false;
+}
     
-    void WebFieldlinesWindow::getNewTriggerTimesWebList(double time){
-        _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
-        _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
+void WebFieldlinesWindow::newWindow(double time) {
+
+    auto it = std::find_if(
+        _triggerTimesWeb.rbegin(),
+        _triggerTimesWeb.rend(),
+        [time](auto element) {
+            return time > element.first;
+        }
+    );
+
+    const int index = static_cast<int>(std::distance(it, _triggerTimesWeb.rend())) - 1;
+    _window.triggerTimes.clear();
+    _window.nTriggerTimes = 0;
+
+    // This should be safe, because in the manager,
+    // it is checked wether the current position is within
+    // the boundaries with respect to back & forward width
+    for(int i = std::max(index - _window.backWidth,0);
+        i <= std::min(index + _window.forwardWidth,
+            static_cast<int>(_triggerTimesWeb.size() -1));
+        i++) {
+        _window.triggerTimes.push_back(
+            std::make_pair(_triggerTimesWeb[i].first, _triggerTimesWeb[i].second)
+        );
+        _window.nTriggerTimes++;
     }
 
-
-    bool WebFieldlinesWindow::workerWindowIsReady()
-    {
-        return _worker.windowIsComplete();
+    if (_worker.edgeMode()) {
+        _edgeWindowReady = true;
     }
 
-    bool WebFieldlinesWindow::expectedWindowIsOutOfBounds(double time) {
-        auto resultForwards = std::find_if(_triggerTimesWeb.rbegin(), _triggerTimesWeb.rbegin() + _window.forwardWidth, [time](auto pair) {
+    _worker.newWindowToDownload();
+}
+    
+bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time) {
+    // There are no files to compare with, just going to be false.
+    if (_nAvailableWeb == 0) return false;
+
+    // Most cases, we are currently in the middle of a bunch of datasets,
+    // if we are not, lets get some new ones.
+    return (
+        time >= (_triggerTimesWeb.front().first) &&
+        time <= (_triggerTimesWeb.back().first)
+    );
+}
+    
+void WebFieldlinesWindow::getNewTriggerTimesWebList(double time) {
+    _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
+    _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
+}
+
+
+bool WebFieldlinesWindow::workerWindowIsReady() {
+    return _worker.windowIsComplete();
+}
+
+bool WebFieldlinesWindow::expectedWindowIsOutOfBounds(double time) {
+    auto resultForwards = std::find_if(
+        _triggerTimesWeb.rbegin(),
+        _triggerTimesWeb.rbegin() + _window.forwardWidth,
+        [time](auto pair) {
             return time > pair.first;
-        });
+        }
+    );
 
-        auto resultBackwards = std::find_if(_triggerTimesWeb.begin(), _triggerTimesWeb.begin() + _window.backWidth, [time](auto pair) {
+    auto resultBackwards = std::find_if(
+        _triggerTimesWeb.begin(),
+        _triggerTimesWeb.begin() + _window.backWidth,
+        [time](auto pair) {
             return time < pair.first;
-        });
+        }
+    );
 
-        return resultForwards != _triggerTimesWeb.rbegin() + _window.forwardWidth || resultBackwards != _triggerTimesWeb.begin() + _window.backWidth;
-    }
+    return resultForwards != _triggerTimesWeb.rbegin() + _window.forwardWidth ||
+        resultBackwards != _triggerTimesWeb.begin() + _window.backWidth;
+}
 
-    void WebFieldlinesWindow::rfsHasUpdated() {
-        _worker.flagUpdated();
-    }
+void WebFieldlinesWindow::rfsHasUpdated() {
+    _worker.flagUpdated();
+}
 
-    bool WebFieldlinesWindow::checkWorkerEdgeMode(){
-        return _worker.edgeMode();
-    }
+bool WebFieldlinesWindow::checkWorkerEdgeMode(){
+    return _worker.edgeMode();
+}
 
-    bool WebFieldlinesWindow::edgeWindowReady(){
-        return _edgeWindowReady;
-    }
-    
-    // -------------------------- PRIVATE FUNCTIONS  -----------------------------------//
-    // Returns first trigger of window
-    double WebFieldlinesWindow::windowStart(){
-        return _window.triggerTimes.front().first;
-    }
-    // Returns last trigger of window
-    double WebFieldlinesWindow::windowEnd(){
-        return _window.triggerTimes.back().first;
-    }
+bool WebFieldlinesWindow::edgeWindowReady(){
+    return _edgeWindowReady;
+}
 
+// Returns first trigger of window
+double WebFieldlinesWindow::windowStart(){
+    return _window.triggerTimes.front().first;
+}
 
-    
-    
+// Returns last trigger of window
+double WebFieldlinesWindow::windowEnd(){
+    return _window.triggerTimes.back().first;
+}
     
 } // namespace openspace
