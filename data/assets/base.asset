@@ -25,7 +25,7 @@ asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
 -- Load web gui
-asset.require('util/webgui')
+local webGui = asset.require('util/webgui')
 
 asset.request('customization/globebrowsing')
 
@@ -66,6 +66,8 @@ local Keybindings = {
 }
 
 asset.onInitialize(function ()
+    webGui.setCefRoute("onscreen")
+
     sceneHelper.bindKeys(Keybindings)
     openspace.setDefaultGuiSorting()
 

@@ -165,6 +165,15 @@ void NavigationHandler::deinitialize() {
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
+void NavigationHandler::setFocusNode(SceneGraphNode* node) {
+    _orbitalNavigator.setFocusNode(node);
+    _camera->setPositionVec3(anchorNode()->worldPosition());
+}
+
+void NavigationHandler::resetCameraDirection() {
+    _orbitalNavigator.startRetargetAnchor();
+}
+
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
     _orbitalNavigator.setCamera(camera);
@@ -297,6 +306,10 @@ void NavigationHandler::stopPlayback() {
     _orbitalNavigator.resetVelocities();
     _orbitalNavigator.resetNodeMovements();
     _playbackModeEnabled = false;
+}
+
+const SceneGraphNode* NavigationHandler::anchorNode() const {
+    return _orbitalNavigator.anchorNode();
 }
 
 Camera* NavigationHandler::camera() const {

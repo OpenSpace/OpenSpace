@@ -36,6 +36,12 @@ namespace openspace::documentation { struct Documentation; }
 namespace openspace::configuration {
 
 struct Configuration {
+    Configuration() = default;
+    Configuration(Configuration&&) = default;
+    Configuration(const Configuration&) = delete;
+    Configuration& operator=(const Configuration&) = delete;
+    Configuration& operator=(Configuration&&) = default;
+
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
     std::vector<std::string> globalCustomizationScripts;

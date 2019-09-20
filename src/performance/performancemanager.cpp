@@ -69,8 +69,6 @@ void PerformanceManager::CreateGlobalSharedMemory() {
         "The global memory struct does not fit the allocated global memory space"
     );
 
-    ghoul::SharedMemory::remove(GlobalSharedMemoryName);
-
     if (ghoul::SharedMemory::exists(GlobalSharedMemoryName)) {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();

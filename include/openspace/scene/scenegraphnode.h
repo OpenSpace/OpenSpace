@@ -29,12 +29,16 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <vector>
+#include <chrono>
 
  //#define Debugging_Core_SceneGraphNode_Indices
 
@@ -149,6 +153,7 @@ private:
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
+    void computeScreenSpaceData(RenderData& newData);
 
     std::atomic<State> _state = State::Loaded;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
@@ -186,6 +191,17 @@ private:
 
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;
+
+    properties::BoolProperty _computeScreenSpaceValues;
+    properties::IVec2Property _screenSpacePosition;
+    properties::BoolProperty _screenVisibility;
+    properties::DoubleProperty _distFromCamToNode;
+    properties::DoubleProperty _screenSizeRadius;
+    properties::FloatProperty _visibilityDistance;
+    
+    // This variable is used for the rate-limiting of the screenspace positions (if they
+    // are calculated when _computeScreenSpaceValues is true)
+    std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     int index = 0;

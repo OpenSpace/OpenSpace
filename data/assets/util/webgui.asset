@@ -3,7 +3,7 @@ asset.require('./static_server')
 local guiCustomization = asset.require('customization/gui')
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "129a2c70ec8179b193fdb3a689c37bd65418ac22"
+local frontendHash = "785d6fe3416b2e30bed0a04313ef61b0e2729645"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
@@ -37,16 +37,6 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
     openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
 
-    if guiCustomization.webguiDevelopmentMode then
-        -- Route CEF to the deveopment version of the GUI.
-        -- This must be manually served using `npm start`
-        -- in the OpenSpace-WebGuiFrontend repository.
-        openspace.setPropertyValueSingle(
-            "Modules.CefWebGui.GuiUrl",
-            "http://127.0.0.1:4690/frontend/#/onscreen"
-        )
-    end
-
     -- The GUI contains date and simulation increment,
     -- so let's remove these from the dashboard.
     if openspace.getPropertyValue('Modules.CefWebGui.Visible') then
@@ -76,3 +66,19 @@ asset.onDeinitialize(function ()
     -- need to address in webguimodule.cpp
     --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
+
+function setCefRoute(route)
+    local port = 4680
+    -- As a developer, you can manually serve the webgui from port 4690
+    -- with the command `npm start` in the web gui repository
+    if guiCustomization.webguiDevelopmentMode then
+        port = 4690
+    end
+    openspace.setPropertyValueSingle(
+        "Modules.CefWebGui.GuiUrl",
+        "http://127.0.0.1:" .. port .. "/frontend/#/" .. route
+    )
+end
+
+
+asset.export("setCefRoute", setCefRoute)

@@ -126,8 +126,8 @@ namespace openspace {
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
     , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
-    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 100.0f)
-    , _emissionMultiply(EmissionMultiplyInfo, 400.f, 0.0f, 1000.0f)
+    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 200.0f)
+    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.0f, 1000.0f)
     , _starRenderingMethod(
         StarRenderingMethodInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -490,8 +490,8 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 
         const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
 
-        const float lowerRampStart = maxDim * 0.02f;
-        const float lowerRampEnd = maxDim * 0.5f;
+        const float lowerRampStart = maxDim * 0.01f;
+        const float lowerRampEnd = maxDim * 0.1f;
 
         const float upperRampStart = maxDim * 2.f;
         const float upperRampEnd = maxDim * 10.f;

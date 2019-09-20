@@ -54,12 +54,12 @@ void main() {
 
     vec4 exitColorTexture = texture(exitColorTexture, texCoord);
 
-    // if we don't have an exit, discard the ray
+    // If we don't have an exit, discard the ray
     if (exitColorTexture.a < 1.0 || exitColorTexture.rgb == vec3(0.0)) {
         discard;
     }
 
-    // fetch exit point from texture
+    // Fetch exit point from texture
     vec3 exitPos = exitColorTexture.rgb;
     float exitDepth =  denormalizeFloat(texture(exitDepthTexture, texCoord).x);
 
@@ -68,7 +68,7 @@ void main() {
     vec3 entryPos;
     float entryDepth;
     getEntry(entryPos, entryDepth);
-    // if we don't have an entry, discard the ray
+    // If we don't have an entry, discard the ray
     if (entryPos == vec3(0.0)) {
         discard;
     }
@@ -84,14 +84,12 @@ void main() {
     raycastDepth = geoRatio * raycastDepth;
 
     float currentDepth = 0.0;
-    // todo: shorten depth if geometry is intersecting!
     float nextStepSize = stepSize#{id}(position, direction);
     float currentStepSize;
     float previousJitterDistance = 0.0;
 
-    int steps = 0;
+    int nSteps = 0;
 
-    float aaOpacity = 1.0;
     int sampleIndex = 0;
     float opacityDecay = 1.0;
 
@@ -99,17 +97,12 @@ void main() {
     vec3 accumulatedAlpha = vec3(0.0);
 
 
-    for (steps = 0; 
+    for (nSteps = 0; 
         (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
-         accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; 
-         ++steps) 
+         accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < RAYCAST_MAX_STEPS; 
+         ++nSteps) 
     {
-        // if (currentDepth + nextStepSize * jitterFactor > raycastDepth) {
-        //     aaOpacity -= opacityDecay;
-        // }
-        bool shortStepSize = nextStepSize < raycastDepth / 10000000000.0;
-
-        if (shortStepSize) {
+        if (nextStepSize < raycastDepth / 10000000000.0) {
             break;
         }
 
@@ -121,18 +114,12 @@ void main() {
         position += direction * currentStepSize;
 
         sample#{id}(jitteredPosition, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
-
-        float sampleDistance = aaOpacity * (jitteredStepSize + previousJitterDistance);
-
-        //blendStep(finalColor, raycasterContribution, sampleDistance);
-        //finalColor
+        float sampleDistance = jitteredStepSize + previousJitterDistance;
 
         previousJitterDistance = currentStepSize - jitteredStepSize;
 
         float maxStepSize = raycastDepth - currentDepth;
-
         nextStepSize = min(nextStepSize, maxStepSize);
-
     }
 
     finalColor = vec4(accumulatedColor, (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3);

@@ -164,7 +164,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             {
                 keyColor,
                 new Vector3Verifier<float>,
-                Optional::No,
+                Optional::Yes,
                 "Astronomical Object Color (r,g,b)."
             },
             {
@@ -715,8 +715,9 @@ bool RenderableDUMeshes::readSpeckFile() {
         //if (line.substr(0, 4) != "mesh") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
-            file.seekg(position);
-            break;
+            //file.seekg(position);
+            //break;
+            continue;
         } else {
 
         //if (line.substr(0, 4) == "mesh") {

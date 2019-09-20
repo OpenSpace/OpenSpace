@@ -29,7 +29,7 @@ local Io = {
             Target = "IO",
             Observer = "JUPITER BARYCENTER",
             Kernels = kernel
-        },
+        }
     },
     Renderable = {
         Type = "RenderableGlobe",

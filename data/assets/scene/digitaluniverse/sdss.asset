@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Sloan Digital Sky Survey Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_sloandss_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,11 +22,11 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = true,
         Color = { 0.8, 0.8, 1.0 },
-        Transparency = 1.0,
-        ScaleFactor = 507.88,
+        Opacity = 0.8,
+        ScaleFactor = 520.0,
         File = speck .. "/SDSSgals.speck",
-        ColorMap = speck .. "/lss.cmap",
-        ColorOption = { "redshift", "prox5Mpc" },
+        ColorMap = speck .. "/SDSSgals.cmap",
+        ColorOption = { "redshift", "proximity" },
         ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
         Texture = textures .. "/point3.png",
         Unit = "Mpc",
@@ -38,7 +38,9 @@ local object = {
         CorrectionSizeFactor = 10.41,
         TextSize = 14.8,
         TextMinSize = 10.0,
-        TextMaxSize = 50.0
+        TextMaxSize = 50.0,
+        BillboardMaxSize = 5.5,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Sloan Digital Sky Survey",

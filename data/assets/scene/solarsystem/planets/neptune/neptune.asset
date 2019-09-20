@@ -18,10 +18,6 @@ local Neptune = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_NEPTUNE",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {

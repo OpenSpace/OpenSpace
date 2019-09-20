@@ -1,20 +1,22 @@
 # Core Team
 Alexander Bock
 Emil Axelsson
+Kalle Bladin
 Jonathas Costa
+Jonas Strandstedt
+Michal Marcinkowski
+Joakim Kilby
 Gene Payne
 Micah Acinapura
-Kalle Bladin
-Joakim Kilby
 Erik Sundén
 Eric Myers
 
 Sebastian Piwell
 Erik Broberg
-Jonas Strandstedt
-Michal Marcinkowski
 Jonathan Bosson
 Michael Nilsson
+Elon Olsson
+Jonathan Franzen
 Hans-Christian Helltegen
 Anton Arbring
 Oskar Carlbaum
@@ -30,10 +32,11 @@ Christoffer Särevall
 
 
 # Community Support
-mingenuity
-nealmcb
-nbartzokas
-mik3caprio
-arfon
 Anteige
+arfon
+DavidLaidlaw
+mik3caprio
+mingenuity
+nbartzokas
+nealmcb
 noahdasanaike

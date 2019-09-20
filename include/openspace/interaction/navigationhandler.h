@@ -80,6 +80,10 @@ public:
     void deinitialize();
 
     // Mutators
+
+    void setFocusNode(SceneGraphNode* node);
+    void resetCameraDirection();
+
     void setNavigationStateNextFame(NavigationState state);
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
@@ -92,6 +96,7 @@ public:
 
     // Accessors
     Camera* camera() const;
+    const SceneGraphNode* anchorNode() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();

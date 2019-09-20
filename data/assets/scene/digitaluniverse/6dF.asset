@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "6dF Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_6dF_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -21,15 +21,17 @@ local object = {
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Transparency = 1.0,
+        Color = { 1.0, 1.0, 0.0 },
+        Opacity = 1.0,
         File = speck .. "/6dF.speck",
         Texture = textures .. "/point3.png",
-        ColorMap = speck .. "/lss.cmap",
-        ColorOption = { "redshift", "prox5Mpc" },
-        ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
+        ColorMap = speck .. "/6dF.cmap",
+        ColorOption = { "redshift", "proximity" },
+        ColorRange = { { 0.0, 0.075 }, { 1.0, 10.0 } },
         Unit = "Mpc",
-        ScaleFactor = 508.0
+        ScaleFactor = 534.0,
+        BillboardMaxSize = 7.0,
+        EnablePixelSizeControl = true,
     },
     GUI = {
         Name = "6dF Galaxies",

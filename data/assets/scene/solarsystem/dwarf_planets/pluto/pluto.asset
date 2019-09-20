@@ -20,10 +20,6 @@ local Pluto = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_PLUTO",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {

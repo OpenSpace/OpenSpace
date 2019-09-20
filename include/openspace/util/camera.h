@@ -101,6 +101,7 @@ public:
     // Right now this function returns the actual combined matrix which makes some
     // of the old calls to the function wrong..
     const glm::dmat4& combinedViewMatrix() const;
+    const glm::dmat4& combinedViewMatrixNoScale() const;
 
     void invalidateCache();
 
