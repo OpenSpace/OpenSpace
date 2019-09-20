@@ -36,146 +36,148 @@
 #include <fstream>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square."
-    };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-        "RenderableType",
-        "RenderableType",
-        "This value specifies if the plane should be rendered in the Background,"
-        "Opaque, Transparent, or Overlay rendering step."
-    };
+constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    "Texture",
+    "Texture",
+    "This value specifies an image that is loaded from disk and is used as a texture "
+    "that is applied to this plane. This image has to be square."
+};
+
+constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
+    "RenderableType",
+    "RenderableType",
+    "This value specifies if the plane should be rendered in the Background,"
+    "Opaque, Transparent, or Overlay rendering step."
+};
+
 } // namespace
 
 namespace openspace {
     
-    documentation::Documentation RenderablePlaneImageLocal::Documentation() {
-        using namespace documentation;
-        return {
-            "Renderable Plane Image Local",
-            "base_renderable_plane_image_local",
+documentation::Documentation RenderablePlaneImageLocal::Documentation() {
+    using namespace documentation;
+    return {
+        "Renderable Plane Image Local",
+        "base_renderable_plane_image_local",
+        {
             {
-                {
-                    TextureInfo.identifier,
-                    new StringVerifier,
-                    Optional::No,
-                    TextureInfo.description
-                },
-                {
-                    RenderableTypeInfo.identifier,
-                    new StringVerifier,
-                    Optional::Yes,
-                    RenderableTypeInfo.description
-                }
-            }
-        };
-    }
-    
-    RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
-        : RenderablePlane(dictionary)
-        , _texturePath(TextureInfo)
-    {
-        documentation::testSpecificationAndThrow(
-            Documentation(),
-            dictionary,
-            "RenderablePlaneImageLocal"
-        );
-
-        addProperty(_blendMode);
-
-        _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-
-        addProperty(_texturePath);
-        _texturePath.onChange([this]() {loadTexture(); });
-        _textureFile->setCallback(
-            [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-        );
-
-        if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-            std::string renderType = dictionary.value<std::string>(
-                RenderableTypeInfo.identifier
-                );
-            if (renderType == "Background") {
-                setRenderBin(Renderable::RenderBin::Background);
-            }
-            else if (renderType == "Opaque") {
-                setRenderBin(Renderable::RenderBin::Opaque);
-            }
-            else if (renderType == "Transparent") {
-                setRenderBin(Renderable::RenderBin::Transparent);
-            }
-            else {
-                setRenderBin(Renderable::RenderBin::Opaque);
+                TextureInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                TextureInfo.description
+            },
+            {
+                RenderableTypeInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                RenderableTypeInfo.description
             }
         }
-    }
+    };
+}
     
-    bool RenderablePlaneImageLocal::isReady() const {
-        return RenderablePlane::isReady() && (_texture != nullptr);
+RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary)
+    , _texturePath(TextureInfo)
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderablePlaneImageLocal"
+    );
+
+    addProperty(_blendMode);
+
+    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+
+    addProperty(_texturePath);
+    _texturePath.onChange([this]() {loadTexture(); });
+    _textureFile->setCallback(
+        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+    );
+
+    if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
+        std::string renderType = dictionary.value<std::string>(
+            RenderableTypeInfo.identifier
+            );
+        if (renderType == "Background") {
+            setRenderBin(Renderable::RenderBin::Background);
+        }
+        else if (renderType == "Opaque") {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
+        else if (renderType == "Transparent") {
+            setRenderBin(Renderable::RenderBin::Transparent);
+        }
+        else {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
     }
+}
     
-    void RenderablePlaneImageLocal::initializeGL() {
-        RenderablePlane::initializeGL();
+bool RenderablePlaneImageLocal::isReady() const {
+    return RenderablePlane::isReady() && (_texture != nullptr);
+}
+    
+void RenderablePlaneImageLocal::initializeGL() {
+    RenderablePlane::initializeGL();
         
+    loadTexture();
+}
+    
+void RenderablePlaneImageLocal::deinitializeGL() {
+    _textureFile = nullptr;
+        
+    BaseModule::TextureManager.release(_texture);
+    RenderablePlane::deinitializeGL();
+}
+    
+void RenderablePlaneImageLocal::bindTexture() {
+    _texture->bind();
+}
+    
+void RenderablePlaneImageLocal::update(const UpdateData& data) {
+    RenderablePlane::update(data);
+        
+    if (_textureIsDirty) {
         loadTexture();
+        _textureIsDirty = false;
     }
+}
     
-    void RenderablePlaneImageLocal::deinitializeGL() {
-        _textureFile = nullptr;
-        
-        BaseModule::TextureManager.release(_texture);
-        RenderablePlane::deinitializeGL();
-    }
-    
-    void RenderablePlaneImageLocal::bindTexture() {
-        _texture->bind();
-    }
-    
-    void RenderablePlaneImageLocal::update(const UpdateData& data) {
-        RenderablePlane::update(data);
-        
-        if (_textureIsDirty) {
-            loadTexture();
-            _textureIsDirty = false;
-        }
-    }
-    
-    void RenderablePlaneImageLocal::loadTexture() {
-        if (!_texturePath.value().empty()) {
-            ghoul::opengl::Texture* t = _texture;
+void RenderablePlaneImageLocal::loadTexture() {
+    if (!_texturePath.value().empty()) {
+        ghoul::opengl::Texture* t = _texture;
             
-            unsigned int hash = ghoul::hashCRC32File(_texturePath);
+        unsigned int hash = ghoul::hashCRC32File(_texturePath);
             
-            _texture = BaseModule::TextureManager.request(
-                                                          std::to_string(hash),
-                                                          [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-                                                              std::unique_ptr<ghoul::opengl::Texture> texture =
-                                                              ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+        _texture = BaseModule::TextureManager.request(
+            std::to_string(hash),
+            [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
+                std::unique_ptr<ghoul::opengl::Texture> texture =
+                ghoul::io::TextureReader::ref().loadTexture(absPath(path));
                                                               
-                                                              LDEBUGC(
-                                                                      "RenderablePlaneImageLocal",
-                                                                      fmt::format("Loaded texture from '{}'", absPath(path))
-                                                                      );
-                                                              texture->uploadTexture();
+                LDEBUGC(
+                    "RenderablePlaneImageLocal",
+                    fmt::format("Loaded texture from '{}'", absPath(path))
+                );
+                texture->uploadTexture();
                                                               
-                                                              texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
                                                               
-                                                              return texture;
-                                                          }
-                                                          );
+                return texture;
+            }
+        );
             
-            BaseModule::TextureManager.release(t);
+        BaseModule::TextureManager.release(t);
             
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                                      [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-                                      );
-        }
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+        _textureFile->setCallback([&](const ghoul::filesystem::File&) {
+            _textureIsDirty = true;
+        });
     }
+}
     
 } // namespace openspace
