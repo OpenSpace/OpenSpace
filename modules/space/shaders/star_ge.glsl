@@ -82,8 +82,6 @@ void main() {
     vs_position = gl_in[0].gl_Position; // in object space
     dvec4 dpos  = modelMatrix * dvec4(vs_position); 
 
-    dvec4 clipTestPos = cameraViewProjectionMatrix * dpos;
-   
     ge_bvLumAbsMagAppMag = vs_bvLumAbsMagAppMag[0];
     ge_velocity    = vs_velocity[0];
     ge_speed       = vs_speed[0];
