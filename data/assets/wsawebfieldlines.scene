@@ -18,8 +18,8 @@ asset.require('util/default_dashboard')
 -- asset.require('util/default_joystick')
 
 -- DEBUG
-asset.require('./testwsa/debugcoordaxes');
-asset.require('util/webgui')
+-- asset.require('./testwsa/debugcoordaxes');
+local webGui = asset.require('util/webgui')
 
 asset.request('customization/globebrowsing')
 
@@ -216,6 +216,8 @@ asset.onInitialize(function ()
         Position = { 40*sunRadius, 40*sunRadius, 0 },
         Rotation = { 0.0, 0.0, 0.7, 0.0 },
     })
+
+    webGui.setCefRoute("onscreen")
 
 end)
 
