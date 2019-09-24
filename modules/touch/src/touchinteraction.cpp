@@ -1372,7 +1372,7 @@ void TouchInteraction::step(double dt) {
 #ifdef TOUCH_DEBUG_PROPERTIES
                     LINFO(fmt::format(
                         "{}: Zoom In Limit should be larger than anchor center to surface, setting it to {}",
-                        _loggerCat, zoomInBounds);
+                        _loggerCat, zoomInBounds));
 #endif
                     _zoomInLimit.setValue(zoomInBounds);
                 }     
@@ -1396,7 +1396,7 @@ void TouchInteraction::step(double dt) {
             bool willNewPositionViolateZoomOutLimit = (newPosDistance >= _zoomOutLimit.value());
             bool willNewPositionViolateZoomInLimit = (newPosDistance < _zoomInLimit.value());
 
-            if(!willNewPositionViolateZoomInLimit && !willNewPositionViolateZoomOutLimit){
+            if (!willNewPositionViolateZoomInLimit && !willNewPositionViolateZoomOutLimit){
                 camPos += zoomDistanceIncrement;
             }
             else if (currentPosViolatingZoomOutLimit) {
