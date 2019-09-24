@@ -41,10 +41,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "RenderableSphere";
-} // namespace
-
-
-namespace {
     constexpr const char* ProgramName = "Sphere";
 
     constexpr const std::array<const char*, 5> UniformNames = {
@@ -416,7 +412,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.opacity, adjustedTransparency);
     _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
-    
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
@@ -494,6 +490,5 @@ void RenderableSphere::loadTexture() {
         }
     }
 }
-
 
 } // namespace openspace

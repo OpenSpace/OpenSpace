@@ -244,7 +244,7 @@ namespace openspace {
 using namespace properties;
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
-    const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _pColorGroup({ "Color" })
     , _pColorMethod(ColorMethodInfo, OptionProperty::DisplayType::Radio)
@@ -286,14 +286,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pJumpToStartBtn(TimeJumpButtonInfo)
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
-
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
     // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
     SourceFileType sourceFileType = SourceFileType::Invalid;
     if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
-        //wait for a fieldline
+        // Wait for a fieldline
         return;
     }
 
@@ -357,7 +356,7 @@ void RenderableFieldlinesSequence::initializeGL() {
 
     extractPropertyInfoFromDictionary();
 
-    // dictionary is no longer needed as everything is extracted
+    // Dictionary is no longer needed as everything is extracted
     _dictionary.reset();
 
     // Setup shader program
@@ -375,7 +374,6 @@ void RenderableFieldlinesSequence::initializeGL() {
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
-
 }
 
 /**
@@ -384,9 +382,8 @@ void RenderableFieldlinesSequence::initializeGL() {
  * Returns false if it fails to extract mandatory information!
  */
 bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
-    SourceFileType& sourceFileType)
+                                                           SourceFileType& sourceFileType)
 {
-
     _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
@@ -643,7 +640,6 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
 {
     // Load states from .osfls files into RAM!
     for (const std::string& filePath : _sourceFiles) {
-        //LERROR("Loading file into RAM: " + filePath);
         FieldlinesState newState;
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
@@ -821,7 +817,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     });
 
     _pJumpToStartBtn.onChange([this] {
-        global::timeManager.setTimeNextFrame(openspace::Time(_startTimes[0]));
+        global::timeManager.setTimeNextFrame(Time(_startTimes[0]));
     });
 }
 
@@ -829,17 +825,17 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
 
 // Calculate expected end time.
 void RenderableFieldlinesSequence::computeSequenceEndTime() {
-if (_nStates > 1) {
-    const double lastTriggerTime = _startTimes[_nStates - 1];
-    const double sequenceDuration = lastTriggerTime - _startTimes[0];
-    const double averageStateDuration = sequenceDuration /
-        (static_cast<double>(_nStates) - 1.0);
-    _sequenceEndTime = lastTriggerTime + averageStateDuration;
-}
-else {
-    // If there's just one state it should never disappear!
-    _sequenceEndTime = DBL_MAX;
-}
+    if (_nStates > 1) {
+        const double lastTriggerTime = _startTimes[_nStates - 1];
+        const double sequenceDuration = lastTriggerTime - _startTimes[0];
+        const double averageStateDuration = sequenceDuration /
+            (static_cast<double>(_nStates) - 1.0);
+        _sequenceEndTime = lastTriggerTime + averageStateDuration;
+    }
+    else {
+        // If there's just one state it should never disappear!
+        _sequenceEndTime = DBL_MAX;
+    }
 }
 
 
@@ -908,17 +904,13 @@ void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
         timeString.replace(16, 1, ":");
         timeString.replace(19, 1, ".");
         const double triggerTime = Time::convertTime(timeString);
-        //LERROR("Adding starttime " + this->_identifier + " : " + std::to_string(triggerTime));
         _startTimes.push_back(triggerTime);
     }
-
 }
 
 void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
     _states.push_back(state);
-    //LERROR("Adding state to list of states : " + std::to_string(state.triggerTime()));
     _startTimes.push_back(state.triggerTime());
-
     _nStates++;
 }
 
@@ -965,8 +957,8 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
 * Returns false if it fails to extract mandatory information!
 */
 bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& seedFilePath,
-    std::string& tracingVar,
-    std::vector<std::string>& extraVars)
+                                                                std::string& tracingVar,
+                                                      std::vector<std::string>& extraVars)
 {
 
     if (_dictionary->getValue(KeyCdfSeedPointFile, seedFilePath)) {
@@ -1009,7 +1001,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
 }
 
 bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& path,
-    std::vector<glm::vec3>& outVec)
+                                                           std::vector<glm::vec3>& outVec)
 {
 
     std::ifstream seedFile(FileSys.relativePath(path));
@@ -1038,8 +1030,8 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& 
 }
 
 void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
-    std::vector<std::string>& extraVars,
-    std::vector<std::string>& extraMagVars)
+                                                   std::vector<std::string>& extraVars,
+                                                   std::vector<std::string>& extraMagVars)
 {
 
     for (int i = 0; i < static_cast<int>(extraVars.size()); i++) {
@@ -1206,9 +1198,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     const double currentTime = data.time.j2000Seconds();
 
-
     if (_dynamicWebContent) {
-
         if (!_webFieldlinesManager.hasUpdated &&
             _webFieldlinesManager.checkIfWindowIsReadyToLoad())
         {
@@ -1242,7 +1232,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
-                
             updateActiveTriggerTimeIndex(currentTime);
 
             if (_loadingStatesDynamically) {
@@ -1253,8 +1242,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 _activeStateIndex = _activeTriggerTimeIndex;
             }
         } 
-
-
         // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
@@ -1277,7 +1264,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
             std::thread readBinaryThread([this, f = std::move(filePath)]{
                 readNewState(f);
-                });
+            });
             readBinaryThread.detach();
         }
     }
@@ -1286,7 +1273,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
         if (_loadingStatesDynamically) {
             _states[0] = std::move(*_newState);
-
         }
 
         updateVertexPositionBuffer();
@@ -1319,7 +1305,7 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTi
         if (iter != _startTimes.begin()) {
             _activeTriggerTimeIndex = static_cast<int>(
                 std::distance(_startTimes.begin(), iter)
-                ) - 1;
+            ) - 1;
         }
         else {
             _activeTriggerTimeIndex = 0;
