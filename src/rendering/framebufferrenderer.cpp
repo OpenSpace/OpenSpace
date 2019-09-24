@@ -406,9 +406,15 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
 
+    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
+
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
 
     _hdrFilteringProgram->deactivate();
 }
@@ -440,9 +446,15 @@ void FramebufferRenderer::applyFXAA() {
     glm::vec2 inverseScreenSize(1.f/_resolution.x, 1.f/_resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, inverseScreenSize);
 
+    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
+
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
 
     _fxaaProgram->deactivate();
 }
@@ -633,7 +645,7 @@ void FramebufferRenderer::updateResolution() {
         _resolution.y,
         0,
         GL_RGBA,
-        GL_BYTE,
+        GL_UNSIGNED_BYTE,
         nullptr
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -912,6 +924,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     
     if (_enableFXAA) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
+        glDrawBuffers(1, ColorAttachment0Array);
+        glDisable(GL_BLEND);
     }
     else {
         // When applying the TMO, the result is saved to the default FBO to be displayed
