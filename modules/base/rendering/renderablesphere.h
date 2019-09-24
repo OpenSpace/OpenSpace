@@ -33,8 +33,10 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 
+// @TODO emiax: This dependency needs to be removed
+// possibly we can turn it upside down and
+// let the suntexturemanager own a renderablesphere?
 #include <modules/base/rendering/suntexturemanager.h>
-
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -65,7 +67,7 @@ public:
 
 private:
     void loadTexture();
-    
+
     properties::StringProperty _texturePath;
     properties::OptionProperty _orientation;
 
@@ -89,7 +91,8 @@ private:
         _mirrorTexture) _uniformCache;
 
     bool _sphereIsDirty = false;
-    
+
+    // @TODO emiax: This needs to be removed
     SunTextureManager _sunTexMgr;
 };
 

@@ -101,7 +101,7 @@ void main() {
 
     if (hasColor) {
         int direction = 1;
-        if(in_color_scalar < 0){
+        if (in_color_scalar < 0) {
             direction = -1;
         }
         bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,

@@ -30,19 +30,15 @@ in vec4 vs_gPosition;
 in vec3 vs_gNormal;
 
 uniform sampler2D texture1;
-//uniform sampler2DArray texture1;
 uniform bool additiveBlending;
 uniform float opacity = 1.0;
-
 
 Fragment getFragment() {
     Fragment frag;
     if (gl_FrontFacing) {
-//        frag.color = texture(texture1, vec3(vs_st, 0));
         frag.color = texture(texture1, vs_st);
     }
     else {
-//        frag.color = texture(texture1, vec3(vec2(1 - vs_st.s, vs_st.t), 0));
         frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
     }
 
@@ -60,9 +56,6 @@ Fragment getFragment() {
     // G-Buffer 
     frag.gPosition  = vs_gPosition;
     frag.gNormal    = vec4(vs_gNormal, 1.0);
-    
-    frag.color.g = frag.color.r;
-    frag.color.b = frag.color.r;
 
     return frag;
 }

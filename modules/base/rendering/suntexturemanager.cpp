@@ -43,40 +43,33 @@ namespace openspace
 {
 
 SunTextureManager::SunTextureManager()
-{
-    _syncDir = absPath("${BASE}/sync/magnetograms") + ghoul::filesystem::FileSystem::PathSeparator;
-}
-    
-    
+    : _syncDir(absPath("${BASE}/sync/magnetograms") +
+        ghoul::filesystem::FileSystem::PathSeparator)
+{}
+
 void SunTextureManager::loadWSATexture(std::unique_ptr<ghoul::opengl::Texture>& texture){
     processTextureFromName("", &_fitsImageToUpload, &_dateIDToUpload);
     texture = uploadAndReturnTexture(_fitsImageToUpload, _dateIDToUpload);
-    
 }
     
-    
 void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture) {
-    
     // If server is dead, we are not going to do anything
     if (_activeConnection){
-
-
-            std::string currentTime = getOpenSpaceDateTime();
-
-
-        if (_textureToUpload.empty() && currentTime != _activeTextureDate && (_textureListGPU.find(currentTime) != _textureListGPU.end()))
+        std::string currentTime = getOpenSpaceDateTime();
+        if (_textureToUpload.empty() &&
+            currentTime != _activeTextureDate &&
+            (_textureListGPU.find(currentTime) != _textureListGPU.end()))
         {
             _textureToUpload = currentTime;
         }
-        if ((global::timeManager.deltaTime() * _direction) < 0)
-        {
+
+        if ((global::timeManager.deltaTime() * _direction) < 0) {
             _textureToUpload = "";
         }
 
         _direction = global::timeManager.deltaTime();
 
-        switch (_stage)
-        {
+        switch (_stage) {
             //This stage just checks what the next image applied should be,
         case 0:
         {
