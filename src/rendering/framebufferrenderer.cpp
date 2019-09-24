@@ -816,7 +816,7 @@ void FramebufferRenderer::updateHDRAndFiltering() {
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
         absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
-        absPath("${SHADERS}/framebuffer/hdrAndfiltering.frag")
+        absPath("${SHADERS}/framebuffer/hdrAndFiltering.frag")
     );
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     //_hdrFilteringProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
