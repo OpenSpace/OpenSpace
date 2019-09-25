@@ -159,16 +159,26 @@ void main() {
         }
     }
     
-    initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
-                        dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    vs_screenSpaceDepth = initialPosition.w;                        
-    secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
-                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-    crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
-                        dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-    thirdPosition = z_normalization(vec4(cameraViewProjectionMatrix *
-                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+    // initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
+    //                     dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+    // vs_screenSpaceDepth = initialPosition.w;
+    // secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+    // crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                     dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+    // thirdPosition = z_normalization(vec4(cameraViewProjectionMatrix *
+    //                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
 
+    // Saving one matrix multiplication:
+    dvec4 dposClip = cameraViewProjectionMatrix * dpos;
+    dvec4 scaledRightClip = cameraViewProjectionMatrix * dvec4(scaledRight, 0.0);
+    dvec4 scaledUpClip = cameraViewProjectionMatrix * dvec4(scaledUp, 0.0);
+
+    initialPosition = z_normalization(vec4(dposClip - scaledRightClip - scaledUpClip));
+    vs_screenSpaceDepth = initialPosition.w;
+    secondPosition = z_normalization(vec4(dposClip + scaledRightClip - scaledUpClip));
+    crossCorner = z_normalization(vec4(dposClip + scaledUpClip + scaledRightClip));
+    thirdPosition = z_normalization(vec4(dposClip + scaledUpClip - scaledRightClip));
 
     // Build primitive
     texCoord    = corners[3];

@@ -39,6 +39,10 @@ Fragment getFragment() {
    
     vec4 textureColor = texture(spriteTexture, texCoord);
     
+    if (textureColor.a == 0.f || gs_colorMap.a == 0.f) {
+        discard;
+    }
+
     vec4 fullColor = vec4(1.0);
     
     if (hasColorMap) {
