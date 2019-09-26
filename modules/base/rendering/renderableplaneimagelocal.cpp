@@ -52,7 +52,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-    
+
 documentation::Documentation RenderablePlaneImageLocal::Documentation() {
     using namespace documentation;
     return {
@@ -121,7 +121,6 @@ bool RenderablePlaneImageLocal::isReady() const {
 
 void RenderablePlaneImageLocal::initializeGL() {
     RenderablePlane::initializeGL();
-        
     loadTexture();
 }
 
@@ -155,7 +154,7 @@ void RenderablePlaneImageLocal::loadTexture() {
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",

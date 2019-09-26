@@ -29,6 +29,8 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
+#include <fstream>
+#include <ghoul/filesystem/filesystem.h>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 
@@ -375,5 +377,33 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
     state.setExtraQuantityNames(std::move(extraQuantityNames));
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
+bool extractSeedPointsFromFile(const std::string& path, std::vector<glm::vec3>& outVec) {
+    std::ifstream seedFile(FileSys.relativePath(path));
+    if (!seedFile.good()) {
+        LERROR(fmt::format("Could not open seed points file '{}'", path));
+        return false;
+    }
+
+    LDEBUG(fmt::format("Reading seed points from file '{}'", path));
+    std::string line;
+    while (std::getline(seedFile, line)) {
+        std::stringstream ss(line);
+        glm::vec3 point;
+        ss >> point.x;
+        ss >> point.y;
+        ss >> point.z;
+        outVec.push_back(std::move(point));
+    }
+
+    if (outVec.size() == 0) {
+        LERROR(fmt::format("Found no seed points in: {}", path));
+        return false;
+    }
+
+    return true;
+}
+
+
 
 } // namespace openspace::fls

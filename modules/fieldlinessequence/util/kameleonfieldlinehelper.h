@@ -35,6 +35,9 @@ class FieldlinesState;
 
 namespace fls {
 
+bool extractSeedPointsFromFile(const std::string& path,
+        std::vector<glm::vec3>& outVec);
+
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
     const std::vector<glm::vec3>& seedPoints, const std::string& tracingVar,
     std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);

@@ -224,8 +224,6 @@ private:
     void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
     void extractPropertyInfoFromDictionary();
     void extractOsflsInfoFromDictionary();
-    bool extractSeedPointsFromFile(const std::string& path,
-        std::vector<glm::vec3>& outVec);
     void extractTriggerTimesFromFileNames();
     bool loadJsonStatesIntoRAM(const std::string& outputFolder);
     void loadOsflsStatesIntoRAM(const std::string& outputFolder);

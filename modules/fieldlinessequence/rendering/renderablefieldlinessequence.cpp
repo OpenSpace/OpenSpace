@@ -924,7 +924,7 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
     }
 
     std::vector<glm::vec3> seedPoints;
-    if (!extractSeedPointsFromFile(seedFilePath, seedPoints)) {
+    if (!fls::extractSeedPointsFromFile(seedFilePath, seedPoints)) {
         return false;
     }
 
@@ -995,35 +995,6 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
                 extraQuantityNamesDictionary.value<std::string>(std::to_string(i))
             );
         }
-    }
-
-    return true;
-}
-
-bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& path,
-                                                           std::vector<glm::vec3>& outVec)
-{
-
-    std::ifstream seedFile(FileSys.relativePath(path));
-    if (!seedFile.good()) {
-        LERROR(fmt::format("Could not open seed points file '{}'", path));
-        return false;
-    }
-
-    LDEBUG(fmt::format("Reading seed points from file '{}'", path));
-    std::string line;
-    while (std::getline(seedFile, line)) {
-        std::stringstream ss(line);
-        glm::vec3 point;
-        ss >> point.x;
-        ss >> point.y;
-        ss >> point.z;
-        outVec.push_back(std::move(point));
-    }
-
-    if (outVec.size() == 0) {
-        LERROR(fmt::format("Found no seed points in: {}", path));
-        return false;
     }
 
     return true;
