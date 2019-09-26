@@ -32,7 +32,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlinesmanager.h
   ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlineswindow.h
   ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlinesworker.h
-
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonvolumetofieldlinestask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -44,6 +44,8 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlinesmanager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlineswindow.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlinesworker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonvolumetofieldlinestask.cpp
+
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

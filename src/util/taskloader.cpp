@@ -54,7 +54,14 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         } else if (tasksDictionary.getValue(key, subTask)) {
             const std::string& taskType = subTask.value<std::string>("Type");
-            std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
+            std::unique_ptr<Task> task;
+            try {
+                task = Task::createFromDictionary(subTask);
+            } catch (const ghoul::RuntimeError& e) {
+                LERROR(fmt::format(
+                    "{}, {}", e.component, e.message
+                ));
+            }
             if (!task) {
                 LERROR(fmt::format(
                     "Failed to create a Task object of type '{}'", taskType

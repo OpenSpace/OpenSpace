@@ -22,52 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETOFIELDLINESTASK___H__
 
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
+#include <openspace/util/task.h>
 
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
-
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+#include <ghoul/glm.h>
+#include <string>
 
 namespace openspace {
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+class KameleonVolumeToFieldlinesTask : public Task {
+public:
+    KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
-}
-
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<KameleonVolumeToFieldlinesTask>("KameleonVolumeToFieldlinesTask");
-
-}
+private:
+    std::string _tracingVar;
+    std::vector<std::string> _extraScalarVars;
+    std::vector<std::string> _extraMagnitudeVars;
+    std::string _inputPath;
+    std::string _timeKernelPath;
+    std::string _seedpointsPath;
+    std::string _outputFolder;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETOFIELDLINESTASK___H__
