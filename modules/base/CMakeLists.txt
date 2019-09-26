@@ -47,6 +47,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingsphere.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.h
@@ -95,6 +96,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingsphere.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.cpp
