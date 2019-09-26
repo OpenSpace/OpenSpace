@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
     Name = "Sloan Digital Sky Survey Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_sloandss_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({
@@ -28,7 +28,7 @@ local object = {
         ColorMap = speck .. "/SDSSgals.cmap",
         ColorOption = { "redshift", "proximity" },
         ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-        Texture = textures .. "/point3.png",
+        Texture = textures .. "/point3A.png",
         Unit = "Mpc",
         -- Fade in value in the same unit as "Unit"
         FadeInDistances = { 220.0, 650.0 },

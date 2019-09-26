@@ -39,7 +39,8 @@ Fragment getFragment() {
    
     vec4 textureColor = texture(spriteTexture, texCoord);
     
-    if (textureColor.a == 0.f || gs_colorMap.a == 0.f) {
+    if (textureColor.a == 0.f || gs_colorMap.a == 0.f || 
+        ta == 0.f || fadeInValue == 0.f) {
         discard;
     }
 
