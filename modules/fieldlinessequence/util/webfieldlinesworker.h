@@ -94,6 +94,9 @@ private:
     
     // The directory for downloaded files. Passed down from WebFieldlinesManager.
     std::string _syncDir;
+
+    // Fileextension is used for the destructor
+    std::string _fileExtension = "";
     
     // TODO(Axel): Hmm, can we get around using these bools somehow? 
     bool _readyToUpdateSourceFiles = false;
