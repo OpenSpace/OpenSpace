@@ -213,8 +213,8 @@ void RenderableTimeVaryingSphere::initializeGL() {
     
     _renderableSphere->initializeGL();
     
-    prepareForTimeVaryingTexture();
-    computeSequenceEndTime();
+    //prepareForTimeVaryingTexture();
+    //computeSequenceEndTime();
     
     _webFieldlinesManager.initializeSyncDirectory(_identifier);
     initializeWebManager();
@@ -234,16 +234,16 @@ void RenderableTimeVaryingSphere::update(const UpdateData& updateData) {
 }
     
 //void RenderableTimeVaryingSphere::prepareForTimeVaryingTexture(){
-//    
+//
 //}
-//    
+//
 //void RenderableTimeVaryingSphere::computeSequenceEndTime(){
-//    
+//
 //}
-//    
+//
 //bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
 //{
-//    
+//
 //}
 
 } // namespace openspace
