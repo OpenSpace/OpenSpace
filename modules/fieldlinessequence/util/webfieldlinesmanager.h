@@ -64,7 +64,9 @@ public:
     bool hasUpdated = false;
 
     bool notifyUpdate = false;
-    
+    // For debug purposes
+    std::string _identifier;
+
 private:
 
     // Flag wether the manager is properly connected

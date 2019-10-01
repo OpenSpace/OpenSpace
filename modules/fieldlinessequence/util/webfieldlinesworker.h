@@ -27,6 +27,7 @@
 
 #include <string>
 #include <vector>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/httprequest.h>
 
 namespace openspace {
@@ -75,6 +76,9 @@ private:
 
     // Asynchttpdownloader worker.
     std::unique_ptr<AsyncHttpFileDownload> _downloading;
+    std::unique_ptr<AsyncHttpMemoryDownload> _availableTimesDownloader;
+    Time _maxTime;
+    Time _minTime;
 
     // Might need this l8r
     std::pair<double, std::string> _latestDownload;
@@ -99,6 +103,7 @@ private:
     bool _noMoreRequests = false;
     bool _bigWindowHasData = false;
     bool _downloadedSomething = false;
+    bool _requestSent = false;
     unsigned int _strikes = 0;
     std::pair<double, double> acceptableToStartRequestingAgain = std::make_pair(0.0, 0.0);
     

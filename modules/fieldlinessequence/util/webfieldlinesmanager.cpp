@@ -42,6 +42,9 @@ namespace {
 namespace openspace{
 
 // --------------------------- PUBLIC FUNCTIONS --------------------------- //
+
+// IMPORTANT: This initializing function must be called AFTER initializeSyncDirectory
+// Might be included in this function in the future.
 void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier,
                                                                           std::string url,
                                                                          size_t& _nStates,
@@ -51,7 +54,7 @@ void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier
     // Initialize the sliding window
     _webFieldlinesWindow =
         WebFieldlinesWindow(_syncDir, url, _sourceFiles, _startTimes, _nStates);
-
+    _identifier = identifier;
     LTRACE("WebFieldlinesManager initialized " + identifier);
 }
 
@@ -158,7 +161,8 @@ void WebFieldlinesManager::update(){
 
     // More than 2hrs a second would generally be unfeasable
     // for a regular internet connection to operate at
-    const int speedThreshhold = 7200;
+    const int speedThreshhold = 4000;
+
         
     // Hold your horses, we don't want to do anything while deltatime is too high
     if (abs(deltaTime) < speedThreshhold) {
@@ -190,6 +194,7 @@ void WebFieldlinesManager::update(){
             }
             else {
                 // get new window
+
                 _webFieldlinesWindow.newWindow(openspaceTime);
                 hasUpdated = false;
             }

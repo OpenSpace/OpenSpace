@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGESPHERE___H__
 
 #include <modules/base/rendering/renderablesphere.h>
+#include <modules/fieldlinessequence/util/webfieldlinesmanager.h>
 
 
 namespace ghoul::opengl {
@@ -57,6 +58,15 @@ public:
 
 private:
     void loadTexture();
+
+    /* Variables for handling dynamic web content */
+    WebFieldlinesManager _webFieldlinesManager;
+    // Store all link to file paths for each texture
+    std::vector<std::string> _sourceFiles;
+    // Store all starting times for each texture
+    std::vector<double> _startTimes;
+
+    void initializeWebManager();
 
     properties::StringProperty _defaultTexturePath;
     

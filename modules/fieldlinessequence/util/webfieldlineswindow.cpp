@@ -46,9 +46,8 @@ WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string server
 {
     _window.backWidth = 3;
     _window.forwardWidth = 3;
-        
     _window.nTriggerTimes = static_cast<int>(_nStates);
-        
+
     for(int i = 0; i < _window.nTriggerTimes ; i++){
         _window.triggerTimes.push_back(
             std::make_pair(_startTimes[i], _sourceFiles[i])
@@ -67,6 +66,8 @@ WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string server
        
 // Returns true if time is inside the current window
 bool WebFieldlinesWindow::timeIsInWindow(double time) {
+    if (_window.triggerTimes.empty())
+        return false;
     return time >= windowStart() && time <= windowEnd();
 }
     
@@ -108,7 +109,6 @@ void WebFieldlinesWindow::executeDownloadWorker() {
 }
     
 void WebFieldlinesWindow::newWindow(double time) {
-
     auto it = std::find_if(
         _triggerTimesWeb.rbegin(),
         _triggerTimesWeb.rend(),

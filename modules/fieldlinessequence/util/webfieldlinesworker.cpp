@@ -28,7 +28,6 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
 
@@ -53,6 +52,10 @@ WebFieldlinesWorker::~WebFieldlinesWorker() {
     // Cancel any potential download
     if (_downloading && _downloading->hasStarted())
         _downloading->wait();
+
+    if (_availableTimesDownloader && _availableTimesDownloader->hasStarted())
+        _downloading->wait();
+
     // Remove all files
     std::vector<std::string> temp =
         ghoul::filesystem::Directory(_syncDir).readFiles();
@@ -72,44 +75,48 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
                                                             std::vector<std::pair<double,
                                                     std::string>> &_triggerTimesWeb)
 {
+    
     // We don't want to keep sending request, if we just get empty responses.
-    if (!_noMoreRequests) {
+    if (!_noMoreRequests && !_requestSent) {
+        _requestSent = true;
         auto time = global::timeManager.time().ISO8601();
-        Time maxTime;
-        Time minTime;
-
+        
         // The timespan we would like to request (in seconds)
         // [ 1 day = 86400, 1 week = 604800 ]
-        const int timeSpan = 2*86400;
+        const int timeSpan = 2 * 86400;
 
-        const std::string dataID = "dataID";
-        const std::string files = "files";
+        _maxTime.setTime(time);
+        _minTime.setTime(time);
+        _maxTime.advanceTime(timeSpan);
+        _minTime.advanceTime(-timeSpan);
+
+        std::string url = _serverUrl +
+            "&time.min=" + _minTime.ISO8601() +
+            "&time.max=" + _maxTime.ISO8601();
+
+        AsyncHttpMemoryDownload mmryDld = AsyncHttpMemoryDownload(url);
+        _availableTimesDownloader = std::make_unique<AsyncHttpMemoryDownload>(url);
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        _availableTimesDownloader->start(opt);
+    }
+
+    if (!_noMoreRequests && _availableTimesDownloader && _availableTimesDownloader->hasStarted() && _availableTimesDownloader->hasSucceeded()) {
+        _availableTimesDownloader->wait();
         std::string stringResult;
         std::vector<std::string> urlList;
         std::vector<std::string> timeList;
-
-        maxTime.setTime(time);
-        minTime.setTime(time);
-        maxTime.advanceTime(timeSpan);
-        minTime.advanceTime(-timeSpan);
-
-        std::string url = _serverUrl +
-            "&time.min=" + minTime.ISO8601() +
-            "&time.max=" + maxTime.ISO8601();
-
-        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
-        HttpRequest::RequestOptions opt = {};
-        opt.requestTimeoutSeconds = 0;
-        mmryDld.download(opt);
+        const std::string dataID = "dataID";
+        const std::string files = "files";
 
         // TODO emiax: std::copy or similar should be possible here
         std::transform(
-            mmryDld.downloadedData().begin(),
-            mmryDld.downloadedData().end(),
+            _availableTimesDownloader->downloadedData().begin(),
+            _availableTimesDownloader->downloadedData().end(),
             std::back_inserter(stringResult),
             [](char c) {
-                return c;
-            }
+            return c;
+        }
         );
 
         auto res = json::parse(stringResult);
@@ -138,18 +145,20 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
                 _triggerTimesWeb.begin(),
                 _triggerTimesWeb.end()
             )
-        ) { // We got an empty response or the same response twice, stahp it
+            ) { // We got an empty response or the same response twice, stahp it
             _strikes++;
         }
 
         // We have got 2 strikes, no more requests for you, Mr.Sir.
-        if (_strikes % 2 == 0) { 
+        if (_strikes % 2 == 0) {
             _bigWindowHasData = (_triggerTimesWeb.size() > 0);
             _noMoreRequests = true;
             acceptableToStartRequestingAgain =
-                std::make_pair(minTime.j2000Seconds(), maxTime.j2000Seconds());
-        }     
+                std::make_pair(_minTime.j2000Seconds(), _maxTime.j2000Seconds());
+        }
+        _requestSent = false;
     }
+    
 }
 
 // Download all files in the current window
@@ -310,7 +319,6 @@ std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> dow
     const int fileNameLength = 29;
     const std::string fileName =
         downloadKey.second.substr(downloadKey.second.size() - fileNameLength);
-
     std::string url = downloadKey.second;
     std::string destinationPath =
         absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + fileName);

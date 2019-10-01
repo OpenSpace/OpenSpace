@@ -175,6 +175,14 @@ documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
     };
 }
 
+void RenderableTimeVaryingSphere::initializeWebManager()
+{
+    size_t hej = 0;
+    _webFieldlinesManager.initializeWebFieldlinesManager(
+        _identifier, "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180", hej, _sourceFiles, _startTimes
+    );
+}
+
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere
     (const ghoul::Dictionary& dictionary)
@@ -191,7 +199,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere
     _defaultTexturePath = absPath(dictionary.value<std::string>(DefaultTextureInfo.identifier));
     ghoul::Dictionary renderableSphereDictionary(dictionary);
     renderableSphereDictionary.setValue<std::string>("Texture", _defaultTexturePath.value());
-    
+    renderableSphereDictionary.getValue("Identifier", _identifier);
 
     _renderableSphere = std::make_unique<RenderableSphere>(renderableSphereDictionary);
 }
@@ -201,7 +209,10 @@ bool RenderableTimeVaryingSphere::isReady() const {
 }
 
 void RenderableTimeVaryingSphere::initializeGL() {
+    
     _renderableSphere->initializeGL();
+    _webFieldlinesManager.initializeSyncDirectory(_identifier);
+    initializeWebManager();
 }
 
 void RenderableTimeVaryingSphere::deinitializeGL() {
@@ -213,6 +224,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& 
 }
 
 void RenderableTimeVaryingSphere::update(const UpdateData& updateData) {
+    _webFieldlinesManager.update();
     _renderableSphere->update(updateData);
 }
 
