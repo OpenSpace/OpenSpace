@@ -190,6 +190,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere
     : Renderable(dictionary),
     _defaultTexturePath(DefaultTextureInfo)
 {
+    
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -211,6 +212,10 @@ bool RenderableTimeVaryingSphere::isReady() const {
 void RenderableTimeVaryingSphere::initializeGL() {
     
     _renderableSphere->initializeGL();
+    
+    //prepareForTimeVaryingTexture();
+    //computeSequenceEndTime();
+    
     _webFieldlinesManager.initializeSyncDirectory(_identifier);
     initializeWebManager();
 }
@@ -227,5 +232,18 @@ void RenderableTimeVaryingSphere::update(const UpdateData& updateData) {
     _webFieldlinesManager.update();
     _renderableSphere->update(updateData);
 }
+    
+//void RenderableTimeVaryingSphere::prepareForTimeVaryingTexture(){
+//
+//}
+//
+//void RenderableTimeVaryingSphere::computeSequenceEndTime(){
+//
+//}
+//
+//bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
+//{
+//
+//}
 
 } // namespace openspace

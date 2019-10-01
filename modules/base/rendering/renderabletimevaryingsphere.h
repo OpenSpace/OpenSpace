@@ -28,7 +28,6 @@
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/fieldlinessequence/util/webfieldlinesmanager.h>
 
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -57,23 +56,65 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void loadTexture();
-
-    /* Variables for handling dynamic web content */
+    
+    // --------------------- Web Download Manager ----------------------------------- //
+    // Web download manager
     WebFieldlinesManager _webFieldlinesManager;
-    // Store all link to file paths for each texture
+    
+    // ------------------------------------ STRINGS ------------------------------------//
+    // Name of the RenderableSphere
+    std::string _identifier;
+    
+    // ------------------------------------- FLAGS -------------------------------------//
+    // True when loading a new state from disk on another thread.
+    std::atomic_bool _isLoadingTextureFromDisk = false;
+    // True if new texture must be loaded from disk.
+    // False => the previous frame's state should still be shown
+    bool _mustLoadNewTextureFromDisk  = false;
+    // True when finished loading a new texture from disk on another thread.
+    std::atomic_bool _newTextureIsReady = false;
+    // Stated weather the asset is fetching dynamic web content,
+    // The URL to the content is specifiec in the string below,
+    bool _dynamicWebContent = false;
+    // URL to the dynamic web content.
+    std::string _dynWebContentUrl = "";
+    
+    // --------------------------------- NUMERICALS ----------------------------------- //
+    // Active index of _states. If(==-1)=>no state available for current time.
+    int _activeTriggerTimeIndex = -1;
+    // Number of textures in the sequence
+    size_t _nTextures = 0;
+    // Estimated end of sequence.
+    double _sequenceEndTime;
+    
+    // ----------------------------------- POINTERS ------------------------------------//
+    // The actual RenderableSphere object who's texture is to be modified
+    std::unique_ptr<RenderableSphere> _renderableSphere;
+    // Current texture
+    std::unique_ptr<ghoul::opengl::Texture> _currentTexture;
+    // Used when switching out current texture to a new texture
+    std::unique_ptr<ghoul::opengl::Texture> _newTexture;
+    
+    // ------------------------------------ VECTORS ----------------------------------- //
+    // Stores the provided or downloaded source file paths
     std::vector<std::string> _sourceFiles;
-    // Store all starting times for each texture
+    // Contains the _triggerTimes for all Textures in the sequence
     std::vector<double> _startTimes;
-
-    void initializeWebManager();
-
+    
+    // ---------------------------------- Properties ---------------------------------- //
+    // The default texture to display when no time varying data is loaded,
+    // set in the lua asset file
     properties::StringProperty _defaultTexturePath;
     
-    std::unique_ptr<ghoul::opengl::Texture> _activeTexture;
-
-    std::unique_ptr<RenderableSphere> _renderableSphere;
+    // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
+    void computeSequenceEndTime();
+    bool prepareForTimeVaryingTexture();
+    void initializeWebManager();
     
+    // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
+    void readNewTexture(const std::string& filePath);
+    // Read fits-file and turn into texture
+    void processFitsData(std::string filename, std::vector<float> *imagedata);
 };
 
 } // namespace openspace
