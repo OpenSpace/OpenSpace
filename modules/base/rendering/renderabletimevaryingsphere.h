@@ -64,6 +64,8 @@ private:
     // ------------------------------------ STRINGS ------------------------------------//
     // Name of the RenderableSphere
     std::string _identifier;
+    // Web content endpoint
+    std::string _webContentUrl;
     
     // ------------------------------------- FLAGS -------------------------------------//
     // True when loading a new state from disk on another thread.
@@ -73,9 +75,8 @@ private:
     bool _mustLoadNewTextureFromDisk  = false;
     // True when finished loading a new texture from disk on another thread.
     std::atomic_bool _newTextureIsReady = false;
-    // Stated weather the asset is fetching dynamic web content,
-    // The URL to the content is specifiec in the string below,
-    bool _dynamicWebContent = false;
+    // Stated weather the asset will get textures from the web
+    bool _webContent = false;
     // URL to the dynamic web content.
     std::string _dynWebContentUrl = "";
     
@@ -88,6 +89,8 @@ private:
     double _sequenceEndTime;
     
     // ----------------------------------- POINTERS ------------------------------------//
+    // The Lua-Modfile-Dictionary used during initialization
+    std::unique_ptr<ghoul::Dictionary> _dictionary;
     // The actual RenderableSphere object who's texture is to be modified
     std::unique_ptr<RenderableSphere> _renderableSphere;
     // Current texture
@@ -107,9 +110,12 @@ private:
     properties::StringProperty _defaultTexturePath;
     
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
+    void createRenderableSphere();
     void computeSequenceEndTime();
     bool prepareForTimeVaryingTexture();
     void initializeWebManager();
+    bool extractMandatoryInfoFromDictionary();
+    void removeOtherFiles(std::string fileExtension)
     
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void readNewTexture(const std::string& filePath);

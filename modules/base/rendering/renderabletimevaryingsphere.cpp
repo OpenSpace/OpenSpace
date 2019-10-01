@@ -36,14 +36,8 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingSphere";
     constexpr const char* ProgramName = "TimeVaryingSphere";
-
-    constexpr openspace::properties::Property::PropertyInfo DefaultTextureInfo = {
-        "DefaultTexture",
-        "Default Texture",
-        "This value specifies an image that is loaded from disk and is used as a default "
-        "texture that is applied to this sphere, when online textures has not yet loaded,"
-        " or data is missing. This image is expected to be an equirectangular projection."
-    };
+    
+    // --------------------- PROPERTIES FROM RENDERABLESPHERE ------------------------- //
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
@@ -101,6 +95,35 @@ namespace {
         "Sets the current sphere rendering as a background rendering type",
         "Enables/Disables background rendering."
     };
+    
+    // --------------------- PROPERTIES TIMEVARYINGSPHERE ----------------------------- //
+    constexpr openspace::properties::Property::PropertyInfo DefaultTextureInfo = {
+        "DefaultTexture",
+        "Default Texture",
+        "This value specifies an image that is loaded from disk and is used as a default "
+        "texture that is applied to this sphere, when online textures has not yet loaded,"
+        " or data is missing. This image is expected to be an equirectangular projection."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
+        "SourceFolder",
+        "Source Folder",
+        "Specify directory for texture sequence files, if loading from disk/locally."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo WebContentInfo = {
+        "WebContent",
+        "Web Content",
+        "Set true if conent is online. The field SourceFolder will be disregarded if set "
+        "to true."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo WebContentUrlInfo = {
+        "WebContentUrl",
+        "Web Content Url",
+        "Endpoint for web content. Property WebContent needs to be set to true. "
+    };
+    
 } // namespace
 
 namespace openspace {
@@ -122,12 +145,6 @@ documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
                 new IntVerifier,
                 Optional::No,
                 SegmentsInfo.description
-            },
-            {
-                DefaultTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                DefaultTextureInfo.description
             },
             {
                 OrientationInfo.identifier,
@@ -171,6 +188,30 @@ documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
                 Optional::Yes,
                 BackgroundInfo.description
             },
+            {
+                DefaultTextureInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                DefaultTextureInfo.description
+            },
+            {
+                SourceFolderInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                SourceFolderInfo.description
+            },
+            {
+                WebContentInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                WebContentInfo.description
+            },
+            {
+                WebContentUrlInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                WebContentUrlInfo.description
+            },
         }
     };
 }
@@ -179,30 +220,28 @@ void RenderableTimeVaryingSphere::initializeWebManager()
 {
     size_t hej = 0;
     _webFieldlinesManager.initializeWebFieldlinesManager(
-        _identifier, "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180", hej, _sourceFiles, _startTimes
+        _identifier,
+        "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180",
+        hej, _sourceFiles, _startTimes
     );
 }
 
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere
     (const ghoul::Dictionary& dictionary)
-    // Does this have any consequences? Will there be an additional renderable in the scene?
+    // Does this have any consequences?
+    // Will there be an additional renderable in the scene?
     : Renderable(dictionary),
     _defaultTexturePath(DefaultTextureInfo)
 {
-    
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
         "RenderableTimeVaryingSphere"
     );
+    _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     
-    _defaultTexturePath = absPath(dictionary.value<std::string>(DefaultTextureInfo.identifier));
-    ghoul::Dictionary renderableSphereDictionary(dictionary);
-    renderableSphereDictionary.setValue<std::string>("Texture", _defaultTexturePath.value());
-    renderableSphereDictionary.getValue("Identifier", _identifier);
-
-    _renderableSphere = std::make_unique<RenderableSphere>(renderableSphereDictionary);
+    createRenderableSphere();
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
@@ -213,8 +252,11 @@ void RenderableTimeVaryingSphere::initializeGL() {
     
     _renderableSphere->initializeGL();
     
+    extractMandatoryInfoFromDictionary();
+    
     //prepareForTimeVaryingTexture();
     //computeSequenceEndTime();
+    
     
     _webFieldlinesManager.initializeSyncDirectory(_identifier);
     initializeWebManager();
@@ -224,7 +266,8 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     _renderableSphere->deinitializeGL();
 }
 
-void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& rendererTasks) {
+void RenderableTimeVaryingSphere::render(
+    const RenderData& data, RendererTasks& rendererTasks) {
     _renderableSphere->render(data, rendererTasks);
 }
 
@@ -233,17 +276,118 @@ void RenderableTimeVaryingSphere::update(const UpdateData& updateData) {
     _renderableSphere->update(updateData);
 }
     
-//void RenderableTimeVaryingSphere::prepareForTimeVaryingTexture(){
-//
-//}
-//
-//void RenderableTimeVaryingSphere::computeSequenceEndTime(){
-//
-//}
-//
-//bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
-//{
-//
-//}
+void RenderableTimeVaryingSphere::createRenderableSphere(){
+    ghoul::Dictionary renderableSphereDictionary(*_dictionary);
+    renderableSphereDictionary.setValue<std::string>("Texture",
+                                                     _defaultTexturePath.value());
+    _renderableSphere = std::make_unique<RenderableSphere>(renderableSphereDictionary);
+}
+
+bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
+{
+    _dictionary->getValue("Identifier", _identifier);
+    _defaultTexturePath = absPath(
+                        _dictionary->value<std::string>(DefaultTextureInfo.identifier));
+    
+    std::string sourceFolderPath;
+    
+    // If web content is set to true
+    if(_dictionary->getValue(WebContentInfo.identifier, _webContent)){
+        _dictionary->getValue(WebContentUrlInfo.identifier, _webContentUrl);
+        if (_dictionary->getValue(SourceFolderInfo.identifier, sourceFolderPath)) {
+            LERROR(fmt::format(
+                "{}: The field {} is provided while {} is set to true, and"
+                " will be disregarded",
+                _identifier, SourceFolderInfo.identifier,
+                WebContentInfo.identifier
+            ));
+        }
+        if (!_webContentUrl.empty()) {
+            LINFO("Initializing sync-directory for web content.");
+            sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
+            // The Sun will have a default texture so hopefully no predownload is neeeded
+            //_webFieldlinesManager.preDownload(_webContentUrl);
+        }
+        else {
+            LERROR(fmt::format(
+                "{}: The field {} is missing a url", _identifier,
+                WebContentInfo.identifier
+            ));
+            return false;
+        }
+    }
+    else{ // Else load local files from SourceFolder
+        if (_dictionary->getValue(SourceFolderInfo.identifier, sourceFolderPath)) {
+            LERROR(fmt::format(
+           "{}: The field {} is missing to load textures from disk. "
+           "Provide it, or set {} to true to load content from web.",
+           _identifier, SourceFolderInfo.identifier,
+           WebContentInfo.identifier
+           ));
+        }
+        std::string fileExtension = "fits";
+        
+        // Ensure that the source folder exists and then extract
+        // the files with the same extension as <fileExtension>
+        ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
+        if (FileSys.directoryExists(sourceFolder)) {
+            // Extract all file paths from the provided folder
+            _sourceFiles = sourceFolder.readFiles(
+                ghoul::filesystem::Directory::Recursive::No,
+                ghoul::filesystem::Directory::Sort::Yes
+            );
+            
+            // Remove all files that don't have fits as extension
+            removeOtherFiles(fileExtension);
+            
+            // Ensure that there are available and valid source files left
+            if (_sourceFiles.empty()) {
+                LERROR(fmt::format(
+                    "{}: {} contains no {} files",
+                    _identifier, sourceFolderPath, fileExtension
+                ));
+                return false;
+            }
+        }
+        else {
+            LERROR(fmt::format(
+                "{}: {} is not a valid directory for source files",
+                _identifier, sourceFolderPath
+            ));
+            return false;
+        }
+    }
+    
+    return true;
+}
+    
+void RenderableTimeVaryingSphere::prepareForTimeVaryingTexture(){
+
+}
+
+void RenderableTimeVaryingSphere::computeSequenceEndTime(){
+
+}
+
+void RenderableTimeVaryingSphere::removeOtherFiles(std::string fileExtension){
+    _sourceFiles.erase(
+        std::remove_if(
+            _sourceFiles.begin(),
+            _sourceFiles.end(),
+            [fileExtension](const std::string& str) {
+                const size_t extLength = fileExtension.length();
+                std::string sub = str.substr(str.length() - extLength, extLength);
+                std::transform(
+                    sub.begin(),
+                    sub.end(),
+                    sub.begin(),
+                    [](char c) { return static_cast<char>(::tolower(c)); }
+                );
+                return sub != fileExtension;
+            }),
+        _sourceFiles.end()
+    );
+}
+
 
 } // namespace openspace
