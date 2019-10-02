@@ -45,11 +45,6 @@ public:
     
     void getRangeOfAvailableTriggerTimes(double startTime, double endTime, std::vector<std::pair<double, std::string>>& _triggerTimesWeb);
     
-    // Sets the third index in _triggerTimesWeb to whether it is on disk already or not
-    // If it's on disk, get the index of the corresponding triggertime in _triggerTimesOnDisk
-    // This means the _triggerTimesOnDisk can't be sorted or shuffled. We could also use pointers instead?
-    void checkForExistingData(std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb,
-                                                   std::vector<std::pair<double, std::string>>& _triggerTimesOnDisk);
     // Download all the steps within one window.
     // Spawn one thread per file to download?
     void downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes);

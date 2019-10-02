@@ -317,7 +317,6 @@ std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> dow
     _downloadedSomething = true;
     _latestDownload = downloadKey;
 
-
     const std::string fileName =
         downloadKey.second.substr(downloadKey.second.find_last_of('/', downloadKey.second.size() - 1));
     std::string url = downloadKey.second;
@@ -351,26 +350,6 @@ bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime) {
         [&triggerTime] (std::pair<double, std::string> const &element) {
             return element.first == triggerTime;
         }) != _downloadedTriggerTimes.end();
-}
-    
-void WebFieldlinesWorker::checkForExistingData(
-    std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb,
-    std::vector<std::pair<double, std::string>>& _triggerTimesOnDisk)
-{
-    int indexWeb = 0;
-    int indexDisk = 0;
-
-    // TODO emiax: This looks like an infinite loop.
-    // Need a way to break out from this when destroying the worker..?
-    while (true) {
-        if (compareTimetriggersEqual(
-                std::get<0>(_triggerTimesWeb[indexWeb]),
-                _triggerTimesOnDisk[indexDisk].first
-        )) {
-            std::get<1>(_triggerTimesWeb[indexWeb]) =
-                _triggerTimesOnDisk[indexDisk].second;
-        }
-    }
 }
     
 void WebFieldlinesWorker::parseTriggerTimesList(std::string s,
@@ -420,7 +399,7 @@ void WebFieldlinesWorker::triggerTimeDouble2String(double i, std::string& s) {
     
 // Inserts the pair in sorted order
 void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pair) {
-    const std::string fileName = pair.second.substr(pair.second.size() - 29);
+    const std::string fileName = pair.second.substr(pair.second.find_last_of('/', pair.second.size() - 1) + 1);
     _downloadedTriggerTimes.insert(
         std::upper_bound(
             _downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), pair

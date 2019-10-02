@@ -237,6 +237,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& 
 }
 
 void RenderableTimeVaryingSphere::update(const UpdateData& updateData) {
+
     _webFieldlinesManager.update();
     _renderableSphere->update(updateData);
 }
