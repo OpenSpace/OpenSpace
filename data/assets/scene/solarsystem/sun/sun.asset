@@ -8,6 +8,8 @@ local Sun = {
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingSphere",
+        -- Url to web content
+        DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180",
         Enabled = true,
         Size = 6.957E8,
         Segments = 64,

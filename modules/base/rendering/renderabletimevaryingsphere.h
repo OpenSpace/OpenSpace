@@ -60,6 +60,7 @@ private:
     // --------------------- Web Download Manager ----------------------------------- //
     // Web download manager
     WebFieldlinesManager _webFieldlinesManager;
+    std::string _apiUrl;
     
     // ------------------------------------ STRINGS ------------------------------------//
     // Name of the RenderableSphere

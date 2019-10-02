@@ -36,6 +36,9 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingSphere";
     constexpr const char* ProgramName = "TimeVaryingSphere";
+    // Specifying the url to the api where dynamic web content may be fetched
+    constexpr const char* KeyDynamicWebContent = "DynamicWebContent";
+    constexpr const char* KeyIdentifier = "Identifier";
 
     constexpr openspace::properties::Property::PropertyInfo DefaultTextureInfo = {
         "DefaultTexture",
@@ -177,9 +180,8 @@ documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
 
 void RenderableTimeVaryingSphere::initializeWebManager()
 {
-    size_t hej = 0;
     _webFieldlinesManager.initializeWebFieldlinesManager(
-        _identifier, "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180", hej, _sourceFiles, _startTimes
+        _identifier, _apiUrl, _sourceFiles, _startTimes
     );
 }
 
@@ -197,10 +199,16 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere
         "RenderableTimeVaryingSphere"
     );
     
+    // Extracting info from dictionary
     _defaultTexturePath = absPath(dictionary.value<std::string>(DefaultTextureInfo.identifier));
     ghoul::Dictionary renderableSphereDictionary(dictionary);
     renderableSphereDictionary.setValue<std::string>("Texture", _defaultTexturePath.value());
-    renderableSphereDictionary.getValue("Identifier", _identifier);
+    renderableSphereDictionary.getValue(KeyIdentifier, _identifier);
+
+    if(!renderableSphereDictionary.getValue(KeyDynamicWebContent, _apiUrl))
+        LERROR(fmt::format(
+            "{}: Must include a url to key '{}'", _identifier, KeyDynamicWebContent
+        ));
 
     _renderableSphere = std::make_unique<RenderableSphere>(renderableSphereDictionary);
 }
