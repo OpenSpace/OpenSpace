@@ -6,11 +6,11 @@ local renderableHelper = asset.require('util/renderable_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
+-- asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -21,9 +21,9 @@ asset.require('util/default_dashboard')
 -- asset.require('./testwsa/debugcoordaxes');
 local webGui = asset.require('util/webgui')
 
-asset.request('customization/globebrowsing')
+-- asset.request('customization/globebrowsing')
 
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+-- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local sunRadius = 695508000
@@ -31,11 +31,13 @@ local sunRadius = 695508000
 local earthRadius = 6371
 
 -- Selected field lines + some additional field lines
- asset.require('./wsa/scs_oi')
- asset.require('./wsa/pfss_oi')
+-- asset.require('./wsa/scs_oi')
+-- asset.require('./wsa/pfss_oi')
 -- asset.require('./wsa/pfss_io')
 -- Sub-Earth track
 -- asset.require('./wsa/sub_earth')
+-- Sun with magnetic field texture
+-- local sunAsset = asset.require('./wsa/sun')
 
 -- Parker Solar Probe asset package
 -- asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
@@ -185,7 +187,7 @@ asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
     sceneHelper.bindKeys(Keybindings)
     -- Sun magnetogram texture testing
-    openspace.time.setTime("2017 JUL 1 10:00:00.000")
+    openspace.time.setTime("2017 JUL 1 04:00:00.000")
     
     -- Set different deltatimes
     sceneHelper.setDeltaTimeKeys({
