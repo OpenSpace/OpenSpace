@@ -491,4 +491,9 @@ void RenderableSphere::loadTexture() {
     }
 }
 
+// So texture can be updated from outside class
+void RenderableSphere::updateTexture(std::unique_ptr<ghoul::opengl::Texture>& newTexture){
+    _texture = std::move(newTexture);
+}
+
 } // namespace openspace

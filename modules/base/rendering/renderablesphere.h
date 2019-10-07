@@ -64,6 +64,9 @@ public:
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
+    
+    // So texture can be updated from outside class
+    void updateTexture(std::unique_ptr<ghoul::opengl::Texture>& newTexture);
 
 private:
     void loadTexture();
@@ -92,10 +95,8 @@ private:
 
     bool _sphereIsDirty = false;
 
-    // @TODO emiax: This needs to be removed
-    SunTextureManager _sunTexMgr;
 };
-
+    
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__

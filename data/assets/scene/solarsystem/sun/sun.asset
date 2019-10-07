@@ -2,6 +2,8 @@ local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
+local wsaOutDirectory = asset.localResource("wsa_out_fits")
+
 
 local Sun = {
     Identifier = "Sun",
@@ -11,6 +13,8 @@ local Sun = {
         Enabled = true,
         Size = 6.957E8,
         Segments = 64,
+        SourceFolder = wsaOutDirectory, -- Running locally
+        MapType = "gong",
         DefaultTexture = textures .. "/sun.jpg",
         PerformShading = false
     },
@@ -20,3 +24,4 @@ local Sun = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Sun })
+

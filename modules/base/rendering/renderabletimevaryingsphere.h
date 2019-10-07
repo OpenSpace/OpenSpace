@@ -33,9 +33,10 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
+namespace { enum class MapType : int; }
+
 namespace openspace {
 
-class PowerScaledSphere;
 struct RenderData;
 struct UpdateData;
 
@@ -66,6 +67,8 @@ private:
     std::string _identifier;
     // Web content endpoint
     std::string _webContentUrl;
+    // GONG or ADAPT GONG so far. GONG default
+    MapType _mapType;
     
     // ------------------------------------- FLAGS -------------------------------------//
     // True when loading a new state from disk on another thread.
@@ -77,8 +80,6 @@ private:
     std::atomic_bool _newTextureIsReady = false;
     // Stated weather the asset will get textures from the web
     bool _webContent = false;
-    // URL to the dynamic web content.
-    std::string _dynWebContentUrl = "";
     
     // --------------------------------- NUMERICALS ----------------------------------- //
     // Active index of _states. If(==-1)=>no state available for current time.
@@ -94,15 +95,15 @@ private:
     // The actual RenderableSphere object who's texture is to be modified
     std::unique_ptr<RenderableSphere> _renderableSphere;
     // Current texture
-    std::unique_ptr<ghoul::opengl::Texture> _currentTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _activeTexture;
     // Used when switching out current texture to a new texture
     std::unique_ptr<ghoul::opengl::Texture> _newTexture;
     
     // ------------------------------------ VECTORS ----------------------------------- //
     // Stores the provided or downloaded source file paths
     std::vector<std::string> _sourceFiles;
-    // Contains the _triggerTimes for all Textures in the sequence
-    std::vector<double> _startTimes;
+    // Contains the _triggerTimes for all Textures in the sequence. In J2000
+    std::vector<double> _triggerTimes;
     
     // ---------------------------------- Properties ---------------------------------- //
     // The default texture to display when no time varying data is loaded,
@@ -115,12 +116,17 @@ private:
     bool prepareForTimeVaryingTexture();
     void initializeWebManager();
     bool extractMandatoryInfoFromDictionary();
-    void removeOtherFiles(std::string fileExtension)
+    void extractOptionalInfoFromDictionary();
+    void removeOtherFiles(std::string fileExtension);
+    void extractTriggerTimesFromFileNames();
     
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void readNewTexture(const std::string& filePath);
-    // Read fits-file and turn into texture
-    void processFitsData(std::string filename, std::vector<float> *imagedata);
+    void updateActiveTriggerTimeIndex(double currentTime);
+    void processWSAFitsFile(std::string filePath, std::vector<float> *imagedata);
+    bool loadTextureData(std::vector<float> *imagedata);
+    void loadDefaultTexture();
+
 };
 
 } // namespace openspace
