@@ -43,7 +43,7 @@ public:
     
     WebFieldlinesWorker(std::string syncDir, std::string serverUrl);
     
-    void getRangeOfAvailableTriggerTimes(double startTime, double endTime, std::vector<std::pair<double, std::string>>& _triggerTimesWeb);
+    void getRangeOfAvailableTriggerTimes(double time, std::vector<std::pair<double, std::string>>& _triggerTimesWeb);
     
     // Download all the steps within one window.
     // Spawn one thread per file to download?
