@@ -47,24 +47,21 @@ namespace openspace{
 // Might be included in this function in the future.
 void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier,
                                                                           std::string url,
-                                                                         size_t& _nStates,
                                                    std::vector<std::string>& _sourceFiles,
                                                          std::vector<double>& _startTimes)
 {
     // Initialize the sliding window
     _webFieldlinesWindow =
-        WebFieldlinesWindow(_syncDir, url, _sourceFiles, _startTimes, _nStates);
-    _identifier = identifier;
-    LTRACE("WebFieldlinesManager initialized " + identifier);
-}
+        WebFieldlinesWindow(_syncDir, url, _sourceFiles, _startTimes);
 
-bool WebFieldlinesManager::isConnected() {
-    return _connected;
+    LTRACE("WebFieldlinesManager initialized " + identifier);
 }
     
 // Make sure that the sync directory exists
 // Also creates a new directory in the web_fieldlines directory corresponding to the
-// field line identifier
+// field line identifier. The separation of this sync-directory initialization and
+// the initialization function of the class is because of RFLS, that can't
+// handle empty directories to begin with.
 std::string WebFieldlinesManager::initializeSyncDirectory(std::string identifier) {
     std::string path =
         absPath("${BASE}/sync/http/web_fieldlines") + FileSys.PathSeparator;

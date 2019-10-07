@@ -42,11 +42,11 @@ namespace openspace{
 
 WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                                                 std::vector<std::string>& _sourceFiles,
-                                    std::vector<double>& _startTimes, size_t& _nStates)
+                                    std::vector<double>& _startTimes)
 {
     _window.backWidth = 3;
     _window.forwardWidth = 3;
-    _window.nTriggerTimes = static_cast<int>(_nStates);
+    _window.nTriggerTimes = _sourceFiles.size();
 
     for(int i = 0; i < _window.nTriggerTimes ; i++){
         _window.triggerTimes.push_back(
@@ -54,9 +54,7 @@ WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string server
         );
     }
         
-    rfs_nStates = &_nStates;
     rfs_sourceFiles = &_sourceFiles;
-    rfs_startTimes = &_startTimes;
         
     _nAvailableWeb = 0; // haven't downloaded that list yet
         

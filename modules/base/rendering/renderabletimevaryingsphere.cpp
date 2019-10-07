@@ -313,6 +313,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     
     if(isInInterval) {
         const size_t stepForwardIndex = _activeTriggerTimeIndex + 1;
+        _hasExitedInterval = false;
         
         if (
             // true => Previous frame was not within the sequence interval
@@ -328,11 +329,14 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         }// else {we're still in same state as previous frame (no changes needed)}
     }
     else {
-        // Not in interval => set everything to false
-        _activeTriggerTimeIndex = -1;
-        loadDefaultTexture();
-        _mustLoadNewTextureFromDisk = false;
-        
+        if (!_hasExitedInterval){
+            // Exiting interval => set everything to false
+            _activeTriggerTimeIndex = -1;
+            _mustLoadNewTextureFromDisk = false;
+            loadDefaultTexture();
+            _renderableSphere->updateTexture(_activeTexture);
+            _hasExitedInterval = true;
+        }
     }
     
     // TODO: add web content update
@@ -372,11 +376,10 @@ void RenderableTimeVaryingSphere::createRenderableSphere(){
     
 void RenderableTimeVaryingSphere::initializeWebManager()
 {
-    size_t hej = 0;
     _webFieldlinesManager.initializeWebFieldlinesManager(
         _identifier,
         "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180",
-        hej, _sourceFiles, _triggerTimes
+        _sourceFiles, _triggerTimes
     );
 }
 
@@ -667,7 +670,7 @@ void RenderableTimeVaryingSphere::loadDefaultTexture() {
         
         if (texture) {
             LDEBUGC(
-                    "RenderableSphere",
+                    _identifier,
                     fmt::format("Loaded default texture from '{}'",
                     absPath(_defaultTexturePath))
                     );

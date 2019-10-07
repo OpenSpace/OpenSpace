@@ -71,7 +71,7 @@ public:
     // If files existed on disk already
     WebFieldlinesWindow(std::string syncDir, std::string serverUrl,
                         std::vector<std::string>& _sourceFiles,
-                        std::vector<double>& _startTimes, size_t& _nStates);
+                        std::vector<double>& _startTimes);
     
     // Copy constructor
     WebFieldlinesWindow& operator=(WebFieldlinesWindow&&) = default;
@@ -131,14 +131,9 @@ private:
     std::vector<std::pair<double, std::string>> _triggerTimesWeb;
 
     int _nAvailableWeb;
-    
-    // POINTERS TO RENDERABLEFIELDLIENSSEQUENCE
-    // Number of states in the sequence
-    size_t *rfs_nStates;
+
     // Stores the provided source file paths
     std::vector<std::string> *rfs_sourceFiles;
-    // Contains the _triggerTimes for all FieldlineStates in the sequence
-    std::vector<double> *rfs_startTimes;
     
     // PRIVATE MEMBER FUNCTIONS
     

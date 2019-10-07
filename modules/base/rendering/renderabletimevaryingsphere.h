@@ -80,7 +80,7 @@ private:
     std::atomic_bool _newTextureIsReady = false;
     // Stated weather the asset will get textures from the web
     bool _webContent = false;
-    
+    bool _hasExitedInterval = true;
     // --------------------------------- NUMERICALS ----------------------------------- //
     // Active index of _states. If(==-1)=>no state available for current time.
     int _activeTriggerTimeIndex = -1;

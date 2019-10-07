@@ -60,12 +60,14 @@ WebFieldlinesWorker::~WebFieldlinesWorker() {
     std::vector<std::string> temp =
         ghoul::filesystem::Directory(_syncDir).readFiles();
     // Sneaky check, just want to make sure it is only deleting fieldlines for now
-    if (temp.back().substr(temp.back().size() - 5) == "osfls" &&
-        temp.front().substr(temp.front().size() - 5) == "osfls")
-    {
-        std::for_each(temp.begin(), temp.end(), [&](auto it) {
-            FileSys.deleteFile(it);
-        });
+    if (!_fileExtension.empty()) {
+        if (temp.back().substr(temp.back().size() - _fileExtension.size()) == _fileExtension &&
+            temp.front().substr(temp.front().size() - _fileExtension.size()) == _fileExtension)
+        {
+            std::for_each(temp.begin(), temp.end(), [&](auto it) {
+                FileSys.deleteFile(it);
+            });
+        }
     }
 }
     
@@ -315,15 +317,17 @@ std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> dow
     _downloadedSomething = true;
     _latestDownload = downloadKey;
 
-    // YYYY-MM-DDTHH-MM-SS.sss.osfls - Might change
-    const int fileNameLength = 29;
     const std::string fileName =
-        downloadKey.second.substr(downloadKey.second.size() - fileNameLength);
+        downloadKey.second.substr(downloadKey.second.find_last_of('/', downloadKey.second.size() - 1));
     std::string url = downloadKey.second;
     std::string destinationPath =
         absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + fileName);
     // what the downloaded filename is to be
 
+    // Extracting the file type
+    if (_fileExtension.empty())
+        _fileExtension = fileName.substr(fileName.find_last_of('.', fileName.size() - 1), fileName.size());
+    
     _downloading = std::make_unique<AsyncHttpFileDownload>(
         url, destinationPath, HttpFileDownload::Overwrite::Yes
     );
@@ -346,26 +350,6 @@ bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime) {
         [&triggerTime] (std::pair<double, std::string> const &element) {
             return element.first == triggerTime;
         }) != _downloadedTriggerTimes.end();
-}
-    
-void WebFieldlinesWorker::checkForExistingData(
-    std::vector<std::tuple<double, std::string, int>>& _triggerTimesWeb,
-    std::vector<std::pair<double, std::string>>& _triggerTimesOnDisk)
-{
-    int indexWeb = 0;
-    int indexDisk = 0;
-
-    // TODO emiax: This looks like an infinite loop.
-    // Need a way to break out from this when destroying the worker..?
-    while (true) {
-        if (compareTimetriggersEqual(
-                std::get<0>(_triggerTimesWeb[indexWeb]),
-                _triggerTimesOnDisk[indexDisk].first
-        )) {
-            std::get<1>(_triggerTimesWeb[indexWeb]) =
-                _triggerTimesOnDisk[indexDisk].second;
-        }
-    }
 }
     
 void WebFieldlinesWorker::parseTriggerTimesList(std::string s,
@@ -415,7 +399,7 @@ void WebFieldlinesWorker::triggerTimeDouble2String(double i, std::string& s) {
     
 // Inserts the pair in sorted order
 void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pair) {
-    const std::string fileName = pair.second.substr(pair.second.size() - 29);
+    const std::string fileName = pair.second.substr(pair.second.find_last_of('/', pair.second.size() - 1) + 1);
     _downloadedTriggerTimes.insert(
         std::upper_bound(
             _downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), pair

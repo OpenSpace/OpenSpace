@@ -1187,7 +1187,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
 void RenderableFieldlinesSequence::initializeWebManager() {
     _webFieldlinesManager.initializeWebFieldlinesManager(
-        _identifier,_dynWebContentUrl, _nStates, _sourceFiles, _startTimes
+        _identifier,_dynWebContentUrl, _sourceFiles, _startTimes
     );
 }
 
