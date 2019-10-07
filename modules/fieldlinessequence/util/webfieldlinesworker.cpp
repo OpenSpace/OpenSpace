@@ -72,16 +72,13 @@ WebFieldlinesWorker::~WebFieldlinesWorker() {
 }
     
 // PUBLIC FUNCTIONS
-void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double startTime,
-                                                            double endTime,
-                                                            std::vector<std::pair<double,
+void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time, std::vector<std::pair<double,
                                                     std::string>> &_triggerTimesWeb)
 {
     
     // We don't want to keep sending request, if we just get empty responses.
     if (!_noMoreRequests && !_requestSent) {
         _requestSent = true;
-        auto time = global::timeManager.time().ISO8601();
         
         // The timespan we would like to request (in seconds)
         // [ 1 day = 86400, 1 week = 604800 ]
@@ -172,7 +169,7 @@ void WebFieldlinesWorker::downloadWindow(
                                  std::vector<std::pair<double, std::string>> triggerTimes)
 {
     // Helper variables
-    int startingPoint = triggerTimes.size() / 2;
+    size_t startingPoint = triggerTimes.size() / 2;
     bool downloaded = false;
     bool oneUpdate = false;
     bool fastDownload = global::timeManager.deltaTime() > 1800.0;

@@ -152,7 +152,7 @@ bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time) {
 }
     
 void WebFieldlinesWindow::getNewTriggerTimesWebList(double time) {
-    _worker.getRangeOfAvailableTriggerTimes(time, time, _triggerTimesWeb);
+    _worker.getRangeOfAvailableTriggerTimes(time, _triggerTimesWeb);
     _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
 }
 
