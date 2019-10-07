@@ -11,9 +11,9 @@ local Sun = {
     Renderable = {
         Type = "RenderableTimeVaryingSphere",
         -- Use WebContent
-        -- WebContent = true,
+        WebContent = true,
         -- Url to web content
-        -- WebContentUrl = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180",
+        WebContentUrl = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180",
         Enabled = true,
         Size = 6.957E8,
         Segments = 64,

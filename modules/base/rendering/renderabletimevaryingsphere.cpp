@@ -280,8 +280,8 @@ void RenderableTimeVaryingSphere::initializeGL() {
     prepareForTimeVaryingTexture();
     computeSequenceEndTime();
     
-    //_webFieldlinesManager.initializeSyncDirectory(_identifier);
-    //initializeWebManager();
+    _webFieldlinesManager.initializeSyncDirectory(_identifier);
+    initializeWebManager();
 }
 
 void RenderableTimeVaryingSphere::deinitializeGL() {
@@ -304,12 +304,31 @@ void RenderableTimeVaryingSphere::render(
 }
 
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
-    //_webFieldlinesManager.update();
     const double currentTime = data.time.j2000Seconds();
     
+    if (_webContent) {
+        if (!_webFieldlinesManager.hasUpdated &&
+            _webFieldlinesManager.checkIfWindowIsReadyToLoad())
+        {
+            _triggerTimes.clear();
+            extractTriggerTimesFromFileNames();
+            
+            // _startTimes are not sorted right now, have to do something about that ->
+            std::sort(_triggerTimes.begin(), _triggerTimes.end());
+            _nTextures = _triggerTimes.size();
+            
+            _webFieldlinesManager.hasUpdated = true;
+            _webFieldlinesManager.notifyUpdate = true;
+            _webFieldlinesManager.resetWorker();
+        }
+        _webFieldlinesManager.update();
+        // we could also send time as a variable as we already have it
+    }
+    
     //Check if current time is within the sequence interval
-    const bool isInInterval = (currentTime >= _triggerTimes[0]) &&
-    (currentTime < _sequenceEndTime);
+    const bool isInInterval = (_nTextures > 0) &&
+                              (currentTime >= _triggerTimes[0]) &&
+                              (currentTime < _sequenceEndTime);
     
     if(isInInterval) {
         const size_t stepForwardIndex = _activeTriggerTimeIndex + 1;
@@ -333,13 +352,19 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             // Exiting interval => set everything to false
             _activeTriggerTimeIndex = -1;
             _mustLoadNewTextureFromDisk = false;
-            loadDefaultTexture();
-            _renderableSphere->updateTexture(_activeTexture);
+            if(!_webContent){
+                loadDefaultTexture();
+                _renderableSphere->updateTexture(_activeTexture);
+            }
             _hasExitedInterval = true;
         }
     }
     
-    // TODO: add web content update
+    if (_webContent && _webFieldlinesManager.notifyUpdate) {
+        updateActiveTriggerTimeIndex(currentTime);
+        computeSequenceEndTime();
+        _webFieldlinesManager.notifyUpdate = false;
+    }
     
     if (_mustLoadNewTextureFromDisk) {
         if (!_isLoadingTextureFromDisk && !_newTextureIsReady) {
@@ -356,7 +381,6 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     }
     
     if (_newTextureIsReady) {
-        //maybe remove this and just use _newTexture
         _activeTexture = std::make_unique<ghoul::opengl::Texture>(
                                                                 std::move(*_newTexture));
         // Everything is set and ready for sending to RenderableSphere
@@ -377,9 +401,7 @@ void RenderableTimeVaryingSphere::createRenderableSphere(){
 void RenderableTimeVaryingSphere::initializeWebManager()
 {
     _webFieldlinesManager.initializeWebFieldlinesManager(
-        _identifier,
-        "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180",
-        _sourceFiles, _triggerTimes
+        _identifier, _webContentUrl, _sourceFiles, _triggerTimes
     );
 }
 
@@ -402,8 +424,6 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary() {
         if (!_webContentUrl.empty()) {
             LINFO("Initializing sync-directory for web content.");
             sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
-            // The Sun will have a default texture so hopefully no predownload is neeeded
-            //_webFieldlinesManager.preDownload(_webContentUrl);
         }
         else {
             LERROR(fmt::format(
@@ -543,7 +563,6 @@ void RenderableTimeVaryingSphere::removeOtherFiles(std::string fileExtension) {
 }
     
 // Assumes we already know that currentTime is within the sequence interval
-// TODO: try using lower bound instead because why this long alogorthm?
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(_triggerTimes.begin(), _triggerTimes.end(), currentTime);
     if (iter != _triggerTimes.end()) {
