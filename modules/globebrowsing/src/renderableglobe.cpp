@@ -505,6 +505,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
+    , _ringsComponent(dictionary)
+    , _shadowComponent(dictionary)
 {
     _generalProperties.currentLodScaleFactor.setReadOnly(true);
 
@@ -656,6 +658,20 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
     }
 
+    // Components
+    if (dictionary.hasKey("Rings")) {
+        _ringsComponent.initialize();
+        addPropertySubOwner(_ringsComponent);
+        _hasRings = true;
+        
+        ghoul::Dictionary ringsDic;
+        dictionary.getValue("Rings", ringsDic);
+        if (ringsDic.hasKey("Shadows")) {
+            _shadowComponent.initialize();
+            addPropertySubOwner(_shadowComponent);
+        }
+    }
+
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
     _module = global::moduleEngine.module<GlobeBrowsingModule>();
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
@@ -670,6 +686,11 @@ void RenderableGlobe::initializeGL() {
     _layerManager.update();
 
     _grid.initializeGL();
+
+    _ringsComponent.initializeGL();
+
+    _shadowComponent.initializeGL();
+
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     recompileShaders();
@@ -691,6 +712,10 @@ void RenderableGlobe::deinitializeGL() {
     }
 
     _grid.deinitializeGL();
+
+    _ringsComponent.deinitializeGL();
+
+    _shadowComponent.deinitializeGL();
 }
 
 bool RenderableGlobe::isReady() const {
@@ -713,8 +738,49 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
     if (distanceToCamera < distance) {
         try {
-            renderChunks(data, rendererTask);
-            _globeLabelsComponent.draw(data);
+            // Before Shadows
+            //renderChunks(data, rendererTask);
+            //_globeLabelsComponent.draw(data);
+
+
+            if (_hasRings && _ringsComponent.isEnabled()) {
+                if (_shadowComponent.isEnabled()) {
+
+                    glDisablei(GL_BLEND, 3);
+                    //glEnablei(GL_DEPTH_TEST, 3);
+                    _shadowComponent.begin(data);
+
+                    //_ringsComponent.draw(data, RingsComponent::GeometryOnly);
+                    //RenderData tmpRD = data;
+                    //tmpRD.modelTransform.rotation = tmpRD.modelTransform.rotation * glm::dmat3(glm::rotate(glm::dmat4(1), 90.0, glm::dvec3(1.0, 0.0, 0.0)));
+                    //_ringsComponent.draw(tmpRD, RingsComponent::GeometryOnly);
+                    renderChunks(data, rendererTask, true);
+
+                    _shadowComponent.end(data);
+                    glEnablei(GL_BLEND, 3);
+
+                    glEnable(GL_POLYGON_OFFSET_FILL);
+                    glPolygonOffset(2.5f, 10.0f);
+
+                    _ringsComponent.draw(
+                        data,
+                        RingsComponent::GeometryAndShading,
+                        _shadowComponent.shadowMapData()
+                    );
+                    renderChunks(data, rendererTask);
+
+                    glDisable(GL_POLYGON_OFFSET_FILL);
+                }
+                else {
+                    renderChunks(data, rendererTask);
+                    _ringsComponent.draw(data, RingsComponent::GeometryAndShading);
+                }
+            }
+            else {
+                renderChunks(data, rendererTask);
+            }
+
+
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
             std::string layer = _lastChangedLayer ? _lastChangedLayer->guiName() : "";
@@ -852,7 +918,8 @@ const glm::dmat4& RenderableGlobe::modelTransform() const {
 //  Rendering code
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
+void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&, 
+    const bool renderGeomOnly) {
     if (_shadersNeedRecompilation) {
         recompileShaders();
     }
@@ -1086,7 +1153,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
     for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
-        renderChunkGlobally(*global[i], data);
+        renderChunkGlobally(*global[i], data, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
@@ -1094,7 +1161,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
-        renderChunkLocally(*local[i], data);
+        renderChunkLocally(*local[i], data, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
@@ -1151,7 +1218,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
 }
 
-void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
+void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data,
+    const bool renderGeomOnly) {
     //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
@@ -1199,16 +1267,21 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    
+    if (!renderGeomOnly) {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+    }
 
     _grid.drawUsingActiveProgram();
+    
     for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
         l.deactivate();
     }
 }
 
-void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
+void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
+    const bool renderGeomOnly) {
     //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
@@ -1301,9 +1374,11 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
+    if (!renderGeomOnly) {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+    }
+    
     _grid.drawUsingActiveProgram();
 
     for (GPULayerGroup& l : _localRenderer.gpuLayerGroups) {

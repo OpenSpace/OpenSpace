@@ -32,6 +32,8 @@
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/ringscomponent.h>
+#include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -181,7 +183,8 @@ private:
      */
     float getHeight(const glm::dvec3& position) const;
 
-    void renderChunks(const RenderData& data, RendererTasks& rendererTask);
+    void renderChunks(const RenderData& data, RendererTasks& rendererTask, 
+        const bool renderGeomOnly = false);
 
     /**
      * Chunks can be rendered either globally or locally. Global rendering is performed
@@ -191,7 +194,8 @@ private:
      * point precision by doing this which means that the camera too close to a global
      * tile will lead to jagging. We only render global chunks for lower chunk levels.
      */
-    void renderChunkGlobally(const Chunk& chunk, const RenderData& data);
+    void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
+        const bool renderGeomOnly = false);
 
     /**
      * Local rendering of chunks are done using linear interpolation in camera space.
@@ -204,7 +208,8 @@ private:
      * levels) the better the approximation becomes. This is why we only render local
      * chunks for higher chunk levels.
      */
-    void renderChunkLocally(const Chunk& chunk, const RenderData& data);
+    void renderChunkLocally(const Chunk& chunk, const RenderData& data,
+        const bool renderGeomOnly = false);
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
         bool renderBounds, bool renderAABB) const;
@@ -274,6 +279,11 @@ private:
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    // Components
+    RingsComponent _ringsComponent;
+    ShadowComponent _shadowComponent;
+    bool _hasRings = false;
 
     // Labels
     GlobeLabelsComponent _globeLabelsComponent;

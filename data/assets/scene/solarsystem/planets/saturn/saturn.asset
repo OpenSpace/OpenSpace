@@ -34,6 +34,15 @@ local Saturn = {
                     Enabled = true
                 }
             }
+        },
+        Rings = {
+            Texture = textures .. "/saturn_rings.png",
+            Size = 140445000,
+            Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
+            Shadows = {
+                Enabled = true,
+                DistanceFraction = 50.0
+            } 
         }
     },
     Tag = { "planet_solarSystem", "planet_giants" },
@@ -42,21 +51,22 @@ local Saturn = {
     }
 }
 
-local SaturnRings = {
-    Identifier = "SaturnRings",
-    Parent = Saturn.Identifier,
-    Renderable = {
-        Type = "RenderableRings",
-        Texture = textures .. "/saturn_rings.png",
-        Size = 140445000,
-        Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
-    },
-    GUI = {
-        Name = "Saturn Rings",
-        Path = "/Solar System/Planets/Saturn"
-    }
-}
+-- local SaturnRings = {
+--     Identifier = "SaturnRings",
+--     Parent = Saturn.Identifier,
+--     Renderable = {
+--         Type = "RenderableRings",
+--         Texture = textures .. "/saturn_rings.png",
+--         Size = 140445000,
+--         Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
+--     },
+--     GUI = {
+--         Name = "Saturn Rings",
+--         Path = "/Solar System/Planets/Saturn"
+--     }
+-- }
 
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnRings })
+--assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnRings })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn })
