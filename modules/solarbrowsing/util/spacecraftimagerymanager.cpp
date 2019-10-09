@@ -258,9 +258,8 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
     std::string_view bufferView(buffer.data(), size);
     
 
-    auto extractInnerXml =
-        [](std::string_view view,
-            const std::string& elementName) -> std::optional<std::string_view>
+    auto extractInnerXml = [](std::string_view view, const std::string& elementName) ->
+        std::optional<std::string_view>
         {
             const std::string startTag =
                 std::string("<") + elementName + std::string(">");
@@ -268,7 +267,6 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
 
             const auto begin =
                 std::search(view.begin(), view.end(), startTag.begin(), startTag.end());
-
             if (begin == view.end()) {
                 return std::nullopt;
 ;           }
@@ -276,15 +274,13 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
 
             const auto end =
                 std::search(afterBeginTag, view.end(), endTag.begin(), endTag.end());
-
             if (end == view.end()) {
                 return std::nullopt;
             }
             return std::string_view(&*afterBeginTag, end - afterBeginTag);
         };
        
-    std::optional<std::string_view> metaData =
-        extractInnerXml(bufferView, "meta");
+    std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
     if (!metaData.has_value()) {
         LERROR(fmt::format("Could not find metadata in {}", file.fullBaseName()));
         return im;
@@ -343,58 +339,54 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         }
         else {
             LERROR(fmt::format("Could not find NAXIS1 tag {}", file.fullBaseName()));
+            return im;
         }       
     }
     else if (telescop.value() == "SDO") {
-        if (std::optional<std::string_view> rsunObs =
-            extractInnerXml(bufferView, "RSUN_OBS"))
-        {
-            if (std::optional<std::string_view> cDelt1 =
-                extractInnerXml(bufferView, "CDELT1"))
-            {
-                im.scale = (std::stof(std::string(rsunObs.value())) /
-                    std::stof(std::string(cDelt1.value()))) /
-                    (im.fullResolution / 2.f);
-                im.isCoronaGraph = false;
-            }
-            else {
-                LERROR(fmt::format("Could not find CDELT1 tag {}", file.fullBaseName()));
-            }
-        }
-        else {
+        std::optional<std::string_view> rsunObs = extractInnerXml(bufferView, "RSUN_OBS");
+        std::optional<std::string_view> cDelt1 = extractInnerXml(bufferView, "CDELT1");
+        
+        if (!rsunObs.has_value()) {
             LERROR(fmt::format("Could not find RSUN_OBS tag {}", file.fullBaseName()));
+            return im;
         }
+        if (!cDelt1.has_value()) {
+            LERROR(fmt::format("Could not find CDELT1 tag {}", file.fullBaseName()));
+            return im;
+        }
+
+        im.scale = (std::stof(std::string(rsunObs.value())) /
+            std::stof(std::string(cDelt1.value()))) /
+            (im.fullResolution / 2.f);
+        im.isCoronaGraph = false;   
     }
     else { // Telescope is assumed to be STEREO
-        if (std::optional<std::string_view> rsun =
-            extractInnerXml(bufferView, "RSUN"))
-        {
-            if (std::optional<std::string_view> cDelt1 =
-                extractInnerXml(bufferView, "CDELT1"))
-            {
-                im.scale = (std::stof(std::string(rsun.value())) /
-                    std::stof(std::string(cDelt1.value()))) /
-                    (im.fullResolution / 2.f);
-                im.isCoronaGraph = false;
+        std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
+        std::optional<std::string_view> cDelt1 = extractInnerXml(bufferView, "CDELT1");
+        if (!rsun.has_value()) {
+            LERROR(fmt::format("Could not find RSUN_OBS tag {}", file.fullBaseName()));
+            return im;
+        }
+        if (!cDelt1.has_value()) {
+            LERROR(fmt::format("Could not find CDELT1 tag {}", file.fullBaseName()));
+            return im;
+        }
 
-                if (std::optional<std::string_view> detector =
-                    extractInnerXml(bufferView, "DETECTOR"))
-                {
-                    im.isCoronaGraph =
-                        detector.value() == "COR1" || detector.value() == "COR2";
-                }
-                else {
-                    LWARNING(fmt::format(
-                        "Could not find DETECTOR tag {}", file.fullBaseName()
-                    ));
-                }
-            }
-            else {
-                LERROR(fmt::format("Could not find CDELT1 tag {}", file.fullBaseName()));
-            }
+        im.scale = (std::stof(std::string(rsun.value())) /
+            std::stof(std::string(cDelt1.value()))) /
+            (im.fullResolution / 2.f);
+        im.isCoronaGraph = false;
+
+        if (std::optional<std::string_view> detector =
+            extractInnerXml(bufferView, "DETECTOR"))
+        {
+            im.isCoronaGraph =
+                detector.value() == "COR1" || detector.value() == "COR2";
         }
         else {
-            LERROR(fmt::format("Could not find RSUN_OBS tag {}", file.fullBaseName()));
+            LWARNING(fmt::format(
+                "Could not find DETECTOR tag {}", file.fullBaseName()
+            ));
         }
     }
     return im;
