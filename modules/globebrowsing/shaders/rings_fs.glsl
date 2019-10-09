@@ -74,9 +74,12 @@ Fragment getFragment() {
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;
-    if ( shadowCoords.z >= 0 ) {
-        shadow = textureProj(shadowMap, shadowCoords);
-    }
+    //if ( shadowCoords.z >= 0 ) {
+        vec4 normalizedShadowCoords = shadowCoords;
+        //normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.z);
+        normalizedShadowCoords.w = 1.0/normalizeFloat(normalizedShadowCoords.z);
+        shadow = textureProj(shadowMap, normalizedShadowCoords);
+    //}
     
     // shadow = 1.0;
     // vec4 depthInTexture = vec4(0.0, 0.0, 0.0, 1.0);

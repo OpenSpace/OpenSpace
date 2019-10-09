@@ -25,8 +25,6 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-layout (location = 3) out vec4 renderedPosition;
-
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
 in vec4 vs_positionViewSpace;
@@ -66,9 +64,9 @@ Fragment getFragment() {
     // }
 
     Fragment frag;
-    frag.color      = vec4(1.0);;
+    frag.color      = vec4(vec3(vs_screenSpaceDepth), 1.0);
     frag.depth      = vs_screenSpaceDepth;
-    renderedPosition = vec4(vec3(length(vs_positionViewSpace.xyz)), 1.0);//vec4(vs_positionViewSpace.xyz, 1.0);
+    //renderedPosition = vec4(vec3(length(vs_positionViewSpace.xyz)), 1.0);//vec4(vs_positionViewSpace.xyz, 1.0);
     //renderedPosition = vec4(vec3(vs_screenSpaceDepth.w)/10.0, 1.0);
     
     return frag;

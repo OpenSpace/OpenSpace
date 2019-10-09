@@ -79,8 +79,8 @@ namespace openspace {
 
         bool isReady() const;
 
-        void begin(const RenderData& data);
-        void end(const RenderData& data);
+        RenderData begin(const RenderData& data);
+        void end(const RenderData& dataOrig);
         void update(const UpdateData& data);
 
         static documentation::Documentation Documentation();

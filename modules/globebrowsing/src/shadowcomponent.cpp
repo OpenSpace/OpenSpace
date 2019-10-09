@@ -232,7 +232,7 @@ namespace openspace {
         checkGLError("ShadowComponent::deinitializeGL() -- Deleted Textures and Framebuffer");
     }
 
-    void ShadowComponent::begin(const RenderData& data) {
+    RenderData ShadowComponent::begin(const RenderData& data) {
         // ===========================================
         // Builds light's ModelViewProjectionMatrix:
         // ===========================================
@@ -253,6 +253,10 @@ namespace openspace {
         _cameraPos = data.camera.positionVec3();
         // JCC: We have aim and ancor nodes and position now. Need to fix this.
         //_cameraFocus = data.camera.focusPositionVec3();
+        
+        //const SceneGraphNode * origAimNode = global::navigationHandler.orbitalNavigator().aimNode();
+        //const SceneGraphNode * origAnchorNode = global::navigationHandler.orbitalNavigator().anchorNode();
+
         _cameraRotation = data.camera.rotationQuaternion();
 
         //=============== Automatically Created Camera Matrix ===================
@@ -290,14 +294,14 @@ namespace openspace {
         glm::dmat4 cameraRotationMatrix(1.0);
         
         double* matrix = glm::value_ptr(cameraRotationMatrix);
-        matrix[0] = cameraX.x;
-        matrix[4] = cameraX.y;
-        matrix[8] = cameraX.z;
-        matrix[1] = cameraY.x;
-        matrix[5] = cameraY.y;
-        matrix[9] = cameraY.z;
-        matrix[2] = cameraZ.x;
-        matrix[6] = cameraZ.y;
+        matrix[0]  = cameraX.x;
+        matrix[4]  = cameraX.y;
+        matrix[8]  = cameraX.z;
+        matrix[1]  = cameraY.x;
+        matrix[5]  = cameraY.y;
+        matrix[9]  = cameraY.z;
+        matrix[2]  = cameraZ.x;
+        matrix[6]  = cameraZ.y;
         matrix[10] = cameraZ.z;
 
         // set translation part
@@ -310,8 +314,8 @@ namespace openspace {
         /*Scene* scene = camera->parent()->scene();
         global::navigationHandler.setFocusNode(data.);
         */
-
-        Camera camera(data.camera);
+       
+        Camera camera = data.camera;
         camera.setPositionVec3(lightPosition);
         // JCC: We have aim and ancor nodes and position now. Need to fix this.
         //camera.setFocusPositionVec3(data.modelTransform.translation);
@@ -355,6 +359,8 @@ namespace openspace {
 
         checkGLError("begin() -- before binding FBO");
         glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
+        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
+        glDrawBuffers(3, drawBuffers);
         checkGLError("begin() -- after binding FBO");
         glViewport(0, 0, _shadowDepthTextureWidth, _shadowDepthTextureHeight);
         checkGLError("begin() -- set new viewport");
@@ -376,10 +382,19 @@ namespace openspace {
         checkGLError("begin() -- set values for polygon offset");*/
 
         checkGLError("begin() finished");
-        
+
+        RenderData lightRenderData{ 
+            camera, 
+            data.time, 
+            data.doPerformanceMeasurement, 
+            data.renderBinMask, 
+            data.modelTransform 
+        };
+
+        return lightRenderData;
     }
 
-    void ShadowComponent::end(const RenderData& data) {
+    void ShadowComponent::end(const RenderData& dataOrig) {
         checkGLError("end() -- Flushing");
         //glFlush();
         if (_executeDepthTextureSave) {
@@ -388,7 +403,7 @@ namespace openspace {
         }
 
         // Restores Camera Parameters
-        Camera camera = data.camera;
+        Camera camera = dataOrig.camera;
         camera.setPositionVec3(_cameraPos);
         // JCC: We have aim and ancor nodes and position now. Need to fix this.
         //camera.setFocusPositionVec3(_cameraFocus);
@@ -396,6 +411,10 @@ namespace openspace {
         
         // Restores system state
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+        GLenum drawBuffers[] = {
+            GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
+        };
+        glDrawBuffers(3, drawBuffers);
         checkGLError("end() -- Rebinding default FBO");
         glViewport(
             _mViewport[0],
@@ -452,15 +471,15 @@ namespace openspace {
         checkGLError("createDepthTexture() -- Starting configuration");
         glGenTextures(1, &_shadowDepthTexture);
         glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-        glTexStorage2D(
+        /*glTexStorage2D(
             GL_TEXTURE_2D, 
             1, 
             GL_DEPTH_COMPONENT32F,
             _shadowDepthTextureWidth, 
             _shadowDepthTextureHeight
-        );
+        );*/
 
-        /*glTexImage2D(
+        glTexImage2D(
             GL_TEXTURE_2D,
             0,
             GL_DEPTH_COMPONENT32F,
@@ -470,15 +489,15 @@ namespace openspace {
             GL_DEPTH_COMPONENT,
             GL_FLOAT,
             0
-        );*/
+        );
         checkGLError("createDepthTexture() -- Depth testure created");
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, shadowBorder);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         checkGLError("createdDepthTexture");
@@ -519,24 +538,23 @@ namespace openspace {
 
         glGenFramebuffers(1, &_shadowFBO);
         glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
-        glFramebufferTexture2D(
+        glFramebufferTexture(
             GL_FRAMEBUFFER, 
             GL_DEPTH_ATTACHMENT, 
-            GL_TEXTURE_2D,
             _shadowDepthTexture, 
             0
         );
 
         glFramebufferTexture(
             GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT3,
+            GL_COLOR_ATTACHMENT0,
             _positionInLightSpaceTexture,
             0
         );
         checkGLError("createShadowFBO() -- Created Shadow Framebuffer");
         //GLenum drawBuffers[] = { GL_NONE };
-        GLenum drawBuffers[] = { GL_NONE, GL_NONE, GL_NONE, GL_COLOR_ATTACHMENT3 };
-        glDrawBuffers(4, drawBuffers);
+        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
+        glDrawBuffers(3, drawBuffers);
 
         checkFrameBufferState("createShadowFBO()");
 

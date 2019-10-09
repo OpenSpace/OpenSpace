@@ -746,30 +746,29 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             if (_hasRings && _ringsComponent.isEnabled()) {
                 if (_shadowComponent.isEnabled()) {
 
-                    glDisablei(GL_BLEND, 3);
-                    //glEnablei(GL_DEPTH_TEST, 3);
-                    _shadowComponent.begin(data);
-
-                    //_ringsComponent.draw(data, RingsComponent::GeometryOnly);
-                    //RenderData tmpRD = data;
-                    //tmpRD.modelTransform.rotation = tmpRD.modelTransform.rotation * glm::dmat3(glm::rotate(glm::dmat4(1), 90.0, glm::dvec3(1.0, 0.0, 0.0)));
-                    //_ringsComponent.draw(tmpRD, RingsComponent::GeometryOnly);
-                    renderChunks(data, rendererTask, true);
-
-                    _shadowComponent.end(data);
-                    glEnablei(GL_BLEND, 3);
-
+                    // Render from light source point of view
+                    RenderData lightRenderData(_shadowComponent.begin(data));
+                    
+                    glDisable(GL_BLEND);
                     glEnable(GL_POLYGON_OFFSET_FILL);
                     glPolygonOffset(2.5f, 10.0f);
 
+                    renderChunks(lightRenderData, rendererTask, true);
+                    _ringsComponent.draw(lightRenderData, RingsComponent::GeometryOnly);
+
+                    glEnable(GL_BLEND);
+                    glDisable(GL_POLYGON_OFFSET_FILL);
+                    
+                    _shadowComponent.end(data);
+                                        
+
+                    // Render again from original point of view
+                    renderChunks(data, rendererTask);
                     _ringsComponent.draw(
                         data,
                         RingsComponent::GeometryAndShading,
                         _shadowComponent.shadowMapData()
                     );
-                    renderChunks(data, rendererTask);
-
-                    glDisable(GL_POLYGON_OFFSET_FILL);
                 }
                 else {
                     renderChunks(data, rendererTask);
