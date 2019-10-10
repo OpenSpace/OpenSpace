@@ -99,7 +99,7 @@ void SpacecraftImageryManager::loadTransferFunctions(const std::string& path,
 }
 
 bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
-           std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap)
+           std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
 {
 
     ghoul::filesystem::Directory sequenceDir(
@@ -189,13 +189,7 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
                 return false;
             }
 
-            std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
-            TimedependentState<ImageMetadata> timeState(
-                std::move(data),
-                timeObserved,
-                im.filename
-            );
-            _imageMetadataMap[instrument].addState(std::move(timeState));
+            _imageMetadataMap[instrument].addKeyframe(timeObserved, std::move(im));
         }
         myfile.close();
     }
@@ -203,35 +197,35 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
 }
 
 void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath,
-           std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap)
+           std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
 {
     using K = std::string;
-    using V = ImageMetadataStateSequence;
+    using V = Timeline<ImageMetadata>;
     for (const std::pair<K, V>& instrument : _imageMetadataMap) {
         std::ofstream ofs(rootPath + "/" + instrument.first + "_cached" + ".txt");
         if (!ofs.is_open()) {
             LERROR("Failed to open file");
         }
-        const ImageMetadataStateSequence& sequence = instrument.second;
-        ofs << sequence.numStates() << "\n";
-        for (const TimedependentState<ImageMetadata>& metadata : sequence.states()) {
+        const Timeline<ImageMetadata>& sequence = instrument.second;
+        ofs << sequence.nKeyframes() << "\n";
+        for (const Keyframe<ImageMetadata>& metadata : sequence.keyframes()) {
                 ofs << SpiceManager::ref().dateFromEphemerisTime(
-                    metadata.timeObserved()
+                    metadata.timestamp
                 ) << "\n";
-                const std::shared_ptr<ImageMetadata>& im = metadata.contents();
+                const ImageMetadata& im = metadata.data;
 
-                size_t filenamePos = im->filename.find("imagedata");
+                size_t filenamePos = im.filename.find("imagedata");
                 if (filenamePos == std::string::npos) {
-                    LERROR(fmt::format("Invalid image filename {}", im->filename));
+                    LERROR(fmt::format("Invalid image filename {}", im.filename));
                     return;
                 }
-                std::string fname = im->filename.substr(filenamePos);
+                std::string fname = im.filename.substr(filenamePos);
                 ofs << fname << "\n";
-                ofs << im->fullResolution << "\n";
-                ofs << im->scale << "\n";
-                ofs << im->centerPixel.x << "\n";
-                ofs << im->centerPixel.y << "\n";
-                ofs << im->isCoronaGraph << "\n";
+                ofs << im.fullResolution << "\n";
+                ofs << im.scale << "\n";
+                ofs << im.centerPixel.x << "\n";
+                ofs << im.centerPixel.y << "\n";
+                ofs << im.isCoronaGraph << "\n";
         }
         ofs.close();
     }
@@ -507,9 +501,9 @@ ImageMetadata SpacecraftImageryManager::parseJsonMetadata(
 }
 
 void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
-      std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap)
+      std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
 {
-    std::unordered_map<std::string, ImageMetadataStateSequence> result;
+    std::unordered_map<std::string, Timeline<ImageMetadata>> result;
 
     LDEBUG("Begin loading spacecraft imagery metadata");
 
@@ -588,13 +582,11 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
                 tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
             const ImageMetadata im = parseJ2kMetadata(currentFile);
-            std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
             spiceAndPushMutex.lock();
-            TimedependentState<ImageMetadata> timeState(
-                std::move(data),
-                global::timeManager.time().convertTime(time), seqPath
+            result[instrumentName].addKeyframe(
+                global::timeManager.time().convertTime(time),
+                std::move(im)
             );
-            result[instrumentName].addState(std::move(timeState));
             spiceAndPushMutex.unlock();
         }
         ++count;

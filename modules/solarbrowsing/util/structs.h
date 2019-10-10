@@ -43,12 +43,12 @@ struct ImageMetadata {
 
 struct SolarImageData {
     unsigned char* data;
-    std::shared_ptr<ImageMetadata> im;
+    const ImageMetadata* im;
     double timeObserved;
 };
 
 struct DecodeData {
-    std::shared_ptr<ImageMetadata> im;
+    const ImageMetadata* im;
     unsigned int resolutionLevel;
     double timeObserved;
     bool verboseMode;

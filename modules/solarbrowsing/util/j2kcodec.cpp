@@ -127,12 +127,12 @@ J2kCodec::~J2kCodec() {
 }
 
 void J2kCodec::decodeIntoBuffer(const std::string& path, unsigned char* buffer,
-                                int resolutionLevel, int numQualityLayers, int x0,
+                                int downsamplingLevel, int numQualityLayers, int x0,
                                 int y0, int x1, int y1, int numThreads)
 {
     auto t1 = std::chrono::high_resolution_clock::now();
     createInfileStream(path);
-    setupDecoder(resolutionLevel, numQualityLayers, x0, x1, y0, y1, numThreads);
+    setupDecoder(downsamplingLevel, numQualityLayers, x0, x1, y0, y1, numThreads);
 
     // TODO(mnoven): It's a waste of resources having to decode into the image object and
     // then copy over the data to our buffer. Would be better if we could decode directly
@@ -157,10 +157,8 @@ void J2kCodec::decodeIntoBuffer(const std::string& path, unsigned char* buffer,
         _image->comps[0].data + _image->comps[0].w * _image->comps[0].h,
         buffer
     );
-    // std::memcpy(buffer, _image->comps[0].data, _image->comps[0].w * _image->comps[0].h
-    // * sizeof(int32_t));
-    auto t2 = std::chrono::high_resolution_clock::now();
 
+    auto t2 = std::chrono::high_resolution_clock::now();
     if (_verboseMode) {
         LINFO(fmt::format(
             "Decode time of {}: {} ms",
@@ -329,13 +327,13 @@ void J2kCodec::encodeAsTiles(const char* outfile, const int32_t* data,
     opj_destroy_codec(encoder);
 }
 
-void J2kCodec::setupDecoder(int resolutionLevel, int numQualityLayers, int x0, int y0,
+void J2kCodec::setupDecoder(int downsamplingLevel, int numQualityLayers, int x0, int y0,
                             int x1, int y1, int numThreads)
 {
     opj_set_default_decoder_parameters(&_decoderParams);
     _decoderParams.decod_format = infileFormat(_infileName);
     //_decoderParams.cp_layer = numQualityLayers;
-    _decoderParams.cp_reduce = resolutionLevel;
+    _decoderParams.cp_reduce = downsamplingLevel;
 
     switch (_decoderParams.decod_format) {
         case J2K_CFMT: {

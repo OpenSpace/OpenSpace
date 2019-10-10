@@ -33,7 +33,9 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/util/timeline.h>
 #include <memory>
+#include <optional>
 #include <chrono>
 #include <unordered_set>
 
@@ -58,8 +60,6 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    void performImageTimestep(const double& osTime);
-
     TransferFunction* getTransferFunction();
     const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture();
     const SpacecraftCameraPlane& getCameraPlane();
@@ -76,23 +76,16 @@ private:
     properties::BoolProperty _enableBorder;
     properties::BoolProperty _enableFrustum;
     properties::FloatProperty _gammaValue;
-    properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
     properties::FloatProperty _planeOpacity;
-    properties::IntProperty _resolutionLevel;
+    properties::IntProperty _downsamplingLevel;
     properties::BoolProperty _verboseMode;
-
-    std::chrono::milliseconds _realTime;
-    std::chrono::milliseconds _lastUpdateRealTime;
 
     TransferFunction* _lut;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-
-    bool _timeToUpdateTexture = false;
     float _imagePlaneOffset = 0.0;
     double _realTimeDiff;
-    double _currentActiveImageTime;
 
     bool _isWithinFrustum = false;
     bool _isWithinFrustumLast = true;
@@ -106,13 +99,13 @@ private:
     // For debugging
     unsigned int _frameSkipCount = 0;
 
-    std::string _nodeName;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
-    std::unordered_map<std::string, SpacecraftImageryManager::ImageMetadataStateSequence> _imageMetadataMap;
+    ImageMetadata* _currentImage;
+    std::unordered_map<std::string, Timeline<ImageMetadata>> _imageMetadataMap;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
+    std::vector<unsigned char> _decodeBuffer;
 
-    DecodeData getDecodeDataFromOsTime(int osTime);
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
     void listen();
     bool checkBoundaries(const RenderData& data);

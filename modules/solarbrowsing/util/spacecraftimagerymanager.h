@@ -29,7 +29,7 @@
 #include <vector>
 #include <valarray>
 #include <unordered_map>
-#include <modules/solarbrowsing/util/timedependentstatesequence.h>
+#include <openspace/util/timeline.h>
 #include <modules/solarbrowsing/util/structs.h>
 
 #include <ext/json/json.hpp>
@@ -47,12 +47,10 @@ class TransferFunction;
 
 class SpacecraftImageryManager {
 public:
-    using ImageMetadataStateSequence = TimedependentStateSequence<ImageMetadata>;
-
     void loadTransferFunctions(const std::string& path,
           std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
     void loadImageMetadata(const std::string& path,
-      std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap);
+      std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
 
 private:
     ImageMetadata parseJ2kMetadata(const ghoul::filesystem::File& file);
@@ -61,10 +59,10 @@ private:
     std::string ISO8601(std::string& datetime);
 
     bool loadMetadataFromDisk(const std::string& rootPath,
-        std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap);
+        std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
 
     void saveMetadataToDisk(const std::string& rootPath,
-        std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap);
+        std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
 };
 
 } //namespace openspace

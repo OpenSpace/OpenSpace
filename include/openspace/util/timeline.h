@@ -70,7 +70,11 @@ public:
     void removeKeyframesBetween(double begin, double end, bool inclusiveBegin = false,
         bool inclusiveEnd = false);
     size_t nKeyframes() const;
+
+    Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false);
     const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
+
+    Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false);
     const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
 
     const std::deque<Keyframe<T>>& keyframes() const;

@@ -35,10 +35,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/j2kcodec.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/util/structs.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.inl
-
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
