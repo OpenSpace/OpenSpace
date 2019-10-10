@@ -96,7 +96,7 @@ Fragment getFragment() {
 
     if (renderSurface) {
         // Yellow-ish. Could discard to get the standard sun texture
-        outColor = vec4(0.93, 0.96, 0.3, 1.0);
+        outColor = vec4(0.2, 0.2, 0.2, 1.0);
     }
 
     Fragment frag;

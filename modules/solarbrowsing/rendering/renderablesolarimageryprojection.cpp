@@ -58,11 +58,6 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     : Renderable(dictionary)
     , _sphere(6.96701E8f, 100)
 {
-    if (!dictionary.getValue(SceneGraphNode::KeyIdentifier, _nodeName)) {
-        throw ghoul::RuntimeError("Nodename has to be specified");
-    }
-
-
     ghoul::Dictionary nodes = dictionary.value<ghoul::Dictionary>(KeyDependentNodes);
     for (int i = 1; i <= nodes.size(); ++i) {
         std::string n = nodes.value<std::string>(std::to_string(i));
@@ -71,10 +66,6 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
 }
 
 void RenderableSolarImageryProjection::initialize() {
-    SceneGraphNode* thisNode = global::renderEngine.scene()->sceneGraphNode(
-        _nodeName
-    );
-
     for (const std::string& n : _dependentNodes) {
         SceneGraphNode* depNode = global::renderEngine.scene()->sceneGraphNode(n);
         if (!depNode) {

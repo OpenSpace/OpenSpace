@@ -250,7 +250,6 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         return im;
     }
     std::string_view bufferView(buffer.data(), size);
-    
 
     auto extractInnerXml = [](std::string_view view, const std::string& elementName) ->
         std::optional<std::string_view>
@@ -385,7 +384,6 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
     }
     return im;
 }
-
 
 // This is currently not used. Instead, the parseJ2kMetadata is used,
 // extracting the data directoy from the JPEG2000 file by naively searching the entire

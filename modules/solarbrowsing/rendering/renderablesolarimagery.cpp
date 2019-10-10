@@ -260,6 +260,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
             keyframe->data.fullResolution /
             std::pow(2, static_cast<int>(_downsamplingLevel))
         );
+        _isCoronaGraph = keyframe->data.isCoronaGraph;
         _currentScale = keyframe->data.scale;
         _currentCenterPixel = keyframe->data.centerPixel;
         _currentImage = &(keyframe->data);
@@ -272,6 +273,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
             // No need to re-upload an empty image.
             return;
         }
+        _isCoronaGraph = false;
         _imageSize = 32;
         _currentScale = 0;
         _currentCenterPixel = glm::vec2(2.f);
