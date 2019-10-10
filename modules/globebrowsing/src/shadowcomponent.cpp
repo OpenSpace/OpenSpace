@@ -248,6 +248,9 @@ namespace openspace {
         // New light source position
         glm::dvec3 lightPosition = data.modelTransform.translation + 
             (lightDirection * multiplier);
+
+        //// Light Position
+        //glm::dvec3 lightPosition = glm::dvec3(_sunPosition);
        
         // Saving current Camera parameters
         _cameraPos = data.camera.positionVec3();
@@ -284,7 +287,7 @@ namespace openspace {
         glm::dvec3 cameraZ = lightDirection;
         
         // camera X
-        glm::dvec3 upVector = glm::dvec3(0.0, -1.0, 0.0);
+        glm::dvec3 upVector = glm::dvec3(0.0, 1.0, 0.0);
         glm::dvec3 cameraX = glm::normalize(glm::cross(upVector, cameraZ)); 
         
         // camera Y
@@ -315,11 +318,11 @@ namespace openspace {
         global::navigationHandler.setFocusNode(data.);
         */
        
-        Camera camera = data.camera;
-        camera.setPositionVec3(lightPosition);
+        _lightCamera = new Camera(data.camera);
+        _lightCamera->setPositionVec3(lightPosition);
         // JCC: We have aim and ancor nodes and position now. Need to fix this.
         //camera.setFocusPositionVec3(data.modelTransform.translation);
-        camera.setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
+        _lightCamera->setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
 
         //=======================================================================
         //=======================================================================
@@ -327,7 +330,7 @@ namespace openspace {
 
         //============= Light Matrix by Camera Matrices Composition =============
         //=======================================================================
-        glm::dmat4 lightProjectionMatrix = glm::dmat4(camera.projectionMatrix());
+        glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
         //glm::dmat4 lightProjectionMatrix = glm::ortho(-1000.0, 1000.0, -1000.0, 1000.0, 0.0010, 1000.0);
         //glm::dmat4 lightProjectionMatrix = glm::frustum(-1.0, 1.0, -1.0, 1.0, 1.0, 1000000.0);
 
@@ -336,10 +339,10 @@ namespace openspace {
         _shadowData.shadowMatrix = 
             _toTextureCoordsMatrix * 
             lightProjectionMatrix * 
-            camera.combinedViewMatrix();
+            _lightCamera->combinedViewMatrix();
 
         // temp
-        _shadowData.worldToLightSpaceMatrix = glm::dmat4(camera.combinedViewMatrix());
+        _shadowData.worldToLightSpaceMatrix = glm::dmat4(_lightCamera->combinedViewMatrix());
 
         checkGLError("begin() -- Saving Current GL State");
         // Saves current state
@@ -383,12 +386,20 @@ namespace openspace {
 
         checkGLError("begin() finished");
 
-        RenderData lightRenderData{ 
+        /*RenderData lightRenderData{ 
             camera, 
             data.time, 
             data.doPerformanceMeasurement, 
             data.renderBinMask, 
             data.modelTransform 
+        };*/
+
+        RenderData lightRenderData{
+            *_lightCamera,
+            data.time,
+            data.doPerformanceMeasurement,
+            data.renderBinMask,
+            data.modelTransform
         };
 
         return lightRenderData;
@@ -471,15 +482,15 @@ namespace openspace {
         checkGLError("createDepthTexture() -- Starting configuration");
         glGenTextures(1, &_shadowDepthTexture);
         glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-        /*glTexStorage2D(
+        glTexStorage2D(
             GL_TEXTURE_2D, 
             1, 
             GL_DEPTH_COMPONENT32F,
             _shadowDepthTextureWidth, 
             _shadowDepthTextureHeight
-        );*/
+        );
 
-        glTexImage2D(
+        /*glTexImage2D(
             GL_TEXTURE_2D,
             0,
             GL_DEPTH_COMPONENT32F,
@@ -489,15 +500,15 @@ namespace openspace {
             GL_DEPTH_COMPONENT,
             GL_FLOAT,
             0
-        );
+        );*/
         checkGLError("createDepthTexture() -- Depth testure created");
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, shadowBorder);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         checkGLError("createdDepthTexture");

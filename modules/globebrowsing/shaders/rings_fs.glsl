@@ -28,7 +28,7 @@
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
 in vec4 vs_positionViewSpace;
-in flat vec4 shadowCoords;
+in vec4 shadowCoords;
 
 uniform sampler2D shadowPositionTexture;
 
@@ -74,12 +74,14 @@ Fragment getFragment() {
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;
-    //if ( shadowCoords.z >= 0 ) {
+    if ( shadowCoords.z >= 0 ) {
         vec4 normalizedShadowCoords = shadowCoords;
-        //normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.z);
-        normalizedShadowCoords.w = 1.0/normalizeFloat(normalizedShadowCoords.z);
+        normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w);
+        normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
+        normalizedShadowCoords.w = 1.0;
         shadow = textureProj(shadowMap, normalizedShadowCoords);
-    //}
+        //shadow = textureProj(shadowMap, shadowCoords);
+    }
     
     // shadow = 1.0;
     // vec4 depthInTexture = vec4(0.0, 0.0, 0.0, 1.0);

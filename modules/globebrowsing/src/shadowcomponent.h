@@ -35,6 +35,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
+#include <openspace/util/camera.h>
+
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -149,6 +151,8 @@ namespace openspace {
         glm::dquat _cameraRotation;
 
         std::stringstream _serializedCamera;
+
+        Camera *_lightCamera;
 
         // DEBUG
         bool _executeDepthTextureSave;
