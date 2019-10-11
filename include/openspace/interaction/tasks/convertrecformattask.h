@@ -31,6 +31,13 @@
 
 #include <string>
 
+namespace {
+    constexpr const char* KeyConvertToAscii = "ConvertToAscii";
+    constexpr const char* KeyConvertToBinary = "ConvertToBinary";
+    constexpr const char* KeyInFilePath = "InputFilePath";
+    constexpr const char* KeyOutFilePath = "OutputFilePath";
+}
+
 namespace openspace {
 
 class ConvertRecFormatTask : public Task {
@@ -40,13 +47,19 @@ public:
         ToBinary
     };
     ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
+    ~ConvertRecFormatTask();
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
 
 private:
+    void convertToAscii();
+    void convertToBinary();
+
     std::string _inFilePath;
     std::string  _outFilePath;
+    std::ifstream _iFile;
+    std::ifstream _oFile;
 
     std::string _valueFunctionLua;
 };

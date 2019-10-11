@@ -46,14 +46,6 @@ namespace {
     constexpr const char* _loggerCat = "SessionRecording";
 
     constexpr const bool UsingTimeKeyframes = false;
-    const std::string FileHeaderTitle = "OpenSpace_record/playback";
-    constexpr const size_t FileHeaderVersionLength = 5;
-    constexpr const char FileHeaderVersion[FileHeaderVersionLength] = {
-        '0', '0', '.', '8', '5'
-    };
-    constexpr const char DataFormatAsciiTag = 'A';
-    constexpr const char DataFormatBinaryTag = 'B';
-
 
     template <typename T>
     T readFromPlayback(std::ifstream& stream) {
@@ -979,19 +971,6 @@ void SessionRecording::playbackScript() {
         }
     }
     double timeRef = appropriateTimestamp(timeOs, timeRec, timeSim);
-    //timeRef = getEquivalentSimulationTime(timeOs, timeRec, timeSim);
-
-    //Call script scheduler with this new script entry
-    //std::string timeDescription = SpiceManager::ref().dateFromEphemerisTime(
-    //  timeRef,
-    //  "YYYY MON DD HR:MN:SC.###"
-    //);
-    //ghoul::Dictionary scriptDict(ghoul::Dictionary{
-    //  { KeyTime, timeDescription },
-    //  { KeyForwardScript, pbFrame._script}
-    //}
-    //                            );
-    //global::scriptScheduler.loadScripts({ { "1", scriptDict } });
     addKeyframe(timeRef, pbFrame._script);
 }
 

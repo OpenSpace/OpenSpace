@@ -45,6 +45,14 @@ public:
         Playback
     };
 
+    const std::string FileHeaderTitle = "OpenSpace_record/playback";
+    constexpr const size_t FileHeaderVersionLength = 5;
+    constexpr const char FileHeaderVersion[FileHeaderVersionLength] = {
+        '0', '0', '.', '8', '5'
+    };
+    constexpr const char DataFormatAsciiTag = 'A';
+    constexpr const char DataFormatBinaryTag = 'B';
+
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
 

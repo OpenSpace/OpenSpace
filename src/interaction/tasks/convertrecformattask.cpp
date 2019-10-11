@@ -30,13 +30,11 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <iomanip>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* KeyConvertToAscii = "ConvertToAscii";
-    constexpr const char* KeyConvertToBinary = "ConvertToBinary";
-    constexpr const char* KeyInFilePath = "InputFilePath";
-    constexpr const char* KeyOutFilePath = "OutputFilePath";
-}
+    constexpr const char* _loggerCat = "ConvertRecFormatTask";
+} // namespace
 
 namespace openspace {
 
@@ -49,6 +47,20 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
 
     _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
     _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
+
+    ghoul_assert(FileSys.fileExists(_inFilePath), "The filename must exist");
+    if (!FileSys.fileExists(_inFilePath)) {
+        LERROR(fmt::format("Failed to load session recording file: {}", _inFilePath));
+        //throw ghoul::FileNotFoundError(_inFilePath);
+    }
+
+    _iFile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+    _iFile.open(_inFilePath);
+}
+
+ConvertRecFormatTask::~ConvertRecFormatTask() {
+    _iFile.close();
+    _oFile.close();
 }
 
 void ConvertRecFormatTask::perform(const Task::ProgressCallback& progressCallback) {
@@ -56,35 +68,64 @@ void ConvertRecFormatTask::perform(const Task::ProgressCallback& progressCallbac
 }
 
 void ConvertRecFormatTask::convert() {
-    RecordedDataMode type = formatType();
+    interaction::RecordedDataMode type = formatType();
 
-    if (type == RecordedDataMode::Ascii) {
+    if (type == interaction::RecordedDataMode::Ascii) {
         convertToBinary();
     }
-    else if (type == RecordedDataMode::Binary) {
+    else if (type == interaction::RecordedDataMode::Binary) {
         convertToAscii();
     }
     else {
         //Add error output for file type not recognized
+        LERROR("Session recording file unrecognized format type.");
     }
 }
 
 RecordedDataMode ConvertRecFormatTask::formatType() {
-    //Read file at _inFilePath
+    const std::string expectedHeader = "OpenSpace_record/playback";
+    std::string line;
+    //Get first line, which is ASCII regardless of format
+    std::getline(_iFile, line);
 
-    //Read first line
-
-    //First verify that the line starts with the valid string
-
-    //Get last character which should be either 'A' or 'B', and return Ascii or Binary based on this.
+    if (line.substr(0, interaction::FileHeaderTitle.length())
+        != interaction::FileHeaderTitle)
+    {
+        LERROR(fmt::format("Session recording file {} does not have expected header.", _inFilePath));
+        return RecordedDataMode::Binary + 1;
+    }
+    else {
+        if (line.back() == DataFormatAsciiTag) {
+            return RecordedDataMode::Ascii;
+        }
+        else if (line.back() == DataFormatBinaryTag) {
+            return RecordedDataMode::Binary;
+        }
+        else {
+            return RecordedDataMode::Binary + 1;
+        }
+    }
 }
 
 void ConvertRecFormatTask::convertToAscii() {
-
+    _outFilePath = addFileSuffix(_inFilePath, "_ascii");
 }
 
 void ConvertRecFormatTask::convertToBinary() {
+    _outFilePath = addFileSuffix(_inFilePath, "_binary");
+}
 
+std::string ConvertRecFormatTask::addFileSuffix(const std::string& filePath,
+                                                const std::string& suffix)
+{
+    size_t lastdot = filename.find_last_of(".");
+    std::string extension = filePath.substr(0, lastdot);
+    if (lastdot == std::string::npos) {
+        return filePath + suffix;
+    }
+    else {
+        return filePath.substr(0, lastdot) + suffix + extension;
+    }
 }
 
 documentation::Documentation ConvertRecFormatTask::documentation() {
