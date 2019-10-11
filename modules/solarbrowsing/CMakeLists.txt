@@ -38,6 +38,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/helioviewerdownloadtask.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.h
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -48,6 +50,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/helioviewerdownloadtask.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

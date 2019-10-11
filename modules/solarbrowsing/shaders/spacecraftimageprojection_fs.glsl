@@ -26,6 +26,7 @@ const int MAX_SPACECRAFT_OBSERVATORY = 7;
 in vec4 vs_positionScreenSpace;
 in vec4 clipSpace;
 in vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
+in vec3 vs_positionModelSpace;
 
 uniform int numSpacecraftCameraPlanes;
 uniform dvec3 planePositionSpacecraft[MAX_SPACECRAFT_OBSERVATORY];
@@ -95,8 +96,9 @@ Fragment getFragment() {
     }
 
     if (renderSurface) {
-        // Yellow-ish. Could discard to get the standard sun texture
-        outColor = vec4(0.2, 0.2, 0.2, 1.0);
+        // Arbitrary default shading
+        vec3 diffuse = vec3((vs_positionModelSpace.y) / SUN_RADIUS) * 0.18;
+        outColor = vec4(clamp(diffuse, vec3(-1.0), vec3(1.0)) + vec3(0.2, 0.21, 0.22), 1.0);
     }
 
     Fragment frag;

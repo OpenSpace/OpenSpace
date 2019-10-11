@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,46 +21,38 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#ifndef __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
+#define __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
 
-#include <modules/solarbrowsing/solarbrowsingmodule.h>
-
-#include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
-#include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/task.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/util/time.h>
+#include <openspace/documentation/documentation.h>
+
+#include <ghoul/glm.h>
+
+#include <string>
+#include <vector>
 
 namespace openspace {
 
-SolarBrowsingModule::SolarBrowsingModule() : OpenSpaceModule(Name) {
-}
+class HelioviewerDownloadTask : public Task {
+public:
+    HelioviewerDownloadTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
-SpacecraftImageryManager& SolarBrowsingModule::spacecraftImageryManager() {
-    return _spacecraftImageryManager;
-}
+private:
+    std::vector<std::string> relevantDirectoryListings() const;
 
-void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableSolarImagery>(
-        "RenderableSolarImagery"
-    );
-    fRenderable->registerClass<RenderableSolarImageryProjection>(
-        "RenderableSolarImageryProjection"
-    );
-
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<HelioviewerDownloadTask>("HelioviewerDownloadTask");
-
-
-}
+    std::string _outputFolder;
+    double _timeStep;
+    std::string _downloadUrl;
+    std::string _filenames;
+    Time _startTime;
+    Time _endTime;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__

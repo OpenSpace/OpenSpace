@@ -34,8 +34,8 @@ uniform int numSpacecraftCameraPlanes;
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec2 vs_st;
 out vec4 vs_positionScreenSpace;
+out vec3 vs_positionModelSpace;
 out vec4 clipSpace;
 out vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
 
@@ -43,7 +43,8 @@ out vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
 
 void main() {
     // Transform the damn psc to homogenous coordinate
-    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+    vec4 position = vec4(in_position.xyz, 1);
+    vs_positionModelSpace = position.xyz;
 
     // Transform the positions to the reference frame of the spacecraft to get tex coords
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
