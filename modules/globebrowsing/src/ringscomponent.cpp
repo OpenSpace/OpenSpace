@@ -56,13 +56,13 @@
 #include <locale>
 
 namespace {
-    constexpr const std::array<const char*, 7> UniformNames = {
-        "modelViewMatrix", "projectionMatrix", "textureOffset", 
-        "transparency", "_nightFactor", "sunPosition", "texture1"
+    constexpr const std::array<const char*, 8> UniformNames = {
+        "modelViewProjectionMatrix", "textureOffset", "transparency", "_nightFactor", 
+        "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture"
     };
 
-    constexpr const std::array<const char*, 3> GeomUniformNames = {
-        "modelViewMatrix", "projectionMatrix", "textureOffset"
+    constexpr const std::array<const char*, 2> GeomUniformNames = {
+        "modelViewProjectionMatrix", "textureOffset"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -273,50 +273,44 @@ namespace openspace {
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-        const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-        const glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+        const glm::dmat4 modelViewProjectionTransform = 
+            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix() 
+            * modelTransform;
 
-        ghoul::opengl::TextureUnit unit;
         if (renderPass == GeometryAndShading) {
-            _shader->setUniform(_uniformCache.modelViewMatrix, modelViewTransform);
-            _shader->setUniform(_uniformCache.projectionMatrix, projectionMatrix);
+            _shader->setUniform(
+                _uniformCache.modelViewProjectionMatrix, 
+                modelViewProjectionTransform
+            );
             _shader->setUniform(_uniformCache.textureOffset, _offset);
             _shader->setUniform(_uniformCache.transparency, _transparency);
             _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
             _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
 
-            unit.activate();
+            ghoul::opengl::TextureUnit ringTextureUnit;
+            ringTextureUnit.activate();
             _texture->bind();
-            _shader->setUniform(_uniformCache.texture, unit);
+            _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
 
             // Adding the model transformation to the final shadow matrix so we have a 
             // complete transformation from the model coordinates to the clip space of 
             // the light position.
-            _shader->setUniform("shadowMatrix", shadowData.shadowMatrix * modelTransform);
+            _shader->setUniform(
+                _uniformCache.shadowMatrix, 
+                shadowData.shadowMatrix * modelTransform
+            );
 
             ghoul::opengl::TextureUnit shadowMapUnit;
             shadowMapUnit.activate();
             glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
         
-            _shader->setUniform("shadowMap", shadowMapUnit);
-
-            // DEBUGGING
-            ghoul::opengl::TextureUnit shadowTextureUnit;
-            shadowTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, shadowData.positionInLightSpaceTexture);
-            _shader->setUniform("shadowPositionTexture", shadowTextureUnit);
-            _shader->setUniform("objectToLightSpaceMatrix",
-                                shadowData.worldToLightSpaceMatrix * modelTransform);
+            _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
 
         }
         else if (renderPass == GeometryOnly) {
             _geometryOnlyShader->setUniform(
-                _geomUniformCache.modelViewMatrix,
-                modelViewTransform
-            );
-            _geometryOnlyShader->setUniform(
-                _geomUniformCache.projectionMatrix,
-                projectionMatrix
+                _geomUniformCache.modelViewProjectionMatrix,
+                modelViewProjectionTransform
             );
             _geometryOnlyShader->setUniform(
                 _geomUniformCache.textureOffset,

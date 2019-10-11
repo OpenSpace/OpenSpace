@@ -95,9 +95,10 @@ namespace openspace {
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
         std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
-        UniformCache(modelViewMatrix, projectionMatrix, textureOffset, 
-            transparency, nightFactor, sunPosition, texture) _uniformCache;
-        UniformCache(modelViewMatrix, projectionMatrix, textureOffset) _geomUniformCache;
+        UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
+                     sunPosition, ringTexture, shadowMatrix, shadowMapTexture
+        ) _uniformCache;
+        UniformCache(modelViewProjectionMatrix, textureOffset) _geomUniformCache;
         std::unique_ptr<ghoul::opengl::Texture> _texture;
         std::unique_ptr<ghoul::filesystem::File> _textureFile;
 

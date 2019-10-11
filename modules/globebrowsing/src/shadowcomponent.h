@@ -60,7 +60,7 @@ namespace openspace {
 
     namespace documentation { struct Documentation; }
 
-    static const GLfloat shadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
+    static const GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
 
     class ShadowComponent : public properties::PropertyOwner {
     public:
@@ -82,7 +82,7 @@ namespace openspace {
         bool isReady() const;
 
         RenderData begin(const RenderData& data);
-        void end(const RenderData& dataOrig);
+        void end();
         void update(const UpdateData& data);
 
         static documentation::Documentation Documentation();
@@ -107,8 +107,8 @@ namespace openspace {
         const glm::dmat4 _toTextureCoordsMatrix = glm::dmat4(
             glm::dvec4(0.5, 0.0, 0.0, 0.0),
             glm::dvec4(0.0, 0.5, 0.0, 0.0),
-            glm::dvec4(0.0, 0.0, 0.5, 0.0),
-            glm::dvec4(0.5, 0.5, 0.5, 1.0)
+            glm::dvec4(0.0, 0.0, 1.0, 0.0),
+            glm::dvec4(0.5, 0.5, 0.0, 1.0)
         );
 
         // DEBUG
@@ -152,7 +152,7 @@ namespace openspace {
 
         std::stringstream _serializedCamera;
 
-        Camera *_lightCamera;
+        std::unique_ptr<Camera> _lightCamera;
 
         // DEBUG
         bool _executeDepthTextureSave;

@@ -34,12 +34,7 @@ out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;
 out vec4 shadowCoords;
 
-// temp
-out vec4 fragPosInLightSpace;
-uniform dmat4 objectToLightSpaceMatrix;
-
-uniform dmat4 modelViewMatrix;
-uniform dmat4 projectionMatrix;
+uniform dmat4 modelViewProjectionMatrix;
 
 // ShadowMatrix is the matrix defined by:
 // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
@@ -50,18 +45,13 @@ uniform dmat4 shadowMatrix;
 void main() {
     vs_st = in_st;
 
-    dvec4 positionViewSpace = modelViewMatrix * dvec4(in_position, 0.0, 1.0);
-    vec4 positionClipSpace  = vec4(projectionMatrix * positionViewSpace);
-    vec4 positionClipSpaceZNorm = z_normalization(positionClipSpace);
+    dvec4 positionClipSpace  = modelViewProjectionMatrix * 
+                               dvec4(in_position, 0.0, 1.0);
+    vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
     
     shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
-    // temp
-    fragPosInLightSpace = vec4(objectToLightSpaceMatrix * 
-                               dvec4(in_position.xy, 0.0, 1.0));
-
-    vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
-    vs_positionViewSpace = vec4(positionViewSpace);
     
-    //gl_Position = positionClipSpaceZNorm;
-    gl_Position = positionClipSpace;
+    vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
+    
+    gl_Position = positionClipSpaceZNorm;
 }

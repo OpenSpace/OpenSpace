@@ -165,11 +165,11 @@ namespace openspace {
     ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         : properties::PropertyOwner({ "Shadows" })		
         , _saveDepthTexture(SaveDepthTextureInfo)
-        , _distanceFraction(DistanceFractionInfo, 30, 1, 100000)
+        , _distanceFraction(DistanceFractionInfo, 30, 1, 1000)
         , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
         , _shadowMapDictionary(dictionary)
-        , _shadowDepthTextureHeight(1024)
-        , _shadowDepthTextureWidth(1024)
+        , _shadowDepthTextureHeight(4096)
+        , _shadowDepthTextureWidth(4096)
         , _shadowDepthTexture(-1)
         , _positionInLightSpaceTexture(-1)
         , _shadowFBO(-1)
@@ -252,35 +252,6 @@ namespace openspace {
         //// Light Position
         //glm::dvec3 lightPosition = glm::dvec3(_sunPosition);
        
-        // Saving current Camera parameters
-        _cameraPos = data.camera.positionVec3();
-        // JCC: We have aim and ancor nodes and position now. Need to fix this.
-        //_cameraFocus = data.camera.focusPositionVec3();
-        
-        //const SceneGraphNode * origAimNode = global::navigationHandler.orbitalNavigator().aimNode();
-        //const SceneGraphNode * origAnchorNode = global::navigationHandler.orbitalNavigator().anchorNode();
-
-        _cameraRotation = data.camera.rotationQuaternion();
-
-        //=============== Automatically Created Camera Matrix ===================
-        //=======================================================================
-        //glm::dmat4 lightViewMatrix = glm::lookAt(
-        //    //lightPosition,
-        //    glm::dvec3(0.0),
-        //    //glm::dvec3(_sunPosition), // position
-        //    glm::dvec3(data.modelTransform.translation), // focus 
-        //    data.camera.lookUpVectorWorldSpace()  // up
-        //    //glm::dvec3(0.0, 1.0, 0.0)
-        //);
-
-        //camera->setPositionVec3(lightPosition);
-        //camera->setFocusPositionVec3(data.modelTransform.translation);
-        //camera->setRotation(glm::dquat(glm::inverse(lightViewMatrix)));
-        
-        //=======================================================================
-        //=======================================================================
-
-
         //=============== Manually Created Camera Matrix ===================
         //==================================================================
         // camera Z
@@ -314,16 +285,10 @@ namespace openspace {
         //matrix[13] = -glm::dot(cameraY, lightPosition);
         //matrix[14] = -glm::dot(cameraZ, lightPosition);
 
-        /*Scene* scene = camera->parent()->scene();
-        global::navigationHandler.setFocusNode(data.);
-        */
        
-        _lightCamera = new Camera(data.camera);
+        _lightCamera = std::move(std::unique_ptr<Camera>(new Camera(data.camera)));
         _lightCamera->setPositionVec3(lightPosition);
-        // JCC: We have aim and ancor nodes and position now. Need to fix this.
-        //camera.setFocusPositionVec3(data.modelTransform.translation);
         _lightCamera->setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
-
         //=======================================================================
         //=======================================================================
         
@@ -331,9 +296,7 @@ namespace openspace {
         //============= Light Matrix by Camera Matrices Composition =============
         //=======================================================================
         glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
-        //glm::dmat4 lightProjectionMatrix = glm::ortho(-1000.0, 1000.0, -1000.0, 1000.0, 0.0010, 1000.0);
-        //glm::dmat4 lightProjectionMatrix = glm::frustum(-1.0, 1.0, -1.0, 1.0, 1.0, 1000000.0);
-
+        
         // The model transformation missing in the final shadow matrix is add when rendering each
         // object (using its transformations provided by the RenderData structure)
         _shadowData.shadowMatrix = 
@@ -341,10 +304,7 @@ namespace openspace {
             lightProjectionMatrix * 
             _lightCamera->combinedViewMatrix();
 
-        // temp
-        _shadowData.worldToLightSpaceMatrix = glm::dmat4(_lightCamera->combinedViewMatrix());
-
-        checkGLError("begin() -- Saving Current GL State");
+        
         // Saves current state
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
         glGetIntegerv(GL_VIEWPORT, _mViewport);
@@ -360,19 +320,15 @@ namespace openspace {
         _blendIsEnabled = glIsEnabled(GL_BLEND);
 
 
-        checkGLError("begin() -- before binding FBO");
         glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
         glDrawBuffers(3, drawBuffers);
-        checkGLError("begin() -- after binding FBO");
         glViewport(0, 0, _shadowDepthTextureWidth, _shadowDepthTextureHeight);
-        checkGLError("begin() -- set new viewport");
         glClearDepth(1.0f);
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_DEPTH_TEST);
         glClearColor(0.0, 0.0, 0.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        checkGLError("begin() -- after cleanning Depth buffer");
         
         
         /*glEnable(GL_CULL_FACE);
@@ -383,16 +339,6 @@ namespace openspace {
         checkGLError("begin() -- enabled polygon offset fill");
         glPolygonOffset(2.5f, 10.0f);
         checkGLError("begin() -- set values for polygon offset");*/
-
-        checkGLError("begin() finished");
-
-        /*RenderData lightRenderData{ 
-            camera, 
-            data.time, 
-            data.doPerformanceMeasurement, 
-            data.renderBinMask, 
-            data.modelTransform 
-        };*/
 
         RenderData lightRenderData{
             *_lightCamera,
@@ -405,28 +351,18 @@ namespace openspace {
         return lightRenderData;
     }
 
-    void ShadowComponent::end(const RenderData& dataOrig) {
-        checkGLError("end() -- Flushing");
-        //glFlush();
+    void ShadowComponent::end() {
         if (_executeDepthTextureSave) {
             saveDepthBuffer();
             _executeDepthTextureSave = false;
         }
 
-        // Restores Camera Parameters
-        Camera camera = dataOrig.camera;
-        camera.setPositionVec3(_cameraPos);
-        // JCC: We have aim and ancor nodes and position now. Need to fix this.
-        //camera.setFocusPositionVec3(_cameraFocus);
-        camera.setRotation(_cameraRotation);
-        
         // Restores system state
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
         GLenum drawBuffers[] = {
             GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
         };
         glDrawBuffers(3, drawBuffers);
-        checkGLError("end() -- Rebinding default FBO");
         glViewport(
             _mViewport[0],
             _mViewport[1],
@@ -470,8 +406,6 @@ namespace openspace {
         if (_blendIsEnabled) {
             glEnable(GL_BLEND);
         }
-
-        checkGLError("end() finished");
     }
 
     void ShadowComponent::update(const UpdateData& /*data*/) {
@@ -479,7 +413,6 @@ namespace openspace {
     }
 
     void ShadowComponent::createDepthTexture() {
-        checkGLError("createDepthTexture() -- Starting configuration");
         glGenTextures(1, &_shadowDepthTexture);
         glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
         glTexStorage2D(
@@ -501,21 +434,19 @@ namespace openspace {
             GL_FLOAT,
             0
         );*/
-        checkGLError("createDepthTexture() -- Depth testure created");
+        
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, shadowBorder);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ShadowBorder);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        checkGLError("createdDepthTexture");
+        
+        checkGLError("createDepthTexture() -- Depth testure created");
 
-        glGenTextures(1, &_positionInLightSpaceTexture);
+        /*glGenTextures(1, &_positionInLightSpaceTexture);
         glBindTexture(GL_TEXTURE_2D, _positionInLightSpaceTexture);        
-        //glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage2D(
             GL_TEXTURE_2D, 
             0, 
@@ -527,13 +458,11 @@ namespace openspace {
             GL_FLOAT, 
             nullptr
         );
-        checkGLError("createDepthTexture() -- Position/Distance buffer created");
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        checkGLError("createdPositionTexture");
-
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);*/
+        
         glBindTexture(GL_TEXTURE_2D, 0);
 
         _shadowData.shadowDepthTexture = _shadowDepthTexture;
@@ -544,9 +473,7 @@ namespace openspace {
         // Saves current FBO first
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-        /*GLint _mViewport[4];
-        glGetIntegerv(GL_VIEWPORT, _mViewport);*/
-
+       
         glGenFramebuffers(1, &_shadowFBO);
         glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
         glFramebufferTexture(
@@ -556,28 +483,22 @@ namespace openspace {
             0
         );
 
-        glFramebufferTexture(
+        /*glFramebufferTexture(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT0,
             _positionInLightSpaceTexture,
             0
-        );
+        );*/
+        
         checkGLError("createShadowFBO() -- Created Shadow Framebuffer");
-        //GLenum drawBuffers[] = { GL_NONE };
-        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
+        //GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
+        GLenum drawBuffers[] = { GL_NONE, GL_NONE, GL_NONE };
         glDrawBuffers(3, drawBuffers);
 
         checkFrameBufferState("createShadowFBO()");
 
         // Restores system state
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
-        /*glViewport(
-            _mViewport[0],
-            _mViewport[1],
-            _mViewport[2],
-            _mViewport[3]
-        );*/
-        checkGLError("createShadowFBO() -- createdShadowFBO");
     }
 
     void ShadowComponent::saveDepthBuffer() {

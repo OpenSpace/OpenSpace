@@ -27,13 +27,10 @@
 
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
-in vec4 vs_positionViewSpace;
 in vec4 shadowCoords;
 
-uniform sampler2D shadowPositionTexture;
-
-uniform sampler2DShadow shadowMap;
-uniform sampler1D texture1;
+uniform sampler2DShadow shadowMapTexture;
+uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
 uniform float transparency;
 
@@ -64,7 +61,7 @@ Fragment getFragment() {
         discard;
     }
         
-    vec4 diffuse = texture(texture1, texCoord);
+    vec4 diffuse = texture(ringTexture, texCoord);
     float colorValue = length(diffuse.rgb);
     // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the transparency value to [0,1]
@@ -76,30 +73,12 @@ Fragment getFragment() {
     float shadow = 1.0;
     if ( shadowCoords.z >= 0 ) {
         vec4 normalizedShadowCoords = shadowCoords;
-        normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w);
+        normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w - 0.3);
         normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
         normalizedShadowCoords.w = 1.0;
-        shadow = textureProj(shadowMap, normalizedShadowCoords);
-        //shadow = textureProj(shadowMap, shadowCoords);
+        shadow = textureProj(shadowMapTexture, normalizedShadowCoords);
     }
     
-    // shadow = 1.0;
-    // vec4 depthInTexture = vec4(0.0, 0.0, 0.0, 1.0);
-    // //if (shadowCoords.z >= 0) {
-    // if (true) {    
-    //     vec4 byHandCoords = shadowCoords / shadowCoords.w;
-    //     // Distance of the current pixel from the light source
-    //     depthInTexture = texture(shadowPositionTexture, byHandCoords.xy);
-    //     //depthInTexture = texture(shadowPositionTexture, vec2(0.5, 0.5));
-    //     // if (depthInTexture.x < byHandCoords.z) {
-    //     //     shadow = 0.0;
-    //     // }
-    //     if (length(fragPosInLightSpace) > depthInTexture.x) {
-    //         shadow = 0.2;
-    //     }
-    //     //shadow = length(fragPosInLightSpace);
-    // }
-
     // The normal for the one plane depends on whether we are dealing
     // with a front facing or back facing fragment
     vec3 normal;
@@ -119,15 +98,10 @@ Fragment getFragment() {
     }
 
     Fragment frag;
-    //frag.color = depthInTexture;
+
     frag.color      = (0.55 * diffuse * shadow) + diffuse * 0.45;
-    //frag.color      = vec4(shadow * vec3(1.0, 1.0, 1.0), 1.0);
-    //frag.depth      = vs_position.w;
     frag.depth      = vs_screenSpaceDepth;
-    if (diffuse.a < 1.0)
-        frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
-    else
-        frag.gPosition  = vs_positionViewSpace;
+    frag.gPosition  = vec4(1e30, 1e30, 1e30, 1.0);
     frag.gNormal    = vec4(normal, 1.0);
 
     return frag;

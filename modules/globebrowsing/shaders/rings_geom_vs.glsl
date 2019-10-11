@@ -31,21 +31,17 @@ layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
 out float vs_screenSpaceDepth;
-out vec4 vs_positionViewSpace;
 
-uniform dmat4 modelViewMatrix;
-uniform dmat4 projectionMatrix;
+uniform dmat4 modelViewProjectionMatrix;
 
 void main() {
     vs_st = in_st;
 
-    dvec4 positionViewSpace = modelViewMatrix * dvec4(in_position, 0.0, 1.0);
-    vec4 positionClipSpace  = vec4(projectionMatrix * positionViewSpace);
-    vec4 positionClipSpaceZNorm = z_normalization(positionClipSpace);
+    dvec4 positionClipSpace  = modelViewProjectionMatrix * 
+                               dvec4(in_position, 0.0, 1.0);
+    vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
     
     vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
-    vs_positionViewSpace = vec4(positionViewSpace);
-    
-    //gl_Position = positionClipSpaceZNorm;
-    gl_Position = positionClipSpace;
+
+    gl_Position = positionClipSpaceZNorm;
 }

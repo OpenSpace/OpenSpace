@@ -687,9 +687,10 @@ void RenderableGlobe::initializeGL() {
 
     _grid.initializeGL();
 
-    _ringsComponent.initializeGL();
-
-    _shadowComponent.initializeGL();
+    if (_hasRings) {
+        _ringsComponent.initializeGL();
+        _shadowComponent.initializeGL();
+    }
 
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
@@ -713,9 +714,10 @@ void RenderableGlobe::deinitializeGL() {
 
     _grid.deinitializeGL();
 
-    _ringsComponent.deinitializeGL();
-
-    _shadowComponent.deinitializeGL();
+    if (_hasRings) {
+        _ringsComponent.deinitializeGL();
+        _shadowComponent.deinitializeGL();
+    }
 }
 
 bool RenderableGlobe::isReady() const {
@@ -746,21 +748,18 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             if (_hasRings && _ringsComponent.isEnabled()) {
                 if (_shadowComponent.isEnabled()) {
 
-                    // Render from light source point of view
+                    // Set matrices and other GL states
                     RenderData lightRenderData(_shadowComponent.begin(data));
                     
                     glDisable(GL_BLEND);
-                    glEnable(GL_POLYGON_OFFSET_FILL);
-                    glPolygonOffset(2.5f, 10.0f);
-
+                    
+                    // Render from light source point of view
                     renderChunks(lightRenderData, rendererTask, true);
                     _ringsComponent.draw(lightRenderData, RingsComponent::GeometryOnly);
-
-                    glEnable(GL_BLEND);
-                    glDisable(GL_POLYGON_OFFSET_FILL);
                     
-                    _shadowComponent.end(data);
-                                        
+                    glEnable(GL_BLEND);
+                    
+                    _shadowComponent.end();                    
 
                     // Render again from original point of view
                     renderChunks(data, rendererTask);
