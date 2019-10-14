@@ -23,19 +23,23 @@
  ****************************************************************************************/
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/httprequest.h>
 #include <unordered_set>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <openspace/json.h>
 #include <iostream>
 
 namespace {
     constexpr const char* _loggerCat = "HelioviewerDownloadTask";
 
-    constexpr const char* KeyDownloadUrl = "DownloadUrl";
-    constexpr const char* KeyFilenames = "Filenames";
+    constexpr const char* KeySourceId = "SourceId";
     constexpr const char* KeyStartTime = "StartTime";
     constexpr const char* KeyTimeStep = "TimeStep";
     constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyOutputFolder = "OutputFolder";
+    constexpr const char* KeyTimeKernel = "TimeKernel";
 }
 
 namespace openspace {
@@ -85,7 +89,13 @@ documentation::Documentation HelioviewerDownloadTask::documentation() {
                 Optional::No,
                 "The unique identifier as specified in "
                 "https://api.helioviewer.org/docs/v2/#appendix"
-            }
+            },
+            {
+                KeyTimeKernel,
+                new StringAnnotationVerifier("A file path to a cdf file"),
+                Optional::No,
+                "A file path to a tls spice kernel used for time",
+            },
         }
     };
 }
@@ -96,6 +106,7 @@ HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictio
     _timeStep = dictionary.value<double>(KeyTimeStep);
     _sourceId = static_cast<int>(dictionary.value<double>(KeySourceId));
     _outputFolder = dictionary.value<std::string>(KeyOutputFolder);
+    _timeKernelPath = absPath(dictionary.value<std::string>(KeyTimeKernel));
 }
 
 std::string HelioviewerDownloadTask::description() {
@@ -109,7 +120,9 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     //    Be able to fallback on previous pages, but know when to give up.
     //    In the page, find the best file to download.
 
-    // get best filename from 
+    // get best filename from
+
+    SpiceManager::ref().loadKernel(_timeKernelPath);
     
     std::unordered_set<std::string> availableFiles;
 
@@ -121,6 +134,9 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
                     _sourceId,
                     _timeStep);
 
+
+    LINFO(fmt::format("Requesting {}", jpxRequest));
+
     SyncHttpMemoryDownload fileListing(jpxRequest);
     HttpRequest::RequestOptions opt = { 0 };
     fileListing.download(opt);
@@ -128,9 +144,77 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         LERROR(fmt::format("Request to Heliviewer API failed."));
     }
 
-    const std::vector<char>& data = fileListing.downloadedData();
-    std::string str(data.begin(), data.end());
-    nlohmann::json json = nlohmann::json::parse(str.c_str());
+    const std::vector<char>& listingData = fileListing.downloadedData();
+    std::string listingString(listingData.begin(), listingData.end());
+
+    std::vector<double> frames;
+    try {
+        nlohmann::json json = nlohmann::json::parse(listingString.c_str());
+        const auto& framesIt = json.find("frames");
+        if (framesIt == json.end()) {
+            LERROR(fmt::format("Failed to acquire frames"));
+        }
+
+        nlohmann::json frameData = framesIt.value().get<nlohmann::json>();
+        for (const auto& frame : frameData) {
+            double epoch = frame.get<size_t>();
+            frames.push_back(epoch);
+        }
+    }
+    catch (...) {
+        LERROR(fmt::format("Failed to parse json response: {}", listingString));
+        return;
+    }
+
+    for (size_t i = 0; i < frames.size(); ++i) {
+        const double epoch = frames[i];
+        const double j2000InEpoch = 946684800.0;
+        Time t(epoch - j2000InEpoch);
+
+        std::string formattedDate = t.ISO8601();
+        std::string imageUrl = fmt::format(
+            "http://api.helioviewer.org/v2/getJP2Image/?date={}Z&sourceId={}", 
+            formattedDate,
+            _sourceId
+        );
+
+        std::string year(formattedDate.begin(), formattedDate.begin() + 4);
+        std::string month(formattedDate.begin() + 5,  formattedDate.begin() + 7);
+        std::string day(formattedDate.begin() + 8, formattedDate.begin() + 10);
+        std::string hour(formattedDate.begin() + 11, formattedDate.begin() + 13);
+        std::string minute(formattedDate.begin() + 14, formattedDate.begin() + 16);
+        std::string second(formattedDate.begin() + 17, formattedDate.begin() + 19);
+        std::string millis(formattedDate.begin() + 20, formattedDate.begin() + 23);
+
+        std::string name = "SDO-AIA";
+        std::string instrument = "171";
+
+        std::string outFilename = fmt::format(
+            "{}/{}_{}_{}__{}_{}_{}_{}__{}_{}.jp2",
+            _outputFolder, 
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            millis,
+            name,
+            instrument,
+            static_cast<size_t>(epoch)
+        );
+
+        SyncHttpFileDownload imageDownload(imageUrl, absPath(outFilename));
+
+        imageDownload.download(opt);
+        if (!imageDownload.hasSucceeded()) {
+            LERROR(fmt::format("Request to image {} failed.", imageUrl));
+            continue;
+        }
+        progressCallback(static_cast<float>(i) / static_cast<float>(frames.size()));
+    }
+
+    
 
     // https://api.helioviewer.org/v2/getJP2Header/?id=7654321
     // extract time stamp from DATE_OBS
@@ -138,18 +222,9 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     // beware of 1000 image max limit.
 
     // std::cout << str << std::endl;
-/*
-    const auto& framesIt = json.find("frames");
-    if (framesIt == json.end()) {
-        LERROR(fmt::format("Failed to acquire frames"));
-    }
 
-    nlohmann::json frames = framesIt.value().get<nlohmann::json>();
-    for (const auto& frame : frames) {
-        int index = frame.get<int>();
-        LINFO(fmt::format("{}", index));
-    }
- */
+    
+
 }
 
 }

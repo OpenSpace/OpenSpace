@@ -49,6 +49,7 @@ private:
     int _sourceId;
     std::string _startTime;
     std::string _endTime;
+    std::string _timeKernelPath;
 };
 
 } // namespace openspace
