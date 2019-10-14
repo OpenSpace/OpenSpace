@@ -28,6 +28,7 @@
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
 
+uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
 
 Fragment getFragment() {
@@ -49,6 +50,8 @@ Fragment getFragment() {
     if (texCoord < 0.f || texCoord > 1.f) {
         discard;
     }
+
+    float diffuse = length(texture(ringTexture, texCoord).rgb);
         
     // The normal for the one plane depends on whether we are dealing
     // with a front facing or back facing fragment
@@ -64,7 +67,7 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color      = vec4(vec3(vs_screenSpaceDepth), 1.0);
-    frag.depth      = vs_screenSpaceDepth;
+    frag.depth      = (diffuse < 0.5) ? 1E30 : vs_screenSpaceDepth;
     
     return frag;
 }

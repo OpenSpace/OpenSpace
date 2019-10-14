@@ -61,8 +61,8 @@ namespace {
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture"
     };
 
-    constexpr const std::array<const char*, 2> GeomUniformNames = {
-        "modelViewProjectionMatrix", "textureOffset"
+    constexpr const std::array<const char*, 3> GeomUniformNames = {
+        "modelViewProjectionMatrix", "textureOffset", "ringTexture"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -277,6 +277,7 @@ namespace openspace {
             glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix() 
             * modelTransform;
 
+        ghoul::opengl::TextureUnit ringTextureUnit;
         if (renderPass == GeometryAndShading) {
             _shader->setUniform(
                 _uniformCache.modelViewProjectionMatrix, 
@@ -287,7 +288,6 @@ namespace openspace {
             _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
             _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
 
-            ghoul::opengl::TextureUnit ringTextureUnit;
             ringTextureUnit.activate();
             _texture->bind();
             _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
@@ -316,6 +316,10 @@ namespace openspace {
                 _geomUniformCache.textureOffset,
                 _offset
             );
+
+            ringTextureUnit.activate();
+            _texture->bind();
+            _shader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
         }
 
         glEnable(GL_DEPTH_TEST);

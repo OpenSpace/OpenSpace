@@ -98,7 +98,8 @@ namespace openspace {
         UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
                      sunPosition, ringTexture, shadowMatrix, shadowMapTexture
         ) _uniformCache;
-        UniformCache(modelViewProjectionMatrix, textureOffset) _geomUniformCache;
+        UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) 
+            _geomUniformCache;
         std::unique_ptr<ghoul::opengl::Texture> _texture;
         std::unique_ptr<ghoul::filesystem::File> _textureFile;
 

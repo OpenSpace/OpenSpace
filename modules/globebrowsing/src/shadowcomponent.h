@@ -66,10 +66,7 @@ namespace openspace {
     public:
         struct ShadowMapData {
             glm::dmat4 shadowMatrix;
-            // temp
-            glm::dmat4 worldToLightSpaceMatrix;
             GLuint shadowDepthTexture;
-            GLuint positionInLightSpaceTexture;
         };
     public:
         ShadowComponent(const ghoul::Dictionary& dictionary);

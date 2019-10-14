@@ -165,7 +165,7 @@ namespace openspace {
     ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         : properties::PropertyOwner({ "Shadows" })		
         , _saveDepthTexture(SaveDepthTextureInfo)
-        , _distanceFraction(DistanceFractionInfo, 30, 1, 1000)
+        , _distanceFraction(DistanceFractionInfo, 3, 1, 10000)
         , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
         , _shadowMapDictionary(dictionary)
         , _shadowDepthTextureHeight(4096)
@@ -242,8 +242,11 @@ namespace openspace {
         glm::dvec3 lightDirection = glm::normalize(diffVector);
         
         // Percentage of the original light source distance (to avoid artifacts)
-        double multiplier = originalLightDistance * 
-            (static_cast<double>(_distanceFraction)/1.0E5);
+        /*double multiplier = originalLightDistance * 
+            (static_cast<double>(_distanceFraction)/1.0E5);*/
+
+        double multiplier = originalLightDistance *
+            (static_cast<double>(_distanceFraction) / 10000.0);
         
         // New light source position
         glm::dvec3 lightPosition = data.modelTransform.translation + 
@@ -466,7 +469,7 @@ namespace openspace {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         _shadowData.shadowDepthTexture = _shadowDepthTexture;
-        _shadowData.positionInLightSpaceTexture = _positionInLightSpaceTexture;
+        //_shadowData.positionInLightSpaceTexture = _positionInLightSpaceTexture;
     }
 
     void ShadowComponent::createShadowFBO() {

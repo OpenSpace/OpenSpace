@@ -59,6 +59,11 @@ uniform vec3 lightDirectionCameraSpace;
 uniform float orenNayarRoughness;
 #endif
 
+#if SHADOW_MAPPING_ENABLED
+in vec4 shadowCoords;
+uniform sampler2DShadow shadowMapTexture;
+#endif
+
 #if USE_ECLIPSE_SHADOWS
 
 /*******************************************************************************
@@ -257,6 +262,18 @@ Fragment getFragment() {
         frag.color.rgb += BorderColor;
     }
 #endif // SHOW_CHUNK_EDGES
+
+#if SHADOW_MAPPING_ENABLED
+    float shadow = 1.0;
+    if ( shadowCoords.z >= 0 ) {
+        vec4 normalizedShadowCoords = shadowCoords;
+        normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w - 0.3);
+        normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
+        normalizedShadowCoords.w = 1.0;
+        shadow = textureProj(shadowMapTexture, normalizedShadowCoords);
+    }
+    frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.5, 0.0, 1.0) : shadow;
+#endif
 
     return frag;
 }

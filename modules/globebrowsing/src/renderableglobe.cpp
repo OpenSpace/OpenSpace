@@ -184,6 +184,12 @@ namespace {
         "Enables the rendering of eclipse shadows using hard shadows"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShadowMappingInfo = {
+        "ShadowMapping",
+        "Shadow Mapping",
+        "Enables shadow mapping algorithm. Used by renderable rings too."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
         "TargetLodScaleFactor",
         "Target Level of Detail Scale Factor",
@@ -495,6 +501,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(AccurateNormalsInfo, false),
         BoolProperty(EclipseInfo, false),
         BoolProperty(EclipseHardShadowsInfo, false),
+        BoolProperty(ShadowMappingInfo, false),
         FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
@@ -537,6 +544,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.eclipseShadowsEnabled);
     addProperty(_generalProperties.eclipseHardShadows);
+    addProperty(_generalProperties.shadowMapping);
     _generalProperties.targetLodScaleFactor.onChange([this]() {
         float sf = _generalProperties.targetLodScaleFactor;
         _generalProperties.currentLodScaleFactor = sf;
@@ -566,6 +574,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _generalProperties.eclipseShadowsEnabled.onChange(notifyShaderRecompilation);
     _generalProperties.eclipseHardShadows.onChange(notifyShaderRecompilation);
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
+    _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
@@ -747,14 +756,13 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
             if (_hasRings && _ringsComponent.isEnabled()) {
                 if (_shadowComponent.isEnabled()) {
-
                     // Set matrices and other GL states
                     RenderData lightRenderData(_shadowComponent.begin(data));
                     
                     glDisable(GL_BLEND);
                     
                     // Render from light source point of view
-                    renderChunks(lightRenderData, rendererTask, true);
+                    renderChunks(lightRenderData, rendererTask, {}, true);
                     _ringsComponent.draw(lightRenderData, RingsComponent::GeometryOnly);
                     
                     glEnable(GL_BLEND);
@@ -762,7 +770,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                     _shadowComponent.end();                    
 
                     // Render again from original point of view
-                    renderChunks(data, rendererTask);
+                    renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
                     _ringsComponent.draw(
                         data,
                         RingsComponent::GeometryAndShading,
@@ -917,7 +925,7 @@ const glm::dmat4& RenderableGlobe::modelTransform() const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&, 
-    const bool renderGeomOnly) {
+    const ShadowComponent::ShadowMapData& shadowData, const bool renderGeomOnly) {
     if (_shadersNeedRecompilation) {
         recompileShaders();
     }
@@ -1151,7 +1159,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
     for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
-        renderChunkGlobally(*global[i], data, renderGeomOnly);
+        renderChunkGlobally(*global[i], data, shadowData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
@@ -1159,7 +1167,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
-        renderChunkLocally(*local[i], data, renderGeomOnly);
+        renderChunkLocally(*local[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
@@ -1217,7 +1225,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-    const bool renderGeomOnly) {
+    const ShadowComponent::ShadowMapData& shadowData, const bool renderGeomOnly) {
     //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
@@ -1264,6 +1272,23 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         calculateEclipseShadows(program, data, ShadowCompType::GLOBAL_SHADOW);
     }
 
+    // Shadow Mapping
+    ghoul::opengl::TextureUnit shadowMapUnit;
+    if (_generalProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
+        // Adding the model transformation to the final shadow matrix so we have a 
+           // complete transformation from the model coordinates to the clip space of 
+           // the light position.
+        program.setUniform(
+            "shadowMatrix",
+            shadowData.shadowMatrix * modelTransform()
+        );
+
+        shadowMapUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
+
+        program.setUniform("shadowMapTexture", shadowMapUnit);
+    }
+
     glEnable(GL_DEPTH_TEST);
     
     if (!renderGeomOnly) {
@@ -1279,7 +1304,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 }
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
-    const bool renderGeomOnly) {
+    const ShadowComponent::ShadowMapData& shadowData, const bool renderGeomOnly) {
     //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
@@ -1369,6 +1394,23 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         !_ellipsoid.shadowConfigurationArray().empty())
     {
         calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
+    }
+
+    // Shadow Mapping
+    ghoul::opengl::TextureUnit shadowMapUnit;
+    if (_generalProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
+        // Adding the model transformation to the final shadow matrix so we have a 
+           // complete transformation from the model coordinates to the clip space of 
+           // the light position.
+        program.setUniform(
+            "shadowMatrix",
+            shadowData.shadowMatrix * modelTransform()
+        );
+
+        shadowMapUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
+
+        program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1537,6 +1579,10 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back(
         "useEclipseHardShadows",
         std::to_string(_generalProperties.eclipseHardShadows)
+    );
+    pairs.emplace_back(
+        "enableShadowMapping",
+        std::to_string(_generalProperties.shadowMapping)
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution",

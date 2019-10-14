@@ -48,6 +48,14 @@ out vec3 positionWorldSpace;
 uniform dmat4 inverseViewTransform;
 #endif
 
+#if SHADOW_MAPPING_ENABLED
+    // ShadowMatrix is the matrix defined by:
+    // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
+    // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
+    uniform dmat4 shadowMatrix;
+    out vec4 shadowCoords;
+#endif
+
 uniform mat4 projectionTransform;
 // Input points in camera space
 uniform vec3 p00;
@@ -112,5 +120,9 @@ void main() {
 
 #if USE_ECLIPSE_SHADOWS
     positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
+#endif
+
+#if SHADOW_MAPPING_ENABLED
+    shadowCoords = vec4(shadowMatrix * dvec4(p, 1.0));
 #endif
 }
