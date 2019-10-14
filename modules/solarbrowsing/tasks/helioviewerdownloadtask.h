@@ -43,14 +43,12 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::vector<std::string> relevantDirectoryListings() const;
 
     std::string _outputFolder;
     double _timeStep;
-    std::string _downloadUrl;
-    std::string _filenames;
-    Time _startTime;
-    Time _endTime;
+    int _sourceId;
+    std::string _startTime;
+    std::string _endTime;
 };
 
 } // namespace openspace

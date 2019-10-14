@@ -56,7 +56,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     PowerScaledSphere _sphere;
 
 private:

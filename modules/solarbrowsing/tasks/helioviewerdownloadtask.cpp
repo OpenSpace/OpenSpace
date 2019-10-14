@@ -63,7 +63,7 @@ documentation::Documentation HelioviewerDownloadTask::documentation() {
                 new DoubleAnnotationVerifier("A positive number"),
                 Optional::No,
                 "The preferred number of seconds between each timestep. "
-                "The actual timestep will be determined by the availability of data 
+                "The actual timestep will be determined by the availability of data "
                 "products but will never be smaller than this number. Use this for "
                 "temporal downsampling."
             },
@@ -80,64 +80,26 @@ documentation::Documentation HelioviewerDownloadTask::documentation() {
                 "The end of the time interval to exteract data from"
             },
             {
-                KeyDownloadUrl,
-                new StringAnnotationVerifier(
-                    "A string specifying the directory listings of files to download "
-                    "`https://helioviewer.org/jp2/EUVI-A/${year}/${month}/${day}/195`"
-                ),
+                KeySourceId,
+                new IntVerifier,
                 Optional::No,
-                "The URL to download data from."
-                "Use ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second} "
-                "and ${millisecond} as placeholders."
-            },
-            {
-                KeyFilenames,
-                new StringAnnotationVerifier(
-                    "A valid filename string such as "
-                    "${year}_${month}_${day}__${hour}_${minute}_${second}__"
-                    "${millisecond}_STEREO-A-SECCHI_EUVI_195.jp2"
-                ),
-                Optional::No,
-                "A string specifying the expected format of filenames on the server "
-                "Use ${year}, ${month}, ${day}, ${hour}, ${minute}, ${second} "
-                "and ${millisecond} as placeholders."   
+                "The unique identifier as specified in "
+                "https://api.helioviewer.org/docs/v2/#appendix"
             }
         }
     };
 }
 
 HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
-    _startTime = Time(Time::convertTime(dictionary.value<std::string>(KeyStartTime)));
-    _endTime = Time(Time::convertTime(dictionary.value<std::string>(KeyEndTime)));
+    _startTime = dictionary.value<std::string>(KeyStartTime);
+    _endTime = dictionary.value<std::string>(KeyEndTime);
     _timeStep = dictionary.value<double>(KeyTimeStep);
-    _downloadUrl = dictionary.value<std::string>(KeyDownloadUrl);
-    _filenames = dictionary.value<std::string>(KeyFilenames);
+    _sourceId = static_cast<int>(dictionary.value<double>(KeySourceId));
     _outputFolder = dictionary.value<std::string>(KeyOutputFolder);
 }
 
 std::string HelioviewerDownloadTask::description() {
     return "Download data from helioviewer.";
-}
-
-std::vector<std::string> HelioviewerDownloadTask::relevantDirectoryListings() const {
-    std::vector<std::string> placeholders = {
-        "${year}", "${month}", "${day}",
-        "${hour}", "${minute}", "${second}", "${millisecond}"
-    };
-
-    std::vector<std::string> usedPlaceholders;
-    for (const std::string& placeholder : placeholders) {
-        const auto it =
-            std::search(_downloadUrl.begin(), _downloadUrl.end(), placeholder);
-        if (it != _downloadUrl.end()) {
-            usedPlaceholders.push_back(placeholder);
-        }
-    }
-    // @TODO: emiax, use
-    // https://api.helioviewer.org/docs/v2/
-    // for example:
-    // https://api.helioviewer.org/v2/getJP2Image/
-    // ?date=2014-01-01T23:59:59Z&sourceId=14&jpip=true
 }
 
 void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCallback) {
@@ -150,21 +112,44 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     // get best filename from 
     
     std::unordered_set<std::string> availableFiles;
-    std::vector<std::string> directoryListings = relevantDirectoryListings();
 
+    std::string jpxRequest =
+        fmt::format("http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
+                    "&sourceId={}&verbose=true&cadence=true&cadence={}",
+                    _startTime,
+                    _endTime,
+                    _sourceId,
+                    _timeStep);
 
-
-
-    SyncHttpMemoryDownload fileListing(
-        "http://helioviewer.org/jp2/EUVI-A/2006/11/07/195/"
-    );
+    SyncHttpMemoryDownload fileListing(jpxRequest);
     HttpRequest::RequestOptions opt = { 0 };
     fileListing.download(opt);
-    if (fileListing.hasSucceeded()) {
-        const std::vector<char>& data = fileListing.downloadedData();
-        std::string s(data.begin(), data.end());
-        std::cout << s;
+    if (!fileListing.hasSucceeded()) {
+        LERROR(fmt::format("Request to Heliviewer API failed."));
     }
+
+    const std::vector<char>& data = fileListing.downloadedData();
+    std::string str(data.begin(), data.end());
+    nlohmann::json json = nlohmann::json::parse(str.c_str());
+
+    // https://api.helioviewer.org/v2/getJP2Header/?id=7654321
+    // extract time stamp from DATE_OBS
+    // request jp2 separately based on timestamp.
+    // beware of 1000 image max limit.
+
+    // std::cout << str << std::endl;
+/*
+    const auto& framesIt = json.find("frames");
+    if (framesIt == json.end()) {
+        LERROR(fmt::format("Failed to acquire frames"));
+    }
+
+    nlohmann::json frames = framesIt.value().get<nlohmann::json>();
+    for (const auto& frame : frames) {
+        int index = frame.get<int>();
+        LINFO(fmt::format("{}", index));
+    }
+ */
 }
 
 }
