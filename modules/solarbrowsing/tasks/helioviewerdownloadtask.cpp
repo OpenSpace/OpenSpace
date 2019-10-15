@@ -35,6 +35,8 @@ namespace {
     constexpr const char* _loggerCat = "HelioviewerDownloadTask";
 
     constexpr const char* KeySourceId = "SourceId";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyInstrument = "Instrument";
     constexpr const char* KeyStartTime = "StartTime";
     constexpr const char* KeyTimeStep = "TimeStep";
     constexpr const char* KeyEndTime = "EndTime";
@@ -61,6 +63,18 @@ documentation::Documentation HelioviewerDownloadTask::documentation() {
                 new StringAnnotationVerifier("A folder on the local machine"),
                 Optional::No,
                 "The folder where to output the downloaded jp2 files"
+            },
+            {
+                KeyName,
+                new StringVerifier,
+                Optional::No,
+                "Name of the spacecraft or telescope"
+            },
+            {
+                KeyInstrument,
+                new StringVerifier,
+                Optional::No,
+                "Name of the intrument"
             },
             {
                 KeyTimeStep,
@@ -105,6 +119,8 @@ HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictio
     _endTime = dictionary.value<std::string>(KeyEndTime);
     _timeStep = dictionary.value<double>(KeyTimeStep);
     _sourceId = static_cast<int>(dictionary.value<double>(KeySourceId));
+    _name = dictionary.value<std::string>(KeyName);
+    _instrument = dictionary.value<std::string>(KeyInstrument);
     _outputFolder = dictionary.value<std::string>(KeyOutputFolder);
     _timeKernelPath = absPath(dictionary.value<std::string>(KeyTimeKernel));
 }
@@ -114,19 +130,9 @@ std::string HelioviewerDownloadTask::description() {
 }
 
 void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCallback) {
-
-    // iterate through times,
-    // for each time, find the expected page.   
-    //    Be able to fallback on previous pages, but know when to give up.
-    //    In the page, find the best file to download.
-
-    // get best filename from
-
     SpiceManager::ref().loadKernel(_timeKernelPath);
-    
-    std::unordered_set<std::string> availableFiles;
-
-    std::string jpxRequest =
+   
+    const std::string jpxRequest =
         fmt::format("http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
                     "&sourceId={}&verbose=true&cadence=true&cadence={}",
                     _startTime,
@@ -134,18 +140,18 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
                     _sourceId,
                     _timeStep);
 
-
     LINFO(fmt::format("Requesting {}", jpxRequest));
 
     SyncHttpMemoryDownload fileListing(jpxRequest);
-    HttpRequest::RequestOptions opt = { 0 };
+    const HttpRequest::RequestOptions opt = { 0 };
+
     fileListing.download(opt);
     if (!fileListing.hasSucceeded()) {
         LERROR(fmt::format("Request to Heliviewer API failed."));
     }
 
     const std::vector<char>& listingData = fileListing.downloadedData();
-    std::string listingString(listingData.begin(), listingData.end());
+    const std::string listingString(listingData.begin(), listingData.end());
 
     std::vector<double> frames;
     try {
@@ -169,27 +175,25 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     for (size_t i = 0; i < frames.size(); ++i) {
         const double epoch = frames[i];
         const double j2000InEpoch = 946684800.0;
-        Time t(epoch - j2000InEpoch);
+        const Time time(epoch - j2000InEpoch);
 
-        std::string formattedDate = t.ISO8601();
-        std::string imageUrl = fmt::format(
+        const std::string formattedDate = time.ISO8601();
+        const std::string imageUrl = fmt::format(
             "http://api.helioviewer.org/v2/getJP2Image/?date={}Z&sourceId={}", 
             formattedDate,
             _sourceId
         );
 
-        std::string year(formattedDate.begin(), formattedDate.begin() + 4);
-        std::string month(formattedDate.begin() + 5,  formattedDate.begin() + 7);
-        std::string day(formattedDate.begin() + 8, formattedDate.begin() + 10);
-        std::string hour(formattedDate.begin() + 11, formattedDate.begin() + 13);
-        std::string minute(formattedDate.begin() + 14, formattedDate.begin() + 16);
-        std::string second(formattedDate.begin() + 17, formattedDate.begin() + 19);
-        std::string millis(formattedDate.begin() + 20, formattedDate.begin() + 23);
+        // Format file name according to solarbrowsing convention.
+        const std::string year(formattedDate.begin(), formattedDate.begin() + 4);
+        const std::string month(formattedDate.begin() + 5,  formattedDate.begin() + 7);
+        const std::string day(formattedDate.begin() + 8, formattedDate.begin() + 10);
+        const std::string hour(formattedDate.begin() + 11, formattedDate.begin() + 13);
+        const std::string minute(formattedDate.begin() + 14, formattedDate.begin() + 16);
+        const std::string second(formattedDate.begin() + 17, formattedDate.begin() + 19);
+        const std::string millis(formattedDate.begin() + 20, formattedDate.begin() + 23);
 
-        std::string name = "SDO-AIA";
-        std::string instrument = "171";
-
-        std::string outFilename = fmt::format(
+        const std::string outFilename = fmt::format(
             "{}/{}_{}_{}__{}_{}_{}_{}__{}_{}.jp2",
             _outputFolder, 
             year,
@@ -199,32 +203,20 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
             minute,
             second,
             millis,
-            name,
-            instrument,
+            _name,
+            _instrument,
             static_cast<size_t>(epoch)
         );
 
         SyncHttpFileDownload imageDownload(imageUrl, absPath(outFilename));
-
         imageDownload.download(opt);
         if (!imageDownload.hasSucceeded()) {
             LERROR(fmt::format("Request to image {} failed.", imageUrl));
             continue;
         }
+
         progressCallback(static_cast<float>(i) / static_cast<float>(frames.size()));
     }
-
-    
-
-    // https://api.helioviewer.org/v2/getJP2Header/?id=7654321
-    // extract time stamp from DATE_OBS
-    // request jp2 separately based on timestamp.
-    // beware of 1000 image max limit.
-
-    // std::cout << str << std::endl;
-
-    
-
 }
 
 }

@@ -47,6 +47,8 @@ private:
     std::string _outputFolder;
     double _timeStep;
     int _sourceId;
+    std::string _name;
+    std::string _instrument;
     std::string _startTime;
     std::string _endTime;
     std::string _timeKernelPath;
