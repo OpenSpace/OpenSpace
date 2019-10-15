@@ -1,0 +1,24 @@
+-- Example task for downloading data from Helioviewer API
+-- Valid sourceIds can be found at https://api.helioviewer.org/docs/v2/#appendix
+
+return {{
+	Type = "HelioviewerDownloadTask",
+	SourceId = 10,
+	Name = "SDO",
+	Instrument = "AIA-171",
+	StartTime = "2018-10-15T00:00:00.000Z",
+	EndTime = "2018-11-16T00:00:00.000Z",
+	TimeStep = 60*60, -- Download an image every hour
+	OutputFolder = "${DATA}/assets/scene/solarsystem/missions/parkersolarprobe/solarbrowsing/imagedata/sdo_aia-171",
+	TimeKernel = "${DATA}/assets/spice/naif0012.tls"
+}, {
+	Type = "HelioviewerDownloadTask",
+	SourceId = 20,
+	Name = "STEREO-A",
+	Instrument = "EUVI-A-171",
+	StartTime = "2018-10-15T00:00:00.000Z",
+	EndTime = "2018-11-16T00:00:00.000Z",
+	TimeStep = 60*60, -- Download an image every hour
+	OutputFolder = "${DATA}/assets/scene/solarsystem/missions/parkersolarprobe/solarbrowsing/imagedata/stereo-a_euvi-171",
+	TimeKernel = "${DATA}/assets/spice/naif0012.tls"
+}}

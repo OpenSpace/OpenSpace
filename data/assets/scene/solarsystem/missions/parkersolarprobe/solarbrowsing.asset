@@ -1,0 +1,129 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local SdoTrail = {
+    Identifier = "SolarImagery_SDO_Trail",
+    Parent = "EarthInertial",
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Frame = "J2000",
+            Target = "-136395",
+            Observer = "EARTH",
+            Kernels = asset.localResource("/kernels/SDO_EPHEM_2010123_2017104_new.bsp")
+        },
+        Color = { 1.0, 1.0, 1.0 },
+        Period = 0.997319,
+        Resolution = 1000
+    },
+    GUI = {
+        Name = "Sdo Trail",
+        Path = "/Solar System/Solar Imagery"
+    }
+}
+
+-- Translate in Earth's coordinate system from earth's position
+local Sdo = {
+    Identifier = "Sdo",
+    Parent = "EarthInertial",
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Frame = "J2000",
+            Target = "-136395",
+            Observer = "EARTH",
+            Kernels = asset.localResource("/kernels/SDO_EPHEM_2010123_2017104_new.bsp")
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "ECLIPJ2000",
+            DestinationFrame = "J2000",
+        }
+    },
+    GUI = {
+        Name = "Sdo",
+        Path = "/Solar System/Solar Imagery"
+    }
+}
+
+local StereoA = {
+    Identifier = "StereoA",
+    Parent = "SolarSystemBarycenter",
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "STEREO AHEAD",
+            Observer = "SUN",
+            Kernels = asset.localResource("/kernels/STEREO-A_merged.bsp")
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "ECLIPJ2000",
+            DestinationFrame = "GALACTIC",
+        },
+    },
+    GUI = {
+        Name = "Stereo A",
+        Path = "/Solar System/Solar Imagery"
+    }
+}
+
+local EuviAImagery = {
+    Identifier = "SolarImagery_STEREO-A_Image_EUV",
+    Parent = "StereoA",
+    Renderable = {
+        -- Resolution of imagery, will be moved to metadata later
+        Type = "RenderableSolarImagery",
+        RootPath = asset.localResource("solarbrowsing/stereo-a_euvi-171"),
+        TransferfunctionPath = asset.localResource("solarbrowsing/colortables")
+    },
+    GUI = {
+        Name = "EUV-I-A Imagery",
+        Path = "/Solar System/Solar Imagery"
+    }
+}
+
+local SdoImagery = {
+    Identifier = "SolarImagery_SDO_Image_AIA",
+    Parent = "Sdo",
+    Renderable = {
+        -- Resolution of imagery, will be moved to metadata later
+        Type = "RenderableSolarImagery",
+        RootPath = asset.localResource("solarbrowsing/sdo_aia-171"),
+        TransferfunctionPath = asset.localResource("solarbrowsing/colortables")
+    },
+    GUI = {
+        Name = "SDO Imagery",
+        Path = "/Solar System/Solar Imagery"
+    }
+}
+
+local SunProjection = {
+    Identifier = "SunProjection",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Dependencies = {
+        "SolarImagery_SDO_Image_AIA"
+    },
+    Renderable = {
+        -- This is a really bad name
+        Type = "RenderableSolarImageryProjection",
+        DependentNodes = {
+            "SolarImagery_SDO_Image_AIA",
+            "SolarImagery_STEREO-A_Image_EUV"
+        }
+    },
+    GUI = {
+        Name = "Sun Projection",
+        Path = "/Solar System/Imagery"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    SdoTrail,
+    Sdo,
+    SdoImagery,
+    StereoA,
+    EuviAImagery,
+    SunProjection
+})

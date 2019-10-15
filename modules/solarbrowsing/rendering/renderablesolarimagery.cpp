@@ -313,9 +313,12 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 
 void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     // Update texture
-    if (checkBoundaries(data)) {
-        updateTextureGPU();
-    }
+    //if (checkBoundaries(data)) {
+    // TODO: The checkBoundaries logic was temporarily disabled since it causes
+    // a bug that prevents this renderablesolarimageryprojection component to be updated
+    // as soon as the view frustum is more than 90 degrees off.
+    updateTextureGPU();
+    //}
     const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
     _spacecraftCameraPlane->render(
         data,
