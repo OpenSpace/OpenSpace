@@ -17,7 +17,7 @@
                 </PlanarProjection>
             </Viewport>
         </Window>
-        <Window fullScreen="false" name="GUI" tags="GUI">
+        <Window fullScreen="false" border="false" name="GUI" tags="GUI">
             <Stereo type="none" />
             <Size x="1920" y="1080" />
             <Pos x="0" y="0" />

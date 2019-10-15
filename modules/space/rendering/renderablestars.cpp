@@ -1384,7 +1384,7 @@ void RenderableStars::readSpeckFile() {
     std::string line;
     while (true) {
         std::streampos position = file.tellg();
-        std::getline(file, line);
+        std::getline(file, line, '\n');
 
         if (line[0] == '#' || line.empty()) {
             continue;
@@ -1398,9 +1398,6 @@ void RenderableStars::readSpeckFile() {
             // before the beginning of the current line
             if (_enableTestGrid) {
                 file.seekg(position - std::streamoff(8));
-            }
-            else {
-                file.seekg(position);
             }
             break;
         }
@@ -1450,22 +1447,14 @@ void RenderableStars::readSpeckFile() {
     float minLumValue = std::numeric_limits<float>::max();
     float maxLumValue = std::numeric_limits<float>::min();
 
-    bool first = true;
     do {
         std::vector<float> values(_nValuesPerStar);
-
-        if (!first) {
-            std::getline(file, line);
-        }
-        else {
-            first = false;
-        }
-        
         std::stringstream str(line);
 
         for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
         }
+        
         bool nullArray = true;
         for (float v : values) {
             if (v != 0.0) {
@@ -1480,6 +1469,9 @@ void RenderableStars::readSpeckFile() {
         if (!nullArray) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         }
+
+        std::getline(file, line, '\n');
+
     } while (!file.eof());
 
     // Normalize Luminosity:
