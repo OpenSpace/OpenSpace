@@ -126,7 +126,7 @@ local Earth = {
                     Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-                        "AMSR2_Sea_Ice_Concentration_12km",
+                        "AMSRU2_Sea_Ice_Concentration_12km",
                         "2012-05-08",
                         "Yesterday",
                         "1d",

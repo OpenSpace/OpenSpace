@@ -26,3 +26,6 @@
 [submodule "apps/OpenSpace-MinVR/ext/glfw"]
 	path = apps/OpenSpace-MinVR/ext/glfw
 	url = https://github.com/opensgct/glfw
+[submodule "modules/solarbrowsing/ext/openjpeg"]
+	path = modules/solarbrowsing/ext/openjpeg
+	url = git@github.com:uclouvain/openjpeg.git

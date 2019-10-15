@@ -21,86 +21,39 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#ifndef __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
+#define __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
 
-#ifndef __OPENSPACE_CORE___TIMELINE___H__
-#define __OPENSPACE_CORE___TIMELINE___H__
+#include <openspace/util/task.h>
+#include <openspace/util/time.h>
+#include <openspace/documentation/documentation.h>
 
-#include <algorithm>
-#include <deque>
-#include <cstddef>
+#include <ghoul/glm.h>
+
+#include <string>
+#include <vector>
 
 namespace openspace {
 
-/**
-* Base class for keyframes
-*/
-struct KeyframeBase {
-    size_t id;
-    double timestamp;
-};
-
-/**
-* Templated class for keyframes containing data
-*/
-template <typename T>
-struct Keyframe : public KeyframeBase {
-    Keyframe(size_t i, double t, T d);
-
-    Keyframe(Keyframe const&) = default;
-    Keyframe(Keyframe&&) = default;
-    Keyframe& operator=(Keyframe&&) = default;
-    Keyframe& operator=(Keyframe const&) = default;
-    T data;
-};
-
-/**
-* Templated class for timelines
-*/
-template <typename T>
-class Timeline {
+class HelioviewerDownloadTask : public Task {
 public:
-    virtual ~Timeline() = default;
-
-    void addKeyframe(double time, const T& data);
-    void addKeyframe(double time, T&& data);
-    void clearKeyframes();
-    void removeKeyframe(size_t id);
-    void removeKeyframesBefore(double timestamp, bool inclusive = false);
-    void removeKeyframesAfter(double timestamp, bool inclusive = false);
-    void removeKeyframesBetween(double begin, double end, bool inclusiveBegin = false,
-        bool inclusiveEnd = false);
-    size_t nKeyframes() const;
-
-    Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false);
-    const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
-
-    Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false);
-    const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
-
-    const std::deque<Keyframe<T>>& keyframes() const;
+    HelioviewerDownloadTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
 private:
-    size_t _nextKeyframeId = 1;
-    std::deque<Keyframe<T>> _keyframes;
+
+    std::string _outputFolder;
+    double _timeStep;
+    int _sourceId;
+    std::string _name;
+    std::string _instrument;
+    std::string _startTime;
+    std::string _endTime;
+    std::string _timeKernelPath;
 };
-
-/**
-* Return true if the timestamp of a is smaller the timestamp of b.
-*/
-bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b);
-
-/**
-* Return true if a is smaller than the timestamp of b.
-*/
-bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b);
-
-/**
-* Return true if the timestamp of a is smaller than b.
-*/
-bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
 } // namespace openspace
 
-#include "timeline.inl"
-
-#endif // __OPENSPACE_CORE___TIMELINE___H__
+#endif // __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
