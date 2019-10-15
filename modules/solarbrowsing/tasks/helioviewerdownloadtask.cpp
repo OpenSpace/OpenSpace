@@ -220,6 +220,3 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
 }
 
 }
-
-
-
