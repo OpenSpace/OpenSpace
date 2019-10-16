@@ -265,12 +265,26 @@ Fragment getFragment() {
 
 #if SHADOW_MAPPING_ENABLED
     float shadow = 1.0;
-    if ( shadowCoords.z >= 0 ) {
+    if ( shadowCoords.w > 1 ) {
         vec4 normalizedShadowCoords = shadowCoords;
         normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w - 0.3);
         normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
         normalizedShadowCoords.w = 1.0;
-        shadow = textureProj(shadowMapTexture, normalizedShadowCoords);
+        //shadow = textureProj(shadowMapTexture, normalizedShadowCoords);
+        float sum = 0;
+        int fStep = 5;
+        for (int i = 0; i < fStep; ++i) {
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep + i, -fStep + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep + i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep + i,  fStep - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,     -fStep + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,      fStep - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep - i, -fStep + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep - i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep - i,  fStep - i));
+        }
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,      0));
+        shadow = sum / (8.f * fStep + 1.f);
     }
     frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.5, 0.0, 1.0) : shadow;
 #endif

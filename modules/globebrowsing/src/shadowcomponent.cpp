@@ -246,11 +246,13 @@ namespace openspace {
             (static_cast<double>(_distanceFraction)/1.0E5);*/
 
         double multiplier = originalLightDistance *
-            (static_cast<double>(_distanceFraction) / 10000.0);
+            (static_cast<double>(_distanceFraction) / 1E17);
         
         // New light source position
-        glm::dvec3 lightPosition = data.modelTransform.translation + 
-            (lightDirection * multiplier);
+        /*glm::dvec3 lightPosition = data.modelTransform.translation + 
+            (lightDirection * multiplier);*/
+        glm::dvec3 lightPosition = data.modelTransform.translation +
+            (diffVector * multiplier);
 
         //// Light Position
         //glm::dvec3 lightPosition = glm::dvec3(_sunPosition);

@@ -76,7 +76,19 @@ Fragment getFragment() {
         normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w - 0.3);
         normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
         normalizedShadowCoords.w = 1.0;
-        shadow = textureProj(shadowMapTexture, normalizedShadowCoords);
+        //shadow = textureProj(shadowMapTexture, normalizedShadowCoords);
+        float sum = 0;
+        int fStep = 2;
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep, -fStep));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep,  0));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep,  fStep));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,     -fStep));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,      0));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,      fStep));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep, -fStep));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep,  0));
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep,  fStep));
+        shadow = sum / 9.f;
     }
     
     // The normal for the one plane depends on whether we are dealing
