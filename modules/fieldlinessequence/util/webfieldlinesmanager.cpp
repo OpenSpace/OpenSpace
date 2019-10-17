@@ -187,6 +187,9 @@ void WebFieldlinesManager::update(){
                     // If it's in the middle of the window,
                     // we can just sit back and relax and let the worker work
                     _webFieldlinesWindow.executeDownloadWorker();
+                    if (_webFieldlinesWindow.workerWindowIsReady()) {
+                        hasUpdated = false;
+                    }
                 }
             }
             else {

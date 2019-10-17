@@ -32,7 +32,7 @@ local earthRadius = 6371
 
 -- Selected field lines + some additional field lines
 -- asset.require('./wsa/scs_oi')
--- asset.require('./wsa/pfss_oi')
+asset.require('./wsa/pfss_oi')
 -- asset.require('./wsa/pfss_io')
 -- Sub-Earth track
 -- asset.require('./wsa/sub_earth')

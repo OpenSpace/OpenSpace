@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
-
+#include <cctype>
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -33,6 +33,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <modules/fitsfilereader/include/fitsfilereader.h>
+
 
 // Why will it not compile without this library?
 #include <openspace/util/powerscaledsphere.h>
