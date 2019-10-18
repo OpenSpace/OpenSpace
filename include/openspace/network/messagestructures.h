@@ -233,6 +233,22 @@ struct CameraKeyframe {
             sizeof(_timestamp)
         );
     };
+
+    void read(std::istringstream* iss) {
+        std::string rotationFollowing;
+
+        iss >> _position.x
+            >> _position.y
+            >> _position.z
+            >> _rotation.x
+            >> _rotation.y
+            >> _rotation.z
+            >> _rotation.w
+            >> _scale
+            >> rotationFollowing
+            >> _focusNode;
+        _followNodeRotation = (rotationFollowing == "F");
+    };
 };
 
 struct TimeKeyframe {

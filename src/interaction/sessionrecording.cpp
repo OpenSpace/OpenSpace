@@ -781,82 +781,79 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
 }
 
 void SessionRecording::playbackCamera() {
-    double timeOs;
-    double timeRec;
-    double timeSim;
-    std::string rotationFollowing;
-    interaction::KeyframeNavigator::CameraPose pbFrame;
+    timestamps times;
     datamessagestructures::CameraKeyframe kf;
+
     if (_recordingDataMode == RecordedDataMode::Binary) {
-        timeOs = readFromPlayback<double>(_playbackFile);
-        timeRec = readFromPlayback<double>(_playbackFile);
-        timeSim = readFromPlayback<double>(_playbackFile);
-        try {
-            kf.read(&_playbackFile);
-        }
-        catch (std::bad_alloc&) {
-            LERROR(fmt::format(
-                "Allocation error with camera playback from keyframe entry {}",
-                _playbackLineNum - 1
-            ));
-            return;
-        }
-        catch (std::length_error&) {
-            LERROR(fmt::format(
-                "length_error with camera playback from keyframe entry {}",
-                _playbackLineNum - 1
-            ));
-            return;
-        }
-
-        timeOs = kf._timestamp;
-
-        pbFrame.focusNode = kf._focusNode;
-        pbFrame.position = kf._position;
-        pbFrame.rotation = kf._rotation;
-        pbFrame.scale = kf._scale;
-        pbFrame.followFocusNodeRotation = kf._followNodeRotation;
-
-        if (!_playbackFile) {
-            LINFO(fmt::format(
-                "Error reading camera playback from keyframe entry {}",
-                _playbackLineNum - 1
-            ));
-            return;
-        }
+        readCameraKeyframeBinary(times, kf, _playbackFile, _playbackLineNum);
     }
     else {
-        std::istringstream iss(_playbackLineParsing);
-        std::string entryType;
-        iss >> entryType;
-        iss >> timeOs >> timeRec >> timeSim;
-        iss >> pbFrame.position.x
-            >> pbFrame.position.y
-            >> pbFrame.position.z
-            >> pbFrame.rotation.x
-            >> pbFrame.rotation.y
-            >> pbFrame.rotation.z
-            >> pbFrame.rotation.w
-            >> pbFrame.scale
-            >> rotationFollowing
-            >> pbFrame.focusNode;
-        if (iss.fail() || !iss.eof()) {
-            LERROR(fmt::format(
-                "Error parsing camera line {} of playback file", _playbackLineNum
-            ));
-            return;
-        }
-        pbFrame.followFocusNodeRotation = (rotationFollowing == "F");
+        readCameraKeyframeAscii(times, kf, _playbackLineParsing, _playbackLineNum);
     }
-    if (_setSimulationTimeWithNextCameraKeyframe) {
-        global::timeManager.setTimeNextFrame(Time(timeSim));
-        _setSimulationTimeWithNextCameraKeyframe = false;
-        _saveRenderingCurrentRecordedTime = timeRec;
-    }
-    double timeRef = appropriateTimestamp(timeOs, timeRec, timeSim);
 
-    //global::navigationHandler.keyframeNavigator().addKeyframe(timeRef, pbFrame);
+    if (_setSimulationTimeWithNextCameraKeyframe) {
+        global::timeManager.setTimeNextFrame(Time(times.timeSim));
+        _setSimulationTimeWithNextCameraKeyframe = false;
+        _saveRenderingCurrentRecordedTime = times.timeRec;
+    }
+    double timeRef = appropriateTimestamp(times.timeOs, times.timeRec, times.timeSim);
+
+    interaction::KeyframeNavigator::CameraPose pbFrame(kf);
     addKeyframe(timeRef, pbFrame);
+}
+
+static void SessionRecording::readCameraKeyframeBinary(timestamps& times,
+                                               datamessagestructures::CameraKeyframe& kf,
+                                                       std::ifstream& file, int lineN)
+{
+    times.timeOs = readFromPlayback<double>(file);
+    times.timeRec = readFromPlayback<double>(file);
+    times.timeSim = readFromPlayback<double>(file);
+    try {
+        kf.read(&file);
+    }
+    catch (std::bad_alloc&) {
+        LERROR(fmt::format(
+            "Allocation error with camera playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+    catch (std::length_error&) {
+        LERROR(fmt::format(
+            "length_error with camera playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+    times.timeOs = kf._timestamp;
+
+    if (!file) {
+        LINFO(fmt::format(
+            "Error reading camera playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+}
+
+static void SessionRecording::readCameraKeyframeAscii(timestamps& times,
+                                               datamessagestructures::CameraKeyframe& kf,
+                                                      std::string filenameRead,
+                                                      int lineN)
+{
+    std::string rotationFollowing;
+    std::string entryType;
+
+    std::istringstream iss(filenameRead);
+    iss >> entryType;
+    iss >> times.timeOs >> times.timeRec >> times.timeSim;
+    kf.read(&iss);
+
+    if (iss.fail() || !iss.eof()) {
+        LERROR(fmt::format("Error parsing camera line {} of playback file", lineN));
+        return;
+    }
 }
 
 void SessionRecording::playbackTimeChange() {

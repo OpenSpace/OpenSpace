@@ -45,6 +45,12 @@ public:
         Playback
     };
 
+    struct timestamps {
+        double timeOs;
+        double timeRec;
+        double timeSim;
+    };
+
     const std::string FileHeaderTitle = "OpenSpace_record/playback";
     constexpr const size_t FileHeaderVersionLength = 5;
     constexpr const char FileHeaderVersion[FileHeaderVersionLength] = {
@@ -215,6 +221,30 @@ public:
      * \return vector of filenames in recordings dir
      */
     std::vector<std::string> playbackList() const;
+
+    /**
+     * Reads a camera keyframe from a binary format playback file, and populates input
+     * references with the parameters of the keyframe.
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a camera keyframe which contains camera details
+     * \param file an ifstream reference to the playback file being read
+     * \param lineN keyframe number in playback file where this keyframe resides
+     */
+    static void readCameraKeyframeBinary(timestamps& times,
+        datamessagestructures::CameraKeyframe& kf, std::ifstream& file, int lineN);
+
+    /**
+     * Reads a camera keyframe from an ascii format playback file, and populates input
+     * references with the parameters of the keyframe.
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a camera keyframe which contains camera details
+     * \param filenameRead a string containing the playback filename
+     * \param lineN line number in playback file where this keyframe resides
+     */
+    static void readCameraKeyframeAscii(timestamps& times,
+        datamessagestructures::CameraKeyframe& kf, std::string filenameRead, int lineN);
 
 private:
     enum class RecordedType {
