@@ -36,11 +36,14 @@ namespace {
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
     constexpr const char* InitialConfigHelper =
                                                "${BASE}/scripts/configuration_helper.lua";
+    constexpr const char* ProfileToSceneConverter =
+                                              "${BASE}/scripts/convertProfileToScene.lua";
 
     // Variable names for the openspace.cfg file
     // These are also used in the _doc include file
     constexpr const char* KeySGCTConfig = "SGCTConfig";
     constexpr const char* KeyAsset = "Asset";
+    constexpr const char* KeyProfile = "Profile";
     constexpr const char* KeyGlobalCustomizationScripts = "GlobalCustomizationScripts";
     constexpr const char* KeyPaths = "Paths";
     constexpr const char* KeyFonts = "Fonts";
@@ -277,6 +280,7 @@ void parseLuaState(Configuration& configuration) {
 
     getValue(s, KeySGCTConfig, c.windowConfiguration);
     getValue(s, KeyAsset, c.asset);
+    getValue(s, KeyProfile, c.profile);
     getValue(s, KeyGlobalCustomizationScripts, c.globalCustomizationScripts);
     getValue(s, KeyPaths, c.pathTokens);
     getValue(s, KeyFonts, c.fonts);
@@ -355,6 +359,13 @@ Configuration loadConfigurationFromFile(const std::string& filename) {
     ghoul::lua::runScriptFile(result.state, filename);
 
     parseLuaState(result);
+
+    // Set asset name to that of the profile because a new scene file will be
+    // created with that name, and also because the profile name will override
+    // an asset name if both are provided.
+    if (!result.profile.empty()) {
+        result.asset = result.profile;
+    }
 
     return result;
 }
