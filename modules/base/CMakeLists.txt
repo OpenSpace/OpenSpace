@@ -65,7 +65,6 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/suntexturemanager.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.h
@@ -114,7 +113,6 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/suntexturemanager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.cpp

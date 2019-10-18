@@ -612,7 +612,7 @@ void RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath,
     // the numbers 64800, 16200 means, grab the fifth layer in the fits file, where the
     // photospheric map is, in the wsa file
     std::valarray<float> magnetogram = fitsValues->contents[std::slice(64800, 16200, 1)];
-    float maxvalue = magnetogram.max();
+    float maxvalue = abs(magnetogram).max();
     
     //these values should be adjustable in the gui in the future
     float damper = 1.0;
