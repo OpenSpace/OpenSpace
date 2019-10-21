@@ -84,6 +84,9 @@ constexpr const char* _loggerCat = "main";
 constexpr const char* SpoutTag = "Spout";
 constexpr const char* OpenVRTag = "OpenVR";
 
+constexpr const char* ProfileToSceneConverter
+                                           = "${BASE}/scripts/convertProfileToScene.lua";
+
 sgct::Engine* SgctEngine;
 sgct::SharedVector<char> _synchronizationBuffer;
 

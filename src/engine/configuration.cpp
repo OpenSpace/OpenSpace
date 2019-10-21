@@ -36,8 +36,6 @@ namespace {
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
     constexpr const char* InitialConfigHelper =
                                                "${BASE}/scripts/configuration_helper.lua";
-    constexpr const char* ProfileToSceneConverter =
-                                              "${BASE}/scripts/convertProfileToScene.lua";
 
     // Variable names for the openspace.cfg file
     // These are also used in the _doc include file
