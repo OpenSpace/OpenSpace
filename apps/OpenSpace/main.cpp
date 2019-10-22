@@ -1191,16 +1191,33 @@ int main(int argc, char** argv) {
         if (!global::configuration.profile.empty()) {
             LINFO(fmt::format("Run Lua script to convert {}.profile to scene",
                 global::configuration.profile));
-            std::string setProfileFilenameInLuaState = "local ProfileFilename = \""
-                + global::configuration.profile + ".profile\"";
-            ghoul::lua::runScript(
-                global::configuration.state,
-                setProfileFilenameInLuaState
-            );
-            ghoul::lua::runScript(
-                global::configuration.state,
-                absPath(ProfileToSceneConverter)
-            );
+            ghoul::lua::LuaState lState;
+
+            // Get path where .scene files reside. Need to add extra escape slashes to
+            // accomodate lua parser.
+            std::string outputScenePath = absPath("${BASE}/data/assets");
+            std::string search = "\\";
+            std::string replace = "\\\\";
+            for (std::string::size_type i = outputScenePath.find(search);
+                 i != std::string::npos;
+                 i = outputScenePath.find(search, i))
+            {
+                outputScenePath.replace(i, search.length(), replace);
+                i += replace.length();
+            }
+
+            std::string setProfileFilenameInLuaState = "\
+                openspace = {}\n\
+                openspace.profile = {}\n\
+                function openspace.profile.getFilename()\n\
+                    return \"" + global::configuration.profile + ".profile\"\
+                end\n\
+                function openspace.profile.getPath()\n\
+                    return \"" + outputScenePath + "\"\
+                end\
+            ";
+            ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
+            ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
         }
 
         // Determining SGCT configuration file
