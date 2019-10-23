@@ -134,7 +134,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
    
     const std::string jpxRequest =
         fmt::format("http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
-                    "&sourceId={}&verbose=true&cadence=true&cadence={}",
+                    "&sourceId={}&verbose=true&cadence={}",
                     _startTime,
                     _endTime,
                     _sourceId,
