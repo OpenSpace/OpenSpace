@@ -153,6 +153,11 @@ namespace {
         "Radial limits",
         "Valid radial range. [Min, Max]"
     };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "lineWidth",
+        "Line Width",
+        "Width of fieldlines"
+    };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "color",
         "Color",
@@ -265,6 +270,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pDomainY(DomainYInfo)
     , _pDomainZ(DomainZInfo)
     , _pDomainR(DomainRInfo)
+    , _pLineWidth(LineWidthInfo)
     , _pFlowColor(
         FlowColorInfo,
         glm::vec4(0.8f, 0.7f, 0.0f, 0.6f),
@@ -674,6 +680,8 @@ void RenderableFieldlinesSequence::setupProperties() {
     addProperty(_pColorABlendEnabled);
     addProperty(_pDomainEnabled);
     addProperty(_pFlowEnabled);
+    addProperty(_pLineWidth);
+
     if (hasExtras) {
         addProperty(_pMaskingEnabled);
     }
@@ -1139,12 +1147,14 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         }
 
         glBindVertexArray(_vertexArrayObject);
+        glLineWidth(_pLineWidth);
         glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
             _states[_activeStateIndex].lineStart().data(),
             _states[_activeStateIndex].lineCount().data(),
             static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
         );
+        glLineWidth(1.f);
 
         glBindVertexArray(0);
         _shaderProgram->deactivate();
@@ -1163,6 +1173,10 @@ void RenderableFieldlinesSequence::initializeWebManager() {
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
+    if (!_enabled) {
+        return;
+    }
+
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
     }

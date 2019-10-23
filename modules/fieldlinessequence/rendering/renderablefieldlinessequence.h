@@ -159,6 +159,8 @@ private:
     properties::Vec4Property _pColorUniform;
     // Whether or not to use additive blending
     properties::BoolProperty _pColorABlendEnabled;
+    // Line width
+    properties::FloatProperty _pLineWidth;
 
 // Whether or not to use Domain
     properties::BoolProperty _pDomainEnabled;
