@@ -205,11 +205,16 @@ void SpacecraftCameraPlane::createFrustum() {
 void SpacecraftCameraPlane::render(const RenderData& data,
                                    ghoul::opengl::Texture& imageryTexture,
                                    TransferFunction* lut,
-                                   const glm::dvec3& sunPositionWorld, float planeOpacity,
-                                   float contrastValue, float gammaValue,
-                                   bool enableBorder, bool enableFrustum,
+                                   const glm::dvec3& sunPositionWorld,
+                                   float planeOpacity,
+                                   float multiplierValue,
+                                   float contrastValue,
+                                   float gammaValue,
+                                   bool enableBorder,
+                                   bool enableFrustum,
                                    const glm::vec2& currentCenterPixel,
-                                   float currentScale, float multipleImageryOffset,
+                                   float currentScale,
+                                   float multipleImageryOffset,
                                    bool isCoronaGraph)
 {
     glEnable(GL_CULL_FACE);
@@ -255,6 +260,7 @@ void SpacecraftCameraPlane::render(const RenderData& data,
     _planeShader->setUniform("centerPixel", currentCenterPixel);
     _planeShader->setUniform("imageryTexture", imageUnit);
     _planeShader->setUniform("planeOpacity", planeOpacity);
+    _planeShader->setUniform("multiplierValue", multiplierValue);
     _planeShader->setUniform("gammaValue", gammaValue);
     _planeShader->setUniform("contrastValue", contrastValue);
     _planeShader->setUniform(

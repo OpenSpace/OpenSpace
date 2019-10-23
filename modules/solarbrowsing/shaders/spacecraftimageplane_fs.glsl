@@ -25,6 +25,7 @@ uniform sampler2D imageryTexture;
 uniform sampler1D lut;
 uniform bool additiveBlending;
 
+uniform float multiplierValue;
 uniform float contrastValue;
 uniform float gammaValue;
 uniform float planeOpacity;
@@ -42,7 +43,7 @@ float contrast(float intensity) {
 
 Fragment getFragment() {
     float intensityOrg = texture(imageryTexture, vec2(vs_st.x, 1 - vs_st.y)).r;
-    intensityOrg = contrast(intensityOrg);
+    intensityOrg = contrast(intensityOrg * multiplierValue);
 
     vec4 outColor;
     if (hasLut) {

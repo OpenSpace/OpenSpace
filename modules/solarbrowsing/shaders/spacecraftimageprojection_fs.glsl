@@ -41,6 +41,7 @@ uniform bool isEnabled[MAX_SPACECRAFT_OBSERVATORY];
 uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
 uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
 uniform vec2 centerPixel[MAX_SPACECRAFT_OBSERVATORY];
+uniform float multiplierValue[MAX_SPACECRAFT_OBSERVATORY];
 
 const float SUN_RADIUS = 1391600000 * 0.5;
 
@@ -68,7 +69,8 @@ Fragment getFragment() {
             uv.y -= ((centerPixel[i].y) /  SUN_RADIUS) / 2.0;
 
             float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
-            intensityOrg = contrast(intensityOrg, i);
+            float multipliedIntensity = multiplierValue[i] * intensityOrg;
+            intensityOrg = contrast(multipliedIntensity, i);
 
             vec4 res;
             if (hasLut[i]) {

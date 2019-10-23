@@ -43,8 +43,8 @@ public:
 
     void render(const RenderData& data, ghoul::opengl::Texture& imageryTexture,
         TransferFunction* lut, const glm::dvec3& sunPositionWorld, float planeOpacity,
-        float contrastValue, float gammaValue, bool enableBorder, bool enableFrustum,
-        const glm::vec2& currentCenterPixel, float currentScale,
+        float multiplierValue, float contrastValue, float gammaValue, bool enableBorder,
+        bool enableFrustum, const glm::vec2& currentCenterPixel, float currentScale,
         float multipleImageryOffset, bool isCoronaGraph);
 
     void update();

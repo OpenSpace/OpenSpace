@@ -68,6 +68,11 @@ namespace {
         "Enable frustum",
         "Enables frustum around the current spacecraft imagery"
     };
+    static const openspace::properties::Property::PropertyInfo MultiplierValueInfo = {
+        "multiplierValue",
+        "Multiplier",
+        "Multiplier for imagery intensity, applied before gamma, contrast and lut"
+    };
     static const openspace::properties::Property::PropertyInfo GammaValueInfo = {
         "gammaValue",
         "Gamma",
@@ -103,6 +108,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
     , _enableBorder(EnableBorderInfo, false)
     , _enableFrustum(EnableFrustumInfo, false)
+    , _multiplierValue(MultiplierValueInfo, 1.f, 0.f, 10.f)
     , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
     , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
     , _planeOpacity(PlaneOpacityInfo, 1.f, 0.f, 1.f)
@@ -152,6 +158,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     addProperty(_enableBorder);
     addProperty(_enableFrustum);
     addProperty(_activeInstruments);
+    addProperty(_multiplierValue);
     addProperty(_gammaValue);
     addProperty(_contrastValue);
     addProperty(_downsamplingLevel);
@@ -213,6 +220,10 @@ const std::unique_ptr<ghoul::opengl::Texture>& RenderableSolarImagery::getImager
 
 const SpacecraftCameraPlane& RenderableSolarImagery::getCameraPlane() {
     return *_spacecraftCameraPlane;
+}
+
+float RenderableSolarImagery::getMultiplierValue() {
+    return _multiplierValue;
 }
 
 float RenderableSolarImagery::getContrastValue() {
@@ -326,6 +337,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
         _lut,
         sunPositionWorld,
         _planeOpacity,
+        _multiplierValue,
         _contrastValue,
         _gammaValue,
         _enableBorder,

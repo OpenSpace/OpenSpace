@@ -153,6 +153,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
                             glm::dvec3(planeRot * glm::dvec4(planePos, 1.0)));
         _shader->setUniform("gammaValue[" + std::to_string(i) + "]", solarImagery->getGammaValue());
+        _shader->setUniform("multiplierValue[" + std::to_string(i) + "]", solarImagery->getMultiplierValue());
         _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->getContrastValue());
         _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->getScale());
         _shader->setUniform("centerPixel[" + std::to_string(i) + "]", solarImagery->getCenterPixel());

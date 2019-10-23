@@ -63,6 +63,7 @@ public:
     TransferFunction* getTransferFunction();
     const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture();
     const SpacecraftCameraPlane& getCameraPlane();
+    float getMultiplierValue();
     float getContrastValue();
     float getGammaValue();
     float getImageResolutionFactor();
@@ -75,6 +76,7 @@ private:
     properties::FloatProperty _contrastValue;
     properties::BoolProperty _enableBorder;
     properties::BoolProperty _enableFrustum;
+    properties::FloatProperty _multiplierValue;
     properties::FloatProperty _gammaValue;
     properties::DoubleProperty _moveFactor;
     properties::FloatProperty _planeOpacity;
