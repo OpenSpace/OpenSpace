@@ -296,6 +296,29 @@ public:
     static void SessionRecording::readScriptKeyframeAscii(timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::string filenameRead, int lineN);
 
+    /**
+     * Writes a camera keyframe to a binary format recording file using a CameraKeyframe
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a camera keyframe which contains the camera details
+     * \param kfBuffer a buffer temporarily used for preparing data to be written
+     * \param idx index into the temporary buffer
+     * \param file an ofstream reference to the playback file being written-to
+     */
+    static void SessionRecording::saveCameraKeyframeBinary(timestamps times,
+        datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer, size_t& idx,
+        std::ofstream& file);
+
+    /**
+     * Writes a camera keyframe to an ascii format recording file using a CameraKeyframe
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a camera keyframe which contains the camera details
+     * \param file an ofstream reference to the playback file being written-to
+     */
+    static void SessionRecording::saveCameraKeyframeAscii(timestamps times,
+        datamessagestructures::CameraKeyframe& kf, std::ofstream& file);
+
 private:
     enum class RecordedType {
         Camera = 0,
@@ -323,14 +346,11 @@ private:
     void playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
-    void writeToFileBuffer(double src);
-    void writeToFileBuffer(std::vector<char>& cvec);
-    void writeToFileBuffer(unsigned char c);
-    void writeToFileBuffer(bool b);
     void saveStringToFile(const std::string& s);
-    void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size);
+    void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
+        std::ofstream& file);
     void findFirstCameraKeyframeInTimeline();
-    void saveKeyframeToFile(std::string entry);
+    void saveKeyframeToFile(std::string entry, std::ofstream& file);
 
     void addKeyframe(double timestamp,
         interaction::KeyframeNavigator::CameraPose keyframe);
@@ -354,6 +374,11 @@ private:
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
+
+    static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
+    static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
+    static void writeToFileBuffer(unsigned char* buf, size_t& idx, unsigned char c);
+    static void writeToFileBuffer(unsigned char* buf, size_t& idx, bool b);
 
     RecordedDataMode _recordingDataMode = RecordedDataMode::Binary;
     SessionState _state = SessionState::Idle;

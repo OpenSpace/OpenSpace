@@ -385,28 +385,40 @@ void SessionRecording::cleanUpPlayback() {
     _cleanupNeeded = false;
 }
 
-void SessionRecording::writeToFileBuffer(double src) {
+static void SessionRecording::writeToFileBuffer(unsigned char* buf,
+                                                size_t& idx,
+                                                double src)
+{
     const size_t writeSize_bytes = sizeof(double);
     unsigned char const *p = reinterpret_cast<unsigned char const*>(&src);
-    memcpy((_keyframeBuffer + _bufferIndex), p, writeSize_bytes);
-    _bufferIndex += writeSize_bytes;
+    memcpy((buf + idx), p, writeSize_bytes);
+    idx += writeSize_bytes;
 }
 
-void SessionRecording::writeToFileBuffer(std::vector<char>& cvec) {
-    const size_t writeSize_bytes = cvec.size() * sizeof(char);
-    memcpy((_keyframeBuffer + _bufferIndex), cvec.data(), writeSize_bytes);
-    _bufferIndex += writeSize_bytes;
+static void SessionRecording::writeToFileBuffer(unsigned char* buf,
+                                                size_t& idx,
+                                                std::vector<char>& cv)
+{
+    const size_t writeSize_bytes = cv.size() * sizeof(char);
+    memcpy((buf + idx), cv.data(), writeSize_bytes);
+    idx += writeSize_bytes;
 }
 
-void SessionRecording::writeToFileBuffer(unsigned char c) {
+static void SessionRecording::writeToFileBuffer(unsigned char* buf,
+                                                size_t& idx,
+                                                unsigned char c)
+{
     const size_t writeSize_bytes = sizeof(char);
-    _keyframeBuffer[_bufferIndex] = c;
-    _bufferIndex += writeSize_bytes;
+    buf[idx] = c;
+    idx += writeSize_bytes;
 }
 
-void SessionRecording::writeToFileBuffer(bool b) {
-    _keyframeBuffer[_bufferIndex] = b ? 1 : 0;
-    _bufferIndex += sizeof(char);
+static void SessionRecording::writeToFileBuffer(unsigned char* buf,
+                                                size_t& idx,
+                                                bool b)
+{
+    buf[idx] = b ? 1 : 0;
+    idx += sizeof(char);
 }
 
 void SessionRecording::saveStringToFile(const std::string& s) {
@@ -417,7 +429,7 @@ void SessionRecording::saveStringToFile(const std::string& s) {
     unsigned char const *p = reinterpret_cast<unsigned char const*>(&strLen);
     memcpy((_keyframeBuffer + _bufferIndex), p, writeSize_bytes);
     _bufferIndex += static_cast<unsigned int>(writeSize_bytes);
-    saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
+    saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex, _recordFile);
 
     _recordFile.write(s.c_str(), s.size());
 }
@@ -456,52 +468,69 @@ void SessionRecording::saveCameraKeyframe() {
     // & orientation of camera
     datamessagestructures::CameraKeyframe kf = _externInteract.generateCameraKeyframe();
 
+    timestamps times = {
+        kf._timestamp,
+        kf._timestamp - _timestampRecordStarted,
+        global::timeManager.time().j2000Seconds()
+    };
     if (_recordingDataMode == RecordedDataMode::Binary) {
-        // Writing to a binary session recording file
-        _bufferIndex = 0;
-        _keyframeBuffer[_bufferIndex++] = 'c';
-
-        // Writing to internal buffer, and then to file, for performance reasons
-        writeToFileBuffer(kf._timestamp);
-        writeToFileBuffer(kf._timestamp - _timestampRecordStarted);
-        writeToFileBuffer(global::timeManager.time().j2000Seconds());
-        std::vector<char> kfBuffer;
-        kf.serialize(kfBuffer);
-        writeToFileBuffer(kfBuffer);
-
-        saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
+        saveCameraKeyframeBinary(times, kf, _keyframeBuffer, _bufferIndex, _recordFile);
     }
     else {
-        // Writing to an ASCII session recording file
-        std::stringstream keyframeLine = std::stringstream();
-        // Add simulation timestamp, timestamp relative, simulation time to recording
-        // start
-        keyframeLine << "camera ";
-        keyframeLine << kf._timestamp << ' ';
-        keyframeLine << (kf._timestamp - _timestampRecordStarted) << ' ';
-        keyframeLine << std::fixed << std::setprecision(3) <<
-                        global::timeManager.time().j2000Seconds();
-        keyframeLine << ' ';
-        // Add camera position
-        keyframeLine << std::fixed << std::setprecision(7) << kf._position.x << ' '
-            << std::fixed << std::setprecision(7) << kf._position.y << ' '
-            << std::fixed << std::setprecision(7) << kf._position.z << ' ';
-        // Add camera rotation
-        keyframeLine << std::fixed << std::setprecision(7) << kf._rotation.x << ' '
-            << std::fixed << std::setprecision(7) << kf._rotation.y << ' '
-            << std::fixed << std::setprecision(7) << kf._rotation.z << ' '
-            << std::fixed << std::setprecision(7) << kf._rotation.w << ' ';
-        keyframeLine << std::scientific << kf._scale << ' ';
-        if (kf._followNodeRotation) {
-            keyframeLine << "F ";
-        }
-        else {
-            keyframeLine << "- ";
-        }
-        keyframeLine << kf._focusNode;
-
-        saveKeyframeToFile(keyframeLine.str());
+        saveCameraKeyframeAscii(times, kf, _recordFile);
     }
+}
+
+static void SessionRecording::saveCameraKeyframeBinary(timestamps times,
+                                               datamessagestructures::CameraKeyframe& kf,
+                                                       unsigned char* kfBuffer,
+                                                       size_t& idx,
+                                                       std::ofstream& file)
+{
+    // Writing to a binary session recording file
+    idx = 0;
+    kfBuffer[idx++] = 'c';
+
+    // Writing to internal buffer, and then to file, for performance reasons
+    writeToFileBuffer(kfBuffer, idx, times.timeOs);
+    writeToFileBuffer(kfBuffer, idx, times.timeRec);
+    writeToFileBuffer(kfBuffer, idx, times.timeSim);
+    std::vector<char> writeBuffer;
+    kf.serialize(writeBuffer);
+    writeToFileBuffer(kfBuffer, idx, writeBuffer);
+
+    saveKeyframeToFileBinary(kfBuffer, idx, file);
+}
+
+static void SessionRecording::saveCameraKeyframeAscii(timestamps times,
+                                               datamessagestructures::CameraKeyframe& kf,
+                                                      std::ofstream& file)
+{
+    std::stringstream keyframeLine = std::stringstream();
+    // Add simulation timestamp, timestamp relative, simulation time to recording start
+    keyframeLine << "camera ";
+    keyframeLine << times.timeOs << ' ';
+    keyframeLine << times.timeRec << ' ';
+    keyframeLine << std::fixed << std::setprecision(3) << times.timeSim << ' ';
+    // Add camera position
+    keyframeLine << std::fixed << std::setprecision(7) << kf._position.x << ' '
+        << std::fixed << std::setprecision(7) << kf._position.y << ' '
+        << std::fixed << std::setprecision(7) << kf._position.z << ' ';
+    // Add camera rotation
+    keyframeLine << std::fixed << std::setprecision(7) << kf._rotation.x << ' '
+        << std::fixed << std::setprecision(7) << kf._rotation.y << ' '
+        << std::fixed << std::setprecision(7) << kf._rotation.z << ' '
+        << std::fixed << std::setprecision(7) << kf._rotation.w << ' ';
+    keyframeLine << std::scientific << kf._scale << ' ';
+    if (kf._followNodeRotation) {
+        keyframeLine << "F ";
+    }
+    else {
+        keyframeLine << "- ";
+    }
+    keyframeLine << kf._focusNode;
+
+    saveKeyframeToFile(keyframeLine.str(), file);
 }
 
 void SessionRecording::saveTimeKeyframe() {
@@ -515,14 +544,15 @@ void SessionRecording::saveTimeKeyframe() {
     if (_recordingDataMode == RecordedDataMode::Binary) {
         _bufferIndex = 0;
         _keyframeBuffer[_bufferIndex++] = 't';
-        writeToFileBuffer(kf._timestamp);
-        writeToFileBuffer(kf._timestamp - _timestampRecordStarted);
-        writeToFileBuffer(kf._time);
-        writeToFileBuffer(kf._dt);
-        writeToFileBuffer(kf._paused);
-        writeToFileBuffer(kf._requiresTimeJump);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._timestamp);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._timestamp
+            - _timestampRecordStarted);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._time);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._dt);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._paused);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._requiresTimeJump);
 
-        saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
+        saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex, _recordFile);
     } else {
         std::stringstream keyframeLine = std::stringstream();
         //Add simulation timestamp, timestamp relative, simulation time to recording start
@@ -545,7 +575,7 @@ void SessionRecording::saveTimeKeyframe() {
         else {
             keyframeLine << " -";
         }
-        saveKeyframeToFile(keyframeLine.str());
+        saveKeyframeToFile(keyframeLine.str(), _recordFile);
     }
 }
 
@@ -560,11 +590,11 @@ void SessionRecording::saveScriptKeyframe(std::string scriptToSave) {
     if (_recordingDataMode == RecordedDataMode::Binary) {
         _bufferIndex = 0;
         _keyframeBuffer[_bufferIndex++] = 's';
-        writeToFileBuffer(sm._timestamp);
-        writeToFileBuffer(sm._timestamp - _timestampRecordStarted);
-        writeToFileBuffer(global::timeManager.time().j2000Seconds());
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, sm._timestamp);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, sm._timestamp - _timestampRecordStarted);
+        writeToFileBuffer(_keyframeBuffer, _bufferIndex, global::timeManager.time().j2000Seconds());
         //Write header to file
-        saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
+        saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex, _recordFile);
 
         saveStringToFile(scriptToSave);
     }
@@ -583,7 +613,7 @@ void SessionRecording::saveScriptKeyframe(std::string scriptToSave) {
         keyframeLine << (numLinesInScript + 1) << ' ';
         keyframeLine << scriptToSave;
 
-        saveKeyframeToFile(keyframeLine.str());
+        saveKeyframeToFile(keyframeLine.str(), _recordFile);
     }
 }
 
@@ -1320,12 +1350,15 @@ SessionRecording::RecordedType SessionRecording::getPrevKeyframeType() {
     }
 }
 
-void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer, size_t size) {
-    _recordFile.write(reinterpret_cast<char*>(buffer), size);
+void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer,
+                                                size_t size,
+                                                std::ofstream& file)
+{
+    file.write(reinterpret_cast<char*>(buffer), size);
 }
 
-void SessionRecording::saveKeyframeToFile(std::string entry) {
-    _recordFile << std::move(entry) << std::endl;
+void SessionRecording::saveKeyframeToFile(std::string entry, std::ofstream& file) {
+    file << std::move(entry) << std::endl;
 }
 
 SessionRecording::CallbackHandle SessionRecording::addStateChangeCallback(
