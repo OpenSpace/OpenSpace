@@ -1,17 +1,18 @@
-local version
-local modulesTable = {}
-local assetsTable = {}
-local propertiesTable = {}
-local timeTable = {}
-local cameraTable = {}
-local markNodesTable = {}
-local keybindingsTable = {}
-local resultTable = {}
-local insideSection = false
-local currFunction = "None"
-local currSection = "None"
-local numLinesVersion = 0
-local lineIndex = 1
+version = ""
+modulesTable = {}
+assetsTable = {}
+propertiesTable = {}
+timeTable = {}
+cameraTable = {}
+markNodesTable = {}
+keybindingsTable = {}
+resultTable = {}
+insideSection = false
+currFunction = "None"
+currSection = "None"
+numLinesVersion = 0
+lineIndex = 1
+
 
 function printError(message)
   print("Error @ line "..lineIndex..": "..message)
@@ -203,18 +204,6 @@ function parseCamera(line)
   table.insert(cameraTable, t)
 end
 
-
-local parsingSections = {
-  {section = "Version", func = parseVersion},
-  {section = "Module", func = parseModule},
-  {section = "Asset", func = parseAsset},
-  {section = "Property", func = parseProperty},
-  {section = "Keybinding", func = parseKeybinding},
-  {section = "Time", func = parseTime},
-  {section = "Camera", func = parseCamera},
-  {section = "MarkNodes", func = parseMarkNodes}
-}
-
 function file_exists(file)
   local f = io.open(file, "rb")
   if f then
@@ -291,17 +280,6 @@ function parseProfile(fileIn)
 
   return resultTable
 end
-
-
-
-
-ModuleStr = ""
-AssetStr = ""
-KeyStr = ""
-TimeStr = ""
-MarkNodesStr = ""
-PropertyStr = ""
-CameraStr = ""
 
 function tableSize(T)
   local size = 0
@@ -443,37 +421,53 @@ function generateAsset(T, fileOut)
     end
   end
 
-
   --Write the file
-  io.write(ModuleStr)
-  io.write("\n")
-  io.write(AssetStr)
-  io.write("\n")
-  io.write(KeyStr)
-  io.write("\n")
+  io.write(ModuleStr.."\n")
+  io.write(AssetStr.."\n")
+  io.write(KeyStr.."\n")
   io.write("asset.onInitialize(function ()\n")
-  io.write(TimeStr)
-  io.write("\n")
+  io.write(TimeStr.."\n")
   if not (tableSize(T["Keybinding"]) == 0) then
-    io.write("  sceneHelper.bindKeys(Keybindings)")
-    io.write("\n")
+    io.write("  sceneHelper.bindKeys(Keybindings)\n")
   end
-  io.write(MarkNodesStr)
-  io.write("\n")
-  io.write(PropertyStr)
-  io.write("\n")
-  io.write(CameraStr)
-  io.write("\n")
+  io.write(MarkNodesStr.."\n")
+  io.write(PropertyStr.."\n")
+  io.write(CameraStr.."\n")
   io.write("end)\n")
 
   io.close(file)
 end
 
+--[[
+########################################################################################## 
+                                          M a i n
+########################################################################################## 
+]]--
+
+ModuleStr = ""
+AssetStr = ""
+KeyStr = ""
+TimeStr = ""
+MarkNodesStr = ""
+PropertyStr = ""
+CameraStr = ""
+
+parsingSections = {
+  {section = "Version", func = parseVersion},
+  {section = "Module", func = parseModule},
+  {section = "Asset", func = parseAsset},
+  {section = "Property", func = parseProperty},
+  {section = "Keybinding", func = parseKeybinding},
+  {section = "Time", func = parseTime},
+  {section = "Camera", func = parseCamera},
+  {section = "MarkNodes", func = parseMarkNodes}
+}
+
 profileFilename = openspace.profile.getFilename()
-profileOutFile = profileFilename:match("^.+%.").."scene"
-profileOutPath = openspace.profile.getPath()
-print("Using profile input "..profileFilename.."!")
-print("Using output scene filepath "..profileOutFile.."!")
-print("Using output path "..profileOutPath)
-local resultTable = parseProfile(profileOutPath.."\\"..profileFilename)
-generateAsset(resultTable, profileOutPath.."\\"..profileOutFile)
+profilePath = openspace.profile.getPath()
+
+profileIn = profilePath.."\\"..profileFilename
+assetOut  = profilePath.."\\"..profileFilename:match("^.+%.").."scene"
+
+local resultTable = parseProfile(profileIn)
+generateAsset(resultTable, assetOut)
