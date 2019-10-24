@@ -246,6 +246,56 @@ public:
     static void readCameraKeyframeAscii(timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::string filenameRead, int lineN);
 
+    /**
+     * Reads a time keyframe from a binary format playback file, and populates input
+     * references with the parameters of the keyframe.
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a time keyframe which contains time details
+     * \param file an ifstream reference to the playback file being read
+     * \param lineN keyframe number in playback file where this keyframe resides
+     */
+    static void SessionRecording::readTimeKeyframeBinary(timestamps& times,
+        datamessagestructures::TimeKeyframe& kf, std::ifstream& file, int lineN);
+
+    /**
+     * Reads a time keyframe from an ascii format playback file, and populates input
+     * references with the parameters of the keyframe.
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a time keyframe which contains time details
+     * \param filenameRead a string containing the playback filename
+     * \param lineN line number in playback file where this keyframe resides
+     */
+    static void SessionRecording::readTimeKeyframeAscii(timestamps& times,
+        datamessagestructures::TimeKeyframe& kf, std::string filenameRead, int lineN);
+
+    /**
+     * Reads a script keyframe from a binary format playback file, and populates input
+     * references with the parameters of the keyframe.
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a script keyframe which contains the size of the script
+     *        (in chars) and the text itself
+     * \param file an ifstream reference to the playback file being read
+     * \param lineN keyframe number in playback file where this keyframe resides
+     */
+    static void SessionRecording::readScriptKeyframeBinary(timestamps& times,
+        datamessagestructures::ScriptMessage& kf, std::ifstream& file, int lineN);
+
+    /**
+     * Reads a script keyframe from an ascii format playback file, and populates input
+     * references with the parameters of the keyframe.
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a script keyframe which contains the size of the script
+     *        (in chars) and the text itself
+     * \param filenameRead a string containing the playback filename
+     * \param lineN line number in playback file where this keyframe resides
+     */
+    static void SessionRecording::readScriptKeyframeAscii(timestamps& times,
+        datamessagestructures::ScriptMessage& kf, std::string filenameRead, int lineN);
+
 private:
     enum class RecordedType {
         Camera = 0,

@@ -290,6 +290,16 @@ struct TimeKeyframe {
             sizeof(TimeKeyframe)
         );
     };
+
+    void read(std::istringstream* iss) {
+        std::string paused, jump;
+
+        iss >> _dt
+            >> paused
+            >> jump;
+        _paused = (paused == "P");
+        _requiresTimeJump = (jump == "J");
+    };
 };
 
 struct TimeTimeline {
@@ -403,6 +413,20 @@ struct ScriptMessage {
 
         _script.erase();
         _script = temp.data();
+    };
+
+    void read(std::istringstream* iss) {
+        int numScriptLines;
+        iss >> numScriptLines;
+        std::string tmpReadbackScript;
+        _script.erase();
+        for (unsigned int i = 0; i < numScriptLines; ++i) {
+            std::getline(iss, tmpReadbackScript);
+            _script.append(tmpReadbackScript);
+            if (i < (numScriptLines - 1)) {
+                _script.append("\n");
+            }
+        }
     };
 };
 

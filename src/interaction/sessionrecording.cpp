@@ -803,7 +803,7 @@ void SessionRecording::playbackCamera() {
 }
 
 static void SessionRecording::readCameraKeyframeBinary(timestamps& times,
-                                               datamessagestructures::CameraKeyframe& kf,
+                                            datamessagestructures::CameraKeyframe& kf,
                                                        std::ifstream& file, int lineN)
 {
     times.timeOs = readFromPlayback<double>(file);
@@ -838,7 +838,7 @@ static void SessionRecording::readCameraKeyframeBinary(timestamps& times,
 }
 
 static void SessionRecording::readCameraKeyframeAscii(timestamps& times,
-                                               datamessagestructures::CameraKeyframe& kf,
+                                     datamessagestructures::CameraKeyframe& kf,
                                                       std::string filenameRead,
                                                       int lineN)
 {
@@ -857,119 +857,146 @@ static void SessionRecording::readCameraKeyframeAscii(timestamps& times,
 }
 
 void SessionRecording::playbackTimeChange() {
-    double timeOs;
-    double timeRec;
-    double timeSim;
-    datamessagestructures::TimeKeyframe pbFrame;
+    timestamps times;
+    datamessagestructures::TimeKeyframe kf;
+
     if (_recordingDataMode == RecordedDataMode::Binary) {
-        timeOs = readFromPlayback<double>(_playbackFile);
-        timeRec = readFromPlayback<double>(_playbackFile);
-        timeSim = readFromPlayback<double>(_playbackFile);
-        pbFrame._dt = readFromPlayback<double>(_playbackFile);
-        pbFrame._paused = readFromPlayback<bool>(_playbackFile);
-        pbFrame._requiresTimeJump = readFromPlayback<bool>(_playbackFile);
-
-        if (!_playbackFile) {
-            LERROR(fmt::format(
-                "Error reading time playback from keyframe entry {}", _playbackLineNum - 1
-            ));
-            return;
-        }
+        readTimeKeyframeBinary(times, kf, _playbackFile, _playbackLineNum);
     } else {
-        std::istringstream iss(_playbackLineParsing);
-        std::string entryType;
-        //double timeRef;
-        std::string paused, jump;
-        iss >> entryType;
-        iss >> timeOs >> timeRec >> timeSim;
-        iss >> pbFrame._dt
-            >> paused
-            >> jump;
-        if (iss.fail() || !iss.eof()) {
-            LERROR(fmt::format(
-                "Error parsing time line {} of playback file", _playbackLineNum
-            ));
-            return;
-        }
-        pbFrame._paused = (paused == "P");
-        pbFrame._requiresTimeJump = (jump == "J");
+        readTimeKeyframeAscii(times, kf, _playbackLineParsing, _playbackLineNum);
     }
-    pbFrame._timestamp = equivalentApplicationTime(timeOs, timeRec, timeSim);
+    kf._timestamp = equivalentApplicationTime(times.timeOs, times.timeRec, times.timeSim);
 
-    pbFrame._time = pbFrame._timestamp + _timestampApplicationStarted_simulation;
+    kf._time = kf._timestamp + _timestampApplicationStarted_simulation;
     //global::timeManager.addKeyframe(timeRef, pbFrame._timestamp);
     //_externInteract.timeInteraction(pbFrame);
-    addKeyframe(pbFrame._timestamp, pbFrame);
+    addKeyframe(kf._timestamp, kf);
+}
+
+static void SessionRecording::readTimeKeyframeBinary(timestamps& times,
+                                            datamessagestructures::TimeKeyframe& kf,
+                                                     std::ifstream& file, int lineN)
+{
+    times.timeOs = readFromPlayback<double>(file);
+    times.timeRec = readFromPlayback<double>(file);
+    times.timeSim = readFromPlayback<double>(file);
+
+    try {
+        kf.read(&file);
+    }
+    catch (std::bad_alloc&) {
+        LERROR(fmt::format(
+            "Allocation error with time playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+    catch (std::length_error&) {
+        LERROR(fmt::format(
+            "length_error with time playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+
+    if (!file) {
+        LERROR(fmt::format(
+            "Error reading time playback from keyframe entry {}", lineN - 1
+        ));
+        return;
+    }
+}
+
+static void SessionRecording::readTimeKeyframeAscii(timestamps& times,
+                                     datamessagestructures::TimeKeyframe& kf,
+                                                    std::string filenameRead,
+                                                    int lineN)
+{
+    std::string entryType;
+
+    std::istringstream iss(filenameRead);
+    iss >> entryType;
+    iss >> times.timeOs >> times.timeRec >> times.timeSim;
+    kf.read(&iss);
+
+    if (iss.fail() || !iss.eof()) {
+        LERROR(fmt::format(
+            "Error parsing time line {} of playback file", _playbackLineNum
+        ));
+        return;
+    }
 }
 
 void SessionRecording::playbackScript() {
-    double timeOs;
-    double timeRec;
-    double timeSim;
-    unsigned int numScriptLines;
-    datamessagestructures::ScriptMessage pbFrame;
+    timestamps times;
+    datamessagestructures::ScriptMessage kf;
 
     if (_recordingDataMode == RecordedDataMode::Binary) {
-        timeOs = readFromPlayback<double>(_playbackFile);
-        timeRec = readFromPlayback<double>(_playbackFile);
-        timeSim = readFromPlayback<double>(_playbackFile);
-        try {
-            pbFrame._script = readFromPlayback<std::string>(_playbackFile);
-        }
-        catch (std::bad_alloc&) {
-            LERROR(fmt::format(
-                "Allocation error with script playback from keyframe entry {}",
-                _playbackLineNum - 1
-            ));
-            return;
-        }
-        catch (std::length_error&) {
-            LERROR(fmt::format(
-                "length_error with script playback from keyframe entry {}",
-                _playbackLineNum - 1
-            ));
-            return;
-        }
-
-        if (!_playbackFile) {
-            LERROR(fmt::format(
-                "Error reading script playback from keyframe entry {}",
-                _playbackLineNum - 1
-            ));
-            return;
-        }
+        readScriptKeyframeBinary(times, kf, _playbackFile, _playbackLineNum);
     } else {
-        std::istringstream iss(_playbackLineParsing);
-        std::string entryType;
-        std::string tmpReadbackScript;
-
-        iss >> entryType;
-        iss >> timeOs >> timeRec >> timeSim;
-        iss >> numScriptLines;
-        std::getline(iss, tmpReadbackScript); //iss >> tmpReadbackScript;
-        pbFrame._script.append(tmpReadbackScript);
-        if (iss.fail()) {
-            LERROR(fmt::format(
-                "Error parsing script line {} of playback file", _playbackLineNum
-            ));
-            return;
-        } else if (!iss.eof()) {
-            LERROR(fmt::format(
-                "Did not find an EOL at line {} of playback file", _playbackLineNum
-            ));
-            return;
-        }
-        if (numScriptLines > 1) {
-            //Now loop to read any subsequent lines if is a multi-line script
-            for (unsigned int i = 1; i < numScriptLines; ++i) {
-                pbFrame._script.append("\n");
-                std::getline(_playbackFile, tmpReadbackScript);
-                pbFrame._script.append(tmpReadbackScript);
-            }
-        }
+        readScriptKeyframeAscii(times, kf, _playbackLineParsing, _playbackLineNum);
     }
-    double timeRef = appropriateTimestamp(timeOs, timeRec, timeSim);
-    addKeyframe(timeRef, pbFrame._script);
+
+    double timeRef = appropriateTimestamp(times.timeOs, times.timeRec, times.timeSim);
+    addKeyframe(timeRef, kf._script);
+}
+
+static void SessionRecording::readScriptKeyframeBinary(timestamps& times,
+                                            datamessagestructures::ScriptMessage& kf,
+                                                     std::ifstream& file, int lineN)
+{
+    times.timeOs = readFromPlayback<double>(file);
+    times.timeRec = readFromPlayback<double>(file);
+    times.timeSim = readFromPlayback<double>(file);
+
+    try {
+        kf.read(&file);
+    }
+    catch (std::bad_alloc&) {
+        LERROR(fmt::format(
+            "Allocation error with script playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+    catch (std::length_error&) {
+        LERROR(fmt::format(
+            "length_error with script playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+
+    if (!file) {
+        LERROR(fmt::format(
+            "Error reading script playback from keyframe entry {}",
+            lineN - 1
+        ));
+        return;
+    }
+}
+
+static void SessionRecording::readScriptKeyframeAscii(timestamps& times,
+                                      datamessagestructures::ScriptMessage& kf,
+                                                      std::string filenameRead,
+                                                      int lineN)
+{
+    std::string entryType;
+    std::istringstream iss(filenameRead);
+    iss >> entryType;
+    iss >> times.timeOs >> times.timeRec >> times.timeSim;
+    kf.read(&iss);
+    if (iss.fail()) {
+        LERROR(fmt::format(
+            "Error parsing script line {} of playback file", _playbackLineNum
+        ));
+        return;
+    } else if (!iss.eof()) {
+        LERROR(fmt::format(
+            "Did not find an EOL at line {} of playback file", _playbackLineNum
+        ));
+        return;
+    }
 }
 
 void SessionRecording::addKeyframe(double timestamp,
