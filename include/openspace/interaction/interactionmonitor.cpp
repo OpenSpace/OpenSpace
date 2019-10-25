@@ -59,6 +59,11 @@ namespace openspace::interaction {
         _isInActiveState.setValue(isActive);
     }
 
+    void InteractionMonitor::setIdleTime(double time)
+    {
+        _idleTime.setValue(time);
+    }
+
     void InteractionMonitor::updateActivityState()
     {
         double currentApplicationTime = global::windowDelegate.applicationTime();

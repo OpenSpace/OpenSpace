@@ -46,6 +46,8 @@ public:
     ~InteractionMonitor() = default;
 
     void setActivityState(bool isActive);
+    void setIdleTime(double time);
+
 
     /* Called every frame from OpenSpaceEngine and calculates the activity 
     ** state depending on the last registered interaction */
