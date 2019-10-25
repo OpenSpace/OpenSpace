@@ -41,19 +41,19 @@ namespace openspace {
         /**
         * Returns true if new touch input occured since the last frame
         */
-        bool hasNewInput();
+        bool processNewInput();
         /**
         * Checks if touchevent should be parsed to the webgui
         */
         void hasNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
 
-        TuioEar ear;
-        TouchInteraction touch;
-        TouchMarker markers;
-        std::vector<TUIO::TuioCursor> listOfContactPoints;
+        TuioEar _ear;
+        TouchInteraction _touch;
+        TouchMarker _markers;
+        std::vector<TUIO::TuioCursor> _listOfContactPoints;
         // contains an id and the TuioPoint that was processed last frame
-        std::vector<Point> lastProcessed;
-        glm::ivec2 webPositionCallback = glm::ivec2(0,0);
+        std::vector<Point> _lastProcessed;
+        glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
     };
 
 } // namespace openspace
