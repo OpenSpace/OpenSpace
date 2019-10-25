@@ -24,47 +24,57 @@
 
 #include <openspace/interaction/interactionmonitor.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 namespace {
+    constexpr const char* _loggerCat = "InteractionMonitor";
+
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
         "Idle Time",
-        "Time until application goes idle"
+        "Time passed from latest registerad interaction until application goes idle."
     };
-    constexpr openspace::properties::Property::PropertyInfo InteractionStateInfo = {
-        "InteractionStateInfo",
-        "Interaction State Info",
-        ""
+    constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
+        "IsInActiveStateInfo",
+        "Is State Active",
+        "Keeps track whether the interaction session is in active state or not. " 
+        "False if application is in idle state, true if it is in active state."
     };
 } // namespace
 
-
 namespace openspace::interaction {
-    /*
-    documentation::Documentation InteractionMonitor::Documentation() {
-        using namespace documentation;
-
-        return {
-            "Interaction Monitor",
-            "interaction_monitor",
-            {
-             {
-                 KeyAnchor,
-                 new StringVerifier,
-                 Optional::No,
-                 "The identifier of the anchor node."
-             },
-
-         }
-        };
-    }*/
 
     InteractionMonitor::InteractionMonitor()
         : properties::PropertyOwner({ "InteractionMonitor" })
-        , _idleTime( properties::FloatProperty(IdleTimeInfo, 5.0))
-        , _interactionState(properties::StringProperty(InteractionStateInfo, "OnStart"))
-
+        , _isInActiveState(IsInActiveStateInfo, false)
+        , _idleTime( properties::DoubleProperty(IdleTimeInfo, 120.0))
     {
+        addProperty(_isInActiveState);
         addProperty(_idleTime);
     }
+
+    void InteractionMonitor::setActivityState(bool isActive)
+    {
+        _isInActiveState.setValue(isActive);
+    }
+
+    void InteractionMonitor::updateActivityState()
+    {
+        double currentApplicationTime = global::windowDelegate.applicationTime();
+        double timeDiff = currentApplicationTime - _lastInteractionTime;
+
+        if (timeDiff >= _idleTime.value() && _isInActiveState) {
+            setActivityState(false);
+        }
+    }
+
+    void InteractionMonitor::registerInteraction(std::string interactionType)
+    {
+        _lastInteractionTime = global::windowDelegate.applicationTime();
+        _lastInteractionType = interactionType;
+        setActivityState(true);
+        // LDEBUG(fmt::format("Interaction Type {} at time {}", _lastInteractionType, _lastInteractionTime));
+    }
+
 }

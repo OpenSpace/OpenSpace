@@ -30,6 +30,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -53,6 +54,10 @@ bool TouchModule::processNewInput() {
     _ear.clearInput();
      // Set touch property to active (to void mouse input, mainly for mtdev bridges)
     _touch.touchActive(!_listOfContactPoints.empty());
+
+    if (!_listOfContactPoints.empty()) {
+        global::interactionMonitor.registerInteraction("Touch");
+    }
 
     // Erase old input id's that no longer exists
     _lastProcessed.erase(

@@ -36,6 +36,7 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -1030,6 +1031,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
         global::sessionRecording.preSynchronization();
         global::parallelPeer.preSynchronization();
+        global::interactionMonitor.updateActivityState();
     }
 
     for (const std::function<void()>& func : global::callback::preSync) {

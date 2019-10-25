@@ -26,50 +26,44 @@
 #define __OPENSPACE_CORE___INTERACTIONMONITOR___H__
 
 #include <openspace/properties/propertyowner.h>
-//#include <openspace/documentation/documentation.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
-
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 
 namespace openspace::interaction {
 
-
-namespace documentation { struct Documentation; }
-
+/**
+* The class InteractionMonitor keeps track of user interactions
+* during an OpenSpace session. It keeps track of when the latest
+* interaction was made and of when the state changes to idle.
+*/
 class InteractionMonitor : public properties::PropertyOwner {
-    enum InteractionState {
-        IDLE,
-        ACTIVE
-    };
 
 public:
     InteractionMonitor();
     ~InteractionMonitor() = default;
 
-    // functions
-        // get state
-        // set state
-        // get idle time
-        // set idle time
+    void setActivityState(bool isActive);
 
-
-    // interaction state idle/active
-    // last time interacted
-    // optional last time interacted typ
-    // optional list of events to monitor
+    /* Called every frame from OpenSpaceEngine and calculates the activity 
+    ** state depending on the last registered interaction */
+    void updateActivityState();
+    
+    /* Called from all places we want to register activity
+    ** Updates the last registered interaction time */
+    void registerInteraction(std::string interactionType);
 
 private:
-    // properties
-    // time until idle
-    properties::FloatProperty _idleTime;
-    properties::StringProperty _interactionState;
+    properties::BoolProperty _isInActiveState;
+    properties::DoubleProperty _idleTime;
 
-    //InteractionState _state;
-    // functions
-    // idle countdown
+    double _lastInteractionTime = 0;
+    std::string _lastInteractionType = "";
 
+    // @TODO (lovisa) make a list of interactions to listen for
+    // and only allow registering updates from those interactions
 };
 
 } // namespace openspace::interaction
