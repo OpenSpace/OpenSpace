@@ -46,6 +46,41 @@ int loadNavigationState(lua_State* L) {
     return 0;
 }
 
+int getNavigationState(lua_State* L) {
+    const int n = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 0, 1 },
+        "lua::getNavigationState"
+    );
+
+    interaction::NavigationHandler::NavigationState state;
+    if (n > 0) {
+        std::string referenceFrameIdentifier = ghoul::lua::value<std::string>(L, 1);
+        if (!referenceFrameIdentifier.empty()) {
+            const SceneGraphNode* referenceFrame =
+                sceneGraphNode(referenceFrameIdentifier);
+
+            if (!referenceFrame) {
+                LERROR(fmt::format(
+                    "Could not find node '{}' to use as reference frame",
+                    referenceFrameIdentifier
+                ));
+                return 0;
+            }
+            state = global::navigationHandler.navigationState(*referenceFrame);
+        }
+    }
+    else {
+        state = global::navigationHandler.navigationState();
+    }
+
+    lua_settop(L, 0);
+    ghoul::DictionaryLuaFormatter formatter;
+    std::string luaString = "return " + formatter.format(state.dictionary());
+    ghoul::lua::runScript(L, luaString);
+    return lua_gettop(L);
+}
+
 int setNavigationState(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setNavigationState");
 
