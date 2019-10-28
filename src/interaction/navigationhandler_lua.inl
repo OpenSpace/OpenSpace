@@ -62,6 +62,7 @@ int getNavigationState(lua_State* L) {
                 "Could not find node '{}' to use as reference frame",
                 referenceFrameIdentifier
             ));
+            lua_settop(L, 0);
             return 0;
         }
         state = global::navigationHandler.navigationState(*referenceFrame);
