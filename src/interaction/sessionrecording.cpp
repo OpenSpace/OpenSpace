@@ -513,11 +513,13 @@ static void SessionRecording::saveCameraKeyframeAscii(timestamps times,
     keyframeLine << times.timeRec << ' ';
     keyframeLine << std::fixed << std::setprecision(3) << times.timeSim << ' ';
     // Add camera position
-    keyframeLine << std::fixed << std::setprecision(7) << kf._position.x << ' '
+    keyframeLine
+        << std::fixed << std::setprecision(7) << kf._position.x << ' '
         << std::fixed << std::setprecision(7) << kf._position.y << ' '
         << std::fixed << std::setprecision(7) << kf._position.z << ' ';
     // Add camera rotation
-    keyframeLine << std::fixed << std::setprecision(7) << kf._rotation.x << ' '
+    keyframeLine
+        << std::fixed << std::setprecision(7) << kf._rotation.x << ' '
         << std::fixed << std::setprecision(7) << kf._rotation.y << ' '
         << std::fixed << std::setprecision(7) << kf._rotation.z << ' '
         << std::fixed << std::setprecision(7) << kf._rotation.w << ' ';
@@ -541,42 +543,61 @@ void SessionRecording::saveTimeKeyframe() {
     //Create a time keyframe, then call to populate it with current time props
     datamessagestructures::TimeKeyframe kf = _externInteract.generateTimeKeyframe();
 
+    timestamps times = {
+        kf._timestamp,
+        kf._timestamp - _timestampRecordStarted,
+        global::timeManager.time().j2000Seconds()
+    };
     if (_recordingDataMode == RecordedDataMode::Binary) {
-        _bufferIndex = 0;
-        _keyframeBuffer[_bufferIndex++] = 't';
-        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._timestamp);
-        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._timestamp
-            - _timestampRecordStarted);
-        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._time);
-        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._dt);
-        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._paused);
-        writeToFileBuffer(_keyframeBuffer, _bufferIndex, kf._requiresTimeJump);
-
-        saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex, _recordFile);
+        saveTimeKeyframeBinary(times, kf, _keyframeBuffer, _bufferIndex, _recordFile);
     } else {
-        std::stringstream keyframeLine = std::stringstream();
-        //Add simulation timestamp, timestamp relative, simulation time to recording start
-        keyframeLine << "time ";
-        keyframeLine << kf._timestamp << ' ';
-        keyframeLine << (kf._timestamp - _timestampRecordStarted) << ' ';
-
-        keyframeLine << std::fixed << std::setprecision(3) << kf._time;
-
-        keyframeLine << ' ' << kf._dt;
-        if (kf._paused) {
-            keyframeLine << " P";
-        }
-        else {
-            keyframeLine << " R";
-        }
-        if (kf._requiresTimeJump) {
-            keyframeLine << " J";
-        }
-        else {
-            keyframeLine << " -";
-        }
-        saveKeyframeToFile(keyframeLine.str(), _recordFile);
+        saveTimeKeyframeAscii(times, kf, _recordFile);
     }
+}
+
+static void SessionRecording::saveTimeKeyframeBinary(timestamps times,
+                                                 datamessagestructures::TimeKeyframe& kf,
+                                                     unsigned char* kfBuffer,
+                                                     size_t& idx,
+                                                     std::ofstream& file)
+{
+    idx = 0;
+    kfBuffer[idx++] = 't';
+    writeToFileBuffer(kfBuffer, idx, times.timeOs);
+    writeToFileBuffer(kfBuffer, idx, times.timeRec);
+    writeToFileBuffer(kfBuffer, idx, times.timeSim);
+    std::vector<char> writeBuffer;
+    kf.serialize(writeBuffer);
+    writeToFileBuffer(kfBuffer, idx, writeBuffer);
+
+    saveKeyframeToFileBinary(kfBuffer, idx, file);
+}
+
+static void SessionRecording::saveTimeKeyframeAscii(timestamps times,
+                                                datamessagestructures::CameraKeyframe& kf,
+                                                    std::ofstream& file)
+{
+    std::stringstream keyframeLine = std::stringstream();
+    //Add simulation timestamp, timestamp relative, simulation time to recording start
+    keyframeLine << "time ";
+    keyframeLine << times.timeOs << ' ';
+    keyframeLine << times.timeRec << ' ';
+    keyframeLine << std::fixed << std::setprecision(3) << times.timeSim << ' ';
+
+    keyframeLine << ' ' << kf._dt;
+    if (kf._paused) {
+        keyframeLine << " P";
+    }
+    else {
+        keyframeLine << " R";
+    }
+    if (kf._requiresTimeJump) {
+        keyframeLine << " J";
+    }
+    else {
+        keyframeLine << " -";
+    }
+    saveKeyframeToFile(keyframeLine.str(), _recordFile);
 }
 
 void SessionRecording::saveScriptKeyframe(std::string scriptToSave) {

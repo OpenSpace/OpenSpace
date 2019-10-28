@@ -303,7 +303,7 @@ public:
      * \param kf reference to a camera keyframe which contains the camera details
      * \param kfBuffer a buffer temporarily used for preparing data to be written
      * \param idx index into the temporary buffer
-     * \param file an ofstream reference to the playback file being written-to
+     * \param file an ofstream reference to the recording file being written-to
      */
     static void SessionRecording::saveCameraKeyframeBinary(timestamps times,
         datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer, size_t& idx,
@@ -314,10 +314,33 @@ public:
      *
      * \param times reference to a timestamps structure which contains recorded times
      * \param kf reference to a camera keyframe which contains the camera details
-     * \param file an ofstream reference to the playback file being written-to
+     * \param file an ofstream reference to the recording file being written-to
      */
     static void SessionRecording::saveCameraKeyframeAscii(timestamps times,
         datamessagestructures::CameraKeyframe& kf, std::ofstream& file);
+
+    /**
+     * Writes a time keyframe to a binary format recording file using a TimeKeyframe
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a time keyframe which contains the time details
+     * \param kfBuffer a buffer temporarily used for preparing data to be written
+     * \param idx index into the temporary buffer
+     * \param file an ofstream reference to the recording file being written-to
+     */
+    static void SessionRecording::saveTimeKeyframeBinary(timestamps times,
+        datamessagestructures::TimeKeyframe& kf, unsigned char* kfBuffer, size_t& idx,
+        std::ofstream& file);
+
+    /**
+     * Writes a time keyframe to an ascii format recording file using a TimeKeyframe
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param kf reference to a time keyframe which contains the time details
+     * \param file an ofstream reference to the recording file being written-to
+     */
+    static void SessionRecording::saveTimeKeyframeAscii(timestamps times,
+        datamessagestructures::TimeKeyframe& kf, std::ofstream& file);
 
 private:
     enum class RecordedType {
