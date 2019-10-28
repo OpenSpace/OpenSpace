@@ -36,7 +36,7 @@ namespace {
         "Time passed from latest registerad interaction until application goes idle."
     };
     constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
-        "IsInActiveStateInfo",
+        "IsInActiveState",
         "Is State Active",
         "Keeps track whether the interaction session is in active state or not. " 
         "False if application is in idle state, true if it is in active state."
@@ -45,41 +45,35 @@ namespace {
 
 namespace openspace::interaction {
 
-    InteractionMonitor::InteractionMonitor()
-        : properties::PropertyOwner({ "InteractionMonitor" })
-        , _isInActiveState(IsInActiveStateInfo, false)
-        , _idleTime( properties::DoubleProperty(IdleTimeInfo, 120.0))
-    {
-        addProperty(_isInActiveState);
-        addProperty(_idleTime);
-    }
-
-    void InteractionMonitor::setActivityState(bool isActive)
-    {
-        _isInActiveState.setValue(isActive);
-    }
-
-    void InteractionMonitor::setIdleTime(double time)
-    {
-        _idleTime.setValue(time);
-    }
-
-    void InteractionMonitor::updateActivityState()
-    {
-        double currentApplicationTime = global::windowDelegate.applicationTime();
-        double timeDiff = currentApplicationTime - _lastInteractionTime;
-
-        if (timeDiff >= _idleTime.value() && _isInActiveState) {
-            setActivityState(false);
-        }
-    }
-
-    void InteractionMonitor::registerInteraction(std::string interactionType)
-    {
-        _lastInteractionTime = global::windowDelegate.applicationTime();
-        _lastInteractionType = interactionType;
-        setActivityState(true);
-        // LDEBUG(fmt::format("Interaction Type {} at time {}", _lastInteractionType, _lastInteractionTime));
-    }
-
+InteractionMonitor::InteractionMonitor()
+    : properties::PropertyOwner({ "InteractionMonitor" })
+    , _isInActiveState(IsInActiveStateInfo, false)
+    , _idleTime( properties::DoubleProperty(IdleTimeInfo, 120.0))
+{
+    addProperty(_isInActiveState);
+    addProperty(_idleTime);
 }
+
+void InteractionMonitor::setActivityState(bool isActive) {
+    _isInActiveState.set(isActive);
+}
+
+void InteractionMonitor::setIdleTime(double time) {
+    _idleTime.set(time);
+}
+
+void InteractionMonitor::updateActivityState() {
+    double currentApplicationTime = global::windowDelegate.applicationTime();
+    double timeDiff = currentApplicationTime - _lastInteractionTime;
+
+    if (timeDiff >= _idleTime.value() && _isInActiveState) {
+        setActivityState(false);
+    }
+}
+
+void InteractionMonitor::registerInteraction() {
+    _lastInteractionTime = global::windowDelegate.applicationTime();
+    setActivityState(true);
+}
+
+} // namespace openspace::interaction

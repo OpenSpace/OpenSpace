@@ -31,7 +31,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
-
 namespace openspace::interaction {
 
 /**
@@ -48,22 +47,19 @@ public:
     void setActivityState(bool isActive);
     void setIdleTime(double time);
 
-
     /* Called every frame from OpenSpaceEngine and calculates the activity 
     ** state depending on the last registered interaction */
     void updateActivityState();
     
     /* Called from all places we want to register activity
     ** Updates the last registered interaction time */
-    void registerInteraction(std::string interactionType);
+    void registerInteraction();
 
-private:
     properties::BoolProperty _isInActiveState;
     properties::DoubleProperty _idleTime;
 
+private:
     double _lastInteractionTime = 0;
-    std::string _lastInteractionType = "";
-
     // @TODO (lovisa) make a list of interactions to listen for
     // and only allow registering updates from those interactions
 };

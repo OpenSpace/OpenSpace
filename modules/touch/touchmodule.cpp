@@ -56,7 +56,7 @@ bool TouchModule::processNewInput() {
     _touch.touchActive(!_listOfContactPoints.empty());
 
     if (!_listOfContactPoints.empty()) {
-        global::interactionMonitor.registerInteraction("Touch");
+        global::interactionMonitor.registerInteraction();
     }
 
     // Erase old input id's that no longer exists
