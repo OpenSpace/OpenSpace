@@ -54,21 +54,17 @@ int getNavigationState(lua_State* L) {
     );
 
     interaction::NavigationHandler::NavigationState state;
-    if (n > 0) {
-        std::string referenceFrameIdentifier = ghoul::lua::value<std::string>(L, 1);
-        if (!referenceFrameIdentifier.empty()) {
-            const SceneGraphNode* referenceFrame =
-                sceneGraphNode(referenceFrameIdentifier);
-
-            if (!referenceFrame) {
-                LERROR(fmt::format(
-                    "Could not find node '{}' to use as reference frame",
-                    referenceFrameIdentifier
-                ));
-                return 0;
-            }
-            state = global::navigationHandler.navigationState(*referenceFrame);
+    if (n == 1) {
+        const std::string referenceFrameIdentifier = ghoul::lua::value<std::string>(L, 1);
+        const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
+        if (!referenceFrame) {
+            LERROR(fmt::format(
+                "Could not find node '{}' to use as reference frame",
+                referenceFrameIdentifier
+            ));
+            return 0;
         }
+        state = global::navigationHandler.navigationState(*referenceFrame);
     }
     else {
         state = global::navigationHandler.navigationState();
