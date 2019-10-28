@@ -71,9 +71,14 @@ int getNavigationState(lua_State* L) {
     }
 
     lua_settop(L, 0);
+
+    // Ideally we would want to translate the dictionary to a lua state,
+    // but right now we have to go via a script representation and execute it:
+    // @TODO: Implement a better way to populate lua state from dictionaries in ghoul.
     ghoul::DictionaryLuaFormatter formatter;
     std::string luaString = "return " + formatter.format(state.dictionary());
     ghoul::lua::runScript(L, luaString);
+
     return lua_gettop(L);
 }
 
