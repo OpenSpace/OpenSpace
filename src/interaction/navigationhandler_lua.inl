@@ -73,7 +73,7 @@ int getNavigationState(lua_State* L) {
 
     lua_settop(L, 0);
 
-    const auto pushVector = [](lua_State* L, glm::dvec3 v) {
+    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
         lua_newtable(L);
         ghoul::lua::push(L, 1, v.x);
         lua_rawset(L, -3);
