@@ -124,16 +124,6 @@ namespace {
         "shown on the screen"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
-        "TakeScreenshot",
-        "Take Screenshot",
-        "If this property is triggered, a screenshot is taken and stored in the current "
-        "working directory (which is the same directory where the OpenSpace.exe) is "
-        "located in most cases. The images are prefixed with 'SGCT' and postfixed with "
-        "the number of frames. This function will silently overwrite images that are "
-        "already present in the folder."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
         "ApplyWarpingScreenshot",
         "Apply Warping to Screenshots",
@@ -264,7 +254,6 @@ RenderEngine::RenderEngine()
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
-    , _takeScreenshot(TakeScreenshotInfo)
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -378,9 +367,6 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_horizFieldOfView);
-
-    _takeScreenshot.onChange([this](){ _shouldTakeScreenshot = true; });
-    addProperty(_takeScreenshot);
 
     addProperty(_showFrameInformation);
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -864,21 +850,6 @@ void RenderEngine::renderDashboard() {
 void RenderEngine::postDraw() {
     ++_frameNumber;
 
-    if (_shouldTakeScreenshot) {
-        // We only create the directory here, as we don't want to spam the users
-        // screenshot folder everytime we start OpenSpace even when we are not taking any
-        // screenshots. So the first time we actually take one, we create the folder:
-        if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
-            FileSys.createDirectory(
-                absPath("${SCREENSHOTS}"),
-                ghoul::filesystem::FileSystem::Recursive::Yes
-            );
-        }
-
-        global::windowDelegate.takeScreenshot(_applyWarping);
-        _shouldTakeScreenshot = false;
-    }
-
     if (global::performanceManager.isEnabled()) {
         global::performanceManager.storeScenePerformanceMeasurements(
             scene()->allSceneGraphNodes()
@@ -1061,10 +1032,31 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 /**
-  * Mark that one screenshot should be taken
-*/
+ * Take a screenshot and store it in the ${SCREENSHOTS} directory
+ */
 void RenderEngine::takeScreenShot() {
-    _shouldTakeScreenshot = true;
+    // We only create the directory here, as we don't want to spam the users
+    // screenshot folder everytime we start OpenSpace even when we are not taking any
+    // screenshots. So the first time we actually take one, we create the folder:
+
+    if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
+        FileSys.createDirectory(
+            absPath("${SCREENSHOTS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes
+        );
+    }
+
+    _latestScreenShotNumber = global::windowDelegate.takeScreenshot(_applyWarping);
+}
+
+/**
+ * Get the latest screenshot filename
+ */
+std::string RenderEngine::latestScreenShotFilename() const {
+    return fmt::format(
+        "OpenSpace_{:0>6}.png",
+        _latestScreenShotNumber
+    );
 }
 
 /**
@@ -1123,6 +1115,14 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "Given a ScreenSpaceRenderable name this script will remove it from the "
                 "renderengine"
             },
+            {
+                "takeScreenShot",
+                &luascriptfunctions::takeScreenShot,
+                {},
+                "",
+                "Take a screenshot and return the path of the generated file. "
+                "The Screenshot will be stored in the ${SCREENSHOTS} folder."
+            }
         },
     };
 }

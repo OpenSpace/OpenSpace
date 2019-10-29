@@ -142,9 +142,14 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-     * Mark that one screenshot should be taken
+     * Take a screenshot and store in the ${SCREENSHOTS} directory
      */
     void takeScreenShot();
+
+    /**
+     * Get the filename of the latest screenshot
+     */
+    std::string latestScreenShotFilename() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -187,8 +192,6 @@ private:
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
-    properties::TriggerProperty _takeScreenshot;
-    bool _shouldTakeScreenshot = false;
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showFrameInformation;
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -226,6 +229,7 @@ private:
     properties::Vec3Property _masterRotation;
     
     uint64_t _frameNumber = 0;
+    unsigned int _latestScreenShotNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 

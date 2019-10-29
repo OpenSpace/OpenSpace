@@ -1014,6 +1014,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
         sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
         sgct::Engine::instance()->takeScreenshot();
+        return sgct::Engine::instance()->getScreenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
         GLFWwindow* w = glfwGetCurrentContext();
