@@ -73,12 +73,45 @@ int getNavigationState(lua_State* L) {
 
     lua_settop(L, 0);
 
-    // Ideally we would want to translate the dictionary to a lua state,
-    // but right now we have to go via a script representation and execute it:
-    // @TODO: Implement a better way to populate lua state from dictionaries in ghoul.
-    ghoul::DictionaryLuaFormatter formatter;
-    std::string luaString = "return " + formatter.format(state.dictionary());
-    ghoul::lua::runScript(L, luaString);
+    const auto pushVector = [](lua_State* L, glm::dvec3 v) {
+        lua_newtable(L);
+        ghoul::lua::push(L, 1, v.x);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, v.y);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 3, v.z);
+        lua_rawset(L, -3);
+    };
+
+    lua_newtable(L);
+    ghoul::lua::push(L, "Anchor", state.anchor);
+    lua_rawset(L, -3);
+
+    if (!state.aim.empty()) {
+        ghoul::lua::push(L, "Aim", state.aim);
+        lua_rawset(L, -3);
+    }
+    if (!state.referenceFrame.empty()) {
+        ghoul::lua::push(L, "ReferenceFrame", state.referenceFrame);
+        lua_rawset(L, -3);
+    }
+    ghoul::lua::push(L, "Position");
+    pushVector(L, state.position);
+    lua_rawset(L, -3);
+
+    if (state.up.has_value()) {
+        ghoul::lua::push(L, "Up");
+        pushVector(L, state.up.value());
+        lua_rawset(L, -3);
+    }
+    if (state.yaw != 0) {
+        ghoul::lua::push(L, "Yaw", state.yaw);
+        lua_rawset(L, -3);
+    }
+    if (state.pitch != 0) {
+        ghoul::lua::push(L, "Pitch", state.pitch);
+        lua_rawset(L, -3);
+    }
 
     return lua_gettop(L);
 }
