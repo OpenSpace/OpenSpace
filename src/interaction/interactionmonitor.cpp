@@ -33,7 +33,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
         "Idle Time",
-        "Time passed from latest registerad interaction until application goes idle."
+        "Time in seconds that has passed from latest registerad interaction until application goes idle."
     };
     constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
