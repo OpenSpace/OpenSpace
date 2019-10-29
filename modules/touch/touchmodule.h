@@ -45,7 +45,7 @@ namespace openspace {
         /**
         * Checks if touchevent should be parsed to the webgui
         */
-        void hasNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
+        void processNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
 
         TuioEar _ear;
         TouchInteraction _touch;

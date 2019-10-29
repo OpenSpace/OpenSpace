@@ -84,7 +84,7 @@ bool TouchModule::processNewInput() {
     }
 
     // Check if we need to parse touchevent to the webgui
-    hasNewWebInput(_listOfContactPoints);
+    processNewWebInput(_listOfContactPoints);
 
     // Return true if we got new input
     if (_listOfContactPoints.size() == _lastProcessed.size() &&
@@ -119,7 +119,7 @@ bool TouchModule::processNewInput() {
     }
 }
 
-void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoints) {
+void TouchModule::processNewWebInput(const std::vector<TuioCursor>& listOfContactPoints) {
     bool isWebPositionCallbackZero =
         (_webPositionCallback.x == 0 && _webPositionCallback.y == 0);
     bool isSingleContactPoint = (listOfContactPoints.size() == 1);
