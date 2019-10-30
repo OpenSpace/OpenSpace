@@ -642,7 +642,7 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "locally or remotely. The latter being the default."
             },
             {
-                "clearJoystickButotn",
+                "clearJoystickButton",
                 &luascriptfunctions::clearJoystickButton,
                 {},
                 "int",
