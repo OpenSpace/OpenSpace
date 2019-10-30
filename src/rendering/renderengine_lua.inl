@@ -93,9 +93,9 @@ int takeScreenshot(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::takeScreenshot");
 
     global::renderEngine.takeScreenshot();
-    const std::string filename = global::renderEngine.latestScreenShotFilename();
+    const unsigned int screenshotNumber = global::renderEngine.latestScreenshotNumber();
 
-    lua_pushstring(L, filename.c_str());
+    lua_pushinteger(L, screenshotNumber);
     return 1;
 }
 

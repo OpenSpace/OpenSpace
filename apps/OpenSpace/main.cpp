@@ -383,7 +383,10 @@ void mainInitFunc() {
 
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        constexpr const char* screenshotNames = "OpenSpace";
+        const std::string screenshotNames = nWindows > 1 ?
+            fmt::format("OpenSpace_{}", i) :
+            "OpenSpace";
+
         sgct_core::ScreenCapture* cpt0 = w->getScreenCapturePointer(0);
         sgct_core::ScreenCapture* cpt1 = w->getScreenCapturePointer(1);
 

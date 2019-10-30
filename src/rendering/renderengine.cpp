@@ -1046,17 +1046,14 @@ void RenderEngine::takeScreenshot() {
         );
     }
 
-    _latestScreenShotNumber = global::windowDelegate.takeScreenshot(_applyWarping);
+    _latestScreenshotNumber = global::windowDelegate.takeScreenshot(_applyWarping);
 }
 
 /**
  * Get the latest screenshot filename
  */
-std::string RenderEngine::latestScreenShotFilename() const {
-    return fmt::format(
-        "OpenSpace_{:0>6}.png",
-        _latestScreenShotNumber
-    );
+unsigned int RenderEngine::latestScreenshotNumber() const {
+    return _latestScreenshotNumber;
 }
 
 /**
@@ -1120,8 +1117,8 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 &luascriptfunctions::takeScreenshot,
                 {},
                 "",
-                "Take a screenshot and return the path of the generated file. "
-                "The Screenshot will be stored in the ${SCREENSHOTS} folder."
+                "Take a screenshot and return the screenshot number. The screenshot will "
+                "be stored in the ${SCREENSHOTS} folder. "
             }
         },
     };

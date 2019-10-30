@@ -149,7 +149,7 @@ public:
     /**
      * Get the filename of the latest screenshot
      */
-    std::string latestScreenShotFilename() const;
+    unsigned int latestScreenshotNumber() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -229,7 +229,7 @@ private:
     properties::Vec3Property _masterRotation;
     
     uint64_t _frameNumber = 0;
-    unsigned int _latestScreenShotNumber = 0;
+    unsigned int _latestScreenshotNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
