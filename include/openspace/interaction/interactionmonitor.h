@@ -26,40 +26,41 @@
 #define __OPENSPACE_CORE___INTERACTIONMONITOR___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <ghoul/logging/logmanager.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace::interaction {
 
 /**
-* The class InteractionMonitor keeps track of user interactions
-* during an OpenSpace session. It keeps track of when the latest
-* interaction was made and of when the state changes to idle.
-*/
+ * The class InteractionMonitor keeps track of user interactions during an OpenSpace
+ * session. It keeps track of when the latest interaction was made and of when the state
+ * changes to idle.
+ */
 class InteractionMonitor : public properties::PropertyOwner {
-
 public:
     InteractionMonitor();
-    ~InteractionMonitor() = default;
 
     void setActivityState(bool isActive);
-    void setIdleTime(double time);
+    void setIdleTime(float time);
 
-    /* Called every frame from OpenSpaceEngine and calculates the activity 
-    ** state depending on the last registered interaction */
+    /*
+     * Called every frame from OpenSpaceEngine and calculates the activity state depending
+     * on the last registered interaction.
+     */
     void updateActivityState();
-    
-    /* Called from all places we want to register activity
-    ** Updates the last registered interaction time */
-    void registerInteraction();
 
-    properties::BoolProperty _isInActiveState;
-    properties::DoubleProperty _idleTime;
+    /*
+     * Called from all places we want to register activity. Updates the last registered
+     * interaction time
+     */
+    void registerInteraction();
 
 private:
     double _lastInteractionTime = 0;
+    properties::BoolProperty _isInActiveState;
+    properties::FloatProperty _idleTime; // in seconds
+
     // @TODO (lovisa) make a list of interactions to listen for
     // and only allow registering updates from those interactions
 };

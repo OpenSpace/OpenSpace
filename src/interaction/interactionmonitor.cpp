@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "InteractionMonitor";
@@ -33,13 +34,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
         "Idle Time",
-        "Time in seconds that has passed from latest registerad interaction until application goes idle."
+        "Time in seconds that has passed from latest registered interaction until the "
+        "application goes idle."
     };
     constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
         "Is State Active",
-        "Keeps track whether the interaction session is in active state or not. " 
-        "False if application is in idle state, true if it is in active state."
+        "Keeps track whether the interaction session is in active state or not. False if "
+        "application is in idle state, true if it is in active state."
     };
 } // namespace
 
@@ -48,32 +50,32 @@ namespace openspace::interaction {
 InteractionMonitor::InteractionMonitor()
     : properties::PropertyOwner({ "InteractionMonitor" })
     , _isInActiveState(IsInActiveStateInfo, false)
-    , _idleTime( properties::DoubleProperty(IdleTimeInfo, 120.0))
+    , _idleTime(IdleTimeInfo, 120.f)
 {
     addProperty(_isInActiveState);
     addProperty(_idleTime);
 }
 
 void InteractionMonitor::setActivityState(bool isActive) {
-    _isInActiveState.set(isActive);
+    _isInActiveState = isActive;
 }
 
-void InteractionMonitor::setIdleTime(double time) {
-    _idleTime.set(time);
+void InteractionMonitor::setIdleTime(float time) {
+    _idleTime = time;
 }
 
 void InteractionMonitor::updateActivityState() {
-    double currentApplicationTime = global::windowDelegate.applicationTime();
-    double timeDiff = currentApplicationTime - _lastInteractionTime;
+    const double currentApplicationTime = global::windowDelegate.applicationTime();
+    const double timeDiff = currentApplicationTime - _lastInteractionTime;
 
-    if (timeDiff >= _idleTime.value() && _isInActiveState) {
-        setActivityState(false);
+    if (timeDiff >= _idleTime && _isInActiveState) {
+        _isInActiveState = false;
     }
 }
 
 void InteractionMonitor::registerInteraction() {
     _lastInteractionTime = global::windowDelegate.applicationTime();
-    setActivityState(true);
+    _isInActiveState = true;
 }
 
 } // namespace openspace::interaction
