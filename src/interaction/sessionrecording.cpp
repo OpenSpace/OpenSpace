@@ -1033,7 +1033,7 @@ void SessionRecording::moveAheadInTime() {
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            global::renderEngine.takeScreenShot();
+            global::renderEngine.takeScreenshot();
         }
     }
 }

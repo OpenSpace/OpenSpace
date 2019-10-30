@@ -1034,7 +1034,7 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 /**
  * Take a screenshot and store it in the ${SCREENSHOTS} directory
  */
-void RenderEngine::takeScreenShot() {
+void RenderEngine::takeScreenshot() {
     // We only create the directory here, as we don't want to spam the users
     // screenshot folder everytime we start OpenSpace even when we are not taking any
     // screenshots. So the first time we actually take one, we create the folder:
@@ -1116,8 +1116,8 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "renderengine"
             },
             {
-                "takeScreenShot",
-                &luascriptfunctions::takeScreenShot,
+                "takeScreenshot",
+                &luascriptfunctions::takeScreenshot,
                 {},
                 "",
                 "Take a screenshot and return the path of the generated file. "

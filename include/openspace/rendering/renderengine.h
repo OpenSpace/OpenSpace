@@ -144,7 +144,7 @@ public:
     /**
      * Take a screenshot and store in the ${SCREENSHOTS} directory
      */
-    void takeScreenShot();
+    void takeScreenshot();
 
     /**
      * Get the filename of the latest screenshot

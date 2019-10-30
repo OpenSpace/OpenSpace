@@ -20,7 +20,7 @@ local Keybindings = {
     {
         Key = "PRINT_SCREEN",
         Name = "Take Screenshot",
-        Command = "openspace.takeScreenShot()",
+        Command = "openspace.takeScreenshot()",
         Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
         GuiPath = "/Rendering",
         Local = true
@@ -28,7 +28,7 @@ local Keybindings = {
     {
         Key = "F12",
         Name = "Take Screenshot",
-        Command = "openspace.takeScreenShot()",
+        Command = "openspace.takeScreenshot()",
         Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
         GuiPath = "/Rendering",
         Local = true

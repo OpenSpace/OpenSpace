@@ -89,10 +89,10 @@ int removeScreenSpaceRenderable(lua_State* L) {
     return 0;
 }
 
-int takeScreenShot(lua_State* L) {
+int takeScreenshot(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::takeScreenshot");
 
-    global::renderEngine.takeScreenShot();
+    global::renderEngine.takeScreenshot();
     const std::string filename = global::renderEngine.latestScreenShotFilename();
 
     lua_pushstring(L, filename.c_str());
