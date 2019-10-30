@@ -906,7 +906,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         if (doPerformanceMeasurements) {
             perfInternal = std::make_unique<performance::PerformanceMeasurement>(
                 "FramebufferRenderer::render::deferredTasks"
-                );
+            );
         }
         performDeferredTasks(tasks.deferredcasterTasks);
     }

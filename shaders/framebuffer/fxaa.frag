@@ -109,7 +109,7 @@ void main() {
 
     // Step size (one pixel) according to the edge direction.
     float stepLength = isHorizontal ? inverseScreenSize.y : inverseScreenSize.x;
-    
+
     float pixelLumLocalAverage = 0.0;
 
     if (is1Steepest) {
