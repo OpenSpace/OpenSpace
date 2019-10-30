@@ -113,7 +113,8 @@ int getNavigationState(lua_State* L) {
         lua_rawset(L, -3);
     }
 
-    return lua_gettop(L);
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
 }
 
 int setNavigationState(lua_State* L) {

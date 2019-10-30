@@ -341,6 +341,10 @@ NavigationHandler::NavigationState NavigationHandler::navigationState() const {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
         sceneGraph()->root();
+    ghoul_assert(
+        referenceFrame,
+        "The root will always exist and the anchor node ought to be reset when removed"
+    );
 
     return navigationState(*referenceFrame);
 }
@@ -568,21 +572,20 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "getNavigationState",
                 &luascriptfunctions::getNavigationState,
                 {},
-                "[string]",
-                "Return the current navigation state as a lua table. "
-                "The optional argument is the scene graph node to "
-                "use as reference frame. By default, the reference frame will picked "
-                "based on whether the orbital navigator is currently following the "
-                "anchor node rotation. If it is, the anchor will be chosen as reference "
-                "frame. If not, the reference frame will be set to the scene graph root."
+                "[table]",
+                "Return the current navigation state as a lua table. The optional "
+                "argument is the scene graph node to use as reference frame. By default, "
+                "the reference frame will picked based on whether the orbital navigator "
+                "is currently following the anchor node rotation. If it is, the anchor "
+                "will be chosen as reference frame. If not, the reference frame will be "
+                "set to the scene graph root."
             },
             {
                 "setNavigationState",
                 &luascriptfunctions::setNavigationState,
                 {},
                 "table",
-                "Set the navigation state. "
-                "The argument must be a valid Navigation State."
+                "Set the navigation state. The argument must be a valid Navigation State."
             },
             {
                 "saveNavigationState",
