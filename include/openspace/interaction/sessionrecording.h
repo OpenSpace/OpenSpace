@@ -302,11 +302,10 @@ public:
      * \param times reference to a timestamps structure which contains recorded times
      * \param kf reference to a camera keyframe which contains the camera details
      * \param kfBuffer a buffer temporarily used for preparing data to be written
-     * \param idx index into the temporary buffer
      * \param file an ofstream reference to the recording file being written-to
      */
     static void SessionRecording::saveCameraKeyframeBinary(timestamps times,
-        datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer, size_t& idx,
+        datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
     /**
@@ -325,11 +324,10 @@ public:
      * \param times reference to a timestamps structure which contains recorded times
      * \param kf reference to a time keyframe which contains the time details
      * \param kfBuffer a buffer temporarily used for preparing data to be written
-     * \param idx index into the temporary buffer
      * \param file an ofstream reference to the recording file being written-to
      */
     static void SessionRecording::saveTimeKeyframeBinary(timestamps times,
-        datamessagestructures::TimeKeyframe& kf, unsigned char* kfBuffer, size_t& idx,
+        datamessagestructures::TimeKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
     /**
@@ -341,6 +339,28 @@ public:
      */
     static void SessionRecording::saveTimeKeyframeAscii(timestamps times,
         datamessagestructures::TimeKeyframe& kf, std::ofstream& file);
+
+    /**
+     * Writes a script keyframe to a binary format recording file using a ScriptMessage
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param sm reference to a ScriptMessage object which contains the script details
+     * \param smBuffer a buffer temporarily used for preparing data to be written
+     * \param file an ofstream reference to the recording file being written-to
+     */
+    static void SessionRecording::saveScriptKeyframeBinary(timestamps times,
+        datamessagestructures::ScriptMessage& sm, unsigned char* smBuffer,
+        std::string& script, std::ofstream& file);
+
+    /**
+     * Writes a script keyframe to an ascii format recording file using a ScriptMessage
+     *
+     * \param times reference to a timestamps structure which contains recorded times
+     * \param sm reference to a ScriptMessage which contains the script details
+     * \param file an ofstream reference to the recording file being written-to
+     */
+    static void SessionRecording::saveScriptKeyframeAscii(timestamps times,
+        datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
 private:
     enum class RecordedType {
@@ -403,6 +423,11 @@ private:
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, unsigned char c);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, bool b);
 
+    static void SessionRecording::saveHeaderBinary(timestamps times, char type,
+        unsigned char* kfBuffer, size_t& idx);
+    static void SessionRecording::saveHeaderAscii(timestamps times, std::string& type,
+        std::stringstream& line);
+
     RecordedDataMode _recordingDataMode = RecordedDataMode::Binary;
     SessionState _state = SessionState::Idle;
     SessionState _lastState = SessionState::Idle;
@@ -430,7 +455,6 @@ private:
         + saveBufferCameraSize_min
         + saveBufferStringSize_max;
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
-    size_t _bufferIndex = 0;
 
     bool _cleanupNeeded = false;
 

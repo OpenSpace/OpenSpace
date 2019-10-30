@@ -188,6 +188,26 @@ struct CameraKeyframe {
         );
     };
 
+    void write(std::stringstream& out) const {
+        // Add camera position
+        out << std::fixed << std::setprecision(7) << _position.x << ' '
+            << std::fixed << std::setprecision(7) << _position.y << ' '
+            << std::fixed << std::setprecision(7) << _position.z << ' ';
+        // Add camera rotation
+        out << std::fixed << std::setprecision(7) << _rotation.x << ' '
+            << std::fixed << std::setprecision(7) << _rotation.y << ' '
+            << std::fixed << std::setprecision(7) << _rotation.z << ' '
+            << std::fixed << std::setprecision(7) << _rotation.w << ' ';
+        out << std::scientific << _scale << ' ';
+        if (_followNodeRotation) {
+            out << "F ";
+        }
+        else {
+            out << "- ";
+        }
+        out << _focusNode;
+    };
+
     void read(std::istream* in) {
         // Read position
         in->read(
@@ -282,6 +302,22 @@ struct TimeKeyframe {
             reinterpret_cast<const char*>(this),
             sizeof(TimeKeyframe)
         );
+    };
+
+    void write(std::stringstream out) const {
+        out << ' ' << _dt;
+        if (_paused) {
+            out << " P";
+        }
+        else {
+            out << " R";
+        }
+        if (_requiresTimeJump) {
+            out << " J";
+        }
+        else {
+            out << " -";
+        }
     };
 
     void read(std::istream* in) {
@@ -401,6 +437,29 @@ struct ScriptMessage {
     void write(std::ostream* out) const {
         out->write(_script.c_str(), _script.size());
     };
+
+    void write(unsigned char* buf, size_t& idx, std::ofstream& file) const {
+        size_t strLen = _script.size();
+        size_t writeSize_bytes = sizeof(size_t);
+
+        unsigned char const *p = reinterpret_cast<unsigned char const*>(&strLen);
+        memcpy((buf + idx), p, writeSize_bytes);
+        idx += static_cast<unsigned int>(writeSize_bytes);
+
+        memcpy((buf + idx), _script.c_str(), _script.size());
+        idx += static_cast<unsigned int>(strLen);
+        file.write(reinterpret_cast<char*>(buf), idx);
+        //Write directly to file because some scripts can be very long
+        file.write(_script.c_str(), _script.size());
+    };
+
+    void write(std::stringstream& ss) const {
+        unsigned int numLinesInScript = static_cast<unsigned int>(
+            std::count(_script.begin(), _script.end(), '\n')
+        );
+        ss << ' ' << (numLinesInScript + 1) << ' ';
+        ss << _script;
+    }
 
     void read(std::istream* in) {
         size_t strLen;
