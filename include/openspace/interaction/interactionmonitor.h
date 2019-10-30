@@ -51,10 +51,10 @@ public:
     void updateActivityState();
 
     /*
-     * Called from all places we want to register activity. Updates the last registered
+     * Called from all places we want to mark activity from. Updates the last registered
      * interaction time
      */
-    void registerInteraction();
+    void markInteraction();
 
 private:
     double _lastInteractionTime = 0;

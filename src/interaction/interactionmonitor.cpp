@@ -73,7 +73,7 @@ void InteractionMonitor::updateActivityState() {
     }
 }
 
-void InteractionMonitor::registerInteraction() {
+void InteractionMonitor::markInteraction() {
     _lastInteractionTime = global::windowDelegate.applicationTime();
     _isInActiveState = true;
 }
