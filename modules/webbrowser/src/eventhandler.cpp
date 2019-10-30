@@ -226,7 +226,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button,
         return false;
     }
 
-    global::interactionMonitor.registerInteraction();
+    global::interactionMonitor.markInteraction();
     MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
@@ -276,9 +276,9 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
     _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
-    global::interactionMonitor.registerInteraction();
-    // Let the mouse event trickle on
+    global::interactionMonitor.markInteraction();
 
+    // Let the mouse event trickle on
     return false;
 }
 
