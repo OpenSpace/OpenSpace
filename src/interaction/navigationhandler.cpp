@@ -572,7 +572,7 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "getNavigationState",
                 &luascriptfunctions::getNavigationState,
                 {},
-                "[table]",
+                "[string]",
                 "Return the current navigation state as a lua table. The optional "
                 "argument is the scene graph node to use as reference frame. By default, "
                 "the reference frame will picked based on whether the orbital navigator "
