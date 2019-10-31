@@ -189,18 +189,18 @@ int countLeapSeconds(int year, int dayOfYear) {
 
 double epochFromSubstring(const std::string& epochString) {
     // The epochString is in the form:
-    // YYDDD.DDDDDDDD
-    // With YY being the last two years of the launch epoch, the first DDD the day
-    // of the year and the remaning a fractional part of the day
+    // YYYYMMDD.ddddddd
+    // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
+    // and dddd the fraction of that day.
 
     // The main overview of this function:
-    // 1. Reconstruct the full year from the YY part
+    // 1. Read the year value
     // 2. Calculate the number of seconds since the beginning of the year
     // 2.a Get the number of full days since the beginning of the year
     // 2.b If the year is a leap year, modify the number of days
     // 3. Convert the number of days to a number of seconds
     // 4. Get the number of leap seconds since January 1st, 2000 and remove them
-    // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
+    // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
     // midnight
 
     // According to https://celestrak.com/columns/v04n03/
@@ -209,12 +209,8 @@ double epochFromSubstring(const std::string& epochString) {
     // By their reasoning, two-digit years from 57-99 correspond to 1957-1999 and
     // those from 00-56 correspond to 2000-2056. We'll see each other again in 2057!
 
-    // 1. Get the full year
-    std::string yearPrefix = [y = epochString.substr(0, 2)](){
-        int year = std::atoi(y.c_str());
-        return year >= 57 ? "19" : "20";
-    }();
-    const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
+    // 1. Get the year
+    int year = std::atoi(epochString.substr(0, 4).c_str());
     const int daysSince2000 = countDays(year);
 
     // 2.
@@ -348,34 +344,45 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
         KeplerParameters keplerElements;
         // Object designator string
         std::getline(file, name, ',');
+
         // (Ignore object status for NEO, PHA, diameter)
         std::getline(file, ignore, ',');
         std::getline(file, ignore, ',');
         std::getline(file, ignore, ',');
+
         // Eccentricity (unit-less)
         std::getline(file, ignore, ',');
         keplerElements.eccentricity = std::stod(ignore);
+
         // Semi-major axis (astronomical units - au)
         std::getline(file, ignore, ',');
         keplerElements.semiMajorAxis = std::stod(ignore);
+        keplerElements.semiMajorAxis *= convertAuToKm;
+
         // Inclination (degrees)
         std::getline(file, ignore, ',');
         keplerElements.inclination = std::stod(ignore);
+
         // Longitude of ascending node (degrees)
         std::getline(file, ignore, ',');
         keplerElements.ascendingNode = std::stod(ignore);
+
         // Argument of Periapsis (degrees)
         std::getline(file, ignore, ',');
-        keplerElements.argumentOfPeriapsis = std::std(ignore);
+        keplerElements.argumentOfPeriapsis = std::stod(ignore);
+
         // Mean Anomaly (degrees)
         std::getline(file, ignore, ',');
-        keplerElements.meanAnomaly = std::std(ignore);
+        keplerElements.meanAnomaly = std::stod(ignore);
+
         // Epoch (MJD)
         std::getline(file, ignore, ',');
-        keplerElements.epoch = std::std(ignore);
+        keplerElements.epoch = epochFromSubstring(ignore);
+
         // Period (days)
         std::getline(file, ignore, ',');
-        keplerElements.period = std::std(ignore);
+        keplerElements.period = std::stod(ignore);
+        keplerElements.period *= convertDaysToSecs;
 
         _sbData.push_back(keplerElements);
         _sbNames.push_back(name);

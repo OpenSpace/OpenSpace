@@ -123,6 +123,9 @@ private:
 
     UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
         numberOfSegments) _uniformCache;
+
+    const double convertAuToKm = 1.496e8;
+    const double convertDaysToSecs = 86400.;
 };
 
 } // namespace openspace
