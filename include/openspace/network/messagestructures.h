@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <iomanip>
+#include <algorithm>
 
 namespace openspace::datamessagestructures {
 
@@ -254,7 +256,7 @@ struct CameraKeyframe {
         );
     };
 
-    void read(std::istringstream* iss) {
+    void read(std::istringstream& iss) {
         std::string rotationFollowing;
 
         iss >> _position.x
@@ -304,7 +306,7 @@ struct TimeKeyframe {
         );
     };
 
-    void write(std::stringstream out) const {
+    void write(std::stringstream& out) const {
         out << ' ' << _dt;
         if (_paused) {
             out << " P";
@@ -327,7 +329,7 @@ struct TimeKeyframe {
         );
     };
 
-    void read(std::istringstream* iss) {
+    void read(std::istringstream& iss) {
         std::string paused, jump;
 
         iss >> _dt
@@ -474,12 +476,15 @@ struct ScriptMessage {
         _script = temp.data();
     };
 
-    void read(std::istringstream* iss) {
+    void read(std::istringstream& iss) {
         int numScriptLines;
         iss >> numScriptLines;
+        if (numScriptLines < 0) {
+            numScriptLines = 0;
+        }
         std::string tmpReadbackScript;
         _script.erase();
-        for (unsigned int i = 0; i < numScriptLines; ++i) {
+        for (int i = 0; i < numScriptLines; ++i) {
             std::getline(iss, tmpReadbackScript);
             _script.append(tmpReadbackScript);
             if (i < (numScriptLines - 1)) {

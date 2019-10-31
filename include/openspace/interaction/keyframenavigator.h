@@ -55,13 +55,21 @@ public:
         float scale;
         bool followFocusNodeRotation;
 
+        CameraPose() {
+            position = {0., 0., 0.};
+            rotation = {0., 0., 0., 0.};
+            focusNode = "";
+            scale = 1.0;
+            followFocusNodeRotation = false;
+        };
+
         CameraPose(const openspace::datamessagestructures::CameraKeyframe& kf) {
             position = kf._position;
             rotation = kf._rotation;
             focusNode = kf._focusNode;
             scale = kf._scale;
             followFocusNodeRotation = kf._followNodeRotation;
-        }
+        };
     };
 
     /**

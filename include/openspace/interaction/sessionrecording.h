@@ -52,12 +52,12 @@ public:
     };
 
     const std::string FileHeaderTitle = "OpenSpace_record/playback";
-    constexpr const size_t FileHeaderVersionLength = 5;
-    constexpr const char FileHeaderVersion[FileHeaderVersionLength] = {
+    static const size_t FileHeaderVersionLength = 5;
+    const char FileHeaderVersion[FileHeaderVersionLength] = {
         '0', '0', '.', '8', '5'
     };
-    constexpr const char DataFormatAsciiTag = 'A';
-    constexpr const char DataFormatBinaryTag = 'B';
+    const char DataFormatAsciiTag = 'A';
+    const char DataFormatBinaryTag = 'B';
 
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
@@ -255,7 +255,7 @@ public:
      * \param file an ifstream reference to the playback file being read
      * \param lineN keyframe number in playback file where this keyframe resides
      */
-    static void SessionRecording::readTimeKeyframeBinary(timestamps& times,
+    static void readTimeKeyframeBinary(timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::ifstream& file, int lineN);
 
     /**
@@ -267,7 +267,7 @@ public:
      * \param filenameRead a string containing the playback filename
      * \param lineN line number in playback file where this keyframe resides
      */
-    static void SessionRecording::readTimeKeyframeAscii(timestamps& times,
+    static void readTimeKeyframeAscii(timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::string filenameRead, int lineN);
 
     /**
@@ -280,7 +280,7 @@ public:
      * \param file an ifstream reference to the playback file being read
      * \param lineN keyframe number in playback file where this keyframe resides
      */
-    static void SessionRecording::readScriptKeyframeBinary(timestamps& times,
+    static void readScriptKeyframeBinary(timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::ifstream& file, int lineN);
 
     /**
@@ -293,7 +293,7 @@ public:
      * \param filenameRead a string containing the playback filename
      * \param lineN line number in playback file where this keyframe resides
      */
-    static void SessionRecording::readScriptKeyframeAscii(timestamps& times,
+    static void readScriptKeyframeAscii(timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::string filenameRead, int lineN);
 
     /**
@@ -304,7 +304,7 @@ public:
      * \param kfBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void SessionRecording::saveCameraKeyframeBinary(timestamps times,
+    static void saveCameraKeyframeBinary(timestamps times,
         datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
@@ -315,7 +315,7 @@ public:
      * \param kf reference to a camera keyframe which contains the camera details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void SessionRecording::saveCameraKeyframeAscii(timestamps times,
+    static void saveCameraKeyframeAscii(timestamps times,
         datamessagestructures::CameraKeyframe& kf, std::ofstream& file);
 
     /**
@@ -326,7 +326,7 @@ public:
      * \param kfBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void SessionRecording::saveTimeKeyframeBinary(timestamps times,
+    static void saveTimeKeyframeBinary(timestamps times,
         datamessagestructures::TimeKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
@@ -337,7 +337,7 @@ public:
      * \param kf reference to a time keyframe which contains the time details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void SessionRecording::saveTimeKeyframeAscii(timestamps times,
+    static void saveTimeKeyframeAscii(timestamps times,
         datamessagestructures::TimeKeyframe& kf, std::ofstream& file);
 
     /**
@@ -348,9 +348,9 @@ public:
      * \param smBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void SessionRecording::saveScriptKeyframeBinary(timestamps times,
+    static void saveScriptKeyframeBinary(timestamps times,
         datamessagestructures::ScriptMessage& sm, unsigned char* smBuffer,
-        std::string& script, std::ofstream& file);
+        std::ofstream& file);
 
     /**
      * Writes a script keyframe to an ascii format recording file using a ScriptMessage
@@ -359,7 +359,7 @@ public:
      * \param sm reference to a ScriptMessage which contains the script details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void SessionRecording::saveScriptKeyframeAscii(timestamps times,
+    static void saveScriptKeyframeAscii(timestamps times,
         datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
 private:
@@ -389,11 +389,12 @@ private:
     void playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
-    void saveStringToFile(const std::string& s);
-    void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
-        std::ofstream& file);
     void findFirstCameraKeyframeInTimeline();
-    void saveKeyframeToFile(std::string entry, std::ofstream& file);
+    static void saveStringToFile(const std::string& s, unsigned char* kfBuffer, size_t& idx,
+        std::ofstream& file);
+    static void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
+        std::ofstream& file);
+    static void saveKeyframeToFile(std::string entry, std::ofstream& file);
 
     void addKeyframe(double timestamp,
         interaction::KeyframeNavigator::CameraPose keyframe);
@@ -423,9 +424,9 @@ private:
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, unsigned char c);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, bool b);
 
-    static void SessionRecording::saveHeaderBinary(timestamps times, char type,
+    static void saveHeaderBinary(timestamps times, char type,
         unsigned char* kfBuffer, size_t& idx);
-    static void SessionRecording::saveHeaderAscii(timestamps times, std::string& type,
+    static void saveHeaderAscii(timestamps times, const std::string& type,
         std::stringstream& line);
 
     RecordedDataMode _recordingDataMode = RecordedDataMode::Binary;
