@@ -107,7 +107,7 @@ struct WindowDelegate {
 
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    void (*takeScreenshot)(bool applyWarping) = [](bool) { };
+    unsigned int(*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };
 
     void (*swapBuffer)() = []() {};
 
