@@ -224,6 +224,18 @@ namespace openspace {
         LERROR("No volume dimensions specified.");
     }
 
+    if (volumeDictionary.hasKey("Steps")) {
+        _rayCastSteps = static_cast<int>(volumeDictionary.value<float>("Steps"));
+    }
+    else {
+        LINFO("Number of raycasting steps not specified for Milkway Galaxy."
+              " Using default value.");
+    }
+
+    if (volumeDictionary.hasKey("Downscale")) {
+        _downScaleVolumeRendering = volumeDictionary.value<float>("Downscale");
+    }
+
     if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
         LERROR("No points dictionary specified.");
     }
@@ -470,6 +482,8 @@ void RenderableGalaxy::update(const UpdateData& data) {
         volumeTransform[3] += translation;
         _pointTransform[3] += translation;
 
+        _raycaster->setDownscaleRender(_downScaleVolumeRendering);
+        _raycaster->setMaxSteps(_rayCastSteps);
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
         _raycaster->setModelTransform(volumeTransform);

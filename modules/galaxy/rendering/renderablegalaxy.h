@@ -79,6 +79,8 @@ private:
     glm::ivec3 _volumeDimensions;
     std::string _pointsFilename;
     std::string _pointSpreadFunctionTexturePath;
+    int _rayCastSteps = 1000;
+    float _downScaleVolumeRendering = 1.f;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
     std::unique_ptr<volume::RawVolume<glm::tvec4<GLubyte>>> _volume;

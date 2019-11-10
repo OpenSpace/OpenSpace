@@ -32,6 +32,8 @@ uniform bool insideRaycaster;
 uniform vec3 cameraPosInRaycaster;
 uniform vec2 windowSize;
 
+uniform int rayCastSteps;
+
 #include "blending.glsl"
 #include "rand.glsl"
 #include "floatoperations.glsl"
@@ -45,7 +47,6 @@ uniform vec2 windowSize;
 out vec4 finalColor;
 
 #define ALPHA_LIMIT 0.99
-#define RAYCAST_MAX_STEPS 480
 
 #include <#{getEntryPath}>
 
@@ -99,7 +100,7 @@ void main() {
 
     for (nSteps = 0; 
         (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || 
-         accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < RAYCAST_MAX_STEPS; 
+         accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < rayCastSteps; 
          ++nSteps) 
     {
         if (nextStepSize < raycastDepth / 10000000000.f) {
