@@ -36,6 +36,7 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -1030,6 +1031,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
         global::sessionRecording.preSynchronization();
         global::parallelPeer.preSynchronization();
+        global::interactionMonitor.updateActivityState();
     }
 
     for (const std::function<void()>& func : global::callback::preSync) {
@@ -1218,6 +1220,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 
     global::navigationHandler.keyboardCallback(key, mod, action);
     global::keybindingManager.keyboardCallback(key, mod, action);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -1230,6 +1233,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     }
 
     global::luaConsole.charCallback(codepoint, modifier);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
@@ -1265,6 +1269,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
     }
 
     global::navigationHandler.mouseButtonCallback(button, action);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
@@ -1274,6 +1279,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     }
 
     global::navigationHandler.mousePositionCallback(x, y);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
@@ -1286,6 +1292,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     }
 
     global::navigationHandler.mouseScrollWheelCallback(posY);
+    global::interactionMonitor.markInteraction();
 }
 
 std::vector<char> OpenSpaceEngine::encode() {
