@@ -165,7 +165,7 @@ namespace openspace {
     ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         : properties::PropertyOwner({ "Shadows" })		
         , _saveDepthTexture(SaveDepthTextureInfo)
-        , _distanceFraction(DistanceFractionInfo, 3, 1, 10000)
+        , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
         , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
         , _shadowMapDictionary(dictionary)
         , _shadowDepthTextureHeight(4096)
@@ -182,12 +182,8 @@ namespace openspace {
     {
         using ghoul::filesystem::File;
 
-        if (dictionary.hasKey("Rings")) {
-            ghoul::Dictionary ringsDic;
-            dictionary.getValue("Rings", ringsDic);
-            if (ringsDic.hasKey("Shadows")) {
-                ringsDic.getValue("Shadows", _shadowMapDictionary);
-            }
+        if (dictionary.hasKey("Shadows")) {
+            dictionary.getValue("Shadows", _shadowMapDictionary);
         }
 
         documentation::testSpecificationAndThrow(
@@ -201,7 +197,6 @@ namespace openspace {
                 _shadowMapDictionary.value<float>(DistanceFractionInfo.identifier)
                 );
         }
-
         _saveDepthTexture.onChange([&]() {
             _executeDepthTextureSave = true;
         });

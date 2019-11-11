@@ -675,10 +675,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         
         ghoul::Dictionary ringsDic;
         dictionary.getValue("Rings", ringsDic);
-        if (ringsDic.hasKey("Shadows")) {
-            _shadowComponent.initialize();
-            addPropertySubOwner(_shadowComponent);
-        }
+    }
+
+    if (dictionary.hasKey("Shadows")) {
+        _shadowComponent.initialize();
+        addPropertySubOwner(_shadowComponent);
+        _hasShadows = true;
     }
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
@@ -698,6 +700,9 @@ void RenderableGlobe::initializeGL() {
 
     if (_hasRings) {
         _ringsComponent.initializeGL();
+    }
+
+    if (_hasShadows) {
         _shadowComponent.initializeGL();
     }
 
@@ -725,6 +730,9 @@ void RenderableGlobe::deinitializeGL() {
 
     if (_hasRings) {
         _ringsComponent.deinitializeGL();
+    }
+
+    if (_hasShadows) {
         _shadowComponent.deinitializeGL();
     }
 }
@@ -753,40 +761,38 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             //renderChunks(data, rendererTask);
             //_globeLabelsComponent.draw(data);
 
+            if (_hasShadows && _shadowComponent.isEnabled()) {
+                // Set matrices and other GL states
+                RenderData lightRenderData(_shadowComponent.begin(data));
 
-            if (_hasRings && _ringsComponent.isEnabled()) {
-                if (_shadowComponent.isEnabled()) {
-                    // Set matrices and other GL states
-                    RenderData lightRenderData(_shadowComponent.begin(data));
-                    
-                    glDisable(GL_BLEND);
-                    
-                    // Render from light source point of view
-                    renderChunks(lightRenderData, rendererTask, {}, true);
+                glDisable(GL_BLEND);
+
+                // Render from light source point of view
+                renderChunks(lightRenderData, rendererTask, {}, true);
+                if (_hasRings && _ringsComponent.isEnabled()) {
                     _ringsComponent.draw(lightRenderData, RingsComponent::GeometryOnly);
+                }
                     
-                    glEnable(GL_BLEND);
-                    
-                    _shadowComponent.end();                    
+                glEnable(GL_BLEND);
 
-                    // Render again from original point of view
-                    renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
+                _shadowComponent.end();
+
+                // Render again from original point of view
+                renderChunks(data, rendererTask, _shadowComponent.shadowMapData());
+                if (_hasRings && _ringsComponent.isEnabled()) {
                     _ringsComponent.draw(
                         data,
                         RingsComponent::GeometryAndShading,
                         _shadowComponent.shadowMapData()
                     );
                 }
-                else {
-                    renderChunks(data, rendererTask);
-                    _ringsComponent.draw(data, RingsComponent::GeometryAndShading);
-                }
             }
             else {
                 renderChunks(data, rendererTask);
+                if (_hasRings && _ringsComponent.isEnabled()) {
+                    _ringsComponent.draw(data, RingsComponent::GeometryAndShading);
+                }
             }
-
-
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
             std::string layer = _lastChangedLayer ? _lastChangedLayer->guiName() : "";

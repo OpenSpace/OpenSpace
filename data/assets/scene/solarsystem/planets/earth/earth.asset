@@ -263,6 +263,10 @@ local Earth = {
             }
             --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
         },
+        Shadows = {
+            Enabled = true,
+            DistanceFraction = 40.0
+        }, 
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/Earth.labels",

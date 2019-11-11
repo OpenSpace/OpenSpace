@@ -291,6 +291,7 @@ private:
     RingsComponent _ringsComponent;
     ShadowComponent _shadowComponent;
     bool _hasRings = false;
+    bool _hasShadows = false;
 
     // Labels
     GlobeLabelsComponent _globeLabelsComponent;
