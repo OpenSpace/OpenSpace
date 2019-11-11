@@ -117,6 +117,13 @@ namespace {
         "Enabled points",
         "" // @TODO Missing documentation
     };
+
+    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo = {
+        "Downscale",
+        "Downscale Factor Volume Rendering",
+        "This value set the downscaling factor"
+        " when rendering the current volume."
+    };
 } // namespace
 
 namespace openspace {
@@ -135,6 +142,7 @@ namespace openspace {
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
 {
     dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
     dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
@@ -232,6 +240,9 @@ namespace openspace {
               " Using default value.");
     }
 
+    _downScaleVolumeRendering.setVisibility(
+        openspace::properties::Property::Visibility::Developer
+    );
     if (volumeDictionary.hasKey("Downscale")) {
         _downScaleVolumeRendering = volumeDictionary.value<float>("Downscale");
     }
@@ -319,6 +330,7 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_enabledPointsRatio);
     addProperty(_translation);
     addProperty(_rotation);
+    addProperty(_downScaleVolumeRendering);
 
     // initialize points.
     if (!_pointsFilename.empty()) {

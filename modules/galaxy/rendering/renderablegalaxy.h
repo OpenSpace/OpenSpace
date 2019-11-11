@@ -71,6 +71,7 @@ private:
     properties::FloatProperty _enabledPointsRatio;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
+    properties::FloatProperty _downScaleVolumeRendering;
 
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
@@ -80,7 +81,6 @@ private:
     std::string _pointsFilename;
     std::string _pointSpreadFunctionTexturePath;
     int _rayCastSteps = 1000;
-    float _downScaleVolumeRendering = 1.f;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
     std::unique_ptr<volume::RawVolume<glm::tvec4<GLubyte>>> _volume;
