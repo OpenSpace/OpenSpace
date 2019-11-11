@@ -49,6 +49,16 @@ openspace.globebrowsing.documentation = {
             ")"
     },
     {
+        Name = "addGibsLayer",
+        Arguments = "string, string, string, string, string",
+        Documentation = "Adds a new layer from NASA GIBS to the Earth globe. Arguments " ..
+            "are: imagery layer name, imagery resolution, start date, end date, format. " ..
+             "For all specifications, see " ..
+            "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products" ..
+            "Usage:" ..
+            "openspace.globebrowsing.addGibsLayer('AIRS_Temperature_850hPa_Night', '2km', '2013-07-15', 'Present', 'png')"
+    },
+    {
         Name = "parseInfoFile",
         Arguments = "string",
         Documentation =
@@ -96,6 +106,14 @@ openspace.globebrowsing.documentation = {
             "'openspace.globebrowsing.loadWMSCapabilities' file."
     }
 }
+
+openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, startDate, endDate)
+    if endDate == 'Present' then
+        endDate = ''
+    end
+    local xml = openspace.globebrowsing.createTemporalGibsGdalXml(layer, startDate, endDate, '1d', resolution, format)
+    openspace.globebrowsing.addLayer('Earth', 'ColorLayers', { Identifier = layer,  Type = "TemporalTileLayer", FilePath = xml })
+end
 
 openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format)
     temporalTemplate =
@@ -332,5 +350,4 @@ openspace.globebrowsing.loadWMSServersFromFile = function (file_path)
             )
         end
     end
-
 end
