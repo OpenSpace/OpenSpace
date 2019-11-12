@@ -86,7 +86,7 @@ namespace {
 namespace openspace {
     
 // The list of leap years only goes until 2056 as we need to touch this file then
-// again anyway ;)
+// again anyway, due to TLE format only supporting 2-digit years starting in 1957.
 const std::vector<int> LeapYears = {
     1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
     2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
@@ -213,14 +213,6 @@ int daysIntoGivenYear(int year, int month, int dayOfMonth) {
 
     for (int m = Months::January; m < month; ++m) {
         dayCount += DaysOfMonths[m];
-        if (m == Months::March) {
-            const auto leapTest = std::find(LeapYears.begin(), LeapYears.end(), year);
-            if (leapTest != LeapYears.end()) {
-                // We are in a leap year, so we have an effective day more if we are
-                // beyond the end of february
-                dayCount--;
-            }
-        }
     }
     return dayCount;
 }
@@ -233,35 +225,43 @@ double epochFromSubstring(const std::string& epochString) {
 
     // The main overview of this function:
     // 1. Read the year value
-    // 2. Get the number of full days since the beginning of the year
+    // 2. Calculate the number of seconds since the beginning of the year
+    // 2.a Get the number of full days since the beginning of the year
+    // 2.b If the year is a leap year, modify the number of days
     // 3. Convert the number of days to a number of seconds
     // 4. Get the number of leap seconds since January 1st, 2000 and remove them
     // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
     // midnight
 
-    // According to https://celestrak.com/columns/v04n03/
-    // Apparently, US Space Command sees no need to change the two-line element
-    // set format yet since no artificial earth satellites existed prior to 1957.
-    // By their reasoning, two-digit years from 57-99 correspond to 1957-1999 and
-    // those from 00-56 correspond to 2000-2056. We'll see each other again in 2057!
-
     // 1
     int year = std::atoi(epochString.substr(0, 4).c_str());
     const int daysSince2000 = countDays(year);
 
-    // 2
+    // 2.
+    // 2.a
     int monthNum = std::atoi(epochString.substr(4, 2).c_str());
     int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
+    int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
     double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
-    double daysInYear = static_cast<double>(daysIntoGivenYear(year, monthNum,
-        dayOfMonthNum));
-    daysInYear += fractionOfDay;
+    double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
+
+    // 2.b
+    const bool isInLeapYear = std::find(
+        LeapYears.begin(),
+        LeapYears.end(),
+        year
+    ) != LeapYears.end();
+    if (isInLeapYear && daysInYear >= 60) {
+        // We are in a leap year, so we have an effective day more if we are
+        // beyond the end of february (= 31+29 days)
+        --daysInYear;
+    }
 
     // 3
     using namespace std::chrono;
     const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
     //Need to subtract 1 from daysInYear since it is not a zero-based count
-    const double nSecondsInCurrYear = daysInYear * SecondsPerDay;
+    const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
     // 4
     // We need to remove additional leap seconds past 2000 and add them prior to
