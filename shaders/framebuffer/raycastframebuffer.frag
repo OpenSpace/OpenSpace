@@ -28,7 +28,6 @@ uniform sampler2D exitColorTexture;
 uniform sampler2D exitDepthTexture;
 uniform sampler2D mainDepthTexture;
 
-uniform bool insideRaycaster;
 uniform vec3 cameraPosInRaycaster;
 uniform vec2 windowSize;
 
@@ -53,6 +52,7 @@ out vec4 finalColor;
 void main() {
     vec2 texCoord = vec2(gl_FragCoord.xy / windowSize);
 
+    // Boundary position in view space
     vec4 exitColorTexture = texture(exitColorTexture, texCoord);
 
     // If we don't have an exit, discard the ray
@@ -80,7 +80,7 @@ void main() {
     vec3 direction = normalize(diff);
     float raycastDepth = length(diff);
 
-    float geoDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), 0).x);
+    float geoDepth = denormalizeFloat((texture(mainDepthTexture, texCoord).x));
     float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.f, 1.f);
     raycastDepth = geoRatio * raycastDepth;
 

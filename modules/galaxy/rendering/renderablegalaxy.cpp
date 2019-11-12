@@ -124,6 +124,12 @@ namespace {
         "This value set the downscaling factor"
         " when rendering the current volume."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo = {
+        "Steps",
+        "Number of RayCasting Steps",
+        "This value set the number of integration steps during the raycasting procedure."
+    };
 } // namespace
 
 namespace openspace {
@@ -143,6 +149,7 @@ namespace openspace {
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
+    , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo, 1000.f, 1.f, 1000.f)
 {
     dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
     dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
@@ -232,8 +239,10 @@ namespace openspace {
         LERROR("No volume dimensions specified.");
     }
 
-    if (volumeDictionary.hasKey("Steps")) {
-        _rayCastSteps = static_cast<int>(volumeDictionary.value<float>("Steps"));
+    if (volumeDictionary.hasKey(NumberOfRayCastingStepsInfo.identifier)) {
+        _numberOfRayCastingSteps = static_cast<int>(
+            volumeDictionary.value<float>(NumberOfRayCastingStepsInfo.identifier)
+        );
     }
     else {
         LINFO("Number of raycasting steps not specified for Milkway Galaxy."
@@ -243,8 +252,9 @@ namespace openspace {
     _downScaleVolumeRendering.setVisibility(
         openspace::properties::Property::Visibility::Developer
     );
-    if (volumeDictionary.hasKey("Downscale")) {
-        _downScaleVolumeRendering = volumeDictionary.value<float>("Downscale");
+    if (volumeDictionary.hasKey(DownscaleVolumeRenderingInfo.identifier)) {
+        _downScaleVolumeRendering = 
+                   volumeDictionary.value<float>(DownscaleVolumeRenderingInfo.identifier);
     }
 
     if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
@@ -331,6 +341,7 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_downScaleVolumeRendering);
+    addProperty(_numberOfRayCastingSteps);
 
     // initialize points.
     if (!_pointsFilename.empty()) {
@@ -495,7 +506,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
         _pointTransform[3] += translation;
 
         _raycaster->setDownscaleRender(_downScaleVolumeRendering);
-        _raycaster->setMaxSteps(_rayCastSteps);
+        _raycaster->setMaxSteps(_numberOfRayCastingSteps);
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
         _raycaster->setModelTransform(volumeTransform);

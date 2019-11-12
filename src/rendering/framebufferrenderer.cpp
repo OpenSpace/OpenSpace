@@ -1116,7 +1116,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             exitProgram->deactivate();
         }
 
-        if (raycaster->downscaleRender() != 1.f) {
+        if (raycaster->downscaleRender() < 1.f) {
             float scaleDown = raycaster->downscaleRender();
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             glViewport(0, 0, _resolution.x * scaleDown, _resolution.y * scaleDown);
@@ -1180,7 +1180,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
-            if (raycaster->downscaleRender() != 1.f) {
+            if (raycaster->downscaleRender() < 1.f) {
                 float scaleDown = raycaster->downscaleRender();
                 raycastProgram->setUniform(
                     "windowSize",
@@ -1211,7 +1211,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             LWARNING("Raycaster is not attached when trying to perform raycaster task");
         }
 
-        if (raycaster->downscaleRender() != 1.f) {
+        if (raycaster->downscaleRender() < 1.f) {
             float scaleDown = raycaster->downscaleRender();
             glViewport(0, 0, _resolution.x, _resolution.y);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
