@@ -93,6 +93,25 @@ const std::vector<int> LeapYears = {
     2044, 2048, 2052, 2056
 };
 
+const std::vector<int> DaysOfMonths = {
+    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+};
+
+enum class Months {
+    January = 0,
+    February,
+    March,
+    April,
+    May,
+    June,
+    July,
+    August,
+    September,
+    October,
+    November,
+    December
+};
+
 // Count the number of full days since the beginning of 2000 to the beginning of
 // the parameter 'year'
 int countDays(int year) {
@@ -187,6 +206,25 @@ int countLeapSeconds(int year, int dayOfYear) {
     return nLeapSeconds;
 }
 
+int daysIntoGivenYear(int year, int month, int dayOfMonth) {
+    //month and dayCount are zero-based
+    month -= 1;
+    int dayCount = dayOfMonth - 1;
+
+    for (int m = Months::January; m < month; ++m) {
+        dayCount += DaysOfMonths[m];
+        if (m == Months::March) {
+            const auto leapTest = std::find(LeapYears.begin(), LeapYears.end(), year);
+            if (leapTest != LeapYears.end()) {
+                // We are in a leap year, so we have an effective day more if we are
+                // beyond the end of february
+                dayCount--;
+            }
+        }
+    }
+    return dayCount;
+}
+
 double epochFromSubstring(const std::string& epochString) {
     // The epochString is in the form:
     // YYYYMMDD.ddddddd
@@ -195,9 +233,7 @@ double epochFromSubstring(const std::string& epochString) {
 
     // The main overview of this function:
     // 1. Read the year value
-    // 2. Calculate the number of seconds since the beginning of the year
-    // 2.a Get the number of full days since the beginning of the year
-    // 2.b If the year is a leap year, modify the number of days
+    // 2. Get the number of full days since the beginning of the year
     // 3. Convert the number of days to a number of seconds
     // 4. Get the number of leap seconds since January 1st, 2000 and remove them
     // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
@@ -209,31 +245,23 @@ double epochFromSubstring(const std::string& epochString) {
     // By their reasoning, two-digit years from 57-99 correspond to 1957-1999 and
     // those from 00-56 correspond to 2000-2056. We'll see each other again in 2057!
 
-    // 1. Get the year
+    // 1
     int year = std::atoi(epochString.substr(0, 4).c_str());
     const int daysSince2000 = countDays(year);
 
-    // 2.
-    // 2.a
-    double daysInYear = std::atof(epochString.substr(2).c_str());
-
-    // 2.b
-    const bool isInLeapYear = std::find(
-        LeapYears.begin(),
-        LeapYears.end(),
-        year
-    ) != LeapYears.end();
-    if (isInLeapYear && daysInYear >= 60) {
-        // We are in a leap year, so we have an effective day more if we are
-        // beyond the end of february (= 31+29 days)
-        --daysInYear;
-    }
+    // 2
+    int monthNum = std::atoi(epochString.substr(4, 2).c_str());
+    int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
+    double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
+    double daysInYear = static_cast<double>(daysIntoGivenYear(year, monthNum,
+        dayOfMonthNum));
+    daysInYear += fractionOfDay;
 
     // 3
     using namespace std::chrono;
     const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
     //Need to subtract 1 from daysInYear since it is not a zero-based count
-    const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
+    const double nSecondsInCurrYear = daysInYear * SecondsPerDay;
 
     // 4
     // We need to remove additional leap seconds past 2000 and add them prior to
