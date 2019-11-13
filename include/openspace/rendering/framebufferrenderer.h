@@ -112,6 +112,7 @@ private:
     void applyTMO(float blackoutFactor);
     void applyFXAA();
     void updateDownscaleColorTexture();
+    void updateExitVolumeTextures();
     void writeDownscaledVolume();
     
     std::map<VolumeRaycaster*, RaycastData> _raycastData;

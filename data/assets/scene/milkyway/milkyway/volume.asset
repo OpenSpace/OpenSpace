@@ -25,8 +25,7 @@ local MilkyWayVolumeGalaxy = {
             Filename = data .. "/MilkyWayRGBAVolume1024x1024x128.raw",
             Dimensions = {1024, 1024, 128},
             Size = {1.2E21, 1.2E21, 0.15E21},
-            Steps = 480,
-            Downscale = 0.5,
+            Downscale = 0.4,
         },
         Points = {
             Type = "Points",

@@ -560,9 +560,13 @@ void FramebufferRenderer::writeDownscaledVolume() {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+    glDisable(GL_DEPTH_TEST);
+
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
 
     _downscaledVolumeProgram->deactivate();
 
@@ -1212,7 +1216,6 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            float scaleDown = raycaster->downscaleRender();
             glViewport(0, 0, _resolution.x, _resolution.y);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
