@@ -1238,22 +1238,21 @@ int main(int argc, char** argv) {
     sgct::Configuration config = sgct::parseArguments(arguments);
 
     LDEBUG("Creating SGCT Engine");
-    //SgctEngine = new sgct::Engine(config);
     sgct::Engine::create(config);
-    //SgctEngine = sgct::Engine::instance();
+    SgctEngine = sgct::Engine::instance();
 
     // Bind functions
-    sgct::Engine::instance()->setInitOGLFunction(mainInitFunc);
-    sgct::Engine::instance()->setPreSyncFunction(mainPreSyncFunc);
-    sgct::Engine::instance()->setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
-    sgct::Engine::instance()->setDrawFunction(mainRenderFunc);
-    sgct::Engine::instance()->setDraw2DFunction(mainDraw2DFunc);
-    sgct::Engine::instance()->setPostDrawFunction(mainPostDrawFunc);
-    sgct::Engine::instance()->setKeyboardCallbackFunction(mainKeyboardCallback);
-    sgct::Engine::instance()->setMouseButtonCallbackFunction(mainMouseButtonCallback);
-    sgct::Engine::instance()->setMousePosCallbackFunction(mainMousePosCallback);
-    sgct::Engine::instance()->setMouseScrollCallbackFunction(mainMouseScrollCallback);
-    sgct::Engine::instance()->setCharCallbackFunction(mainCharCallback);
+    SgctEngine->setInitOGLFunction(mainInitFunc);
+    SgctEngine->setPreSyncFunction(mainPreSyncFunc);
+    SgctEngine->setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
+    SgctEngine->setDrawFunction(mainRenderFunc);
+    SgctEngine->setDraw2DFunction(mainDraw2DFunc);
+    SgctEngine->setPostDrawFunction(mainPostDrawFunc);
+    SgctEngine->setKeyboardCallbackFunction(mainKeyboardCallback);
+    SgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
+    SgctEngine->setMousePosCallbackFunction(mainMousePosCallback);
+    SgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
+    SgctEngine->setCharCallbackFunction(mainCharCallback);
 
     // Disable the immediate exit of the application when the ESC key is pressed
     SgctEngine->setExitKey(SGCT_KEY_UNKNOWN);
