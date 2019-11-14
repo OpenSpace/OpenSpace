@@ -1,0 +1,58 @@
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require('util/asset_helper')
+
+local satImageFolder = asset.syncedResource({
+    Name = "Satellite Image Files",
+    Type = "HttpSynchronization",
+    Identifier = "tle_satellites_images",
+    Version = 1
+})
+
+function downloadSssbDatabaseFile(sceneAsset, url, name)
+    local identifier = name
+    identifier = identifier:gsub(" ", "")
+    identifier = identifier:gsub("&", "")
+    identifier = identifier:gsub("-", "")
+    return sceneAsset.syncedResource({
+        Name = "Small SolarSystem Body Data (" .. name .. ")",
+        Type = "UrlSynchronization",
+        Identifier = "sssb_data_" .. identifier,
+        Url = url
+    })
+end
+
+local registerSssbGroupObjects = function(containingAsset, group, sssbFolder, shouldAddDuplicates)
+     local filename = group.Url:match("([^/]+)$")
+     local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
+
+     local path = sssbFolder .. "/" .. filename
+
+    function numLinesInFile(filename)
+        local ctr = 0
+        for _ in io.lines(filename) do ctr = ctr + 1 end
+        return ctr
+    end
+
+    function sssBodies(title, file, color)
+        return {
+           Identifier = title,
+           Parent = transforms.SolarSystemBarycenter.Identifier,
+           Renderable = {
+                Type = "RenderableSmallBody",
+                Path = file,
+                Segments = 160,
+                Color = color,
+                Fade = 0.5
+            },
+            GUI = {
+                Path = "/Solar System/sssb"
+           }
+        }
+    end
+
+    local SssbBatch = sssBodies(filenameSansExt, path, group.TrailColor)
+    assetHelper.registerSceneGraphNodesAndExport(containingAsset, { SssbBatch })
+end
+
+asset.export("downloadSssbDatabaseFile", downloadSssbDatabaseFile)
+asset.export("registerSssbGroupObjects", registerSssbGroupObjects)

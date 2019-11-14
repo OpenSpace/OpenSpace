@@ -1,0 +1,11 @@
+local assetHelper = asset.require('util/asset_helper')
+local shared = asset.require('../sssb_shared')
+
+local group = {
+    Title = "PHA",
+    Url = "http://www.celestrak.com/NORAD/elements/education.txt",
+    TrailColor = { 0.75, 0.75, 0.35 }
+}
+
+local tle = shared.downloadSssbDatabaseFile(asset, group.Url, group.Title)
+shared.registerSatelliteGroupObjects(asset, group, tle, true)

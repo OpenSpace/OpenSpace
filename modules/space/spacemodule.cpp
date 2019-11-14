@@ -82,6 +82,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
+    fRenderable->registerClass<RenderableSatellites>("RenderableSmallBody");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
