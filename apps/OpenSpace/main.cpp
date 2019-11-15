@@ -242,6 +242,7 @@ std::pair<int, int> supportedOpenGLVersion() {
     // By creating an offscreen window, the user will not know that we created this window
     GLFWwindow* offscreen = glfwCreateWindow(128, 128, "", nullptr, nullptr);
     glfwMakeContextCurrent(offscreen);
+    glbinding::Binding::initialize(glfwGetProcAddress);
 
     // Get the OpenGL version
     int major, minor;
