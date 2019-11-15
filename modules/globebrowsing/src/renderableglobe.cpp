@@ -775,6 +775,8 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                     
                 glEnable(GL_BLEND);
 
+                _shadowComponent.setViewDepthMap(true);
+
                 _shadowComponent.end();
 
                 // Render again from original point of view

@@ -406,6 +406,33 @@ namespace openspace {
         if (_blendIsEnabled) {
             glEnable(GL_BLEND);
         }
+
+        if (_viewDepthMap) {
+            if (!_renderDMProgram) {
+                _renderDMProgram = global::renderEngine.buildRenderProgram(
+                    "ShadowMappingDebuggingProgram",
+                    absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_vs.glsl"),
+                    absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_fs.glsl")
+                );
+            }
+
+            if (!_quadVAO) {
+                glGenVertexArrays(1, &_quadVAO);
+            }
+
+            ghoul::opengl::TextureUnit shadowMapUnit;
+            shadowMapUnit.activate();
+            glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
+
+            _renderDMProgram->activate();
+
+            _renderDMProgram->setUniform("shadowMapTexture", shadowMapUnit);
+
+            glBindVertexArray(_quadVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+            _renderDMProgram->deactivate();
+        }
     }
 
     void ShadowComponent::update(const UpdateData& /*data*/) {
@@ -654,5 +681,9 @@ namespace openspace {
 
     ShadowComponent::ShadowMapData ShadowComponent::shadowMapData() const {
         return _shadowData;
+    }
+
+    void ShadowComponent::setViewDepthMap(bool enable) {
+        _viewDepthMap = enable;
     }
 } // namespace openspace

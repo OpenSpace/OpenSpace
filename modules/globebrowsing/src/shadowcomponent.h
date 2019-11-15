@@ -81,12 +81,14 @@ namespace openspace {
         RenderData begin(const RenderData& data);
         void end();
         void update(const UpdateData& data);
-
+        
         static documentation::Documentation Documentation();
 
         bool isEnabled() const;
 
         ShadowComponent::ShadowMapData shadowMapData() const;
+
+        void setViewDepthMap(bool enable);
 
     private:
         void createDepthTexture();
@@ -152,7 +154,10 @@ namespace openspace {
         std::unique_ptr<Camera> _lightCamera;
 
         // DEBUG
-        bool _executeDepthTextureSave;
+        bool _executeDepthTextureSave = false;
+        bool _viewDepthMap = false;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _renderDMProgram;
+        GLuint _quadVAO = 0u;
         
     };
 
