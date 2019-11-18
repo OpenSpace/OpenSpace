@@ -406,7 +406,7 @@ function generateAsset(T, fileOut)
       end
       CameraStr = CameraStr.."})\n"
     elseif (j[1] == "goToGeo") then
-      CameraStr = CameraStr.."  openspace.navigation.goToGeo("
+      CameraStr = CameraStr.."  openspace.globebrowsing.goToGeo("
       if not isBlank(j[2]) then
         CameraStr = CameraStr..j[2]..", "
       end
