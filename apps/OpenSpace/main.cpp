@@ -333,24 +333,24 @@ void mainInitFunc() {
         w.windowId = i;
 
         const sgct::Window::StereoMode sm = windowPtr.getStereoMode();
-        const bool hasStereo = (sm != sgct::Window::No_Stereo) &&
-                               (sm < sgct::Window::Side_By_Side_Stereo);
+        const bool hasStereo = (sm != sgct::Window::StereoMode::NoStereo) &&
+                               (sm < sgct::Window::StereoMode::SideBySide);
 
         if (hasStereo) {
             SpoutWindow::SpoutData& left = w.leftOrMain;
             left.handle = GetSpout();
             left.initialized = left.handle->CreateSender(
                 (windowPtr.getName() + "_left").c_str(),
-                windowPtr.getXFramebufferResolution(),
-                windowPtr.getYFramebufferResolution()
+                windowPtr.getFramebufferResolution().x,
+                windowPtr.getFramebufferResolution().y
             );
 
             SpoutWindow::SpoutData& right = w.right;
             right.handle = GetSpout();
             right.initialized = right.handle->CreateSender(
                 (windowPtr.getName() + "_right").c_str(),
-                windowPtr.getXFramebufferResolution(),
-                windowPtr.getYFramebufferResolution()
+                windowPtr.getFramebufferResolution().x,
+                windowPtr.getFramebufferResolution().y
             );
         }
         else {
@@ -358,8 +358,8 @@ void mainInitFunc() {
             main.handle = GetSpout();
             main.initialized = main.handle->CreateSender(
                 windowPtr.getName().c_str(),
-                windowPtr.getXFramebufferResolution(),
-                windowPtr.getYFramebufferResolution()
+                windowPtr.getFramebufferResolution().x,
+                windowPtr.getFramebufferResolution().y
             );
         }
 
@@ -642,26 +642,26 @@ void mainPostDrawFunc() {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
-        sgct::Window* window = SgctEngine->getWindow(w.windowId);
+        sgct::Window& window = SgctEngine->getWindow(w.windowId);
         if (w.leftOrMain.initialized) {
-            const GLuint texId = window->getFrameBufferTexture(sgct::Engine::LeftEye);
+            const GLuint texId = window.getFrameBufferTexture(sgct::Engine::TextureIndex::LeftEye);
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
-                GL_TEXTURE_2D,
-                window->getXFramebufferResolution(),
-                window->getYFramebufferResolution()
+                static_cast<gl::GLuint>(GL_TEXTURE_2D),
+                window.getFramebufferResolution().x,
+                window.getFramebufferResolution().y
             );
         }
 
         if (w.right.initialized) {
-            const GLuint texId = window->getFrameBufferTexture(sgct::Engine::RightEye);
+            const GLuint texId = window.getFrameBufferTexture(sgct::Engine::TextureIndex::RightEye);
             glBindTexture(GL_TEXTURE_2D, texId);
             w.right.handle->SendTexture(
                 texId,
-                GL_TEXTURE_2D,
-                window->getXFramebufferResolution(),
-                window->getYFramebufferResolution()
+                static_cast<gl::GLuint>(GL_TEXTURE_2D),
+                window.getFramebufferResolution().x,
+                window.getFramebufferResolution().y
             );
         }
     }
