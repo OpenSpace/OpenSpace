@@ -58,10 +58,10 @@
 #include <openspace/openspace.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/fmt.h>
+#include <Windows.h>
 #include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
-#include <Windows.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
@@ -645,7 +645,7 @@ void mainPostDrawFunc() {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
-        sgct::Window& window = SgctEngine->getWindow(w.windowId);
+        sgct::Window& window = sgct::Engine::instance().getWindow(w.windowId);
         if (w.leftOrMain.initialized) {
             const GLuint texId = window.getFrameBufferTexture(sgct::Engine::TextureIndex::LeftEye);
             glBindTexture(GL_TEXTURE_2D, texId);
@@ -915,31 +915,25 @@ void setSgctDelegateFunctions() {
         return window.getFinalFBODimensions();
     };
     sgctDelegate.currentDrawBufferResolution = []() {
-        bool isValidViewportRef = false;
-        sgct::core::Viewport& viewport =
-            sgct::Engine::instance().getCurrentWindow().getViewport(0,
-            isValidViewportRef);
-        if (isValidViewportRef) {
-            if (viewport.hasSubViewports() && viewport.getNonLinearProjection()) {
-                int res = viewport.getNonLinearProjection()->getCubemapResolution();
-                return glm::ivec2(res, res);
-            }
-            else {
-                sgct::Window& window = sgct::Engine::instance().getCurrentWindow();
-                return window.getFinalFBODimensions();
-            }
+        if (sgct::Engine::instance().getCurrentWindow().getNumberOfViewports() == 0) {
+            return glm::ivec2(-1, -1);
         }
-        return glm::ivec2(-1, -1);
+        sgct::core::Viewport& viewport =
+            sgct::Engine::instance().getCurrentWindow().getViewport(0);
+        if (viewport.hasSubViewports() && viewport.getNonLinearProjection()) {
+            int res = viewport.getNonLinearProjection()->getCubemapResolution();
+            return glm::ivec2(res, res);
+        }
+        else {
+            sgct::Window& window = sgct::Engine::instance().getCurrentWindow();
+            return window.getFinalFBODimensions();
+        }
     };
     sgctDelegate.currentViewportSize = []() {
-        bool isValidViewportRef = false;
-        sgct::core::Viewport& viewport =
-            sgct::Engine::instance().getCurrentWindow().getViewport(0,
-            isValidViewportRef);
-        if (isValidViewportRef) {
-            return sgct::Engine::instance().getCurrentViewportSize();
+        if (sgct::Engine::instance().getCurrentWindow().getNumberOfViewports() == 0) {
+            return glm::ivec2(-1, -1);
         }
-        return glm::ivec2(-1, -1);
+        return sgct::Engine::instance().getCurrentViewportSize();
     };
     sgctDelegate.dpiScaling = []() {
         return sgct::Engine::instance().getCurrentWindow().getScale();
@@ -948,20 +942,18 @@ void setSgctDelegateFunctions() {
         return sgct::Engine::instance().getCurrentWindow().getNumberOfAASamples();
     };
     sgctDelegate.isRegularRendering = []() {
-        bool isValidViewportRef = false;
         sgct::Window& w = sgct::Engine::instance().getCurrentWindow();
-        ghoul_assert(
-            w.getNumberOfViewports() > 0,
-            "At least one viewport must exist at this time"
-        );
-        sgct::core::Viewport& vp = w.getViewport(0, isValidViewportRef);
-        if (isValidViewportRef) {
-            sgct::core::NonLinearProjection* nlp = vp.getNonLinearProjection();
-            return nlp == nullptr;
-        }
-        else {
+        if (w.getNumberOfViewports() == 0) {
+            ghoul_assert(
+                w.getNumberOfViewports() > 0,
+                "At least one viewport must exist at this time"
+            );
+
             return true;
         }
+        sgct::core::Viewport& vp = w.getViewport(0);
+        sgct::core::NonLinearProjection* nlp = vp.getNonLinearProjection();
+        return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
         for (size_t i = 0; i < sgct::Engine::instance().getNumberOfWindows(); ++i) {
@@ -1016,10 +1008,11 @@ void setSgctDelegateFunctions() {
                 sgct::Engine::RenderTarget::NonLinearBuffer);
     };
     sgctDelegate.isFisheyeRendering = []() {
-        bool isValidViewportRef = false;
+        if (sgct::Engine::instance().getCurrentWindow().getNumberOfViewports() == 0) {
+            return false;
+        }
         sgct::Window& w = sgct::Engine::instance().getCurrentWindow();
-        sgct::core::NonLinearProjection* nlp =
-            w.getViewport(0, isValidViewportRef).getNonLinearProjection();
+        sgct::core::NonLinearProjection* nlp = w.getViewport(0).getNonLinearProjection();
         return dynamic_cast<sgct::core::FisheyeProjection*>(nlp) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
@@ -1226,8 +1219,6 @@ int main(int argc, char** argv) {
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     arguments.insert(arguments.begin(), argv[0]);
-    arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
 
     // Need to set this before the creation of the sgct::Engine
     sgct::MessageHandler::instance().setLogToConsole(false);
@@ -1239,6 +1230,7 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
     sgct::Configuration config = sgct::parseArguments(arguments);
+    config.configFilename = absPath(windowConfiguration);
 
     LDEBUG("Creating SGCT Engine");
     sgct::Engine::create(config);
