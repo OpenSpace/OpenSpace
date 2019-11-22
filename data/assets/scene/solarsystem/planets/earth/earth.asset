@@ -287,6 +287,42 @@ local Earth = {
     }
 }
 
+local EarthLabel = {
+    Identifier = "EarthLabel",
+    Parent = Earth.Identifier,
+    -- Transform = {
+    --     Translation = {
+    --         Type = "SpiceTranslation",
+    --         Target = "EARTH",
+    --         Observer = "EARTH BARYCENTER"
+    --     },
+    --     -- Rotation = {
+    --     --     Type = "SpiceRotation",
+    --     --     SourceFrame = "IAU_MOON",
+    --     --     DestinationFrame = "GALACTIC"
+    --     -- }
+    -- },
+    Renderable = {
+        Enabled = true,
+        Type = "RenderableLabels",
+        LabelText = "Earth",
+        FontSize = 100.0,
+        LabelSize = 6.5,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        BlendMode = "Additive",
+        TransformationMatrix = {
+            1.0, 0.0, 0.0, -8.0E6,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 1.0E7,
+            0.0, 0.0, 0.0, 1.0
+        },
+    },
+    GUI = {
+        Name = "Earth Label",
+        Path = "/Solar System/Planets/Earth"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Earth })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Earth, EarthLabel })
