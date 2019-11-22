@@ -39,7 +39,7 @@ class RawVolumeIoTest : public testing::Test {};
 TEST_F(RawVolumeIoTest, TinyInputOutput) {
     using namespace openspace::volume;
 
-    glm::uvec3 dims{ 1, 1, 1 };
+    glm::uvec3 dims(1);
     float value = 0.5;
 
     RawVolume<float> vol(dims);
@@ -62,7 +62,7 @@ TEST_F(RawVolumeIoTest, TinyInputOutput) {
 TEST_F(RawVolumeIoTest, BasicInputOutput) {
     using namespace openspace::volume;
 
-    glm::uvec3 dims{ 2, 4, 8 };
+    glm::uvec3 dims(2, 4, 8);
     auto value = [dims](glm::uvec3 v) {
         return static_cast<float>(v.z * dims.z * dims.y + v.y * dims.y + v.x);
     };

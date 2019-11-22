@@ -33,9 +33,7 @@
 
 namespace openspace::globebrowsing {
 
-/**
- * All information needed to create a texture used for a Tile.
- */
+/// All information needed to create a texture used for a Tile.
 class TileTextureInitData {
 public:
     using HashKey = uint64_t;

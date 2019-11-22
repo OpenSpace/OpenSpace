@@ -238,7 +238,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _textColor(
         TextColorInfo,
-        glm::vec4(1.0f, 1.0, 1.0f, 1.f),
+        glm::vec4(1.f, 1.f, 1.f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )

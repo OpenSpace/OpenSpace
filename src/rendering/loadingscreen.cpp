@@ -224,7 +224,7 @@ void LoadingScreen::render() {
             rendering::helper::Anchor::Center
         );
 
-        glm::vec4 color;
+        glm::vec4 color = glm::vec4(0.f);
         switch (_phase) {
             case Phase::PreStart:
                 break;
@@ -273,8 +273,8 @@ void LoadingScreen::render() {
 
     renderer.render(*_loadingFont, loadingLl, headline);
 
-    glm::vec2 messageLl;
-    glm::vec2 messageUr;
+    glm::vec2 messageLl = glm::vec2(0.f);
+    glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
         std::lock_guard<std::mutex> guard(_messageMutex);
 
@@ -325,8 +325,8 @@ void LoadingScreen::render() {
                 // we make use with an overlap in the worst case
                 bool foundSpace = false;
 
-                glm::vec2 ll;
-                glm::vec2 ur;
+                glm::vec2 ll = glm::vec2(0.f);
+                glm::vec2 ur = glm::vec2(0.f);
                 int i = 0;
                 for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(

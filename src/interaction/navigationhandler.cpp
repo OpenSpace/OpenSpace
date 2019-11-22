@@ -282,8 +282,8 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         up
     )));
 
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.0, 0.0, 0.0));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.0, -1.0, 0.0));
 
     _camera->setPositionVec3(cameraPositionWorld);
     _camera->setRotation(neutralCameraRotation * yawRotation * pitchRotation);
@@ -372,7 +372,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     const double yaw = -eulerAngles.y;
 
     // Need to compensate by redisual roll left in local rotation:
-    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0, 0, 1));
+    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0.0, 0.0, 1.0));
     const glm::dvec3 neutralUp =
         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();
 

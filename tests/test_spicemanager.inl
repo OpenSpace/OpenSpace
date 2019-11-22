@@ -256,7 +256,7 @@ TEST_F(SpiceManagerTest, getValueFromID_3D) {
     std::string target  = "EARTH";
     std::string value3D = "RADII";
 
-    glm::dvec3 return3D;
+    glm::dvec3 return3D = glm::dvec3(0.0);
     ASSERT_NO_THROW(openspace::SpiceManager::ref().getValue(target, value3D, return3D));
 
     EXPECT_EQ(return3D.x, 6378.14) << "Value not found / differs from expected return";
@@ -302,15 +302,15 @@ TEST_F(SpiceManagerTest, getTargetPosition) {
     using openspace::SpiceManager;
     loadMetaKernel();
 
-    double et;
-    double pos[3];
-    double lt;
+    double et = 0.0;
+    double pos[3] = { 0.0, 0.0, 0.0 };
+    double lt = 0.0;
     char utctime[SRCLEN] = "2004 jun 11 19:32:00";
 
     str2et_c(utctime, &et);
     spkpos_c("EARTH", et, "J2000", "LT+S", "CASSINI", pos, &lt);
 
-    glm::dvec3 targetPosition;
+    glm::dvec3 targetPosition =glm::dvec3(0.0);
     double lightTime = 0.0;
     SpiceManager::AberrationCorrection corr = {
         SpiceManager::AberrationCorrection::Type::LightTimeStellar,
@@ -402,7 +402,7 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix) {
     str2et_c("2004 jun 11 19:32:00", &et);
     pxform_c("CASSINI_HGA", "J2000", et, referenceMatrix);
 
-    glm::dmat3 positionMatrix;
+    glm::dmat3 positionMatrix = glm::dmat3(1.0);
     glm::dvec3 position(state[0], state[1], state[2]);
     ASSERT_NO_THROW(positionMatrix = SpiceManager::ref().positionTransformMatrix(
         "CASSINI_HGA", "J2000", et)

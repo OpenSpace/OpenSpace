@@ -72,11 +72,11 @@ private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
     BoxGeometry _boundingBox;
-    glm::vec4 _color;
-    glm::mat4 _modelTransform;
-    float _stepSize;
-    double _time;
-}; // ToyVolumeRaycaster
+    glm::vec4 _color = glm::vec4(0.f);
+    glm::mat4 _modelTransform = glm::mat4(1.f);
+    float _stepSize = 0.f;
+    double _time = 0.0;
+};
 
 } // openspace
 

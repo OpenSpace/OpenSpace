@@ -41,11 +41,11 @@ glm::mat3x4 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::mat3x4(0);
+                return glm::mat3x4(0.f);
             }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::mat3x4(0);
+                return glm::mat3x4(0.f);
             } else {
                 result[i][j]
                         = static_cast<glm::mat3x4::value_type>(lua_tonumber(state, -1));
@@ -123,7 +123,7 @@ using nl = std::numeric_limits<float>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Mat3x4Property,
     glm::mat3x4,
-    glm::mat3x4(0),
+    glm::mat3x4(0.f),
     glm::mat3x4(
         nl::lowest(), nl::lowest(), nl::lowest(),
         nl::lowest(), nl::lowest(), nl::lowest(),

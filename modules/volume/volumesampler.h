@@ -38,7 +38,7 @@ public:
     typename VolumeType::VoxelType sample(const glm::vec3& position) const;
 
 private:
-    glm::ivec3 _filterSize;
+    glm::ivec3 _filterSize = glm::ivec3(0);
     const VolumeType* _volume;
 };
 

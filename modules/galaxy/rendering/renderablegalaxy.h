@@ -60,8 +60,8 @@ private:
     void renderBillboards(const RenderData& data);
     float safeLength(const glm::vec3& vector) const;
 
-    glm::vec3 _volumeSize;
-    glm::vec3 _pointScaling;
+    glm::vec3 _volumeSize = glm::vec3(0.f);
+    glm::vec3 _pointScaling = glm::vec3(0.f);
     properties::BoolProperty _volumeRenderingEnabled;
     properties::BoolProperty _starRenderingEnabled;
     properties::FloatProperty _stepSize;
@@ -76,16 +76,16 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
     std::string _volumeFilename;
-    glm::ivec3 _volumeDimensions;
+    glm::ivec3 _volumeDimensions = glm::ivec3(0);
     std::string _pointsFilename;
     std::string _pointSpreadFunctionTexturePath;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
     std::unique_ptr<volume::RawVolume<glm::tvec4<GLubyte>>> _volume;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::mat4 _pointTransform;
-    glm::vec3 _aspect;
-    float _opacityCoefficient;
+    glm::mat4 _pointTransform = glm::mat4(1.f);
+    glm::vec3 _aspect = glm::vec3(0.f);
+    float _opacityCoefficient = 0.f;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;
@@ -98,10 +98,10 @@ private:
         cameraUp, eyePosition, psfTexture
     ) _uniformCacheBillboards;
     std::vector<float> _pointsData;
-    size_t _nPoints;
-    GLuint _pointsVao;
-    GLuint _positionVbo;
-    GLuint _colorVbo;
+    size_t _nPoints = 0;
+    GLuint _pointsVao = 0;
+    GLuint _positionVbo = 0;
+    GLuint _colorVbo = 0;
 };
 
 } // namespace openspace

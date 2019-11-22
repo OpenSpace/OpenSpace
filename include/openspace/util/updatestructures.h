@@ -37,9 +37,9 @@ class VolumeRaycaster;
 struct InitializeData {};
 
 struct TransformData {
-    glm::dvec3 translation;
-    glm::dmat3 rotation;
-    double scale;
+    glm::dvec3 translation = glm::dvec3(0.0);
+    glm::dmat3 rotation = glm::dmat3(1.0);
+    double scale = 0.0;
 };
 
 struct UpdateData {
@@ -52,8 +52,8 @@ struct UpdateData {
 struct RenderData {
     const Camera& camera;
     const Time time;
-    bool doPerformanceMeasurement;
-    int renderBinMask;
+    bool doPerformanceMeasurement = false;
+    int renderBinMask = -1;
     TransformData modelTransform;
 };
 
@@ -73,12 +73,12 @@ struct RendererTasks {
 };
 
 struct RaycastData {
-    int id;
+    int id = -1;
     std::string namespaceName;
 };
 
 struct DeferredcastData {
-    int id;
+    int id = -1;
     std::string namespaceName;
 };
 
@@ -88,13 +88,13 @@ struct DeferredcastData {
  */
 struct SurfacePositionHandle {
     /// Vector from the center of the object to the reference surface of the object
-    glm::dvec3 centerToReferenceSurface;
+    glm::dvec3 centerToReferenceSurface = glm::dvec3(0.0);
     /// Direction out from the reference. Can conincide with the surface normal but does
     /// not have to.
-    glm::dvec3 referenceSurfaceOutDirection;
+    glm::dvec3 referenceSurfaceOutDirection = glm::dvec3(0.0);
     /// Height from the reference surface out to the actual surface in the direction of
     /// the surface normal. Can be positive or negative.
-    double heightToSurface;
+    double heightToSurface = 0.0;
 };
 
 } // namespace openspace

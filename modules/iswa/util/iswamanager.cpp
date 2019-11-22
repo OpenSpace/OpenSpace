@@ -408,11 +408,10 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
     if (extension == "cdf") {
         KameleonWrapper kw = KameleonWrapper(absPath(info.path));
 
-        std::string parent  = kw.parent();
-        std::string frame   = kw.frame();
-        glm::vec3   min     = kw.gridMin();
-        glm::vec3   max     = kw.gridMax();
-
+        std::string parent = kw.parent();
+        std::string frame = kw.frame();
+        glm::vec3 min = kw.gridMin();
+        glm::vec3 max = kw.gridMax();
 
         std::array<std::string, 3> gridUnits = kw.gridUnits();
 

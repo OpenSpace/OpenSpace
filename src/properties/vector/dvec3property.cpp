@@ -39,11 +39,11 @@ glm::dvec3 fromLuaConversion(lua_State* state, bool& success) {
         int hasNext = lua_next(state, -2);
         if (hasNext != 1) {
             success = false;
-            return glm::dvec3(0);
+            return glm::dvec3(0.0);
         }
         if (lua_isnumber(state, -1) != 1) {
             success = false;
-            return glm::dvec3(0);
+            return glm::dvec3(0.0);
         }
         else {
             result[i] = lua_tonumber(state, -1);
@@ -108,7 +108,7 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DVec3Property,
     glm::dvec3,
-    glm::dvec3(0),
+    glm::dvec3(0.0),
     glm::dvec3(std::numeric_limits<double>::lowest()),
     glm::dvec3(std::numeric_limits<double>::max()),
     glm::dvec3(0.01),

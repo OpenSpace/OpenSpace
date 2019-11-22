@@ -70,11 +70,11 @@ private:
 
 struct MappingKey {
     MappingKey(float p, const glm::vec4& c): position(p), color(c) {};
-    MappingKey(float p): position(p), color(glm::vec4(0.0f)) {};
+    MappingKey(float p): position(p), color(glm::vec4(0.f)) {};
     bool operator<(const MappingKey& rhs) {return position < rhs.position;};
 
     float position = 0.f;
-    glm::vec4 color = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    glm::vec4 color = glm::vec4(0.f);
 };
 
 } // namespace openspace

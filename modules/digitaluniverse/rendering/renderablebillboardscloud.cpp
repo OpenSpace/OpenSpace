@@ -1474,7 +1474,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
         std::stringstream str(line);
 
         glm::vec3 position;
-        for (auto j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }
 
@@ -1692,7 +1692,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             addPosition(position);
         }
     }
-    _fadeInDistance.setMaxValue(glm::vec2(10.0f * biggestCoord));
+    _fadeInDistance.setMaxValue(glm::vec2(10.f * biggestCoord));
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {

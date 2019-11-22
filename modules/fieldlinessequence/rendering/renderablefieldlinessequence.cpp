@@ -250,7 +250,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pColorTablePath(ColorTablePathInfo)
     , _pColorUniform(
         ColorUniformInfo,
-        glm::vec4(0.75f, 0.5f, 0.0f, 0.5f),
+        glm::vec4(0.75f, 0.5f, 0.f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -263,7 +263,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pDomainR(DomainRInfo)
     , _pFlowColor(
         FlowColorInfo,
-        glm::vec4(0.8f, 0.7f, 0.0f, 0.6f),
+        glm::vec4(0.8f, 0.7f, 0.f, 0.6f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )

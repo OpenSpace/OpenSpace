@@ -144,22 +144,16 @@ public:
     Status status = Status::Unavailable;
 };
 
-
-
 struct TileUvTransform {
-    glm::vec2 uvOffset;
-    glm::vec2 uvScale;
+    glm::vec2 uvOffset = glm::vec2(0.f);
+    glm::vec2 uvScale = glm::vec2(0.f);
 };
-
-
 
 struct ChunkTile {
     Tile tile;
     TileUvTransform uvTransform;
     TileDepthTransform depthTransform;
 };
-
-
 
 using ChunkTilePile = std::vector<ChunkTile>;
 

@@ -64,9 +64,9 @@ public:
 
 private:
     struct Vertex {
-        glm::vec3 position;
-        glm::vec3 color;
-        glm::vec2 texcoord;
+        glm::vec3 position = glm::vec3(0.f);
+        glm::vec3 color = glm::vec3(0.f);
+        glm::vec2 texcoord = glm::vec2(0.f);
     };
 
     struct KeplerParameters {
@@ -83,8 +83,12 @@ private:
 
     /// The layout of the VBOs
     struct TrailVBOLayout {
-        float x, y, z, time;
-        double epoch, period; 
+        float x = 0.f;
+        float y = 0.f;
+        float z = 0.f;
+        float time = 0.f;
+        double epoch = 0.0;
+        double period = 0.0;
     };
 
     KeplerTranslation _keplerTranslator;
@@ -117,7 +121,7 @@ private:
 
     RenderableTrail::Appearance _appearance;
 
-    glm::vec3 _position;
+    glm::vec3 _position = glm::vec3(0.f);
 
     UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
         numberOfSegments) _uniformCache;

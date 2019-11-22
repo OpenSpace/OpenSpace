@@ -835,8 +835,7 @@ void mainLogCallback(const char* msg) {
         // connections from other network nodes
         return;
     }
-    // Remove the trailing \n that is passed along
-    LINFOC("SGCT", message.substr(0, message.size() - 1));
+    LINFOC("SGCT", message);
 }
 
 } // namespace

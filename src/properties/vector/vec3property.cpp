@@ -39,11 +39,11 @@ glm::vec3 fromLuaConversion(lua_State* state, bool& success) {
         int hasNext = lua_next(state, -2);
         if (hasNext != 1) {
             success = false;
-            return glm::vec3(0);
+            return glm::vec3(0.f);
         }
         if (lua_isnumber(state, -1) != 1) {
             success = false;
-            return glm::vec3(0);
+            return glm::vec3(0.f);
         }
         else {
             result[i] = static_cast<glm::vec3::value_type>(lua_tonumber(state, -1));
@@ -107,7 +107,7 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Vec3Property,
     glm::vec3,
-    glm::vec3(0),
+    glm::vec3(0.f),
     glm::vec3(std::numeric_limits<float>::lowest()),
     glm::vec3(std::numeric_limits<float>::max()),
     glm::vec3(0.01f),

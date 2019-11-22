@@ -41,11 +41,11 @@ glm::dmat2x2 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::dmat2x2(0);
+                return glm::dmat2x2(0.0);
             }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::dmat2x2(0);
+                return glm::dmat2x2(0.0);
             }
             else {
                 result[i][j] = lua_tonumber(state, -1);
@@ -123,7 +123,7 @@ using nl = std::numeric_limits<double>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DMat2Property,
     glm::dmat2x2,
-    glm::dmat2x2(0),
+    glm::dmat2x2(0.0),
     glm::dmat2x2(nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest()),
     glm::dmat2x2(nl::max(), nl::max(), nl::max(), nl::max()),
     glm::dmat2x2(0.01, 0.01, 0.01, 0.01),

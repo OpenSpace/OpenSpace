@@ -44,7 +44,7 @@ public:
 
 private:
     properties::Vec3Property _eulerRotation;
-    mutable glm::dmat3 _cachedMatrix;
+    mutable glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
     mutable bool _matrixIsDirty = true;
 };
 

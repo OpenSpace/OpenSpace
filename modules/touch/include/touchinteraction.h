@@ -73,18 +73,18 @@ public:
 
     // Stores the velocity in all 6DOF
     struct VelocityStates {
-        glm::dvec2 orbit;
-        double zoom;
-        double roll;
-        glm::dvec2 pan;
+        glm::dvec2 orbit = glm::dvec2(0.0);
+        double zoom = 0.0;
+        double roll = 0.0;
+        glm::dvec2 pan = glm::dvec2(0.0);
     };
 
     // Stores the selected node, the cursor ID as well as the surface coordinates the
     // cursor touched
     struct SelectedBody {
-        long id;
-        SceneGraphNode* node;
-        glm::dvec3 coordinates;
+        long id = 0;
+        SceneGraphNode* node = nullptr;
+        glm::dvec3 coordinates = glm::dvec3(0.0);
     };
 
     // Used in the LM algorithm
@@ -259,8 +259,8 @@ private:
     std::vector<SelectedBody> _selected;
     SceneGraphNode* _pickingSelected = nullptr;
     LMstat _lmstat;
-    glm::dquat _toSlerp;
-    glm::dvec3 _centroid;
+    glm::dquat _toSlerp = glm::dquat(1.0, 0.0, 0.0, 0.0);
+    glm::dvec3 _centroid = glm::dvec3(0.0);
 
     FrameTimeAverage _frameTimeAvg;
 

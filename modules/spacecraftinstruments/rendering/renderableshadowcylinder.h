@@ -81,7 +81,7 @@ private:
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor) _uniformCache;
 
-    glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

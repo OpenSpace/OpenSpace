@@ -90,20 +90,20 @@ private:
 
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
-    glm::dmat3 _instrumentMatrix;
+    glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 
     // uniforms
-    glm::vec3 _up;
-    glm::mat4 _transform;
-    glm::mat4 _projectorMatrix;
-    glm::vec3 _boresight;
+    glm::vec3 _up = glm::vec3(0.0);
+    glm::mat4 _transform = glm::mat4(1.f);
+    glm::mat4 _projectorMatrix = glm::mat4(1.f);
+    glm::vec3 _boresight = glm::vec3(0.0);
 
     std::vector<Image> _imageTimes;
     double _time = -std::numeric_limits<double>::max();
 
     bool _shouldCapture = false;
 
-    glm::vec3 _sunPosition;
+    glm::vec3 _sunPosition = glm::vec3(0.0);
     properties::BoolProperty _performShading;
 };
 

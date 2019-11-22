@@ -64,12 +64,11 @@ protected:
         void setFriction(double friction);
         void setVelocityScaleFactor(double scaleFactor);
 
-        glm::dvec2 previousPosition;
+        glm::dvec2 previousPosition = glm::dvec2(0.0);
         DelayedVariable<glm::dvec2, double> velocity;
     };
 
-
-    double _sensitivity;
+    double _sensitivity = 0.0;
 
     InteractionState _globalRotationState;
     InteractionState _localRotationState;

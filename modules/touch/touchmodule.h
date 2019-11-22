@@ -53,7 +53,7 @@ namespace openspace {
         std::vector<TUIO::TuioCursor> _listOfContactPoints;
         // contains an id and the TuioPoint that was processed last frame
         std::vector<Point> _lastProcessed;
-        glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
+        glm::ivec2 _webPositionCallback = glm::ivec2(0);
     };
 
 } // namespace openspace

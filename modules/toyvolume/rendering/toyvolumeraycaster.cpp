@@ -49,7 +49,7 @@ namespace {
 namespace openspace {
 
 ToyVolumeRaycaster::ToyVolumeRaycaster(glm::vec4 color)
-    : _boundingBox(glm::vec3(1.0))
+    : _boundingBox(glm::vec3(1.f))
     , _color(std::move(color))
 {}
 
@@ -119,7 +119,7 @@ bool ToyVolumeRaycaster::isCameraInside(const RenderData& data, glm::vec3& local
     glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
                          glm::vec4(0.f, 0.f, 0.f, 1.f);
 
-    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
+    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 
     return (localPosition.x > 0 && localPosition.x < 1 &&
             localPosition.y > 0 && localPosition.y < 1 &&

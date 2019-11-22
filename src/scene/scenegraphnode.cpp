@@ -746,11 +746,7 @@ SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }
     else {
-        return {
-            glm::dvec3(0.0, 0.0, 0.0),
-            glm::normalize(targetModelSpace),
-            0.0
-        };
+        return { glm::dvec3(0.0), glm::normalize(targetModelSpace), 0.0 };
     }
 }
 

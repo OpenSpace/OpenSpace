@@ -41,11 +41,11 @@ glm::dmat4x3 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::dmat4x3(0);
+                return glm::dmat4x3(0.0);
             }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::dmat4x3(0);
+                return glm::dmat4x3(0.0);
             } else {
                 result[i][j] = lua_tonumber(state, -1);
                 lua_pop(state, 1);
@@ -122,7 +122,7 @@ using nl = std::numeric_limits<double>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DMat4x3Property,
     glm::dmat4x3,
-    glm::dmat4x3(0),
+    glm::dmat4x3(0.0),
     glm::dmat4x3(
         nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest(),
         nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest(),

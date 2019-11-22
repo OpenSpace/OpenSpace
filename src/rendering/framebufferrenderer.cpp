@@ -960,7 +960,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-        glm::vec3 cameraPosition;
+        glm::vec3 cameraPosition = glm::vec3(0.f);
         bool isCameraInside = raycaster->isCameraInside(
             raycasterTask.renderData,
             cameraPosition

@@ -201,7 +201,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
 
     std::string frame;
     std::vector<glm::dvec3> bounds;
-    glm::dvec3 boresight;
+    glm::dvec3 boresight = glm::dvec3(0.0);
     try {
         SpiceManager::FieldOfViewResult r = SpiceManager::ref().fieldOfView(_instrument);
 

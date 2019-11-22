@@ -72,10 +72,10 @@ private:
     // Labels Structures
     struct LabelEntry {
         char feature[256];
-        float diameter;
-        float latitude;
-        float longitude;
-        glm::vec3 geoPosition;
+        float diameter = 0.f;
+        float latitude = 0.f;
+        float longitude = 0.f;
+        glm::vec3 geoPosition = glm::vec3(0.f);
     };
 
     struct Labels {

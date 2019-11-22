@@ -51,7 +51,7 @@ public:
 private:
     size_t coordsToIndex(const glm::uvec3& cartesian) const;
     glm::uvec3 indexToCoords(size_t linear) const;
-    glm::uvec3 _dimensions;
+    glm::uvec3 _dimensions = glm::uvec3(0);
     std::string _path;
 };
 

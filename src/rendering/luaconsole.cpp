@@ -142,7 +142,7 @@ LuaConsole::LuaConsole()
     )
     , _historyTextColor(
         HistoryTextColorInfo,
-        glm::vec4(1.0f, 1.0f, 1.0f, 0.65f),
+        glm::vec4(1.f, 1.f, 1.f, 0.65f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -646,7 +646,7 @@ void LuaConsole::render() {
     glDisable(GL_DEPTH_TEST);
 
     rendering::helper::renderBox(
-        glm::vec2(0.f, 0.f),
+        glm::vec2(0.f),
         glm::vec2(1.f, _currentHeight / res.y),
         _backgroundColor
     );
@@ -793,7 +793,7 @@ void LuaConsole::render() {
     };
 
     if (_remoteScripting) {
-        const glm::vec4 Red(1, 0, 0, 1);
+        const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
         ParallelConnection::Status status = global::parallelPeer.status();
         const int nClients =
@@ -809,7 +809,7 @@ void LuaConsole::render() {
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
     } else if (global::parallelPeer.isHost()) {
-        const glm::vec4 LightBlue(0.4, 0.4, 1, 1);
+        const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText = "Local script execution";
         const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);

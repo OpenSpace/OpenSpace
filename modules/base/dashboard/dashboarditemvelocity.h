@@ -58,7 +58,7 @@ private:
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
 
-    glm::dvec3 _prevPosition;
+    glm::dvec3 _prevPosition = glm::dvec3(0.0);
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };

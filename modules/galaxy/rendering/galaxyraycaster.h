@@ -78,13 +78,13 @@ private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
     BoxGeometry _boundingBox;
-    float _stepSize;
-    glm::mat4 _modelTransform;
-    glm::vec3 _aspect;
-    double _time;
-    float _opacityCoefficient;
-    float _absorptionMultiply;
-    float _emissionMultiply; 
+    float _stepSize = 0.f;
+    glm::mat4 _modelTransform = glm::mat4(1.f);
+    glm::vec3 _aspect = glm::vec3(0.f);
+    double _time = 0.0;
+    float _opacityCoefficient = 0.f;
+    float _absorptionMultiply = 0.f;
+    float _emissionMultiply = 0.f;
     ghoul::opengl::Texture& _texture;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
 

@@ -2710,15 +2710,15 @@ TEST_F(DocumentationTest, DeprecatedVerifier) {
         { "int", 1 },
         { "double", 2.0 },
         { "string" , ""s },
-        { "boolvec2", glm::bvec2() },
-        { "intvec2", glm::ivec2() },
-        { "doublevec2", glm::dvec2() },
-        { "boolvec3", glm::bvec3() },
-        { "intvec3", glm::ivec3() },
-        { "doublevec3", glm::dvec3() },
-        { "boolvec4", glm::bvec4() },
-        { "intvec4", glm::ivec4() },
-        { "doublevec4", glm::dvec4() }
+        { "boolvec2", glm::bvec2(false) },
+        { "intvec2", glm::ivec2(0) },
+        { "doublevec2", glm::dvec2(0.0) },
+        { "boolvec3", glm::bvec3(false) },
+        { "intvec3", glm::ivec3(0) },
+        { "doublevec3", glm::dvec3(0.0) },
+        { "boolvec4", glm::bvec4(false) },
+        { "intvec4", glm::ivec4(0) },
+        { "doublevec4", glm::dvec4(0.0) }
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
