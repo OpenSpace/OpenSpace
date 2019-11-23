@@ -74,7 +74,7 @@ bool toLuaConversion(lua_State* state, glm::dmat2x2 value) {
 }
 
 glm::dmat2x2 fromStringConversion(const std::string& val, bool& success) {
-    glm::dmat2x2 result;
+    glm::dmat2x2 result = glm::dmat2x2(1.0);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() !=
         (ghoul::glm_rows<glm::dmat2x2>::value * ghoul::glm_cols<glm::dmat2x2>::value))

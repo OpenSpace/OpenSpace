@@ -346,7 +346,7 @@ RenderEngine::RenderEngine()
 
     _hue.onChange([this]() {
         if (_renderer) {
-            const float h = _hue / 360.0;
+            const float h = _hue / 360.f;
             _renderer->setHue(h);
         }
     });
@@ -666,6 +666,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                 case WindowDelegate::Frustum::Mono: return "";
                 case WindowDelegate::Frustum::LeftEye: return "(left)";
                 case WindowDelegate::Frustum::RightEye: return "(right)";
+                default: throw std::logic_error("Unhandled case label");
             }
         }(frustum);
 

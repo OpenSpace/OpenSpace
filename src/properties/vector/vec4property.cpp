@@ -69,7 +69,7 @@ bool toLuaConversion(lua_State* state, glm::vec4 value) {
 }
 
 glm::vec4 fromStringConversion(const std::string& val, bool& success) {
-    glm::vec4 result;
+    glm::vec4 result = glm::vec4(0.f);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {
         success = false;

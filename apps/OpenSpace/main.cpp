@@ -45,6 +45,8 @@
 #include <ctime>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
+#include <sgct/engine.h>
+#include <sgct/fisheyeprojection.h>
 #include <sgct/messagehandler.h>
 #include <sgct/screencapture.h>
 #include <sgct/settings.h>
@@ -141,7 +143,7 @@ struct SpoutWindow {
     SpoutData right;
 
     /// The window ID of this windows
-    size_t windowId = size_t(-1);
+    int windowId = -1;
 };
 
 /// The list of all windows with spout senders
@@ -286,7 +288,7 @@ void mainInitFunc() {
         icons[0].height = y;
 
         const size_t nWindows = sgct::Engine::instance().getNumberOfWindows();
-        for (size_t i = 0; i < nWindows; ++i) {
+        for (int i = 0; i < nWindows; ++i) {
             const sgct::Window& windowPtr = sgct::Engine::instance().getWindow(i);
             glfwSetWindowIcon(windowPtr.getWindowHandle(), 1, icons);
         }
@@ -303,7 +305,7 @@ void mainInitFunc() {
 
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
-    for (size_t i = 0; i < sgct::Engine::instance().getNumberOfWindows(); ++i) {
+    for (int i = 0; i < sgct::Engine::instance().getNumberOfWindows(); ++i) {
         if (sgct::Engine::instance().getWindow(i).hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = sgct::Engine::instance().getWindow(i);
@@ -321,8 +323,8 @@ void mainInitFunc() {
         }
     }
 
-    const size_t nWindows = sgct::Engine::instance().getNumberOfWindows();
-    for (size_t i = 0; i < nWindows; ++i) {
+    const int nWindows = sgct::Engine::instance().getNumberOfWindows();
+    for (int i = 0; i < nWindows; ++i) {
         const sgct::Window& windowPtr = sgct::Engine::instance().getWindow(i);
 
         if (!windowPtr.hasTag(SpoutTag)) {
@@ -390,7 +392,7 @@ void mainInitFunc() {
         );
     }
 
-    for (size_t i = 0; i < nWindows; ++i) {
+    for (int i = 0; i < nWindows; ++i) {
         sgct::Window& w = sgct::Engine::instance().getWindow(i);
         constexpr const char* screenshotNames = "OpenSpace";
         sgct::core::ScreenCapture* cpt0 = w.getScreenCapturePointer(
@@ -647,7 +649,9 @@ void mainPostDrawFunc() {
     for (const SpoutWindow& w : SpoutWindows) {
         sgct::Window& window = sgct::Engine::instance().getWindow(w.windowId);
         if (w.leftOrMain.initialized) {
-            const GLuint texId = window.getFrameBufferTexture(sgct::Engine::TextureIndex::LeftEye);
+            const GLuint texId = window.getFrameBufferTexture(
+                sgct::Window::TextureIndex::LeftEye
+            );
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
@@ -658,7 +662,9 @@ void mainPostDrawFunc() {
         }
 
         if (w.right.initialized) {
-            const GLuint texId = window.getFrameBufferTexture(sgct::Engine::TextureIndex::RightEye);
+            const GLuint texId = window.getFrameBufferTexture(
+                sgct::Window::TextureIndex::RightEye
+            );
             glBindTexture(GL_TEXTURE_2D, texId);
             w.right.handle->SendTexture(
                 texId,
@@ -851,8 +857,8 @@ void setSgctDelegateFunctions() {
         sgct::core::ClusterManager::instance().setUseIgnoreSync(enabled);
     };
     sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
-        size_t n = sgct::Engine::instance().getNumberOfWindows();
-        for (size_t i = 0; i < n; ++i) {
+        int n = sgct::Engine::instance().getNumberOfWindows();
+        for (int i = 0; i < n; ++i) {
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             GLFWwindow* w = sgct::Engine::instance().getWindow(i).getWindowHandle();
@@ -955,7 +961,7 @@ void setSgctDelegateFunctions() {
         return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
-        for (size_t i = 0; i < sgct::Engine::instance().getNumberOfWindows(); ++i) {
+        for (int i = 0; i < sgct::Engine::instance().getNumberOfWindows(); ++i) {
             if (sgct::Engine::instance().getWindow(i).hasTag("GUI")) {
                 return true;
             }
@@ -1047,6 +1053,7 @@ void setSgctDelegateFunctions() {
             case FM::MonoEye: return WindowDelegate::Frustum::Mono;
             case FM::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
             case FM::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+            default: throw std::logic_error("Unhandled case label");
         }
     };
     sgctDelegate.swapGroupFrameNumber = []() {
