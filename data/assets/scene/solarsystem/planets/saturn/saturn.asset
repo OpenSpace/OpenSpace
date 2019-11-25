@@ -81,6 +81,7 @@ local SaturnLabel = {
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
         BlendMode = "Additive",
+        LabelOrientationOption = "Camera View Direction",
         TransformationMatrix = {
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,

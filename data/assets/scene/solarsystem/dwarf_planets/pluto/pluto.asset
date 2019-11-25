@@ -83,6 +83,7 @@ local PlutoLabel = {
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
         BlendMode = "Additive",
+        LabelOrientationOption = "Camera View Direction",
         TransformationMatrix = {
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
@@ -92,7 +93,7 @@ local PlutoLabel = {
     },
     GUI = {
         Name = "Pluto Label",
-        Path = "/Solar System/Planets/Pluto"
+        Path = "/Solar System/Dwarf Planets/Pluto"
     }
 }
 
