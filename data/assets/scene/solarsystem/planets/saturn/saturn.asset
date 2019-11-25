@@ -57,6 +57,42 @@ local SaturnRings = {
     }
 }
 
+local SaturnLabel = {
+    Identifier = "SaturnLabel",
+    Parent = Saturn.Identifier,
+    -- Transform = {
+    --     Translation = {
+    --         Type = "SpiceTranslation",
+    --         Target = "EARTH",
+    --         Observer = "EARTH BARYCENTER"
+    --     },
+    --     -- Rotation = {
+    --     --     Type = "SpiceRotation",
+    --     --     SourceFrame = "IAU_MOON",
+    --     --     DestinationFrame = "GALACTIC"
+    --     -- }
+    -- },
+    Renderable = {
+        Enabled = true,
+        Type = "RenderableLabels",
+        LabelText = "Saturn",
+        FontSize = 100.0,
+        LabelSize = 8.7,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        BlendMode = "Additive",
+        TransformationMatrix = {
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        },
+    },
+    GUI = {
+        Name = "Saturn Label",
+        Path = "/Solar System/Planets/Saturn"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnRings })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnRings, SaturnLabel })
