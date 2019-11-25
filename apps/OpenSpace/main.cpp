@@ -434,6 +434,7 @@ void mainPreSyncFunc() {
 
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
         JoystickInputState& state = global::joystickInputStates[i];
+        sgct::Joystick joystick = sgct::Joystick(i);
 
         int present = glfwJoystickPresent(i);
         if (present == GLFW_FALSE) {
@@ -444,13 +445,13 @@ void mainPreSyncFunc() {
         if (!state.isConnected) {
             // Joystick was added
             state.isConnected = true;
-            state.name = sgct::Engine::getJoystickName(i);
+            state.name = sgct::Engine::getJoystickName(joystick);
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
         }
 
-        const float* axes = sgct::Engine::getJoystickAxes(i, &state.nAxes);
+        const float* axes = sgct::Engine::getJoystickAxes(joystick, &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
             LWARNING(fmt::format(
                 "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
@@ -462,7 +463,7 @@ void mainPreSyncFunc() {
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = sgct::Engine::getJoystickButtons(
-            i,
+            joystick,
             &state.nButtons
         );
 
@@ -687,7 +688,7 @@ void mainPostDrawFunc() {
 
 
 
-void mainKeyboardCallback(int key, int, int action, int modifiers) {
+void mainKeyboardCallback(sgct::Key key, sgct::Modifier mod, sgct::Action action, int) {
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.keyboard, nullptr);
@@ -696,7 +697,7 @@ void mainKeyboardCallback(int key, int, int action, int modifiers) {
     LTRACE("main::mainKeyboardCallback(begin)");
 
     const Key k = Key(key);
-    const KeyModifier m = KeyModifier(modifiers);
+    const KeyModifier m = KeyModifier(mod);
     const KeyAction a = KeyAction(action);
     global::openSpaceEngine.keyboardCallback(k, m, a);
 
@@ -710,7 +711,7 @@ void mainKeyboardCallback(int key, int, int action, int modifiers) {
 
 
 
-void mainMouseButtonCallback(int key, int action, int modifiers) {
+void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier mod, sgct::Action ac) {
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.mouseButton, nullptr);
@@ -719,8 +720,8 @@ void mainMouseButtonCallback(int key, int action, int modifiers) {
     LTRACE("main::mainMouseButtonCallback(begin)");
 
     const MouseButton k = MouseButton(key);
-    const MouseAction a = MouseAction(action);
-    const KeyModifier m = KeyModifier(modifiers);
+    const MouseAction a = MouseAction(ac);
+    const KeyModifier m = KeyModifier(mod);
     global::openSpaceEngine.mouseButtonCallback(k, a, m);
 
     LTRACE("main::mainMouseButtonCallback(end)");
@@ -1253,9 +1254,6 @@ int main(int argc, char** argv) {
     sgct::Engine::instance().setMousePosCallbackFunction(mainMousePosCallback);
     sgct::Engine::instance().setMouseScrollCallbackFunction(mainMouseScrollCallback);
     sgct::Engine::instance().setCharCallbackFunction(mainCharCallback);
-
-    // Disable the immediate exit of the application when the ESC key is pressed
-    sgct::Engine::instance().setExitKey(GLFW_KEY_UNKNOWN);
 
     sgct::MessageHandler::instance().setNotifyLevel(sgct::MessageHandler::Level::Debug);
 
