@@ -83,9 +83,7 @@ private:
     properties::BoolProperty  _pixelSizeControl;
     properties::Vec2Property  _fadeInDistance;
     properties::BoolProperty  _disableFadeInDistance;
-    properties::FloatProperty _correctionSizeEndDistance;
-    properties::FloatProperty _correctionSizeFactor;
-
+    
     properties::OptionProperty _labelOrientationOption;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;

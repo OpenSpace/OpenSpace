@@ -127,19 +127,6 @@ namespace {
         "Enables/Disables the Fade-in effect."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        CorrectionSizeEndDistanceInfo = {
-            "CorrectionSizeEndDistance",
-            "Distance in 10^X meters where correction size stops acting.",
-            "Distance in 10^X meters where correction size stops acting."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
-        "CorrectionSizeFactor",
-        "Control variable for distance size.",
-        ""
-    };
-
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable pixel size control.",
@@ -186,8 +173,6 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         glm::vec2(100.f)
     )
     , _disableFadeInDistance(DisableFadeInInfo, true)
-    , _correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.f, 12.f, 25.f)
-    , _correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
     , _labelOrientationOption(LabelOrientationOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     documentation::testSpecificationAndThrow(
@@ -295,22 +280,6 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         addProperty(_fadeInDistance);
         addProperty(_disableFadeInDistance);
     }
-
-    if (dictionary.hasKey(CorrectionSizeEndDistanceInfo.identifier)) {
-        _correctionSizeEndDistance = static_cast<float>(
-            dictionary.value<double>(CorrectionSizeEndDistanceInfo.identifier)
-            );
-    }
-    addProperty(_correctionSizeEndDistance);
-
-    if (dictionary.hasKey(CorrectionSizeFactorInfo.identifier)) {
-        _correctionSizeFactor = static_cast<float>(
-            dictionary.value<double>(CorrectionSizeFactorInfo.identifier)
-            );
-
-        addProperty(_correctionSizeFactor);
-    }
-
 
     if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
         _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
