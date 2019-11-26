@@ -574,7 +574,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _generalProperties.eclipseShadowsEnabled.onChange(notifyShaderRecompilation);
     _generalProperties.eclipseHardShadows.onChange(notifyShaderRecompilation);
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
-    _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
@@ -681,7 +680,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _shadowComponent.initialize();
         addPropertySubOwner(_shadowComponent);
         _hasShadows = true;
+        _generalProperties.shadowMapping = true;
     }
+    _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
     _module = global::moduleEngine.module<GlobeBrowsingModule>();
@@ -775,7 +776,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                     
                 glEnable(GL_BLEND);
 
-                _shadowComponent.setViewDepthMap(true);
+                _shadowComponent.setViewDepthMap(false);
 
                 _shadowComponent.end();
 

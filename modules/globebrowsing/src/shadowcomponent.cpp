@@ -79,6 +79,12 @@ namespace {
         "considered as the new light source distance."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
+        "DepthMapSize",
+        "Depth Map Size",
+        "The depth map size in pixels. You must entry the width and height values."
+    };
+
     void checkFrameBufferState(const std::string& codePosition)
     {
         if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -200,6 +206,23 @@ namespace openspace {
         _saveDepthTexture.onChange([&]() {
             _executeDepthTextureSave = true;
         });
+
+
+        if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
+            glm::vec2 depthMapSize = 
+                _shadowMapDictionary.value<glm::vec2>(DepthMapSizeInfo.identifier);
+            _shadowDepthTextureWidth = depthMapSize.x;
+            _shadowDepthTextureHeight = depthMapSize.y;
+            _dynamicDepthTextureRes = false;
+        }
+        else {
+            glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+            _shadowDepthTextureWidth = renderingResolution.x * 2;
+            _shadowDepthTextureHeight = renderingResolution.y * 2;
+            _dynamicDepthTextureRes = true;
+        }
+
+        _viewDepthMap = false;
 
         addProperty(_enabled);
         addProperty(_saveDepthTexture);
@@ -420,11 +443,11 @@ namespace openspace {
                 glGenVertexArrays(1, &_quadVAO);
             }
 
+            _renderDMProgram->activate();
+
             ghoul::opengl::TextureUnit shadowMapUnit;
             shadowMapUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-
-            _renderDMProgram->activate();
 
             _renderDMProgram->setUniform("shadowMapTexture", shadowMapUnit);
 
@@ -437,61 +460,22 @@ namespace openspace {
 
     void ShadowComponent::update(const UpdateData& /*data*/) {
         _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition();
+        
+        glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+        if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
+            (_shadowDepthTextureHeight != renderingResolution.y))) {
+            _shadowDepthTextureWidth = renderingResolution.x * 2;
+            _shadowDepthTextureHeight = renderingResolution.y * 2;
+            updateDepthTexture();
+        }
     }
 
     void ShadowComponent::createDepthTexture() {
         glGenTextures(1, &_shadowDepthTexture);
-        glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-        glTexStorage2D(
-            GL_TEXTURE_2D, 
-            1, 
-            GL_DEPTH_COMPONENT32F,
-            _shadowDepthTextureWidth, 
-            _shadowDepthTextureHeight
-        );
-
-        /*glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_DEPTH_COMPONENT32F,
-            _shadowDepthTextureWidth,
-            _shadowDepthTextureHeight,
-            0,
-            GL_DEPTH_COMPONENT,
-            GL_FLOAT,
-            0
-        );*/
+        updateDepthTexture();
         
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ShadowBorder);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        checkGLError("createDepthTexture() -- Depth texture created");
         
-        checkGLError("createDepthTexture() -- Depth testure created");
-
-        /*glGenTextures(1, &_positionInLightSpaceTexture);
-        glBindTexture(GL_TEXTURE_2D, _positionInLightSpaceTexture);        
-        glTexImage2D(
-            GL_TEXTURE_2D, 
-            0, 
-            GL_RGB32F, 
-            _shadowDepthTextureWidth,
-            _shadowDepthTextureHeight, 
-            0, 
-            GL_RGBA, 
-            GL_FLOAT, 
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);*/
-        
-        glBindTexture(GL_TEXTURE_2D, 0);
-
         _shadowData.shadowDepthTexture = _shadowDepthTexture;
         //_shadowData.positionInLightSpaceTexture = _positionInLightSpaceTexture;
     }
@@ -499,8 +483,7 @@ namespace openspace {
     void ShadowComponent::createShadowFBO() {
         // Saves current FBO first
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-
-       
+   
         glGenFramebuffers(1, &_shadowFBO);
         glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
         glFramebufferTexture(
@@ -526,6 +509,58 @@ namespace openspace {
 
         // Restores system state
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    }
+
+    void ShadowComponent::updateDepthTexture() {
+        glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
+        /*
+        glTexStorage2D(
+            GL_TEXTURE_2D,
+            1,
+            GL_DEPTH_COMPONENT32F,
+            _shadowDepthTextureWidth,
+            _shadowDepthTextureHeight
+        );
+        */
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_DEPTH_COMPONENT32F,
+            _shadowDepthTextureWidth,
+            _shadowDepthTextureHeight,
+            0,
+            GL_DEPTH_COMPONENT,
+            GL_FLOAT,
+            0
+        );
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ShadowBorder);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+        /*glGenTextures(1, &_positionInLightSpaceTexture);
+        glBindTexture(GL_TEXTURE_2D, _positionInLightSpaceTexture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGB32F,
+            _shadowDepthTextureWidth,
+            _shadowDepthTextureHeight,
+            0,
+            GL_RGBA,
+            GL_FLOAT,
+            nullptr
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);*/
+
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     void ShadowComponent::saveDepthBuffer() {

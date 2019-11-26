@@ -25,9 +25,11 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
+precision highp float;
+
 in vec2 texCoord;
 
-uniform sampler2D shadowMapTexture;
+uniform highp sampler2D shadowMapTexture;
 
 Fragment getFragment() {
     Fragment frag;

@@ -93,6 +93,7 @@ namespace openspace {
     private:
         void createDepthTexture();
         void createShadowFBO();
+        void updateDepthTexture();
 
         // Debug
         void saveDepthBuffer();
@@ -119,6 +120,7 @@ namespace openspace {
         
         int _shadowDepthTextureHeight;
         int _shadowDepthTextureWidth;
+        bool _dynamicDepthTextureRes = true;
         
         GLuint _shadowDepthTexture;
         GLuint _positionInLightSpaceTexture;

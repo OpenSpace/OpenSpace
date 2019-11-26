@@ -267,7 +267,7 @@ Fragment getFragment() {
     float shadow = 1.0;
     if ( shadowCoords.w > 1 ) {
         vec4 normalizedShadowCoords = shadowCoords;
-        normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w - 0.3);
+        normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w - 0.005 * normalizedShadowCoords.w);
         normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
         normalizedShadowCoords.w = 1.0;
         
