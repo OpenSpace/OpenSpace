@@ -22,40 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#include <openspace/interaction/interactionmonitor.h>
 
-#include <openspace/util/openspacemodule.h>
-#include <modules/touch/include/touchmarker.h>
-#include <modules/touch/include/touchinteraction.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <ghoul/logging/logmanager.h>
 
+namespace {
+    constexpr const char* _loggerCat = "InteractionMonitor";
 
-namespace openspace {
-
-    class TouchModule : public OpenSpaceModule {
-        using Point = std::pair<int, TUIO::TuioPoint>;
-    public:
-        TouchModule();
-
-    private:
-        /**
-        * Returns true if new touch input occured since the last frame
-        */
-        bool processNewInput();
-        /**
-        * Checks if touchevent should be parsed to the webgui
-        */
-        void processNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
-
-        TuioEar _ear;
-        TouchInteraction _touch;
-        TouchMarker _markers;
-        std::vector<TUIO::TuioCursor> _listOfContactPoints;
-        // contains an id and the TuioPoint that was processed last frame
-        std::vector<Point> _lastProcessed;
-        glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
+    constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
+        "IdleTime",
+        "Idle Time",
+        "Time in seconds that has passed from latest registered interaction until the "
+        "application goes idle."
     };
+    constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
+        "IsInActiveState",
+        "Is State Active",
+        "Keeps track whether the interaction session is in active state or not. False if "
+        "application is in idle state, true if it is in active state."
+    };
+} // namespace
 
-} // namespace openspace
+namespace openspace::interaction {
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+InteractionMonitor::InteractionMonitor()
+    : properties::PropertyOwner({ "InteractionMonitor" })
+    , _isInActiveState(IsInActiveStateInfo, false)
+    , _idleTime(IdleTimeInfo, 120.f)
+{
+    addProperty(_isInActiveState);
+    addProperty(_idleTime);
+}
+
+void InteractionMonitor::setActivityState(bool isActive) {
+    _isInActiveState = isActive;
+}
+
+void InteractionMonitor::setIdleTime(float time) {
+    _idleTime = time;
+}
+
+void InteractionMonitor::updateActivityState() {
+    const double currentApplicationTime = global::windowDelegate.applicationTime();
+    const double timeDiff = currentApplicationTime - _lastInteractionTime;
+
+    if (timeDiff >= _idleTime && _isInActiveState) {
+        _isInActiveState = false;
+    }
+}
+
+void InteractionMonitor::markInteraction() {
+    _lastInteractionTime = global::windowDelegate.applicationTime();
+    _isInActiveState = true;
+}
+
+} // namespace openspace::interaction

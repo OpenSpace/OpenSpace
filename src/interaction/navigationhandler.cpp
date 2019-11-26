@@ -337,6 +337,18 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     _inputState.keyboardCallback(key, modifier, action);
 }
 
+NavigationHandler::NavigationState NavigationHandler::navigationState() const {
+    const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
+        _orbitalNavigator.anchorNode() :
+        sceneGraph()->root();
+    ghoul_assert(
+        referenceFrame,
+        "The root will always exist and the anchor node ought to be reset when removed"
+    );
+
+    return navigationState(*referenceFrame);
+}
+
 NavigationHandler::NavigationState NavigationHandler::navigationState(
                                                const SceneGraphNode& referenceFrame) const
 {
@@ -383,12 +395,9 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
 void NavigationHandler::saveNavigationState(const std::string& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
-    const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
-        _orbitalNavigator.anchorNode() :
-        sceneGraph()->root();
-
+    NavigationHandler::NavigationState state;
     if (!referenceFrameIdentifier.empty()) {
-        referenceFrame = sceneGraphNode(referenceFrameIdentifier);
+        const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
         if (!referenceFrame) {
             LERROR(fmt::format(
                 "Could not find node '{}' to use as reference frame",
@@ -396,17 +405,18 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
             ));
             return;
         }
+        state = navigationState(*referenceFrame).dictionary();
+    } else {
+        state = navigationState().dictionary();
     }
 
     if (!filepath.empty()) {
         std::string absolutePath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        ghoul::Dictionary cameraDict = navigationState(*referenceFrame).dictionary();
         ghoul::DictionaryLuaFormatter formatter;
-
         std::ofstream ofs(absolutePath.c_str());
-        ofs << "return " << formatter.format(cameraDict);
+        ofs << "return " << formatter.format(state.dictionary());
         ofs.close();
     }
 }
@@ -559,12 +569,23 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
         "navigation",
         {
             {
+                "getNavigationState",
+                &luascriptfunctions::getNavigationState,
+                {},
+                "[string]",
+                "Return the current navigation state as a lua table. The optional "
+                "argument is the scene graph node to use as reference frame. By default, "
+                "the reference frame will picked based on whether the orbital navigator "
+                "is currently following the anchor node rotation. If it is, the anchor "
+                "will be chosen as reference frame. If not, the reference frame will be "
+                "set to the scene graph root."
+            },
+            {
                 "setNavigationState",
                 &luascriptfunctions::setNavigationState,
                 {},
                 "table",
-                "Set the navigation state. "
-                "The argument must be a valid Navigation State."
+                "Set the navigation state. The argument must be a valid Navigation State."
             },
             {
                 "saveNavigationState",
@@ -642,7 +663,7 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "locally or remotely. The latter being the default."
             },
             {
-                "clearJoystickButotn",
+                "clearJoystickButton",
                 &luascriptfunctions::clearJoystickButton,
                 {},
                 "int",

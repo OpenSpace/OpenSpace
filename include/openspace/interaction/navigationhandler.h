@@ -136,6 +136,7 @@ public:
         WebsocketCameraStates::AxisNormalize shouldNormalize =
         WebsocketCameraStates::AxisNormalize::No);
     
+    NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
     void saveNavigationState(const std::string& filepath,

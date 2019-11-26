@@ -22,40 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#ifndef __OPENSPACE_CORE___INTERACTIONMONITOR___H__
+#define __OPENSPACE_CORE___INTERACTIONMONITOR___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <modules/touch/include/touchmarker.h>
-#include <modules/touch/include/touchinteraction.h>
+#include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
-namespace openspace {
+namespace openspace::interaction {
 
-    class TouchModule : public OpenSpaceModule {
-        using Point = std::pair<int, TUIO::TuioPoint>;
-    public:
-        TouchModule();
+/**
+ * The class InteractionMonitor keeps track of user interactions during an OpenSpace
+ * session. It keeps track of when the latest interaction was made and of when the state
+ * changes to idle.
+ */
+class InteractionMonitor : public properties::PropertyOwner {
+public:
+    InteractionMonitor();
 
-    private:
-        /**
-        * Returns true if new touch input occured since the last frame
-        */
-        bool processNewInput();
-        /**
-        * Checks if touchevent should be parsed to the webgui
-        */
-        void processNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
+    void setActivityState(bool isActive);
+    void setIdleTime(float time);
 
-        TuioEar _ear;
-        TouchInteraction _touch;
-        TouchMarker _markers;
-        std::vector<TUIO::TuioCursor> _listOfContactPoints;
-        // contains an id and the TuioPoint that was processed last frame
-        std::vector<Point> _lastProcessed;
-        glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
-    };
+    /*
+     * Called every frame from OpenSpaceEngine and calculates the activity state depending
+     * on the last registered interaction.
+     */
+    void updateActivityState();
 
-} // namespace openspace
+    /*
+     * Called from all places we want to mark activity from. Updates the last registered
+     * interaction time
+     */
+    void markInteraction();
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+private:
+    double _lastInteractionTime = 0;
+    properties::BoolProperty _isInActiveState;
+    properties::FloatProperty _idleTime; // in seconds
+
+    // @TODO (lovisa) make a list of interactions to listen for
+    // and only allow registering updates from those interactions
+};
+
+} // namespace openspace::interaction
+
+#endif // __OPENSPACE_CORE___INTERACTIONMONITOR___H__
