@@ -236,7 +236,7 @@ std::pair<int, int> supportedOpenGLVersion() {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
 
@@ -287,7 +287,7 @@ void mainInitFunc() {
         icons[0].width = x;
         icons[0].height = y;
 
-        const size_t nWindows = sgct::Engine::instance().getNumberOfWindows();
+        const int nWindows = sgct::Engine::instance().getNumberOfWindows();
         for (int i = 0; i < nWindows; ++i) {
             const sgct::Window& windowPtr = sgct::Engine::instance().getWindow(i);
             glfwSetWindowIcon(windowPtr.getWindowHandle(), 1, icons);
@@ -1333,9 +1333,9 @@ int main(int argc, char** argv) {
     // machine. If the loading screen shows up without doing anything to the window, it
     // is fixed. With the bug, the rendering stays gray even well after the main render
     // loop has started     -- 2018-10-28   abock
-    size_t n = sgct::Engine::instance().getNumberOfWindows();
-    for (size_t i = 0; i < n; ++i) {
-        GLFWwindow* w = sgct::Engine::instance().getWindow(i)->getWindowHandle();
+    int n = sgct::Engine::instance().getNumberOfWindows();
+    for (int i = 0; i < n; ++i) {
+        GLFWwindow* w = sgct::Engine::instance().getWindow(i).getWindowHandle();
         int x, y;
         glfwGetWindowPos(w, &x, &y);
         glfwSetWindowPos(w, x + 1, y + 1);
