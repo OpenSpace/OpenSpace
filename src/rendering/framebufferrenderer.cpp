@@ -1180,7 +1180,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
                 _downscaleVolumeRendering.currentDownscaleFactor = scaleDown;
                 updateDownscaleTextures();
             }
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
         else {
             glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
