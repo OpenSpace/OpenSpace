@@ -126,5 +126,6 @@ void main() {
     finalColor = vec4(accumulatedColor, (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3.f);
 
     finalColor.rgb /= finalColor.a ;
+
     gl_FragDepth = normalizeFloat(entryDepth);
 }

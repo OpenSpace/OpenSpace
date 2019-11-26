@@ -59,8 +59,8 @@ namespace {
         "renderedTexture", "inverseScreenSize"
     };
 
-    constexpr const std::array<const char*, 1> DownscaledVolumeUniformNames = {
-        "downscaledRenderedVolume"
+    constexpr const std::array<const char*, 2> DownscaledVolumeUniformNames = {
+        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -191,6 +191,7 @@ void FramebufferRenderer::initialize() {
     // DownscaleVolumeRendering
     glGenFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
     glGenTextures(1, &_downscaleVolumeRendering.colorTexture);
+    glGenTextures(1, &_downscaleVolumeRendering.depthbuffer);
     
     // Allocate Textures/Buffers Memory
     updateResolution();
@@ -325,6 +326,12 @@ void FramebufferRenderer::initialize() {
         _downscaleVolumeRendering.colorTexture,
         0
     );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        _downscaleVolumeRendering.depthbuffer,
+        0
+    );
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -383,6 +390,7 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_gBuffers.positionTexture);
     glDeleteTextures(1, &_gBuffers.normalTexture);
     glDeleteTextures(1, &_downscaleVolumeRendering.colorTexture);
+    glDeleteTextures(1, &_downscaleVolumeRendering.depthbuffer);
 
     glDeleteTextures(1, &_pingPongBuffers.colorTexture[1]);
 
@@ -492,7 +500,7 @@ void FramebufferRenderer::applyFXAA() {
     _fxaaProgram->deactivate();
 }
 
-void FramebufferRenderer::updateDownscaleColorTexture() {
+void FramebufferRenderer::updateDownscaleTextures() {
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -502,6 +510,23 @@ void FramebufferRenderer::updateDownscaleColorTexture() {
         _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
         0,
         GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+
+    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
+        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        0,
+        GL_DEPTH_COMPONENT,
         GL_FLOAT,
         nullptr
     );
@@ -557,6 +582,19 @@ void FramebufferRenderer::writeDownscaledVolume() {
         downscaledTextureUnit
     );
     
+    ghoul::opengl::TextureUnit downscaledDepthUnit;
+    downscaledDepthUnit.activate();
+    glBindTexture(
+        GL_TEXTURE_2D,
+        _downscaleVolumeRendering.depthbuffer
+    );
+
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
+        downscaledDepthUnit
+    );
+
+
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -800,6 +838,20 @@ void FramebufferRenderer::updateResolution() {
     float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
 
+    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
+        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     // Volume Rendering Textures
     glBindTexture(GL_TEXTURE_2D, _exitColorTexture);
@@ -1126,7 +1178,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glViewport(0, 0, _resolution.x * scaleDown, _resolution.y * scaleDown);
             if (_downscaleVolumeRendering.currentDownscaleFactor != scaleDown) {
                 _downscaleVolumeRendering.currentDownscaleFactor = scaleDown;
-                updateDownscaleColorTexture();
+                updateDownscaleTextures();
             }
             glClear(GL_COLOR_BUFFER_BIT);
         }

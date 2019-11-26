@@ -111,7 +111,7 @@ private:
     void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor);
     void applyFXAA();
-    void updateDownscaleColorTexture();
+    void updateDownscaleTextures();
     void updateExitVolumeTextures();
     void writeDownscaledVolume();
     
@@ -131,7 +131,8 @@ private:
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
                  Hue, Saturation, Value) _hdrUniformCache;
     UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
-    UniformCache(downscaledRenderedVolume) _writeDownscaledVolumeUniformCache;
+    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth) 
+        _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;
@@ -166,6 +167,7 @@ private:
     struct {
         GLuint framebuffer;
         GLuint colorTexture;
+        GLuint depthbuffer;
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 

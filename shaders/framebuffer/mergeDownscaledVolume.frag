@@ -27,9 +27,11 @@
 layout (location = 0) out vec4 finalColor;
 
 uniform sampler2D downscaledRenderedVolume;
+uniform sampler2D downscaledRenderedVolumeDepth;
 
 in vec2 texCoord;
 
 void main() {
-    finalColor = texture(downscaledRenderedVolume, texCoord);
+    finalColor   = texture(downscaledRenderedVolume, texCoord);
+    gl_FragDepth = texture(downscaledRenderedVolumeDepth, texCoord).r;
 }
