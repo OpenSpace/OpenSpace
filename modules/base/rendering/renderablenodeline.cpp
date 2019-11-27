@@ -33,6 +33,8 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 
 namespace {
 
@@ -190,8 +192,8 @@ void RenderableNodeLine::update(const UpdateData & data)
     _vertexArray.clear();
 
     // Update the positions of the nodes
-    _startPos = global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition();
-    _endPos = global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition();
+    _startPos = getCoordinatePosFromAnchorNode(global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition());
+    _endPos = getCoordinatePosFromAnchorNode(global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition());
 
     // @TODO Update distance for distance label
     // double distance = glm::distance(_startPos, _endPos);
@@ -224,13 +226,19 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     
     _program->activate();
 
+    glm::dmat4 anchorTranslation(1.0);
+    // Update anchor node information, used to counter precision problems
+    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+        anchorTranslation = glm::translate(glm::dmat4(1.0), global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition());
+    }
+
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-        modelTransform;
+        modelTransform * anchorTranslation;
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -274,5 +282,23 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_LINE_SMOOTH);
     }
 }
+
+
+/*  Returns a position that is relative to the current
+    anchor node. This is a method to handle precision
+    problems that occur when getting close to a line end */
+glm::dvec3 RenderableNodeLine::getCoordinatePosFromAnchorNode(glm::dvec3 worldPos) {
+
+    glm::dvec3 anchorNodePos(0);
+
+    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+        anchorNodePos = global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition();
+    }
+    glm::dvec3 diffPos = glm::dvec3(worldPos.x - anchorNodePos.x, worldPos.y - anchorNodePos.y,
+        worldPos.z - anchorNodePos.z);
+
+    return diffPos;
+}
+
 
 } // namespace openspace

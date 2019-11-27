@@ -60,6 +60,8 @@ public:
     void unbindGL();
     void bindGL();
 
+    glm::dvec3 getCoordinatePosFromAnchorNode(glm::dvec3 worldPos);
+
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
