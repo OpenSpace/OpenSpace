@@ -58,12 +58,16 @@ public:
     bool isReady() const override;
     void update(const UpdateData& data) override;
     void unbindGL();
+    void bindGL();
+
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     glm::dvec3 _startPos;
     glm::dvec3 _endPos;
 
+    properties::StringProperty _start;
+    properties::StringProperty _end;
     properties::Vec4Property _lineColor;
     properties::FloatProperty _lineWidth;
     static documentation::Documentation Documentation();

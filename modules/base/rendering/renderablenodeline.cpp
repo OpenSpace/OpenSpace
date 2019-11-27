@@ -25,7 +25,6 @@
 #include <modules/base/rendering/renderablenodeline.h>
 
 #include <modules/base/basemodule.h>
-//#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
@@ -38,6 +37,7 @@
 namespace {
 
     constexpr const char* ProgramName = "NodeLineProgram";
+    constexpr const char* Root = "Root";
 
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
@@ -87,7 +87,7 @@ documentation::Documentation RenderableNodeLine::Documentation() {
             },
             {
                 LineColorInfo.identifier,
-                new DoubleVector3Verifier,
+                new DoubleVector4Verifier,
                 Optional::Yes,
                 LineColorInfo.description
             },
@@ -103,8 +103,10 @@ documentation::Documentation RenderableNodeLine::Documentation() {
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec4(1.0f, 0.0f, 0.f, 1.0), glm::vec4(0.f), glm::vec4(1.f))
+    , _lineColor(LineColorInfo, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , _start(StartNodeInfo, Root)
+    , _end(EndNodeInfo, Root)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -112,6 +114,15 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         "RenderableNodeLine"
     );
 
+    _start = dictionary.value<std::string>(StartNodeInfo.identifier);
+    _end = dictionary.value<std::string>(EndNodeInfo.identifier);
+
+    if (dictionary.hasKey(LineColorInfo.identifier)) {
+        _lineColor = dictionary.value<glm::vec4>(LineColorInfo.identifier);
+    }
+
+    addProperty(_start);
+    addProperty(_end);
     addProperty(_lineColor);
     addProperty(_lineWidth);
 }
@@ -132,10 +143,8 @@ void RenderableNodeLine::initializeGL() {
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vBufferId);
 
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    bindGL();
 
-    // (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void * pointer);
     glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(_locVertex);
 
@@ -170,13 +179,22 @@ void RenderableNodeLine::unbindGL() {
     glBindVertexArray(0);
 }
 
+void RenderableNodeLine::bindGL()
+{
+    glBindVertexArray(_vaoId);
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+}
+
 void RenderableNodeLine::update(const UpdateData & data)
 {
     _vertexArray.clear();
 
     // Update the positions of the nodes
-    _startPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
-    _endPos = global::renderEngine.scene()->sceneGraphNode("Mars")->worldPosition();
+    _startPos = global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition();
+    _endPos = global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition();
+
+    // @TODO Update distance for distance label
+    // double distance = glm::distance(_startPos, _endPos);
 
     _vertexArray.push_back(_startPos.x);
     _vertexArray.push_back(_startPos.y);
@@ -188,8 +206,7 @@ void RenderableNodeLine::update(const UpdateData & data)
 
     _vertexArray;
 
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    bindGL();
     glBufferData(
         GL_ARRAY_BUFFER,
         _vertexArray.size() * sizeof(float),
@@ -197,12 +214,11 @@ void RenderableNodeLine::update(const UpdateData & data)
         GL_DYNAMIC_DRAW
     );
 
-    //update vertex attributes? 
+    //update vertex attributes
     glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
     unbindGL();
 }
-
 
 void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     
@@ -241,9 +257,8 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(_lineWidth);
 
-    // Bind and Draw
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    // Bind and draw
+    bindGL();
     glDrawArrays(GL_LINES, 0, 2);
     
     // Restore GL State
