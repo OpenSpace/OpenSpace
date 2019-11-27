@@ -340,7 +340,7 @@ function generateAsset(T, fileOut)
       KeyStr = KeyStr.."    Name = \""..j[3].."\",\n"
       KeyStr = KeyStr.."    GuiPath = \""..j[4].."\",\n"
       KeyStr = KeyStr.."    Local = "..j[5]..",\n"
-      KeyStr = KeyStr.."    Command = \""..j[6].."\"\n"
+      KeyStr = KeyStr.."    Command = "..j[6].."\n"
       KeyStr = KeyStr.."  },\n"
     end
     KeyStr = KeyStr.."}\n"
@@ -354,7 +354,8 @@ function generateAsset(T, fileOut)
     elseif (j[1] == "absolute") then
       TimeStr = TimeStr.."  openspace.time.setTime(\""..j[2].."\")\n"
     elseif (j[1] == "relative") then
-      TimeStr = TimeStr.."  openspace.time.setTime("
+      TimeStr = TimeStr.."  local now = openspace.time.currentWallTime();"
+      TimeStr = TimeStr.." openspace.time.setTime("
       TimeStr = TimeStr.."openspace.time.advancedTime(now, \""
       TimeStr = TimeStr..j[2].."\"))\n"
     end
