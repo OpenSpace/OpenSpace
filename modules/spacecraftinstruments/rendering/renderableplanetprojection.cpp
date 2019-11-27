@@ -536,8 +536,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         lightTime
     ) * 1000.0;
 
-    float distance = glm::length(p);
-    float radius = boundingSphere();
+    const double distance = glm::length(p);
+    const double radius = boundingSphere();
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         p,
         bs,
@@ -545,8 +545,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        distance - radius,
-        distance + radius,
+        static_cast<float>(distance - radius),
+        static_cast<float>(distance + radius),
         _boresight
     );
 }
