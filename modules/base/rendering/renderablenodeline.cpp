@@ -187,16 +187,13 @@ void RenderableNodeLine::bindGL()
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
 }
 
-void RenderableNodeLine::update(const UpdateData & data)
+void RenderableNodeLine::updateVertexData()
 {
     _vertexArray.clear();
 
     // Update the positions of the nodes
     _startPos = getCoordinatePosFromAnchorNode(global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition());
     _endPos = getCoordinatePosFromAnchorNode(global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition());
-
-    // @TODO Update distance for distance label
-    // double distance = glm::distance(_startPos, _endPos);
 
     _vertexArray.push_back(_startPos.x);
     _vertexArray.push_back(_startPos.y);
@@ -223,6 +220,8 @@ void RenderableNodeLine::update(const UpdateData & data)
 }
 
 void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
+
+    updateVertexData();
     
     _program->activate();
 
@@ -286,7 +285,7 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
 
 /*  Returns a position that is relative to the current
     anchor node. This is a method to handle precision
-    problems that occur when getting close to a line end */
+    problems that occur when approaching a line end point */
 glm::dvec3 RenderableNodeLine::getCoordinatePosFromAnchorNode(glm::dvec3 worldPos) {
 
     glm::dvec3 anchorNodePos(0);

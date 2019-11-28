@@ -32,7 +32,6 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
-//#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -45,25 +44,36 @@ namespace documentation { struct Documentation; }
 class Translation;
 
 /**
- * This is the base class for a line that is drawn between two nodes in OpenSpace. 
+ * This is a class for a line that is drawn between two nodes in OpenSpace.
  */
 class RenderableNodeLine : public Renderable {
 public:
     RenderableNodeLine(const ghoul::Dictionary& dictionary);
     ~RenderableNodeLine() = default;
 
+    static documentation::Documentation Documentation();
+    
+private:
+
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
-    void update(const UpdateData& data) override;
+    void updateVertexData();
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+
     void unbindGL();
     void bindGL();
 
     glm::dvec3 getCoordinatePosFromAnchorNode(glm::dvec3 worldPos);
 
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    ghoul::opengl::ProgramObject* _program;
+    /// The vertex attribute location for position
+    /// must correlate to layout location in vertex shader
+    const GLuint _locVertex = 0;
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
+    std::vector<float> _vertexArray;
 
     glm::dvec3 _startPos;
     glm::dvec3 _endPos;
@@ -72,25 +82,6 @@ public:
     properties::StringProperty _end;
     properties::Vec4Property _lineColor;
     properties::FloatProperty _lineWidth;
-    static documentation::Documentation Documentation();
-
-    ghoul::opengl::ProgramObject* _program;
-
-    /// The vertex attribute location for position
-    /// must correlate to layout location in vertex shader
-    const GLuint _locVertex = 0;
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
-
-    std::vector<float> _vertexArray;
-
-
-
-protected:
-    
-
-
-private:
 };
 
 } // namespace openspace
