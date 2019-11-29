@@ -158,6 +158,8 @@ TouchModule::TouchModule()
         LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
+    //We currently only support one window of touch input internally
+    //so here we grab the first window-handle and use it.
     void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
     if (nativeWindowHandle) {
         _win32TouchHook.reset(new Win32TouchHook(nativeWindowHandle));
