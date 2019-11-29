@@ -142,16 +142,6 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(_webHelperLocation);
     LDEBUG("Starting CEF... done!");
 
-    global::callback::preSync.emplace_back([this]() {
-        if (_cefHost && !_browsers.empty()) {
-            _cefHost->doMessageLoopWork();
-
-            const std::chrono::time_point<std::chrono::high_resolution_clock> timeAfter =
-                std::chrono::high_resolution_clock::now();
-            webbrowser::latestCall = timeAfter;
-        }
-    });
-
     if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
         _updateBrowserBetweenRenderables =
             dictionary.value<bool>(UpdateBrowserBetweenRenderablesInfo.identifier);
@@ -225,7 +215,7 @@ namespace webbrowser {
  * described in more detail in globalscallbacks.h.
  */
 
-std::chrono::microseconds interval = std::chrono::microseconds(1);
+std::chrono::microseconds interval = std::chrono::microseconds(10000);
 std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 CefHost* cefHost = nullptr;
 
