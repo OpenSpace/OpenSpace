@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/touch/touchmodule.h>
+#include <modules/touch/include/win32_touch.h>
 
 #include <modules/webgui/webguimodule.h>
 #include <openspace/engine/globals.h>
@@ -156,6 +157,12 @@ TouchModule::TouchModule()
     global::callback::initializeGL.push_back([&]() {
         LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
         _markers.initialize();
+#ifdef WIN32
+    void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
+    if (nativeWindowHandle) {
+        _win32TouchHook.reset(new Win32TouchHook(nativeWindowHandle));
+    }
+#endif //WIN32
     });
 
     global::callback::deinitializeGL.push_back([&]() {

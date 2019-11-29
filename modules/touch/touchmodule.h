@@ -29,6 +29,9 @@
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
 
+#ifdef WIN32
+class Win32TouchHook;
+#endif //WIN32
 
 namespace openspace {
 
@@ -54,6 +57,9 @@ namespace openspace {
         // contains an id and the TuioPoint that was processed last frame
         std::vector<Point> _lastProcessed;
         glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
+#ifdef WIN32
+        std::unique_ptr<Win32TouchHook> _win32TouchHook;
+#endif //WIN32
     };
 
 } // namespace openspace

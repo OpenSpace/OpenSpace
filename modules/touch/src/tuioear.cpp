@@ -115,10 +115,12 @@ void TuioEar::removeTuioBlob(TuioBlob*) { }
 void TuioEar::refresh(TuioTime) { } // about every 15ms
 
 std::vector<TuioCursor> TuioEar::getInput() {
+    std::lock_guard<std::mutex> lock(_mx);
     return _list;
 }
 
 bool TuioEar::tap() {
+    std::lock_guard<std::mutex> lock(_mx);
     if (_tap) {
         _tap = false;
         return !_tap;
@@ -158,8 +160,7 @@ void TuioEar::clearInput() {
 
 // Standard UDP IP connection to port 3333
 TuioEar::TuioEar() {
-    _oscReceiver = new UdpReceiver(3333);
-    _tuioClient = new TuioClient(_oscReceiver);
+    _tuioClient = new TuioClient(3333);
     _tuioClient->addTuioListener(this);
     _tuioClient->connect();
 }
