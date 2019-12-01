@@ -29,7 +29,7 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 
@@ -80,7 +80,7 @@ private:
 
     properties::StringProperty _start;
     properties::StringProperty _end;
-    properties::Vec4Property _lineColor;
+    properties::Vec3Property _lineColor;
     properties::FloatProperty _lineWidth;
 };
 

@@ -89,7 +89,7 @@ documentation::Documentation RenderableNodeLine::Documentation() {
             },
             {
                 LineColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 LineColorInfo.description
             },
@@ -105,7 +105,7 @@ documentation::Documentation RenderableNodeLine::Documentation() {
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _lineColor(LineColorInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _start(StartNodeInfo, Root)
     , _end(EndNodeInfo, Root)
@@ -120,16 +120,17 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     _end = dictionary.value<std::string>(EndNodeInfo.identifier);
 
     if (dictionary.hasKey(LineColorInfo.identifier)) {
-        _lineColor = dictionary.value<glm::vec4>(LineColorInfo.identifier);
+        _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     }
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(dictionary.value<double>(LineWidthInfo.identifier));
+        _lineWidth = float(dictionary.value<double>(LineWidthInfo.identifier));
     }
 
     addProperty(_start);
     addProperty(_end);
     addProperty(_lineColor);
     addProperty(_lineWidth);
+    addProperty(_opacity);
 }
 
 void RenderableNodeLine::initializeGL() {
@@ -244,7 +245,7 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _program->setUniform("color", _lineColor);
+    _program->setUniform("color", glm::vec4(_lineColor.value(), _opacity));
 
     // Save current state:
     GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
