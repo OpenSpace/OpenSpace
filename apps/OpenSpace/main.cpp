@@ -1235,27 +1235,23 @@ int main(int argc, char** argv) {
     config.configFilename = absPath(windowConfiguration);
 
     LDEBUG("Creating SGCT Engine");
-    sgct::Engine::create(config);
 
-    // Bind functions
-    sgct::Engine::instance().setInitOGLFunction(mainInitFunc);
-    sgct::Engine::instance().setPreSyncFunction(mainPreSyncFunc);
-    sgct::Engine::instance().setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
-    sgct::Engine::instance().setDrawFunction(mainRenderFunc);
-    sgct::Engine::instance().setDraw2DFunction(mainDraw2DFunc);
-    sgct::Engine::instance().setPostDrawFunction(mainPostDrawFunc);
-    sgct::Engine::instance().setKeyboardCallbackFunction(mainKeyboardCallback);
-    sgct::Engine::instance().setMouseButtonCallbackFunction(mainMouseButtonCallback);
-    sgct::Engine::instance().setMousePosCallbackFunction(mainMousePosCallback);
-    sgct::Engine::instance().setMouseScrollCallbackFunction(mainMouseScrollCallback);
-    sgct::Engine::instance().setCharCallbackFunction(mainCharCallback);
+    sgct::Engine::Callbacks callbacks;
+    callbacks.initOpenGL = mainInitFunc;
+    callbacks.preSync = mainPreSyncFunc;
+    callbacks.postSyncPreDraw = mainPostSyncPreDrawFunc;
+    callbacks.draw = mainRenderFunc;
+    callbacks.draw2D = mainDraw2DFunc;
+    callbacks.postDraw = mainPostDrawFunc;
+    callbacks.keyboard = mainKeyboardCallback;
+    callbacks.mouseButton = mainMouseButtonCallback;
+    callbacks.mousePos = mainMousePosCallback;
+    callbacks.mouseScroll = mainMouseScrollCallback;
+    callbacks.character = mainCharCallback;
+    callbacks.encode = mainEncodeFun;
+    callbacks.decode = mainDecodeFun;
 
     sgct::Logger::instance().setNotifyLevel(sgct::Logger::Level::Debug);
-
-    // Set encode and decode functions
-    // NOTE: starts synchronizing before init functions
-    sgct::SharedData::instance().setEncodeFunction(mainEncodeFun);
-    sgct::SharedData::instance().setDecodeFunction(mainDecodeFun);
 
     // Try to open a window
     LDEBUG("Initialize SGCT Engine");
@@ -1308,7 +1304,7 @@ int main(int argc, char** argv) {
     };
 
     try {
-        sgct::Engine::instance().init(cluster, versionMapping[version]);
+        sgct::Engine::create(cluster, callbacks, config, versionMapping[version]);
     }
     catch (std::runtime_error e) {
         LFATALC("SGCT Init failed ", e.what());
