@@ -41,13 +41,11 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
-#include <chrono>
-#include <ctime>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
 #include <sgct/engine.h>
 #include <sgct/fisheyeprojection.h>
-#include <sgct/messagehandler.h>
+#include <sgct/logger.h>
 #include <sgct/screencapture.h>
 #include <sgct/settings.h>
 #include <sgct/shareddata.h>
@@ -55,6 +53,8 @@
 #include <sgct/window.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
+#include <chrono>
+#include <ctime>
 
 #ifdef WIN32
 #include <openspace/openspace.h>
@@ -1009,10 +1009,6 @@ void setSgctDelegateFunctions() {
             static_cast<int>(message.size())
         );
     };
-    sgctDelegate.isSimpleRendering = []() {
-        return (sgct::Engine::instance().getCurrentRenderTarget() !=
-                sgct::Engine::RenderTarget::NonLinearBuffer);
-    };
     sgctDelegate.isFisheyeRendering = []() {
         if (sgct::Engine::instance().getCurrentWindow().getNumberOfViewports() == 0) {
             return false;
@@ -1228,10 +1224,9 @@ int main(int argc, char** argv) {
     arguments.insert(arguments.begin(), argv[0]);
 
     // Need to set this before the creation of the sgct::Engine
-    sgct::MessageHandler::instance().setLogToConsole(false);
-    sgct::MessageHandler::instance().setShowTime(false);
-    sgct::MessageHandler::instance().setLogToCallback(true);
-    sgct::MessageHandler::instance().setLogCallback(mainLogCallback);
+    sgct::Logger::instance().setLogToConsole(false);
+    sgct::Logger::instance().setShowTime(false);
+    sgct::Logger::instance().setLogCallback(mainLogCallback);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
@@ -1255,7 +1250,7 @@ int main(int argc, char** argv) {
     sgct::Engine::instance().setMouseScrollCallbackFunction(mainMouseScrollCallback);
     sgct::Engine::instance().setCharCallbackFunction(mainCharCallback);
 
-    sgct::MessageHandler::instance().setNotifyLevel(sgct::MessageHandler::Level::Debug);
+    sgct::Logger::instance().setNotifyLevel(sgct::Logger::Level::Debug);
 
     // Set encode and decode functions
     // NOTE: starts synchronizing before init functions
@@ -1264,15 +1259,15 @@ int main(int argc, char** argv) {
 
     // Try to open a window
     LDEBUG("Initialize SGCT Engine");
-    std::map<std::pair<int, int>, sgct::Engine::RunMode> versionMapping = {
-        { { 3, 3 }, sgct::Engine::RunMode::OpenGL_3_3_Core_Profile },
-        { { 4, 0 }, sgct::Engine::RunMode::OpenGL_4_0_Core_Profile },
-        { { 4, 1 }, sgct::Engine::RunMode::OpenGL_4_1_Core_Profile },
-        { { 4, 2 }, sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
-        { { 4, 3 }, sgct::Engine::RunMode::OpenGL_4_3_Core_Profile },
-        { { 4, 4 }, sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
-        { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile },
-        { { 4, 6 }, sgct::Engine::RunMode::OpenGL_4_6_Core_Profile }
+    std::map<std::pair<int, int>, sgct::Engine::Profile> versionMapping = {
+        { { 3, 3 }, sgct::Engine::Profile::OpenGL_3_3_Core},
+        { { 4, 0 }, sgct::Engine::Profile::OpenGL_4_0_Core},
+        { { 4, 1 }, sgct::Engine::Profile::OpenGL_4_1_Core},
+        { { 4, 2 }, sgct::Engine::Profile::OpenGL_4_2_Core},
+        { { 4, 3 }, sgct::Engine::Profile::OpenGL_4_3_Core},
+        { { 4, 4 }, sgct::Engine::Profile::OpenGL_4_4_Core},
+        { { 4, 5 }, sgct::Engine::Profile::OpenGL_4_5_Core},
+        { { 4, 6 }, sgct::Engine::Profile::OpenGL_4_6_Core}
     };
     sgct::config::Cluster cluster = sgct::loadCluster(config.configFilename);
 
@@ -1286,8 +1281,7 @@ int main(int argc, char** argv) {
         }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
-        sgct::MessageHandler::instance().setLogToCallback(false);
-        sgct::MessageHandler::instance().setLogCallback(nullptr);
+        sgct::Logger::instance().setLogCallback(nullptr);
 
         LDEBUG("Destroying SGCT Engine");
         sgct::Engine::destroy();
@@ -1314,7 +1308,7 @@ int main(int argc, char** argv) {
     };
 
     try {
-        sgct::Engine::instance().init(versionMapping[version], cluster);
+        sgct::Engine::instance().init(cluster, versionMapping[version]);
     }
     catch (std::runtime_error e) {
         LFATALC("SGCT Init failed ", e.what());

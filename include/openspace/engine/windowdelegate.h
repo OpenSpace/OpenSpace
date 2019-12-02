@@ -103,8 +103,6 @@ struct WindowDelegate {
     void (*sendMessageToExternalControl)(const std::vector<char>& message) =
         [](const std::vector<char>&) {};
 
-    bool (*isSimpleRendering)() = []() { return true; };
-
     bool (*isFisheyeRendering)() = []() { return false; };
 
     void (*takeScreenshot)(bool applyWarping) = [](bool) { };
