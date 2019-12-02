@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
-in vec4 vs_positionScreenSpace;
+in float vs_depth;
 in vec4 vs_positionViewSpace;
 
 uniform vec4 color;
@@ -35,7 +35,7 @@ Fragment getFragment() {
 
     frag.color = color;
 
-    frag.depth = vs_positionScreenSpace.w;
+    frag.depth = vs_depth;
     frag.gPosition = vs_positionViewSpace;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
     return frag;

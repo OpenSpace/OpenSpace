@@ -27,17 +27,16 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
 
 namespace {
-
     constexpr const char* ProgramName = "NodeLineProgram";
     constexpr const char* Root = "Root";
 
@@ -64,7 +63,6 @@ namespace {
         "Line Width",
         "This value specifies the line width."
     };
-
 } // namespace
 
 namespace openspace {
@@ -123,7 +121,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     }
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = float(dictionary.value<double>(LineWidthInfo.identifier));
+        _lineWidth = static_cast<float>(dictionary.value<double>(LineWidthInfo.identifier));
     }
 
     addProperty(_start);
@@ -151,7 +149,7 @@ void RenderableNodeLine::initializeGL() {
 
     bindGL();
 
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexAttribArray(_locVertex);
 
     unbindGL();

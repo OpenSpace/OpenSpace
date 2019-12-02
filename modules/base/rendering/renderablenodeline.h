@@ -33,9 +33,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -54,7 +52,6 @@ public:
     static documentation::Documentation Documentation();
     
 private:
-
     void initializeGL() override;
     void deinitializeGL() override;
 
