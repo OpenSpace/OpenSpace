@@ -23,95 +23,90 @@
  ****************************************************************************************/
 
 #ifdef WIN32
+
 #include <modules/touch/include/win32_touch.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <TUIO/TuioServer.h>
 
 #include <ghoul/logging/logmanager.h>
+
+#include <TUIO/TuioServer.h>
 
 #include <tchar.h>
 #include <tpcshrd.h>
 
-//TODO: Make an application namespace?
-constexpr const char* _loggerCat = "win32_touch";
+namespace {
+    constexpr const char* _loggerCat = "win32_touch";
+    HHOOK gTouchHook{ nullptr };
+    bool gStarted{ false };
+    TUIO::TuioServer* gTuioServer{ nullptr };
+    std::unordered_map<UINT, TUIO::TuioCursor*> gCursorMap;
+}
 
-HHOOK g_touchHook{ nullptr };
-bool g_started{ false };
+namespace openspace {
 
-TUIO::TuioServer* g_tuioServer{ nullptr };
-std::unordered_map<UINT, TUIO::TuioCursor*> g_cursorMap;
-
-//This hook will only work for Win7+ Digitizers.
-//  - Once GLFW has native touch support, we can remove this windows-specific code
-LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam)
-{
-    if (nCode < 0) // do not process message 
-    {
+// This hook will only work for Win7+ Digitizers.
+// - Once GLFW has native touch support, we can remove this windows-specific code
+LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
+    if (nCode < 0) {
         return CallNextHookEx(0, nCode, wParam, lParam);
     }
-
-    switch (nCode)
-    {
-    case HC_ACTION:
-        LPMSG pStruct = (LPMSG)lParam;
-        UINT message = pStruct->message;
+    if (nCode == HC_ACTION) {
+        LPMSG pStruct = reinterpret_cast<LPMSG>(lParam);
+        const UINT message = pStruct->message;
         switch (message) {
-        case WM_POINTERDOWN:
-        case WM_POINTERUPDATE:
-        case WM_POINTERUP:
-        {
-            POINTER_INFO pointerInfo = {};
-            if (GetPointerInfo(GET_POINTERID_WPARAM(pStruct->wParam), &pointerInfo)) {
-                RECT rect;
-                GetClientRect(pStruct->hwnd, (LPRECT)&rect);
+            case WM_POINTERDOWN:
+            case WM_POINTERUPDATE:
+            case WM_POINTERUP:
+            {
+                POINTER_INFO pointerInfo = {};
+                if (GetPointerInfo(GET_POINTERID_WPARAM(pStruct->wParam), &pointerInfo)) {
+                    RECT rect;
+                    GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
 
-                POINT p = pointerInfo.ptPixelLocation;
-                // native touch to screen conversion
-                ScreenToClient(pStruct->hwnd, (LPPOINT)&p);
+                    POINT p = pointerInfo.ptPixelLocation;
+                    // native touch to screen conversion
+                    ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-                float xPos = (float)p.x / (float)(rect.right - rect.left);
-                float yPos = (float)p.y / (float)(rect.bottom - rect.top);               
-                if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
-                    //Handle new touchpoint
-                    g_tuioServer->initFrame(TUIO::TuioTime::getSessionTime());
-                    g_cursorMap[pointerInfo.pointerId] = g_tuioServer->addTuioCursor(xPos, yPos);
-                    g_tuioServer->commitFrame();
-                }
-                else if (pointerInfo.pointerFlags & POINTER_FLAG_UPDATE) {
-                    //Handle update of touchpoint
-                    TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
-                    if (g_cursorMap[pointerInfo.pointerId]->getTuioTime() == frameTime)
-                    {
-                        break;
+                    float xPos = (float)p.x / (float)(rect.right - rect.left);
+                    float yPos = (float)p.y / (float)(rect.bottom - rect.top);
+                    if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
+                        // Handle new touchpoint
+                        gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
+                        gCursorMap[pointerInfo.pointerId] = gTuioServer->addTuioCursor(xPos, yPos);
+                        gTuioServer->commitFrame();
                     }
-                    g_tuioServer->initFrame(frameTime);
-                    g_tuioServer->updateTuioCursor(g_cursorMap[pointerInfo.pointerId], xPos, yPos);
-                    g_tuioServer->commitFrame();
+                    else if (pointerInfo.pointerFlags & POINTER_FLAG_UPDATE) {
+                        // Handle update of touchpoint
+                        TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
+                        if (gCursorMap[pointerInfo.pointerId]->getTuioTime() == frameTime) {
+                            break;
+                        }
+                        gTuioServer->initFrame(frameTime);
+                        gTuioServer->updateTuioCursor(gCursorMap[pointerInfo.pointerId], xPos, yPos);
+                        gTuioServer->commitFrame();
+                    }
+                    else if (pointerInfo.pointerFlags & POINTER_FLAG_UP) {
+                        // Handle removed touchpoint
+                        gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
+                        gTuioServer->removeTuioCursor(gCursorMap[pointerInfo.pointerId]);
+                        gTuioServer->commitFrame();
+                        gCursorMap.erase(pointerInfo.pointerId);
+                    }
                 }
-                else if (pointerInfo.pointerFlags & POINTER_FLAG_UP) {
-                    //Handle removed touchpoint
-                    g_tuioServer->initFrame(TUIO::TuioTime::getSessionTime());
-                    g_tuioServer->removeTuioCursor(g_cursorMap[pointerInfo.pointerId]);
-                    g_tuioServer->commitFrame();
-                    g_cursorMap.erase(pointerInfo.pointerId);
-                }
+                break;
             }
-            break;
         }
-        }
-        break;
     }
 
-    //Pass the hook along!
+    // Pass the hook along!
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 
-Win32TouchHook::Win32TouchHook(void* nativeWindowPtr)
-    : _enabled(false)
+Win32TouchHook::Win32TouchHook(void* nativeWindow)
 {
-    HWND hWnd = reinterpret_cast<HWND>(nativeWindowPtr);
+    HWND hWnd = reinterpret_cast<HWND>(nativeWindow);
     if (hWnd == nullptr) {
         LINFO("No windowhandle available for touch input.");
         return;
@@ -119,24 +114,24 @@ Win32TouchHook::Win32TouchHook(void* nativeWindowPtr)
 
     // Test for touch:
     int value = GetSystemMetrics(SM_DIGITIZER);
-    if (value & NID_READY) { 
-        // stack ready, drivers installed and digitizer is ready for input
-    }
-    else {
-        //Don't bother setting up touch hooks?
+    if ((value & NID_READY) == 0) { 
+        // Don't bother setting up touch hooks?
         return;
     }
+    // stack ready, drivers installed and digitizer is ready for input
     if (value & NID_MULTI_INPUT) {
-        /* digitizer is multitouch */
+        // Digitizer is multitouch
         LINFO("Found Multitouch input digitizer!");
     }
-    if (value & NID_INTEGRATED_TOUCH) { /* Integrated touch */ }
+    if (value & NID_INTEGRATED_TOUCH) { 
+        // Integrated touch
+    }
 
-    //This should be needed, but we seem to receive messages even without it,
-    //probably a Win7+ behaviour
-    //Also - RegisterTouchWindow enables Windows gestures, which we don't want
-    //since they produce visual feedback for "press-and-tap" etc.
-    //RegisterTouchWindow(hWnd, TWF_FINETOUCH | TWF_WANTPALM);
+    // This should be needed, but we seem to receive messages even without it,
+    // probably a Win7+ behaviour
+    // Also - RegisterTouchWindow enables Windows gestures, which we don't want
+    // since they produce visual feedback for "press-and-tap" etc.
+    // RegisterTouchWindow(hWnd, TWF_FINETOUCH | TWF_WANTPALM);
 
     // TODO: Would be nice to find out if the gesture "press-and-tap" can be disabled
     // basically we don't really care for windows gestures for now...
@@ -144,24 +139,28 @@ Win32TouchHook::Win32TouchHook(void* nativeWindowPtr)
     const DWORD dwHwndTabletProperty = TABLET_DISABLE_PRESSANDHOLD; 
 
     ATOM atom = ::GlobalAddAtom(MICROSOFT_TABLETPENSERVICE_PROPERTY);
-    ::SetProp(hWnd, MICROSOFT_TABLETPENSERVICE_PROPERTY, 
-        reinterpret_cast<HANDLE>(dwHwndTabletProperty));
+    ::SetProp(hWnd, MICROSOFT_TABLETPENSERVICE_PROPERTY, reinterpret_cast<HANDLE>(dwHwndTabletProperty));
     ::GlobalDeleteAtom(atom);
 
-    if (!g_started) {
-        g_tuioServer = new TUIO::TuioServer("localhost", 3333);
-        if (!(g_touchHook = SetWindowsHookExW(WH_GETMESSAGE, HookCallback, GetModuleHandleW(NULL), GetCurrentThreadId()))) {
-            LINFO(fmt::format("Failed to setup WindowsHook for touch input redirection"));
-        }
+    if (!gStarted) {
+        gStarted = true;
+        gTuioServer = new TUIO::TuioServer("localhost", 3333);
         TUIO::TuioTime::initSession();
+        gTouchHook = SetWindowsHookExW(WH_GETMESSAGE, HookCallback, GetModuleHandleW(NULL), GetCurrentThreadId());
+        if (!gTouchHook) {
+            LINFO(fmt::format("Failed to setup WindowsHook for touch input redirection"));
+            delete gTuioServer;
+            gStarted = false;
+        }
     }
 }
 
 Win32TouchHook::~Win32TouchHook() {
-    if (_enabled) {
-        UnhookWindowsHookEx(g_touchHook);
-        delete g_tuioServer;
+    if (gStarted) {
+        UnhookWindowsHookEx(gTouchHook);
+        delete gTuioServer;
     }
 }
 
-#endif //WIN32
+} // namespace openspace
+#endif // WIN32

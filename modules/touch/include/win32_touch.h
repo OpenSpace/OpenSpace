@@ -27,14 +27,15 @@
 
 #ifdef WIN32
 
+namespace openspace {
+
 class Win32TouchHook {
 public:
-    Win32TouchHook(void* nativeWindowPtr);
+    Win32TouchHook(void* nativeWindow);
     ~Win32TouchHook();
-
-private:
-    bool _enabled;
 };
 
-#endif //WIN32
-#endif //__OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
+} // namespace openspace
+
+#endif // WIN32
+#endif // __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__

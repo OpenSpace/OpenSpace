@@ -29,16 +29,17 @@
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
 
-#ifdef WIN32
-class Win32TouchHook;
-#endif //WIN32
 
 namespace openspace {
+    #ifdef WIN32
+    class Win32TouchHook;
+    #endif //WIN32
 
     class TouchModule : public OpenSpaceModule {
         using Point = std::pair<int, TUIO::TuioPoint>;
     public:
         TouchModule();
+        ~TouchModule();
 
     private:
         /**
