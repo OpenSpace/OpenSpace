@@ -61,9 +61,7 @@ class TuioEar : public TUIO::TuioListener {
     public:
         TuioEar();
         ~TuioEar() {
-            _tuioClient->disconnect();
-            delete _tuioClient;
-            delete _oscReceiver;
+            _tuioClient.disconnect();
         }
 
         /**
@@ -108,8 +106,7 @@ class TuioEar : public TUIO::TuioListener {
         TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
         std::mutex _mx;
 
-        TUIO::TuioClient *_tuioClient;
-        TUIO::OscReceiver *_oscReceiver;
+        TUIO::TuioClient _tuioClient;
 
         std::vector<TUIO::TuioCursor> _list;
 

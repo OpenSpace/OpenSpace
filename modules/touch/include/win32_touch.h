@@ -22,47 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
+#define __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <modules/touch/include/touchmarker.h>
-#include <modules/touch/include/touchinteraction.h>
-
+#ifdef WIN32
 
 namespace openspace {
-    #ifdef WIN32
-    class Win32TouchHook;
-    #endif //WIN32
 
-    class TouchModule : public OpenSpaceModule {
-        using Point = std::pair<int, TUIO::TuioPoint>;
-    public:
-        TouchModule();
-        ~TouchModule();
-
-    private:
-        /**
-        * Returns true if new touch input occured since the last frame
-        */
-        bool processNewInput();
-        /**
-        * Checks if touchevent should be parsed to the webgui
-        */
-        void processNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
-
-        TuioEar _ear;
-        TouchInteraction _touch;
-        TouchMarker _markers;
-        std::vector<TUIO::TuioCursor> _listOfContactPoints;
-        // contains an id and the TuioPoint that was processed last frame
-        std::vector<Point> _lastProcessed;
-        glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
-#ifdef WIN32
-        std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif //WIN32
-    };
+class Win32TouchHook {
+public:
+    Win32TouchHook(void* nativeWindow);
+    ~Win32TouchHook();
+};
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#endif // WIN32
+#endif // __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
