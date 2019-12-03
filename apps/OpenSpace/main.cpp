@@ -1016,7 +1016,7 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.modelMatrix = []() {
         // @TODO (abock, 2019-02-03) This should probably disappear and we want to pass
-        // the modelviewmatrix to the correct places
+        // the model projection to the correct places
         return _sgctState.model;
     };
     sgctDelegate.setNearFarClippingPlane = [](float nearPlane, float farPlane) {
