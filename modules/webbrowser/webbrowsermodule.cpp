@@ -208,13 +208,17 @@ bool WebBrowserModule::isEnabled() const {
     return _enabled;
 }
 
-namespace webbrowser {
-
 /**
  * Logic for the webbrowser performance hotfix,
  * described in more detail in globalscallbacks.h.
  */
+namespace webbrowser {
 
+ /**
+* The time interval to describe how often the CEF message loop needs to
+* be pumped to work properly. A value of 10000 us updates CEF a 100 times
+* per second which is enough for fluid interaction without wasting resources
+*/
 std::chrono::microseconds interval = std::chrono::microseconds(10000);
 std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 CefHost* cefHost = nullptr;
