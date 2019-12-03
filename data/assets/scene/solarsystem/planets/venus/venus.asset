@@ -4,7 +4,7 @@ asset.require("spice/base")
 asset.request('./trail')
 local labelsPath = asset.require('./venus_labels').LabelsPath
 
-
+local mapServiceConfigs = asset.localResource("map_service_configs")
 
 local textures = asset.syncedResource({
     Name = "Venus Textures",
@@ -12,6 +12,19 @@ local textures = asset.syncedResource({
     Identifier = "venus_textures",
     Version = 1
 })
+
+local color_layers = {
+    {
+        Identifier = "Texture",
+        FilePath = textures .. "/venus.jpg",
+        Enabled = true
+    },
+    {
+        Identifier = "Magellan_Mosaic_Utah",
+        Name = "Magellan Mosaic [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.wms"
+    }
+}
 
 local Venus = {
     Identifier = "Venus",
@@ -33,13 +46,7 @@ local Venus = {
         Radii = { 6051900.0, 6051900.0, 6051800.0 },
         SegmentsPerPatch = 64,
         Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/venus.jpg",
-                    Enabled = true
-                }
-            }
+            ColorLayers = color_layers
         },
         Labels = {
             Enable = false,
