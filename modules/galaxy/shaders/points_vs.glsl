@@ -50,8 +50,6 @@ void main() {
 		dpos.xyz *= 8.0;
 		dpos = modelMatrix * dpos;
 		dpos /= PARSEC;
-		//It lies about 8 kpc from the center on what is known as the Orion Arm of the Milky Way
-		dpos.x += 8000;
 
 		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
 		vs_color = in_color;
