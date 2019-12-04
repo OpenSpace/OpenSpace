@@ -283,7 +283,7 @@ void mainInitFunc() {
 
     // @TODO (abock, 2019-12-03) This is a hack as we no longer want to assume that there
     // is an active window in the initialization function in SGCT
-    _sgctState.window = &sgct::Engine::instance().getWindow(0);
+    _sgctState.window = &sgct::Engine::instance().window(0);
 
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine.initialize();
@@ -301,10 +301,9 @@ void mainInitFunc() {
         icons[0].width = x;
         icons[0].height = y;
 
-        const int nWindows = sgct::Engine::instance().getNumberOfWindows();
-        for (int i = 0; i < nWindows; ++i) {
-            const sgct::Window& windowPtr = sgct::Engine::instance().getWindow(i);
-            glfwSetWindowIcon(windowPtr.getWindowHandle(), 1, icons);
+        for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
+            const sgct::Window& windowPtr = sgct::Engine::instance().window(i);
+            glfwSetWindowIcon(windowPtr.windowHandle(), 1, icons);
         }
 
         stbi_image_free(icons[0].pixels);
@@ -319,15 +318,15 @@ void mainInitFunc() {
 
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
-    for (int i = 0; i < sgct::Engine::instance().getNumberOfWindows(); ++i) {
-        if (sgct::Engine::instance().getWindow(i).hasTag(OpenVRTag)) {
+    for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
+        if (sgct::Engine::instance().window(i).hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
-            FirstOpenVRWindow = sgct::Engine::instance().getWindow(i);
+            FirstOpenVRWindow = sgct::Engine::instance().window(i);
 
             // If we have an OpenVRWindow, initialize OpenVR.
             sgct::SGCTOpenVR::initialize(
-                sgct::Engine::instance().getNearClippingPlane(),
-                sgct::Engine::instance().getFarClippingPlane()
+                sgct::Engine::instance().nearClippingPlane(),
+                sgct::Engine::instance()farClippingPlane()
             );
 #else
             LWARNING("OpenVR was requested, but program was compiled without VR support");
@@ -337,9 +336,8 @@ void mainInitFunc() {
         }
     }
 
-    const int nWindows = sgct::Engine::instance().getNumberOfWindows();
-    for (int i = 0; i < nWindows; ++i) {
-        const sgct::Window& windowPtr = sgct::Engine::instance().getWindow(i);
+    for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
+        const sgct::Window& windowPtr = sgct::Engine::instance().window(i);
 
         if (!windowPtr.hasTag(SpoutTag)) {
             continue;
@@ -350,7 +348,7 @@ void mainInitFunc() {
 
         w.windowId = i;
 
-        const sgct::Window::StereoMode sm = windowPtr.getStereoMode();
+        const sgct::Window::StereoMode sm = windowPtr.stereoMode();
         const bool hasStereo = (sm != sgct::Window::StereoMode::NoStereo) &&
                                (sm < sgct::Window::StereoMode::SideBySide);
 
@@ -358,26 +356,26 @@ void mainInitFunc() {
             SpoutWindow::SpoutData& left = w.leftOrMain;
             left.handle = GetSpout();
             left.initialized = left.handle->CreateSender(
-                (windowPtr.getName() + "_left").c_str(),
-                windowPtr.getFramebufferResolution().x,
-                windowPtr.getFramebufferResolution().y
+                (windowPtr.name() + "_left").c_str(),
+                windowPtr.framebufferResolution().x,
+                windowPtr.framebufferResolution().y
             );
 
             SpoutWindow::SpoutData& right = w.right;
             right.handle = GetSpout();
             right.initialized = right.handle->CreateSender(
-                (windowPtr.getName() + "_right").c_str(),
-                windowPtr.getFramebufferResolution().x,
-                windowPtr.getFramebufferResolution().y
+                (windowPtr.name() + "_right").c_str(),
+                windowPtr.framebufferResolution().x,
+                windowPtr.framebufferResolution().y
             );
         }
         else {
             SpoutWindow::SpoutData& main = w.leftOrMain;
             main.handle = GetSpout();
             main.initialized = main.handle->CreateSender(
-                windowPtr.getName().c_str(),
-                windowPtr.getFramebufferResolution().x,
-                windowPtr.getFramebufferResolution().y
+                windowPtr.name().c_str(),
+                windowPtr.framebufferResolution().x,
+                windowPtr.framebufferResolution().y
             );
         }
 
@@ -406,13 +404,12 @@ void mainInitFunc() {
         );
     }
 
-    for (int i = 0; i < nWindows; ++i) {
-        sgct::Window& w = sgct::Engine::instance().getWindow(i);
+    for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
+        using namespace sgct;
+        Window& w = sgct::Engine::instance().window(i);
         constexpr const char* screenshotNames = "OpenSpace";
-        sgct::core::ScreenCapture* cpt0 = w.getScreenCapturePointer(
-            sgct::Window::Eye::MonoOrLeft);
-        sgct::core::ScreenCapture* cpt1 = w.getScreenCapturePointer(
-            sgct::Window::Eye::Right);
+        core::ScreenCapture* cpt0 = w.screenCapturePointer(Window::Eye::MonoOrLeft);
+        core::ScreenCapture* cpt1 = w.screenCapturePointer(Window::Eye::Right);
 
         if (cpt0) {
             cpt0->setPathAndFileName(absPath(screenshotPath), screenshotNames);
@@ -589,7 +586,7 @@ void mainRenderFunc(sgct::RenderData data) {
     _sgctState.modelViewProjection = data.modelViewProjectionMatrix;
 
     glm::mat4 viewMatrix = data.viewMatrix *
-        glm::translate(glm::mat4(1.f), sgct::Engine::getDefaultUser().getPosMono());
+        glm::translate(glm::mat4(1.f), sgct::Engine::defaultUser().posMono());
 
     glm::mat4 projectionMatrix = data.projectionMatrix;
 #ifdef OPENVR_SUPPORT
@@ -684,30 +681,30 @@ void mainPostDrawFunc() {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
-        sgct::Window& window = sgct::Engine::instance().getWindow(w.windowId);
+        sgct::Window& window = sgct::Engine::instance().window(w.windowId);
         if (w.leftOrMain.initialized) {
-            const GLuint texId = window.getFrameBufferTexture(
+            const GLuint texId = window.frameBufferTexture(
                 sgct::Window::TextureIndex::LeftEye
             );
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
                 static_cast<gl::GLuint>(GL_TEXTURE_2D),
-                window.getFramebufferResolution().x,
-                window.getFramebufferResolution().y
+                window.framebufferResolution().x,
+                window.framebufferResolution().y
             );
         }
 
         if (w.right.initialized) {
-            const GLuint texId = window.getFrameBufferTexture(
+            const GLuint texId = window.frameBufferTexture(
                 sgct::Window::TextureIndex::RightEye
             );
             glBindTexture(GL_TEXTURE_2D, texId);
             w.right.handle->SendTexture(
                 texId,
                 static_cast<gl::GLuint>(GL_TEXTURE_2D),
-                window.getFramebufferResolution().x,
-                window.getFramebufferResolution().y
+                window.framebufferResolution().x,
+                window.framebufferResolution().y
             );
         }
     }
@@ -836,7 +833,7 @@ void mainEncodeFun() {
     LTRACE("main::mainEncodeFun(begin)");
 
     std::vector<char> data = global::openSpaceEngine.encode();
-    _synchronizationBuffer.setVal(std::move(data));
+    _synchronizationBuffer.setValue(std::move(data));
     sgct::SharedData::instance().writeVector(_synchronizationBuffer);
 
     LTRACE("main::mainEncodeFun(end)");
@@ -858,7 +855,7 @@ void mainDecodeFun() {
     LTRACE("main::mainDecodeFun(begin)");
 
     sgct::SharedData::instance().readVector(_synchronizationBuffer);
-    std::vector<char> data = _synchronizationBuffer.getVal();
+    std::vector<char> data = _synchronizationBuffer.value();
     global::openSpaceEngine.decode(std::move(data));
 
     LTRACE("main::mainDecodeFun(end)");
@@ -894,37 +891,37 @@ void setSgctDelegateFunctions() {
         sgct::core::ClusterManager::instance().setUseIgnoreSync(enabled);
     };
     sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
-        int n = sgct::Engine::instance().getNumberOfWindows();
+        int n = sgct::Engine::instance().numberOfWindows();
         for (int i = 0; i < n; ++i) {
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            GLFWwindow* w = sgct::Engine::instance().getWindow(i).getWindowHandle();
+            GLFWwindow* w = sgct::Engine::instance().window(i).windowHandle();
             glfwSwapBuffers(w);
         }
     };
     sgctDelegate.windowHasResized = []() {
         return _sgctState.window->isWindowResized();
     };
-    sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance().getAvgDt(); };
+    sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance().avgDt(); };
     sgctDelegate.deltaTimeStandardDeviation = []() {
-        return sgct::Engine::instance().getDtStandardDeviation();
+        return sgct::Engine::instance().standardDeviationDt();
     };
     sgctDelegate.minDeltaTime = []() {
-        return sgct::Engine::instance().getMinDt();
+        return sgct::Engine::instance().minDt();
     };
     sgctDelegate.maxDeltaTime = []() {
-        return sgct::Engine::instance().getMaxDt();
+        return sgct::Engine::instance().maxDt();
     };
-    sgctDelegate.deltaTime = []() { return sgct::Engine::instance().getDt(); };
+    sgctDelegate.deltaTime = []() { return sgct::Engine::instance().dt(); };
     sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
     sgctDelegate.mousePosition = []() {
-        int id = _sgctState.window->getId();
+        int id = _sgctState.window->id();
         double posX, posY;
         sgct::Engine::getMousePos(id, &posX, &posY);
         return glm::vec2(posX, posY);
     };
     sgctDelegate.mouseButtons = [](int maxNumber) {
-        int id = _sgctState.window->getId();
+        int id = _sgctState.window->id();
         uint32_t result = 0;
         for (int i = 0; i < maxNumber; ++i) {
             bool button = (sgct::Engine::getMouseButton(id, i) != 0);
@@ -935,65 +932,65 @@ void setSgctDelegateFunctions() {
         return result;
     };
     sgctDelegate.currentWindowSize = []() {
-        return _sgctState.window->getResolution();
+        return _sgctState.window->resolution();
     };
     sgctDelegate.currentSubwindowSize = []() {
         const sgct::Window& window = *_sgctState.window;
-        switch (window.getStereoMode()) {
+        switch (window.stereoMode()) {
             case sgct::Window::StereoMode::SideBySide:
             case sgct::Window::StereoMode::SideBySideInverted:
-                return glm::ivec2(window.getResolution().x / 2, window.getResolution().y);
+                return glm::ivec2(window.resolution().x / 2, window.resolution().y);
             case sgct::Window::StereoMode::TopBottom:
             case sgct::Window::StereoMode::TopBottomInverted:
-                return glm::ivec2(window.getResolution().x, window.getResolution().y / 2);
+                return glm::ivec2(window.resolution().x, window.resolution().y / 2);
             default:
-                return glm::ivec2(window.getResolution().x, window.getResolution().y);
+                return glm::ivec2(window.resolution().x, window.resolution().y);
         }
     };
     sgctDelegate.currentWindowResolution = []() {
-        return _sgctState.window->getFinalFBODimensions();
+        return _sgctState.window->finalFBODimensions();
     };
     sgctDelegate.currentDrawBufferResolution = []() {
-        if (_sgctState.window->getNumberOfViewports() == 0) {
+        if (_sgctState.window->numberOfViewports() == 0) {
             return glm::ivec2(-1, -1);
         }
-        const sgct::core::Viewport& viewport = _sgctState.window->getViewport(0);
-        if (viewport.hasSubViewports() && viewport.getNonLinearProjection()) {
-            int res = viewport.getNonLinearProjection()->getCubemapResolution();
+        const sgct::core::Viewport& viewport = _sgctState.window->viewport(0);
+        if (viewport.hasSubViewports() && viewport.nonLinearProjection()) {
+            int res = viewport.nonLinearProjection()->cubemapResolution();
             return glm::ivec2(res, res);
         }
         else {
-            return _sgctState.window->getFinalFBODimensions();
+            return _sgctState.window->finalFBODimensions();
         }
     };
     sgctDelegate.currentViewportSize = []() {
-        if (_sgctState.window->getNumberOfViewports() == 0) {
+        if (_sgctState.window->numberOfViewports() == 0) {
             return glm::ivec2(-1, -1);
         }
-        return _sgctState.window->getFramebufferResolution();
+        return _sgctState.window->framebufferResolution();
     };
     sgctDelegate.dpiScaling = []() {
-        return _sgctState.window->getScale();
+        return _sgctState.window->scale();
     };
     sgctDelegate.currentNumberOfAaSamples = []() {
-        return _sgctState.window->getNumberOfAASamples();
+        return _sgctState.window->numberOfAASamples();
     };
     sgctDelegate.isRegularRendering = []() {
-        if (_sgctState.window->getNumberOfViewports() == 0) {
+        if (_sgctState.window->numberOfViewports() == 0) {
             ghoul_assert(
-                _sgctState.window->getNumberOfViewports() > 0,
+                _sgctState.window->numberOfViewports() > 0,
                 "At least one viewport must exist at this time"
             );
 
             return true;
         }
-        const sgct::core::Viewport& vp = _sgctState.window->getViewport(0);
-        sgct::core::NonLinearProjection* nlp = vp.getNonLinearProjection();
+        const sgct::core::Viewport& vp = _sgctState.window->viewport(0);
+        sgct::core::NonLinearProjection* nlp = vp.nonLinearProjection();
         return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
-        for (int i = 0; i < sgct::Engine::instance().getNumberOfWindows(); ++i) {
-            if (sgct::Engine::instance().getWindow(i).hasTag("GUI")) {
+        for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
+            if (sgct::Engine::instance().window(i).hasTag("GUI")) {
                 return true;
             }
         }
@@ -1035,11 +1032,11 @@ void setSgctDelegateFunctions() {
         );
     };
     sgctDelegate.isFisheyeRendering = []() {
-        if (_sgctState.window->getNumberOfViewports() == 0) {
+        if (_sgctState.window->numberOfViewports() == 0) {
             return false;
         }
         const sgct::Window& w = *_sgctState.window;
-        sgct::core::NonLinearProjection* nlp = w.getViewport(0).getNonLinearProjection();
+        sgct::core::NonLinearProjection* nlp = w.viewport(0).nonLinearProjection();
         return dynamic_cast<sgct::core::FisheyeProjection*>(nlp) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
@@ -1052,28 +1049,28 @@ void setSgctDelegateFunctions() {
         glfwPollEvents();
     };
     sgctDelegate.nWindows = []() {
-        return static_cast<int>(sgct::Engine::instance().getNumberOfWindows());
+        return static_cast<int>(sgct::Engine::instance().numberOfWindows());
     };
     sgctDelegate.currentWindowId = []() {
-        return _sgctState.window->getId();
+        return _sgctState.window->id();
     };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         return glfwGetProcAddress(func);
     };
     sgctDelegate.getHorizFieldOfView = []() {
         return static_cast<double>(
-            sgct::Engine::instance().getWindow(0).getHorizFieldOfViewDegrees()
+            sgct::Engine::instance().window(0).horizFieldOfViewDegrees()
         );
     };
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
-        sgct::Window& w = sgct::Engine::instance().getWindow(0);
+        sgct::Window& w = sgct::Engine::instance().window(0);
         w.setHorizFieldOfView(hFovDeg);
     };
     sgctDelegate.frustumMode = []() {
         return _sgctState.frustumMode;
     };
     sgctDelegate.swapGroupFrameNumber = []() {
-        unsigned int fn = _sgctState.window->getSwapGroupFrameNumber();
+        unsigned int fn = _sgctState.window->swapGroupFrameNumber();
         return static_cast<uint64_t>(fn);
     };
 }
