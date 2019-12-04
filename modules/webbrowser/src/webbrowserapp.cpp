@@ -43,8 +43,9 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
                                                   CefRefPtr<CefCommandLine> commandLine)
 {
-//    command_line->AppendSwitch("disable-gpu");
-//    command_line->AppendSwitch("disable-gpu-compositing");
+    commandLine->AppendSwitch("disable-gpu");
+    commandLine->AppendSwitch("disable-gpu-compositing");
+    commandLine->AppendSwitch("enable-begin-frame-scheduling");
     commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 }
 
