@@ -55,6 +55,7 @@
 #include <stb_image.h>
 #include <chrono>
 #include <ctime>
+#include <numeric>
 
 #ifdef WIN32
 #include <openspace/openspace.h>
@@ -456,13 +457,13 @@ void mainPreSyncFunc() {
         if (!state.isConnected) {
             // Joystick was added
             state.isConnected = true;
-            state.name = sgct::Engine::getJoystickName(joystick);
+            state.name = glfwGetJoystickName(static_cast<int>(joystick));
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
         }
 
-        const float* axes = sgct::Engine::getJoystickAxes(joystick, &state.nAxes);
+        const float* axes = glfwGetJoystickAxes(static_cast<int>(joystick), &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
             LWARNING(fmt::format(
                 "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
@@ -473,8 +474,8 @@ void mainPreSyncFunc() {
         }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
-        const unsigned char* buttons = sgct::Engine::getJoystickButtons(
-            joystick,
+        const unsigned char* buttons = glfwGetJoystickButtons(
+            static_cast<int>(joystick),
             &state.nButtons
         );
 
@@ -904,7 +905,26 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance().avgDt(); };
     sgctDelegate.deltaTimeStandardDeviation = []() {
-        return sgct::Engine::instance().standardDeviationDt();
+        const sgct::Engine::Statistics& stats = sgct::Engine::instance().statistics();
+        const double avg = sgct::Engine::instance().avgDt();
+        const double sumSquare = std::accumulate(
+            stats.frametimes.begin(),
+            stats.frametimes.end(),
+            0.0,
+            [avg](double cur, double rhs) { return cur + pow(rhs - avg, 2.0); }
+        );
+        const int nValues = static_cast<int>(std::count_if(
+            stats.frametimes.begin(),
+            stats.frametimes.end(),
+            [](double d) { return d != 0.0; }
+        ));
+        // We must take the frame counter into account as the history might not be filled yet
+        unsigned f = std::clamp<unsigned int>(
+            sgct::Engine::instance().currentFrameNumber(),
+            1,
+            nValues
+        );
+        return sumSquare / f;
     };
     sgctDelegate.minDeltaTime = []() {
         return sgct::Engine::instance().minDt();
@@ -915,17 +935,23 @@ void setSgctDelegateFunctions() {
     sgctDelegate.deltaTime = []() { return sgct::Engine::instance().dt(); };
     sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
     sgctDelegate.mousePosition = []() {
-        int id = _sgctState.window->id();
+        const sgct::Window* window = sgct::Engine::instance().focusedWindow();
+        if (window == nullptr) {
+            return glm::vec2(0.f);
+        }
         double posX, posY;
-        sgct::Engine::getMousePos(id, &posX, &posY);
+        glfwGetCursorPos(window->windowHandle(), &posX, &posY);
         return glm::vec2(posX, posY);
     };
     sgctDelegate.mouseButtons = [](int maxNumber) {
-        int id = _sgctState.window->id();
         uint32_t result = 0;
+        const sgct::Window* window = sgct::Engine::instance().focusedWindow();
+        if (window == nullptr) {
+            return result;
+        }
         for (int i = 0; i < maxNumber; ++i) {
-            bool button = (sgct::Engine::getMouseButton(id, i) != 0);
-            if (button) {
+            int button = glfwGetMouseButton(window->windowHandle(), button);
+            if (button != 0) {
                 result |= (1 << i);
             }
         }
