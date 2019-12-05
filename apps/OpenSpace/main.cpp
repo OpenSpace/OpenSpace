@@ -153,8 +153,8 @@ struct SpoutWindow {
     /// The right framebuffer
     SpoutData right;
 
-    /// The window ID of this windows
-    int windowId = -1;
+    /// The window ID of this window
+    sgct::Window* window = nullptr;
 };
 
 /// The list of all windows with spout senders
@@ -284,7 +284,7 @@ void mainInitFunc() {
 
     // @TODO (abock, 2019-12-03) This is a hack as we no longer want to assume that there
     // is an active window in the initialization function in SGCT
-    _sgctState.window = &sgct::Engine::instance().window(0);
+    _sgctState.window = sgct::Engine::instance().windows()[0].get();
 
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine.initialize();
@@ -302,9 +302,9 @@ void mainInitFunc() {
         icons[0].width = x;
         icons[0].height = y;
 
-        for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
-            const sgct::Window& windowPtr = sgct::Engine::instance().window(i);
-            glfwSetWindowIcon(windowPtr.windowHandle(), 1, icons);
+        using namespace sgct;
+        for (const std::unique_ptr<Window>& win : Engine::instance().windows()) {
+            glfwSetWindowIcon(win->windowHandle(), 1, icons);
         }
 
         stbi_image_free(icons[0].pixels);
@@ -318,38 +318,34 @@ void mainInitFunc() {
 
 
     // Find if we have at least one OpenVR window
-    // Save reference to first OpenVR window, which is the one we will copy to the HMD.
-    for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
-        if (sgct::Engine::instance().window(i).hasTag(OpenVRTag)) {
+    // Save reference to first OpenVR window, which is the one we will copy to the HMD
+    using namespace sgct;
+    for (const std::unique_ptr<Window>& win : Engine::instance().windows()) {
+        if (win->hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = sgct::Engine::instance().window(i);
 
             // If we have an OpenVRWindow, initialize OpenVR.
             sgct::SGCTOpenVR::initialize(
                 sgct::Engine::instance().nearClippingPlane(),
-                sgct::Engine::instance()farClippingPlane()
+                sgct::Engine::instance().farClippingPlane()
             );
 #else
             LWARNING("OpenVR was requested, but program was compiled without VR support");
 #endif
-
             break;
         }
-    }
 
-    for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
-        const sgct::Window& windowPtr = sgct::Engine::instance().window(i);
-
-        if (!windowPtr.hasTag(SpoutTag)) {
+        if (!win->hasTag(SpoutTag)) {
             continue;
         }
 
 #ifdef OPENSPACE_HAS_SPOUT
         SpoutWindow w;
 
-        w.windowId = i;
+        w.window = win.get();
 
-        const sgct::Window::StereoMode sm = windowPtr.stereoMode();
+        const sgct::Window::StereoMode sm = win->stereoMode();
         const bool hasStereo = (sm != sgct::Window::StereoMode::NoStereo) &&
                                (sm < sgct::Window::StereoMode::SideBySide);
 
@@ -357,26 +353,26 @@ void mainInitFunc() {
             SpoutWindow::SpoutData& left = w.leftOrMain;
             left.handle = GetSpout();
             left.initialized = left.handle->CreateSender(
-                (windowPtr.name() + "_left").c_str(),
-                windowPtr.framebufferResolution().x,
-                windowPtr.framebufferResolution().y
+                (win->name() + "_left").c_str(),
+                win->framebufferResolution().x,
+                win->framebufferResolution().y
             );
 
             SpoutWindow::SpoutData& right = w.right;
             right.handle = GetSpout();
             right.initialized = right.handle->CreateSender(
-                (windowPtr.name() + "_right").c_str(),
-                windowPtr.framebufferResolution().x,
-                windowPtr.framebufferResolution().y
+                (win->name() + "_right").c_str(),
+                win->framebufferResolution().x,
+                win->framebufferResolution().y
             );
         }
         else {
             SpoutWindow::SpoutData& main = w.leftOrMain;
             main.handle = GetSpout();
             main.initialized = main.handle->CreateSender(
-                windowPtr.name().c_str(),
-                windowPtr.framebufferResolution().x,
-                windowPtr.framebufferResolution().y
+                win->name().c_str(),
+                win->framebufferResolution().x,
+                win->framebufferResolution().y
             );
         }
 
@@ -405,12 +401,11 @@ void mainInitFunc() {
         );
     }
 
-    for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
+    for (const std::unique_ptr<Window>& win : sgct::Engine::instance().windows()) {
         using namespace sgct;
-        Window& w = sgct::Engine::instance().window(i);
         constexpr const char* screenshotNames = "OpenSpace";
-        core::ScreenCapture* cpt0 = w.screenCapturePointer(Window::Eye::MonoOrLeft);
-        core::ScreenCapture* cpt1 = w.screenCapturePointer(Window::Eye::Right);
+        core::ScreenCapture* cpt0 = win->screenCapturePointer(Window::Eye::MonoOrLeft);
+        core::ScreenCapture* cpt1 = win->screenCapturePointer(Window::Eye::Right);
 
         if (cpt0) {
             cpt0->setPathAndFileName(absPath(screenshotPath), screenshotNames);
@@ -682,30 +677,29 @@ void mainPostDrawFunc() {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
-        sgct::Window& window = sgct::Engine::instance().window(w.windowId);
         if (w.leftOrMain.initialized) {
-            const GLuint texId = window.frameBufferTexture(
+            const GLuint texId = w.window->frameBufferTexture(
                 sgct::Window::TextureIndex::LeftEye
             );
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
                 static_cast<gl::GLuint>(GL_TEXTURE_2D),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
+                w.window->framebufferResolution().x,
+                w.window->framebufferResolution().y
             );
         }
 
         if (w.right.initialized) {
-            const GLuint texId = window.frameBufferTexture(
+            const GLuint texId = w.window->frameBufferTexture(
                 sgct::Window::TextureIndex::RightEye
             );
             glBindTexture(GL_TEXTURE_2D, texId);
             w.right.handle->SendTexture(
                 texId,
                 static_cast<gl::GLuint>(GL_TEXTURE_2D),
-                window.framebufferResolution().x,
-                window.framebufferResolution().y
+                w.window->framebufferResolution().x,
+                w.window->framebufferResolution().y
             );
         }
     }
@@ -892,12 +886,11 @@ void setSgctDelegateFunctions() {
         sgct::core::ClusterManager::instance().setUseIgnoreSync(enabled);
     };
     sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
-        int n = sgct::Engine::instance().numberOfWindows();
-        for (int i = 0; i < n; ++i) {
+        using namespace sgct;
+        for (const std::unique_ptr<Window>& win : Engine::instance().windows()) {
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            GLFWwindow* w = sgct::Engine::instance().window(i).windowHandle();
-            glfwSwapBuffers(w);
+            glfwSwapBuffers(win->windowHandle());
         }
     };
     sgctDelegate.windowHasResized = []() {
@@ -950,7 +943,7 @@ void setSgctDelegateFunctions() {
             return result;
         }
         for (int i = 0; i < maxNumber; ++i) {
-            int button = glfwGetMouseButton(window->windowHandle(), button);
+            const int button = glfwGetMouseButton(window->windowHandle(), i);
             if (button != 0) {
                 result |= (1 << i);
             }
@@ -977,10 +970,10 @@ void setSgctDelegateFunctions() {
         return _sgctState.window->finalFBODimensions();
     };
     sgctDelegate.currentDrawBufferResolution = []() {
-        if (_sgctState.window->numberOfViewports() == 0) {
+        if (_sgctState.window->viewports().empty()) {
             return glm::ivec2(-1, -1);
         }
-        const sgct::core::Viewport& viewport = _sgctState.window->viewport(0);
+        const sgct::core::Viewport& viewport = *_sgctState.window->viewports()[0];
         if (viewport.hasSubViewports() && viewport.nonLinearProjection()) {
             int res = viewport.nonLinearProjection()->cubemapResolution();
             return glm::ivec2(res, res);
@@ -990,7 +983,7 @@ void setSgctDelegateFunctions() {
         }
     };
     sgctDelegate.currentViewportSize = []() {
-        if (_sgctState.window->numberOfViewports() == 0) {
+        if (_sgctState.window->viewports().empty()) {
             return glm::ivec2(-1, -1);
         }
         return _sgctState.window->framebufferResolution();
@@ -1002,21 +995,14 @@ void setSgctDelegateFunctions() {
         return _sgctState.window->numberOfAASamples();
     };
     sgctDelegate.isRegularRendering = []() {
-        if (_sgctState.window->numberOfViewports() == 0) {
-            ghoul_assert(
-                _sgctState.window->numberOfViewports() > 0,
-                "At least one viewport must exist at this time"
-            );
-
-            return true;
-        }
-        const sgct::core::Viewport& vp = _sgctState.window->viewport(0);
+        const sgct::core::Viewport& vp = *_sgctState.window->viewports()[0];
         sgct::core::NonLinearProjection* nlp = vp.nonLinearProjection();
         return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
-        for (int i = 0; i < sgct::Engine::instance().numberOfWindows(); ++i) {
-            if (sgct::Engine::instance().window(i).hasTag("GUI")) {
+        using namespace sgct;
+        for (const std::unique_ptr<Window>& win : Engine::instance().windows()) {
+            if (win->hasTag("GUI")) {
                 return true;
             }
         }
@@ -1058,11 +1044,11 @@ void setSgctDelegateFunctions() {
         );
     };
     sgctDelegate.isFisheyeRendering = []() {
-        if (_sgctState.window->numberOfViewports() == 0) {
+        if (_sgctState.window->viewports().empty()) {
             return false;
         }
         const sgct::Window& w = *_sgctState.window;
-        sgct::core::NonLinearProjection* nlp = w.viewport(0).nonLinearProjection();
+        sgct::core::NonLinearProjection* nlp = w.viewports()[0]->nonLinearProjection();
         return dynamic_cast<sgct::core::FisheyeProjection*>(nlp) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
@@ -1075,7 +1061,7 @@ void setSgctDelegateFunctions() {
         glfwPollEvents();
     };
     sgctDelegate.nWindows = []() {
-        return static_cast<int>(sgct::Engine::instance().numberOfWindows());
+        return static_cast<int>(sgct::Engine::instance().windows().size());
     };
     sgctDelegate.currentWindowId = []() {
         return _sgctState.window->id();
@@ -1085,12 +1071,11 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.getHorizFieldOfView = []() {
         return static_cast<double>(
-            sgct::Engine::instance().window(0).horizFieldOfViewDegrees()
+            sgct::Engine::instance().windows()[0]->horizFieldOfViewDegrees()
         );
     };
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
-        sgct::Window& w = sgct::Engine::instance().window(0);
-        w.setHorizFieldOfView(hFovDeg);
+        sgct::Engine::instance().windows()[0]->setHorizFieldOfView(hFovDeg);
     };
     sgctDelegate.frustumMode = []() {
         return _sgctState.frustumMode;
