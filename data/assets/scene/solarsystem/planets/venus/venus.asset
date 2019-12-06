@@ -26,6 +26,15 @@ local color_layers = {
     }
 }
 
+local height_layers = {
+    {
+        Identifier = "Magellan",
+        Name = "Magellan Elevation [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MagellanDEM.wms",
+        TilePixelSize = 64
+    }
+}
+
 local Venus = {
     Identifier = "Venus",
     Parent = transforms.VenusBarycenter.Identifier,
@@ -46,7 +55,8 @@ local Venus = {
         Radii = { 6051900.0, 6051900.0, 6051800.0 },
         SegmentsPerPatch = 64,
         Layers = {
-            ColorLayers = color_layers
+            ColorLayers = color_layers,
+            HeightLayers = height_layers
         },
         Labels = {
             Enable = false,
