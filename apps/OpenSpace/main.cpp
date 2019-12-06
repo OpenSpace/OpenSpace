@@ -45,7 +45,7 @@
 #include <sgct/commandline.h>
 #include <sgct/engine.h>
 #include <sgct/fisheyeprojection.h>
-#include <sgct/logger.h>
+#include <sgct/log.h>
 #include <sgct/screencapture.h>
 #include <sgct/settings.h>
 #include <sgct/shareddata.h>
@@ -404,8 +404,8 @@ void mainInitFunc() {
     for (const std::unique_ptr<Window>& win : sgct::Engine::instance().windows()) {
         using namespace sgct;
         constexpr const char* screenshotNames = "OpenSpace";
-        core::ScreenCapture* cpt0 = win->screenCapturePointer(Window::Eye::MonoOrLeft);
-        core::ScreenCapture* cpt1 = win->screenCapturePointer(Window::Eye::Right);
+        ScreenCapture* cpt0 = win->screenCapturePointer(Window::Eye::MonoOrLeft);
+        ScreenCapture* cpt1 = win->screenCapturePointer(Window::Eye::Right);
 
         if (cpt0) {
             cpt0->setPathAndFileName(absPath(screenshotPath), screenshotNames);
@@ -883,7 +883,7 @@ void setSgctDelegateFunctions() {
         sgct::Window::setBarrier(enabled);
     };
     sgctDelegate.setSynchronization = [](bool enabled) {
-        sgct::core::ClusterManager::instance().setUseIgnoreSync(enabled);
+        sgct::ClusterManager::instance().setUseIgnoreSync(enabled);
     };
     sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
         using namespace sgct;
@@ -973,7 +973,7 @@ void setSgctDelegateFunctions() {
         if (_sgctState.window->viewports().empty()) {
             return glm::ivec2(-1, -1);
         }
-        const sgct::core::Viewport& viewport = *_sgctState.window->viewports()[0];
+        const sgct::Viewport& viewport = *_sgctState.window->viewports()[0];
         if (viewport.hasSubViewports() && viewport.nonLinearProjection()) {
             int res = viewport.nonLinearProjection()->cubemapResolution();
             return glm::ivec2(res, res);
@@ -995,8 +995,8 @@ void setSgctDelegateFunctions() {
         return _sgctState.window->numberOfAASamples();
     };
     sgctDelegate.isRegularRendering = []() {
-        const sgct::core::Viewport& vp = *_sgctState.window->viewports()[0];
-        sgct::core::NonLinearProjection* nlp = vp.nonLinearProjection();
+        const sgct::Viewport& vp = *_sgctState.window->viewports()[0];
+        sgct::NonLinearProjection* nlp = vp.nonLinearProjection();
         return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
@@ -1048,8 +1048,8 @@ void setSgctDelegateFunctions() {
             return false;
         }
         const sgct::Window& w = *_sgctState.window;
-        sgct::core::NonLinearProjection* nlp = w.viewports()[0]->nonLinearProjection();
-        return dynamic_cast<sgct::core::FisheyeProjection*>(nlp) != nullptr;
+        sgct::NonLinearProjection* nlp = w.viewports()[0]->nonLinearProjection();
+        return dynamic_cast<sgct::FisheyeProjection*>(nlp) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
         sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
@@ -1250,9 +1250,9 @@ int main(int argc, char** argv) {
     arguments.insert(arguments.begin(), argv[0]);
 
     // Need to set this before the creation of the sgct::Engine
-    sgct::Logger::instance().setLogToConsole(false);
-    sgct::Logger::instance().setShowTime(false);
-    sgct::Logger::instance().setLogCallback(mainLogCallback);
+    sgct::Log::instance().setLogToConsole(false);
+    sgct::Log::instance().setShowTime(false);
+    sgct::Log::instance().setLogCallback(mainLogCallback);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
@@ -1277,7 +1277,7 @@ int main(int argc, char** argv) {
     callbacks.encode = mainEncodeFun;
     callbacks.decode = mainDecodeFun;
 
-    sgct::Logger::instance().setNotifyLevel(sgct::Logger::Level::Debug);
+    sgct::Log::instance().setNotifyLevel(sgct::Log::Level::Debug);
 
     // Try to open a window
     LDEBUG("Initialize SGCT Engine");
@@ -1303,7 +1303,7 @@ int main(int argc, char** argv) {
         }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
-        sgct::Logger::instance().setLogCallback(nullptr);
+        sgct::Log::instance().setLogCallback(nullptr);
 
         LDEBUG("Destroying SGCT Engine");
         sgct::Engine::destroy();
