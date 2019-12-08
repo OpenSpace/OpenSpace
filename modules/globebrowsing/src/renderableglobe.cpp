@@ -190,6 +190,20 @@ namespace {
         "Enables shadow mapping algorithm. Used by renderable rings too."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
+        "ZFightingPercentage",
+        "Z-Fighting Percentage",
+        "The percentage of the correct distance to the surface being shadowed. "
+        "Possible values: [0.0, 1.0]"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
+        "NumberShadowSamples",
+        "Number of Shadow Samples",
+        "The number of samples used during shadow mapping calculation "
+        "(Percentage Closer Filtering)."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
         "TargetLodScaleFactor",
         "Target Level of Detail Scale Factor",
@@ -502,12 +516,15 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseInfo, false),
         BoolProperty(EclipseHardShadowsInfo, false),
         BoolProperty(ShadowMappingInfo, false),
+        FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
+        IntProperty(NumberShadowSamplesInfo, 5, 1, 20),
         FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
         IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
     })
+    , _shadowMappingPropertyOwner({ "Shadow Mapping" })
     , _debugPropertyOwner({ "Debug" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
@@ -544,7 +561,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.eclipseShadowsEnabled);
     addProperty(_generalProperties.eclipseHardShadows);
-    addProperty(_generalProperties.shadowMapping);
+
+    _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
+    _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
+    _shadowMappingPropertyOwner.addProperty(_generalProperties.nShadowSamples);
+    addPropertySubOwner(_shadowMappingPropertyOwner);
+
     _generalProperties.targetLodScaleFactor.onChange([this]() {
         float sf = _generalProperties.targetLodScaleFactor;
         _generalProperties.currentLodScaleFactor = sf;
@@ -1296,6 +1318,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
+        program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
+        program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1420,6 +1444,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
+        program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
+        program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
     glEnable(GL_DEPTH_TEST);

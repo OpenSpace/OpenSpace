@@ -37,6 +37,8 @@ uniform float transparency;
 uniform bool hasSunPosition;
 uniform vec3 sunPosition;
 uniform float _nightFactor;
+uniform int nShadowSamples;
+uniform float zFightingPercentage;
 
 // temp
 in vec4 fragPosInLightSpace;
@@ -73,24 +75,23 @@ Fragment getFragment() {
     float shadow = 1.0;
     if ( shadowCoords.z >= 0 ) {
         vec4 normalizedShadowCoords = shadowCoords;
-        normalizedShadowCoords.z = normalizeFloat(normalizedShadowCoords.w - 0.005 * normalizedShadowCoords.w);
-        normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
-        normalizedShadowCoords.w = 1.0;
-        
-        //shadow = textureProj(shadowMapTexture, normalizedShadowCoords);
+        normalizedShadowCoords.z    = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
+        normalizedShadowCoords.xy   = normalizedShadowCoords.xy / normalizedShadowCoords.w;
+        normalizedShadowCoords.w    = 1.0;
         
         float sum = 0;
-        int fStep = 2;
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep, -fStep));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep,  0));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-fStep,  fStep));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,     -fStep));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,      0));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0,      fStep));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep, -fStep));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep,  0));
-        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( fStep,  fStep));
-        shadow = sum / 9.f;
+        for (int i = 0; i < nShadowSamples; ++i) {
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i, -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  nShadowSamples - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 , -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 ,  nShadowSamples - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i, -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  nShadowSamples - i));
+        }
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
+        shadow = sum / (8.f * nShadowSamples + 1.f);
     }
     
     // The normal for the one plane depends on whether we are dealing

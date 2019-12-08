@@ -92,11 +92,14 @@ namespace openspace {
         properties::FloatProperty _nightFactor;
         properties::FloatProperty _transparency;
         properties::BoolProperty _enabled;
+        properties::FloatProperty _zFightingPercentage;
+        properties::IntProperty _nShadowSamples;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
         std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
         UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
-                     sunPosition, ringTexture, shadowMatrix, shadowMapTexture
+                     sunPosition, ringTexture, shadowMatrix, shadowMapTexture,
+                     nShadowSamples, zFightingPercentage
         ) _uniformCache;
         UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) 
             _geomUniformCache;

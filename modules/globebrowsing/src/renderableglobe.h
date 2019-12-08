@@ -129,24 +129,28 @@ private:
         properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
-        properties::IntProperty modelSpaceRenderingCutoffLevel;
-        properties::IntProperty dynamicLodIterationCount;
+        properties::IntProperty  modelSpaceRenderingCutoffLevel;
+        properties::IntProperty  dynamicLodIterationCount;
     } _debugProperties;
 
     struct {
-        properties::BoolProperty performShading;
-        properties::BoolProperty useAccurateNormals;
-        properties::BoolProperty eclipseShadowsEnabled;
-        properties::BoolProperty eclipseHardShadows;
-        properties::BoolProperty shadowMapping;
+        properties::BoolProperty  performShading;
+        properties::BoolProperty  useAccurateNormals;
+        properties::BoolProperty  eclipseShadowsEnabled;
+        properties::BoolProperty  eclipseHardShadows;
+        properties::BoolProperty  shadowMapping;
+        properties::FloatProperty zFightingPercentage;
+        properties::IntProperty   nShadowSamples;
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
-        properties::IntProperty nActiveLayers;
+        properties::IntProperty   nActiveLayers;
     } _generalProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
+
+    properties::PropertyOwner _shadowMappingPropertyOwner;
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered

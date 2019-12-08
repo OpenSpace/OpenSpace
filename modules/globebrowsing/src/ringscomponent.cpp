@@ -56,9 +56,10 @@
 #include <locale>
 
 namespace {
-    constexpr const std::array<const char*, 8> UniformNames = {
+    constexpr const std::array<const char*, 10> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "transparency", "_nightFactor", 
-        "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture"
+        "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
+        "nShadowSamples", "zFightingPercentage"
     };
 
     constexpr const std::array<const char*, 3> GeomUniformNames = {
@@ -101,6 +102,20 @@ namespace {
         "This value determines the transparency of part of the rings depending on the "
         "color values. For this value v, the transparency is equal to length(color) / v."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
+        "ZFightingPercentage",
+        "Z-Fighting Percentage",
+        "The percentage of the correct distance to the surface being shadowed. "
+        "Possible values: [0.0, 1.0]"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
+        "NumberShadowSamples",
+        "Number of Shadow Samples",
+        "The number of samples used during shadow mapping calculation "
+        "(Percentage Closer Filtering)."
+    };
 } // namespace
 
 namespace openspace {
@@ -140,6 +155,18 @@ namespace openspace {
                     new DoubleVerifier,
                     Optional::Yes,
                     TransparencyInfo.description
+                },
+                {
+                    ZFightingPercentageInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    ZFightingPercentageInfo.description
+                },
+                {
+                    NumberShadowSamplesInfo.identifier,
+                    new IntVerifier,
+                    Optional::Yes,
+                    NumberShadowSamplesInfo.description
                 }
             }
         };
@@ -153,6 +180,8 @@ namespace openspace {
         , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
         , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
         , _enabled({ "Enabled", "Enabled", "Enable/Disable Rings" }, true)
+        , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
+        , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 20)
         , _ringsDictionary(dictionary)
     {
         using ghoul::filesystem::File;
@@ -204,6 +233,22 @@ namespace openspace {
                 _ringsDictionary.value<double>(TransparencyInfo.identifier)
                 );
         }
+
+        // Shadow Mapping Quality Controls
+        if (_ringsDictionary.hasKey(ZFightingPercentageInfo.identifier)) {
+            _zFightingPercentage = _ringsDictionary.value<float>(
+                ZFightingPercentageInfo.identifier
+            );
+        }
+        addProperty(_zFightingPercentage);
+
+        if (_ringsDictionary.hasKey(NumberShadowSamplesInfo.identifier)) {
+            _nShadowSamples = _ringsDictionary.value<int>(
+                NumberShadowSamplesInfo.identifier
+                );
+        }
+        addProperty(_nShadowSamples);
+
         addProperty(_transparency);
     }
 
@@ -287,6 +332,8 @@ namespace openspace {
             _shader->setUniform(_uniformCache.transparency, _transparency);
             _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
             _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
+            _shader->setUniform(_uniformCache.nShadowSamples, _nShadowSamples);
+            _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
 
             ringTextureUnit.activate();
             _texture->bind();

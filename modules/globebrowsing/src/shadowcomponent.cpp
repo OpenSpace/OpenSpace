@@ -163,13 +163,19 @@ namespace openspace {
                     new DoubleVerifier,
                     Optional::Yes,
                     DistanceFractionInfo.description
+                },
+                {
+                    DepthMapSizeInfo.identifier,
+                    new Vector2ListVerifier<float>,
+                    Optional::Yes,
+                    DepthMapSizeInfo.description
                 }
             }
         };
     }
 
     ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
-        : properties::PropertyOwner({ "Shadows" })		
+        : properties::PropertyOwner({ "Shadows Component" })		
         , _saveDepthTexture(SaveDepthTextureInfo)
         , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
         , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
@@ -221,6 +227,10 @@ namespace openspace {
             _shadowDepthTextureHeight = renderingResolution.y * 2;
             _dynamicDepthTextureRes = true;
         }
+
+        _saveDepthTexture.onChange([&]() {
+            _executeDepthTextureSave = true;
+            });
 
         _viewDepthMap = false;
 
