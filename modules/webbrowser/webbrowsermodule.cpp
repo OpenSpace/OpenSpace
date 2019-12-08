@@ -142,16 +142,6 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(_webHelperLocation);
     LDEBUG("Starting CEF... done!");
 
-    global::callback::preSync.emplace_back([this]() {
-        if (_cefHost && !_browsers.empty()) {
-            _cefHost->doMessageLoopWork();
-
-            const std::chrono::time_point<std::chrono::high_resolution_clock> timeAfter =
-                std::chrono::high_resolution_clock::now();
-            webbrowser::latestCall = timeAfter;
-        }
-    });
-
     if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
         _updateBrowserBetweenRenderables =
             dictionary.value<bool>(UpdateBrowserBetweenRenderablesInfo.identifier);
@@ -218,14 +208,18 @@ bool WebBrowserModule::isEnabled() const {
     return _enabled;
 }
 
-namespace webbrowser {
-
 /**
  * Logic for the webbrowser performance hotfix,
  * described in more detail in globalscallbacks.h.
  */
+namespace webbrowser {
 
-std::chrono::microseconds interval = std::chrono::microseconds(1);
+ /**
+* The time interval to describe how often the CEF message loop needs to
+* be pumped to work properly. A value of 10000 us updates CEF a 100 times
+* per second which is enough for fluid interaction without wasting resources
+*/
+std::chrono::microseconds interval = std::chrono::microseconds(10000);
 std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 CefHost* cefHost = nullptr;
 

@@ -22,37 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
+#define __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#ifdef WIN32
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_color;
+namespace openspace {
 
-out vec4 vs_position;
-out vec3 vs_color;
-out float vs_screenSpaceDepth;
-out float vs_starBrightness;
+class Win32TouchHook {
+public:
+    Win32TouchHook(void* nativeWindow);
+    ~Win32TouchHook();
+};
 
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
-uniform dvec3 eyePosition;
+} // namespace openspace
 
-const double PARSEC = 3.08567756E16;
-
-void main() {
-	  vs_position = vec4(in_position, 1.0);
-		dvec4 dpos = dvec4(vs_position);
-
-		double distanceToStar = length((dpos.xyz - eyePosition));
-		vs_starBrightness = clamp(float(8000*PARSEC/distanceToStar), 0.0, 1.0);
-
-		dpos.xyz *= 8.0;
-		dpos = modelMatrix * dpos;
-		dpos /= PARSEC;
-
-		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
-		vs_color = in_color;
-		vs_screenSpaceDepth = positionScreenSpace.w;
-		gl_Position = positionScreenSpace;
-}
+#endif // WIN32
+#endif // __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__

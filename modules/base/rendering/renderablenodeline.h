@@ -22,37 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLENODELINE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLENODELINE___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/rendering/renderable.h>
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_color;
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
 
-out vec4 vs_position;
-out vec3 vs_color;
-out float vs_screenSpaceDepth;
-out float vs_starBrightness;
+namespace ghoul::opengl { class ProgramObject; }
 
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
-uniform dvec3 eyePosition;
+namespace openspace {
 
-const double PARSEC = 3.08567756E16;
+namespace documentation { struct Documentation; }
 
-void main() {
-	  vs_position = vec4(in_position, 1.0);
-		dvec4 dpos = dvec4(vs_position);
+class Translation;
 
-		double distanceToStar = length((dpos.xyz - eyePosition));
-		vs_starBrightness = clamp(float(8000*PARSEC/distanceToStar), 0.0, 1.0);
+/**
+ * This is a class for a line that is drawn between two nodes in OpenSpace.
+ */
+class RenderableNodeLine : public Renderable {
+public:
+    RenderableNodeLine(const ghoul::Dictionary& dictionary);
+    ~RenderableNodeLine() = default;
 
-		dpos.xyz *= 8.0;
-		dpos = modelMatrix * dpos;
-		dpos /= PARSEC;
+    static documentation::Documentation Documentation();
+    
+private:
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
-		vs_color = in_color;
-		vs_screenSpaceDepth = positionScreenSpace.w;
-		gl_Position = positionScreenSpace;
-}
+    bool isReady() const override;
+    void updateVertexData();
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+
+    void unbindGL();
+    void bindGL();
+
+    glm::dvec3 getCoordinatePosFromAnchorNode(glm::dvec3 worldPos);
+
+    ghoul::opengl::ProgramObject* _program;
+    /// The vertex attribute location for position
+    /// must correlate to layout location in vertex shader
+    const GLuint _locVertex = 0;
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
+    std::vector<float> _vertexArray;
+
+    glm::dvec3 _startPos;
+    glm::dvec3 _endPos;
+
+    properties::StringProperty _start;
+    properties::StringProperty _end;
+    properties::Vec3Property _lineColor;
+    properties::FloatProperty _lineWidth;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLENODELINE___H__
