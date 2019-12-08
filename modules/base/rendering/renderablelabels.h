@@ -54,6 +54,18 @@ namespace documentation { struct Documentation; }
 struct LinePoint;
 
 class RenderableLabels : public Renderable {
+private:
+    enum Unit {
+        Meter = 0,
+        Kilometer = 1,
+        AU = 2,
+        Parsec = 3,
+        Kiloparsec = 4,
+        Megaparsec = 5,
+        Gigaparsec = 6,
+        GigalightYears = 7
+    };
+
 public:
     RenderableLabels(const ghoul::Dictionary& dictionary);
 
@@ -68,6 +80,8 @@ public:
 
     static documentation::Documentation Documentation();
 
+    void setLabelText(const std::string & newText);
+
 protected:
     properties::OptionProperty _blendMode;
 
@@ -75,16 +89,38 @@ private:
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
-    properties::Vec4Property  _labelColor;
-    properties::FloatProperty _labelSize;
-    properties::FloatProperty _fontSize;
-    properties::FloatProperty _labelMinSize;
-    properties::FloatProperty _labelMaxSize;
-    properties::BoolProperty  _pixelSizeControl;
-    properties::Vec2Property  _fadeInDistance;
-    properties::BoolProperty  _disableFadeInDistance;
+    float changedPerlinSmoothStepFunc(
+                                      const float x, 
+                                      const float startX, 
+                                      const float endX 
+    ) const;
     
+    float linearSmoothStepFunc(
+                               const float x,
+                               const float startX,
+                               const float endX,
+                               const float sUnit,
+                               const float eUnit
+    ) const;
+
+    float getUnit(int unit) const;
+
+    properties::Vec4Property   _labelColor;
+    properties::FloatProperty  _labelSize;
+    properties::FloatProperty  _fontSize;
+    properties::FloatProperty  _labelMinSize;
+    properties::FloatProperty  _labelMaxSize;
+    properties::BoolProperty   _pixelSizeControl;
+    properties::BoolProperty   _enableFadingEffect;
+    properties::StringProperty _labelText;
+    properties::FloatProperty  _fadeStartDistance;
+    properties::FloatProperty  _fadeEndDistance;
+    properties::FloatProperty  _fadeStartSpeed;
+    properties::FloatProperty  _fadeEndSpeed;
+
     properties::OptionProperty _labelOrientationOption;
+    properties::OptionProperty _fadeStartUnitOption;
+    properties::OptionProperty _fadeEndUnitOption;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
@@ -93,8 +129,6 @@ private:
     std::string _labelFile;
     std::string _colorOptionString;
     std::string _datavarSizeOptionString;
-
-    std::string _labelText;
 
     // Data may require some type of transformation prior the spice transformation being
     // applied.

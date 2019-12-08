@@ -49,6 +49,15 @@
 namespace {
     constexpr const char* _loggerCat = "base::RenderableLabels";
     
+    constexpr const char* MeterUnit = "m";
+    constexpr const char* KilometerUnit = "Km";
+    constexpr const char* AstronomicalUnit = "au";
+    constexpr const char* ParsecUnit = "pc";
+    constexpr const char* KiloparsecUnit = "Kpc";
+    constexpr const char* MegaparsecUnit = "Mpc";
+    constexpr const char* GigaparsecUnit = "Gpc";
+    constexpr const char* GigalightyearUnit = "Gly";
+
     enum BlendMode {
         BlendModeNormal = 0,
         BlendModeAdditive
@@ -56,6 +65,8 @@ namespace {
 
     constexpr const int ViewDirection   = 0;
     constexpr const int NormalDirection = 1;
+
+    constexpr double PARSEC = 0.308567756E17;
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
@@ -113,24 +124,52 @@ namespace {
         "Label orientation rendering mode."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
-        "FadeInDistances",
-        "Fade-In Start and End Distances",
-        "These values determine the initial and final distances from the center of "
-        "our galaxy from which the astronomical object will start and end "
-        "fading-in."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
-        "DisableFadeIn",
-        "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect."
+    constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
+        "EnableFading",
+        "Enable/Disable Fade-in effect",
+        "Enable/Disable the Fade-in effect."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable pixel size control.",
         "Enable pixel size control for rectangular projections."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeStartUnitOptionInfo = {
+        "FadeStartUnit",
+        "Fade-In/-Out Start Unit.",
+        "Unit for fade-in/-out starting position calculation."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeEndUnitOptionInfo = {
+        "FadeEndUnit",
+        "Fade-In/-Out End Unit.",
+        "Unit for fade-in/-out ending position calculation."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeStartDistInfo = {
+        "FadeStartDistance",
+        "Fade-In/-Out starting distance.",
+        "Fade-In/-Out starting distance."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeEndDistInfo = {
+        "FadeEndDistance",
+        "Fade-In/-Out ending distance.",
+        "Fade-In/-Out ending distance."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeStartSpeedInfo = {
+        "FadeStartSpeed",
+        "Fade-In/-Out starting speed.",
+        "Fade-In/-Out starting speed."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeEndSpeedInfo = {
+        "FadeEndSpeed",
+        "Fade-In/-Out ending speed.",
+        "Fade-In/-Out ending speed."
     };
 } // namespace
 
@@ -166,14 +205,15 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     , _labelMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
     , _labelMaxSize(LabelMaxSizeInfo, 20.f, 0.5f, 100.f)
     , _pixelSizeControl(PixelSizeControlInfo, false)
-    , _fadeInDistance(
-        FadeInDistancesInfo,
-        glm::vec2(0.f),
-        glm::vec2(0.f),
-        glm::vec2(100.f)
-    )
-    , _disableFadeInDistance(DisableFadeInInfo, true)
+    , _enableFadingEffect(EnableFadingEffectInfo, false)
+    , _labelText(LabelTextInfo)
+    , _fadeStartDistance(FadeStartDistInfo, 1.f, 0.f, 100.f)
+    , _fadeEndDistance(FadeEndDistInfo, 1.f, 0.f, 100.f)
+    , _fadeStartSpeed(FadeStartSpeedInfo, 1.f, 1.f, 100.f)
+    , _fadeEndSpeed(FadeEndSpeedInfo, 1.f, 1.f, 100.f)
     , _labelOrientationOption(LabelOrientationOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fadeStartUnitOption(FadeStartUnitOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fadeEndUnitOption(FadeEndUnitOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -230,6 +270,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(LabelTextInfo.identifier)) {
         _labelText = dictionary.value<std::string>(LabelTextInfo.identifier);
     }
+    addProperty(_labelText);
 
     addProperty(_labelOrientationOption);
     
@@ -273,18 +314,134 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
             );
     }
 
-    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
-        _fadeInDistance = v;
-        _disableFadeInDistance = false;
-        addProperty(_fadeInDistance);
-        addProperty(_disableFadeInDistance);
-    }
-
     if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
         _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
         addProperty(_pixelSizeControl);
     }
+
+    if (dictionary.hasKey(EnableFadingEffectInfo.identifier)) {
+        _enableFadingEffect = dictionary.value<bool>(EnableFadingEffectInfo.identifier);
+    }
+    addProperty(_enableFadingEffect);
+
+    if (dictionary.hasKey(FadeStartDistInfo.identifier)) {
+        _fadeStartDistance = dictionary.value<float>(FadeStartDistInfo.identifier);
+    }
+
+    addProperty(_fadeStartDistance);
+
+    _fadeStartUnitOption.addOption(Meter, MeterUnit);
+    _fadeStartUnitOption.addOption(Kilometer, KilometerUnit);
+    _fadeStartUnitOption.addOption(AU, AstronomicalUnit);
+    _fadeStartUnitOption.addOption(Parsec, ParsecUnit);
+    _fadeStartUnitOption.addOption(Kiloparsec, KiloparsecUnit);
+    _fadeStartUnitOption.addOption(Megaparsec, MegaparsecUnit);
+    _fadeStartUnitOption.addOption(Gigaparsec, GigaparsecUnit);
+    _fadeStartUnitOption.addOption(GigalightYears, GigalightyearUnit);
+
+    _fadeStartUnitOption = AU;
+
+    if (dictionary.hasKey(FadeStartUnitOptionInfo.identifier)) {
+        std::string unit = dictionary.value<std::string>(FadeStartUnitOptionInfo.identifier);
+        if (unit == MeterUnit) {
+            _fadeStartUnitOption = Meter;
+        }
+        else if (unit == KilometerUnit) {
+            _fadeStartUnitOption = Kilometer;
+        }
+        else if (unit == AstronomicalUnit) {
+            _fadeStartUnitOption = AU;
+        }
+        else if (unit == ParsecUnit) {
+            _fadeStartUnitOption = Parsec;
+        }
+        else if (unit == KiloparsecUnit) {
+            _fadeStartUnitOption = Kiloparsec;
+        }
+        else if (unit == MegaparsecUnit) {
+            _fadeStartUnitOption = Megaparsec;
+        }
+        else if (unit == GigaparsecUnit) {
+            _fadeStartUnitOption = Gigaparsec;
+        }
+        else if (unit == GigalightyearUnit) {
+            _fadeStartUnitOption = GigalightYears;
+        }
+        else {
+            LWARNING(
+                "No unit given for RenderableLabels. Using kilometer as units."
+            );
+            _fadeStartUnitOption = Kilometer;
+        }
+    }
+
+    addProperty(_fadeStartUnitOption);
+
+    if (dictionary.hasKey(FadeStartSpeedInfo.identifier)) {
+        _fadeStartSpeed = dictionary.value<float>(FadeStartSpeedInfo.identifier);
+    }
+
+    addProperty(_fadeStartSpeed);
+
+    if (dictionary.hasKey(FadeEndDistInfo.identifier)) {
+        _fadeEndDistance = dictionary.value<float>(FadeEndDistInfo.identifier);
+    }
+
+    addProperty(_fadeEndDistance);
+
+    _fadeEndUnitOption.addOption(Meter, MeterUnit);
+    _fadeEndUnitOption.addOption(Kilometer, KilometerUnit);
+    _fadeEndUnitOption.addOption(AU, AstronomicalUnit);
+    _fadeEndUnitOption.addOption(Parsec, ParsecUnit);
+    _fadeEndUnitOption.addOption(Kiloparsec, KiloparsecUnit);
+    _fadeEndUnitOption.addOption(Megaparsec, MegaparsecUnit);
+    _fadeEndUnitOption.addOption(Gigaparsec, GigaparsecUnit);
+    _fadeEndUnitOption.addOption(GigalightYears, GigalightyearUnit);
+
+    _fadeEndUnitOption = AU;
+
+    if (dictionary.hasKey(FadeEndUnitOptionInfo.identifier)) {
+        std::string unit = dictionary.value<std::string>(FadeEndUnitOptionInfo.identifier);
+        if (unit == MeterUnit) {
+            _fadeEndUnitOption = Meter;
+        }
+        else if (unit == KilometerUnit) {
+            _fadeEndUnitOption = Kilometer;
+        }
+        else if (unit == AstronomicalUnit) {
+            _fadeEndUnitOption = AU;
+        }
+        else if (unit == ParsecUnit) {
+            _fadeEndUnitOption = Parsec;
+        }
+        else if (unit == KiloparsecUnit) {
+            _fadeEndUnitOption = Kiloparsec;
+        }
+        else if (unit == MegaparsecUnit) {
+            _fadeEndUnitOption = Megaparsec;
+        }
+        else if (unit == GigaparsecUnit) {
+            _fadeEndUnitOption = Gigaparsec;
+        }
+        else if (unit == GigalightyearUnit) {
+            _fadeEndUnitOption = GigalightYears;
+        }
+        else {
+            LWARNING(
+                "No unit given for RenderableLabels. Using kilometer as units."
+            );
+            _fadeEndUnitOption = Kilometer;
+        }
+    }
+
+    addProperty(_fadeEndUnitOption);
+
+    if (dictionary.hasKey(FadeEndSpeedInfo.identifier)) {
+        _fadeEndSpeed = dictionary.value<float>(FadeEndSpeedInfo.identifier);
+    }
+
+    addProperty(_fadeEndSpeed);
+
 
     //setBoundingSphere(_size);
 }
@@ -326,23 +483,19 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
     //}
 
     float fadeInVariable = 1.f;
-    if (!_disableFadeInDistance) {
-        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.f / ((fadeRange.y - fadeRange.x));
-        const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const float funcValue = a * distCamera + b;
-        fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
-
-        if (funcValue < 0.01f) {
-            return;
-        }
+    
+    if (_enableFadingEffect) {
+        float distanceNodeToCamera = glm::distance(
+            data.camera.positionVec3(),
+            data.modelTransform.translation
+        );
+        float sUnit = getUnit(_fadeStartUnitOption);
+        float eUnit = getUnit(_fadeEndUnitOption);
+        float startX = _fadeStartDistance * sUnit;
+        float endX = _fadeEndDistance * eUnit;
+        //fadeInVariable = changedPerlinSmoothStepFunc(distanceNodeToCamera, startX, endX);
+        fadeInVariable = linearSmoothStepFunc(distanceNodeToCamera, startX, endX, sUnit, eUnit);
     }
-
-    //glm::dmat4 modelMatrix =
-    //    glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-    //    glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-    //    glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelMatrix(1.0);
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
@@ -374,7 +527,10 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableLabels::update(const UpdateData&) {
-    // JCC: Change font size?
+}
+
+void RenderableLabels::setLabelText(const std::string & newText) {
+    _labelText = newText;
 }
 
 void RenderableLabels::renderLabels(const RenderData& data, 
@@ -414,5 +570,82 @@ void RenderableLabels::renderLabels(const RenderData& data,
         textColor,
         labelInfo
     );
+}
+
+float RenderableLabels::changedPerlinSmoothStepFunc(const float x,
+                                                    const float startX,
+                                                    const float endX) const 
+{
+    float f1 = 6.f * powf((x - startX), 5.f) - 15.f * powf((x - startX), 4.f) + 
+               10.f * powf((x - startX), 3.f);
+    float f2 = -6.f * powf((x - endX), 5.f) + 15.f * powf((x - endX), 4.f) - 
+               10.f * powf((x - endX), 3.f) + 1.f;
+    float f3 = 1.f;
+
+    if (x <= startX) {
+        return std::clamp(f1, 0.f, 1.f);
+    }
+    else if (x > startX && x < endX) {
+        return f3;
+    }
+    else if (x >= endX) {
+        return std::clamp(f2, 0.f, 1.f);
+    } 
+}
+
+float RenderableLabels::linearSmoothStepFunc(const float x,
+                                             const float startX,
+                                             const float endX,
+                                             const float sUnit,
+                                             const float eUnit) const
+{
+    float sdiv = 1.f / (sUnit * _fadeStartSpeed);
+    float ediv = -1.f / (eUnit * _fadeEndSpeed);
+    float f1 = sdiv * (x - startX) + 1.f;
+    float f2 = ediv * (x - endX) + 1.f;
+    float f3 = 1.f;
+   
+    if (x <= startX) {
+        return std::clamp(f1, 0.f, 1.f);
+    }
+    else if (x > startX && x < endX) {
+        return f3;
+    }
+    else if (x >= endX) {
+        return std::clamp(f2, 0.f, 1.f);
+    }
+}
+
+float RenderableLabels::getUnit(int unit) const {
+
+    float scale = 0.f;
+    switch (static_cast<Unit>(unit)) {
+    case Meter:
+        scale = 1.f;
+        break;
+    case Kilometer:
+        scale = 1e3f;
+        break;
+    case AU:
+        scale = 149597870700.f;
+        break;
+    case Parsec:
+        scale = static_cast<float>(PARSEC);
+        break;
+    case Kiloparsec:
+        scale = static_cast<float>(1e3 * PARSEC);
+        break;
+    case Megaparsec:
+        scale = static_cast<float>(1e6 * PARSEC);
+        break;
+    case Gigaparsec:
+        scale = static_cast<float>(1e9 * PARSEC);
+        break;
+    case GigalightYears:
+        scale = static_cast<float>(306391534.73091 * PARSEC);
+        break;
+    }
+
+    return scale;
 }
 } // namespace openspace
