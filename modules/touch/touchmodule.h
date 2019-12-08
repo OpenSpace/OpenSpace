@@ -31,11 +31,15 @@
 
 
 namespace openspace {
+    #ifdef WIN32
+    class Win32TouchHook;
+    #endif //WIN32
 
     class TouchModule : public OpenSpaceModule {
         using Point = std::pair<int, TUIO::TuioPoint>;
     public:
         TouchModule();
+        ~TouchModule();
 
     private:
         /**
@@ -54,6 +58,9 @@ namespace openspace {
         // contains an id and the TuioPoint that was processed last frame
         std::vector<Point> _lastProcessed;
         glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
+#ifdef WIN32
+        std::unique_ptr<Win32TouchHook> _win32TouchHook;
+#endif //WIN32
     };
 
 } // namespace openspace

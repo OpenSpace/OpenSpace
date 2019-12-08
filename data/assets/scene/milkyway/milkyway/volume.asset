@@ -10,15 +10,25 @@ local data = asset.syncedResource({
     Version = 1
 })
 
+local kiloparsec = 3.086E19
+
 local MilkyWayVolumeGalaxy = {
-    Identifier = "Milky Way Volume",
+    Identifier = "MilkyWayVolume",
     Parent = transforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            -- The center of the Milky Way is approximately 8 kiloparsec from the Sun.
+            -- The x-axis of galactic coordinates points from the sun towards the center
+            -- of the galaxy.
+            Position = {8 * kiloparsec, 0, 0}
+        }
+    },
     Renderable = {
         Type = "RenderableGalaxy",
         StepSize = 0.01,
         AbsorptionMultiply = 200,
         EmissionMultiply = 250,
-        Translation = {0.2, 0, 0},
         Rotation = {3.1415926, 3.1248, 4.45741},
         Volume = {
             Type = "Volume",
@@ -34,7 +44,8 @@ local MilkyWayVolumeGalaxy = {
         }
     },
     GUI = {
-        Path = "/Milky Way"
+        Path = "/Milky Way",
+        Name = "Milky Way Volume"
     }
 }
 

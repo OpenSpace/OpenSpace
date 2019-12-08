@@ -22,37 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in float vs_depth;
+in vec4 vs_positionViewSpace;
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_color;
+uniform vec4 color;
 
-out vec4 vs_position;
-out vec3 vs_color;
-out float vs_screenSpaceDepth;
-out float vs_starBrightness;
+Fragment getFragment() {
+    Fragment frag;
 
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
-uniform dvec3 eyePosition;
+    frag.color = color;
 
-const double PARSEC = 3.08567756E16;
-
-void main() {
-	  vs_position = vec4(in_position, 1.0);
-		dvec4 dpos = dvec4(vs_position);
-
-		double distanceToStar = length((dpos.xyz - eyePosition));
-		vs_starBrightness = clamp(float(8000*PARSEC/distanceToStar), 0.0, 1.0);
-
-		dpos.xyz *= 8.0;
-		dpos = modelMatrix * dpos;
-		dpos /= PARSEC;
-
-		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
-		vs_color = in_color;
-		vs_screenSpaceDepth = positionScreenSpace.w;
-		gl_Position = positionScreenSpace;
+    frag.depth = vs_depth;
+    frag.gPosition = vs_positionViewSpace;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    return frag;
 }
