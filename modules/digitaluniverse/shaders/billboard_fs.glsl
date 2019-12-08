@@ -24,12 +24,12 @@
 
 #include "fragment.glsl"
 
-in vec4 gs_colorMap;
+flat in vec4 gs_colorMap;
 in float vs_screenSpaceDepth;
 in vec2 texCoord;
 in float ta;
 
-uniform float alphaValue;
+uniform float alphaValue; // opacity
 uniform vec3 color;
 uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
@@ -64,6 +64,7 @@ Fragment getFragment() {
     // with the ATM.
     frag.gPosition  = vec4(-1e32, -1e32, -1e32, 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
-    
+    //frag.disableLDR2HDR = true;
+
     return frag;
 }

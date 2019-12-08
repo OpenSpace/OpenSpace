@@ -440,6 +440,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     }
 
     penPosition.y -= _font->height();
+
     RenderFont(
         *_font,
         penPosition,

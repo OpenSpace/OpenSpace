@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/orbitalnavigator.h>
-
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
@@ -35,6 +34,7 @@ namespace {
 
     constexpr const double AngleEpsilon = 1E-7;
     constexpr const double DistanceRatioAimThreshold = 1E-4;
+    constexpr const double FlightDestinationFactor = 1E-4;
 
     constexpr const openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -136,12 +136,31 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
-    {
-        "StereoInterpolationTime",
-        "Stereo interpolation time",
-        "The time to interpolate to a new stereoscopic depth "
-        "when the anchor node is changed."
+    constexpr openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
+        "VelocityZoomControl",
+        "Velocity zoom control",
+        "Controls the velocity of the camera motion when zooming in to the focus node. "
+        "The higher the value the faster the camera will move towards the focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyLinearFlightInfo = {
+        "ApplyLinearFlight",
+        "Apply Linear Flight",
+        "This property makes the camera move to the specified distance 'FlightDestinationDistance' while facing the anchor"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FlightDestinationDistanceInfo = {
+        "FlightDestinationDistance",
+        "Flight Destination Distance",
+        "The final distance we want to fly to, with regards to the anchor node."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        StereoInterpolationTimeInfo = {
+            "StereoInterpolationTime",
+            "Stereo interpolation time",
+            "The time to interpolate to a new stereoscopic depth "
+            "when the anchor node is changed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -210,6 +229,9 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
+    , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
+    , _applyLinearFlight(ApplyLinearFlightInfo, false)
+    , _flightDestinationDistance(FlightDestinationDistanceInfo, 2e8f, 0.0f, 1e10f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -262,7 +284,8 @@ OrbitalNavigator::OrbitalNavigator()
     _retargetAim.onChange([this]() {
         if (_aimNode && _aimNode != _anchorNode) {
             startRetargetAim();
-        } else {
+        }
+        else {
             startRetargetAnchor();
         }
     });
@@ -337,6 +360,9 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetAim);
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
+    addProperty(_velocitySensitivity);
+    addProperty(_flightDestinationDistance);
+    addProperty(_applyLinearFlight);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -393,6 +419,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     }
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
+
+    SurfacePositionHandle posHandle;
+
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
     const glm::dvec3 anchorDisplacement = _previousAnchorNodePosition.has_value() ?
         (anchorPos - _previousAnchorNodePosition.value()) :
@@ -402,6 +431,31 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
     };
+
+    if (_applyLinearFlight) {
+        // Calculate a position handle based on the camera position in world space
+        glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
+        // Use the boundingsphere to get an approximate distance to the surface of the node
+        double nodeRadius = static_cast<double>(_anchorNode->boundingSphere());
+        double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
+
+        // Make the approximation delta size depending on the flight distance
+        double arrivalThreshold = _flightDestinationDistance.value() * FlightDestinationFactor;
+
+        // Fly towards the flight destination distance. When getting closer than arrivalThreshold terminate the flight
+        if (abs(distFromCameraToFocus - _flightDestinationDistance.value()) > arrivalThreshold) {
+
+            pose.position = moveCameraAlongVector(
+                pose.position,
+                distFromCameraToFocus,
+                camPosToAnchorPosDiff,
+                _flightDestinationDistance
+            );
+        }
+        else {
+            _applyLinearFlight.setValue(false);
+        }
+    }
 
     const bool hasPreviousPositions =
         _previousAnchorNodePosition.has_value() &&
@@ -433,8 +487,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     _previousAnchorNodePosition = _anchorNode->worldPosition();
 
     // Calculate a position handle based on the camera position in world space
-    SurfacePositionHandle posHandle =
-        calculateSurfacePositionHandle(*_anchorNode, pose.position);
+    posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
     // Decompose camera rotation so that we can handle global and local rotation
     // individually. Then we combine them again when finished.
@@ -532,7 +585,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         if (_directlySetStereoDistance) {
             _currentCameraToSurfaceDistance = targetCameraToSurfaceDistance;
             _directlySetStereoDistance = false;
-        } else {
+        }
+        else {
             _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
                 deltaTime,
                 _currentCameraToSurfaceDistance,
@@ -543,7 +597,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             _stereoscopicDepthOfFocusSurface /
             static_cast<float>(_currentCameraToSurfaceDistance)
         );
-    } else {
+    }
+    else {
         _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
     }
 }
@@ -972,6 +1027,7 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
     return localCameraRotation * joystickRotationDiff * mouseRotationDiff *
            websocketRotationDiff * scriptRotationDiff;
 }
+
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     const glm::dquat& localCameraRotation)
 {
@@ -1171,6 +1227,27 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Add difference to position
     return cameraPosition + rotationDiffVec3;
+}
+
+glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
+                                                  double distFromCameraToFocus,
+                                                  const glm::dvec3& camPosToAnchorPosDiff,
+                                                  double destination) const
+{
+    // This factor adapts the velocity so it slows down when getting closer
+    // to our final destination
+    double velocity = 0.0;
+
+    if (destination < distFromCameraToFocus) { // When flying towards anchor
+        velocity = 1.0 - destination / distFromCameraToFocus;
+    }
+    else { // When flying away from anchor
+        velocity = distFromCameraToFocus / destination - 1.0;
+    }
+    velocity *= _velocitySensitivity;
+
+    // Return the updated camera position
+    return camPos - velocity * camPosToAnchorPosDiff;
 }
 
 glm::dvec3 OrbitalNavigator::followAnchorNodeRotation(const glm::dvec3& cameraPosition,

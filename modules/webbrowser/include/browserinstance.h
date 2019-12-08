@@ -86,7 +86,6 @@ public:
 
     void sendTouchPressEvent(const CefMouseEvent & event,
         CefBrowserHost::MouseButtonType button, const int clickCount);
-
     void sendResleasePressEvent(const CefMouseEvent & event,
         CefBrowserHost::MouseButtonType button, const int clickCount);
 

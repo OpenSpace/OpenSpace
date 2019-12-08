@@ -1,14 +1,14 @@
 -- Function that returns the string that inverts the fully qualified boolean property 'property'
 local invert = function(prop)
     local escaped_property = "'" .. prop .. "'"
-    return "openspace.setPropertyValue(" .. escaped_property .. ", not openspace.getPropertyValue(" .. escaped_property .. "));"
+    return "openspace.setPropertyValueSingle(" .. escaped_property .. ", not openspace.getPropertyValue(" .. escaped_property .. "));"
 end
 
 -- Function that returns the string that increments the 'property' by the 'value'
 local increment = function(prop, value)
     local v = value or 1
     local escaped_property = "'" .. prop .. "'"
-    return "openspace.setPropertyValue(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ");"
+    return "openspace.setPropertyValueSingle(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ");"
 end
 
 -- Function that returns the string that decrements the 'property' by the 'value'
@@ -21,7 +21,7 @@ local fade = function(prop, value, duration)
     assert(type(duration) == "number", "duration must be a number")
 
     local escaped_property = "'" .. prop .. "'"
-    return "openspace.setPropertyValue(" .. escaped_property ..", " .. tostring(value) .. ", " .. tostring(duration) .. ")"
+    return "openspace.setPropertyValueSingle(" .. escaped_property ..", " .. tostring(value) .. ", " .. tostring(duration) .. ")"
 end
 
 local fadeOut = function(prop, duration)

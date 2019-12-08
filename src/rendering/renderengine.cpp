@@ -124,16 +124,6 @@ namespace {
         "shown on the screen"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
-        "TakeScreenshot",
-        "Take Screenshot",
-        "If this property is triggered, a screenshot is taken and stored in the current "
-        "working directory (which is the same directory where the OpenSpace.exe) is "
-        "located in most cases. The images are prefixed with 'SGCT' and postfixed with "
-        "the number of frames. This function will silently overwrite images that are "
-        "already present in the folder."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
         "ApplyWarpingScreenshot",
         "Apply Warping to Screenshots",
@@ -264,7 +254,6 @@ RenderEngine::RenderEngine()
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
-    , _takeScreenshot(TakeScreenshotInfo)
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -274,12 +263,12 @@ RenderEngine::RenderEngine()
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
-    , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 0.95f, 0.01f, 5.0f)
-    , _hue(HueInfo, 180.f, 0.0f, 360.0f)
-    , _saturation(SaturationInfo, 1.f, 0.0f, 2.0f)
-    , _value(ValueInfo, 1.f, 0.0f, 2.0f)
-    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
+    , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
+    , _gamma(GammaInfo, 0.95f, 0.01f, 5.f)
+    , _hue(HueInfo, 0.f, 0.f, 360.f)
+    , _saturation(SaturationInfo, 1.f, 0.0f, 2.f)
+    , _value(ValueInfo, 1.f, 0.f, 2.f)
+    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
     , _globalRotation(
         GlobalRotationInfo,
         glm::vec3(0.f),
@@ -346,8 +335,8 @@ RenderEngine::RenderEngine()
 
     _hue.onChange([this]() {
         if (_renderer) {
-            float pHue = (_hue + 180.f) / 360.f;
-            _renderer->setHue(pHue);
+            const float h = _hue / 360.0;
+            _renderer->setHue(h);
         }
     });
 
@@ -378,9 +367,6 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_horizFieldOfView);
-
-    _takeScreenshot.onChange([this](){ _shouldTakeScreenshot = true; });
-    addProperty(_takeScreenshot);
 
     addProperty(_showFrameInformation);
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -793,7 +779,7 @@ void RenderEngine::renderEndscreen() {
     );
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.boundingBox.x / 2,
-        fontResolution().y / 2- size.boundingBox.y / 2
+        fontResolution().y / 2 - size.boundingBox.y / 2
     );
     RenderFont(*_fontDate, penPosition, "Shutting down");
 }
@@ -836,9 +822,11 @@ void RenderEngine::renderDashboard() {
             "Main Dashboard::render"
         );
     }
+
+    glm::vec2 dashboardStart = global::dashboard.getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
-        10.f,
-        fontResolution().y - global::luaConsole.currentHeight()
+        dashboardStart.x,
+        dashboardStart.y + fontResolution().y - global::luaConsole.currentHeight()
     );
 
     global::dashboard.render(penPosition);
@@ -861,21 +849,6 @@ void RenderEngine::renderDashboard() {
 
 void RenderEngine::postDraw() {
     ++_frameNumber;
-
-    if (_shouldTakeScreenshot) {
-        // We only create the directory here, as we don't want to spam the users
-        // screenshot folder everytime we start OpenSpace even when we are not taking any
-        // screenshots. So the first time we actually take one, we create the folder:
-        if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
-            FileSys.createDirectory(
-                absPath("${SCREENSHOTS}"),
-                ghoul::filesystem::FileSystem::Recursive::Yes
-            );
-        }
-
-        global::windowDelegate.takeScreenshot(_applyWarping);
-        _shouldTakeScreenshot = false;
-    }
 
     if (global::performanceManager.isEnabled()) {
         global::performanceManager.storeScenePerformanceMeasurements(
@@ -1059,10 +1032,28 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 /**
-  * Mark that one screenshot should be taken
-*/
-void RenderEngine::takeScreenShot() {
-    _shouldTakeScreenshot = true;
+ * Take a screenshot and store it in the ${SCREENSHOTS} directory
+ */
+void RenderEngine::takeScreenshot() {
+    // We only create the directory here, as we don't want to spam the users
+    // screenshot folder everytime we start OpenSpace even when we are not taking any
+    // screenshots. So the first time we actually take one, we create the folder:
+
+    if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
+        FileSys.createDirectory(
+            absPath("${SCREENSHOTS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes
+        );
+    }
+
+    _latestScreenshotNumber = global::windowDelegate.takeScreenshot(_applyWarping);
+}
+
+/**
+ * Get the latest screenshot filename
+ */
+unsigned int RenderEngine::latestScreenshotNumber() const {
+    return _latestScreenshotNumber;
 }
 
 /**
@@ -1121,6 +1112,14 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "Given a ScreenSpaceRenderable name this script will remove it from the "
                 "renderengine"
             },
+            {
+                "takeScreenshot",
+                &luascriptfunctions::takeScreenshot,
+                {},
+                "",
+                "Take a screenshot and return the screenshot number. The screenshot will "
+                "be stored in the ${SCREENSHOTS} folder. "
+            }
         },
     };
 }

@@ -865,8 +865,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
             const float dsf = static_cast<float>(
                 _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
             );
+            
+            // We are setting the setIgnoreUniformLocationError as it is not super trivial
+            // and brittle to figure out apriori whether the uniform was optimized away
+            // or not. It should be something long the lines of:
+            // (hasBlendingLayers && (has multiple different layer types)) || (uses
+            //  accurate shading)  [maybe]
+            // it's easier to just try to set it and ignore the error, since this is only
+            // happening on a few frames
+            using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+            _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
             _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
+            _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
+
+            _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
             _localRenderer.program->setUniform("distanceScaleFactor", dsf);
+            _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
             _lodScaleFactorDirty = false;
         }
     }
@@ -894,8 +908,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         const float dsf = static_cast<float>(
             _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
         );
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
-
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
 
         _globalRenderer.updatedSinceLastCall = false;
     }
@@ -916,7 +932,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         const float dsf = static_cast<float>(
             _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
         );
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _localRenderer.program->setUniform("distanceScaleFactor", dsf);
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
 
         _localRenderer.updatedSinceLastCall = false;
     }

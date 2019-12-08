@@ -160,21 +160,21 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    if (configuration.hasValue<std::string>(GuiUrlInfo.identifier)) {
-        _url = configuration.value<std::string>(GuiUrlInfo.identifier);
-    } else {
-        WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
-        _url = "http://127.0.0.1:" +
-            std::to_string(webGuiModule->port()) + "/frontend/#/onscreen";
+    // We need this to make sure that the browser is reloaded
+    // once the endpoint comes online, on OpenSpace startup.
 
-        _endpointCallback = webGuiModule->addEndpointChangeCallback(
-            [this](const std::string& endpoint, bool exists) {
-                if (exists && endpoint == "frontend" && _instance) {
-                    _instance->reloadBrowser();
-                }
+    // TODO: See if the hardcoded endpoint `frontend` below can be removed.
+    // Possible fix: Reload browser if cefwebgui is routed to localhost
+    // and the same endpoint that just came online.
+    WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+
+    _endpointCallback = webGuiModule->addEndpointChangeCallback(
+        [this](const std::string& endpoint, bool exists) {
+            if (exists && endpoint == "frontend" && _instance) {
+                _instance->reloadBrowser();
             }
-        );
-    }
+        }
+    );
 
     if (configuration.hasValue<float>(GuiScaleInfo.identifier)) {
         _guiScale = configuration.value<float>(GuiScaleInfo.identifier);

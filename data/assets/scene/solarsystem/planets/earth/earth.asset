@@ -14,12 +14,6 @@ local mapServiceConfigsPath = asset.localResource("map_service_configs")
 local Earth = {
     Identifier = "Earth",
     Parent = transforms.EarthIAU.Identifier,
-    Transform = {
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
-        }
-    },
     Renderable = {
         Type = "RenderableGlobe",
         Radii = earthEllipsoid,
@@ -132,7 +126,7 @@ local Earth = {
                     Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-                        "AMSR2_Sea_Ice_Concentration_12km",
+                        "AMSRU2_Sea_Ice_Concentration_12km",
                         "2012-05-08",
                         "Yesterday",
                         "1d",

@@ -33,21 +33,16 @@ void sample#{id}(vec3 samplePos,
   vec3 dir,
   inout vec3 accumulatedColor,
   inout vec3 accumulatedAlpha,
-  inout float maxStepSize)
+  inout float stepSize)
   {
     vec3 aspect = aspect#{id};
-    maxStepSize = maxStepSize#{id} / length(dir / aspect);
+    stepSize = maxStepSize#{id} / length(dir / aspect);
 
     //Early ray termination on black parts of the data
-    vec3 normalizedPos = (samplePos*2.0)-1.0;
-    if(abs(normalizedPos.x) > 0.8 || abs(normalizedPos.y) > 0.8){
+    vec3 normalizedPos = samplePos*2.0 - 1.0;
+    if (normalizedPos.x * normalizedPos.x + normalizedPos.y * normalizedPos.y > 0.7) {
         return;
     }
-
-    float STEP_SIZE = maxStepSize#{id}*0.5;
-    //float STEP_SIZE = 1 / 256.0;
-
-    vec3 alphaTint = vec3(0.3, 0.54, 0.85);
 
     vec4 sampledColor = texture(galaxyTexture#{id}, samplePos.xyz);
 
@@ -55,24 +50,25 @@ void sample#{id}(vec3 samplePos,
     // So square them back
     sampledColor = sampledColor*sampledColor;
 
-    // fudge for the dust "spreading"
-    sampledColor.a = clamp(sampledColor.a, 0.0, 1.0) * opacityCoefficient#{id};
+    // Fudge for the dust "spreading"
+    sampledColor.a = clamp(sampledColor.a, 0.0, 1.0);
     sampledColor.a = pow(sampledColor.a, 0.7);
 
-    // absorption probability
-    float scaled_density = sampledColor.a * STEP_SIZE * absorptionMultiply#{id};
-    vec3 absorption = alphaTint * scaled_density;
+    // Absorption probability
+    float scaledDensity = sampledColor.a * stepSize * absorptionMultiply#{id};
+    vec3 alphaTint = vec3(0.3, 0.54, 0.85);
+    vec3 absorption = alphaTint * scaledDensity;
 
-    // extinction
+    // Extinction
     vec3 extinction = exp(-absorption);
     accumulatedColor.rgb *= extinction;
 
-    // emission
-    accumulatedColor.rgb += sampledColor.rgb * STEP_SIZE * emissionMultiply#{id};
+    // Emission
+    accumulatedColor.rgb +=
+        sampledColor.rgb * stepSize * emissionMultiply#{id} * opacityCoefficient#{id};
 
     vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-    //accumulatedColor += oneMinusFrontAlpha * sampledColor.rgb;
-    accumulatedAlpha += oneMinusFrontAlpha * sampledColor.rgb;
+    accumulatedAlpha += oneMinusFrontAlpha * sampledColor.rgb  * opacityCoefficient#{id};
   }
 
   float stepSize#{id}(vec3 samplePos, vec3 dir) {

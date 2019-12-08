@@ -100,8 +100,8 @@ asset.onInitialize(function ()
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);
 
-    openspace.setPropertyValueSingle('Scene.Apollo11LemDescentModel.Renderable.RotationVector', { 273.205475,6.904110,308.712311 });
-    openspace.setPropertyValueSingle('Scene.Apollo11LemLandedModel.Renderable.RotationVector', { 273.205475,6.904110,308.712311 });
+    openspace.setPropertyValueSingle('Scene.Apollo11LemDescentModel.Renderable.RotationVector', { 273.750,28.0,309.85 });
+    openspace.setPropertyValueSingle('Scene.Apollo11LemLandedModel.Renderable.RotationVector', { 273.750,28.0,309.85 });
 
     openspace.globebrowsing.goToGeo(moonAsset.Moon.Identifier, 20, -60, 15000000)
 

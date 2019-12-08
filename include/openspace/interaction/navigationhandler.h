@@ -80,6 +80,10 @@ public:
     void deinitialize();
 
     // Mutators
+
+    void setFocusNode(SceneGraphNode* node);
+    void resetCameraDirection();
+
     void setNavigationStateNextFame(NavigationState state);
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
@@ -92,6 +96,7 @@ public:
 
     // Accessors
     Camera* camera() const;
+    const SceneGraphNode* anchorNode() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
@@ -131,6 +136,7 @@ public:
         WebsocketCameraStates::AxisNormalize shouldNormalize =
         WebsocketCameraStates::AxisNormalize::No);
     
+    NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
     void saveNavigationState(const std::string& filepath,

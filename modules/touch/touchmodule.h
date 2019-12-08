@@ -31,29 +31,36 @@
 
 
 namespace openspace {
+    #ifdef WIN32
+    class Win32TouchHook;
+    #endif //WIN32
 
     class TouchModule : public OpenSpaceModule {
         using Point = std::pair<int, TUIO::TuioPoint>;
     public:
         TouchModule();
+        ~TouchModule();
 
     private:
         /**
         * Returns true if new touch input occured since the last frame
         */
-        bool hasNewInput();
+        bool processNewInput();
         /**
         * Checks if touchevent should be parsed to the webgui
         */
-        void hasNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
+        void processNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
 
-        TuioEar ear;
-        TouchInteraction touch;
-        TouchMarker markers;
-        std::vector<TUIO::TuioCursor> listOfContactPoints;
+        TuioEar _ear;
+        TouchInteraction _touch;
+        TouchMarker _markers;
+        std::vector<TUIO::TuioCursor> _listOfContactPoints;
         // contains an id and the TuioPoint that was processed last frame
-        std::vector<Point> lastProcessed;
-        glm::ivec2 webPositionCallback = glm::ivec2(0,0);
+        std::vector<Point> _lastProcessed;
+        glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
+#ifdef WIN32
+        std::unique_ptr<Win32TouchHook> _win32TouchHook;
+#endif //WIN32
     };
 
 } // namespace openspace

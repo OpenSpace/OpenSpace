@@ -24,7 +24,7 @@ local radio = {
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
-        GridColor = { 1.0, 1.0, 0.3, 0.75},
+        GridColor = { 0.3, 0.84, 1.0, 0.3},
         LineWidth = 2.0,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
                        -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -74,7 +74,7 @@ local ecliptic = {
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
-        GridColor = { 0.7, 0.0, 0.0, 0.5},
+        GridColor = { 0.74, 0.26, 0.26, 0.5},
         LineWidth = 2.0,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
                        -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -121,13 +121,13 @@ local equatorial = {
     Transform = {
         Scale = {
             Type = "StaticScale",
-            Scale = 6.2440846E17;
+            Scale = 4.28601E17;
         }
     },
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
-        GridColor = { 0.0, 0.0, 1.0, 0.8},
+        GridColor = { 0.69, 0.68, 0.29, 0.8},
         LineWidth = 2.0,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661, 0.0,
                        -0.8734371 , -0.4448296, -0.1980764, 0.0,
