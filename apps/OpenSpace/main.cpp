@@ -1042,6 +1042,16 @@ void setSgctDelegateFunctions() {
         sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(0);
         w->setHorizFieldOfView(hFovDeg);
     };
+    #ifdef WIN32
+    sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(windowIndex);
+        if(w) {
+                HWND hWnd = glfwGetWin32Window(w->getWindowHandle());
+                return reinterpret_cast<void*>(hWnd);
+        }
+        return nullptr;
+    };
+    #endif // WIN32
     sgctDelegate.frustumMode = []() {
         using FM = sgct_core::Frustum::FrustumMode;
         switch (sgct::Engine::instance()->getCurrentFrustumMode()) {

@@ -24,35 +24,20 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_color;
 
-out vec4 vs_position;
-out vec3 vs_color;
-out float vs_screenSpaceDepth;
-out float vs_starBrightness;
+out float vs_depth;
+out vec4 vs_positionViewSpace;
 
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
-uniform dvec3 eyePosition;
-
-const double PARSEC = 3.08567756E16;
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
 void main() {
-	  vs_position = vec4(in_position, 1.0);
-		dvec4 dpos = dvec4(vs_position);
+    vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
+    vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
+    vs_depth = positionScreenSpace.w;
+    gl_Position  = positionScreenSpace;
 
-		double distanceToStar = length((dpos.xyz - eyePosition));
-		vs_starBrightness = clamp(float(8000*PARSEC/distanceToStar), 0.0, 1.0);
-
-		dpos.xyz *= 8.0;
-		dpos = modelMatrix * dpos;
-		dpos /= PARSEC;
-
-		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
-		vs_color = in_color;
-		vs_screenSpaceDepth = positionScreenSpace.w;
-		gl_Position = positionScreenSpace;
+    // Set z to 0 to disable near and far plane, unique handling for perspective in space
+    gl_Position.z = 0.f;
 }

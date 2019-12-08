@@ -40,6 +40,7 @@
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderablelabels.h>
 #include <modules/base/rendering/renderablemodel.h>
+#include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
@@ -125,6 +126,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
     fRenderable->registerClass<RenderableLabels>("RenderableLabels");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
+    fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
@@ -193,6 +195,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableBoxGrid::Documentation(),
         RenderableLabels::Documentation(),
         RenderableModel::Documentation(),
+        RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
         RenderableSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),

@@ -29,6 +29,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/tuioear.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/touchinteraction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/touchmarker.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/win32_touch.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tuioear.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/touchinteraction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/touchmarker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/win32_touch.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
