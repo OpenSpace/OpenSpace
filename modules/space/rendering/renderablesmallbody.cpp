@@ -46,7 +46,7 @@
 
 namespace {
     constexpr const char* ProgramName = "RenderableSmallBody";
-    constexpr const char* _loggerCat = "Satellites";
+    constexpr const char* _loggerCat = "SmallSolarSystemBody";
 
     static const openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",

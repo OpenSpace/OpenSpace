@@ -21,11 +21,11 @@ function downloadSssbDatabaseFile(sceneAsset, url, name)
     })
 end
 
-local registerSssbGroupObjects = function(containingAsset, group, sssbFolder, shouldAddDuplicates)
-     local filename = group.Url:match("([^/]+)$")
-     local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
-
-     local path = sssbFolder .. "/" .. filename
+local registerSssbGroupObjects = function(containingAsset, filename, sssbFolder, shouldAddDuplicates)
+    --local filename = group.Url:match("([^/]+)$")
+    local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
+    --local path = sssbFolder .. "/" .. filename
+    local trailColor = { 0.75, 0.75, 0.35 }
 
     function numLinesInFile(filename)
         local ctr = 0
@@ -50,7 +50,7 @@ local registerSssbGroupObjects = function(containingAsset, group, sssbFolder, sh
         }
     end
 
-    local SssbBatch = sssBodies(filenameSansExt, path, group.TrailColor)
+    local SssbBatch = sssBodies('sssb_'..filenameSansExt, sssbFolder, trailColor)
     assetHelper.registerSceneGraphNodesAndExport(containingAsset, { SssbBatch })
 end
 
