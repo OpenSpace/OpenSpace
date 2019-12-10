@@ -186,7 +186,103 @@ documentation::Documentation RenderableLabels::Documentation() {
                 new StringInListVerifier({ "Normal", "Additive" }),
                 Optional::Yes,
                 BlendModeInfo.description, // + " The default value is 'Normal'.",
-            }
+            },
+            {
+                LabelOrientationOptionInfo.identifier,
+                new StringInListVerifier({ "Camera View Direction", "Camera Position Normal" }),
+                Optional::Yes,
+                LabelOrientationOptionInfo.description,
+            },
+            {
+                LabelColorInfo.identifier,
+                new DoubleVector4Verifier,
+                Optional::Yes,
+                LabelColorInfo.description, 
+            },
+            {
+                LabelColorInfo.identifier,
+                new DoubleVector4Verifier,
+                Optional::Yes,
+                LabelColorInfo.description,
+            },
+            {
+                LabelTextInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                LabelTextInfo.description
+            },
+            {
+                FontSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FontSizeInfo.description
+            },
+            {
+                LabelSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelSizeInfo.description
+            },
+            {
+                LabelMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelMinSizeInfo.description
+            },
+            {
+                LabelMaxSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
+            {
+                EnableFadingEffectInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                EnableFadingEffectInfo.description
+            },
+            {
+                PixelSizeControlInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                PixelSizeControlInfo.description
+            },
+            {
+                FadeStartUnitOptionInfo.identifier,
+                new StringInListVerifier({"m", "Km", "au", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
+                Optional::Yes,
+                FadeStartUnitOptionInfo.description,
+            },
+            {
+                FadeEndUnitOptionInfo.identifier,
+                new StringInListVerifier({"m", "Km", "au", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
+                Optional::Yes,
+                FadeEndUnitOptionInfo.description,
+            },
+            {
+                FadeStartDistInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeStartDistInfo.description
+            },
+            {
+                FadeEndDistInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeEndDistInfo.description
+            },
+            {
+                FadeStartSpeedInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeStartSpeedInfo.description
+            },
+            {
+                FadeEndSpeedInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeEndSpeedInfo.description
+            },
         }
     };
 }
