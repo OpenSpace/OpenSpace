@@ -69,8 +69,8 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                     // native touch to screen conversion
                     ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-                    float xPos = (float)p.x / (float)(rect.right - rect.left);
-                    float yPos = (float)p.y / (float)(rect.bottom - rect.top);
+                    float xPos = static_cast<float>(p.x) / static_cast<float>(rect.right - rect.left);
+                    float yPos = static_cast<float>(p.y) / static_cast<float>(rect.bottom - rect.top);
                     if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
                         // Handle new touchpoint
                         gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
