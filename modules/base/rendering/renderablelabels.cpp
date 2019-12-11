@@ -51,7 +51,11 @@ namespace {
     
     constexpr const char* MeterUnit = "m";
     constexpr const char* KilometerUnit = "Km";
+    constexpr const char* MegameterUnit = "Mm";
+    constexpr const char* GigameterUnit = "Gm";
     constexpr const char* AstronomicalUnit = "au";
+    constexpr const char* TerameterUnit = "Tm";
+    constexpr const char* PetameterUnit = "Pm";
     constexpr const char* ParsecUnit = "pc";
     constexpr const char* KiloparsecUnit = "Kpc";
     constexpr const char* MegaparsecUnit = "Mpc";
@@ -249,13 +253,13 @@ documentation::Documentation RenderableLabels::Documentation() {
             },
             {
                 FadeStartUnitOptionInfo.identifier,
-                new StringInListVerifier({"m", "Km", "au", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
+                new StringInListVerifier({"m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
                 Optional::Yes,
                 FadeStartUnitOptionInfo.description,
             },
             {
                 FadeEndUnitOptionInfo.identifier,
-                new StringInListVerifier({"m", "Km", "au", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
+                new StringInListVerifier({"m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
                 Optional::Yes,
                 FadeEndUnitOptionInfo.description,
             },
@@ -428,7 +432,11 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     _fadeStartUnitOption.addOption(Meter, MeterUnit);
     _fadeStartUnitOption.addOption(Kilometer, KilometerUnit);
+    _fadeStartUnitOption.addOption(Megameter, MegameterUnit);
+    _fadeStartUnitOption.addOption(Gigameter, GigameterUnit);
     _fadeStartUnitOption.addOption(AU, AstronomicalUnit);
+    _fadeStartUnitOption.addOption(Terameter, TerameterUnit);
+    _fadeStartUnitOption.addOption(Petameter, PetameterUnit);
     _fadeStartUnitOption.addOption(Parsec, ParsecUnit);
     _fadeStartUnitOption.addOption(Kiloparsec, KiloparsecUnit);
     _fadeStartUnitOption.addOption(Megaparsec, MegaparsecUnit);
@@ -445,8 +453,20 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         else if (unit == KilometerUnit) {
             _fadeStartUnitOption = Kilometer;
         }
+        else if (unit == MegameterUnit) {
+            _fadeStartUnitOption = Megameter;
+        }
+        else if (unit == GigameterUnit) {
+            _fadeStartUnitOption = Gigameter;
+        }
         else if (unit == AstronomicalUnit) {
             _fadeStartUnitOption = AU;
+        }
+        else if (unit == TerameterUnit) {
+            _fadeStartUnitOption = Terameter;
+        }
+        else if (unit == PetameterUnit) {
+            _fadeStartUnitOption = Petameter;
         }
         else if (unit == ParsecUnit) {
             _fadeStartUnitOption = Parsec;
@@ -487,7 +507,11 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     _fadeEndUnitOption.addOption(Meter, MeterUnit);
     _fadeEndUnitOption.addOption(Kilometer, KilometerUnit);
+    _fadeEndUnitOption.addOption(Megameter, MegameterUnit);
+    _fadeEndUnitOption.addOption(Gigameter, GigameterUnit);
     _fadeEndUnitOption.addOption(AU, AstronomicalUnit);
+    _fadeEndUnitOption.addOption(Terameter, TerameterUnit);
+    _fadeEndUnitOption.addOption(Petameter, PetameterUnit);
     _fadeEndUnitOption.addOption(Parsec, ParsecUnit);
     _fadeEndUnitOption.addOption(Kiloparsec, KiloparsecUnit);
     _fadeEndUnitOption.addOption(Megaparsec, MegaparsecUnit);
@@ -504,8 +528,20 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         else if (unit == KilometerUnit) {
             _fadeEndUnitOption = Kilometer;
         }
+        else if (unit == MegameterUnit) {
+            _fadeEndUnitOption = Megameter;
+        }
+        else if (unit == GigameterUnit) {
+            _fadeEndUnitOption = Gigameter;
+        }
         else if (unit == AstronomicalUnit) {
             _fadeEndUnitOption = AU;
+        }
+        else if (unit == TerameterUnit) {
+            _fadeEndUnitOption = Terameter;
+        }
+        else if (unit == PetameterUnit) {
+            _fadeEndUnitOption = Petameter;
         }
         else if (unit == ParsecUnit) {
             _fadeEndUnitOption = Parsec;
@@ -720,10 +756,22 @@ float RenderableLabels::getUnit(int unit) const {
         scale = 1.f;
         break;
     case Kilometer:
-        scale = 1e3f;
+        scale = 1e3;
+        break;
+    case Megameter:
+        scale = 1e6;
+        break;
+    case Gigameter:
+        scale = 1e9;
         break;
     case AU:
         scale = 149597870700.f;
+        break;
+    case Terameter:
+        scale = 1e12;
+        break;
+    case Petameter:
+        scale = 1e15;
         break;
     case Parsec:
         scale = static_cast<float>(PARSEC);

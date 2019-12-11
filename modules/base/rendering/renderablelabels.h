@@ -58,12 +58,16 @@ private:
     enum Unit {
         Meter = 0,
         Kilometer = 1,
-        AU = 2,
-        Parsec = 3,
-        Kiloparsec = 4,
-        Megaparsec = 5,
-        Gigaparsec = 6,
-        GigalightYears = 7
+        Megameter = 2,
+        Gigameter = 3,
+        AU = 4,
+        Terameter = 5,
+        Petameter = 6,
+        Parsec = 7,
+        Kiloparsec = 8,
+        Megaparsec = 9,
+        Gigaparsec = 10,
+        GigalightYears = 11
     };
 
 public:
