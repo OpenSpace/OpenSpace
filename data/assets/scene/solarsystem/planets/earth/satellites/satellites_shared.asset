@@ -56,7 +56,7 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
            Renderable = {
                 Type = "RenderableSatellites",
                 Path = file,
-                Segments = 160,
+                Segments = 120,
                 Color = color,
                 Fade = 0.5
             },

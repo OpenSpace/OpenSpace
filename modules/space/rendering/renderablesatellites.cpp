@@ -66,13 +66,6 @@ namespace {
         "method includes lines. If the rendering mode is set to Points, this value is "
         "ignored."
     };
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
-        "Line fade",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. The higher the number, "
-        "the less fading is applied."
-    };
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
@@ -302,12 +295,6 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 LineWidthInfo.description
             },
             {
-                FadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInfo.description
-            },
-            {
                 LineColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::No,
@@ -320,8 +307,7 @@ documentation::Documentation RenderableSatellites::Documentation() {
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
-    , _nSegments(SegmentsInfo)
-    , _lineFade(FadeInfo)
+    , _nSegments(SegmentsInfo, 120, 4, 1024)
 
 {
     documentation::testSpecificationAndThrow(
@@ -332,16 +318,21 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 
     _path = dictionary.value<std::string>(PathInfo.identifier);
     _nSegments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
 
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     }
 
+    auto reinitializeTrailBuffers = [this]() {
+        initializeGL();
+    };
+
+    _path.onChange(reinitializeTrailBuffers);
+    _nSegments.onChange(reinitializeTrailBuffers);
+
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
-    addProperty(_lineFade);
 }
    
     
