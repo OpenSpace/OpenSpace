@@ -594,12 +594,13 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         long id = c.getSessionID();
 
         for (SceneGraphNode* node : selectableNodes) {
-            double boundingSphere = node->boundingSphere();
+            double boundingSphereSquared = double(node->boundingSphere()) * double(node->boundingSphere());
             glm::dvec3 camToSelectable = node->worldPosition() - camPos;
-            glm::dvec3 intersectionPos = {};
-            glm::dvec3 intersectionNormal = {};
-            bool intersected = glm::intersectRaySphere(camPos, raytrace, node->worldPosition(), boundingSphere, intersectionPos, intersectionNormal);
+            double intersectionDist = 0.0;
+            bool intersected = glm::intersectRaySphere(camPos, raytrace, node->worldPosition(),
+                                                       boundingSphereSquared, intersectionDist);
             if (intersected) {
+                glm::dvec3 intersectionPos = camPos + raytrace * intersectionDist;
                 glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
                                               (intersectionPos - node->worldPosition());
 
@@ -660,7 +661,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                         "Picking candidate based on proximity"
                     );
 #endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    double dist = length(intersectionPos - camPos);
+                    double dist = length(camToSelectable);
                     if (dist < std::get<1>(currentlyPicked)) {
                         currentlyPicked = {
                             node,
