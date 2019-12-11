@@ -30,7 +30,8 @@ local Venus = {
     },
     Renderable = {
         Type = "RenderableGlobe",
-        Radii = { 6051900.0, 6051900.0, 6051800.0 },
+        --Radii = { 6051900.0, 6051900.0, 6051800.0 },
+        Radii = { 6051900.0, 6051900.0, 6051900.0 },
         SegmentsPerPatch = 64,
         Layers = {
             ColorLayers = {
