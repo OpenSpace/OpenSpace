@@ -97,7 +97,7 @@ const std::vector<int> DaysOfMonths = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
-enum class Months {
+enum Months {
     January = 0,
     February,
     March,
@@ -285,7 +285,7 @@ documentation::Documentation RenderableSmallBody::Documentation() {
     using namespace documentation;
     return {
         "RenderableSmallBody",
-        "space_renderable_satellites",
+        "small solar system bodies",
         {
             {
                 SegmentsInfo.identifier,

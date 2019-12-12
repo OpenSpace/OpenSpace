@@ -1,12 +1,12 @@
 local transforms = asset.require('scene/solarsystem/sun/transforms')
 local assetHelper = asset.require('util/asset_helper')
 
-local satImageFolder = asset.syncedResource({
-    Name = "Satellite Image Files",
-    Type = "HttpSynchronization",
-    Identifier = "tle_satellites_images",
-    Version = 1
-})
+--local satImageFolder = asset.syncedResource({
+--    Name = "Satellite Image Files",
+--    Type = "HttpSynchronization",
+--    Identifier = "tle_satellites_images",
+--    Version = 1
+--})
 
 function downloadSssbDatabaseFile(sceneAsset, url, name)
     local identifier = name
