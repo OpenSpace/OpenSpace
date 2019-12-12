@@ -84,14 +84,6 @@ namespace {
 }
 
 namespace openspace {
-    
-    // The list of leap years only goes until 2056 as we need to touch this file then
-    // again anyway ;)
-    const std::vector<int> LeapYears = {
-        1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
-        2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
-        2044, 2048, 2052, 2056
-    };
 
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
