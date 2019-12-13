@@ -55,7 +55,7 @@ flat in float dvarScaling[];
 flat out vec4 gs_colorMap;
 
 out vec2 texCoord;
-out float vs_screenSpaceDepth;
+flat out float vs_screenSpaceDepth;
 out float ta;
 
 const double PARSEC = 0.308567756e17LF;
@@ -171,17 +171,22 @@ void main() {
 
 
     // Build primitive
-    texCoord    = corners[3];
-    gl_Position = thirdPosition;
-    EmitVertex();
+
     texCoord    = corners[0];
     gl_Position = initialPosition;
     EmitVertex();
-    texCoord    = corners[2];
-    gl_Position = crossCorner;
-    EmitVertex();
+    
     texCoord    = corners[1];
     gl_Position = secondPosition;
     EmitVertex();
+
+    texCoord    = corners[3];
+    gl_Position = thirdPosition;
+    EmitVertex();
+        
+    texCoord    = corners[2];
+    gl_Position = crossCorner;
+    EmitVertex();
+    
     EndPrimitive();
 }
