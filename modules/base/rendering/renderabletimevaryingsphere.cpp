@@ -614,8 +614,9 @@ void RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath,
     std::valarray<float> magnetogram = fitsValues->contents[std::slice(64800, 16200, 1)];
     float maxvalue = abs(magnetogram).max();
     
-    //these values should be adjustable in the gui in the future
-    float damper = 1.0;
+    //these values should be adjustable in the gui in the future,
+    // since they have varying results depending on solar activity
+    float damper = 1.0f;
     float multiplyer = 20.0f;
     
     for (float mapvalue : magnetogram) {
@@ -627,8 +628,9 @@ void RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath,
         r = 0.5f, g = 0.5f, b = 0.5f; // gray
         if(mapvalue != 0.0f){
             if(_mapType == MapType::Gong){
-                // The values need to be amplified to be visible for this type
-                colorIntensity = damper*log( 1 + multiplyer * colorIntensity );
+                // The values are be amplified to be visible for this type
+                // Commenting out for now, since it has had varying results
+                //colorIntensity = damper*log( 1 + multiplyer * colorIntensity );
             }
             // If negative
             if(mapvalue < 0) {
