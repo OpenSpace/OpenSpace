@@ -82,6 +82,43 @@ local Venus = {
     }
 }
 
+local VenusLabel = {
+    Identifier = "VenusLabel",
+    Parent = Venus.Identifier,
+    -- Transform = {
+    --     Translation = {
+    --         Type = "SpiceTranslation",
+    --         Target = "EARTH",
+    --         Observer = "EARTH BARYCENTER"
+    --     },
+    --     -- Rotation = {
+    --     --     Type = "SpiceRotation",
+    --     --     SourceFrame = "IAU_MOON",
+    --     --     DestinationFrame = "GALACTIC"
+    --     -- }
+    -- },
+    Renderable = {
+        Enabled = true,
+        Type = "RenderableLabels",
+        LabelText = "Venus",
+        FontSize = 100.0,
+        LabelSize = 8.4,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        TransformationMatrix = {
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        },
+    },
+    GUI = {
+        Name = "Venus Label",
+        Path = "/Solar System/Planets/Venus"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Venus })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })

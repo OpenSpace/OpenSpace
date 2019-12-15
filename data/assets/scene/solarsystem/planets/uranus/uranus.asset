@@ -42,6 +42,42 @@ local Uranus = {
     }
 }
 
+local UranusLabel = {
+    Identifier = "UranusLabel",
+    Parent = Uranus.Identifier,
+    -- Transform = {
+    --     Translation = {
+    --         Type = "SpiceTranslation",
+    --         Target = "EARTH",
+    --         Observer = "EARTH BARYCENTER"
+    --     },
+    --     -- Rotation = {
+    --     --     Type = "SpiceRotation",
+    --     --     SourceFrame = "IAU_MOON",
+    --     --     DestinationFrame = "GALACTIC"
+    --     -- }
+    -- },
+    Renderable = {
+        Enabled = true,
+        Type = "RenderableLabels",
+        LabelText = "Uranus",
+        FontSize = 100.0,
+        LabelSize = 8.7,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        TransformationMatrix = {
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        },
+    },
+    GUI = {
+        Name = "Neptune Label",
+        Path = "/Solar System/Planets/Uranus"
+    }
+}
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus, UranusLabel })
