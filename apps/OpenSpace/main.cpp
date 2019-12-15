@@ -1332,7 +1332,7 @@ int main(int argc, char** argv) {
     try {
         sgct::Engine::create(cluster, callbacks, config, versionMapping[version]);
     }
-    catch (std::runtime_error e) {
+    catch (const std::runtime_error& e) {
         LFATALC("SGCT Init failed ", e.what());
         cleanup(false);
         return EXIT_FAILURE;
