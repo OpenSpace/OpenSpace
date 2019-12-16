@@ -956,7 +956,9 @@ const glm::dmat4& RenderableGlobe::modelTransform() const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&, 
-    const ShadowComponent::ShadowMapData& shadowData, const bool renderGeomOnly) {
+                                   const ShadowComponent::ShadowMapData& shadowData,
+                                   bool renderGeomOnly)
+{
     if (_shadersNeedRecompilation) {
         recompileShaders();
     }
@@ -1256,7 +1258,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-    const ShadowComponent::ShadowMapData& shadowData, const bool renderGeomOnly) {
+                                         const ShadowComponent::ShadowMapData& shadowData,
+                                                                      bool renderGeomOnly)
+{
     //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;

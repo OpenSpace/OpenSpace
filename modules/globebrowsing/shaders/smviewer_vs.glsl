@@ -46,6 +46,6 @@ const vec2 texData[6] = vec2[] (
 );
 
 void main() {
-    texCoord = texData[ gl_VertexID ];
-    gl_Position = vec4(posData[ gl_VertexID ], 1.0);
+    texCoord = texData[gl_VertexID];
+    gl_Position = vec4(posData[gl_VertexID], 1.0);
 }

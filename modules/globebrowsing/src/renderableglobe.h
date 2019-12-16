@@ -189,8 +189,7 @@ private:
     float getHeight(const glm::dvec3& position) const;
 
     void renderChunks(const RenderData& data, RendererTasks& rendererTask, 
-        const ShadowComponent::ShadowMapData& shadowData = {},
-        const bool renderGeomOnly = false
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
     );
 
     /**
@@ -202,8 +201,7 @@ private:
      * tile will lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        const ShadowComponent::ShadowMapData& shadowData = {},
-        const bool renderGeomOnly = false
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
     );
 
     /**
@@ -218,8 +216,7 @@ private:
      * chunks for higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        const ShadowComponent::ShadowMapData& shadowData = {},
-        const bool renderGeomOnly = false
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
