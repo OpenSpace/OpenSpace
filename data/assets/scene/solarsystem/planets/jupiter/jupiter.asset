@@ -42,6 +42,25 @@ local Jupiter = {
     }
 }
 
+local JupiterLabel = {
+    Identifier = "JupiterLabel",
+    Parent = Jupiter.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Jupiter",
+        FontSize = 100.0,
+        LabelSize = 8.6,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Jupiter Label",
+        Path = "/Solar System/Planets/Jupiter"
+    }
+}
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter, JupiterLabel })

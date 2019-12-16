@@ -59,6 +59,24 @@ local Pluto = {
     }
 }
 
+local PlutoLabel = {
+    Identifier = "PlutoLabel",
+    Parent = Pluto.Identifier,
+    Renderable = {
+        Enabled = true,
+        Type = "RenderableLabels",
+        LabelText = "Pluto",
+        FontSize = 100.0,
+        LabelSize = 8.9,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        BlendMode = "Additive",
+        LabelOrientationOption = "Camera View Direction"
+    },
+    GUI = {
+        Name = "Pluto Label",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pluto })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Pluto, PlutoLabel })

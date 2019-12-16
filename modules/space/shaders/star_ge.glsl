@@ -82,14 +82,6 @@ void main() {
     vs_position = gl_in[0].gl_Position; // in object space
     dvec4 dpos  = modelMatrix * dvec4(vs_position); 
 
-    dvec4 clipTestPos = cameraViewProjectionMatrix * dpos;
-    clipTestPos /= clipTestPos.w;
-    if ((clipTestPos.x < -1.0 || clipTestPos.x > 1.0) ||
-        (clipTestPos.y < -1.0 || clipTestPos.y > 1.0))
-    {
-        return;
-    }
-
     ge_bvLumAbsMagAppMag = vs_bvLumAbsMagAppMag[0];
     ge_velocity    = vs_velocity[0];
     ge_speed       = vs_speed[0];
@@ -156,96 +148,43 @@ void main() {
     dvec3 scaledUp       = dvec3(0.0);
     vec4 bottomLeftVertex, bottomRightVertex, topLeftVertex, topRightVertex;
   
-    // if (distanceToStarInParsecs > 1800.0) {
-    //     scaledRight    = scaleMultiply * invariantRight * 0.5f;
-    //     scaledUp       = scaleMultiply * invariantUp * 0.5f;
-    // } else {
-        dvec3 normal   = normalize(eyePosition - dpos.xyz);
-        dvec3 newRight = normalize(cross(cameraUp, normal));
-        dvec3 newUp    = cross(normal, newRight);
-        scaledRight    = scaleMultiply * newRight;
-        scaledUp       = scaleMultiply * newUp;
-    //}
-   
+    dvec3 normal   = normalize(eyePosition - dpos.xyz);
+    dvec3 newRight = normalize(cross(cameraUp, normal));
+    dvec3 newUp    = cross(normal, newRight);
+    scaledRight    = scaleMultiply * newRight;
+    scaledUp       = scaleMultiply * newUp;
+    
     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
     gs_screenSpaceDepth  = bottomLeftVertex.w;
     
-    topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
+    topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix *
+                        dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
 
-    // Testing size:
-    // vec3 tmpPos = vec3(eyePositionDelta);
-    // vec4 falseBottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                     dvec4(tmpPos - scaledRight - scaledUp, dpos.w)));
+    bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
     
-    // vec4 falseTopRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                         dvec4(tmpPos + scaledUp + scaledRight, dpos.w)));  
-    // vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
-    // vec2 topRight = falseTopRightVertex.xy/falseTopRightVertex.w;
-    // vec2 bottomLeft = falseBottomLeftVertex.xy/falseBottomLeftVertex.w;
-    
-    // Complete algebra
-    // topRight =  ((topRight + vec2(1.0)) * halfViewSize) - vec2(0.5);
-    // bottomLeft = ((bottomLeft + vec2(1.0)) * halfViewSize) - vec2(0.5);
-    //vec2 sizes = abs(topRight - bottomLeft);
-    
-    // Optimized version
-    // vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
-    
-    // float height = sizes.y;
-    // float width  = sizes.x;
-
-    // if ((height > billboardSize) ||
-    //     (width > billboardSize)) { 
-    //     float correctionScale = height > billboardSize ? billboardSize / height :
-    //                                                      billboardSize / width;
-
-    //     scaledRight *= correctionScale;
-    //     scaledUp    *= correctionScale;
-    //     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
-    //                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    //     gs_screenSpaceDepth = bottomLeftVertex.w;
-    //     topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))); 
-
-    
-    //     bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                 dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-        
-    //     topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-
-    // } else {
-        // if (width < 2.0f) {
-        //     float maxVar = 2.0f;
-        //     float minVar = 1.0f;
-        //     float var    = (height + width);    
-        //     float ta = ( (var - minVar)/(maxVar - minVar) );
-        //     if (ta == 0.0f)
-        //         return;
-        // }  
-        // float minSize = 30.f; 
-        // if ((width < minSize) || (height < minSize))
-        //     return;         
-        bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                    dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-        topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+    topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    // } 
-
+    
     // Build primitive
-    gl_Position = topLeftVertex;
-    psfCoords   = vec2(-1.0, 1.0);
-    EmitVertex();
+    
     gl_Position = bottomLeftVertex;
     psfCoords   = vec2(-1.0, -1.0);
     EmitVertex();
-    gl_Position = topRightVertex;
-    psfCoords   = vec2(1.0, 1.0);
-    EmitVertex();
+    
     gl_Position = bottomRightVertex;
     psfCoords   = vec2(1.0, -1.0);
     EmitVertex();
+
+    gl_Position = topLeftVertex;
+    psfCoords   = vec2(-1.0, 1.0);
+    EmitVertex();
+    
+    gl_Position = topRightVertex;
+    psfCoords   = vec2(1.0, 1.0);
+    EmitVertex();
+    
     EndPrimitive();
+
 }

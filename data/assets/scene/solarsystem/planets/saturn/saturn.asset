@@ -51,22 +51,25 @@ local Saturn = {
     }
 }
 
--- local SaturnRings = {
---     Identifier = "SaturnRings",
---     Parent = Saturn.Identifier,
---     Renderable = {
---         Type = "RenderableRings",
---         Texture = textures .. "/saturn_rings.png",
---         Size = 140445000,
---         Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
---     },
---     GUI = {
---         Name = "Saturn Rings",
---         Path = "/Solar System/Planets/Saturn"
---     }
--- }
+local SaturnLabel = {
+    Identifier = "SaturnLabel",
+    Parent = Saturn.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Saturn",
+        FontSize = 100.0,
+        LabelSize = 8.7,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        BlendMode = "Additive",
+        LabelOrientationOption = "Camera View Direction"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Saturn Label",
+        Path = "/Solar System/Planets/Saturn"
+    }
+}
 
-
-
---assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnRings })
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })

@@ -9,9 +9,9 @@ asset.onInitialize(function ()
 
     openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
 
-    openspace.markInterestingNodes({ "Saturn", "Mars", "Moon", "Sun", "Saturn" })
+    openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun"})
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({ "Earth", "Mars", "Moon", "Sun", "Saturn" })
+    openspace.removeInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
 end)

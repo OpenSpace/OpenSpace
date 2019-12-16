@@ -59,6 +59,10 @@ namespace {
         "renderedTexture", "inverseScreenSize"
     };
 
+    constexpr const std::array<const char*, 2> DownscaledVolumeUniformNames = {
+        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth"
+    };
+
     constexpr const char* ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer.frag";
     constexpr const char* RaycastFragmentShaderPath =
@@ -184,6 +188,11 @@ void FramebufferRenderer::initialize() {
     glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glGenTextures(1, &_fxaaBuffers.fxaaTexture);
 
+    // DownscaleVolumeRendering
+    glGenFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
+    glGenTextures(1, &_downscaleVolumeRendering.colorTexture);
+    glGenTextures(1, &_downscaleVolumeRendering.depthbuffer);
+    
     // Allocate Textures/Buffers Memory
     updateResolution();
 
@@ -307,11 +316,35 @@ void FramebufferRenderer::initialize() {
         LERROR("FXAA framebuffer is not complete");
     }
 
+    //================================================//
+    //=====  Downscale Volume Rendering Buffers  =====//
+    //================================================//
+    glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        _downscaleVolumeRendering.colorTexture,
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        _downscaleVolumeRendering.depthbuffer,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Downscale Volume Rendering framebuffer is not complete");
+    }
+
+
     // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
     // Building programs
     updateHDRAndFiltering();
     updateFXAA();
     updateDeferredcastData();
+    updateDownscaledVolume();
 
     // Sets back to default FBO
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
@@ -325,6 +358,11 @@ void FramebufferRenderer::initialize() {
         *_fxaaProgram,
         _fxaaUniformCache,
         FXAAUniformNames
+    );
+    ghoul::opengl::updateUniformLocations(
+        *_downscaledVolumeProgram,
+        _writeDownscaledVolumeUniformCache,
+        DownscaledVolumeUniformNames
     );
 
     global::raycasterManager.addListener(*this);
@@ -342,6 +380,7 @@ void FramebufferRenderer::deinitialize() {
     glDeleteFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
     glDeleteFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glDeleteFramebuffers(1, &_pingPongBuffers.framebuffer);
+    glDeleteFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
 
     glDeleteTextures(1, &_gBuffers.colorTexture);
     glDeleteTextures(1, &_gBuffers.depthTexture);
@@ -350,7 +389,9 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_fxaaBuffers.fxaaTexture);
     glDeleteTextures(1, &_gBuffers.positionTexture);
     glDeleteTextures(1, &_gBuffers.normalTexture);
-    
+    glDeleteTextures(1, &_downscaleVolumeRendering.colorTexture);
+    glDeleteTextures(1, &_downscaleVolumeRendering.depthbuffer);
+
     glDeleteTextures(1, &_pingPongBuffers.colorTexture[1]);
 
     glDeleteTextures(1, &_exitColorTexture);
@@ -459,6 +500,124 @@ void FramebufferRenderer::applyFXAA() {
     _fxaaProgram->deactivate();
 }
 
+void FramebufferRenderer::updateDownscaleTextures() {
+    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
+        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+
+    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
+        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void FramebufferRenderer::writeDownscaledVolume() {
+    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
+    std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
+
+    if (doPerformanceMeasurements) {
+        perfInternal = std::make_unique<performance::PerformanceMeasurement>(
+            "FramebufferRenderer::render::writeDownscaledVolume"
+            );
+    }
+
+    // Saving current OpenGL state
+    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
+
+    GLenum blendEquationRGB;
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+
+    GLenum blendEquationAlpha;
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+
+    GLenum blendDestAlpha;
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+
+    GLenum blendDestRGB;
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+
+    GLenum blendSrcAlpha;
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+
+    GLenum blendSrcRGB;
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+    glEnablei(GL_BLEND, 0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    _downscaledVolumeProgram->activate();
+
+    ghoul::opengl::TextureUnit downscaledTextureUnit;
+    downscaledTextureUnit.activate();
+    glBindTexture(
+        GL_TEXTURE_2D,
+        _downscaleVolumeRendering.colorTexture
+    );
+
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.downscaledRenderedVolume,
+        downscaledTextureUnit
+    );
+    
+    ghoul::opengl::TextureUnit downscaledDepthUnit;
+    downscaledDepthUnit.activate();
+    glBindTexture(
+        GL_TEXTURE_2D,
+        _downscaleVolumeRendering.depthbuffer
+    );
+
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
+        downscaledDepthUnit
+    );
+
+
+    glEnablei(GL_BLEND, 0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    glDisable(GL_DEPTH_TEST);
+
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+
+    _downscaledVolumeProgram->deactivate();
+
+    // Restores blending state
+    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+
+    if (!blendEnabled) {
+        glDisablei(GL_BLEND, 0);
+    }
+
+}
+
 void FramebufferRenderer::update() {
     if (_dirtyResolution) {
         updateResolution();
@@ -489,6 +648,16 @@ void FramebufferRenderer::update() {
             *_fxaaProgram,
             _fxaaUniformCache,
             FXAAUniformNames
+        );
+    }
+
+    if (_downscaledVolumeProgram->isDirty()) {
+        _downscaledVolumeProgram->rebuildFromFile();
+
+        ghoul::opengl::updateUniformLocations(
+            *_downscaledVolumeProgram,
+            _writeDownscaledVolumeUniformCache,
+            DownscaledVolumeUniformNames
         );
     }
 
@@ -646,6 +815,39 @@ void FramebufferRenderer::updateResolution() {
         0,
         GL_RGBA,
         GL_UNSIGNED_BYTE,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // Downscale Volume Rendering
+    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
+        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+
+    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
+        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
         nullptr
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -834,6 +1036,17 @@ void FramebufferRenderer::updateFXAA() {
     //_fxaaProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
+void FramebufferRenderer::updateDownscaledVolume() {
+    _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
+        "Write Downscaled Volume Program",
+        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
+        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
+    );
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    //_downscaledVolumeProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_downscaledVolumeProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+}
+
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     // Set OpenGL default rendering state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
@@ -959,7 +1172,20 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             exitProgram->deactivate();
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
+        if (raycaster->downscaleRender() < 1.f) {
+            float scaleDown = raycaster->downscaleRender();
+            glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
+            glViewport(0, 0, _resolution.x * scaleDown, _resolution.y * scaleDown);
+            if (_downscaleVolumeRendering.currentDownscaleFactor != scaleDown) {
+                _downscaleVolumeRendering.currentDownscaleFactor = scaleDown;
+                updateDownscaleTextures();
+            }
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+        else {
+            glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
+        }
+
         glm::vec3 cameraPosition;
         bool isCameraInside = raycaster->isCameraInside(
             raycasterTask.renderData,
@@ -991,6 +1217,8 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycastProgram) {
+            raycastProgram->setUniform("rayCastSteps", raycaster->maxSteps());
+            
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
@@ -1008,7 +1236,16 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
-            raycastProgram->setUniform("windowSize", static_cast<glm::vec2>(_resolution));
+            if (raycaster->downscaleRender() < 1.f) {
+                float scaleDown = raycaster->downscaleRender();
+                raycastProgram->setUniform(
+                    "windowSize",
+                    glm::vec2(_resolution.x * scaleDown, _resolution.y * scaleDown)
+                );
+            }
+            else {
+                raycastProgram->setUniform("windowSize", static_cast<glm::vec2>(_resolution));
+            }
 
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
@@ -1029,12 +1266,17 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         else {
             LWARNING("Raycaster is not attached when trying to perform raycaster task");
         }
+
+        if (raycaster->downscaleRender() < 1.f) {
+            glViewport(0, 0, _resolution.x, _resolution.y);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
+            writeDownscaledVolume();
+        }
     }
 }
 
 void FramebufferRenderer::performDeferredTasks(
-                                             const std::vector<DeferredcasterTask>& tasks
-                                              )
+                                             const std::vector<DeferredcasterTask>& tasks)
 {   
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;

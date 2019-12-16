@@ -164,7 +164,7 @@ TouchModule::TouchModule()
     if (nativeWindowHandle) {
         _win32TouchHook.reset(new Win32TouchHook(nativeWindowHandle));
     }
-#endif //WIN32
+#endif
     });
 
     global::callback::deinitializeGL.push_back([&]() {

@@ -42,7 +42,6 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 #include <array>
