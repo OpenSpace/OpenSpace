@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
-local labelsPath = asset.require('./mercury_labels').LabelsPath
+local labelsPath = asset.require('./mercury_globelabels').LabelsPath
 
 
 asset.require("spice/base")
@@ -223,5 +223,25 @@ local Mercury = {
     }
 }
 
+local MercuryLabel = {
+    Identifier = "MercuryLabel",
+    Parent = Mercury.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Mercury",
+        FontSize = 100.0,
+        LabelSize = 8.3,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Mercury Label",
+        Path = "/Solar System/Planets/Mercury"
+    }
+}
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })

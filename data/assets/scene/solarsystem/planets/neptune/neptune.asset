@@ -40,4 +40,25 @@ local Neptune = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune })
+local NeptuneLabel = {
+    Identifier = "NeptuneLabel",
+    Parent = Neptune.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Neptune",
+        FontSize = 100.0,
+        LabelSize = 8.8,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Neptune Label",
+        Path = "/Solar System/Planets/Neptune"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })

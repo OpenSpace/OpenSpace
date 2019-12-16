@@ -27,4 +27,32 @@ local Sun = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Sun })
+local SunLabel = {
+    Identifier = "SunLabel",
+    Parent = Sun.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Sun",
+        FontSize = 100.0,
+        LabelSize = 13.127,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        EnableFading = true,
+        FadeStartUnit = "Pm",
+        FadeStartDistance = 2.841,
+        FadeStartSpeed = 1.375,
+        FadeEndUnit = "pc",
+        FadeEndDistance = 1.326,
+        FadeEndSpeed = 1.0
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Sun Label",
+        Path = "/Solar System/Sun"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })

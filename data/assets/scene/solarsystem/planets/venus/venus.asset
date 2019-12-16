@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.request('./trail')
-local labelsPath = asset.require('./venus_labels').LabelsPath
+local labelsPath = asset.require('./venus_globelabels').LabelsPath
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
 
@@ -82,6 +82,26 @@ local Venus = {
     }
 }
 
+local VenusLabel = {
+    Identifier = "VenusLabel",
+    Parent = Venus.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Venus",
+        FontSize = 100.0,
+        LabelSize = 8.4,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Venus Label",
+        Path = "/Solar System/Planets/Venus"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Venus })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })

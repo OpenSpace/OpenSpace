@@ -2,7 +2,7 @@ local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
-local labelsPath = asset.require('./mars_labels').LabelsPath
+local labelsPath = asset.require('./mars_globelabels').LabelsPath
 
 
 
@@ -187,4 +187,31 @@ local Mars = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mars })
+local MarsLabel = {
+    Identifier = "MarsLabel",
+    Parent = Mars.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Mars",
+        FontSize = 100.0,
+        LabelSize = 8.5,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        TransformationMatrix = {
+            1.0, 0.0, 0.0, -8.0E6,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 1.0E7,
+            0.0, 0.0, 0.0, 1.0
+        },
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Mars Label",
+        Path = "/Solar System/Planets/Mars"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mars, MarsLabel })
