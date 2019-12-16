@@ -1271,14 +1271,12 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glViewport(0, 0, _resolution.x, _resolution.y);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
-            
         }
     }
 }
 
 void FramebufferRenderer::performDeferredTasks(
-                                             const std::vector<DeferredcasterTask>& tasks
-                                              )
+                                             const std::vector<DeferredcasterTask>& tasks)
 {   
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;

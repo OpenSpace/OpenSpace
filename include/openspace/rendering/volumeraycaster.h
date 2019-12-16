@@ -129,13 +129,13 @@ public:
      */
     virtual std::string helperPath() const = 0;
 
-    virtual void setMaxSteps(int nsteps) { _rayCastMaxSteps = nsteps; };
+    void setMaxSteps(int nsteps);
 
-    virtual const int maxSteps() const { return _rayCastMaxSteps;  };
+    int maxSteps() const;
 
-    virtual void setDownscaleRender(float value) { _downscaleRenderConst = value; };
+    void setDownscaleRender(float value);
 
-    virtual const float downscaleRender() const { return _downscaleRenderConst; };
+    float downscaleRender() const;
 
 private:
     /**

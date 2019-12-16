@@ -245,8 +245,7 @@ namespace openspace {
         );
     }
     else {
-        LINFO("Number of raycasting steps not specified for Milkway Galaxy."
-              " Using default value.");
+        LINFO("Number of raycasting steps not specified. Using default value.");
     }
 
     _downScaleVolumeRendering.setVisibility(
@@ -254,7 +253,7 @@ namespace openspace {
     );
     if (volumeDictionary.hasKey(DownscaleVolumeRenderingInfo.identifier)) {
         _downScaleVolumeRendering = 
-                   volumeDictionary.value<float>(DownscaleVolumeRenderingInfo.identifier);
+            volumeDictionary.value<float>(DownscaleVolumeRenderingInfo.identifier);
     }
 
     if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
