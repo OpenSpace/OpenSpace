@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/directinputsolver.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/tuioear.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/touchinteraction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/touchmarker.h
@@ -35,6 +36,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/directinputsolver.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tuioear.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/touchinteraction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/touchmarker.cpp
