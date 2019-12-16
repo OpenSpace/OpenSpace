@@ -63,6 +63,22 @@ local Keybindings = {
         GuiPath = "/Rendering",
         Local = false
     },
+    {
+        Key = "l",
+        Name = "Turn on labels",
+        Command = "openspace.setPropertyValue('{solarsystem_labels}.Renderable.Enabled', true)",
+        Documentation = "Turns on visibility for all solar system labels",
+        GuiPath = "/Rendering",
+        Local = false
+    },
+    {
+        Key = "Shift+l",
+        Name = "Turn off labels",
+        Command = "openspace.setPropertyValue('{solarsystem_labels}.Renderable.Enabled', false)",
+        Documentation = "Turns off visibility for all solar system labels",
+        GuiPath = "/Rendering",
+        Local = false
+    }
 }
 
 asset.onInitialize(function ()

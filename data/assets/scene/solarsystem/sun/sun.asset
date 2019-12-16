@@ -48,6 +48,7 @@ local SunLabel = {
         FadeEndDistance = 1.326,
         FadeEndSpeed = 1.0
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Sun Label",
         Path = "/Solar System/Sun"

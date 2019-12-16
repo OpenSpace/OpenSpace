@@ -207,6 +207,7 @@ local MarsLabel = {
             0.0, 0.0, 0.0, 1.0
         },
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mars Label",
         Path = "/Solar System/Planets/Mars"

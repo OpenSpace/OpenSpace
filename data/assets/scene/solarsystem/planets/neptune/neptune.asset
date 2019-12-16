@@ -54,6 +54,7 @@ local NeptuneLabel = {
         LabelOrientationOption = "Camera View Direction",
         BlendMode = "Additive"
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Neptune Label",
         Path = "/Solar System/Planets/Neptune"

@@ -78,6 +78,7 @@ local VenusLabel = {
         LabelOrientationOption = "Camera View Direction",
         BlendMode = "Additive"
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Venus Label",
         Path = "/Solar System/Planets/Venus"

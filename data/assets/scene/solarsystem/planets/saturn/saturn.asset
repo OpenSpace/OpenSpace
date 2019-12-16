@@ -71,6 +71,7 @@ local SaturnLabel = {
         BlendMode = "Additive",
         LabelOrientationOption = "Camera View Direction"
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Saturn Label",
         Path = "/Solar System/Planets/Saturn"

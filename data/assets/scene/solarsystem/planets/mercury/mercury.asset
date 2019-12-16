@@ -237,6 +237,7 @@ local MercuryLabel = {
         LabelOrientationOption = "Camera View Direction",
         BlendMode = "Additive"
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mercury Label",
         Path = "/Solar System/Planets/Mercury"

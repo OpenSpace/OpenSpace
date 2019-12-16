@@ -320,6 +320,7 @@ local EarthLabel = {
         FadeEndDistance = 15.0,
         FadeEndSpeed = 25.0
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Earth Label",
         Path = "/Solar System/Planets/Earth"
