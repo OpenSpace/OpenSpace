@@ -21,7 +21,7 @@ local MilkyWayVolumeGalaxy = {
             -- The center of the Milky Way is approximately 8 kiloparsec from the Sun.
             -- The x-axis of galactic coordinates points from the sun towards the center
             -- of the galaxy.
-            Position = {8 * kiloparsec, 0, 0}
+            Position = { 8 * kiloparsec, 0, 0 }
         }
     },
     Renderable = {
@@ -29,12 +29,13 @@ local MilkyWayVolumeGalaxy = {
         StepSize = 0.01,
         AbsorptionMultiply = 200,
         EmissionMultiply = 250,
-        Rotation = {3.1415926, 3.1248, 4.45741},
+        Rotation = { 3.1415926, 3.1248, 4.45741 },
         Volume = {
             Type = "Volume",
             Filename = data .. "/MilkyWayRGBAVolume1024x1024x128.raw",
-            Dimensions = {1024, 1024, 128},
-            Size = {1.2E21, 1.2E21, 0.15E21}
+            Dimensions = { 1024, 1024, 128 },
+            Size = { 1.2E21, 1.2E21, 0.15E21 },
+            Downscale = 0.4,
         },
         Points = {
             Type = "Points",
