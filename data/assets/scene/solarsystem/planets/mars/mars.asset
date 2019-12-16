@@ -2,7 +2,7 @@ local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
-local labelsPath = asset.require('./mars_labels').LabelsPath
+local labelsPath = asset.require('./mars_globelabels').LabelsPath
 
 
 

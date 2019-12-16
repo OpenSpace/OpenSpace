@@ -1,7 +1,7 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require('./earth_textures').TexturesPath
-local labelsPath = asset.require('./earth_labels').LabelsPath
+local labelsPath = asset.require('./earth_globelabels').LabelsPath
 
 asset.request('./trail')
 
