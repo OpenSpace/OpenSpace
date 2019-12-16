@@ -71,6 +71,8 @@ private:
     properties::FloatProperty _enabledPointsRatio;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
+    properties::FloatProperty _downScaleVolumeRendering;
+    properties::FloatProperty _numberOfRayCastingSteps;
 
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;

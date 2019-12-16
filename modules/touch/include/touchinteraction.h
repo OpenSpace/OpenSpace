@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/touch/ext/levmarq.h>
+#include <modules/touch/include/directinputsolver.h>
 #include <modules/touch/include/tuioear.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
@@ -37,6 +37,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+
+#include <memory>
 
 //#define TOUCH_DEBUG_PROPERTIES
 //#define TOUCH_DEBUG_NODE_PICK_MESSAGES
@@ -77,27 +79,6 @@ public:
         double zoom;
         double roll;
         glm::dvec2 pan;
-    };
-
-    // Stores the selected node, the cursor ID as well as the surface coordinates the
-    // cursor touched
-    struct SelectedBody {
-        long id;
-        SceneGraphNode* node;
-        glm::dvec3 coordinates;
-    };
-
-    // Used in the LM algorithm
-    struct FunctionData {
-        std::vector<glm::dvec3> selectedPoints;
-        std::vector<glm::dvec2> screenPoints;
-        int nDOF;
-        glm::dvec2(*castToNDC)(const glm::dvec3&, Camera&, SceneGraphNode*);
-        double(*distToMinimize)(double* par, int x, void* fdata, LMstat* lmstat);
-        Camera* camera;
-        SceneGraphNode* node;
-        LMstat stats;
-        double objectScreenRadius;
     };
 
     /* Main function call
@@ -256,9 +237,10 @@ private:
     bool _zoomOutTap;
     bool _lmSuccess;
     bool _guiON;
-    std::vector<SelectedBody> _selected;
+    std::vector<DirectInputSolver::SelectedBody> _selected;
     SceneGraphNode* _pickingSelected = nullptr;
-    LMstat _lmstat;
+    DirectInputSolver _solver;
+
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;
 

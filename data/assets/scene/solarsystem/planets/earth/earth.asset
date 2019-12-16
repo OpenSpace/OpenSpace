@@ -1,7 +1,7 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require('./earth_textures').TexturesPath
-local labelsPath = asset.require('./earth_labels').LabelsPath
+local labelsPath = asset.require('./earth_globelabels').LabelsPath
 
 asset.request('./trail')
 
@@ -303,7 +303,7 @@ local EarthLabel = {
     --     -- }
     -- },
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Earth",
         FontSize = 100.0,
@@ -318,14 +318,9 @@ local EarthLabel = {
         FadeStartSpeed = 1.0,
         FadeEndUnit = "au",
         FadeEndDistance = 15.0,
-        FadeEndSpeed = 25.0,
-        TransformationMatrix = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        },
+        FadeEndSpeed = 25.0
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Earth Label",
         Path = "/Solar System/Planets/Earth"

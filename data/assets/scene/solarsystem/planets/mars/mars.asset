@@ -2,7 +2,7 @@ local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
-local labelsPath = asset.require('./mars_labels').LabelsPath
+local labelsPath = asset.require('./mars_globelabels').LabelsPath
 
 
 
@@ -190,20 +190,8 @@ local Mars = {
 local MarsLabel = {
     Identifier = "MarsLabel",
     Parent = Mars.Identifier,
-    -- Transform = {
-    --     Translation = {
-    --         Type = "SpiceTranslation",
-    --         Target = "EARTH",
-    --         Observer = "EARTH BARYCENTER"
-    --     },
-    --     -- Rotation = {
-    --     --     Type = "SpiceRotation",
-    --     --     SourceFrame = "IAU_MOON",
-    --     --     DestinationFrame = "GALACTIC"
-    --     -- }
-    -- },
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Mars",
         FontSize = 100.0,
@@ -219,6 +207,7 @@ local MarsLabel = {
             0.0, 0.0, 0.0, 1.0
         },
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mars Label",
         Path = "/Solar System/Planets/Mars"

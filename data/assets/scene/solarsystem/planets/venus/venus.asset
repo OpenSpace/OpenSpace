@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.request('./trail')
-local labelsPath = asset.require('./venus_labels').LabelsPath
+local labelsPath = asset.require('./venus_globelabels').LabelsPath
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
 
@@ -85,20 +85,8 @@ local Venus = {
 local VenusLabel = {
     Identifier = "VenusLabel",
     Parent = Venus.Identifier,
-    -- Transform = {
-    --     Translation = {
-    --         Type = "SpiceTranslation",
-    --         Target = "EARTH",
-    --         Observer = "EARTH BARYCENTER"
-    --     },
-    --     -- Rotation = {
-    --     --     Type = "SpiceRotation",
-    --     --     SourceFrame = "IAU_MOON",
-    --     --     DestinationFrame = "GALACTIC"
-    --     -- }
-    -- },
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Venus",
         FontSize = 100.0,
@@ -106,14 +94,9 @@ local VenusLabel = {
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
         LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive",
-        TransformationMatrix = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        },
+        BlendMode = "Additive"
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Venus Label",
         Path = "/Solar System/Planets/Venus"

@@ -54,22 +54,6 @@ namespace documentation { struct Documentation; }
 struct LinePoint;
 
 class RenderableLabels : public Renderable {
-private:
-    enum Unit {
-        Meter = 0,
-        Kilometer = 1,
-        Megameter = 2,
-        Gigameter = 3,
-        AU = 4,
-        Terameter = 5,
-        Petameter = 6,
-        Parsec = 7,
-        Kiloparsec = 8,
-        Megaparsec = 9,
-        Gigaparsec = 10,
-        GigalightYears = 11
-    };
-
 public:
     RenderableLabels(const ghoul::Dictionary& dictionary);
 
@@ -90,37 +74,43 @@ protected:
     properties::OptionProperty _blendMode;
 
 private:
+    enum Unit {
+        Meter = 0,
+        Kilometer,
+        Megameter,
+        Gigameter,
+        AU,
+        Terameter,
+        Petameter,
+        Parsec,
+        Kiloparsec,
+        Megaparsec,
+        Gigaparsec,
+        GigalightYears
+    };
+
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
-    float changedPerlinSmoothStepFunc(
-                                      const float x, 
-                                      const float startX, 
-                                      const float endX 
-    ) const;
+    float changedPerlinSmoothStepFunc(float x, float startX, float endX) const;
     
-    float linearSmoothStepFunc(
-                               const float x,
-                               const float startX,
-                               const float endX,
-                               const float sUnit,
-                               const float eUnit
-    ) const;
+    float linearSmoothStepFunc(float x, float startX, float endX, float sUnit,
+        float eUnit) const;
 
     float getUnit(int unit) const;
 
-    properties::Vec4Property   _labelColor;
-    properties::FloatProperty  _labelSize;
-    properties::FloatProperty  _fontSize;
-    properties::FloatProperty  _labelMinSize;
-    properties::FloatProperty  _labelMaxSize;
-    properties::BoolProperty   _pixelSizeControl;
-    properties::BoolProperty   _enableFadingEffect;
+    properties::Vec4Property _labelColor;
+    properties::FloatProperty _labelSize;
+    properties::FloatProperty _fontSize;
+    properties::FloatProperty _labelMinSize;
+    properties::FloatProperty _labelMaxSize;
+    properties::BoolProperty _pixelSizeControl;
+    properties::BoolProperty _enableFadingEffect;
     properties::StringProperty _labelText;
-    properties::FloatProperty  _fadeStartDistance;
-    properties::FloatProperty  _fadeEndDistance;
-    properties::FloatProperty  _fadeStartSpeed;
-    properties::FloatProperty  _fadeEndSpeed;
+    properties::FloatProperty _fadeStartDistance;
+    properties::FloatProperty _fadeEndDistance;
+    properties::FloatProperty _fadeStartSpeed;
+    properties::FloatProperty _fadeEndSpeed;
 
     properties::OptionProperty _labelOrientationOption;
     properties::OptionProperty _fadeStartUnitOption;

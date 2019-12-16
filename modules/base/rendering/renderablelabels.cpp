@@ -193,7 +193,9 @@ documentation::Documentation RenderableLabels::Documentation() {
             },
             {
                 LabelOrientationOptionInfo.identifier,
-                new StringInListVerifier({ "Camera View Direction", "Camera Position Normal" }),
+                new StringInListVerifier(
+                    { "Camera View Direction", "Camera Position Normal" }
+                ),
                 Optional::Yes,
                 LabelOrientationOptionInfo.description,
             },
@@ -253,13 +255,19 @@ documentation::Documentation RenderableLabels::Documentation() {
             },
             {
                 FadeStartUnitOptionInfo.identifier,
-                new StringInListVerifier({"m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
+                new StringInListVerifier(
+                    { "m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc",
+                      "Gpc", "Gly"}
+                ),
                 Optional::Yes,
                 FadeStartUnitOptionInfo.description,
             },
             {
                 FadeEndUnitOptionInfo.identifier,
-                new StringInListVerifier({"m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc", "Gpc", "Gly"}),
+                new StringInListVerifier(
+                    {"m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc",
+                     "Gpc", "Gly"}
+                ),
                 Optional::Yes,
                 FadeEndUnitOptionInfo.description,
             },
@@ -311,9 +319,18 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     , _fadeEndDistance(FadeEndDistInfo, 1.f, 0.f, 100.f)
     , _fadeStartSpeed(FadeStartSpeedInfo, 1.f, 1.f, 100.f)
     , _fadeEndSpeed(FadeEndSpeedInfo, 1.f, 1.f, 100.f)
-    , _labelOrientationOption(LabelOrientationOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeStartUnitOption(FadeStartUnitOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeEndUnitOption(FadeEndUnitOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _labelOrientationOption(
+        LabelOrientationOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _fadeStartUnitOption(
+        FadeStartUnitOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _fadeEndUnitOption(
+        FadeEndUnitOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -357,7 +374,9 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     _labelOrientationOption = NormalDirection;
     if (dictionary.hasKeyAndValue<std::string>(LabelOrientationOptionInfo.identifier)) {
-        const std::string o = dictionary.value<std::string>(LabelOrientationOptionInfo.identifier);
+        const std::string o = dictionary.value<std::string>(
+            LabelOrientationOptionInfo.identifier
+            );
 
         if (o == "Camera View Direction") {
             _labelOrientationOption = ViewDirection;
@@ -446,7 +465,9 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _fadeStartUnitOption = AU;
 
     if (dictionary.hasKey(FadeStartUnitOptionInfo.identifier)) {
-        std::string unit = dictionary.value<std::string>(FadeStartUnitOptionInfo.identifier);
+        std::string unit = dictionary.value<std::string>(
+            FadeStartUnitOptionInfo.identifier
+        );
         if (unit == MeterUnit) {
             _fadeStartUnitOption = Meter;
         }
@@ -521,7 +542,9 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _fadeEndUnitOption = AU;
 
     if (dictionary.hasKey(FadeEndUnitOptionInfo.identifier)) {
-        std::string unit = dictionary.value<std::string>(FadeEndUnitOptionInfo.identifier);
+        std::string unit = dictionary.value<std::string>(
+            FadeEndUnitOptionInfo.identifier
+        );
         if (unit == MeterUnit) {
             _fadeEndUnitOption = Meter;
         }
@@ -573,9 +596,6 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(_fadeEndSpeed);
-
-
-    //setBoundingSphere(_size);
 }
 
 bool RenderableLabels::isReady() const {
@@ -603,8 +623,7 @@ void RenderableLabels::initializeGL() {
     }
 }
 
-void RenderableLabels::deinitializeGL() {
-}
+void RenderableLabels::deinitializeGL() {}
 
 void RenderableLabels::render(const RenderData& data, RendererTasks&) {
 
@@ -626,7 +645,13 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
         float startX = _fadeStartDistance * sUnit;
         float endX = _fadeEndDistance * eUnit;
         //fadeInVariable = changedPerlinSmoothStepFunc(distanceNodeToCamera, startX, endX);
-        fadeInVariable = linearSmoothStepFunc(distanceNodeToCamera, startX, endX, sUnit, eUnit);
+        fadeInVariable = linearSmoothStepFunc(
+            distanceNodeToCamera,
+            startX,
+            endX,
+            sUnit,
+            eUnit
+        );
     }
 
     glm::dmat4 modelMatrix(1.0);
@@ -668,8 +693,7 @@ void RenderableLabels::setLabelText(const std::string & newText) {
 void RenderableLabels::renderLabels(const RenderData& data, 
                                     const glm::dmat4& modelViewProjectionMatrix,
                                     const glm::dvec3& orthoRight,
-                                    const glm::dvec3& orthoUp,
-                                    float fadeInVariable)
+                                    const glm::dvec3& orthoUp, float fadeInVariable)
 {
     glm::vec4 textColor = _labelColor;
     
@@ -704,9 +728,8 @@ void RenderableLabels::renderLabels(const RenderData& data,
     );
 }
 
-float RenderableLabels::changedPerlinSmoothStepFunc(const float x,
-                                                    const float startX,
-                                                    const float endX) const 
+float RenderableLabels::changedPerlinSmoothStepFunc(float x, float startX,
+                                                    float endX) const 
 {
     float f1 = 6.f * powf((x - startX), 5.f) - 15.f * powf((x - startX), 4.f) + 
                10.f * powf((x - startX), 3.f);
@@ -725,11 +748,8 @@ float RenderableLabels::changedPerlinSmoothStepFunc(const float x,
     } 
 }
 
-float RenderableLabels::linearSmoothStepFunc(const float x,
-                                             const float startX,
-                                             const float endX,
-                                             const float sUnit,
-                                             const float eUnit) const
+float RenderableLabels::linearSmoothStepFunc(float x, float startX, float endX,
+                                             float sUnit, float eUnit) const
 {
     float sdiv = 1.f / (sUnit * _fadeStartSpeed);
     float ediv = -1.f / (eUnit * _fadeEndSpeed);
@@ -752,44 +772,45 @@ float RenderableLabels::getUnit(int unit) const {
 
     float scale = 0.f;
     switch (static_cast<Unit>(unit)) {
-    case Meter:
-        scale = 1.f;
-        break;
-    case Kilometer:
-        scale = 1e3;
-        break;
-    case Megameter:
-        scale = 1e6;
-        break;
-    case Gigameter:
-        scale = 1e9;
-        break;
-    case AU:
-        scale = 149597870700.f;
-        break;
-    case Terameter:
-        scale = 1e12;
-        break;
-    case Petameter:
-        scale = 1e15;
-        break;
-    case Parsec:
-        scale = static_cast<float>(PARSEC);
-        break;
-    case Kiloparsec:
-        scale = static_cast<float>(1e3 * PARSEC);
-        break;
-    case Megaparsec:
-        scale = static_cast<float>(1e6 * PARSEC);
-        break;
-    case Gigaparsec:
-        scale = static_cast<float>(1e9 * PARSEC);
-        break;
-    case GigalightYears:
-        scale = static_cast<float>(306391534.73091 * PARSEC);
-        break;
+        case Meter:
+            scale = 1.f;
+            break;
+        case Kilometer:
+            scale = 1e3;
+            break;
+        case Megameter:
+            scale = 1e6;
+            break;
+        case Gigameter:
+            scale = 1e9;
+            break;
+        case AU:
+            scale = 149597870700.f;
+            break;
+        case Terameter:
+            scale = 1e12;
+            break;
+        case Petameter:
+            scale = 1e15;
+            break;
+        case Parsec:
+            scale = static_cast<float>(PARSEC);
+            break;
+        case Kiloparsec:
+            scale = static_cast<float>(1e3 * PARSEC);
+            break;
+        case Megaparsec:
+            scale = static_cast<float>(1e6 * PARSEC);
+            break;
+        case Gigaparsec:
+            scale = static_cast<float>(1e9 * PARSEC);
+            break;
+        case GigalightYears:
+            scale = static_cast<float>(306391534.73091 * PARSEC);
+            break;
     }
 
     return scale;
 }
+
 } // namespace openspace

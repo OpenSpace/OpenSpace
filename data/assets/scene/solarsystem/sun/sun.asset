@@ -31,7 +31,7 @@ local SunLabel = {
     Identifier = "SunLabel",
     Parent = Sun.Identifier,
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Sun",
         FontSize = 100.0,
@@ -46,14 +46,9 @@ local SunLabel = {
         FadeStartSpeed = 1.375,
         FadeEndUnit = "pc",
         FadeEndDistance = 1.326,
-        FadeEndSpeed = 1.0,
-        TransformationMatrix = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        },
+        FadeEndSpeed = 1.0
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Sun Label",
         Path = "/Solar System/Sun"

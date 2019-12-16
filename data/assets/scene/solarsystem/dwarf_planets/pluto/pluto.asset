@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.request('./trail')
-local labelsPath = asset.require('./pluto_labels').LabelsPath
+local labelsPath = asset.require('./pluto_globelabels').LabelsPath
 
 
 
@@ -62,20 +62,8 @@ local Pluto = {
 local PlutoLabel = {
     Identifier = "PlutoLabel",
     Parent = Pluto.Identifier,
-    -- Transform = {
-    --     Translation = {
-    --         Type = "SpiceTranslation",
-    --         Target = "EARTH",
-    --         Observer = "EARTH BARYCENTER"
-    --     },
-    --     -- Rotation = {
-    --     --     Type = "SpiceRotation",
-    --     --     SourceFrame = "IAU_MOON",
-    --     --     DestinationFrame = "GALACTIC"
-    --     -- }
-    -- },
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Pluto",
         FontSize = 100.0,
@@ -83,14 +71,9 @@ local PlutoLabel = {
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
         BlendMode = "Additive",
-        LabelOrientationOption = "Camera View Direction",
-        TransformationMatrix = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        },
+        LabelOrientationOption = "Camera View Direction"
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Pluto Label",
         Path = "/Solar System/Dwarf Planets/Pluto"

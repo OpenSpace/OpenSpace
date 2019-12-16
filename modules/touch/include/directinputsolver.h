@@ -22,43 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
+#define __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 
-#include "hdr.glsl"
+#include <modules/touch/ext/levmarq.h>
+#include <modules/touch/ext/libTUIO11/TUIO/TuioCursor.h>
+#include <vector>
 
-#define HSV_COLOR 0u
-#define HSL_COLOR 1u
 
-layout (location = 0) out vec4 finalColor;
+namespace openspace {
 
-uniform float hdrExposure;
-uniform float blackoutFactor;
-uniform float gamma;
-uniform float Hue;
-uniform float Saturation;
-uniform float Value;
-uniform float Lightness;
+class Camera;
+class SceneGraphNode;
 
-uniform sampler2D hdrFeedingTexture;
+class DirectInputSolver {
+public:
+    // Stores the selected node, the cursor ID as well as the surface coordinates the
+    // cursor touched
+    struct SelectedBody {
+        long id;
+        SceneGraphNode* node;
+        glm::dvec3 coordinates;
+    };
 
-in vec2 texCoord;
+    DirectInputSolver();
+    bool solve(const std::vector<TUIO::TuioCursor>& list,
+        const std::vector<SelectedBody>& selectedBodies,
+        std::vector<double>* calculatedValues, const Camera& camera);
+    int getNDof() const;
 
-void main() {
-    vec4 color = texture(hdrFeedingTexture, texCoord);
-    color.rgb *= blackoutFactor;
-    
-    // Applies TMO
-    vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
-    
-    // Color control
-    vec3 hsvColor = rgb2hsv(tColor);
-    hsvColor.x = (hsvColor.x + Hue);
-    if (hsvColor.x > 360.0) {
-        hsvColor -= 360.0;
-    }
-    hsvColor.y = clamp(hsvColor.y * Saturation, 0.0, 1.0);
-    hsvColor.z = clamp(hsvColor.z * Value, 0.0, 1.0);
+    const LMstat& getLevMarqStat();
+    void setLevMarqVerbosity(bool verbose);
 
-    // Gamma Correction
-    finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
-}
+private:
+    int _nDof = 0;
+    LMstat _lmstat;
+};
+
+} // openspace namespace
+
+#endif // __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
+
