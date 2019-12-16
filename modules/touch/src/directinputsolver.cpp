@@ -24,27 +24,24 @@
 
 #include <modules/touch/include/touchinteraction.h>
 
-
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 
+namespace {
+    // Used in the LM algorithm
+    struct FunctionData {
+        std::vector<glm::dvec3> selectedPoints;
+        std::vector<glm::dvec2> screenPoints;
+        int nDOF;
+        const openspace::Camera* camera;
+        openspace::SceneGraphNode* node;
+        LMstat stats;
+    };
+}
 
 namespace openspace {
 
-// Used in the LM algorithm
-struct FunctionData {
-    std::vector<glm::dvec3> selectedPoints;
-    std::vector<glm::dvec2> screenPoints;
-    int nDOF;
-    const Camera* camera;
-    SceneGraphNode* node;
-    LMstat stats;
-};
-
-
-DirectInputSolver::DirectInputSolver() 
-    : _nDof(0)
-{
+DirectInputSolver::DirectInputSolver() {
     levmarq_init(&_lmstat);
 }
 
@@ -106,8 +103,7 @@ double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
 
         dquat rotationDiffWorldSpace =
             globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
-        dvec3 rotationDiffVec3 =
-            centerToCamera * rotationDiffWorldSpace - centerToCamera;
+        dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace - centerToCamera;
         camPos += rotationDiffVec3;
 
         centerToCamera = camPos - centerPos;
@@ -117,7 +113,8 @@ double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
         lookAtMat = lookAt(
             dvec3(0, 0, 0),
             directionToCenter,
-            lookUpWhenFacingCenter);
+            lookUpWhenFacingCenter
+        );
         globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
     }
     { // Zooming
@@ -205,11 +202,9 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
 }
 
 bool DirectInputSolver::solve(const std::vector<TUIO::TuioCursor>& list, 
-                        const std::vector<SelectedBody>& selectedBodies,
-                        std::vector<double> *parameters,
-                        const Camera &camera) 
+                              const std::vector<SelectedBody>& selectedBodies,
+                              std::vector<double>* parameters, const Camera& camera) 
 {
-    
     int nFingers = std::min(static_cast<int>(list.size()), 3);
     _nDof = std::min(nFingers * 2, 6);
 
@@ -220,7 +215,10 @@ bool DirectInputSolver::solve(const std::vector<TUIO::TuioCursor>& list,
     for (int i = 0; i < nFingers; ++i) {
         const SelectedBody& sb = selectedBodies.at(i);
         selectedPoints.push_back(sb.coordinates);
-        screenPoints.emplace_back(2 * (list[i].getX() - 0.5), -2 * (list[i].getY() - 0.5));
+        screenPoints.emplace_back(
+            2 * (list[i].getX() - 0.5),
+            -2 * (list[i].getY() - 0.5)
+        );
 
         // This might be needed when we're directing the touchtable from another screen?
         //    std::vector<TuioCursor>::const_iterator c = std::find_if(
@@ -265,6 +263,18 @@ bool DirectInputSolver::solve(const std::vector<TUIO::TuioCursor>& list,
     );
 
     return result;
+}
+
+int DirectInputSolver::getNDof() const {
+    return _nDof;
+}
+
+const LMstat& DirectInputSolver::getLevMarqStat() {
+    return _lmstat;
+}
+
+void DirectInputSolver::setLevMarqVerbosity(bool verbose) {
+    _lmstat.verbose = verbose;
 }
 
 } // openspace namespace

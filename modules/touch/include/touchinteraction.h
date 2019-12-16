@@ -237,9 +237,9 @@ private:
     bool _zoomOutTap;
     bool _lmSuccess;
     bool _guiON;
-    std::vector<SelectedBody> _selected;
+    std::vector<DirectInputSolver::SelectedBody> _selected;
     SceneGraphNode* _pickingSelected = nullptr;
-    std::unique_ptr<DirectInputSolver> _solver;
+    DirectInputSolver _solver;
 
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;

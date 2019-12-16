@@ -322,7 +322,6 @@ TouchInteraction::TouchInteraction()
     , _zoomOutTap(false)
     , _lmSuccess(true)
     , _guiON(false)
-    , _solver(new DirectInputSolver())
 #ifdef TOUCH_DEBUG_PROPERTIES
     , _debugProperties()
 #endif
@@ -518,8 +517,8 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     std::vector<double> par(6, 0.0);
     par.at(0) = _lastVel.orbit.x; // use _lastVel for orbit
     par.at(1) = _lastVel.orbit.y;
-    _lmSuccess = _solver->solve(list, _selected, &par, *_camera);
-    int nDof = _solver->getNDof();
+    _lmSuccess = _solver.solve(list, _selected, &par, *_camera);
+    int nDof = _solver.getNDof();
 
     if (_lmSuccess && !_unitTest) {
          // if good values were found set new camera state
@@ -574,7 +573,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
-    std::vector<SelectedBody> newSelected;
+    std::vector<DirectInputSolver::SelectedBody> newSelected;
     
     //node & distance
     std::tuple<SceneGraphNode*, double> currentlyPicked = {
@@ -594,24 +593,32 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         long id = c.getSessionID();
 
         for (SceneGraphNode* node : selectableNodes) {
-            double boundingSphereSquared = double(node->boundingSphere()) * double(node->boundingSphere());
+            double boundingSphereSquared = static_cast<double>(node->boundingSphere()) *
+                                           static_cast<double>(node->boundingSphere());
             glm::dvec3 camToSelectable = node->worldPosition() - camPos;
             double intersectionDist = 0.0;
-            bool intersected = glm::intersectRaySphere(camPos, raytrace, node->worldPosition(),
-                                                       boundingSphereSquared, intersectionDist);
+            bool intersected = glm::intersectRaySphere(
+                camPos,
+                raytrace,
+                node->worldPosition(),
+                boundingSphereSquared,
+                intersectionDist
+            );
             if (intersected) {
                 glm::dvec3 intersectionPos = camPos + raytrace * intersectionDist;
                 glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
                                               (intersectionPos - node->worldPosition());
 
                 // Add id, node and surface coordinates to the selected list
-                std::vector<SelectedBody>::iterator oldNode = std::find_if(
+                auto oldNode = std::find_if(
                     newSelected.begin(),
                     newSelected.end(),
-                    [id](SelectedBody s) { return s.id == id; }
+                    [id](const DirectInputSolver::SelectedBody& s) { return s.id == id; }
                 );
                 if (oldNode != newSelected.end()) {
-                    double oldNodeDist = glm::length(oldNode->node->worldPosition() - camPos);
+                    double oldNodeDist = glm::length(
+                        oldNode->node->worldPosition() - camPos
+                    );
                     if (glm::length(camToSelectable) < oldNodeDist) {
                          // new node is closer, remove added node and add the new one
                          // instead
@@ -1127,8 +1134,11 @@ void TouchInteraction::step(double dt) {
             else if (_zoomInLimit.value() < zoomInBounds) {
                 // If zoom in limit is less than the estimated node radius we need to 
                 // make sure we do not get too close to possible height maps
-                SurfacePositionHandle posHandle = anchor->calculateSurfacePositionHandle(camPos);
-                glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
+                SurfacePositionHandle posHandle = anchor->calculateSurfacePositionHandle(
+                    camPos
+                );
+                glm::dvec3 centerToActualSurfaceModelSpace =
+                    posHandle.centerToReferenceSurface +
                     posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
                 glm::dvec3 centerToActualSurface = glm::dmat3(anchor->modelTransform()) *
                     centerToActualSurfaceModelSpace;
@@ -1137,9 +1147,8 @@ void TouchInteraction::step(double dt) {
                 // Because of heightmaps we should make sure we do not go through the surface
                 if (_zoomInLimit.value() < nodeRadius) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                    LINFO(fmt::format(
-                        "{}: Zoom In Limit should be larger than anchor center to surface, setting it to {}",
-                        _loggerCat, zoomInBounds));
+                    LINFO(fmt::format("{}: Zoom In limit should be larger than anchor "
+                        "center to surface, setting it to {}", _loggerCat, zoomInBounds));
 #endif
                     _zoomInLimit.setValue(zoomInBounds);
                 }     
@@ -1159,9 +1168,12 @@ void TouchInteraction::step(double dt) {
             double currentPosDistance = length(centerToCamera);
 
             // Possible with other navigations performed outside touch interaction
-            bool currentPosViolatingZoomOutLimit = (currentPosDistance >= _zoomOutLimit.value());
-            bool willNewPositionViolateZoomOutLimit = (newPosDistance >= _zoomOutLimit.value());
-            bool willNewPositionViolateZoomInLimit = (newPosDistance < _zoomInLimit.value());
+            bool currentPosViolatingZoomOutLimit =
+                (currentPosDistance >= _zoomOutLimit.value());
+            bool willNewPositionViolateZoomOutLimit =
+                (newPosDistance >= _zoomOutLimit.value());
+            bool willNewPositionViolateZoomInLimit =
+                (newPosDistance < _zoomInLimit.value());
 
             if (!willNewPositionViolateZoomInLimit && !willNewPositionViolateZoomOutLimit){
                 camPos += zoomDistanceIncrement;
@@ -1214,7 +1226,7 @@ void TouchInteraction::step(double dt) {
 
 void TouchInteraction::unitTest() {
     if (_unitTest) {
-        _solver->setLevMarqVerbosity(true);
+        _solver.setLevMarqVerbosity(true);
 
         // set _selected pos and new pos (on screen)
         std::vector<TuioCursor> lastFrame = {
@@ -1235,7 +1247,7 @@ void TouchInteraction::unitTest() {
         snprintf(buffer, sizeof(char) * 32, "lmdata%i.csv", _numOfTests);
         _numOfTests++;
         std::ofstream file(buffer);
-        file << _solver->getLevMarqStat().data;
+        file << _solver.getLevMarqStat().data;
 
         // clear everything
         _selected.clear();
@@ -1247,7 +1259,7 @@ void TouchInteraction::unitTest() {
         _lastVel = _vel;
         _unitTest = false;
 
-        _solver->setLevMarqVerbosity(false);
+        _solver.setLevMarqVerbosity(false);
         // could be the camera copy in func
     }
 }

@@ -25,11 +25,8 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 #define __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 
-
 #include <modules/touch/ext/levmarq.h>
-
 #include <modules/touch/ext/libTUIO11/TUIO/TuioCursor.h>
-
 #include <vector>
 
 
@@ -38,32 +35,29 @@ namespace openspace {
 class Camera;
 class SceneGraphNode;
 
-// Stores the selected node, the cursor ID as well as the surface coordinates the
-// cursor touched
-struct SelectedBody {
-    long id;
-    SceneGraphNode* node;
-    glm::dvec3 coordinates;
-};
-
 class DirectInputSolver {
 public:
+    // Stores the selected node, the cursor ID as well as the surface coordinates the
+    // cursor touched
+    struct SelectedBody {
+        long id;
+        SceneGraphNode* node;
+        glm::dvec3 coordinates;
+    };
+
     DirectInputSolver();
     bool solve(const std::vector<TUIO::TuioCursor>& list,
-            const std::vector<SelectedBody>& selectedBodies,
-            std::vector<double>* calculatedValues,
-            const Camera& camera);
-    int getNDof() { return _nDof; }
+        const std::vector<SelectedBody>& selectedBodies,
+        std::vector<double>* calculatedValues, const Camera& camera);
+    int getNDof() const;
 
-    const LMstat& getLevMarqStat() { return _lmstat; }
-    void setLevMarqVerbosity(bool verbose) { _lmstat.verbose = verbose; }
+    const LMstat& getLevMarqStat();
+    void setLevMarqVerbosity(bool verbose);
 
 private:
-    int _nDof;
+    int _nDof = 0;
     LMstat _lmstat;
 };
-
-
 
 } // openspace namespace
 
