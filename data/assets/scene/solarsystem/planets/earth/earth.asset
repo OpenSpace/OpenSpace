@@ -303,7 +303,7 @@ local EarthLabel = {
     --     -- }
     -- },
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Earth",
         FontSize = 100.0,
@@ -318,13 +318,7 @@ local EarthLabel = {
         FadeStartSpeed = 1.0,
         FadeEndUnit = "au",
         FadeEndDistance = 15.0,
-        FadeEndSpeed = 25.0,
-        TransformationMatrix = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        },
+        FadeEndSpeed = 25.0
     },
     GUI = {
         Name = "Earth Label",

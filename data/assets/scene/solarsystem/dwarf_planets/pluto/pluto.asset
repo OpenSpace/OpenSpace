@@ -62,18 +62,6 @@ local Pluto = {
 local PlutoLabel = {
     Identifier = "PlutoLabel",
     Parent = Pluto.Identifier,
-    -- Transform = {
-    --     Translation = {
-    --         Type = "SpiceTranslation",
-    --         Target = "EARTH",
-    --         Observer = "EARTH BARYCENTER"
-    --     },
-    --     -- Rotation = {
-    --     --     Type = "SpiceRotation",
-    --     --     SourceFrame = "IAU_MOON",
-    --     --     DestinationFrame = "GALACTIC"
-    --     -- }
-    -- },
     Renderable = {
         Enabled = true,
         Type = "RenderableLabels",
@@ -83,13 +71,7 @@ local PlutoLabel = {
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
         BlendMode = "Additive",
-        LabelOrientationOption = "Camera View Direction",
-        TransformationMatrix = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        },
+        LabelOrientationOption = "Camera View Direction"
     },
     GUI = {
         Name = "Pluto Label",

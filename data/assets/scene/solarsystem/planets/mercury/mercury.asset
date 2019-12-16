@@ -226,20 +226,8 @@ local Mercury = {
 local MercuryLabel = {
     Identifier = "MercuryLabel",
     Parent = Mercury.Identifier,
-    -- Transform = {
-    --     Translation = {
-    --         Type = "SpiceTranslation",
-    --         Target = "EARTH",
-    --         Observer = "EARTH BARYCENTER"
-    --     },
-    --     -- Rotation = {
-    --     --     Type = "SpiceRotation",
-    --     --     SourceFrame = "IAU_MOON",
-    --     --     DestinationFrame = "GALACTIC"
-    --     -- }
-    -- },
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Mercury",
         FontSize = 100.0,
@@ -247,13 +235,7 @@ local MercuryLabel = {
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
         LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive",
-        TransformationMatrix = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        },
+        BlendMode = "Additive"
     },
     GUI = {
         Name = "Mercury Label",

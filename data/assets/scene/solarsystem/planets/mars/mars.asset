@@ -190,20 +190,8 @@ local Mars = {
 local MarsLabel = {
     Identifier = "MarsLabel",
     Parent = Mars.Identifier,
-    -- Transform = {
-    --     Translation = {
-    --         Type = "SpiceTranslation",
-    --         Target = "EARTH",
-    --         Observer = "EARTH BARYCENTER"
-    --     },
-    --     -- Rotation = {
-    --     --     Type = "SpiceRotation",
-    --     --     SourceFrame = "IAU_MOON",
-    --     --     DestinationFrame = "GALACTIC"
-    --     -- }
-    -- },
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "Mars",
         FontSize = 100.0,
