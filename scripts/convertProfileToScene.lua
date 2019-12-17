@@ -18,7 +18,7 @@ function printError(message)
   print("Error @ line "..lineIndex..": "..message)
 end
 
-function splitByTab (inputstr)
+function splitByTab(inputstr)
   sep = "\t"
   t = {}
   for match in (inputstr..sep):gmatch("(.-)"..sep) do

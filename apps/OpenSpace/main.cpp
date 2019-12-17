@@ -1206,16 +1206,19 @@ int main(int argc, char** argv) {
                 i += replace.length();
             }
 
-            std::string setProfileFilenameInLuaState = "\
-                openspace = {}\n\
-                openspace.profile = {}\n\
-                function openspace.profile.getFilename()\n\
-                    return \"" + global::configuration.profile + ".profile\"\
-                end\n\
-                function openspace.profile.getPath()\n\
-                    return \"" + outputScenePath + "\"\
-                end\
-            ";
+            std::string setProfileFilenameInLuaState = fmt::format(R"(
+                openspace = {{}}
+                openspace.profile = {{}}
+                function openspace.profile.getFilename()
+                  return "{}.profile"
+                end
+                function openspace.profile.getPath()
+                  return "{}"
+                end
+                )",
+                global::configuration.profile, outputScenePath
+            );
+
             ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
             ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
         }
