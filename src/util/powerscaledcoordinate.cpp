@@ -111,7 +111,7 @@ glm::dvec3 PowerScaledCoordinate::dvec3() const
 
 float PowerScaledCoordinate::length() const
 {
-    return glm::length(glm::vec3(_vec[0], _vec[1], _vec[2])) * std::pow(10, _vec[3]);
+    return glm::length(glm::vec3(_vec[0], _vec[1], _vec[2])) * std::pow(10.f, _vec[3]);
 }
 
 glm::vec3 PowerScaledCoordinate::direction() const
