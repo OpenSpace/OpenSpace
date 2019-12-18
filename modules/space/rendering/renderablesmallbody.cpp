@@ -280,8 +280,9 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             std::getline(file, ignore, ',');
             std::getline(file, ignore, ',');
 
-            // Ignore date
+            // Epoch
             std::getline(file, ignore, ',');
+            keplerElements.epoch = epochFromYMDdSubstring(ignore);
 
             // Eccentricity (unit-less)
             std::getline(file, ignore, ',');
@@ -308,10 +309,6 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             std::getline(file, ignore, ',');
             keplerElements.meanAnomaly = std::stod(ignore);
 
-            // Epoch (MJD)
-            std::getline(file, ignore, ',');
-            keplerElements.epoch = epochFromYMDdSubstring(ignore);
-
             // Period (days)
             std::getline(file, ignore);
             keplerElements.period = std::stod(ignore);
@@ -324,13 +321,13 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
     catch (std::invalid_argument&) {
         LERROR(fmt::format(
             "invalid_argument exception on line {} of {}",
-            csvLine - 1, filename
+            csvLine + 1, filename
         ));
     }
     catch (std::out_of_range&) {
         LERROR(fmt::format(
             "out_of_range exception on line {} of {}",
-            csvLine - 1, filename
+            csvLine + 1, filename
         ));
     }
 
