@@ -172,18 +172,65 @@ TouchModule::TouchModule()
         _markers.deinitialize();
     });
 
+    // These are handled in UI thread, which (as of 20th dec 2019) is in main thread
+    // so we don't need to lock here
+    global::callback::touchDetected.push_back([&](TouchInput input) 
+    {
+        _touchPoints.emplace_back(input);
+    });
+
+    global::callback::touchUpdated.push_back([&](TouchInput input) {
+        //Touchmodule don't care
+        if(input.dx == 0.0 && input.dy == 0.0){
+            return;
+        }
+        for(TouchInputs& points : _touchPoints){
+            if(points.getFingerId() == input.fingerId 
+                && points.getTouchDeviceId() == input.touchDeviceId){
+                points.addPoint(std::move(input));
+                return;
+            }
+        }
+        //ghoul assertions?
+        assert(!"Touchpoint was updated but not in list");
+    });
+
+    global::callback::touchExit.push_back([&](TouchInput input){
+        for(TouchInputs& points : _touchPoints) {
+            if(points.getFingerId() == input.fingerId 
+                && points.getTouchDeviceId() == input.touchDeviceId) {
+                points = std::move(_touchPoints.back());
+                _touchPoints.pop_back();
+                return;
+            }
+        }
+        //ghoul assertions?
+        assert(!"Could not find touchpoint to delete!");
+    });
+
     global::callback::preSync.push_back([&]() {
         _touch.setCamera(global::navigationHandler.camera());
         _touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
 
-        if (processNewInput() && global::windowDelegate.isMaster()) {
-            _touch.updateStateFromInput(_listOfContactPoints, _lastProcessed);
-        }
-        else if (_listOfContactPoints.empty()) {
+        // if (processNewInput() && global::windowDelegate.isMaster()) {
+        //     _touch.updateStateFromInput(_listOfContactPoints, _lastProcessed);
+        // }
+        // else if (_listOfContactPoints.empty()) {
+        //     _touch.resetAfterInput();
+        // }
+        if(!_touchPoints.empty() && !_lastTouchInputs.empty()){
+            _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
+        }else if(_touchPoints.empty()){
             _touch.resetAfterInput();
         }
 
+        
+
         // update lastProcessed
+        _lastTouchInputs.clear();
+        for(const TouchInputs& points : _touchPoints) {
+            _lastTouchInputs.emplace_back(points.getLatestInput());
+        }
         _lastProcessed.clear();
         for (const TuioCursor& c : _listOfContactPoints) {
             _lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
@@ -195,7 +242,10 @@ TouchModule::TouchModule()
         _touch.step(global::windowDelegate.deltaTime());
     });
 
-    global::callback::render.push_back([&]() { _markers.render(_listOfContactPoints); });
+    global::callback::render.push_back([&]() { 
+        _markers.render(_listOfContactPoints); 
+        _markers.render(_ear._touchpointList); 
+    });
 
 }
 

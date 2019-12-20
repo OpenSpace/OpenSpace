@@ -55,15 +55,18 @@ public:
     void deinitialize();
 
     void render(const std::vector<TUIO::TuioCursor>& list);
+    void render(const std::vector<openspace::TouchInputs>& list);
 
 private:
     void createVertexList(const std::vector<TUIO::TuioCursor>& list);
+    void createVertexList(const std::vector<openspace::TouchInputs>& list);
 
     properties::BoolProperty _visible;
     properties::FloatProperty _radiusSize;
     properties::FloatProperty _transparency;
     properties::FloatProperty _thickness;
     properties::Vec3Property _color;
+    properties::Vec3Property _inhouseColor;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     UniformCache(radius, transparency, thickness, color) _uniformCache;

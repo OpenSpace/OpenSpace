@@ -1295,6 +1295,27 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     global::interactionMonitor.markInteraction();
 }
 
+void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
+    for (const auto& func : global::callback::touchDetected) {
+        func(input);
+    }
+
+    global::navigationHandler.touchEntered(input);
+}
+
+void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
+    for(const auto& func : global::callback::touchUpdated) {
+        func(input);
+    }
+}
+
+void OpenSpaceEngine::touchExitCallback(TouchInput input) {
+    for(const auto& func : global::callback::touchExit) {
+        func(input);
+    }
+}
+
+
 std::vector<char> OpenSpaceEngine::encode() {
     std::vector<char> buffer = global::syncEngine.encodeSyncables();
     return buffer;

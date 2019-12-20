@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 #define __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 
+#include <openspace/util/touch.h>
 #include <modules/touch/ext/levmarq.h>
 #include <modules/touch/ext/libTUIO11/TUIO/TuioCursor.h>
 #include <vector>
@@ -40,13 +41,16 @@ public:
     // Stores the selected node, the cursor ID as well as the surface coordinates the
     // cursor touched
     struct SelectedBody {
-        long id;
+        size_t id;
         SceneGraphNode* node;
         glm::dvec3 coordinates;
     };
 
     DirectInputSolver();
     bool solve(const std::vector<TUIO::TuioCursor>& list,
+        const std::vector<SelectedBody>& selectedBodies,
+        std::vector<double>* calculatedValues, const Camera& camera);
+    bool solve(const std::vector<TouchInputs>& list,
         const std::vector<SelectedBody>& selectedBodies,
         std::vector<double>* calculatedValues, const Camera& camera);
     int getNDof() const;

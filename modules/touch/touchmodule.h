@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/util/touch.h>
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
 
@@ -55,6 +56,8 @@ namespace openspace {
         TouchInteraction _touch;
         TouchMarker _markers;
         std::vector<TUIO::TuioCursor> _listOfContactPoints;
+        std::vector<TouchInputs> _touchPoints;
+        std::vector<TouchInput> _lastTouchInputs;
         // contains an id and the TuioPoint that was processed last frame
         std::vector<Point> _lastProcessed;
         glm::ivec2 _webPositionCallback = glm::ivec2(0,0);

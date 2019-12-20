@@ -98,6 +98,10 @@ public:
     void updateStateFromInput(const std::vector<TUIO::TuioCursor>& list,
         std::vector<Point>& lastProcessed);
 
+
+    void updateStateFromInput(const std::vector<TouchInputs>& list,
+        std::vector<TouchInput>& lastProcessed);
+
     // Calculates the new camera state with velocities and time since last frame
     void step(double dt);
 
@@ -124,33 +128,41 @@ private:
     * be parsed to the webbrowser
     */
     bool webContent(const std::vector<TUIO::TuioCursor>& list);
+    bool webContent(glm::dvec2 screenPosition);
 
     /* Returns true if we have the GUI window open. If so, emulates the incoming touch
      * input to a mouse such that we can interact with the GUI
      */
     bool guiMode(const std::vector<TUIO::TuioCursor>& list);
+    bool guiMode(glm::dvec2 screenPosition, size_t numFingers);
 
     /* Function that calculates the new camera state such that it minimizes the L2 error
      * in screenspace
      * between contact points and surface coordinates projected to clip space using LMA
      */
     void directControl(const std::vector<TUIO::TuioCursor>& list);
+    void directControl(const std::vector<TouchInputs>& list);
 
     /* Traces each contact point into the scene as a ray
      * if the ray hits a node, save the id, node and surface coordinates the cursor hit
      * in the list _selected
      */
     void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
+    void findSelectedNode(const std::vector<TouchInputs>& list);
 
     /* Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
      * depending on what input was gotten
      */
     int interpretInteraction(const std::vector<TUIO::TuioCursor>& list,
         const std::vector<Point>& lastProcessed);
+    int interpretInteraction(const std::vector<TouchInputs>& list,
+        const std::vector<TouchInput>& lastProcessed);
 
     // Compute new velocity according to the interpreted action
     void computeVelocities(const std::vector<TUIO::TuioCursor>& list,
         const std::vector<Point>& lastProcessed);
+    void computeVelocities(const std::vector<TouchInputs>& list,
+        const std::vector<TouchInput>& lastProcessed);
 
     //Compute velocity based on double-tap for zooming
     double computeTapZoomDistance(double zoomGain);
@@ -242,7 +254,7 @@ private:
     DirectInputSolver _solver;
 
     glm::dquat _toSlerp;
-    glm::dvec3 _centroid;
+    glm::fvec2 _centroid;
 
     FrameTimeAverage _frameTimeAvg;
 
