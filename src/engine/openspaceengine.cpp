@@ -98,6 +98,9 @@
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const int CacheVersion = 1;
+    constexpr const char* ProfileToSceneConverter
+                                           = "${BASE}/scripts/convertProfileToScene.lua";
+
 } // namespace
 
 namespace openspace {
@@ -291,6 +294,42 @@ void OpenSpaceEngine::initialize() {
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(global::scriptEngine);
+
+    // Convert profile to scene file (if was provided in configuration file)
+    if (!global::configuration.profile.empty()) {
+        LINFO(fmt::format("Run Lua script to convert {}.profile to scene",
+            global::configuration.profile));
+        ghoul::lua::LuaState lState;
+
+        // Get path where .scene files reside. Need to add extra escape slashes to
+        // accomodate lua parser.
+        std::string outputScenePath = absPath("${TEMPORARY}");
+        std::string search = "\\";
+        std::string replace = "\\\\";
+        for (std::string::size_type i = outputScenePath.find(search);
+             i != std::string::npos;
+             i = outputScenePath.find(search, i))
+        {
+            outputScenePath.replace(i, search.length(), replace);
+            i += replace.length();
+        }
+
+        std::string setProfileFilenameInLuaState = fmt::format(R"(
+            openspace = {{}}
+            openspace.profile = {{}}
+            function openspace.profile.getFilename()
+              return "{}.profile"
+            end
+            function openspace.profile.getPath()
+              return "{}"
+            end
+            )",
+            global::configuration.profile, outputScenePath
+        );
+
+        ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
+        ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
+    }
 
     // Set up asset loader
     std::unique_ptr<SynchronizationWatcher> w =

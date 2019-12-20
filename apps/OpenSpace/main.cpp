@@ -84,9 +84,6 @@ constexpr const char* _loggerCat = "main";
 constexpr const char* SpoutTag = "Spout";
 constexpr const char* OpenVRTag = "OpenVR";
 
-constexpr const char* ProfileToSceneConverter
-                                           = "${BASE}/scripts/convertProfileToScene.lua";
-
 sgct::Engine* SgctEngine;
 sgct::SharedVector<char> _synchronizationBuffer;
 
@@ -1185,42 +1182,6 @@ int main(int argc, char** argv) {
                 commandlineArguments.configurationOverride
             );
             parseLuaState(global::configuration);
-        }
-
-        // Convert profile to scene file (if was provided in configuration file)
-        if (!global::configuration.profile.empty()) {
-            LINFO(fmt::format("Run Lua script to convert {}.profile to scene",
-                global::configuration.profile));
-            ghoul::lua::LuaState lState;
-
-            // Get path where .scene files reside. Need to add extra escape slashes to
-            // accomodate lua parser.
-            std::string outputScenePath = absPath("${BASE}/data/assets");
-            std::string search = "\\";
-            std::string replace = "\\\\";
-            for (std::string::size_type i = outputScenePath.find(search);
-                 i != std::string::npos;
-                 i = outputScenePath.find(search, i))
-            {
-                outputScenePath.replace(i, search.length(), replace);
-                i += replace.length();
-            }
-
-            std::string setProfileFilenameInLuaState = fmt::format(R"(
-                openspace = {{}}
-                openspace.profile = {{}}
-                function openspace.profile.getFilename()
-                  return "{}.profile"
-                end
-                function openspace.profile.getPath()
-                  return "{}"
-                end
-                )",
-                global::configuration.profile, outputScenePath
-            );
-
-            ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
-            ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
         }
 
         // Determining SGCT configuration file
