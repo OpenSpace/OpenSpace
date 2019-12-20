@@ -1,0 +1,105 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2019                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <openspace/util/time.h>
+#include <openspace/util/touch.h>
+#include <cmath>
+
+namespace openspace {
+
+TouchInput::TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y)
+: touchDeviceId(touchDeviceId), fingerId(fingerId), x(x), y(y), dx(0.f), dy(0.f)
+, timestamp(openspace::Time::now().j2000Seconds()) 
+{}
+
+float TouchInput::getScreenX(float resolutionX) const {
+    return std::floor(x * resolutionX + 0.5f);
+}
+
+float TouchInput::getScreenY(float resolutionY) const {
+    return std::floor(y * resolutionY + 0.5f);
+}
+
+
+
+
+TouchInputs::TouchInputs(TouchInput input)
+    : _inputs{input}
+    , _touchDeviceId(input.touchDeviceId)
+    , _fingerId(input.fingerId)
+{}
+
+
+void TouchInputs::addPoint(const TouchInput &&input) {
+    _inputs.emplace_front(input);
+    if(_inputs.size() > MAX_INPUTS){
+        _inputs.pop_back();
+    }
+}
+
+void TouchInputs::clearInputs() {
+    _inputs.clear();
+}
+
+const size_t TouchInputs::getTouchDeviceId() const { 
+    return _touchDeviceId; 
+}
+
+const size_t TouchInputs::getFingerId() const { 
+    return _fingerId; 
+}
+
+float TouchInputs::getCurrentSpeed() const {
+    if(_inputs.size() <= 1){ return 0.0; }
+    TouchInput currentInput = _inputs[0];
+    TouchInput previousInput = _inputs[1];
+    //dt in seconds:
+    double dt = currentInput.timestamp - previousInput.timestamp;
+    float dist = sqrt(currentInput.dx*currentInput.dx + currentInput.dy*currentInput.dy);
+
+    return dist / dt;
+}
+
+float TouchInputs::getSpeedX() const {
+    if(_inputs.size() <= 1) { return 0.0; }
+    const TouchInput &currentInput = _inputs[0];
+    const TouchInput &previousInput = _inputs[1];
+    double dt = currentInput.timestamp - previousInput.timestamp;
+
+    return currentInput.dx / dt;
+}
+
+float TouchInputs::getSpeedY() const {
+    if(_inputs.size() <= 1) { return 0.0; }
+    const TouchInput &currentInput = _inputs[0];
+    const TouchInput &previousInput = _inputs[1];
+    double dt = currentInput.timestamp - previousInput.timestamp;
+
+    return currentInput.dy / dt;
+}
+const TouchInput& TouchInputs::getLatestInput() const{
+    return _inputs.front();
+}
+
+} // namespace openspace
