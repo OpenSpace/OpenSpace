@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/base/rendering/renderablelabels.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -50,7 +51,18 @@ public:
     ~RenderableNodeLine() = default;
 
     static documentation::Documentation Documentation();
-    
+
+    // Identifier of the optional distance label
+    std::string _distanceLabelId;
+    //SceneGraphNode* distanceLabelNode = nullptr;
+    //RenderableLabels* distanceLabel;
+
+    // Get the distance between the start and end node
+    double getDistance();
+
+    properties::StringProperty _start;
+    properties::StringProperty _end;
+
 private:
     void initializeGL() override;
     void deinitializeGL() override;
@@ -75,8 +87,6 @@ private:
     glm::dvec3 _startPos;
     glm::dvec3 _endPos;
 
-    properties::StringProperty _start;
-    properties::StringProperty _end;
     properties::Vec3Property _lineColor;
     properties::FloatProperty _lineWidth;
 };

@@ -43,13 +43,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
-        "The identifier of the node the line starts from. "
+        "The identifier of the node the line starts from. Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
-        "The identifier of the node the line ends at. "
+        "The identifier of the node the line ends at. Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
@@ -76,13 +76,13 @@ documentation::Documentation RenderableNodeLine::Documentation() {
             {
                 StartNodeInfo.identifier,
                 new StringVerifier,
-                Optional::No,
+                Optional::Yes,
                 StartNodeInfo.description
             },
             {
                 EndNodeInfo.identifier,
                 new StringVerifier,
-                Optional::No,
+                Optional::Yes,
                 EndNodeInfo.description
             },
             {
@@ -114,8 +114,13 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         "RenderableNodeLine"
     );
 
-    _start = dictionary.value<std::string>(StartNodeInfo.identifier);
-    _end = dictionary.value<std::string>(EndNodeInfo.identifier);
+    if (dictionary.hasKey(StartNodeInfo.identifier)) {
+        _start = dictionary.value<std::string>(StartNodeInfo.identifier);
+    }
+
+    if (dictionary.hasKey(EndNodeInfo.identifier)) {
+        _end = dictionary.value<std::string>(EndNodeInfo.identifier);
+    }
 
     if (dictionary.hasKey(LineColorInfo.identifier)) {
         _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
@@ -129,6 +134,11 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     addProperty(_lineColor);
     addProperty(_lineWidth);
     addProperty(_opacity);
+}
+
+double RenderableNodeLine::getDistance()
+{
+    return glm::distance(_startPos, _endPos);
 }
 
 void RenderableNodeLine::initializeGL() {

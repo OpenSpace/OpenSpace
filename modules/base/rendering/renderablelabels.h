@@ -107,6 +107,7 @@ private:
     properties::BoolProperty _pixelSizeControl;
     properties::BoolProperty _enableFadingEffect;
     properties::StringProperty _labelText;
+    properties::StringProperty _nodeLine;
     properties::FloatProperty _fadeStartDistance;
     properties::FloatProperty _fadeEndDistance;
     properties::FloatProperty _fadeStartSpeed;
