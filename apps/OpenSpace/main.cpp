@@ -1349,9 +1349,8 @@ int main(int argc, char** argv) {
     // machine. If the loading screen shows up without doing anything to the window, it
     // is fixed. With the bug, the rendering stays gray even well after the main render
     // loop has started     -- 2018-10-28   abock
-    int n = sgct::Engine::instance().getNumberOfWindows();
-    for (int i = 0; i < n; ++i) {
-        GLFWwindow* w = sgct::Engine::instance().getWindow(i).getWindowHandle();
+    for (const std::unique_ptr<sgct::Window>& win : sgct::Engine::instance().windows()) {
+        GLFWwindow* w = win->getWindowHandle();
         int x, y;
         glfwGetWindowPos(w, &x, &y);
         glfwSetWindowPos(w, x + 1, y + 1);
