@@ -37,6 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/profiling.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <fstream>
 
@@ -151,6 +152,8 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {} // NOLINT
 
 void NavigationHandler::initialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
@@ -162,6 +165,8 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 

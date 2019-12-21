@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/profiling.h>
 #include <fstream>
 
 #include "scriptengine_lua.inl"
@@ -55,6 +56,8 @@ ScriptEngine::ScriptEngine()
 {}
 
 void ScriptEngine::initialize() {
+    ZoneScoped
+
     LDEBUG("Adding base library");
     addBaseLibrary();
 
@@ -63,6 +66,8 @@ void ScriptEngine::initialize() {
 }
 
 void ScriptEngine::deinitialize() {
+    ZoneScoped
+
     _registeredLibraries.clear();
 }
 

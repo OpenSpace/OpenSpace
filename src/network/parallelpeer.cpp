@@ -35,6 +35,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/io/socket/tcpsocket.h>
 
 #include "parallelpeer_lua.inl"
@@ -503,6 +504,8 @@ void ParallelPeer::resetTimeOffset() {
 }
 
 void ParallelPeer::preSynchronization() {
+    ZoneScoped
+
     std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
         ParallelConnection::Message& message = _receiveBuffer.front();

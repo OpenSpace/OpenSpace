@@ -54,6 +54,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
@@ -422,6 +423,8 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 void RenderEngine::initialize() {
+    ZoneScoped
+
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
     _globalRotation = static_cast<glm::vec3>(global::configuration.globalRotation);
@@ -460,6 +463,8 @@ void RenderEngine::initialize() {
 }
 
 void RenderEngine::initializeGL() {
+    ZoneScoped
+
     LTRACE("RenderEngine::initializeGL(begin)");
 
     std::string renderingMethod = global::configuration.renderingMethod;
@@ -513,6 +518,8 @@ void RenderEngine::deinitializeGL() {
 }
 
 void RenderEngine::updateScene() {
+    ZoneScoped
+
     if (!_scene) {
         return;
     }
@@ -533,6 +540,8 @@ void RenderEngine::updateScene() {
 }
 
 void RenderEngine::updateShaderPrograms() {
+    ZoneScoped
+
     for (ghoul::opengl::ProgramObject* program : _programs) {
         try {
             if (program->isDirty()) {
@@ -546,6 +555,8 @@ void RenderEngine::updateShaderPrograms() {
 }
 
 void RenderEngine::updateRenderer() {
+    ZoneScoped
+
     const bool windowResized = global::windowDelegate.windowHasResized();
 
     if (windowResized) {
@@ -563,6 +574,8 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
+    ZoneScoped
+
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         ssr->update();
     }
@@ -627,6 +640,8 @@ uint64_t RenderEngine::frameNumber() const {
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
+    ZoneScoped
+
     LTRACE("RenderEngine::render(begin)");
 
     const WindowDelegate& delegate = global::windowDelegate;
@@ -654,6 +669,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (_showFrameInformation) {
+        ZoneScopedN("Show Frame Information")
+
         glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
             fontResolution().y / 3
@@ -681,6 +698,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+        ZoneScopedN("Render Screenspace Renderable")
+
         std::vector<ScreenSpaceRenderable*> ssrs;
         ssrs.reserve(global::screenSpaceRenderables.size());
         for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
@@ -759,6 +778,8 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 }
 
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
+    ZoneScoped
+
     const bool isMaster = global::windowDelegate.isMaster();
     if (isMaster || _showOverlayOnSlaves) {
         renderScreenLog();
@@ -800,6 +821,8 @@ void RenderEngine::renderEndscreen() {
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
+    ZoneScoped
+
     timer = std::max(timer, 0.f);
 
     using BBox = ghoul::fontrendering::FontRenderer::BoundingBoxInformation;
@@ -831,6 +854,8 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::renderDashboard() {
+    ZoneScoped
+
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
@@ -863,6 +888,8 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
+    ZoneScoped
+
     ++_frameNumber;
 
     if (_shouldTakeScreenshot) {
@@ -1225,6 +1252,8 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(
 }
 
 void RenderEngine::renderCameraInformation() {
+    ZoneScoped
+
     if (!_showCameraInfo) {
         return;
     }
@@ -1299,6 +1328,8 @@ void RenderEngine::renderCameraInformation() {
 }
 
 void RenderEngine::renderVersionInformation() {
+    ZoneScoped
+
     if (!_showVersionInfo) {
         return;
     }
@@ -1362,6 +1393,8 @@ void RenderEngine::renderVersionInformation() {
 }
 
 void RenderEngine::renderScreenLog() {
+    ZoneScoped
+
     if (!_showLog) {
         return;
     }

@@ -40,6 +40,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <iomanip>
 
 namespace {
@@ -587,6 +588,8 @@ void SessionRecording::saveScriptKeyframe(std::string scriptToSave) {
 }
 
 void SessionRecording::preSynchronization() {
+    ZoneScoped
+
     if (_state == SessionState::Recording) {
         saveCameraKeyframe();
         if (UsingTimeKeyframes) {

@@ -34,6 +34,7 @@
 #include <openspace/scene/timeframe.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
 
@@ -311,6 +312,9 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {} // NOLINT
 
 void SceneGraphNode::initialize() {
+    ZoneScoped
+    ZoneText(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Initializing: {}", identifier()));
 
     if (_renderable) {
@@ -332,6 +336,9 @@ void SceneGraphNode::initialize() {
 }
 
 void SceneGraphNode::initializeGL() {
+    ZoneScoped
+    ZoneText(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Initializing GL: {}", identifier()));
 
     if (_renderable) {
@@ -343,6 +350,9 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
+    ZoneScoped
+    ZoneText(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
     setScene(nullptr);
@@ -357,6 +367,9 @@ void SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::deinitializeGL() {
+    ZoneScoped
+    ZoneText(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
 
     if (_renderable) {
@@ -381,6 +394,9 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
+    ZoneScoped
+    ZoneText(identifier().c_str(), identifier().size())
+
     State s = _state;
     if (s != State::Initialized && _state != State::GLInitialized) {
         return;
@@ -482,6 +498,9 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
+    ZoneScoped
+    ZoneText(identifier().c_str(), identifier().size())
+
     if (_state != State::GLInitialized) {
         return;
     }
@@ -522,6 +541,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _performanceRecord.renderTime = (end - start).count();
     }
     else {
+        TracyGpuZone("Render")
+
         _renderable->render(newData, tasks);
         if (_computeScreenSpaceValues) {
             computeScreenSpaceData(newData);
@@ -856,6 +877,8 @@ Scene* SceneGraphNode::scene() {
 }
 
 void SceneGraphNode::setScene(Scene* scene) {
+    ZoneScoped
+
     // Unregister from previous scene, bottom up
     traversePostOrder([](SceneGraphNode* node) {
         if (node->_scene) {

@@ -34,8 +34,10 @@
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 #include <string>
 #include <stack>
@@ -120,6 +122,8 @@ void Scene::markNodeRegistryDirty() {
 }
 
 void Scene::updateNodeRegistry() {
+    ZoneScoped
+
     sortTopologically();
     _dirtyNodeRegistry = false;
 }
@@ -279,6 +283,8 @@ void Scene::initializeGL() {
 */
 
 void Scene::update(const UpdateData& data) {
+    ZoneScoped
+
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
 
     for (SceneGraphNode* node : initializedNodes) {
@@ -304,6 +310,12 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
+    ZoneScoped
+    ZoneText(
+        std::to_string(data.renderBinMask).c_str(),
+        std::to_string(data.renderBinMask).size()
+    )
+
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::render(begin '" + node->identifier() + "')");
@@ -509,6 +521,8 @@ void Scene::removePropertyInterpolation(properties::Property* prop) {
 }
 
 void Scene::updateInterpolations() {
+    ZoneScoped
+
     using namespace std::chrono;
 
     auto now = steady_clock::now();

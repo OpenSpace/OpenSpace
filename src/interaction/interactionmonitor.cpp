@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "InteractionMonitor";
@@ -65,6 +66,8 @@ void InteractionMonitor::setIdleTime(float time) {
 }
 
 void InteractionMonitor::updateActivityState() {
+    ZoneScoped
+
     const double currentApplicationTime = global::windowDelegate.applicationTime();
     const double timeDiff = currentApplicationTime - _lastInteractionTime;
 

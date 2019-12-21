@@ -41,6 +41,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
+#include <ghoul/misc/profiling.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
 #include <sgct/engine.h>
@@ -275,6 +276,8 @@ std::pair<int, int> supportedOpenGLVersion() {
 //  Init function
 //
 void mainInitFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.init, nullptr);
@@ -427,6 +430,8 @@ void mainInitFunc() {
 
 
 void mainPreSyncFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.preSync, nullptr);
@@ -440,6 +445,8 @@ void mainPreSyncFunc() {
     using namespace interaction;
 
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+        ZoneScopedN("Joystick state")
+
         JoystickInputState& state = global::joystickInputStates[i];
         sgct::Joystick joystick = sgct::Joystick(i);
 
@@ -524,6 +531,8 @@ void mainPreSyncFunc() {
 
 
 void mainPostSyncPreDrawFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.postSyncPreDraw, nullptr);
@@ -558,6 +567,8 @@ void mainPostSyncPreDrawFunc() {
 
 
 void mainRenderFunc(sgct::RenderData data) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.render, nullptr);
@@ -616,6 +627,8 @@ void mainRenderFunc(sgct::RenderData data) {
 
 
 void mainDraw2DFunc(sgct::RenderData data) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.draw2D, nullptr);
@@ -659,6 +672,8 @@ void mainDraw2DFunc(sgct::RenderData data) {
 
 
 void mainPostDrawFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.postDraw, nullptr);
@@ -717,6 +732,8 @@ void mainPostDrawFunc() {
 
 
 void mainKeyboardCallback(sgct::Key key, sgct::Modifier mod, sgct::Action action, int) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.keyboard, nullptr);
@@ -740,6 +757,8 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier mod, sgct::Action action
 
 
 void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier mod, sgct::Action ac) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.mouseButton, nullptr);
@@ -763,6 +782,8 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier mod, sgct::Ac
 
 
 void mainMousePosCallback(double x, double y) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.mousePos, nullptr);
@@ -781,6 +802,8 @@ void mainMousePosCallback(double x, double y) {
 
 
 void mainMouseScrollCallback(double posX, double posY) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.mouseScroll, nullptr);
@@ -801,6 +824,8 @@ void mainMouseScrollCallback(double posX, double posY) {
 
 
 void mainCharCallback(unsigned int codepoint, int modifiers) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.character, nullptr);
@@ -820,6 +845,8 @@ void mainCharCallback(unsigned int codepoint, int modifiers) {
 
 
 void mainEncodeFun() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.encode, nullptr);
@@ -842,6 +869,8 @@ void mainEncodeFun() {
 
 
 void mainDecodeFun() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.decode, nullptr);
@@ -864,6 +893,8 @@ void mainDecodeFun() {
 
 
 void mainLogCallback(const char* msg) {
+    ZoneScoped
+
     std::string message = msg;
     if (message.empty() || message == ".") {
         // We don't want the empty '.' message that SGCT sends while it is waiting for
@@ -880,12 +911,15 @@ void setSgctDelegateFunctions() {
     WindowDelegate& sgctDelegate = global::windowDelegate;
     sgctDelegate.terminate = []() { sgct::Engine::instance().terminate(); };
     sgctDelegate.setBarrier = [](bool enabled) {
+        ZoneScoped
         sgct::Window::setBarrier(enabled);
     };
     sgctDelegate.setSynchronization = [](bool enabled) {
+        ZoneScoped
         sgct::ClusterManager::instance().setUseIgnoreSync(enabled);
     };
     sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
+        ZoneScoped
         using namespace sgct;
         for (const std::unique_ptr<Window>& win : Engine::instance().windows()) {
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -894,10 +928,15 @@ void setSgctDelegateFunctions() {
         }
     };
     sgctDelegate.windowHasResized = []() {
+        ZoneScoped
         return _sgctState.window->isWindowResized();
     };
-    sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance().avgDt(); };
+    sgctDelegate.averageDeltaTime = []() {
+        ZoneScoped
+        return sgct::Engine::instance().avgDt();
+    };
     sgctDelegate.deltaTimeStandardDeviation = []() {
+        ZoneScoped
         const sgct::Engine::Statistics& stats = sgct::Engine::instance().statistics();
         const double avg = sgct::Engine::instance().avgDt();
         const double sumSquare = std::accumulate(
@@ -920,14 +959,23 @@ void setSgctDelegateFunctions() {
         return sumSquare / f;
     };
     sgctDelegate.minDeltaTime = []() {
-        return sgct::Engine::instance().minDt();
+        ZoneScoped
+            return sgct::Engine::instance().minDt();
     };
     sgctDelegate.maxDeltaTime = []() {
-        return sgct::Engine::instance().maxDt();
+        ZoneScoped
+            return sgct::Engine::instance().maxDt();
     };
-    sgctDelegate.deltaTime = []() { return sgct::Engine::instance().dt(); };
-    sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
+    sgctDelegate.deltaTime = []() {
+        ZoneScoped
+        return sgct::Engine::instance().dt();
+    };
+    sgctDelegate.applicationTime = []() {
+        ZoneScoped
+        return sgct::Engine::getTime();
+    };
     sgctDelegate.mousePosition = []() {
+        ZoneScoped
         const sgct::Window* window = sgct::Engine::instance().focusedWindow();
         if (window == nullptr) {
             return glm::vec2(0.f);
@@ -937,6 +985,7 @@ void setSgctDelegateFunctions() {
         return glm::vec2(posX, posY);
     };
     sgctDelegate.mouseButtons = [](int maxNumber) {
+        ZoneScoped
         uint32_t result = 0;
         const sgct::Window* window = sgct::Engine::instance().focusedWindow();
         if (window == nullptr) {
@@ -951,9 +1000,11 @@ void setSgctDelegateFunctions() {
         return result;
     };
     sgctDelegate.currentWindowSize = []() {
+        ZoneScoped
         return _sgctState.window->resolution();
     };
     sgctDelegate.currentSubwindowSize = []() {
+        ZoneScoped
         const sgct::Window& window = *_sgctState.window;
         switch (window.stereoMode()) {
             case sgct::Window::StereoMode::SideBySide:
@@ -967,9 +1018,11 @@ void setSgctDelegateFunctions() {
         }
     };
     sgctDelegate.currentWindowResolution = []() {
+        ZoneScoped
         return _sgctState.window->finalFBODimensions();
     };
     sgctDelegate.currentDrawBufferResolution = []() {
+        ZoneScoped
         if (_sgctState.window->viewports().empty()) {
             return glm::ivec2(-1, -1);
         }
@@ -983,23 +1036,28 @@ void setSgctDelegateFunctions() {
         }
     };
     sgctDelegate.currentViewportSize = []() {
+        ZoneScoped
         if (_sgctState.window->viewports().empty()) {
             return glm::ivec2(-1, -1);
         }
         return _sgctState.window->framebufferResolution();
     };
     sgctDelegate.dpiScaling = []() {
+        ZoneScoped
         return _sgctState.window->scale();
     };
     sgctDelegate.currentNumberOfAaSamples = []() {
+        ZoneScoped
         return _sgctState.window->numberOfAASamples();
     };
     sgctDelegate.isRegularRendering = []() {
+        ZoneScoped
         const sgct::Viewport& vp = *_sgctState.window->viewports()[0];
         sgct::NonLinearProjection* nlp = vp.nonLinearProjection();
         return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
+        ZoneScoped
         using namespace sgct;
         for (const std::unique_ptr<Window>& win : Engine::instance().windows()) {
             if (win->hasTag("GUI")) {
@@ -1009,41 +1067,54 @@ void setSgctDelegateFunctions() {
         return false;
     };
     sgctDelegate.isGuiWindow = []() {
+        ZoneScoped
         return _sgctState.window->hasTag("GUI");
     };
-    sgctDelegate.isMaster = []() { return sgct::Engine::instance().isMaster(); };
+    sgctDelegate.isMaster = []() {
+        ZoneScoped
+        return sgct::Engine::instance().isMaster();
+    };
     sgctDelegate.isUsingSwapGroups = []() {
+        ZoneScoped
         return sgct::Window::isUsingSwapGroups();
     };
     sgctDelegate.isSwapGroupMaster = []() {
+        ZoneScoped
         return sgct::Window::isSwapGroupMaster();
     };
     sgctDelegate.viewProjectionMatrix = []() {
         // @TODO (abock, 2019-02-03) This should probably disappear and we want to pass
         // the modelviewmatrix to the correct places
+        ZoneScoped
         return _sgctState.modelViewProjection;
     };
     sgctDelegate.modelMatrix = []() {
         // @TODO (abock, 2019-02-03) This should probably disappear and we want to pass
         // the model projection to the correct places
+        ZoneScoped
         return _sgctState.model;
     };
     sgctDelegate.setNearFarClippingPlane = [](float nearPlane, float farPlane) {
+        ZoneScoped
         sgct::Engine::instance().setNearAndFarClippingPlanes(nearPlane, farPlane);
     };
     sgctDelegate.setEyeSeparationDistance = [](float distance) {
+        ZoneScoped
         sgct::Engine::instance().setEyeSeparation(distance);
     };
     sgctDelegate.isExternalControlConnected = []() {
+        ZoneScoped
         return sgct::Engine::instance().isExternalControlConnected();
     };
     sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
+        ZoneScoped
         sgct::Engine::instance().sendMessageToExternalControl(
             message.data(),
             static_cast<int>(message.size())
         );
     };
     sgctDelegate.isFisheyeRendering = []() {
+        ZoneScoped
         if (_sgctState.window->viewports().empty()) {
             return false;
         }
@@ -1052,35 +1123,44 @@ void setSgctDelegateFunctions() {
         return dynamic_cast<sgct::FisheyeProjection*>(nlp) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
+        ZoneScoped
         sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
         sgct::Engine::instance().takeScreenshot();
     };
     sgctDelegate.swapBuffer = []() {
+        ZoneScoped
         GLFWwindow* w = glfwGetCurrentContext();
         glfwSwapBuffers(w);
         glfwPollEvents();
     };
     sgctDelegate.nWindows = []() {
+        ZoneScoped
         return static_cast<int>(sgct::Engine::instance().windows().size());
     };
     sgctDelegate.currentWindowId = []() {
+        ZoneScoped
         return _sgctState.window->id();
     };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
+        ZoneScoped
         return glfwGetProcAddress(func);
     };
     sgctDelegate.getHorizFieldOfView = []() {
+        ZoneScoped
         return static_cast<double>(
             sgct::Engine::instance().windows()[0]->horizFieldOfViewDegrees()
         );
     };
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
+        ZoneScoped
         sgct::Engine::instance().windows()[0]->setHorizFieldOfView(hFovDeg);
     };
     sgctDelegate.frustumMode = []() {
+        ZoneScoped
         return _sgctState.frustumMode;
     };
     sgctDelegate.swapGroupFrameNumber = []() {
+        ZoneScoped
         unsigned int fn = _sgctState.window->swapGroupFrameNumber();
         return static_cast<uint64_t>(fn);
     };

@@ -24,6 +24,7 @@
 
 #include <openspace/util/camera.h>
 
+#include <ghoul/misc/profiling.h>
 #include <sstream>
 
 namespace openspace {
@@ -193,6 +194,8 @@ const glm::dmat4& Camera::combinedViewMatrix() const {
 }
 
 void Camera::invalidateCache() {
+    ZoneScoped
+
     _cachedViewDirection.isDirty = true;
     _cachedLookupVector.isDirty = true;
     _cachedViewRotationMatrix.isDirty = true;

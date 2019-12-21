@@ -35,6 +35,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -469,6 +470,8 @@ bool ScreenSpaceRenderable::deinitializeGL() {
 }
 
 void ScreenSpaceRenderable::render() {
+    ZoneScoped
+
     draw(
         globalRotationMatrix() *
         translationMatrix() *

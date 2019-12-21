@@ -107,12 +107,14 @@ set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
 set(SGCT_ONLY ON CACHE BOOL "" FORCE)
 set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
 
+set(SGCT_DEP_INCLUDE_TRACY ${GHOUL_MODULE_PROFILING} CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_TRACY_ENABLED ${GHOUL_MODULE_PROFILING} CACHE BOOL "" FORCE)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/include)
 target_link_libraries(
   OpenSpace
-  sgct glfw png16_static quat tinyxml2static
-  vrpn ${GLFW_LIBRARIES}
+  sgct glfw png16_static quat tinyxml2static vrpn ${GLFW_LIBRARIES}
 )
 
 mark_as_advanced(EXECUTABLE_OUTPUT_PATH GLFW_BUILD_DOCS GLFW_BUILD_EXAMPLES

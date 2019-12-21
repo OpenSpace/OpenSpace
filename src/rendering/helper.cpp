@@ -28,6 +28,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
@@ -133,6 +134,9 @@ VertexObjects& gVertexObjectsConstructor() {
 } // namespace detail
 
 void initialize() {
+    ZoneScoped
+    TracyGpuZone("helper::initialize")
+
     ghoul_assert(!isInitialized, "Rendering Helper initialized twice");
 
     //
