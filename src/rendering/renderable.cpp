@@ -170,7 +170,6 @@ void Renderable::update(const UpdateData&) {}
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
-
     _boundingSphere.setValue(boundingSphere);
 }
 

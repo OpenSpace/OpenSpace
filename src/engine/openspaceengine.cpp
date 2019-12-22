@@ -335,7 +335,7 @@ void OpenSpaceEngine::initialize() {
     global::renderEngine.initialize();
 
     for (const std::function<void()>& func : global::callback::initialize) {
-        ZoneScopedN("Callbacks: initialize")
+        ZoneScopedN("[Module] initialize")
         func();
     }
 
@@ -609,7 +609,7 @@ void OpenSpaceEngine::initializeGL() {
     global::moduleEngine.initializeGL();
 
     for (const std::function<void()>& func : global::callback::initializeGL) {
-        ZoneScopedN("Callbacks: initializeGL")
+        ZoneScopedN("[Module] initializeGL")
         func();
     }
 
@@ -1058,7 +1058,7 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     for (const std::function<void()>& func : global::callback::preSync) {
-        ZoneScopedN("Callback: preSync")
+        ZoneScopedN("[Module] preSync")
         func();
     }
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
@@ -1112,7 +1112,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     for (const std::function<void()>& func : global::callback::postSyncPreDraw) {
-        ZoneScopedN("Callback: postSyncPreDraw")
+        ZoneScopedN("[Module] postSyncPreDraw")
         func();
     }
 
@@ -1164,7 +1164,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     global::renderEngine.render(sceneMatrix, viewMatrix, projectionMatrix);
 
     for (const std::function<void()>& func : global::callback::render) {
-        ZoneScopedN("Callback: render")
+        ZoneScopedN("[Module] render")
         func();
     }
 
@@ -1194,7 +1194,7 @@ void OpenSpaceEngine::drawOverlays() {
     }
 
     for (const std::function<void()>& func : global::callback::draw2D) {
-        ZoneScopedN("Callback: draw2D")
+        ZoneScopedN("[Module] draw2D")
         func();
     }
 
@@ -1216,7 +1216,7 @@ void OpenSpaceEngine::postDraw() {
     global::renderEngine.postDraw();
 
     for (const std::function<void()>& func : global::callback::postDraw) {
-        ZoneScopedN("Callback: postDraw")
+        ZoneScopedN("[Module] postDraw")
         func();
     }
 

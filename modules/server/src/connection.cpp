@@ -44,6 +44,7 @@
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <fmt/format.h>
 
 namespace {
@@ -102,6 +103,8 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
 }
 
 void Connection::handleMessage(const std::string& message) {
+    ZoneScoped
+
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
@@ -109,12 +112,13 @@ void Connection::handleMessage(const std::string& message) {
         } catch (const std::domain_error& e) {
             LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
         }
-        } catch (const std::out_of_range& e) {
-            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
-        }
-        catch (const std::exception& e) {
-            LERROR(e.what());
-    } catch (...) {
+    } catch (const std::out_of_range& e) {
+        LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
+    }
+    catch (const std::exception& e) {
+        LERROR(e.what());
+    }
+    catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();
             LERROR(fmt::format(
@@ -138,6 +142,8 @@ void Connection::handleMessage(const std::string& message) {
 }
 
 void Connection::handleJson(const nlohmann::json& json) {
+    ZoneScoped
+
     auto topicJson = json.find(MessageKeyTopic);
     auto payloadJson = json.find(MessageKeyPayload);
 

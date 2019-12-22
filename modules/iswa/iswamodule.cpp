@@ -40,14 +40,17 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
-
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/scripting/lualibrary.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace {
 
 IswaModule::IswaModule() : OpenSpaceModule(Name) {
-    global::callback::initialize.push_back([]() { IswaManager::initialize(); });
+    global::callback::initialize.push_back([]() {
+        ZoneScopedN("IswaModule")
+        IswaManager::initialize();
+    });
 }
 
 void IswaModule::internalInitialize(const ghoul::Dictionary&) {

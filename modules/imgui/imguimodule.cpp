@@ -37,6 +37,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace {
 
@@ -130,21 +131,29 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     });
 
     global::callback::deinitialize.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
         LDEBUGC("ImGui", "Deinitialize GUI");
         gui.deinitialize();
     });
 
     global::callback::initializeGL.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
         LDEBUGC("ImGui", "Initializing GUI OpenGL");
         gui.initializeGL();
     });
 
     global::callback::deinitializeGL.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
         LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
         gui.deinitializeGL();
     });
 
     global::callback::draw2D.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
         // TODO emiax: Make sure this is only called for one of the eyes, in the case
         // of side-by-side / top-bottom stereo.
 
@@ -182,6 +191,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::keyboard.emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+            ZoneScopedN("GlobeBrowsingModule")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -196,6 +207,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::character.emplace_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
+            ZoneScopedN("GlobeBrowsingModule")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -210,6 +223,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::mouseButton.emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
+            ZoneScopedN("GlobeBrowsingModule")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -224,6 +239,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::mouseScrollWheel.emplace_back(
         [&](double, double posY) -> bool {
+            ZoneScopedN("GlobeBrowsingModule")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())

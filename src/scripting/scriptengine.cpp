@@ -53,7 +53,9 @@ ScriptEngine::ScriptEngine()
             { "scriptingTemplate","${WEB}/documentation/scripting.hbs" },
         }
     )
-{}
+{
+    tracy::LuaRegister(_state);
+}
 
 void ScriptEngine::initialize() {
     ZoneScoped
@@ -72,6 +74,8 @@ void ScriptEngine::deinitialize() {
 }
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
+    ZoneScoped
+
     LDEBUG("Create openspace base library");
     const int top = lua_gettop(state);
 
@@ -159,6 +163,8 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
 }
 
 bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
+    ZoneScoped
+
     if (script.empty()) {
         LWARNING("Script was empty");
         return false;
@@ -195,6 +201,8 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
 }
 
 bool ScriptEngine::runScriptFile(const std::string& filename) {
+    ZoneScoped
+
     if (filename.empty()) {
         LWARNING("Filename was empty");
         return false;
@@ -275,6 +283,8 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
 void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                                        Replace replace)
 {
+    ZoneScoped
+
     ghoul_assert(state, "State must not be nullptr");
     for (const LuaLibrary::Function& p : library.functions) {
         if (!replace) {
@@ -335,6 +345,8 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 }
 
 void ScriptEngine::addBaseLibrary() {
+    ZoneScoped
+
     LuaLibrary lib = {
         "",
         {
@@ -494,6 +506,8 @@ void ScriptEngine::remapPrintFunction() {
 }
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
+    ZoneScoped
+
     ghoul_assert(state, "State must not be nullptr");
     const int top = lua_gettop(state);
 
@@ -533,6 +547,8 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
 }
 
 std::vector<std::string> ScriptEngine::allLuaFunctions() const {
+    ZoneScoped
+
     std::vector<std::string> result;
 
     for (const LuaLibrary& library : _registeredLibraries) {
@@ -559,6 +575,8 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 }
 
 std::string ScriptEngine::generateJson() const {
+    ZoneScoped
+
     // Create JSON
     std::stringstream json;
     json << "[";
@@ -608,6 +626,8 @@ std::string ScriptEngine::generateJson() const {
 }
 
 bool ScriptEngine::writeLog(const std::string& script) {
+    ZoneScoped
+
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
@@ -649,6 +669,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
 }
 
 void ScriptEngine::preSync(bool isMaster) {
+    ZoneScoped
+
     if (!isMaster) {
         return;
     }
@@ -674,6 +696,8 @@ void ScriptEngine::preSync(bool isMaster) {
 }
 
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
+    ZoneScoped
+
     size_t nScripts = _scriptsToSync.size();
     syncBuffer->encode(nScripts);
     for (const std::string& s : _scriptsToSync) {
@@ -683,6 +707,8 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 }
 
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
+    ZoneScoped
+
     std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
@@ -695,6 +721,8 @@ void ScriptEngine::decode(SyncBuffer* syncBuffer) {
 }
 
 void ScriptEngine::postSync(bool isMaster) {
+    ZoneScoped
+
     if (isMaster) {
         while (!_masterScriptQueue.empty()) {
             std::string script = std::move(_masterScriptQueue.front().script);

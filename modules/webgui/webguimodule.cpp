@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebGuiModule";
@@ -225,6 +226,8 @@ void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exi
 }
 
 void WebGuiModule::startProcess() {
+    ZoneScoped
+
     _endpoints.clear();
 
     ServerModule* serverModule = global::moduleEngine.module<ServerModule>();

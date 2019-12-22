@@ -152,10 +152,11 @@ LoadingScreen::~LoadingScreen() {
 
 void LoadingScreen::render() {
     ZoneScoped
-
     if (_phase == Phase::PreStart) {
         return;
     }
+
+    FrameMarkStart("Loading")
 
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
@@ -487,6 +488,7 @@ void LoadingScreen::render() {
 
     std::this_thread::sleep_for(RefreshRate);
     global::windowDelegate.swapBuffer();
+    FrameMarkEnd("Loading")
 }
 
 void LoadingScreen::postMessage(std::string message) {

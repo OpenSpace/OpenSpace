@@ -48,6 +48,25 @@ namespace {
     constexpr const char* _loggerCat = "Scene";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
+
+    constexpr const char* renderBinToString(int renderBin) {
+        // Synced with Renderable::RenderBin
+        if (renderBin == 1) {
+            return "Background";
+        }
+        else if (renderBin == 2) {
+            return "Opaque";
+        }
+        else if (renderBin == 4) {
+            return "Transparent";
+        }
+        else if (renderBin == 8) {
+            return "Overlay";
+        }
+        else {
+            throw ghoul::MissingCaseException();
+        }
+    }
 } // namespace
 
 namespace openspace {
@@ -311,9 +330,9 @@ void Scene::update(const UpdateData& data) {
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped
-    ZoneText(
-        std::to_string(data.renderBinMask).c_str(),
-        std::to_string(data.renderBinMask).size()
+    ZoneName(
+        renderBinToString(data.renderBinMask),
+        strlen(renderBinToString(data.renderBinMask))
     )
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
@@ -325,9 +344,9 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
-        if (global::callback::webBrowserPerformanceHotfix) {
-            (*global::callback::webBrowserPerformanceHotfix)();
-        }
+        //if (global::callback::webBrowserPerformanceHotfix) {
+        //    (*global::callback::webBrowserPerformanceHotfix)();
+        //}
 
         // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
         // thread and the CPU thread from diverging too much, particularly the uploading
@@ -336,7 +355,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         // threads to implicitly synchronize and thus prevent the stuttering.  The better
         // solution would be to reduce the number of uploads per frame, use a staggered
         // buffer, or something else like that preventing a large spike in uploads
-        glGetError();
+        //glGetError();
     }
 }
 

@@ -39,6 +39,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
@@ -48,6 +49,8 @@ ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectMa
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
+    ZoneScoped
+
     ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory(

@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
 
 #include <openspace/modulepath.h>
@@ -49,6 +50,9 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
 void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
                                  const ghoul::Dictionary& configuration)
 {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     std::string upperIdentifier = identifier();
     std::transform(
         upperIdentifier.begin(),
@@ -72,14 +76,23 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
 }
 
 void OpenSpaceModule::initializeGL() {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     internalInitializeGL();
 }
 
 void OpenSpaceModule::deinitialize() {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+        
     internalDeinitialize();
 }
 
 void OpenSpaceModule::deinitializeGL() {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+    
     internalDeinitializeGL();
 }
 

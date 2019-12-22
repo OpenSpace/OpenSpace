@@ -31,6 +31,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace::globebrowsing {
 
@@ -53,6 +54,8 @@ documentation::Documentation LayerManager::Documentation() {
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
 void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
+    ZoneScoped
+
     // First create empty layer groups in case not all are specified
     for (size_t i = 0; i < _layerGroups.size(); ++i) {
         _layerGroups[i] = std::make_unique<LayerGroup>(layergroupid::GroupID(i));
@@ -91,6 +94,8 @@ void LayerManager::deinitialize() {
 Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
                               const ghoul::Dictionary& layerDict)
 {
+    ZoneScoped
+        
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
     try {
         return _layerGroups[groupId]->addLayer(layerDict);
@@ -102,6 +107,8 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
 }
 
 void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& layerName) {
+    ZoneScoped
+    
     ghoul_assert(id != layergroupid::Unknown, "Layer group ID must be known");
     _layerGroups[id]->deleteLayer(layerName);
 }
@@ -115,6 +122,8 @@ const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const 
 }
 
 bool LayerManager::hasAnyBlendingLayersEnabled() const {
+    ZoneScoped
+        
     return std::any_of(
         _layerGroups.begin(),
         _layerGroups.end(),
@@ -124,8 +133,9 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
     );
 }
 
-std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const
-{
+std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const {
+    ZoneScoped
+        
     std::array<LayerGroup*, NumLayerGroups> res = {};
     for (int i = 0; i < NumLayerGroups; ++i) {
         res[i] = _layerGroups[i].get();
@@ -134,6 +144,8 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
 }
 
 int LayerManager::update() {
+    ZoneScoped
+
     int res = 0;
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         res += layerGroup->update();
@@ -142,6 +154,8 @@ int LayerManager::update() {
 }
 
 void LayerManager::reset(bool includeDisabled) {
+    ZoneScoped
+
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         for (Layer* layer : layerGroup->layers()) {
             if (layer->enabled() || includeDisabled) {
@@ -152,6 +166,8 @@ void LayerManager::reset(bool includeDisabled) {
 }
 
 void LayerManager::onChange(std::function<void(Layer*)> callback) {
+    ZoneScoped
+
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->onChange(callback);
     }
