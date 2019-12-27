@@ -24,8 +24,10 @@
 
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -309,7 +311,8 @@ void RenderablePlaneProjection::setTarget(std::string body) {
         return;
     }
 
-    _target.frame = SpiceManager::ref().frameFromBody(body);
+    _target.frame =
+        global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(body);
     _target.body = std::move(body);
 }
 
