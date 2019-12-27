@@ -65,8 +65,6 @@ private:
     };
     Result loadPointFile(const std::string& file);
     Result loadCachedFile(const std::string& file);
-    void saveCachedFile(const std::string& file, const std::vector<glm::vec3>& positions,
-        const std::vector<glm::vec3>& colors);
 
     glm::vec3 _volumeSize;
     glm::vec3 _pointScaling;

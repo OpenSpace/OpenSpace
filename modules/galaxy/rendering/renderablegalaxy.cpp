@@ -51,17 +51,18 @@ namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
     constexpr const char* GlslRaycastPath =
-        "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
     constexpr const char* GlslBoundsVsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
     constexpr const char* GlslBoundsFsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
-    constexpr const char* _loggerCat       = "Renderable Galaxy";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
+    constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
         "modelMatrix", "cameraViewProjectionMatrix", "eyePosition",
         "opacityCoefficient"
     };
+
     constexpr const std::array<const char*, 5> UniformNamesBillboards = {
         "modelMatrix", "cameraViewProjectionMatrix",
         "cameraUp", "eyePosition", "psfTexture"
@@ -136,6 +137,35 @@ namespace {
         "Number of RayCasting Steps",
         "This value set the number of integration steps during the raycasting procedure."
     };
+
+    void saveCachedFile(const std::string& file, const std::vector<glm::vec3>& positions,
+                        const std::vector<glm::vec3>& colors, int64_t nPoints,
+                        float pointsRatio)
+    {
+        std::ofstream fileStream(file, std::ofstream::binary);
+
+        if (!fileStream.good()) {
+            LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+            return;
+        }
+
+        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
+        fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
+        fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
+        uint64_t nPositions = static_cast<uint64_t>(positions.size());
+        fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
+        fileStream.write(
+            reinterpret_cast<const char*>(positions.data()),
+            positions.size() * sizeof(glm::vec3)
+        );
+        uint64_t nColors = static_cast<uint64_t>(colors.size());
+        fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
+        fileStream.write(
+            reinterpret_cast<const char*>(colors.data()),
+            colors.size() * sizeof(glm::vec3)
+        );
+    }
+
 } // namespace
 
 namespace openspace {
@@ -246,8 +276,8 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     }
 
     if (volumeDictionary.hasKey(NumberOfRayCastingStepsInfo.identifier)) {
-        _numberOfRayCastingSteps = static_cast<int>(
-            volumeDictionary.value<float>(NumberOfRayCastingStepsInfo.identifier)
+        _numberOfRayCastingSteps = static_cast<float>(
+            volumeDictionary.value<double>(NumberOfRayCastingStepsInfo.identifier)
         );
     }
     else {
@@ -349,123 +379,137 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_numberOfRayCastingSteps);
 
     // initialize points.
-    if (!_pointsFilename.empty()) {
-        _pointsProgram = global::renderEngine.buildRenderProgram(
-            "Galaxy points",
-            absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
-            absPath("${MODULE_GALAXY}/shaders/points_fs.glsl")
-        );
-        _billboardsProgram = global::renderEngine.buildRenderProgram(
-            "Galaxy billboard",
-            absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
-            absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
-            absPath("${MODULE_GALAXY}/shaders/billboard_ge.glsl")
+    if (_pointsFilename.empty()) {
+        return;
+    }
+
+    _pointsProgram = global::renderEngine.buildRenderProgram(
+        "Galaxy points",
+        absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
+        absPath("${MODULE_GALAXY}/shaders/points_fs.glsl")
+    );
+    _billboardsProgram = global::renderEngine.buildRenderProgram(
+        "Galaxy billboard",
+        absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
+        absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
+        absPath("${MODULE_GALAXY}/shaders/billboard_ge.glsl")
+    );
+
+    if (!_pointSpreadFunctionTexturePath.empty()) {
+        _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_pointSpreadFunctionTexturePath)
         );
 
-        if (!_pointSpreadFunctionTexturePath.empty()) {
-            _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+        if (_pointSpreadFunctionTexture) {
+            LDEBUG(fmt::format(
+                "Loaded texture from '{}'",
                 absPath(_pointSpreadFunctionTexturePath)
-            );
-
-            if (_pointSpreadFunctionTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",
-                    absPath(_pointSpreadFunctionTexturePath)
-                ));
-                _pointSpreadFunctionTexture->uploadTexture();
-            }
-            _pointSpreadFunctionTexture->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            );
-
-            _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
-            );
-        }
-
-        ghoul::opengl::updateUniformLocations(
-            *_pointsProgram,
-            _uniformCachePoints,
-            UniformNamesPoints
-        );
-        ghoul::opengl::updateUniformLocations(
-            *_billboardsProgram,
-            _uniformCacheBillboards,
-            UniformNamesBillboards
-        );
-
-        _pointsProgram->setIgnoreUniformLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
-        );
-
-        GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
-        GLint colorAttrib = _pointsProgram->attributeLocation("in_color");
-
-
-        std::vector<glm::vec3> pointPositions;
-        std::vector<glm::vec3> pointColors;
-
-        std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
-            _pointsFilename,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
-        const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
-        if (hasCachedFile) {
-            LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
-                cachedPointsFile, _pointsFilename
             ));
-
-            Result res = loadCachedFile(cachedPointsFile);
-            if (res.success) {
-                pointPositions = std::move(res.positions);
-                pointColors = std::move(res.color);
-            }
-            else {
-                FileSys.cacheManager()->removeCacheFile(_pointsFilename);
-                Result res = loadPointFile(_pointsFilename);
-                pointPositions = std::move(res.positions);
-                pointColors = std::move(res.color);
-                saveCachedFile(cachedPointsFile, pointPositions, pointColors);
-            }
+            _pointSpreadFunctionTexture->uploadTexture();
         }
-        else {
-            Result res = loadPointFile(_pointsFilename);
-            ghoul_assert(res.success, "Point file loading failed");
+        _pointSpreadFunctionTexture->setFilter(
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        );
+
+        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+            _pointSpreadFunctionTexturePath
+        );
+    }
+
+    ghoul::opengl::updateUniformLocations(
+        *_pointsProgram,
+        _uniformCachePoints,
+        UniformNamesPoints
+    );
+    ghoul::opengl::updateUniformLocations(
+        *_billboardsProgram,
+        _uniformCacheBillboards,
+        UniformNamesBillboards
+    );
+
+    _pointsProgram->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
+    );
+
+    GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
+    GLint colorAttrib = _pointsProgram->attributeLocation("in_color");
+
+
+    std::vector<glm::vec3> pointPositions;
+    std::vector<glm::vec3> pointColors;
+
+    std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
+        _pointsFilename,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+    const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
+    if (hasCachedFile) {
+        LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
+            cachedPointsFile, _pointsFilename
+        ));
+
+        Result res = loadCachedFile(cachedPointsFile);
+        if (res.success) {
             pointPositions = std::move(res.positions);
             pointColors = std::move(res.color);
-            saveCachedFile(cachedPointsFile, pointPositions, pointColors);
         }
-
-        glGenVertexArrays(1, &_pointsVao);
-        glGenBuffers(1, &_positionVbo);
-        glGenBuffers(1, &_colorVbo);
-
-        glBindVertexArray(_pointsVao);
-        glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-        glBufferData(GL_ARRAY_BUFFER,
-            pointPositions.size() * sizeof(glm::vec3),
-            pointPositions.data(),
-            GL_STATIC_DRAW
-        );
-
-        glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-        glBufferData(GL_ARRAY_BUFFER,
-            pointColors.size() * sizeof(glm::vec3),
-            pointColors.data(),
-            GL_STATIC_DRAW
-        );
-
-        glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-        glEnableVertexAttribArray(positionAttrib);
-        glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-        glEnableVertexAttribArray(colorAttrib);
-        glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        else {
+            FileSys.cacheManager()->removeCacheFile(_pointsFilename);
+            Result res = loadPointFile(_pointsFilename);
+            pointPositions = std::move(res.positions);
+            pointColors = std::move(res.color);
+            saveCachedFile(
+                cachedPointsFile,
+                pointPositions,
+                pointColors,
+                _nPoints,
+                _enabledPointsRatio
+            );
+        }
     }
+    else {
+        Result res = loadPointFile(_pointsFilename);
+        ghoul_assert(res.success, "Point file loading failed");
+        pointPositions = std::move(res.positions);
+        pointColors = std::move(res.color);
+        saveCachedFile(
+            cachedPointsFile,
+            pointPositions,
+            pointColors,
+            _nPoints,
+            _enabledPointsRatio
+        );
+    }
+
+    glGenVertexArrays(1, &_pointsVao);
+    glGenBuffers(1, &_positionVbo);
+    glGenBuffers(1, &_colorVbo);
+
+    glBindVertexArray(_pointsVao);
+    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
+    glBufferData(GL_ARRAY_BUFFER,
+        pointPositions.size() * sizeof(glm::vec3),
+        pointPositions.data(),
+        GL_STATIC_DRAW
+    );
+
+    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
+    glBufferData(GL_ARRAY_BUFFER,
+        pointColors.size() * sizeof(glm::vec3),
+        pointColors.data(),
+        GL_STATIC_DRAW
+    );
+
+    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
+    glEnableVertexAttribArray(positionAttrib);
+    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
+    glEnableVertexAttribArray(colorAttrib);
+    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void RenderableGalaxy::deinitializeGL() {
@@ -473,6 +517,10 @@ void RenderableGalaxy::deinitializeGL() {
         global::raycasterManager.detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
+
+    glDeleteVertexArrays(1, &_pointsVao);
+    glDeleteBuffers(1, &_positionVbo);
+    glDeleteBuffers(1, &_colorVbo);
 }
 
 bool RenderableGalaxy::isReady() const {
@@ -480,43 +528,44 @@ bool RenderableGalaxy::isReady() const {
 }
 
 void RenderableGalaxy::update(const UpdateData& data) {
-    if (_raycaster) {
-        //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
-        const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
-        glm::mat4 transform = glm::rotate(
-            glm::mat4(1.0),
-            eulerRotation.x,
-            glm::vec3(1, 0, 0)
-        );
-        transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
-        transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
-
-        glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
-        _pointTransform = transform;
-        //_pointTransform = glm::scale(transform, _pointScaling);
-
-        const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.0);
-
-        // Todo: handle floating point overflow, to actually support translation.
-
-        volumeTransform[3] += translation;
-        _pointTransform[3] += translation;
-
-        _raycaster->setDownscaleRender(_downScaleVolumeRendering);
-        _raycaster->setMaxSteps(_numberOfRayCastingSteps);
-        _raycaster->setStepSize(_stepSize);
-        _raycaster->setAspect(_aspect);
-        _raycaster->setModelTransform(volumeTransform);
-        _raycaster->setAbsorptionMultiplier(_absorptionMultiply);
-        _raycaster->setEmissionMultiplier(_emissionMultiply);
-        _raycaster->setTime(data.time.j2000Seconds());
+    if (!_raycaster) {
+        return;
     }
+    //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
+    const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
+    glm::mat4 transform = glm::rotate(
+        glm::mat4(1.0),
+        eulerRotation.x,
+        glm::vec3(1, 0, 0)
+    );
+    transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
+    transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
+
+    glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
+    _pointTransform = transform;
+    //_pointTransform = glm::scale(transform, _pointScaling);
+
+    const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.0);
+
+    // Todo: handle floating point overflow, to actually support translation.
+
+    volumeTransform[3] += translation;
+    _pointTransform[3] += translation;
+
+    _raycaster->setDownscaleRender(_downScaleVolumeRendering);
+    _raycaster->setMaxSteps(_numberOfRayCastingSteps);
+    _raycaster->setStepSize(_stepSize);
+    _raycaster->setAspect(_aspect);
+    _raycaster->setModelTransform(volumeTransform);
+    _raycaster->setAbsorptionMultiplier(_absorptionMultiply);
+    _raycaster->setEmissionMultiplier(_emissionMultiply);
+    _raycaster->setTime(data.time.j2000Seconds());
 }
 
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     // Render the volume
     if (_raycaster && _volumeRenderingEnabled) {
-        RaycasterTask task{ _raycaster.get(), data };
+        RaycasterTask task { _raycaster.get(), data };
 
         const glm::vec3 position = data.camera.positionVec3();
         const float length = safeLength(position);
@@ -533,15 +582,19 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         float opacityCoefficient = 1.f;
         if (length < lowerRampStart) {
             opacityCoefficient = 0.f; // camera really close
-        } else if (length < lowerRampEnd) {
+        }
+        else if (length < lowerRampEnd) {
             opacityCoefficient = (length - lowerRampStart) /
                                  (lowerRampEnd - lowerRampStart);
-        } else if (length < upperRampStart) {
+        }
+        else if (length < upperRampStart) {
             opacityCoefficient = 1.f; // sweet spot (max)
-        } else if (length < upperRampEnd) {
+        }
+        else if (length < upperRampEnd) {
             opacityCoefficient = 1.f - (length - upperRampStart) /
                                  (upperRampEnd - upperRampStart); //fade out
-        } else {
+        }
+        else {
             opacityCoefficient = 0;
         }
 
@@ -568,163 +621,166 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void RenderableGalaxy::renderPoints(const RenderData& data) {
-    if (_pointsProgram) {
-        // Saving current OpenGL state
-        GLenum blendEquationRGB;
-        GLenum blendEquationAlpha;
-        GLenum blendDestAlpha;
-        GLenum blendDestRGB;
-        GLenum blendSrcAlpha;
-        GLenum blendSrcRGB;
-        GLboolean depthMask;
-
-        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
-        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        glDepthMask(false);
-        glDisable(GL_DEPTH_TEST);
-
-        _pointsProgram->activate();
-
-        glm::dmat4 rotMatrix = glm::rotate(
-            glm::dmat4(1.0),
-            glm::pi<double>(),
-            glm::dvec3(1.0, 0.0, 0.0)) *
-                glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
-                glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
-        );
-
-        glm::dmat4 modelMatrix =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-
-        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-
-        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
-            data.camera.combinedViewMatrix();
-
-        _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelMatrix);
-        _pointsProgram->setUniform(
-            _uniformCachePoints.cameraViewProjectionMatrix,
-            cameraViewProjectionMatrix
-        );
-
-        glm::dvec3 eyePosition = glm::dvec3(
-            glm::inverse(data.camera.combinedViewMatrix()) *
-            glm::dvec4(0.0, 0.0, 0.0, 1.0)
-        );
-        _pointsProgram->setUniform(_uniformCachePoints.eyePosition, eyePosition);
-        _pointsProgram->setUniform(
-            _uniformCachePoints.opacityCoefficient,
-            _opacityCoefficient
-        );
-
-        glBindVertexArray(_pointsVao);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
-
-        glBindVertexArray(0);
-
-        _pointsProgram->deactivate();
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(true);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Restores OpenGL blending state
-        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-        glDepthMask(depthMask);
+    if (!_pointsProgram) {
+        return;
     }
+    // Saving current OpenGL state
+    GLenum blendEquationRGB;
+    GLenum blendEquationAlpha;
+    GLenum blendDestAlpha;
+    GLenum blendDestRGB;
+    GLenum blendSrcAlpha;
+    GLenum blendSrcRGB;
+    GLboolean depthMask;
+
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
+
+    _pointsProgram->activate();
+
+    glm::dmat4 rotMatrix = glm::rotate(
+        glm::dmat4(1.0),
+        glm::pi<double>(),
+        glm::dvec3(1.0, 0.0, 0.0)) *
+            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
+            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
+    );
+
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) * rotMatrix *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
+        data.camera.combinedViewMatrix();
+
+    _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelMatrix);
+    _pointsProgram->setUniform(
+        _uniformCachePoints.cameraViewProjectionMatrix,
+        cameraViewProjectionMatrix
+    );
+
+    glm::dvec3 eyePosition = glm::dvec3(
+        glm::inverse(data.camera.combinedViewMatrix()) *
+        glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    _pointsProgram->setUniform(_uniformCachePoints.eyePosition, eyePosition);
+    _pointsProgram->setUniform(
+        _uniformCachePoints.opacityCoefficient,
+        _opacityCoefficient
+    );
+
+    glBindVertexArray(_pointsVao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
+
+    glBindVertexArray(0);
+
+    _pointsProgram->deactivate();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Restores OpenGL blending state
+    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+    glDepthMask(depthMask);
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {
-    if (_billboardsProgram) {
-        // Saving current OpenGL state
-        GLenum blendEquationRGB;
-        GLenum blendEquationAlpha;
-        GLenum blendDestAlpha;
-        GLenum blendDestRGB;
-        GLenum blendSrcAlpha;
-        GLenum blendSrcRGB;
-        GLboolean depthMask;
-
-        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
-        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        glDepthMask(false);
-        glDisable(GL_DEPTH_TEST);
-
-        _billboardsProgram->activate();
-
-        glm::dmat4 rotMatrix = glm::rotate(
-            glm::dmat4(1.0),
-            glm::pi<double>(),
-            glm::dvec3(1.0, 0.0, 0.0)) *
-                glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
-                glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
-        );
-
-        glm::dmat4 modelMatrix =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-
-        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-
-        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
-            data.camera.combinedViewMatrix();
-
-        _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelMatrix);
-        _billboardsProgram->setUniform(
-            _uniformCacheBillboards.cameraViewProjectionMatrix,
-            cameraViewProjectionMatrix
-        );
-
-        glm::dvec3 eyePosition = glm::dvec3(
-            glm::inverse(data.camera.combinedViewMatrix()) *
-            glm::dvec4(0.0, 0.0, 0.0, 1.0)
-        );
-        _billboardsProgram->setUniform(_uniformCacheBillboards.eyePosition, eyePosition);
-
-        glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-        _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
-
-        ghoul::opengl::TextureUnit psfUnit;
-        psfUnit.activate();
-        _pointSpreadFunctionTexture->bind();
-        _billboardsProgram->setUniform(_uniformCacheBillboards.psfTexture, psfUnit);
-
-        glBindVertexArray(_pointsVao);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
-
-        glBindVertexArray(0);
-
-        _billboardsProgram->deactivate();
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(true);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Restores OpenGL blending state
-        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-        glDepthMask(depthMask);
+    if (!_billboardsProgram) {
+        return;
     }
+
+    // Saving current OpenGL state
+    GLenum blendEquationRGB;
+    GLenum blendEquationAlpha;
+    GLenum blendDestAlpha;
+    GLenum blendDestRGB;
+    GLenum blendSrcAlpha;
+    GLenum blendSrcRGB;
+    GLboolean depthMask;
+
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
+
+    _billboardsProgram->activate();
+
+    glm::dmat4 rotMatrix = glm::rotate(
+        glm::dmat4(1.0),
+        glm::pi<double>(),
+        glm::dvec3(1.0, 0.0, 0.0)) *
+            glm::rotate(glm::dmat4(1.0), 3.1248, glm::dvec3(0.0, 1.0, 0.0)) * 
+            glm::rotate(glm::dmat4(1.0), 4.45741, glm::dvec3(0.0, 0.0, 1.0)
+    );
+
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) * rotMatrix *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
+        data.camera.combinedViewMatrix();
+
+    _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelMatrix);
+    _billboardsProgram->setUniform(
+        _uniformCacheBillboards.cameraViewProjectionMatrix,
+        cameraViewProjectionMatrix
+    );
+
+    glm::dvec3 eyePosition = glm::dvec3(
+        glm::inverse(data.camera.combinedViewMatrix()) *
+        glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    _billboardsProgram->setUniform(_uniformCacheBillboards.eyePosition, eyePosition);
+
+    glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+    _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
+
+    ghoul::opengl::TextureUnit psfUnit;
+    psfUnit.activate();
+    _pointSpreadFunctionTexture->bind();
+    _billboardsProgram->setUniform(_uniformCacheBillboards.psfTexture, psfUnit);
+
+    glBindVertexArray(_pointsVao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
+
+    glBindVertexArray(0);
+
+    _billboardsProgram->deactivate();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Restores OpenGL blending state
+    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+    glDepthMask(depthMask);
 }
 
 float RenderableGalaxy::safeLength(const glm::vec3& vector) const {
@@ -823,37 +879,6 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(const std::string& fil
     result.positions = std::move(positions);
     result.color = std::move(colors);
     return result;
-}
-
-void RenderableGalaxy::saveCachedFile(const std::string& file,
-                                      const std::vector<glm::vec3>& positions,
-                                      const std::vector<glm::vec3>& colors)
-{
-    int64_t nPoints = static_cast<int64_t>(_nPoints);
-    float pointsRatio = _enabledPointsRatio;
-
-    std::ofstream fileStream(file, std::ofstream::binary);
-
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-        return;
-    }
-
-    fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
-    fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
-    fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
-    uint64_t nPositions = static_cast<uint64_t>(positions.size());
-    fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
-    fileStream.write(
-        reinterpret_cast<const char*>(positions.data()),
-        positions.size() * sizeof(glm::vec3)
-    );
-    uint64_t nColors = static_cast<uint64_t>(colors.size());
-    fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
-    fileStream.write(
-        reinterpret_cast<const char*>(colors.data()),
-        colors.size() * sizeof(glm::vec3)
-    );
 }
 
 } // namespace openspace
