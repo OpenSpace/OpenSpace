@@ -40,7 +40,7 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class PowerScaledSphere;
+class Sphere;
 struct RenderData;
 struct UpdateData;
 
@@ -80,7 +80,7 @@ private:
     ghoul::opengl::ProgramObject* _shader = nullptr;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    std::unique_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<Sphere> _sphere;
 
     UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
         _mirrorTexture) _uniformCache;
