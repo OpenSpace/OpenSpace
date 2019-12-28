@@ -128,6 +128,25 @@ public:
      * helper file) which should be a prefix to all symbols defined by the helper
      */
     virtual std::string helperPath() const = 0;
+
+    void setMaxSteps(int nsteps);
+
+    int maxSteps() const;
+
+    void setDownscaleRender(float value);
+
+    float downscaleRender() const;
+
+private:
+    /**
+     * Maximum number of integration steps to be executed by the volume integrator. 
+     */
+    int _rayCastMaxSteps = 1000;
+
+    /**
+     * Enable and set the downscale rendering of the volume. Used to improve performance.
+     */
+    float _downscaleRenderConst = 1.0f;
 };
 
 } // namespace openspace

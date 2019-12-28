@@ -1,0 +1,66 @@
+local transforms = asset.require('./venus')
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local Atmosphere = {
+    Identifier = "VenusAtmosphere",
+    Parent = transforms.Venus.Identifier,
+    Renderable = {
+        Type = "RenderableAtmosphere",
+        Atmosphere = {
+            -- Atmosphere radius in Km
+            AtmosphereRadius = 6121.9,
+            PlanetRadius = 6051.9,
+            PlanetAverageGroundReflectance = 0.018,
+            GroundRadianceEmittion = 0.8,
+            SunIntensity = 11.47,
+            --MieScatteringExtinctionPropCoefficient = 0.23862,
+            Rayleigh = {
+                Coefficients = {
+                    -- Wavelengths are given in 10^-9m
+                    Wavelengths = { 680, 550, 440 },
+                    -- Reflection coefficients are given in km^-1
+                    Scattering = { 19.518E-3, 13.83E-3, 3.65E-3 }
+                    -- In Rayleigh scattering, the coefficients of 
+                    -- absorption and scattering are the same.
+                },
+            -- Thichkness of atmosphere if its density were uniform, in Km
+                H_R = 6.7
+            },
+            -- Default
+            Mie = {
+                Coefficients = {
+                    -- Reflection coefficients are given in km^-1
+                    Scattering = { 53.61771e-3, 53.61771e-3, 53.61771e-3 },
+                    -- Extinction coefficients are a fraction of the Scattering coefficients
+                    Extinction = { 53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979 }
+                },
+                -- Mie Height scale (atmosphere thickness for constant density) in Km
+                H_M = 9.8,
+                -- Mie Phase Function Value (G e [-1.0, 1.0]. 
+                -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
+                G = 0.85
+            },
+            Image = {
+                ToneMapping = jToneMapping,
+                Exposure = 0.4,
+                Background = 1.8,
+                Gamma = 1.85
+            },
+            Debug = {
+                -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
+                PreCalculatedTextureScale = 1.0,
+                SaveCalculatedTextures = false
+            }
+        }
+    },
+    GUI = {
+        Name = "Venus Atmosphere",
+        Path = "/Solar System/Planets/Venus"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })

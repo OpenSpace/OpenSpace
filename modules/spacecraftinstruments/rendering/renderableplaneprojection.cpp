@@ -24,8 +24,10 @@
 
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -227,8 +229,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     );
     // The apparent position, CN+S, makes image align best with target
 
-    // @TODO:  Remove these powerscaled coordinates
-    psc projection[4];
+    glm::dvec3 projection[4];
     for (size_t j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(
             frame,
@@ -246,12 +247,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
             currentTime
         ) * cornerPosition;
 
-        projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-            cornerPosition[0],
-            cornerPosition[1],
-            cornerPosition[2]
-        );
-        projection[j][3] += 3;
+        // km -> m
+        projection[j] = cornerPosition * 1000.0;
     }
 
     if (!_moving) {
@@ -264,21 +261,28 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         }
     }
 
+    glm::vec3 p[4] = {
+        glm::vec3(projection[0]),
+        glm::vec3(projection[1]),
+        glm::vec3(projection[2]),
+        glm::vec3(projection[3])
+
+    };
     const GLfloat vertex_data[] = {
         // square of two triangles drawn within fov in target coordinates
         //      x      y     z     w     s     t
         // Lower left 1
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0,
+        p[1].x, p[1].y, p[1].z, 0.f, 0.f, 0.f,
         // Upper right 2
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1,
+        p[3].x, p[3].y, p[3].z, 0.f, 1.f, 1.f,
         // Upper left 3
-        projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 1,
+        p[2].x, p[2].y, p[2].z, 0.f, 0.f, 1.f,
         // Lower left 4 = 1
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0,
+        p[1].x, p[1].y, p[1].z, 0.f, 0.f, 0.f,
         // Lower right 5
-        projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 0,
+        p[0].x, p[0].y, p[0].z, 0.f, 1.f, 0.f,
         // Upper left 6 = 2
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1,
+        p[3].x, p[3].y, p[3].z, 0.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad);
@@ -307,7 +311,8 @@ void RenderablePlaneProjection::setTarget(std::string body) {
         return;
     }
 
-    _target.frame = SpiceManager::ref().frameFromBody(body);
+    _target.frame =
+        global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(body);
     _target.body = std::move(body);
 }
 

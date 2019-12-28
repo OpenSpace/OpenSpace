@@ -33,9 +33,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -62,6 +60,15 @@ private:
 
     glm::vec3 _volumeSize = glm::vec3(0.f);
     glm::vec3 _pointScaling = glm::vec3(0.f);
+
+    struct Result {
+        bool success;
+        std::vector<glm::vec3> positions;
+        std::vector<glm::vec3> color;
+    };
+    Result loadPointFile(const std::string& file);
+    Result loadCachedFile(const std::string& file);
+
     properties::BoolProperty _volumeRenderingEnabled;
     properties::BoolProperty _starRenderingEnabled;
     properties::FloatProperty _stepSize;
@@ -71,6 +78,8 @@ private:
     properties::FloatProperty _enabledPointsRatio;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
+    properties::FloatProperty _downScaleVolumeRendering;
+    properties::FloatProperty _numberOfRayCastingSteps;
 
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;

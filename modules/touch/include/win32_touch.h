@@ -22,44 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
-#define __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
+#define __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#ifdef WIN32
 
 namespace openspace {
 
-class PowerScaledSphere;
-
-class PowerScaledSphere {
+class Win32TouchHook {
 public:
-    PowerScaledSphere(float radius, int segments = 8);
-    PowerScaledSphere(glm::vec3 radius, int segments);
-    PowerScaledSphere(const PowerScaledSphere& cpy);
-    ~PowerScaledSphere();
-
-    bool initialize();
-
-    void render();
-
-//private:
-    struct Vertex {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-    };
-
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
-    GLuint _iBufferID = 0;
-
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
+    Win32TouchHook(void* nativeWindow);
+    ~Win32TouchHook();
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#endif // WIN32
+#endif // __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__

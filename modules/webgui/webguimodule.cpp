@@ -249,16 +249,15 @@ void WebGuiModule::startProcess() {
     std::string formattedDirectories = "[";
 
     std::vector<std::string> directories = _directories.value();
-    bool first = true;
-
-    for (const std::string& str : directories) {
-        if (!first) {
+    for (size_t i = 0; i < directories.size(); ++i) {
+        std::string arg = directories[i];
+        if (i & 1) {
+            arg = absPath(arg);
+        }
+        formattedDirectories += "\\\"" + escapedJson(escapedJson(arg)) + "\\\"";
+        if (i != directories.size() - 1) {
             formattedDirectories += ",";
         }
-        first = false;
-
-        // Escape twice: First json, and then bash (which needs same escape sequences)
-        formattedDirectories += "\\\"" + escapedJson(escapedJson(str)) + "\\\"";
     }
     formattedDirectories += "]";
 

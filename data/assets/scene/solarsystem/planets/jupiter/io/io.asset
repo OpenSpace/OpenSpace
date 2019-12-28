@@ -3,7 +3,7 @@ local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
 local kernel = asset.require('../kernels').jup310
-local labelsPath = asset.require('../jupiter_labels').LabelsPath
+local labelsPath = asset.require('../jupiter_globelabels').LabelsPath
 
 
 

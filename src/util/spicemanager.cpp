@@ -687,24 +687,6 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
     return visible == SPICETRUE;
 }
 
-bool SpiceManager::isTargetInFieldOfView(const std::string& target,
-                                         const std::string& observer,
-                                         const std::string& instrument,
-                                         FieldOfViewMethod method,
-                                         AberrationCorrection aberrationCorrection,
-                                         double& ephemerisTime) const
-{
-    return isTargetInFieldOfView(
-        target,
-        observer,
-        frameFromBody(target),
-        instrument,
-        method,
-        aberrationCorrection,
-        ephemerisTime
-    );
-}
-
 SpiceManager::TargetStateResult SpiceManager::targetState(const std::string& target,
                                                           const std::string& observer,
                                                         const std::string& referenceFrame,
@@ -911,33 +893,6 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
         target, observer, frame, lightSource, ephemerisTime
     ));
     return res;
-}
-
-bool SpiceManager::addFrame(std::string body, std::string frame) {
-    if (body.empty() || frame.empty()) {
-        return false;
-    }
-    else {
-        _frameByBody.emplace_back(body, frame);
-        return true;
-    }
-}
-
-std::string SpiceManager::frameFromBody(const std::string& body) const {
-    for (const std::pair<std::string, std::string>& pair : _frameByBody) {
-        if (pair.first == body) {
-            return pair.second;
-        }
-    }
-
-    constexpr const char* unionPrefix = "IAU_";
-
-    if (body.find(unionPrefix) == std::string::npos) {
-        return unionPrefix + body;
-    }
-    else {
-        return body;
-    }
 }
 
 void SpiceManager::findCkCoverage(const std::string& path) {

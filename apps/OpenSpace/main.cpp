@@ -53,6 +53,8 @@
 #include <sgct/user.h>
 #include <sgct/window.h>
 #include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 #include <stb_image.h>
 #include <chrono>
 #include <ctime>
@@ -406,7 +408,7 @@ void mainInitFunc() {
 
     for (const std::unique_ptr<Window>& win : sgct::Engine::instance().windows()) {
         using namespace sgct;
-        constexpr const char* screenshotNames = "OpenSpace";
+        const std::string screenshotNames = "OpenSpace_" + win->name();
         ScreenCapture* cpt0 = win->screenCapturePointer(Window::Eye::MonoOrLeft);
         ScreenCapture* cpt1 = win->screenCapturePointer(Window::Eye::Right);
 
@@ -1126,6 +1128,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped
         sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
         sgct::Engine::instance().takeScreenshot();
+        return sgct::Engine::instance().screenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
         ZoneScoped
@@ -1155,6 +1158,16 @@ void setSgctDelegateFunctions() {
         ZoneScoped
         sgct::Engine::instance().windows()[0]->setHorizFieldOfView(hFovDeg);
     };
+    #ifdef WIN32
+    sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
+        sgct::Window* w = sgct::Engine::instance().windows()[windowIndex].get();
+        if (w) {
+            HWND hWnd = glfwGetWin32Window(w->windowHandle());
+            return reinterpret_cast<void*>(hWnd);
+        }
+        return nullptr;
+    };
+    #endif // WIN32
     sgctDelegate.frustumMode = []() {
         ZoneScoped
         return _sgctState.frustumMode;

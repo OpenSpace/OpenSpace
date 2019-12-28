@@ -395,9 +395,7 @@ public:
     /**
     * Default view options that can be used in the Property::setViewOption method. The
     * values are: Property::ViewOptions::Color = \c color,
-    * Property::ViewOptions::LightPosition = \c lightPosition,
-    * Property::ViewOptions::PowerScaledScalar = \c powerScaledScalar, and
-    * Property::ViewOptions::PowerScaledCoordinate = \c powerScaledCoordinate.
+    * Property::ViewOptions::LightPosition = \c lightPosition
     */
     struct ViewOptions {
         static const char* Color;

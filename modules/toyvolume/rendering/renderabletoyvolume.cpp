@@ -29,8 +29,10 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
+    constexpr const char* _loggerCat = "Renderable ToyVolume";
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
@@ -66,6 +68,13 @@ namespace {
         "Color",
         "" // @TODO Missing documentation
     };
+
+    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo = {
+        "Downscale",
+        "Downscale Factor Volume Rendering",
+        "This value set the downscaling factor"
+        " when rendering the current volume."
+    };
 } // namespace
 
 namespace openspace {
@@ -83,6 +92,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         glm::vec3(glm::tau<float>())
     )
     , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
+    , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
 {
     if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
         _scalingExponent = static_cast<int>(
@@ -109,6 +119,22 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
+
+    _downScaleVolumeRendering.setVisibility(
+        openspace::properties::Property::Visibility::Developer
+    );
+    if (dictionary.hasKey("Downscale")) {
+        _downScaleVolumeRendering = dictionary.value<float>("Downscale");
+    }
+
+    if (dictionary.hasKey("Steps")) {
+        _rayCastSteps = static_cast<int>(dictionary.value<float>("Steps"));
+    }
+    else {
+        LINFO("Number of raycasting steps not specified for ToyVolume."
+            " Using default value.");
+    }
+
 }
 
 RenderableToyVolume::~RenderableToyVolume() {}
@@ -136,6 +162,7 @@ void RenderableToyVolume::initializeGL() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_color);
+    addProperty(_downScaleVolumeRendering);
 }
 
 void RenderableToyVolume::deinitializeGL() {
@@ -172,6 +199,8 @@ void RenderableToyVolume::update(const UpdateData& data) {
         _raycaster->setStepSize(_stepSize);
         _raycaster->setModelTransform(transform);
         _raycaster->setTime(data.time.j2000Seconds());
+        _raycaster->setDownscaleRender(_downScaleVolumeRendering);
+        _raycaster->setMaxSteps(_rayCastSteps);
     }
 }
 

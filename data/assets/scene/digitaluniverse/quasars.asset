@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
     Name = "Quasars Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_quasars_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({
@@ -24,7 +24,7 @@ local object = {
         Color = { 1.0, 0.4, 0.2 },
         Opacity = 0.95,
         File = speck .. "/quasars.speck",
-        Texture = textures .. "/point3.png",
+        Texture = textures .. "/point3A.png",
         Unit = "Mpc",
         ScaleFactor = 540.9,
         -- Fade in value in the same unit as "Unit"

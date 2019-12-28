@@ -22,42 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scene.h>
+#version __CONTEXT__
 
-#include <openspace/util/powerscaledcoordinate.h>
+layout (location = 0) out vec4 finalColor;
 
-class PowerscaleCoordinatesTest : public testing::Test {
-protected:
-    PowerscaleCoordinatesTest() {
-    }
+uniform sampler2D downscaledRenderedVolume;
+uniform sampler2D downscaledRenderedVolumeDepth;
 
-    ~PowerscaleCoordinatesTest() {
-    }
+in vec2 texCoord;
 
-    void reset() {
-    }
-
-    openspace::Scene* scenegraph;
-};
-
-
-TEST_F(PowerscaleCoordinatesTest, psc) {
-
-    openspace::psc reference(2.f, 1.f, 1.1f, 1.f);
-    
-    openspace::psc first(1.f, 0.f, 1.f, 0.f);
-    openspace::psc second(1.9f, 1.f, 1.f, 1.f);
-    
-    EXPECT_EQ(reference, first + second);
-    EXPECT_TRUE(reference == (first + second));
-    
-    openspace::psc third = first;
-    first[0] = 0.0;
-    
-    EXPECT_TRUE(third != first);
-    
-    
+void main() {
+    finalColor   = texture(downscaledRenderedVolume, texCoord);
+    gl_FragDepth = texture(downscaledRenderedVolumeDepth, texCoord).r;
 }
-
-
-

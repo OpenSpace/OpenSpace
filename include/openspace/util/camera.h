@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___CAMERA___H__
 #define __OPENSPACE_CORE___CAMERA___H__
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <mutex>
@@ -36,7 +35,6 @@ class SceneGraphNode;
 
 /**
  * This class still needs some more love. Suggested improvements:
- * - Remove psc from the camera class interface.
  * - Accessors should return constant references to double precision class members.
  * - Remove the scaling variable (What is it used for?)
  * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded
