@@ -195,9 +195,9 @@ TouchModule::TouchModule()
             if(points.getFingerId() == input.fingerId
                 && points.getTouchDeviceId() == input.touchDeviceId){
                 if(points.isMoving()){
-                    points.addPoint(std::move(input));
+                    points.addInput(input);
                 }else if(input.dx != 0.f || input.dy != 0.f){
-                    points.addPoint(std::move(input));
+                    points.addInput(input);
                 }
                 return;
             }
@@ -215,7 +215,7 @@ TouchModule::TouchModule()
             if(points.getFingerId() == input.fingerId
                && points.getTouchDeviceId() == input.touchDeviceId) {
 
-                points.addPoint(std::move(input));
+                points.addInput(input);
                 double totalTime = points.getGestureTime();
                 float totalDistance = points.getGestureDistance();
                 //Magic values taken from tuioear.cpp:

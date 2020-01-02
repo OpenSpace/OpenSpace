@@ -51,7 +51,7 @@ TouchInputs::TouchInputs(TouchInput input)
 {}
 
 
-void TouchInputs::addPoint(const TouchInput &&input) {
+void TouchInputs::addInput(const TouchInput &input) {
     _inputs.emplace_front(input);
     if(_inputs.size() > MAX_INPUTS){
         _inputs.pop_back();

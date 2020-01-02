@@ -49,7 +49,7 @@ class TouchInputs {
 public:
     TouchInputs(TouchInput input);
 
-    void addPoint(const TouchInput &&input);
+    void addInput(const TouchInput &input);
     void clearInputs();
 
     const size_t getTouchDeviceId() const;
@@ -58,7 +58,7 @@ public:
     float getCurrentSpeed() const;
     float getSpeedX() const;
     float getSpeedY() const;
-    
+
     bool isMoving() const;
     float getGestureDistance() const;
     double getGestureTime() const;

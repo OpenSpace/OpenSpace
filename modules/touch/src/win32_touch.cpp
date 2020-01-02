@@ -116,7 +116,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                     touchInput.dx = touchInput.x - lastInput.x;
                     touchInput.dy = touchInput.y - lastInput.y;
 
-                    points->addPoint(std::move(touchInput));
+                    points->addInput(touchInput);
 
                     global::openSpaceEngine.touchUpdateCallback(points->getLatestInput());
 #ifdef ENABLE_TUIOMESSAGES
@@ -136,6 +136,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 }
                 else if (pointerInfo.pointerFlags & POINTER_FLAG_UP) {
                     global::openSpaceEngine.touchExitCallback(touchInput);
+                    gTouchInputsMap.erase(pointerInfo.pointerId);
 #ifdef ENABLE_TUIOMESSAGES
                     // Handle removed touchpoint
                     gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
