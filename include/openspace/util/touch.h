@@ -58,12 +58,21 @@ public:
     float getCurrentSpeed() const;
     float getSpeedX() const;
     float getSpeedY() const;
+    
+    bool isMoving() const;
+    float getGestureDistance() const;
+    double getGestureTime() const;
+
+    size_t getNumInputs() const;
     const TouchInput& getLatestInput() const;
-    const std::deque<TouchInput> &getInputs() { return _inputs; }
+    const std::deque<TouchInput>& peekInputs() const;
 
 private:
     static constexpr size_t MAX_INPUTS = 128;
+
+    //A deque of recorded inputs. Adding newer points to the front of the queue
     std::deque<TouchInput> _inputs;
+
     size_t _touchDeviceId;
     size_t _fingerId;
 };

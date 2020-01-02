@@ -461,13 +461,14 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputs>& list
     if (_tap) { // check for doubletap
         if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
             _doubleTap = true;
+            LINFOC("Touchinteraction", "Got double tap!");
             _tap = false;
         }
         _time.initSession();
     }
     //Code for lower-right corner double-tap to zoom-out
     glm::ivec2 res = global::windowDelegate.currentWindowSize();
-    glm::dvec2 pos = glm::vec2(
+    glm::fvec2 pos = glm::vec2(
         list[0].getLatestInput().getScreenX(res.x),
         list[0].getLatestInput().getScreenY(res.y)
     );
@@ -500,10 +501,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputs>& list
             _vel.roll = 0.0;
             _vel.pan = glm::dvec2(0.0, 0.0);
             resetAfterInput();
-            /*if( _directTouchMode )
-                LINFO("Touch -> Direct-touch");
-            else
-                LINFO("Direct-touch -> Touch");*/
         }
 
         if (_directTouchMode && _selected.size() > 0 && numFingers == _selected.size()) {
@@ -1133,22 +1130,16 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         }
     }
 }
+
 int TouchInteraction::interpretInteraction(const std::vector<TouchInputs>& list,
                                            const std::vector<TouchInput>& lastProcessed)
 {
     glm::fvec2 lastCentroid = _centroid;
-    _centroid.x = std::accumulate(
-        list.begin(),
-        list.end(),
-        0.0,
-        [](double x, const TouchInputs& inputs) { return x + inputs.getLatestInput().x; }
-    ) / list.size();
-    _centroid.y = std::accumulate(
-        list.begin(),
-        list.end(),
-        0.0,
-        [](double y, const TouchInputs& inputs) { return y + inputs.getLatestInput().y; }
-    ) / list.size();
+    _centroid = {0.f, 0.f};
+    for(const TouchInputs& inputs : list) {
+        _centroid += glm::fvec2{inputs.getLatestInput().x, inputs.getLatestInput().y };        
+    }
+    _centroid /= float(list.size());
 
     // see if the distance between fingers changed - used in pan interpretation
     double dist = 0;
@@ -1170,7 +1161,6 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputs>& list,
     }
     // find the slowest moving finger - used in roll interpretation
     double minDiff = 1000;
-    long id = 0;
     for (const TouchInputs& inputs : list) {
         auto it = std::find_if(
             lastProcessed.begin(),
@@ -1178,7 +1168,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputs>& list,
             [&inputs](const TouchInput& input) {
                 //TODO: Is this the requested ID of this function?
                 //Or should we check for fingerId
-                return input.touchDeviceId == inputs.getTouchDeviceId();
+                return input.fingerId == inputs.getFingerId();
         });
 
         if (it == lastProcessed.end()) {
@@ -1190,13 +1180,11 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputs>& list,
         double diff = latestInput.x - it->x 
         + latestInput.y - it->y;
 
-        if ((latestInput.dx != 0.0 && latestInput.dy != 0.0)) {
+        if (!inputs.isMoving()) {
             diff = minDiff = 0.0;
-            id = latestInput.touchDeviceId;
         }
         else if (std::abs(diff) < std::abs(minDiff)) {
             minDiff = diff;
-            id = latestInput.touchDeviceId;
         }
     }
     // find if all fingers angles are high - used in roll interpretation
@@ -1461,7 +1449,6 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 void TouchInteraction::computeVelocities(const std::vector<TouchInputs>& list,
                                          const std::vector<TouchInput>& lastProcessed)
 {
-    const TouchInputs& inputs = list.at(0);
     const int action = interpretInteraction(list, lastProcessed);
     const SceneGraphNode* anchor =
         global::navigationHandler.orbitalNavigator().anchorNode();
@@ -1492,6 +1479,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputs>& list,
     }
 #endif
 
+    const TouchInputs& inputs = list.at(0);
     switch (action) {
         case ROT: { // add rotation velocity
             _vel.orbit += glm::dvec2(inputs.getSpeedX() *

@@ -50,37 +50,31 @@ namespace openspace {
 
 bool TouchModule::processNewInput() {
     // Get new input from listener
-
     _listOfContactPoints = _ear.getInput();
     _ear.clearInput();
      // Set touch property to active (to void mouse input, mainly for mtdev bridges)
-    _touch.touchActive(!_listOfContactPoints.empty());
+    _touch.touchActive(!_touchPoints.empty());
 
-    if (!_listOfContactPoints.empty()) {
+    if (!_touchPoints.empty()) {
         global::interactionMonitor.markInteraction();
     }
 
     // Erase old input id's that no longer exists
-    _lastProcessed.erase(
-        std::remove_if(
-            _lastProcessed.begin(),
-            _lastProcessed.end(),
-            [this](const Point& point) {
-        return std::find_if(
-            _listOfContactPoints.begin(),
-            _listOfContactPoints.end(),
-            [&point](const TuioCursor& c) {
-            return point.first == c.getSessionID();
-        }
-        ) == _listOfContactPoints.end(); }),
-        _lastProcessed.end());
+    _lastTouchInputs.erase(
+        std::remove_if(_lastTouchInputs.begin(), _lastTouchInputs.end(),
+                       [this](const TouchInput& input) {
+                         return std::find_if(
+                                    _touchPoints.begin(),
+                                    _touchPoints.end(),
+                                    [&input](const TouchInputs& inputs) {
+                                      return input.fingerId == inputs.getFingerId();
+                                    }) == _touchPoints.end();
+                       }),
+        _lastTouchInputs.end());
 
-    // if tap occured, we have new input
-    if (_listOfContactPoints.empty() && _lastProcessed.empty() && _ear.tap()) {
-        TuioCursor c = _ear.getTap();
-        _listOfContactPoints.push_back(c);
-        _lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
+    if(_tap) {
         _touch.tap();
+        _tap = false;
         return true;
     }
 
@@ -88,30 +82,32 @@ bool TouchModule::processNewInput() {
     processNewWebInput(_listOfContactPoints);
 
     // Return true if we got new input
-    if (_listOfContactPoints.size() == _lastProcessed.size() &&
-        !_listOfContactPoints.empty())
+    if (_touchPoints.size() == _lastTouchInputs.size() &&
+        !_touchPoints.empty())
     {
         bool newInput = true;
         // go through list and check if the last registrered time is newer than the one in
         // lastProcessed (last frame)
         std::for_each(
-            _lastProcessed.begin(),
-            _lastProcessed.end(),
-            [this, &newInput](Point& p) {
-                std::vector<TuioCursor>::iterator cursor = std::find_if(
-                    _listOfContactPoints.begin(),
-                    _listOfContactPoints.end(),
-                    [&p](const TuioCursor& c) { return c.getSessionID() == p.first; }
+            _lastTouchInputs.begin(),
+            _lastTouchInputs.end(),
+            [this, &newInput](TouchInput& input) {
+                std::vector<TouchInputs>::iterator inputs = std::find_if(
+                    _touchPoints.begin(),
+                    _touchPoints.end(),
+                    [&input](const TouchInputs& ins) {
+                        return ins.getFingerId() == input.fingerId;
+                    }
             );
-            double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
-            if (!cursor->isMoving()) {
+            // double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
+            if (inputs->getCurrentSpeed() == 0.0) {
                  // if current cursor isn't moving, we want to interpret that as new input
                  // for interaction purposes
                 newInput = true;
             }
-            else if (p.second.getTuioTime().getTotalMilliseconds() == now) {
-                newInput = false;
-            }
+            // else if (p.second.getTuioTime().getTotalMilliseconds() == now) {
+            //     newInput = false;
+            // }
         });
         return newInput;
     }
@@ -148,8 +144,23 @@ void TouchModule::processNewWebInput(const std::vector<TuioCursor>& listOfContac
     }
 }
 
+void TouchModule::clearInputs() {
+    for(const auto& input : _deferredRemovals) {
+        for(TouchInputs& points : _touchPoints) {
+            if(points.getFingerId() == input.fingerId
+                && points.getTouchDeviceId() == input.touchDeviceId) {
+                points = std::move(_touchPoints.back());
+                _touchPoints.pop_back();
+                break;
+            }
+        }
+    }
+    _deferredRemovals.clear();
+}
+
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
+    , _tap(false)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
@@ -172,39 +183,50 @@ TouchModule::TouchModule()
         _markers.deinitialize();
     });
 
-    // These are handled in UI thread, which (as of 20th dec 2019) is in main thread
-    // so we don't need to lock here
-    global::callback::touchDetected.push_back([&](TouchInput input) 
+    // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
+    // thread so we don't need a mutex here
+    global::callback::touchDetected.push_back([&](TouchInput input)
     {
         _touchPoints.emplace_back(input);
     });
 
     global::callback::touchUpdated.push_back([&](TouchInput input) {
-        //Touchmodule don't care
-        if(input.dx == 0.0 && input.dy == 0.0){
-            return;
-        }
         for(TouchInputs& points : _touchPoints){
-            if(points.getFingerId() == input.fingerId 
+            if(points.getFingerId() == input.fingerId
                 && points.getTouchDeviceId() == input.touchDeviceId){
-                points.addPoint(std::move(input));
+                if(points.isMoving()){
+                    points.addPoint(std::move(input));
+                }else if(input.dx != 0.f || input.dy != 0.f){
+                    points.addPoint(std::move(input));
+                }
                 return;
             }
         }
-        //ghoul assertions?
+        //TODO: ghoul assertions?
         assert(!"Touchpoint was updated but not in list");
     });
 
     global::callback::touchExit.push_back([&](TouchInput input){
+        //TODO: "Tap" gesture
+        _deferredRemovals.emplace_back(input);
+
+        //Check for "tap" gesture:
         for(TouchInputs& points : _touchPoints) {
-            if(points.getFingerId() == input.fingerId 
-                && points.getTouchDeviceId() == input.touchDeviceId) {
-                points = std::move(_touchPoints.back());
-                _touchPoints.pop_back();
+            if(points.getFingerId() == input.fingerId
+               && points.getTouchDeviceId() == input.touchDeviceId) {
+
+                points.addPoint(std::move(input));
+                double totalTime = points.getGestureTime();
+                float totalDistance = points.getGestureDistance();
+                //Magic values taken from tuioear.cpp:
+                if(totalTime < 0.18 && totalDistance < 0.0004
+                && _touchPoints.size() == 1 && _deferredRemovals.size() == 1){
+                    _tap = true;
+                }
                 return;
             }
         }
-        //ghoul assertions?
+        //TODO: ghoul assertions?
         assert(!"Could not find touchpoint to delete!");
     });
 
@@ -212,39 +234,29 @@ TouchModule::TouchModule()
         _touch.setCamera(global::navigationHandler.camera());
         _touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
 
-        // if (processNewInput() && global::windowDelegate.isMaster()) {
-        //     _touch.updateStateFromInput(_listOfContactPoints, _lastProcessed);
-        // }
-        // else if (_listOfContactPoints.empty()) {
-        //     _touch.resetAfterInput();
-        // }
-        if(!_touchPoints.empty() && !_lastTouchInputs.empty()){
+        if(processNewInput() && global::windowDelegate.isMaster()){
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }else if(_touchPoints.empty()){
             _touch.resetAfterInput();
         }
 
-        
+
 
         // update lastProcessed
         _lastTouchInputs.clear();
         for(const TouchInputs& points : _touchPoints) {
             _lastTouchInputs.emplace_back(points.getLatestInput());
         }
-        _lastProcessed.clear();
-        for (const TuioCursor& c : _listOfContactPoints) {
-            _lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
-        }
         // used to save data from solver, only calculated for one frame when user chooses
         // in GUI
         _touch.unitTest();
         // calculate the new camera state for this frame
         _touch.step(global::windowDelegate.deltaTime());
+        clearInputs();
     });
 
-    global::callback::render.push_back([&]() { 
-        _markers.render(_listOfContactPoints); 
-        _markers.render(_ear._touchpointList); 
+    global::callback::render.push_back([&]() {
+        _markers.render(_touchPoints);
     });
 
 }

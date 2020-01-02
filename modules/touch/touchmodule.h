@@ -52,11 +52,14 @@ namespace openspace {
         */
         void processNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
 
+        void clearInputs();
+
         TuioEar _ear;
         TouchInteraction _touch;
         TouchMarker _markers;
         std::vector<TUIO::TuioCursor> _listOfContactPoints;
         std::vector<TouchInputs> _touchPoints;
+        std::vector<TouchInput> _deferredRemovals;
         std::vector<TouchInput> _lastTouchInputs;
         // contains an id and the TuioPoint that was processed last frame
         std::vector<Point> _lastProcessed;
@@ -64,6 +67,7 @@ namespace openspace {
 #ifdef WIN32
         std::unique_ptr<Win32TouchHook> _win32TouchHook;
 #endif //WIN32
+        bool _tap;
     };
 
 } // namespace openspace

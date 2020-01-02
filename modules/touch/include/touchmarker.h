@@ -35,6 +35,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/touch.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/uniformcache.h>

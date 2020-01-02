@@ -30,7 +30,7 @@ namespace openspace {
 
 TouchInput::TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y)
 : touchDeviceId(touchDeviceId), fingerId(fingerId), x(x), y(y), dx(0.f), dy(0.f)
-, timestamp(openspace::Time::now().j2000Seconds()) 
+, timestamp(openspace::Time::now().j2000Seconds())
 {}
 
 float TouchInput::getScreenX(float resolutionX) const {
@@ -62,12 +62,12 @@ void TouchInputs::clearInputs() {
     _inputs.clear();
 }
 
-const size_t TouchInputs::getTouchDeviceId() const { 
-    return _touchDeviceId; 
+const size_t TouchInputs::getTouchDeviceId() const {
+    return _touchDeviceId;
 }
 
-const size_t TouchInputs::getFingerId() const { 
-    return _fingerId; 
+const size_t TouchInputs::getFingerId() const {
+    return _fingerId;
 }
 
 float TouchInputs::getCurrentSpeed() const {
@@ -98,8 +98,41 @@ float TouchInputs::getSpeedY() const {
 
     return currentInput.dy / dt;
 }
-const TouchInput& TouchInputs::getLatestInput() const{
+
+bool TouchInputs::isMoving() const {
+    if(_inputs.size() <= 1) { return false; }
+    const TouchInput &currentInput = _inputs[0];
+    return currentInput.dx != 0.f || currentInput.dy != 0.f;
+}
+
+float TouchInputs::getGestureDistance() const {
+    if(_inputs.size() <= 1) { return 0.f; }
+    float distX = 0.f;
+    float distY = 0.f;
+    float startX = _inputs.front().x;
+    float startY = _inputs.front().y;
+    for(const auto& input : _inputs){
+        distX += std::abs(input.x - startX);
+        distY += std::abs(input.y - startY);
+    }
+    return std::sqrt(distX*distX + distY*distY);
+}
+
+double TouchInputs::getGestureTime() const {
+    if(_inputs.size() <= 1) { return 0.0; }
+    double before = _inputs.back().timestamp;
+    double after = _inputs.front().timestamp;
+    return after - before;
+}
+
+size_t TouchInputs::getNumInputs() const {
+    return _inputs.size();
+}
+
+const TouchInput& TouchInputs::getLatestInput() const {
     return _inputs.front();
 }
+
+const std::deque<TouchInput>& TouchInputs::peekInputs() const { return _inputs; }
 
 } // namespace openspace
