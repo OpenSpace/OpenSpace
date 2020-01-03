@@ -320,14 +320,20 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
     }
     catch (std::invalid_argument&) {
         LERROR(fmt::format(
-            "invalid_argument exception on line {} of {}",
-            csvLine + 1, filename
+            "invalid_argument exception on line {}/{} of {}",
+            csvLine + 1, numberOfLines, filename
         ));
     }
     catch (std::out_of_range&) {
         LERROR(fmt::format(
-            "out_of_range exception on line {} of {}",
-            csvLine + 1, filename
+            "out_of_range exception on line {}/{} of {}",
+            csvLine + 1, numberOfLines, filename
+        ));
+    }
+    catch (std::ios_base::failure&) {
+        LERROR(fmt::format(
+            "ios_base::failure exception on line {}/{} of {}",
+            csvLine + 1, numberOfLines, filename
         ));
     }
 
