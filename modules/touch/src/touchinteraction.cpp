@@ -392,10 +392,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputs>& list
     }
     //Code for lower-right corner double-tap to zoom-out
     glm::fvec2 res = global::windowDelegate.currentWindowSize();
-    glm::fvec2 pos = glm::vec2(
-        list[0].getLatestInput().getScreenX(res.x),
-        list[0].getLatestInput().getScreenY(res.y)
-    );
+    glm::fvec2 pos = list[0].getLatestInput().getScreenCoordinates(res);
     bool hasWebContent = webContent(pos);
 
     const float bottomCornerSizeForZoomTap_fraction = 0.08f;
@@ -720,13 +717,13 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputs>& list,
             continue;
         }
         const TouchInput &latestInput = inputs.getLatestInput();
+        TouchInput prevInput = *it;
 
-        TouchInput itPoint = *it;
-        double diff = latestInput.x - it->x
-        + latestInput.y - it->y;
+        double diff = latestInput.x - prevInput.x
+        + latestInput.y - prevInput.y;
 
         if (!inputs.isMoving()) {
-            diff = minDiff = 0.0;
+            minDiff = 0.0;
         }
         else if (std::abs(diff) < std::abs(minDiff)) {
             minDiff = diff;
@@ -745,15 +742,15 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputs>& list,
                     return p.fingerId == c.getFingerId();
                 });
             double res = 0.0;
-            glm::fvec2 lastPos = {lastPoint.x, lastPoint.y};
-            float lastAngle = glm::angle(lastPos, _centroid);
-            glm::fvec2 currPos = {c.getLatestInput().x, c.getLatestInput().y};
-            float currentAngle = glm::angle(currPos, _centroid);
+
+            float lastAngle = lastPoint.getAngleToPos(_centroid.x, _centroid.y);
+            float currentAngle = c.getLatestInput()
+                                    .getAngleToPos(_centroid.x, _centroid.y);
             if (lastAngle > currentAngle + 1.5 * M_PI) {
-                res = currentAngle + (2 * M_PI - lastAngle);
+                res = currentAngle + (2.0 * M_PI - lastAngle);
             }
             else if (currentAngle > lastAngle + 1.5 * M_PI) {
-                res = (2 * M_PI - currentAngle) + lastAngle;
+                res = (2.0 * M_PI - currentAngle) + lastAngle;
             }
             else {
                 res = currentAngle - lastAngle;
@@ -1093,17 +1090,18 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputs>& list,
                 list.begin(),
                 list.end(),
                 0.0,
-                [&](double diff, const TouchInputs& c) {
+                [&](double diff, const TouchInputs& inputs) {
                     TouchInput point = *std::find_if(
                         lastProcessed.begin(),
                         lastProcessed.end(),
-                        [&c](const TouchInput& p) { return p.fingerId == c.getFingerId(); }
+                        [&inputs](const TouchInput& p) {
+                            return p.fingerId == inputs.getFingerId();
+                        }
                     );
                     double res = diff;
-                    glm::fvec2 lastPoint = { point.x, point.y };
-                    glm::fvec2 currPoint = { c.getLatestInput().x, c.getLatestInput().y };
-                    double lastAngle = glm::angle(lastPoint, _centroid);
-                    double currentAngle = glm::angle(currPoint, _centroid);
+                    float lastAngle = point.getAngleToPos(_centroid.x, _centroid.y);
+                    float currentAngle = inputs.getLatestInput()
+                                                .getAngleToPos(_centroid.x, _centroid.y);
                     // if's used to set angles 359 + 1 = 0 and 0 - 1 = 359
                     if (lastAngle > currentAngle + 1.5 * M_PI) {
                         res += currentAngle + (2 * M_PI - lastAngle);
@@ -1117,7 +1115,6 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputs>& list,
                     return res;
                 }
             ) / list.size();
-
             _vel.roll += -rollFactor * _sensitivity.roll;
             _constTimeDecayCoeff.roll = computeConstTimeDecayCoefficient(_vel.roll);
             break;

@@ -26,6 +26,8 @@
 #ifndef __OPENSPACE_CORE___TOUCH___H__
 #define __OPENSPACE_CORE___TOUCH___H__
 
+#include <glm/detail/type_vec2.hpp>
+
 #include <cstdint>
 #include <deque>
 
@@ -33,8 +35,9 @@ namespace openspace {
 
 struct TouchInput {
     TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y);
-    float getScreenX(float resolutionX) const;
-    float getScreenY(float resolutionY) const;
+    glm::vec2 getScreenCoordinates(glm::vec2 resolution) const;
+    float getDistanceToPos(float otherX, float otherY) const;
+    float getAngleToPos(float otherX, float otherY) const;
 
     size_t touchDeviceId;
     size_t fingerId;

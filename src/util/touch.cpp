@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/time.h>
+#define _USE_MATH_DEFINES
 #include <openspace/util/touch.h>
 #include <cmath>
 
@@ -30,19 +30,31 @@ namespace openspace {
 
 TouchInput::TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y)
 : touchDeviceId(touchDeviceId), fingerId(fingerId), x(x), y(y), dx(0.f), dy(0.f)
-, timestamp(openspace::Time::now().j2000Seconds())
+, timestamp(0.0)
 {}
 
-float TouchInput::getScreenX(float resolutionX) const {
-    return std::floor(x * resolutionX + 0.5f);
+glm::vec2 TouchInput::getScreenCoordinates(glm::vec2 resolution) const {
+    return {std::floor(x * resolution.x + 0.5f), std::floor(y * resolution.y + 0.5f)};
 }
 
-float TouchInput::getScreenY(float resolutionY) const {
-    return std::floor(y * resolutionY + 0.5f);
+float TouchInput::getDistanceToPos(float otherX, float otherY) const {
+    float distX = x - otherX;
+    float distY = y - otherY;
+    return std::sqrt(distX*distX + distY*distY);
 }
 
+float TouchInput::getAngleToPos(float otherX, float otherY) const {
+    float side = x - otherX;
+    float height = y - otherY;
+    float distance = getDistanceToPos(otherX, otherY);
 
+    float angle = float(M_PI_2) + std::asin(side / distance);
+    if (height < 0.f) {
+        angle = 2.0f * float(M_PI) - angle;
+    }
 
+    return angle;
+}
 
 TouchInputs::TouchInputs(TouchInput input)
     : _inputs{input}
@@ -74,7 +86,7 @@ float TouchInputs::getCurrentSpeed() const {
     TouchInput currentInput = _inputs[0];
     TouchInput previousInput = _inputs[1];
     //dt in seconds:
-    double dt = currentInput.timestamp - previousInput.timestamp;
+    float dt = static_cast<float>(currentInput.timestamp - previousInput.timestamp);
     float dist = sqrt(currentInput.dx*currentInput.dx + currentInput.dy*currentInput.dy);
     return dist / dt;
 }
@@ -83,7 +95,7 @@ float TouchInputs::getSpeedX() const {
     if(_inputs.size() <= 1) { return 0.0; }
     const TouchInput &currentInput = _inputs[0];
     const TouchInput &previousInput = _inputs[1];
-    double dt = currentInput.timestamp - previousInput.timestamp;
+    float dt = static_cast<float>(currentInput.timestamp - previousInput.timestamp);
 
     return currentInput.dx / dt;
 }
@@ -92,7 +104,7 @@ float TouchInputs::getSpeedY() const {
     if(_inputs.size() <= 1) { return 0.0; }
     const TouchInput &currentInput = _inputs[0];
     const TouchInput &previousInput = _inputs[1];
-    double dt = currentInput.timestamp - previousInput.timestamp;
+    float dt = static_cast<float>(currentInput.timestamp - previousInput.timestamp);
 
     return currentInput.dy / dt;
 }

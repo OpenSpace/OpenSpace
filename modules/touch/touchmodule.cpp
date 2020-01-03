@@ -129,10 +129,7 @@ void TouchModule::processNewWebInput() {
     bool isSingleContactPoint = (_touchPoints.size() == 1);
     if (isSingleContactPoint && isWebPositionCallbackZero) {
         glm::fvec2 res = global::windowDelegate.currentWindowSize();
-        glm::dvec2 pos = glm::vec2(
-            _touchPoints[0].getLatestInput().getScreenX(res.x),
-            _touchPoints[0].getLatestInput().getScreenY(res.y)
-        );
+        glm::dvec2 pos = _touchPoints[0].getLatestInput().getScreenCoordinates(res);
 
 #ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
         WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
