@@ -37,6 +37,7 @@
 #include <tpcshrd.h>
 
 // #define ENABLE_TUIOMESSAGES
+#define ENABLE_DIRECTMSG
 
 namespace {
     constexpr const char* _loggerCat = "win32_touch";
@@ -54,7 +55,7 @@ namespace {
 
 namespace openspace {
 
-// This hook will only work for Win7+ Digitizers.
+// This hook will only work for Win8+ Digitizers.
 // - Once GLFW has native touch support, we can remove this windows-specific code
 LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode != HC_ACTION) {
@@ -97,7 +98,9 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
                     std::unique_ptr<TouchInputs> points(new TouchInputs(touchInput));
                     gTouchInputsMap.emplace(pointerInfo.pointerId, std::move(points));
+#ifdef ENABLE_DIRECTMSG
                     global::openSpaceEngine.touchDetectionCallback(touchInput);
+#endif
 #ifdef ENABLE_TUIOMESSAGES
                     // Handle new touchpoint
                     gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
@@ -117,8 +120,9 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                     touchInput.dy = touchInput.y - lastInput.y;
 
                     points->addInput(touchInput);
-
+#ifdef ENABLE_DIRECTMSG
                     global::openSpaceEngine.touchUpdateCallback(points->getLatestInput());
+#endif
 #ifdef ENABLE_TUIOMESSAGES
                     TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
                     if (gCursorMap[pointerInfo.pointerId]->getTuioTime() == frameTime)
@@ -135,7 +139,9 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
 #endif
                 }
                 else if (pointerInfo.pointerFlags & POINTER_FLAG_UP) {
+#ifdef ENABLE_DIRECTMSG
                     global::openSpaceEngine.touchExitCallback(touchInput);
+#endif
                     gTouchInputsMap.erase(pointerInfo.pointerId);
 #ifdef ENABLE_TUIOMESSAGES
                     // Handle removed touchpoint
@@ -154,10 +160,13 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 
-// Low-level mouse hook is "needed" if we want to stop mouse
-// cursor from moving when we get a touch-input on our window
-// This is not yet fail-proof...maybe a race-condition on message pumping...?
+// Low-level mouse hook is "needed" if we want to stop mousecursor from moving when we get
+// a touch-input on our window
+// A negative effect is that this function is for global threads, meaning our application
+// will cause Windows to stall the mouse cursor when this function can't be scheduled.
+// This is not yet fail-proof...might be a race-condition on message pumping?
 // - Seems to move the cursor when we get two fingers as input..
+// - If we ourselves would pump windows for events, we can handle this in the pump-loop
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
   if (nCode < 0)  // do not process message
   {

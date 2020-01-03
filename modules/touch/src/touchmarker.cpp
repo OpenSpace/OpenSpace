@@ -64,9 +64,6 @@ namespace {
         "MarkerColor", "Marker color", "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InhouseColorInfo = {
-        "MarkerColor_Inhouse", "Marker color", "Marker color for internal touch tracking"
-    };
 } // namespace
 
 namespace openspace {
@@ -83,12 +80,6 @@ TouchMarker::TouchMarker()
         glm::vec3(0.f),
         glm::vec3(1.f)
     )
-    , _inhouseColor(
-        InhouseColorInfo,
-        glm::vec3(51.f / 255.f, 51.f / 255.f, 204.f / 255.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
     , _shader(nullptr)
 {
     addProperty(_visible);
@@ -97,7 +88,6 @@ TouchMarker::TouchMarker()
     addProperty(_thickness);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
-    addProperty(_inhouseColor);
 }
 
 TouchMarker::~TouchMarker() {} // NOLINT
@@ -136,34 +126,12 @@ void TouchMarker::render(const std::vector<openspace::TouchInputs>& list) {
         _shader->setUniform(_uniformCache.radius, _radiusSize);
         _shader->setUniform(_uniformCache.transparency, _transparency);
         _shader->setUniform(_uniformCache.thickness, _thickness);
-        _shader->setUniform(_uniformCache.color, _inhouseColor.value());
-
-        glEnable(GL_BLEND);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        glBindVertexArray(_quad);
-        glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
-
-        _shader->deactivate();
-    }
-}
-
-void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
-    if (_visible && !list.empty()) {
-        createVertexList(list);
-        _shader->activate();
-
-        _shader->setUniform(_uniformCache.radius, _radiusSize);
-        _shader->setUniform(_uniformCache.transparency, _transparency);
-        _shader->setUniform(_uniformCache.thickness, _thickness);
         _shader->setUniform(_uniformCache.color, _color.value());
 
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);  // When included this line makes the webgui disappear at touch interaction
         glBindVertexArray(_quad);
         glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
 
@@ -178,35 +146,6 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputs>& li
     for (const openspace::TouchInputs& points : list) {
         _vertexData[i] = 2 * (points.getLatestInput().x - 0.5f);
         _vertexData[i + 1] = -2 * (points.getLatestInput().y - 0.5f);
-        i += 2;
-    }
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexData.size() * sizeof(GLfloat),
-        _vertexData.data(),
-        GL_STATIC_DRAW
-    );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        0,
-        nullptr
-    );
-}
-
-void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor>& list) {
-    _vertexData.resize(list.size() * 2);
-
-    int i = 0;
-    for (const TUIO::TuioCursor& c : list) {
-        _vertexData[i] = 2 * (c.getX() - 0.5f);
-        _vertexData[i + 1] = -2 * (c.getY() - 0.5f);
         i += 2;
     }
 

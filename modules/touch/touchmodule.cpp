@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/touch/touchmodule.h>
+#include <modules/touch/include/tuioear.h>
 #include <modules/touch/include/win32_touch.h>
 
 #include <modules/webgui/webguimodule.h>
@@ -45,13 +46,23 @@
 #endif
 
 using namespace TUIO;
-
+namespace {
+    constexpr double ONE_MS = 0.001;
+}
 namespace openspace {
 
 bool TouchModule::processNewInput() {
     // Get new input from listener
-    _listOfContactPoints = _ear.getInput();
-    _ear.clearInput();
+    std::vector<TouchInput> earInputs = _ear->takeInput();
+    std::vector<TouchInput> earRemovals = _ear->takeRemovals();
+
+    for(const TouchInput& input : earInputs) {
+        updateOrAddTouchInput(input);
+    }
+    for(const TouchInput& removal : earRemovals) {
+        removeTouchInput(removal);
+    }
+
      // Set touch property to active (to void mouse input, mainly for mtdev bridges)
     _touch.touchActive(!_touchPoints.empty());
 
@@ -79,7 +90,7 @@ bool TouchModule::processNewInput() {
     }
 
     // Check if we need to parse touchevent to the webgui
-    processNewWebInput(_listOfContactPoints);
+    processNewWebInput();
 
     // Return true if we got new input
     if (_touchPoints.size() == _lastTouchInputs.size() &&
@@ -99,15 +110,11 @@ bool TouchModule::processNewInput() {
                         return ins.getFingerId() == input.fingerId;
                     }
             );
-            // double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
             if (inputs->getCurrentSpeed() == 0.0) {
                  // if current cursor isn't moving, we want to interpret that as new input
                  // for interaction purposes
                 newInput = true;
             }
-            // else if (p.second.getTuioTime().getTotalMilliseconds() == now) {
-            //     newInput = false;
-            // }
         });
         return newInput;
     }
@@ -116,15 +123,15 @@ bool TouchModule::processNewInput() {
     }
 }
 
-void TouchModule::processNewWebInput(const std::vector<TuioCursor>& listOfContactPoints) {
+void TouchModule::processNewWebInput() {
     bool isWebPositionCallbackZero =
         (_webPositionCallback.x == 0 && _webPositionCallback.y == 0);
-    bool isSingleContactPoint = (listOfContactPoints.size() == 1);
+    bool isSingleContactPoint = (_touchPoints.size() == 1);
     if (isSingleContactPoint && isWebPositionCallbackZero) {
-        glm::ivec2 res = global::windowDelegate.currentWindowSize();
+        glm::fvec2 res = global::windowDelegate.currentWindowSize();
         glm::dvec2 pos = glm::vec2(
-            listOfContactPoints.at(0).getScreenX(res.x),
-            listOfContactPoints.at(0).getScreenY(res.y)
+            _touchPoints[0].getLatestInput().getScreenX(res.x),
+            _touchPoints[0].getLatestInput().getScreenY(res.y)
         );
 
 #ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
@@ -158,8 +165,57 @@ void TouchModule::clearInputs() {
     _deferredRemovals.clear();
 }
 
+void TouchModule::addTouchInput(TouchInput input) {
+    _touchPoints.emplace_back(input);
+}
+
+void TouchModule::updateOrAddTouchInput(TouchInput input) {
+    for(TouchInputs& points : _touchPoints){
+        if(points.getFingerId() == input.fingerId
+            && points.getTouchDeviceId() == input.touchDeviceId){
+            //TODO: Move this:
+            if(input.timestamp - points.getLatestInput().timestamp < ONE_MS) {
+                return;
+            }
+            input.dx = input.x - points.getLatestInput().x;
+            input.dy = input.y - points.getLatestInput().y;
+            if(points.isMoving()){
+                points.addInput(input);
+            }else if(input.dx != 0.f || input.dy != 0.f){
+                points.addInput(input);
+            }
+            return;
+        }
+    }
+    _touchPoints.emplace_back(input);
+}
+
+void TouchModule::removeTouchInput(TouchInput input) {
+    _deferredRemovals.emplace_back(input);
+    //Check for "tap" gesture:
+    for(TouchInputs& points : _touchPoints) {
+        if(points.getFingerId() == input.fingerId
+            && points.getTouchDeviceId() == input.touchDeviceId) {
+            if(input.timestamp - points.getLatestInput().timestamp > ONE_MS){
+                points.addInput(input);
+            }
+            double totalTime = points.getGestureTime();
+            float totalDistance = points.getGestureDistance();
+            //Magic values taken from tuioear.cpp:
+            if(totalTime < 0.18 && totalDistance < 0.0004
+            && _touchPoints.size() == 1 && _deferredRemovals.size() == 1){
+                _tap = true;
+            }
+            return;
+        }
+    }
+    //TODO: ghoul assertions?
+    assert(!"Could not find touchpoint to delete!");
+}
+
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
+    , _ear(new TuioEar())
     , _tap(false)
 {
     addPropertySubOwner(_touch);
@@ -185,50 +241,15 @@ TouchModule::TouchModule()
 
     // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
     // thread so we don't need a mutex here
-    global::callback::touchDetected.push_back([&](TouchInput input)
-    {
-        _touchPoints.emplace_back(input);
-    });
+    global::callback::touchDetected.push_back(
+            std::bind(&TouchModule::addTouchInput, this, std::placeholders::_1));
 
-    global::callback::touchUpdated.push_back([&](TouchInput input) {
-        for(TouchInputs& points : _touchPoints){
-            if(points.getFingerId() == input.fingerId
-                && points.getTouchDeviceId() == input.touchDeviceId){
-                if(points.isMoving()){
-                    points.addInput(input);
-                }else if(input.dx != 0.f || input.dy != 0.f){
-                    points.addInput(input);
-                }
-                return;
-            }
-        }
-        //TODO: ghoul assertions?
-        assert(!"Touchpoint was updated but not in list");
-    });
+    global::callback::touchUpdated.push_back(
+            std::bind(&TouchModule::updateOrAddTouchInput, this, std::placeholders::_1));
 
-    global::callback::touchExit.push_back([&](TouchInput input){
-        //TODO: "Tap" gesture
-        _deferredRemovals.emplace_back(input);
+    global::callback::touchExit.push_back(
+            std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1));
 
-        //Check for "tap" gesture:
-        for(TouchInputs& points : _touchPoints) {
-            if(points.getFingerId() == input.fingerId
-               && points.getTouchDeviceId() == input.touchDeviceId) {
-
-                points.addInput(input);
-                double totalTime = points.getGestureTime();
-                float totalDistance = points.getGestureDistance();
-                //Magic values taken from tuioear.cpp:
-                if(totalTime < 0.18 && totalDistance < 0.0004
-                && _touchPoints.size() == 1 && _deferredRemovals.size() == 1){
-                    _tap = true;
-                }
-                return;
-            }
-        }
-        //TODO: ghoul assertions?
-        assert(!"Could not find touchpoint to delete!");
-    });
 
     global::callback::preSync.push_back([&]() {
         _touch.setCamera(global::navigationHandler.camera());

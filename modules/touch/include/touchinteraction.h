@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/touch/include/directinputsolver.h>
-#include <modules/touch/include/tuioear.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -38,6 +37,7 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 
+#include <chrono>
 #include <memory>
 
 //#define TOUCH_DEBUG_PROPERTIES
@@ -95,9 +95,6 @@ public:
      * 8 Evaluate if directControl should be called next frame- true if all contact points
      * select the same node and said node is larger than _nodeRadiusThreshold
     */
-    void updateStateFromInput(const std::vector<TUIO::TuioCursor>& list,
-        std::vector<Point>& lastProcessed);
-
 
     void updateStateFromInput(const std::vector<TouchInputs>& list,
         std::vector<TouchInput>& lastProcessed);
@@ -127,40 +124,32 @@ private:
     /* Returns true if the clicked position contains WebGui content and the event will
     * be parsed to the webbrowser
     */
-    bool webContent(const std::vector<TUIO::TuioCursor>& list);
     bool webContent(glm::dvec2 screenPosition);
 
     /* Returns true if we have the GUI window open. If so, emulates the incoming touch
      * input to a mouse such that we can interact with the GUI
      */
-    bool guiMode(const std::vector<TUIO::TuioCursor>& list);
     bool guiMode(glm::dvec2 screenPosition, size_t numFingers);
 
     /* Function that calculates the new camera state such that it minimizes the L2 error
      * in screenspace
      * between contact points and surface coordinates projected to clip space using LMA
      */
-    void directControl(const std::vector<TUIO::TuioCursor>& list);
     void directControl(const std::vector<TouchInputs>& list);
 
     /* Traces each contact point into the scene as a ray
      * if the ray hits a node, save the id, node and surface coordinates the cursor hit
      * in the list _selected
      */
-    void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
     void findSelectedNode(const std::vector<TouchInputs>& list);
 
     /* Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
      * depending on what input was gotten
      */
-    int interpretInteraction(const std::vector<TUIO::TuioCursor>& list,
-        const std::vector<Point>& lastProcessed);
     int interpretInteraction(const std::vector<TouchInputs>& list,
         const std::vector<TouchInput>& lastProcessed);
 
     // Compute new velocity according to the interpreted action
-    void computeVelocities(const std::vector<TUIO::TuioCursor>& list,
-        const std::vector<Point>& lastProcessed);
     void computeVelocities(const std::vector<TouchInputs>& list,
         const std::vector<TouchInput>& lastProcessed);
 
@@ -241,7 +230,7 @@ private:
     double _slerpdT;
     double _timeSlack;
     int _numOfTests;
-    TUIO::TuioTime _time;
+    std::chrono::milliseconds _time;
     bool _directTouchMode;
     bool _wasPrevModeDirectTouch;
     bool _tap;

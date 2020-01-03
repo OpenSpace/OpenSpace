@@ -30,14 +30,15 @@
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
 
+#include <memory>
 
 namespace openspace {
+    class TuioEar;
     #ifdef WIN32
     class Win32TouchHook;
     #endif //WIN32
 
     class TouchModule : public OpenSpaceModule {
-        using Point = std::pair<int, TUIO::TuioPoint>;
     public:
         TouchModule();
         ~TouchModule();
@@ -47,22 +48,26 @@ namespace openspace {
         * Returns true if new touch input occured since the last frame
         */
         bool processNewInput();
+
         /**
         * Checks if touchevent should be parsed to the webgui
         */
-        void processNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
+        void processNewWebInput();
 
         void clearInputs();
 
-        TuioEar _ear;
+        void addTouchInput(TouchInput input);
+        void updateOrAddTouchInput(TouchInput input);
+        void removeTouchInput(TouchInput input);
+
+        std::unique_ptr<TuioEar> _ear;
         TouchInteraction _touch;
         TouchMarker _markers;
-        std::vector<TUIO::TuioCursor> _listOfContactPoints;
         std::vector<TouchInputs> _touchPoints;
         std::vector<TouchInput> _deferredRemovals;
         std::vector<TouchInput> _lastTouchInputs;
-        // contains an id and the TuioPoint that was processed last frame
-        std::vector<Point> _lastProcessed;
+
+        // contains an id and the Point that was processed last frame
         glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
 #ifdef WIN32
         std::unique_ptr<Win32TouchHook> _win32TouchHook;

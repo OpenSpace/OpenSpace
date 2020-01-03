@@ -48,6 +48,8 @@
 #pragma clang diagnostic pop
 #endif // __clang__
 
+#include <openspace/util/touch.h>
+
 #include <ghoul/glm.h>
 
 #include <math.h>
@@ -56,13 +58,12 @@
 #include <numeric>
 #include <algorithm>
 
+namespace openspace {
 
 class TuioEar : public TUIO::TuioListener {
     public:
         TuioEar();
-        ~TuioEar() {
-            _tuioClient.disconnect();
-        }
+        ~TuioEar();
 
         /**
         * Callback functions, listens to the TUIO server
@@ -82,38 +83,19 @@ class TuioEar : public TUIO::TuioListener {
         void refresh(TUIO::TuioTime frameTime);
 
         /**
-        * Returns a list of all touch history that happened since the last frame
+        * Lock-swap the containers of this listener
         */
-        std::vector<TUIO::TuioCursor> getInput();
-
-        /**
-        * Returns true if a tap occured since the last frame
-        */
-        bool tap();
-
-        /**
-        * Returns tap's cursor coordinates and time information
-        */
-        TUIO::TuioCursor getTap();
-
-        /**
-        * Clears the input list, function called after getInput() each frame
-        */
-        void clearInput();
+        std::vector<TouchInput> takeInput();
+        std::vector<TouchInput> takeRemovals();
 
     private:
-        bool _tap = false;
-        TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
-        std::mutex _mx;
-
         TUIO::TuioClient _tuioClient;
 
-        std::vector<TUIO::TuioCursor> _list;
-
-        /**
-        * A list that tracks all of the cursor ID's that got removed since last frame
-        */
-        std::vector<long> _removeList;
+        std::vector<TouchInput> _inputList;
+        std::vector<TouchInput> _removalList;
+        std::mutex _mx;
 };
+
+}
 
 #endif // __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__

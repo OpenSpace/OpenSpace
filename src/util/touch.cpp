@@ -50,7 +50,6 @@ TouchInputs::TouchInputs(TouchInput input)
     , _fingerId(input.fingerId)
 {}
 
-
 void TouchInputs::addInput(const TouchInput &input) {
     _inputs.emplace_front(input);
     if(_inputs.size() > MAX_INPUTS){
@@ -77,7 +76,6 @@ float TouchInputs::getCurrentSpeed() const {
     //dt in seconds:
     double dt = currentInput.timestamp - previousInput.timestamp;
     float dist = sqrt(currentInput.dx*currentInput.dx + currentInput.dy*currentInput.dy);
-
     return dist / dt;
 }
 

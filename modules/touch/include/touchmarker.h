@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 
-#include <modules/touch/include/tuioear.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
@@ -55,11 +53,9 @@ public:
     void initialize();
     void deinitialize();
 
-    void render(const std::vector<TUIO::TuioCursor>& list);
     void render(const std::vector<openspace::TouchInputs>& list);
 
 private:
-    void createVertexList(const std::vector<TUIO::TuioCursor>& list);
     void createVertexList(const std::vector<openspace::TouchInputs>& list);
 
     properties::BoolProperty _visible;
@@ -67,7 +63,6 @@ private:
     properties::FloatProperty _transparency;
     properties::FloatProperty _thickness;
     properties::Vec3Property _color;
-    properties::Vec3Property _inhouseColor;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     UniformCache(radius, transparency, thickness, color) _uniformCache;
