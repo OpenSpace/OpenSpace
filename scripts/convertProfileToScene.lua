@@ -308,7 +308,7 @@ function generateAsset(T, fileOut)
   end
  
   --Asset section 
-  AssetStr = AssetStr.."asset.require('./base');\n"
+  AssetStr = AssetStr.."asset.require('base');\n"
   AssetStr = AssetStr.."local assetHelper = asset.require('util/asset_helper')\n"
   AssetStr = AssetStr.."local propertyHelper = asset.require('util/property_helper')\n"
   AssetStr = AssetStr.."local sceneHelper = asset.require('util/scene_helper')\n"
@@ -467,8 +467,7 @@ parsingSections = {
 profileFilename = openspace.profile.getFilename()
 profilePath = openspace.profile.getPath()
 
-profileIn = profilePath.."\\"..profileFilename
-assetOut  = profilePath.."\\"..profileFilename:match("^.+%.").."scene"
+assetOut  = profilePath..".scene"
 
-local resultTable = parseProfile(profileIn)
+local resultTable = parseProfile(profilePath)
 generateAsset(resultTable, assetOut)

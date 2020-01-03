@@ -362,7 +362,7 @@ Configuration loadConfigurationFromFile(const std::string& filename) {
     // created with that name, and also because the profile name will override
     // an asset name if both are provided.
     if (!result.profile.empty()) {
-        result.asset = result.profile;
+        result.asset = "../../temp/" + result.profile;
     }
 
     return result;

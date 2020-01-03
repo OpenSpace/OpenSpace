@@ -301,18 +301,24 @@ void OpenSpaceEngine::initialize() {
             global::configuration.profile));
         ghoul::lua::LuaState lState;
 
-        // Get path where .scene files reside. Need to add extra escape slashes to
-        // accomodate lua parser.
+        // Generate path to temp dir where output .scene file will reside.
+        // Needs to handle either windows (which seems to require double back-slashes)
+        // or unix path slashes.
         std::string outputScenePath = absPath("${TEMPORARY}");
-        std::string search = "\\";
-        std::string replace = "\\\\";
-        for (std::string::size_type i = outputScenePath.find(search);
-             i != std::string::npos;
-             i = outputScenePath.find(search, i))
-        {
-            outputScenePath.replace(i, search.length(), replace);
-            i += replace.length();
+        const std::string search = "\\";
+        const std::string replace = "\\\\";
+        if (outputScenePath.find(search) != std::string::npos) {
+            size_t start_pos = 0;
+            while((start_pos = outputScenePath.find(search, start_pos)) != std::string::npos) {
+                outputScenePath.replace(start_pos, search.length(), replace);
+                start_pos += replace.length();
+            }
+            outputScenePath.append(replace);
         }
+        else {
+            outputScenePath.append("/");
+        }
+        outputScenePath.append(global::configuration.profile);
 
         std::string setProfileFilenameInLuaState = fmt::format(R"(
             openspace = {{}}
