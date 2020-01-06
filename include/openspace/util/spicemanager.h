@@ -652,36 +652,6 @@ public:
         FieldOfViewMethod method, AberrationCorrection aberrationCorrection,
         double& ephemerisTime) const;
 
-    /**
-     * Determine whether a specific \p target is in the field-of-view of a specified
-     * \p instrument or an \p observer at a given time. The reference frame used is
-     * derived from the \p target by converting it into an \c IAU inertial reference
-     * frame.
-     *
-     * \param target The name or NAIF ID code string of the target
-     * \param observer The name or NAIF ID code string of the observer
-     * \param instrument The name or NAIF ID code string of the instrument
-     * \param method The type of shape model used for the target
-     * \param aberrationCorrection The aberration correction method
-     * \param ephemerisTime Time of the observation (seconds past J2000)
-     * \return \c true if the target is visible, \c false otherwise
-     *
-     * \throw SpiceException If the \p target or \p observer do not name valid
-     *        NAIF objects, the \p target or \p observer name the same NAIF object, the
-     *        \p instrument does not name a valid NAIF object, or insufficient kernel
-     *        information has been loaded.
-     * \pre \p target must not be empty.
-     * \pre \p observer must not be empty.
-     * \pre \p target and \p observer must not be different strings
-     * \pre \p referenceFrame must not be empty.
-     * \pre \p instrument must not be empty.
-     *
-     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/fovtrg_c.html
-     */
-    bool isTargetInFieldOfView(const std::string& target, const std::string& observer,
-        const std::string& instrument, FieldOfViewMethod method,
-        AberrationCorrection aberrationCorrection, double& ephemerisTime) const;
-
     /// Struct that is used as the return value from the #targetState method
     struct TargetStateResult {
         /// The target position
@@ -903,26 +873,6 @@ public:
         int numberOfTerminatorPoints);
 
     /**
-     * This function adds a frame to a body.
-     *
-     * \param body - the name of the body
-     * \param frame - the name of the frame
-     * \return false if the arguments are empty
-     *
-     * \todo I think this function should die ---abock
-     */
-    bool addFrame(std::string body, std::string frame);
-
-    /**
-     * This function returns the frame of a body if defined, otherwise it returns
-     * IAU_ + body (most frames are known by the International Astronomical Union)
-     * \param body - the name of the body
-     * \return  the frame of the body
-     * \todo I think this function should die ---abock
-     */
-    std::string frameFromBody(const std::string& body) const;
-
-    /**
      * Sets the SpiceManager's exception handling. If UseException::No is passed to this
      * function, all subsequent calls will not throw an error, but fail silently instead.
      * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.
@@ -1048,8 +998,6 @@ private:
     std::map<int, std::vector< std::pair<double, double>>> _spkIntervals;
     std::map<int, std::set<double>> _ckCoverageTimes;
     std::map<int, std::set<double>> _spkCoverageTimes;
-    // Vector of pairs: Body, Frame
-    std::vector<std::pair<std::string, std::string>> _frameByBody;
 
     /// Stores whether the SpiceManager throws exceptions (Yes) or fails silently (No)
     UseException _useExceptions = UseException::Yes;

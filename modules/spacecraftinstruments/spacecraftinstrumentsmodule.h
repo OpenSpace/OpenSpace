@@ -41,10 +41,16 @@ public:
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 
+    bool addFrame(std::string body, std::string frame);
+    std::string frameFromBody(const std::string& body);
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
     void internalDeinitializeGL() override;
+
+private:
+    std::vector<std::pair<std::string, std::string>> _frameByBody;
 };
 
 } // namespace openspace

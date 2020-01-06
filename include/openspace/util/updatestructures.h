@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___UPDATESTRUCTURES___H__
 
 #include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/time.h>
 
 namespace openspace {

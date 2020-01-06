@@ -28,11 +28,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
-
 #include <ghoul/logging/logmanager.h>
-
 #include <TUIO/TuioServer.h>
-
 #include <tchar.h>
 #include <tpcshrd.h>
 
@@ -42,7 +39,7 @@ namespace {
     bool gStarted{ false };
     TUIO::TuioServer* gTuioServer{ nullptr };
     std::unordered_map<UINT, TUIO::TuioCursor*> gCursorMap;
-}
+} // namespace
 
 namespace openspace {
 
@@ -69,22 +66,32 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                     // native touch to screen conversion
                     ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-                    float xPos = (float)p.x / (float)(rect.right - rect.left);
-                    float yPos = (float)p.y / (float)(rect.bottom - rect.top);
+                    float xPos = static_cast<float>(p.x) /
+                                 static_cast<float>(rect.right - rect.left);
+                    float yPos = static_cast<float>(p.y) /
+                                 static_cast<float>(rect.bottom - rect.top);
                     if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
                         // Handle new touchpoint
                         gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
-                        gCursorMap[pointerInfo.pointerId] = gTuioServer->addTuioCursor(xPos, yPos);
+                        gCursorMap[pointerInfo.pointerId] = gTuioServer->addTuioCursor(
+                            xPos,
+                            yPos
+                        );
                         gTuioServer->commitFrame();
                     }
                     else if (pointerInfo.pointerFlags & POINTER_FLAG_UPDATE) {
                         // Handle update of touchpoint
                         TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
-                        if (gCursorMap[pointerInfo.pointerId]->getTuioTime() == frameTime) {
+                        if (gCursorMap[pointerInfo.pointerId]->getTuioTime() == frameTime)
+                        {
                             break;
                         }
                         gTuioServer->initFrame(frameTime);
-                        gTuioServer->updateTuioCursor(gCursorMap[pointerInfo.pointerId], xPos, yPos);
+                        gTuioServer->updateTuioCursor(
+                            gCursorMap[pointerInfo.pointerId],
+                            xPos,
+                            yPos
+                        );
                         gTuioServer->commitFrame();
                     }
                     else if (pointerInfo.pointerFlags & POINTER_FLAG_UP) {
@@ -139,14 +146,23 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
     const DWORD dwHwndTabletProperty = TABLET_DISABLE_PRESSANDHOLD; 
 
     ATOM atom = ::GlobalAddAtom(MICROSOFT_TABLETPENSERVICE_PROPERTY);
-    ::SetProp(hWnd, MICROSOFT_TABLETPENSERVICE_PROPERTY, reinterpret_cast<HANDLE>(dwHwndTabletProperty));
+    ::SetProp(
+        hWnd,
+        MICROSOFT_TABLETPENSERVICE_PROPERTY,
+        reinterpret_cast<HANDLE>(dwHwndTabletProperty)
+    );
     ::GlobalDeleteAtom(atom);
 
     if (!gStarted) {
         gStarted = true;
         gTuioServer = new TUIO::TuioServer("localhost", 3333);
         TUIO::TuioTime::initSession();
-        gTouchHook = SetWindowsHookExW(WH_GETMESSAGE, HookCallback, GetModuleHandleW(NULL), GetCurrentThreadId());
+        gTouchHook = SetWindowsHookExW(
+            WH_GETMESSAGE,
+            HookCallback,
+            GetModuleHandleW(NULL),
+            GetCurrentThreadId()
+        );
         if (!gTouchHook) {
             LINFO(fmt::format("Failed to setup WindowsHook for touch input redirection"));
             delete gTuioServer;

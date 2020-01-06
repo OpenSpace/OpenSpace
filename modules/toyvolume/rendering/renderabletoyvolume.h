@@ -55,8 +55,11 @@ private:
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::Vec4Property _color;
+    properties::FloatProperty _downScaleVolumeRendering;
 
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;
+
+    int _rayCastSteps = 1000;
 };
 
 } // namespace openspace

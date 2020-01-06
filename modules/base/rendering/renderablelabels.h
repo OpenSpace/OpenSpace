@@ -22,17 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLELABELS___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLELABELS___H__
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec4property.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
+namespace ghoul::filesystem { class File; }
+namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -40,16 +46,18 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class Sphere;
 struct RenderData;
 struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
-class RenderableSphere : public Renderable {
-public:
-    RenderableSphere(const ghoul::Dictionary& dictionary);
+struct LinePoint;
 
+class RenderableLabels : public Renderable {
+public:
+    RenderableLabels(const ghoul::Dictionary& dictionary);
+
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -60,34 +68,67 @@ public:
 
     static documentation::Documentation Documentation();
 
+    void setLabelText(const std::string & newText);
+
+protected:
+    properties::OptionProperty _blendMode;
+
 private:
-    void loadTexture();
+    enum Unit {
+        Meter = 0,
+        Kilometer,
+        Megameter,
+        Gigameter,
+        AU,
+        Terameter,
+        Petameter,
+        Parsec,
+        Kiloparsec,
+        Megaparsec,
+        Gigaparsec,
+        GigalightYears
+    };
 
-    properties::StringProperty _texturePath;
-    properties::OptionProperty _orientation;
+    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
+    float changedPerlinSmoothStepFunc(float x, float startX, float endX) const;
+    
+    float linearSmoothStepFunc(float x, float startX, float endX, float sUnit,
+        float eUnit) const;
 
-    properties::BoolProperty _mirrorTexture;
-    properties::BoolProperty _useAdditiveBlending;
-    properties::BoolProperty _disableFadeInDistance;
-    properties::BoolProperty _backgroundRendering;
+    float getUnit(int unit) const;
 
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
+    properties::Vec4Property _labelColor;
+    properties::FloatProperty _labelSize;
+    properties::FloatProperty _fontSize;
+    properties::FloatProperty _labelMinSize;
+    properties::FloatProperty _labelMaxSize;
+    properties::BoolProperty _pixelSizeControl;
+    properties::BoolProperty _enableFadingEffect;
+    properties::StringProperty _labelText;
+    properties::FloatProperty _fadeStartDistance;
+    properties::FloatProperty _fadeEndDistance;
+    properties::FloatProperty _fadeStartSpeed;
+    properties::FloatProperty _fadeEndSpeed;
 
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    properties::OptionProperty _labelOrientationOption;
+    properties::OptionProperty _fadeStartUnitOption;
+    properties::OptionProperty _fadeEndUnitOption;
 
-    std::unique_ptr<Sphere> _sphere;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 
-    UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
-        _mirrorTexture) _uniformCache;
+    std::string _speckFile;
+    std::string _colorMapFile;
+    std::string _labelFile;
+    std::string _colorOptionString;
+    std::string _datavarSizeOptionString;
 
-    bool _sphereIsDirty = false;
+    // Data may require some type of transformation prior the spice transformation being
+    // applied.
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLELABELS___H__

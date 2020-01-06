@@ -72,13 +72,16 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
     , _reload(ReloadInfo)
 {
-    if (dictionary.hasKey(KeyIdentifier)) {
-        setIdentifier(dictionary.value<std::string>(KeyIdentifier));
-    } else {
-        static int id = 0;
-        setIdentifier("ScreenSpaceBrowser " + std::to_string(id));
-        ++id;
+
+    std::string identifier;
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
     }
+    else {
+        identifier = "ScreenSpaceBrowser";
+    }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(identifier);
 
     if (dictionary.hasKeyAndValue<std::string>(UrlInfo.identifier)) {
         _url = dictionary.value<std::string>(UrlInfo.identifier);

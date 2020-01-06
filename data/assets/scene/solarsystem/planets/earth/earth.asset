@@ -1,7 +1,7 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require('./earth_textures').TexturesPath
-local labelsPath = asset.require('./earth_labels').LabelsPath
+local labelsPath = asset.require('./earth_globelabels').LabelsPath
 
 asset.request('./trail')
 
@@ -287,6 +287,45 @@ local Earth = {
     }
 }
 
+local EarthLabel = {
+    Identifier = "EarthLabel",
+    Parent = Earth.Identifier,
+    -- Transform = {
+    --     Translation = {
+    --         Type = "SpiceTranslation",
+    --         Target = "EARTH",
+    --         Observer = "EARTH BARYCENTER"
+    --     },
+    --     -- Rotation = {
+    --     --     Type = "SpiceRotation",
+    --     --     SourceFrame = "IAU_MOON",
+    --     --     DestinationFrame = "GALACTIC"
+    --     -- }
+    -- },
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Earth",
+        FontSize = 100.0,
+        LabelSize = 8.6,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        EnableFading = true,
+        FadeStartUnit = "au",
+        FadeStartDistance = 1.5,
+        FadeStartSpeed = 1.0,
+        FadeEndUnit = "au",
+        FadeEndDistance = 15.0,
+        FadeEndSpeed = 25.0
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Earth Label",
+        Path = "/Solar System/Planets/Earth"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Earth })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Earth, EarthLabel })

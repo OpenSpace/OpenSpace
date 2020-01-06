@@ -22,22 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
-#define __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#ifndef __OPENSPACE_CORE___SPHERE___H__
+#define __OPENSPACE_CORE___SPHERE___H__
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-class PowerScaledSphere;
-
-class PowerScaledSphere {
+class Sphere {
 public:
-    PowerScaledSphere(float radius, int segments = 8);
-    PowerScaledSphere(glm::vec3 radius, int segments);
-    PowerScaledSphere(const PowerScaledSphere& cpy);
-    ~PowerScaledSphere();
+    Sphere(float radius, int segments = 8);
+    Sphere(glm::vec3 radius, int segments);
+    Sphere(const Sphere& cpy);
+    ~Sphere();
 
     bool initialize();
 
@@ -62,4 +60,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#endif // __OPENSPACE_CORE___SPHERE___H__

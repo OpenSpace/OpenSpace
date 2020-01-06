@@ -206,8 +206,6 @@ namespace {
             wrap(elevation, -glm::pi<float>(), glm::pi<float>())
         );
     }
-
-
 } // namespace
 
 namespace openspace {
@@ -312,6 +310,27 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
         renderableType,
         dictionary
     );
+}
+
+std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
+    std::vector<ScreenSpaceRenderable*> r = global::renderEngine.screenSpaceRenderables();
+
+    auto nameTaken = [&r](const std::string& name) {
+        bool nameTaken = std::any_of(
+            r.begin(),
+            r.end(),
+            [&name](ScreenSpaceRenderable* r) { return r->identifier() == name; }
+        );
+        return nameTaken;
+    };
+
+    std::string baseName = name;
+    int i = 1;
+    while (nameTaken(name)) {
+        name = baseName + std::to_string(i);
+        i++;
+    }
+    return name;
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)

@@ -24,41 +24,10 @@
 
 #version __CONTEXT__
 
-#include "hdr.glsl"
-
-#define HSV_COLOR 0u
-#define HSL_COLOR 1u
-
-layout (location = 0) out vec4 finalColor;
-
-uniform float hdrExposure;
-uniform float blackoutFactor;
-uniform float gamma;
-uniform float Hue;
-uniform float Saturation;
-uniform float Value;
-uniform float Lightness;
-
-uniform sampler2D hdrFeedingTexture;
-
-in vec2 texCoord;
+layout(location = 0) in vec4 position;
+out vec2 texCoord;
 
 void main() {
-    vec4 color = texture(hdrFeedingTexture, texCoord);
-    color.rgb *= blackoutFactor;
-    
-    // Applies TMO
-    vec3 tColor = toneMappingOperator(color.rgb, hdrExposure);
-    
-    // Color control
-    vec3 hsvColor = rgb2hsv(tColor);
-    hsvColor.x = (hsvColor.x + Hue);
-    if (hsvColor.x > 360.0) {
-        hsvColor -= 360.0;
-    }
-    hsvColor.y = clamp(hsvColor.y * Saturation, 0.0, 1.0);
-    hsvColor.z = clamp(hsvColor.z * Value, 0.0, 1.0);
-
-    // Gamma Correction
-    finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
+    texCoord = 0.5 + position.xy * 0.5;
+    gl_Position = position;
 }

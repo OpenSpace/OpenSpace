@@ -93,24 +93,15 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
         "ScreenSpaceSpout"
     );
 
-    int iIdentifier = 0;
-    if (_identifier.empty()) {
-        static int id = 0;
-        iIdentifier = id;
-
-        if (iIdentifier == 0) {
-            setIdentifier("ScreenSpaceSpout");
-        }
-        else {
-            setIdentifier("ScreenSpaceSpout" + std::to_string(iIdentifier));
-        }
-        ++id;
+    std::string identifier;
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
     }
-
-    if (_guiName.empty()) {
-        // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("ScreenSpaceSpout " + std::to_string(iIdentifier));
+    else {
+        identifier = "ScreenSpaceSpout";
     }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(std::move(identifier));
 
     if (dictionary.hasKey(NameInfo.identifier)) {
         _spoutName = dictionary.value<std::string>(NameInfo.identifier);
