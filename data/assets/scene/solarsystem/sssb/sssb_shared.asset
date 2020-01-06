@@ -22,10 +22,8 @@ function downloadSssbDatabaseFile(sceneAsset, url, name)
 end
 
 local registerSssbGroupObjects = function(containingAsset, filename, sssbFolder, shouldAddDuplicates)
-    --local filename = group.Url:match("([^/]+)$")
     local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
-    --local path = sssbFolder .. "/" .. filename
-    local trailColor = { 0.75, 0.75, 0.35 }
+    local trailColor = { 0.75, 0.1, 0.1 }
 
     function numLinesInFile(filename)
         local ctr = 0
@@ -40,9 +38,9 @@ local registerSssbGroupObjects = function(containingAsset, filename, sssbFolder,
            Renderable = {
                 Type = "RenderableSmallBody",
                 Path = file,
-                Segments = 160,
-                Color = color,
-                Fade = 0.5
+                Segments = 200,
+                Color = trailColor,
+                Fade = 0.5,
             },
             GUI = {
                 Path = "/Solar System/sssb"

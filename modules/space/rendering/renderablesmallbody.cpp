@@ -224,7 +224,6 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
     , _nSegments(SegmentsInfo)
-    , _lineFade(FadeInfo)
 
 {
     documentation::testSpecificationAndThrow(
@@ -235,16 +234,25 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
 
     _path = dictionary.value<std::string>(PathInfo.identifier);
     _nSegments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
 
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+    }
+    if (dictionary.hasKeyAndValue<double>("FadeInfo")) {
+        _appearance.lineFade = static_cast<float>(
+            dictionary.value<double>("FadeInfo")
+        );
+    }
+    else {
+        _appearance.lineFade = 20;
     }
 
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
-    addProperty(_lineFade);
+    addProperty(_opacity);
+
+    setRenderBin(Renderable::RenderBin::Overlay);
 }
    
     
@@ -265,75 +273,129 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
 
     std::string line;
     std::string name;
-    std::string ignore;
-    std::streamoff csvLine;
+    std::string field;
+    std::streamoff csvLine = -1;
+    int fieldCount = 0;
+    const std::string expectedHeaderLine =
+        "full_name,neo,pha,diameter,epoch_cal,e,a,i,om,w,ma,per";
 
     try {
         std::getline(file, line); // get rid of first line (header)
+        numberOfLines -= 1;
+        if (line.compare(expectedHeaderLine) != 0) {
+            LERROR(fmt::format(
+                "File {} does not have the appropriate JPL SBDB header at line 1.",
+                filename
+            ));
+            file.close();
+            return;
+        }
+
         for (csvLine = 0; csvLine < numberOfLines; csvLine++) {
+            fieldCount = 0;
             KeplerParameters keplerElements;
             // Object designator string
             std::getline(file, name, ',');
+            fieldCount++;
 
             // (Ignore object status for NEO, PHA, diameter)
-            std::getline(file, ignore, ',');
-            std::getline(file, ignore, ',');
-            std::getline(file, ignore, ',');
+            std::getline(file, field, ',');
+            std::getline(file, field, ',');
+            std::getline(file, field, ',');
+            fieldCount += 3;
 
             // Epoch
-            std::getline(file, ignore, ',');
-            keplerElements.epoch = epochFromYMDdSubstring(ignore);
+            if (!std::getline(file, field, ',')) {
+                throw std::invalid_argument("Unable to read epoch from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.epoch = epochFromYMDdSubstring(field);
+            fieldCount++;
 
             // Eccentricity (unit-less)
-            std::getline(file, ignore, ',');
-            keplerElements.eccentricity = std::stod(ignore);
+            if (!std::getline(file, field, ',')) {
+                throw std::invalid_argument("Unable to read eccentricity from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.eccentricity = std::stod(field);
+            fieldCount++;
 
             // Semi-major axis (astronomical units - au)
-            std::getline(file, ignore, ',');
-            keplerElements.semiMajorAxis = std::stod(ignore);
+            if (!std::getline(file, field, ',')) {
+                throw std::invalid_argument("Unable to read semi-major axis from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.semiMajorAxis = std::stod(field);
             keplerElements.semiMajorAxis *= convertAuToKm;
+            fieldCount++;
 
             // Inclination (degrees)
-            std::getline(file, ignore, ',');
-            keplerElements.inclination = std::stod(ignore);
+            if (!std::getline(file, field, ',')) {
+                throw std::invalid_argument("Unable to read inclination from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.inclination = std::stod(field);
+            fieldCount++;
 
             // Longitude of ascending node (degrees)
-            std::getline(file, ignore, ',');
-            keplerElements.ascendingNode = std::stod(ignore);
+            if (!std::getline(file, field, ',')) {
+                throw std::invalid_argument("Unable to read ascending node from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.ascendingNode = std::stod(field);
+            fieldCount++;
 
             // Argument of Periapsis (degrees)
-            std::getline(file, ignore, ',');
-            keplerElements.argumentOfPeriapsis = std::stod(ignore);
+            if (!std::getline(file, field, ',')) {
+                throw std::invalid_argument("Unable to read arg of periapsis from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.argumentOfPeriapsis = std::stod(field);
+            fieldCount++;
 
             // Mean Anomaly (degrees)
-            std::getline(file, ignore, ',');
-            keplerElements.meanAnomaly = std::stod(ignore);
+            if (!std::getline(file, field, ',')) {
+                throw std::invalid_argument("Unable to read mean anomaly from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.meanAnomaly = std::stod(field);
+            fieldCount++;
 
             // Period (days)
-            std::getline(file, ignore);
-            keplerElements.period = std::stod(ignore);
+            if (!std::getline(file, field)) {
+                throw std::invalid_argument("Unable to read period from line"
+                    + std::to_string(csvLine + 1));
+            }
+            keplerElements.period = std::stod(field);
             keplerElements.period *= convertDaysToSecs;
+            fieldCount++;
 
             _sbData.push_back(keplerElements);
             _sbNames.push_back(name);
         }
     }
     catch (std::invalid_argument&) {
+        const char* errMsg = "Unable to convert field {} to double value "\
+            "(invalid_argument exception) at line {}/{} of {}";
         LERROR(fmt::format(
-            "invalid_argument exception on line {}/{} of {}",
-            csvLine + 1, numberOfLines, filename
+            errMsg,
+            fieldCount, csvLine + 1, numberOfLines, filename
         ));
     }
     catch (std::out_of_range&) {
+        const char* errMsg = "Unable to convert field {} to double value "\
+            "(out_of_range exception) at line {}/{} of {}";
         LERROR(fmt::format(
-            "out_of_range exception on line {}/{} of {}",
-            csvLine + 1, numberOfLines, filename
+            errMsg,
+            fieldCount, csvLine + 1, numberOfLines, filename
         ));
     }
     catch (std::ios_base::failure&) {
+        const char* errMsg = "File read exception (ios_base::failure) while trying "\
+            "to read field {} at line {}/{} of {}";
         LERROR(fmt::format(
-            "ios_base::failure exception on line {}/{} of {}",
-            csvLine + 1, numberOfLines, filename
+            errMsg,
+            fieldCount, csvLine + 1, numberOfLines, filename
         ));
     }
 
@@ -401,10 +463,12 @@ void RenderableSmallBody::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelView,
         data.camera.combinedViewMatrix() * modelTransform
     );
+    // Because we want the property to work similar to the planet trails
+    float fade = static_cast<float>(pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.0));
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    _programObject->setUniform(_uniformCache.lineFade, fade);
 
     glLineWidth(_appearance.lineWidth);
 
@@ -483,7 +547,7 @@ void RenderableSmallBody::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)0); // stride : 4*sizeof(GL_FLOAT) + 2*sizeof(GL_DOUBLE)
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4*sizeof(GL_FLOAT)) );

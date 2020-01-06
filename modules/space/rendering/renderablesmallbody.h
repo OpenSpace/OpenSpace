@@ -115,8 +115,6 @@ private:
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
 
-    properties::DoubleProperty _lineFade;
-
     RenderableTrail::Appearance _appearance;
 
     glm::vec3 _position;
