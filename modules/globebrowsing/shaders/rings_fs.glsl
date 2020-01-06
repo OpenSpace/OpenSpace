@@ -34,7 +34,6 @@ uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
 uniform float transparency;
 
-uniform bool hasSunPosition;
 uniform vec3 sunPosition;
 uniform float _nightFactor;
 uniform int nShadowSamples;

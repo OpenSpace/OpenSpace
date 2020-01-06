@@ -910,6 +910,15 @@ void RenderableGlobe::update(const UpdateData& data) {
         _layerManager.reset();
         _debugProperties.resetTileProviders = false;
     }
+
+    if (_hasRings) {
+        _ringsComponent.update(data);
+    }
+
+    if (_hasShadows) {
+        _shadowComponent.update(data);
+    }
+
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
     _nUploadedTiles = _layerManager.update();
 #else
