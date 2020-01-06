@@ -22,42 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scene.h>
+#ifndef __OPENSPACE_CORE___SPHERE___H__
+#define __OPENSPACE_CORE___SPHERE___H__
 
-#include <openspace/util/powerscaledcoordinate.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
-class PowerscaleCoordinatesTest : public testing::Test {
-protected:
-    PowerscaleCoordinatesTest() {
-    }
+namespace openspace {
 
-    ~PowerscaleCoordinatesTest() {
-    }
+class Sphere {
+public:
+    Sphere(float radius, int segments = 8);
+    Sphere(glm::vec3 radius, int segments);
+    Sphere(const Sphere& cpy);
+    ~Sphere();
 
-    void reset() {
-    }
+    bool initialize();
 
-    openspace::Scene* scenegraph;
+    void render();
+
+//private:
+    struct Vertex {
+        GLfloat location[4];
+        GLfloat tex[2];
+        GLfloat normal[3];
+    };
+
+    GLuint _vaoID = 0;
+    GLuint _vBufferID = 0;
+    GLuint _iBufferID = 0;
+
+    unsigned int _isize;
+    unsigned int _vsize;
+    Vertex* _varray;
+    int* _iarray;
 };
 
+} // namespace openspace
 
-TEST_F(PowerscaleCoordinatesTest, psc) {
-
-    openspace::psc reference(2.f, 1.f, 1.1f, 1.f);
-    
-    openspace::psc first(1.f, 0.f, 1.f, 0.f);
-    openspace::psc second(1.9f, 1.f, 1.f, 1.f);
-    
-    EXPECT_EQ(reference, first + second);
-    EXPECT_TRUE(reference == (first + second));
-    
-    openspace::psc third = first;
-    first[0] = 0.0;
-    
-    EXPECT_TRUE(third != first);
-    
-    
-}
-
-
-
+#endif // __OPENSPACE_CORE___SPHERE___H__

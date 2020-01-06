@@ -103,7 +103,9 @@ void CefWebGuiModule::startOrStopGui() {
                 new GUIKeyboardHandler
             );
             _instance->initialize();
-            _instance->loadUrl(_url);
+            if (!_url.value().empty()) {
+                _instance->loadUrl(_url);
+            }
         }
         if (_visible) {
             webBrowserModule->attachEventHandler(_instance.get());

@@ -24,7 +24,6 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
 #include <vector>

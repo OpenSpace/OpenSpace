@@ -101,17 +101,17 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
         iIdentifier = id;
 
         if (iIdentifier == 0) {
-            setIdentifier("ScreenSpaceSpout");
+            setIdentifier("RenderablePlaneSpout");
         }
         else {
-            setIdentifier("ScreenSpaceSpout" + std::to_string(iIdentifier));
+            setIdentifier("RenderablePlaneSpout" + std::to_string(iIdentifier));
         }
         ++id;
     }
 
     if (_guiName.empty()) {
         // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("ScreenSpaceSpout " + std::to_string(iIdentifier));
+        setGuiName("RenderablePlaneSpout " + std::to_string(iIdentifier));
     }
 
     if (dictionary.hasKey(NameInfo.identifier)) {

@@ -29,6 +29,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -151,7 +152,6 @@ namespace {
             return 0.5 * bisect(p1, half, testFunction, half);
         }
     }
-
 } // namespace
 
 namespace openspace {
@@ -294,7 +294,10 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(KeyFrameConversions)) {
         ghoul::Dictionary fc = dictionary.value<ghoul::Dictionary>(KeyFrameConversions);
         for (const std::string& key : fc.keys()) {
-            openspace::SpiceManager::ref().addFrame(key, fc.value<std::string>(key));
+            global::moduleEngine.module<SpacecraftInstrumentsModule>()->addFrame(
+                key,
+                fc.value<std::string>(key)
+            );
         }
     }
 
@@ -524,7 +527,12 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
     {
         const bool convert = (ref.find("IAU_") == std::string::npos);
         if (convert) {
-            return { SpiceManager::ref().frameFromBody(target), true };
+            return {
+                global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(
+                    target
+                ),
+                true
+            };
         }
         else {
             return { ref, false };
@@ -917,6 +925,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
         bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
             pt,
             _instrument.spacecraft,
+            global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(pt),
             _instrument.name,
             SpiceManager::FieldOfViewMethod::Ellipsoid,
             _instrument.aberrationCorrection,

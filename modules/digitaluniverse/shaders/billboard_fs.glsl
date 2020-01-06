@@ -35,18 +35,23 @@ uniform sampler2D spriteTexture;
 uniform bool hasColorMap;
 uniform float fadeInValue;
 
-Fragment getFragment() {      
-   
+Fragment getFragment() {
     vec4 textureColor = texture(spriteTexture, texCoord);
     
+    if (textureColor.a == 0.f || gs_colorMap.a == 0.f || ta == 0.f || fadeInValue == 0.f)
+    {
+        discard;
+    }
+
     vec4 fullColor = vec4(1.0);
     
     if (hasColorMap) {
         fullColor = vec4(
-            gs_colorMap.rgb * textureColor.rgb, 
+            gs_colorMap.rgb * textureColor.rgb,
             gs_colorMap.a * textureColor.a * alphaValue
-            );
-    } else {
+        );
+    }
+    else {
         fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a * alphaValue);
     }
 
@@ -58,14 +63,13 @@ Fragment getFragment() {
     }
 
     Fragment frag;
-    frag.color      = fullColor;
-    frag.depth      = vs_screenSpaceDepth;
+    frag.color = fullColor;
+    frag.depth = vs_screenSpaceDepth;
     // Setting the position of the billboards to not interact 
     // with the ATM.
-    frag.gPosition  = vec4(-1e32, -1e32, -1e32, 1.0);
-    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gPosition = vec4(-1e32, -1e32, -1e32, 1.0);
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
     //frag.disableLDR2HDR = true;
-
 
     return frag;
 }

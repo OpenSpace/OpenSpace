@@ -308,7 +308,6 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
     , _nSegments(SegmentsInfo, 120, 4, 1024)
-
 {
     documentation::testSpecificationAndThrow(
          Documentation(),
@@ -322,6 +321,14 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     }
+    if (dictionary.hasKeyAndValue<double>("FadeInfo")) {
+        _appearance.lineFade = static_cast<float>(
+            dictionary.value<double>("FadeInfo")
+        );
+    }
+    else {
+        _appearance.lineFade = 20;
+    }
 
     auto reinitializeTrailBuffers = [this]() {
         initializeGL();
@@ -333,6 +340,9 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
+    addProperty(_opacity);
+
+    setRenderBin(Renderable::RenderBin::Overlay);
 }
    
     
@@ -475,7 +485,6 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
 
     updateBuffers();
-    setRenderBin(Renderable::RenderBin::Overlay);
 }
     
 void RenderableSatellites::deinitializeGL() {
@@ -514,9 +523,12 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
         data.camera.combinedViewMatrix() * modelTransform
     );
 
+    // Because we want the property to work similar to the planet trails
+    float fade = static_cast<float>(pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.0));
+
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    _programObject->setUniform(_uniformCache.lineFade, fade);
 
     glLineWidth(_appearance.lineWidth);
 
@@ -595,10 +607,10 @@ void RenderableSatellites::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)0); // stride : 4*sizeof(GL_FLOAT) + 2*sizeof(GL_DOUBLE)
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout),  nullptr);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4*sizeof(GL_FLOAT)) );
+    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4 * sizeof(GL_FLOAT)));
 
 
     glBindVertexArray(0);

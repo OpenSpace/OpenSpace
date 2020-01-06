@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/sphere.h>
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <ghoul/logging/logmanager.h>
 #include <cstring>
 
@@ -34,12 +33,12 @@ namespace {
 
 namespace openspace {
 
-PowerScaledSphere::PowerScaledSphere(float radius, int segments)
-    : PowerScaledSphere(glm::vec3(radius), segments)
+Sphere::Sphere(float radius, int segments)
+    : Sphere(glm::vec3(radius), segments)
 {}
 
 // Alternative Constructor for using accurate triaxial ellipsoid
-PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
+Sphere::Sphere(glm::vec3 radius, int segments)
     : _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
@@ -110,7 +109,7 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
     }
 }
 
-PowerScaledSphere::PowerScaledSphere(const PowerScaledSphere& cpy)
+Sphere::Sphere(const Sphere& cpy)
     : _vaoID(cpy._vaoID)
     , _vBufferID(cpy._vBufferID)
     , _iBufferID(cpy._iBufferID)
@@ -125,7 +124,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledSphere& cpy)
     std::memcpy(_iarray, cpy._iarray, _isize * sizeof(int));
 }
 
-PowerScaledSphere::~PowerScaledSphere() {
+Sphere::~Sphere() {
     delete[] _varray;
     delete[] _iarray;
 
@@ -137,7 +136,7 @@ PowerScaledSphere::~PowerScaledSphere() {
     glDeleteVertexArrays(1, &_vaoID);
 }
 
-bool PowerScaledSphere::initialize() {
+bool Sphere::initialize() {
     // Initialize and upload to graphics card
     if (_vaoID == 0) {
         glGenVertexArrays(1, &_vaoID);
@@ -197,7 +196,7 @@ bool PowerScaledSphere::initialize() {
     return true;
 }
 
-void PowerScaledSphere::render() {
+void Sphere::render() {
     glBindVertexArray(_vaoID);  // select first VAO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, nullptr);
