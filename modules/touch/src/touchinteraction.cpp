@@ -696,8 +696,6 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputs>& list,
             lastProcessed.begin(),
             lastProcessed.end(),
             [&inputs](const TouchInput& input) {
-                //TODO: Is this the requested ID of this function?
-                //Or should we check for fingerId
                 return input.fingerId == inputs.getFingerId();
         });
 

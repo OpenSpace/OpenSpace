@@ -138,7 +138,6 @@ bool TouchModule::updateOrAddTouchInput(TouchInput input) {
     for(TouchInputs& points : _touchPoints){
         if(points.getFingerId() == input.fingerId
             && points.getTouchDeviceId() == input.touchDeviceId){
-            //TODO: Move this:
             if(input.timestamp - points.getLatestInput().timestamp < ONE_MS) {
                 return false;
             }

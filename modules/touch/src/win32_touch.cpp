@@ -168,7 +168,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
         LINFO("No windowhandle available for touch input.");
         return;
     }
-    //TODO: Remove?
+
     //HACK: This hack is required as long as our GLFW version is based on the touch
     //branch. There is no convenient way to set a GLFWBool (uint32_t) which sets the state
     //of touch-to-mouseinput interpretation. It happens to be 116 bytes into an internal
@@ -194,7 +194,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
     }
 
     // This should be needed, but we seem to receive messages even without it,
-    // probably a Win7+ behaviour
+    // this ought to be part to the older (< win8) windows touch-api.
     // Also - RegisterTouchWindow enables Windows gestures, which we don't want
     // since they produce visual feedback for "press-and-tap" etc.
     // RegisterTouchWindow(hWnd, TWF_FINETOUCH | TWF_WANTPALM);
