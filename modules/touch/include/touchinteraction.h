@@ -121,10 +121,6 @@ public:
     void setCamera(Camera* camera);
 
 private:
-    /* Returns true if the clicked position contains WebGui content and the event will
-    * be parsed to the webbrowser
-    */
-    bool webContent(glm::dvec2 screenPosition);
 
     /* Returns true if we have the GUI window open. If so, emulates the incoming touch
      * input to a mouse such that we can interact with the GUI

@@ -192,30 +192,84 @@ void EventHandler::initialize() {
             return false;
         }
     );
-}
 
-void EventHandler::touchPressCallback(const double x, const double y) {
-    if (_browserInstance) {
-        _mousePosition.x = static_cast<float>(x);
-        _mousePosition.y = static_cast<float>(y);
+    global::callback::touchDetected.emplace_back(
+        [&](TouchInput input) -> bool {
+            if(!_browserInstance) return false;
 
-        int clickCount = BrowserInstance::SingleClick;
-        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false, clickCount);
-    }
-}
+            glm::vec2 windowPos = input.getCurrentWindowCoordinates();
+            if(!_browserInstance->hasContent(static_cast<int>(windowPos.x),
+                                            static_cast<int>(windowPos.y))){
+                return false;
+            }
 
-void EventHandler::touchReleaseCallback(const double x, const double y) {
-    if (_browserInstance) {
-        _mousePosition.x = static_cast<float>(x);
-        _mousePosition.y = static_cast<float>(y);
+            if(_validTouchStates.empty()) {
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = true;
+                _browserInstance->sendMouseClickEvent(mouseEvent(),
+                                                        MBT_LEFT,
+                                                        false,
+                                                        BrowserInstance::SingleClick);
+                _validTouchStates.emplace_back(input);
+            }else {
+                _validTouchStates.emplace_back(input);
+            }
+            return true;
+        }
+    );
 
-        int clickCount = BrowserInstance::SingleClick;
-        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true, clickCount);
-    }
-}
+    global::callback::touchUpdated.emplace_back(
+        [&](TouchInput input) -> bool {
+            if(!_browserInstance) return false;
+            if(_validTouchStates.empty()) return false;
 
-bool EventHandler::hasContentCallback(const double x, const double y) {
-    return _browserInstance->hasContent(static_cast<int>(x), static_cast<int>(y));
+            auto found = std::find_if( _validTouchStates.begin(),
+                                        _validTouchStates.end(),
+                                        [&](const TouchInput& state){
+                                            return state.fingerId == input.fingerId &&
+                                            state.touchDeviceId == input.touchDeviceId;
+                                        });
+
+            if(found == _validTouchStates.begin()) {
+                glm::vec2 windowPos = input.getCurrentWindowCoordinates();
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = true;
+                _browserInstance->sendMouseMoveEvent(mouseEvent());
+                return true;
+            }else if(found != _validTouchStates.end()){
+                return true;
+            }
+            return false;
+        }
+    );
+
+    global::callback::touchExit.emplace_back(
+        [&](TouchInput input) {
+            if(!_browserInstance) return;
+            if(_validTouchStates.empty()) return;
+            auto found = std::find_if( _validTouchStates.begin(),
+                                        _validTouchStates.end(),
+                                        [&](const TouchInput& state){
+                                            return state.fingerId == input.fingerId &&
+                                            state.touchDeviceId == input.touchDeviceId;
+                                        });
+            if(found == _validTouchStates.end()) return;
+
+            _validTouchStates.erase(found);
+            if(_validTouchStates.empty()) {
+                glm::vec2 windowPos = input.getCurrentWindowCoordinates();
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = false;
+                _browserInstance->sendMouseClickEvent(mouseEvent(),
+                                                        MBT_LEFT,
+                                                        true,
+                                                        BrowserInstance::SingleClick);
+            }
+        }
+    );
 }
 
 bool EventHandler::mouseButtonCallback(MouseButton button,

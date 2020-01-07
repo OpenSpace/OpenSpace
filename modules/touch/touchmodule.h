@@ -42,6 +42,8 @@ namespace openspace {
     public:
         TouchModule();
         ~TouchModule();
+    protected:
+        void internalInitialize(const ghoul::Dictionary& dictionary) override;
 
     private:
         /**
@@ -49,15 +51,10 @@ namespace openspace {
         */
         bool processNewInput();
 
-        /**
-        * Checks if touchevent should be parsed to the webgui
-        */
-        void processNewWebInput();
-
         void clearInputs();
 
-        void addTouchInput(TouchInput input);
-        void updateOrAddTouchInput(TouchInput input);
+        bool addTouchInput(TouchInput input);
+        bool updateOrAddTouchInput(TouchInput input);
         void removeTouchInput(TouchInput input);
 
         std::unique_ptr<TuioEar> _ear;
@@ -72,7 +69,7 @@ namespace openspace {
 #ifdef WIN32
         std::unique_ptr<Win32TouchHook> _win32TouchHook;
 #endif //WIN32
-        bool _tap;
+        bool _tap = false;
     };
 
 } // namespace openspace

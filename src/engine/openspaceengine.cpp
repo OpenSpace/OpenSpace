@@ -1297,13 +1297,19 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
 
 void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
     for (const auto& func : global::callback::touchDetected) {
-        func(input);
+        bool isConsumed = func(input);
+        if(isConsumed) {
+            return;
+        }
     }
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
     for(const auto& func : global::callback::touchUpdated) {
-        func(input);
+        bool isConsumed = func(input);
+        if(isConsumed) {
+            return;
+        }
     }
 }
 

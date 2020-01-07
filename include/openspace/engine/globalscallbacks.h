@@ -54,8 +54,8 @@ std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>& gMouseB
 std::vector<std::function<void(double, double)>>& gMousePosition();
 std::vector<std::function<bool(double, double)>>& gMouseScrollWheel();
 
-std::vector<std::function<void(TouchInput)>>& gTouchDetected();
-std::vector<std::function<void(TouchInput)>>& gTouchUpdated();
+std::vector<std::function<bool(TouchInput)>>& gTouchDetected();
+std::vector<std::function<bool(TouchInput)>>& gTouchUpdated();
 std::vector<std::function<void(TouchInput)>>& gTouchExit();
 
 } // namespace detail
@@ -81,9 +81,9 @@ static std::vector<std::function<void(double, double)>>& mousePosition =
     detail::gMousePosition();
 static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
     detail::gMouseScrollWheel();
-static std::vector<std::function<void(TouchInput)>>& touchDetected =
+static std::vector<std::function<bool(TouchInput)>>& touchDetected =
     detail::gTouchDetected();
-static std::vector<std::function<void(TouchInput)>>& touchUpdated =
+static std::vector<std::function<bool(TouchInput)>>& touchUpdated =
     detail::gTouchUpdated();
 static std::vector<std::function<void(TouchInput)>>& touchExit =
     detail::gTouchExit();

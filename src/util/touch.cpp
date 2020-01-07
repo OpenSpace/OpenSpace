@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #define _USE_MATH_DEFINES
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/touch.h>
 #include <cmath>
 
@@ -35,6 +37,11 @@ TouchInput::TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y)
 
 glm::vec2 TouchInput::getScreenCoordinates(glm::vec2 resolution) const {
     return {std::floor(x * resolution.x + 0.5f), std::floor(y * resolution.y + 0.5f)};
+}
+
+glm::vec2 TouchInput::getCurrentWindowCoordinates() const {
+    glm::vec2 res = global::windowDelegate.currentWindowSize();
+    return {std::floor(x * res.x + 0.5f), std::floor(y * res.y + 0.5f)};
 }
 
 float TouchInput::getDistanceToPos(float otherX, float otherY) const {

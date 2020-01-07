@@ -26,7 +26,6 @@
 #include <modules/touch/include/tuioear.h>
 #include <modules/touch/include/win32_touch.h>
 
-#include <modules/webgui/webguimodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
@@ -40,10 +39,6 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-#include <modules/webbrowser/webbrowsermodule.h>
-#endif
 
 using namespace TUIO;
 namespace {
@@ -89,9 +84,6 @@ bool TouchModule::processNewInput() {
         return true;
     }
 
-    // Check if we need to parse touchevent to the webgui
-    processNewWebInput();
-
     // Return true if we got new input
     if (_touchPoints.size() == _lastTouchInputs.size() &&
         !_touchPoints.empty())
@@ -123,31 +115,6 @@ bool TouchModule::processNewInput() {
     }
 }
 
-void TouchModule::processNewWebInput() {
-    bool isWebPositionCallbackZero =
-        (_webPositionCallback.x == 0 && _webPositionCallback.y == 0);
-    bool isSingleContactPoint = (_touchPoints.size() == 1);
-    if (isSingleContactPoint && isWebPositionCallbackZero) {
-        glm::fvec2 res = global::windowDelegate.currentWindowSize();
-        glm::dvec2 pos = _touchPoints[0].getLatestInput().getScreenCoordinates(res);
-
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-        WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
-        if (module.eventHandler().hasContentCallback(pos.x, pos.y)) {
-            _webPositionCallback = glm::vec2(pos.x, pos.y);
-            module.eventHandler().touchPressCallback(pos.x, pos.y);
-        }
-    }
-    // Send mouse release if not same point input
-    else if (!isSingleContactPoint && !isWebPositionCallbackZero) {
-        WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
-        module.eventHandler().touchReleaseCallback(_webPositionCallback.x,
-            _webPositionCallback.y);
-        _webPositionCallback = glm::vec2(0, 0);
-#endif
-    }
-}
-
 void TouchModule::clearInputs() {
     for(const auto& input : _deferredRemovals) {
         for(TouchInputs& points : _touchPoints) {
@@ -162,17 +129,18 @@ void TouchModule::clearInputs() {
     _deferredRemovals.clear();
 }
 
-void TouchModule::addTouchInput(TouchInput input) {
+bool TouchModule::addTouchInput(TouchInput input) {
     _touchPoints.emplace_back(input);
+    return true;
 }
 
-void TouchModule::updateOrAddTouchInput(TouchInput input) {
+bool TouchModule::updateOrAddTouchInput(TouchInput input) {
     for(TouchInputs& points : _touchPoints){
         if(points.getFingerId() == input.fingerId
             && points.getTouchDeviceId() == input.touchDeviceId){
             //TODO: Move this:
             if(input.timestamp - points.getLatestInput().timestamp < ONE_MS) {
-                return;
+                return false;
             }
             input.dx = input.x - points.getLatestInput().x;
             input.dy = input.y - points.getLatestInput().y;
@@ -181,10 +149,11 @@ void TouchModule::updateOrAddTouchInput(TouchInput input) {
             }else if(input.dx != 0.f || input.dy != 0.f){
                 points.addInput(input);
             }
-            return;
+            return true;
         }
     }
     _touchPoints.emplace_back(input);
+    return true;
 }
 
 void TouchModule::removeTouchInput(TouchInput input) {
@@ -206,28 +175,34 @@ void TouchModule::removeTouchInput(TouchInput input) {
             return;
         }
     }
-    //TODO: ghoul assertions?
-    assert(!"Could not find touchpoint to delete!");
 }
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
-    , _ear(new TuioEar())
-    , _tap(false)
+    , _ear(nullptr)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
+}
+
+TouchModule::~TouchModule() {
+    //intentionally left empty
+}
+
+
+void TouchModule::internalInitialize(const ghoul::Dictionary& dictionary){
+    _ear.reset(new TuioEar());
 
     global::callback::initializeGL.push_back([&]() {
         LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
-    // We currently only support one window of touch input internally
-    // so here we grab the first window-handle and use it.
-    void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
-    if (nativeWindowHandle) {
-        _win32TouchHook.reset(new Win32TouchHook(nativeWindowHandle));
-    }
+        // We currently only support one window of touch input internally
+        // so here we grab the first window-handle and use it.
+        void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
+        if (nativeWindowHandle) {
+            _win32TouchHook.reset(new Win32TouchHook(nativeWindowHandle));
+        }
 #endif
     });
 
@@ -276,11 +251,6 @@ TouchModule::TouchModule()
     global::callback::render.push_back([&]() {
         _markers.render(_touchPoints);
     });
-
-}
-
-TouchModule::~TouchModule() {
-    //intentionally left empty
 }
 
 } // namespace openspace

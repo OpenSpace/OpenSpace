@@ -36,6 +36,7 @@ namespace openspace {
 struct TouchInput {
     TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y);
     glm::vec2 getScreenCoordinates(glm::vec2 resolution) const;
+    glm::vec2 getCurrentWindowCoordinates() const;
     float getDistanceToPos(float otherX, float otherY) const;
     float getAngleToPos(float otherX, float otherY) const;
 

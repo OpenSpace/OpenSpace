@@ -49,9 +49,6 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #endif
 
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-#include <modules/webbrowser/webbrowsermodule.h>
-#endif
 
 #include <cmath>
 #include <numeric>
@@ -393,7 +390,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputs>& list
     //Code for lower-right corner double-tap to zoom-out
     glm::fvec2 res = global::windowDelegate.currentWindowSize();
     glm::fvec2 pos = list[0].getLatestInput().getScreenCoordinates(res);
-    bool hasWebContent = webContent(pos);
 
     const float bottomCornerSizeForZoomTap_fraction = 0.08f;
     int zoomTapThresholdX = static_cast<int>(
@@ -413,7 +409,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputs>& list
     }
 
     size_t numFingers = list.size();
-    if (!guiMode(pos, numFingers) && !hasWebContent) {
+    if (!guiMode(pos, numFingers)) {
         bool isThisFrameTransitionBetweenTouchModes
             = (_wasPrevModeDirectTouch != _directTouchMode);
         if (isThisFrameTransitionBetweenTouchModes) {
@@ -448,14 +444,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputs>& list
     }
 }
 
-bool TouchInteraction::webContent(const glm::dvec2 screenPosition) {
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-    WebBrowserModule* module = global::moduleEngine.module<WebBrowserModule>();
-    return module->eventHandler().hasContentCallback(screenPosition.x, screenPosition.y);
-#else
-    return false;
-#endif
-}
 
 bool TouchInteraction::guiMode(glm::dvec2 screenPosition, size_t numFingers) {
     if (_ignoreGui) {

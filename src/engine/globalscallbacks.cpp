@@ -96,13 +96,13 @@ std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
     return g;
 }
 
-std::vector<std::function<void(TouchInput)>>& gTouchDetected() {
-    static std::vector<std::function<void(TouchInput)>> g;
+std::vector<std::function<bool(TouchInput)>>& gTouchDetected() {
+    static std::vector<std::function<bool(TouchInput)>> g;
     return g;
 }
 
-std::vector<std::function<void(TouchInput)>>& gTouchUpdated() {
-    static std::vector<std::function<void(TouchInput)>> g;
+std::vector<std::function<bool(TouchInput)>>& gTouchUpdated() {
+    static std::vector<std::function<bool(TouchInput)>> g;
     return g;
 }
 
