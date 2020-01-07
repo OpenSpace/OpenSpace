@@ -1299,8 +1299,6 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
     for (const auto& func : global::callback::touchDetected) {
         func(input);
     }
-
-    global::navigationHandler.touchEntered(input);
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
