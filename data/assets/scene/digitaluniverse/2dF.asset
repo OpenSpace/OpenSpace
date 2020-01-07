@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
     Name = "2dF Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_2dF_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({
@@ -24,7 +24,7 @@ local object = {
         Color = { 1.0, 1.0, 1.0 },
         Opacity = 1.0,
         File = speck .. "/2dF.speck",
-        Texture = textures .. "/point3.png",
+        Texture = textures .. "/point3A.png",
         ColorMap = speck .. "/2dF.cmap",
         ColorOption = { "redshift", "proximity" },
         ColorRange = { { 0.0, 0.075 }, { 1.0, 25.0 } },

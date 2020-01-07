@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/RenderableLabels.h>
+#include <modules/base/rendering/renderablelabels.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>

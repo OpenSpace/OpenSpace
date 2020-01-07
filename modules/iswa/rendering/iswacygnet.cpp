@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
@@ -157,12 +156,13 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
     }
     transform = transform * _rotation;
 
-    psc position =
+    glm::vec4 pposition =
         static_cast<glm::vec4>(glm::dvec4(data.modelTransform.translation, 0.0)) +
         transform * glm::vec4(
             _data.spatialScale.x * _data.offset,
             _data.spatialScale.w
         );
+    glm::vec3 position = glm::vec3(pposition) * pow(10.f, pposition.w);
 
     // Activate shader
     _shader->activate();
@@ -173,7 +173,7 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("ModelTransform", transform);
 
     _shader->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
-    _shader->setUniform("objpos", glm::vec4(position.vec3(), 0.f));
+    _shader->setUniform("objpos", glm::vec4(position, 0.f));
     _shader->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
     _shader->setUniform("scaling", glm::vec2(1.f, 0.f));
 
