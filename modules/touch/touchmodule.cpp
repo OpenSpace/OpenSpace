@@ -72,8 +72,8 @@ bool TouchModule::processNewInput() {
                          return std::find_if(
                                     _touchPoints.begin(),
                                     _touchPoints.end(),
-                                    [&input](const TouchInputs& inputs) {
-                                      return input.fingerId == inputs.getFingerId();
+                                    [&input](const TouchInputHolder& holder) {
+                                      return holder.holdsInput(input);
                                     }) == _touchPoints.end();
                        }),
         _lastTouchInputs.end());
@@ -95,14 +95,14 @@ bool TouchModule::processNewInput() {
             _lastTouchInputs.begin(),
             _lastTouchInputs.end(),
             [this, &newInput](TouchInput& input) {
-                std::vector<TouchInputs>::iterator inputs = std::find_if(
+                std::vector<TouchInputHolder>::iterator holder = std::find_if(
                     _touchPoints.begin(),
                     _touchPoints.end(),
-                    [&input](const TouchInputs& ins) {
-                        return ins.getFingerId() == input.fingerId;
+                    [&input](const TouchInputHolder& inputHolder) {
+                        return inputHolder.holdsInput(input);
                     }
             );
-            if (inputs->getCurrentSpeed() == 0.0) {
+            if (holder->getCurrentSpeed() == 0.0) {
                  // if current cursor isn't moving, we want to interpret that as new input
                  // for interaction purposes
                 newInput = true;
@@ -117,10 +117,9 @@ bool TouchModule::processNewInput() {
 
 void TouchModule::clearInputs() {
     for(const auto& input : _deferredRemovals) {
-        for(TouchInputs& points : _touchPoints) {
-            if(points.getFingerId() == input.fingerId
-                && points.getTouchDeviceId() == input.touchDeviceId) {
-                points = std::move(_touchPoints.back());
+        for(TouchInputHolder& inputHolder : _touchPoints) {
+            if(inputHolder.holdsInput(input)) {
+                inputHolder = std::move(_touchPoints.back());
                 _touchPoints.pop_back();
                 break;
             }
@@ -135,19 +134,9 @@ bool TouchModule::addTouchInput(TouchInput input) {
 }
 
 bool TouchModule::updateOrAddTouchInput(TouchInput input) {
-    for(TouchInputs& points : _touchPoints){
-        if(points.getFingerId() == input.fingerId
-            && points.getTouchDeviceId() == input.touchDeviceId){
-            if(input.timestamp - points.getLatestInput().timestamp < ONE_MS) {
-                return false;
-            }
-            input.dx = input.x - points.getLatestInput().x;
-            input.dy = input.y - points.getLatestInput().y;
-            if(points.isMoving()){
-                points.addInput(input);
-            }else if(input.dx != 0.f || input.dy != 0.f){
-                points.addInput(input);
-            }
+    for(TouchInputHolder& inputHolder : _touchPoints) {
+        if(inputHolder.holdsInput(input)){
+            inputHolder.tryAddInput(input);
             return true;
         }
     }
@@ -158,16 +147,13 @@ bool TouchModule::updateOrAddTouchInput(TouchInput input) {
 void TouchModule::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
     //Check for "tap" gesture:
-    for(TouchInputs& points : _touchPoints) {
-        if(points.getFingerId() == input.fingerId
-            && points.getTouchDeviceId() == input.touchDeviceId) {
-            if(input.timestamp - points.getLatestInput().timestamp > ONE_MS){
-                points.addInput(input);
-            }
-            double totalTime = points.getGestureTime();
-            float totalDistance = points.getGestureDistance();
+    for(TouchInputHolder& inputHolder : _touchPoints) {
+        if(inputHolder.holdsInput(input)) {
+            inputHolder.tryAddInput(input);
+            double totalTime = inputHolder.getGestureTime();
+            float totalDistance = inputHolder.getGestureDistance();
             //Magic values taken from tuioear.cpp:
-            if(totalTime < 0.18 && totalDistance < 0.0004
+            if(totalTime < 0.18 && totalDistance < 0.0004f
             && _touchPoints.size() == 1 && _deferredRemovals.size() == 1){
                 _tap = true;
             }
@@ -189,7 +175,7 @@ TouchModule::~TouchModule() {
 }
 
 
-void TouchModule::internalInitialize(const ghoul::Dictionary& dictionary){
+void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     _ear.reset(new TuioEar());
 
     global::callback::initializeGL.push_back([&]() {
@@ -236,7 +222,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dictionary){
 
         // update lastProcessed
         _lastTouchInputs.clear();
-        for(const TouchInputs& points : _touchPoints) {
+        for(const TouchInputHolder& points : _touchPoints) {
             _lastTouchInputs.emplace_back(points.getLatestInput());
         }
         // used to save data from solver, only calculated for one frame when user chooses

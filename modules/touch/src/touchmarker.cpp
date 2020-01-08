@@ -118,7 +118,7 @@ void TouchMarker::deinitialize() {
     }
 }
 
-void TouchMarker::render(const std::vector<openspace::TouchInputs>& list) {
+void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
     if (_visible && !list.empty()) {
         createVertexList(list);
         _shader->activate();
@@ -139,13 +139,13 @@ void TouchMarker::render(const std::vector<openspace::TouchInputs>& list) {
     }
 }
 
-void TouchMarker::createVertexList(const std::vector<openspace::TouchInputs>& list) {
+void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder>& list) {
     _vertexData.resize(list.size() * 2);
 
     int i = 0;
-    for (const openspace::TouchInputs& points : list) {
-        _vertexData[i] = 2 * (points.getLatestInput().x - 0.5f);
-        _vertexData[i + 1] = -2 * (points.getLatestInput().y - 0.5f);
+    for (const openspace::TouchInputHolder& inputHolder : list) {
+        _vertexData[i] = 2 * (inputHolder.getLatestInput().x - 0.5f);
+        _vertexData[i + 1] = -2 * (inputHolder.getLatestInput().y - 0.5f);
         i += 2;
     }
 

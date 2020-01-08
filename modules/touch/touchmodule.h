@@ -60,7 +60,7 @@ namespace openspace {
         std::unique_ptr<TuioEar> _ear;
         TouchInteraction _touch;
         TouchMarker _markers;
-        std::vector<TouchInputs> _touchPoints;
+        std::vector<TouchInputHolder> _touchPoints;
         std::vector<TouchInput> _deferredRemovals;
         std::vector<TouchInput> _lastTouchInputs;
 

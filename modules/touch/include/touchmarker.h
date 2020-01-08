@@ -53,10 +53,10 @@ public:
     void initialize();
     void deinitialize();
 
-    void render(const std::vector<openspace::TouchInputs>& list);
+    void render(const std::vector<openspace::TouchInputHolder>& list);
 
 private:
-    void createVertexList(const std::vector<openspace::TouchInputs>& list);
+    void createVertexList(const std::vector<openspace::TouchInputHolder>& list);
 
     properties::BoolProperty _visible;
     properties::FloatProperty _radiusSize;

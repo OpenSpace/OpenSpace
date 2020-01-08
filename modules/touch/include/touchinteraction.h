@@ -66,8 +66,6 @@ private:
 
 class TouchInteraction : public properties::PropertyOwner {
 public:
-    using Point = std::pair<int, TUIO::TuioPoint>;
-
     TouchInteraction();
 
     // for interpretInteraction()
@@ -96,7 +94,7 @@ public:
      * select the same node and said node is larger than _nodeRadiusThreshold
     */
 
-    void updateStateFromInput(const std::vector<TouchInputs>& list,
+    void updateStateFromInput(const std::vector<TouchInputHolder>& list,
         std::vector<TouchInput>& lastProcessed);
 
     // Calculates the new camera state with velocities and time since last frame
@@ -131,22 +129,22 @@ private:
      * in screenspace
      * between contact points and surface coordinates projected to clip space using LMA
      */
-    void directControl(const std::vector<TouchInputs>& list);
+    void directControl(const std::vector<TouchInputHolder>& list);
 
     /* Traces each contact point into the scene as a ray
      * if the ray hits a node, save the id, node and surface coordinates the cursor hit
      * in the list _selected
      */
-    void findSelectedNode(const std::vector<TouchInputs>& list);
+    void findSelectedNode(const std::vector<TouchInputHolder>& list);
 
     /* Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
      * depending on what input was gotten
      */
-    int interpretInteraction(const std::vector<TouchInputs>& list,
+    int interpretInteraction(const std::vector<TouchInputHolder>& list,
         const std::vector<TouchInput>& lastProcessed);
 
     // Compute new velocity according to the interpreted action
-    void computeVelocities(const std::vector<TouchInputs>& list,
+    void computeVelocities(const std::vector<TouchInputHolder>& list,
         const std::vector<TouchInput>& lastProcessed);
 
     //Compute velocity based on double-tap for zooming

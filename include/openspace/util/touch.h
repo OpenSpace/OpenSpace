@@ -34,9 +34,10 @@
 namespace openspace {
 
 struct TouchInput {
-    TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y);
+    TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
     glm::vec2 getScreenCoordinates(glm::vec2 resolution) const;
     glm::vec2 getCurrentWindowCoordinates() const;
+    bool isMoving() const;
     float getDistanceToPos(float otherX, float otherY) const;
     float getAngleToPos(float otherX, float otherY) const;
 
@@ -49,12 +50,17 @@ struct TouchInput {
     double timestamp; // timestamp in seconds from global touch initialization
 };
 
-class TouchInputs {
+class TouchInputHolder {
 public:
-    TouchInputs(TouchInput input);
+    TouchInputHolder(TouchInput input);
 
-    void addInput(const TouchInput &input);
+    // tryAddInput:
+    // Succeeds upon a different input than last.
+    // Fails upon a too similar input as last.
+    bool tryAddInput(TouchInput input);
     void clearInputs();
+
+    bool holdsInput(const TouchInput &input) const;
 
     const size_t getTouchDeviceId() const;
     const size_t getFingerId() const;

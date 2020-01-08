@@ -201,73 +201,9 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
     }
 }
 
-bool DirectInputSolver::solve(const std::vector<TUIO::TuioCursor>& list, 
+bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
                               const std::vector<SelectedBody>& selectedBodies,
-                              std::vector<double>* parameters, const Camera& camera) 
-{
-    int nFingers = std::min(static_cast<int>(list.size()), 3);
-    _nDof = std::min(nFingers * 2, 6);
-
-    // Parse input data to be used in the LM algorithm
-    std::vector<glm::dvec3> selectedPoints;
-    std::vector<glm::dvec2> screenPoints;
-
-    for (int i = 0; i < nFingers; ++i) {
-        const SelectedBody& sb = selectedBodies.at(i);
-        selectedPoints.push_back(sb.coordinates);
-        screenPoints.emplace_back(
-            2 * (list[i].getX() - 0.5),
-            -2 * (list[i].getY() - 0.5)
-        );
-
-        // This might be needed when we're directing the touchtable from another screen?
-        //    std::vector<TuioCursor>::const_iterator c = std::find_if(
-        //        list.begin(),
-        //        list.end(),
-        //        [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; }
-        //    );
-        //    if (c != list.end()) {
-        //        // normalized -1 to 1 coordinates on screen
-        //        screenPoints.emplace_back(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5));
-        //    }
-        //    else {
-        //        global::moduleEngine.module<ImGUIModule>()->touchInput = {
-        //            true,
-        //            glm::dvec2(0.0, 0.0),
-        //            1
-        //        };
-        //        resetAfterInput();
-        //        return;
-        //    }
-    }
-
-    FunctionData fData = {
-        selectedPoints,
-        screenPoints,
-        _nDof,
-        &camera,
-        selectedBodies.at(0).node,
-        _lmstat
-    };
-    void* dataPtr = reinterpret_cast<void*>(&fData);
-
-    bool result = levmarq(
-        _nDof,
-        parameters->data(),
-        static_cast<int>(screenPoints.size()),
-        nullptr,
-        distToMinimize,
-        gradient,
-        dataPtr,
-        &_lmstat
-    );
-
-    return result;
-}
-
-bool DirectInputSolver::solve(const std::vector<TouchInputs>& list, 
-                              const std::vector<SelectedBody>& selectedBodies,
-                              std::vector<double>* parameters, const Camera& camera) 
+                              std::vector<double>* parameters, const Camera& camera)
 {
     int nFingers = std::min(static_cast<int>(list.size()), 3);
     _nDof = std::min(nFingers * 2, 6);
@@ -283,26 +219,6 @@ bool DirectInputSolver::solve(const std::vector<TouchInputs>& list,
             2 * (list[i].getLatestInput().x - 0.5),
             -2 * (list[i].getLatestInput().y - 0.5)
         );
-
-        // This might be needed when we're directing the touchtable from another screen?
-        //    std::vector<TuioCursor>::const_iterator c = std::find_if(
-        //        list.begin(),
-        //        list.end(),
-        //        [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; }
-        //    );
-        //    if (c != list.end()) {
-        //        // normalized -1 to 1 coordinates on screen
-        //        screenPoints.emplace_back(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5));
-        //    }
-        //    else {
-        //        global::moduleEngine.module<ImGUIModule>()->touchInput = {
-        //            true,
-        //            glm::dvec2(0.0, 0.0),
-        //            1
-        //        };
-        //        resetAfterInput();
-        //        return;
-        //    }
     }
 
     FunctionData fData = {

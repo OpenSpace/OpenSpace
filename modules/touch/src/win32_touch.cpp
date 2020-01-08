@@ -46,7 +46,7 @@ namespace {
     HHOOK gMouseHook{ nullptr };
     bool gStarted{ false };
     std::chrono::microseconds gStartTime{ 0 };
-    std::unordered_map<UINT32, std::unique_ptr<openspace::TouchInputs>> gTouchInputsMap;
+    std::unordered_map<UINT32, std::unique_ptr<openspace::TouchInputHolder>> gTouchInputsMap;
 #ifdef ENABLE_TUIOMESSAGES
     TUIO::TuioServer* gTuioServer{ nullptr };
     std::unordered_map<UINT, TUIO::TuioCursor*> gCursorMap;
@@ -92,14 +92,14 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                         reinterpret_cast<size_t>(pointerInfo.sourceDevice),
                         static_cast<size_t>(pointerInfo.pointerId),
                         xPos,
-                        yPos
+                        yPos,
+                        static_cast<double>(timestamp.count())/1'000'000.0
                     );
-                touchInput.timestamp = static_cast<double>(timestamp.count())/1'000'000.0;
 
                 if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
-                    std::unique_ptr<TouchInputs> points(new TouchInputs(touchInput));
-                    gTouchInputsMap.emplace(pointerInfo.pointerId, std::move(points));
 #ifdef ENABLE_DIRECTMSG
+                    std::unique_ptr<TouchInputHolder> points(new TouchInputHolder(touchInput));
+                    gTouchInputsMap.emplace(pointerInfo.pointerId, std::move(points));
                     global::openSpaceEngine.touchDetectionCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
@@ -114,15 +114,14 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 }
                 else if (pointerInfo.pointerFlags & POINTER_FLAG_UPDATE) {
                     // Handle update of touchpoint
-                    TouchInputs* points = gTouchInputsMap[pointerInfo.pointerId].get();
-
-                    const TouchInput& lastInput = points->getLatestInput();
-                    touchInput.dx = touchInput.x - lastInput.x;
-                    touchInput.dy = touchInput.y - lastInput.y;
-
-                    points->addInput(touchInput);
 #ifdef ENABLE_DIRECTMSG
-                    global::openSpaceEngine.touchUpdateCallback(points->getLatestInput());
+                    TouchInputHolder* points =
+                                            gTouchInputsMap[pointerInfo.pointerId].get();
+
+                    if(points->tryAddInput(touchInput)){
+                        global::openSpaceEngine.touchUpdateCallback(
+                                                                points->getLatestInput());
+                    }
 #endif
 #ifdef ENABLE_TUIOMESSAGES
                     TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
@@ -141,9 +140,9 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 }
                 else if (pointerInfo.pointerFlags & POINTER_FLAG_UP) {
 #ifdef ENABLE_DIRECTMSG
+                    gTouchInputsMap.erase(pointerInfo.pointerId);
                     global::openSpaceEngine.touchExitCallback(touchInput);
 #endif
-                    gTouchInputsMap.erase(pointerInfo.pointerId);
 #ifdef ENABLE_TUIOMESSAGES
                     // Handle removed touchpoint
                     gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());

@@ -27,7 +27,6 @@
 
 #include <openspace/util/touch.h>
 #include <modules/touch/ext/levmarq.h>
-#include <modules/touch/ext/libTUIO11/TUIO/TuioCursor.h>
 #include <vector>
 
 
@@ -47,10 +46,7 @@ public:
     };
 
     DirectInputSolver();
-    bool solve(const std::vector<TUIO::TuioCursor>& list,
-        const std::vector<SelectedBody>& selectedBodies,
-        std::vector<double>* calculatedValues, const Camera& camera);
-    bool solve(const std::vector<TouchInputs>& list,
+    bool solve(const std::vector<TouchInputHolder>& list,
         const std::vector<SelectedBody>& selectedBodies,
         std::vector<double>* calculatedValues, const Camera& camera);
     int getNDof() const;
