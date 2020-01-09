@@ -608,8 +608,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
                               glm::vec4(node->worldPosition(), 1.0);
             glm::dvec2 ndc = clip / clip.w;
 
-            // If the object is not in the screen, we dont want to consider it at all
-            if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0) {
+            bool isVisibleX = (ndc.x >= -1.0 && ndc.x <= 1.0);
+            bool isVisibleY = (ndc.y >= -1.0 && ndc.y <= 1.0);
+            if (isVisibleX && isVisibleY) {
                 glm::dvec2 cursor = { xCo, yCo };
 
                 double ndcDist = glm::length(ndc - cursor);
@@ -676,20 +677,20 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
     // see if the distance between fingers changed - used in pan interpretation
     double dist = 0;
     double lastDist = 0;
-    TouchInput input = list[0].getLatestInput();
+    TouchInput distInput = list[0].getLatestInput();
     for (const TouchInputHolder& inputHolder : list) {
         const TouchInput& latestInput = inputHolder.getLatestInput();
         dist += glm::length(
             glm::dvec2(latestInput.x, latestInput.y) -
-            glm::dvec2(input.x, input.y)
+            glm::dvec2(distInput.x, distInput.y)
         );
-        input = latestInput;
+        distInput = latestInput;
     }
-    TouchInput point = lastProcessed[0];
+    distInput = lastProcessed[0];
     for (const TouchInput& p : lastProcessed) {
         lastDist += glm::length(glm::dvec2(p.x, p.y) -
-                    glm::dvec2(point.x, point.y));
-        point = p;
+                    glm::dvec2(distInput.x, distInput.y));
+        distInput = p;
     }
     // find the slowest moving finger - used in roll interpretation
     double minDiff = 1000;
@@ -772,9 +773,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
         return ROT;
     }
     else {
-        float avgDistance = static_cast<float>(
-            std::abs(dist - lastDist) / list[0].getCurrentSpeed()
-        );
+        float avgDistance = static_cast<float>(std::abs(dist - lastDist));
         // if average distance between 3 fingers are constant we have panning
         if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
             return PAN;

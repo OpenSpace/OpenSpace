@@ -89,12 +89,12 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                                 static_cast<float>(rect.bottom - rect.top);
 
                 openspace::TouchInput touchInput(
-                        reinterpret_cast<size_t>(pointerInfo.sourceDevice),
-                        static_cast<size_t>(pointerInfo.pointerId),
-                        xPos,
-                        yPos,
-                        static_cast<double>(timestamp.count())/1'000'000.0
-                    );
+                    reinterpret_cast<size_t>(pointerInfo.sourceDevice),
+                    static_cast<size_t>(pointerInfo.pointerId),
+                    xPos,
+                    yPos,
+                    static_cast<double>(timestamp.count())/1'000'000.0
+                );
 
                 if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
 #ifdef ENABLE_DIRECTMSG
@@ -118,7 +118,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                     TouchInputHolder* points =
                                             gTouchInputsMap[pointerInfo.pointerId].get();
 
-                    if(points->tryAddInput(touchInput)){
+                    if (points->tryAddInput(touchInput)) {
                         global::openSpaceEngine.touchUpdateCallback(
                                                                 points->getLatestInput());
                     }

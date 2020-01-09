@@ -45,8 +45,8 @@ void TuioEar::removeTuioObject(TuioObject*) { }
 void TuioEar::addTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     TouchInput input(size_t(tcur->getTuioSourceID()),
-                     size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
-                     double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
+        size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
+        double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
     _inputList.emplace_back(input);
     _mx.unlock();
 }
@@ -54,8 +54,8 @@ void TuioEar::addTuioCursor(TuioCursor* tcur) {
 void TuioEar::updateTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     TouchInput input(size_t(tcur->getTuioSourceID()),
-                     size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
-                     double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
+        size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
+        double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
     _inputList.emplace_back(input);
     _mx.unlock();
 }
@@ -64,8 +64,8 @@ void TuioEar::updateTuioCursor(TuioCursor* tcur) {
 void TuioEar::removeTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     TouchInput input(size_t(tcur->getTuioSourceID()),
-                     size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
-                     double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
+        size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
+        double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
     _removalList.emplace_back(input);
     _mx.unlock();
 }

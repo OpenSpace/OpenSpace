@@ -65,7 +65,6 @@ public:
     const size_t getTouchDeviceId() const;
     const size_t getFingerId() const;
 
-    float getCurrentSpeed() const;
     float getSpeedX() const;
     float getSpeedY() const;
 

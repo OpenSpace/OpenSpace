@@ -67,18 +67,22 @@ bool TouchModule::processNewInput() {
 
     // Erase old input id's that no longer exists
     _lastTouchInputs.erase(
-        std::remove_if(_lastTouchInputs.begin(), _lastTouchInputs.end(),
-                       [this](const TouchInput& input) {
-                         return std::find_if(
-                                    _touchPoints.begin(),
-                                    _touchPoints.end(),
-                                    [&input](const TouchInputHolder& holder) {
-                                      return holder.holdsInput(input);
-                                    }) == _touchPoints.end();
-                       }),
-        _lastTouchInputs.end());
+        std::remove_if(
+            _lastTouchInputs.begin(),
+            _lastTouchInputs.end(),
+            [this](const TouchInput& input) {
+                return std::find_if(
+                    _touchPoints.begin(),
+                    _touchPoints.end(),
+                    [&input](const TouchInputHolder& holder) {
+                        return holder.holdsInput(input);
+                    }) == _touchPoints.end();
+            }
+        ),
+        _lastTouchInputs.end()
+    );
 
-    if(_tap) {
+    if (_tap) {
         _touch.tap();
         _tap = false;
         return true;
@@ -102,9 +106,7 @@ bool TouchModule::processNewInput() {
                         return inputHolder.holdsInput(input);
                     }
             );
-            if (holder->getCurrentSpeed() == 0.0) {
-                 // if current cursor isn't moving, we want to interpret that as new input
-                 // for interaction purposes
+            if (!holder->isMoving()) {
                 newInput = true;
             }
         });
@@ -118,7 +120,7 @@ bool TouchModule::processNewInput() {
 void TouchModule::clearInputs() {
     for(const auto& input : _deferredRemovals) {
         for(TouchInputHolder& inputHolder : _touchPoints) {
-            if(inputHolder.holdsInput(input)) {
+            if (inputHolder.holdsInput(input)) {
                 inputHolder = std::move(_touchPoints.back());
                 _touchPoints.pop_back();
                 break;
@@ -135,7 +137,7 @@ bool TouchModule::addTouchInput(TouchInput input) {
 
 bool TouchModule::updateOrAddTouchInput(TouchInput input) {
     for(TouchInputHolder& inputHolder : _touchPoints) {
-        if(inputHolder.holdsInput(input)){
+        if (inputHolder.holdsInput(input)){
             inputHolder.tryAddInput(input);
             return true;
         }
@@ -148,13 +150,15 @@ void TouchModule::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
     //Check for "tap" gesture:
     for(TouchInputHolder& inputHolder : _touchPoints) {
-        if(inputHolder.holdsInput(input)) {
+        if (inputHolder.holdsInput(input)) {
             inputHolder.tryAddInput(input);
             double totalTime = inputHolder.getGestureTime();
             float totalDistance = inputHolder.getGestureDistance();
             //Magic values taken from tuioear.cpp:
-            if(totalTime < 0.18 && totalDistance < 0.0004f
-            && _touchPoints.size() == 1 && _deferredRemovals.size() == 1){
+            bool isWithinTapTime = totalTime < 0.18;
+            bool wasStationary = totalDistance < 0.0004f;
+            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1
+                && _deferredRemovals.size() == 1) {
                 _tap = true;
             }
             return;
@@ -199,22 +203,23 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
     // thread so we don't need a mutex here
     global::callback::touchDetected.push_back(
-            std::bind(&TouchModule::addTouchInput, this, std::placeholders::_1));
+        std::bind(&TouchModule::addTouchInput, this, std::placeholders::_1));
 
     global::callback::touchUpdated.push_back(
-            std::bind(&TouchModule::updateOrAddTouchInput, this, std::placeholders::_1));
+        std::bind(&TouchModule::updateOrAddTouchInput, this, std::placeholders::_1));
 
     global::callback::touchExit.push_back(
-            std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1));
+        std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1));
 
 
     global::callback::preSync.push_back([&]() {
         _touch.setCamera(global::navigationHandler.camera());
         _touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
 
-        if(processNewInput() && global::windowDelegate.isMaster()){
+        if (processNewInput() && global::windowDelegate.isMaster()) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
-        }else if(_touchPoints.empty()){
+        }
+        else if (_touchPoints.empty()) {
             _touch.resetAfterInput();
         }
 

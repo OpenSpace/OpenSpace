@@ -74,12 +74,7 @@ TouchMarker::TouchMarker()
     , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
     , _transparency(TransparencyInfo, 0.8f, 0.f, 1.f)
     , _thickness(ThicknessInfo, 2.f, 0.f, 4.f )
-    , _color(
-        ColorInfo,
-        glm::vec3(204.f / 255.f, 51.f / 255.f, 51.f / 255.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _color(ColorInfo, glm::vec3(0.96f, 0.2f, 0.2f), glm::vec3(0.f), glm::vec3(1.f))
     , _shader(nullptr)
 {
     addProperty(_visible);

@@ -38,8 +38,6 @@
 
 #include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
 #include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
-#include <modules/touch/ext/libTUIO11/TUIO/UdpReceiver.h>
-#include <modules/touch/ext/libTUIO11/TUIO/TcpReceiver.h>
 
 #if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic pop

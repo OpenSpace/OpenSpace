@@ -195,24 +195,28 @@ void EventHandler::initialize() {
 
     global::callback::touchDetected.emplace_back(
         [&](TouchInput input) -> bool {
-            if(!_browserInstance) return false;
-
-            glm::vec2 windowPos = input.getCurrentWindowCoordinates();
-            if(!_browserInstance->hasContent(static_cast<int>(windowPos.x),
-                                            static_cast<int>(windowPos.y))){
+            if (!_browserInstance) {
                 return false;
             }
 
-            if(_validTouchStates.empty()) {
+            glm::vec2 windowPos = input.getCurrentWindowCoordinates();
+            const bool hasContent = _browserInstance->hasContent(
+                static_cast<int>(windowPos.x),
+                static_cast<int>(windowPos.y)
+            );
+            if (!hasContent) {
+                return false;
+            }
+
+            if (_validTouchStates.empty()) {
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
-                _browserInstance->sendMouseClickEvent(mouseEvent(),
-                                                        MBT_LEFT,
-                                                        false,
-                                                        BrowserInstance::SingleClick);
+                _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false,
+                    BrowserInstance::SingleClick);
                 _validTouchStates.emplace_back(input);
-            }else {
+            }
+            else {
                 _validTouchStates.emplace_back(input);
             }
             return true;
@@ -221,24 +225,29 @@ void EventHandler::initialize() {
 
     global::callback::touchUpdated.emplace_back(
         [&](TouchInput input) -> bool {
-            if(!_browserInstance) return false;
-            if(_validTouchStates.empty()) return false;
+            if (!_browserInstance) {
+                return false;
+            }
+            if (_validTouchStates.empty()) {
+                return false;
+            }
 
-            auto found = std::find_if( _validTouchStates.begin(),
-                                        _validTouchStates.end(),
-                                        [&](const TouchInput& state){
-                                            return state.fingerId == input.fingerId &&
-                                            state.touchDeviceId == input.touchDeviceId;
-                                        });
+            auto found = std::find_if(_validTouchStates.begin(), _validTouchStates.end(),
+                [&](const TouchInput& state){
+                    return state.fingerId == input.fingerId &&
+                    state.touchDeviceId == input.touchDeviceId;
+                }
+            );
 
-            if(found == _validTouchStates.begin()) {
+            if (found == _validTouchStates.begin()) {
                 glm::vec2 windowPos = input.getCurrentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
                 return true;
-            }else if(found != _validTouchStates.end()){
+            }
+            else if (found != _validTouchStates.end()){
                 return true;
             }
             return false;
@@ -247,26 +256,32 @@ void EventHandler::initialize() {
 
     global::callback::touchExit.emplace_back(
         [&](TouchInput input) {
-            if(!_browserInstance) return;
-            if(_validTouchStates.empty()) return;
-            auto found = std::find_if( _validTouchStates.begin(),
-                                        _validTouchStates.end(),
-                                        [&](const TouchInput& state){
-                                            return state.fingerId == input.fingerId &&
-                                            state.touchDeviceId == input.touchDeviceId;
-                                        });
-            if(found == _validTouchStates.end()) return;
+            if (!_browserInstance) {
+                return;
+            }
+            if (_validTouchStates.empty()) {
+                return;
+            }
+
+            auto found = std::find_if(_validTouchStates.begin(), _validTouchStates.end(),
+                [&](const TouchInput& state){
+                    return state.fingerId == input.fingerId &&
+                    state.touchDeviceId == input.touchDeviceId;
+                }
+            );
+
+            if (found == _validTouchStates.end()) {
+                return;
+            }
 
             _validTouchStates.erase(found);
-            if(_validTouchStates.empty()) {
+            if (_validTouchStates.empty()) {
                 glm::vec2 windowPos = input.getCurrentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = false;
-                _browserInstance->sendMouseClickEvent(mouseEvent(),
-                                                        MBT_LEFT,
-                                                        true,
-                                                        BrowserInstance::SingleClick);
+                _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true,
+                    BrowserInstance::SingleClick);
             }
         }
     );
