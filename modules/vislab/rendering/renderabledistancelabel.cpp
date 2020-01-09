@@ -24,10 +24,55 @@
 
 #include <modules/vislab/rendering/renderabledistancelabel.h>
 
+#include <openspace/documentation/documentation.h>
+//#include <openspace/documentation/verifier.h>
+
 namespace openspace {
 
-//RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
-//{
+documentation::Documentation RenderableDistanceLabel::Documentation() {
+    using namespace documentation;
+    return {
+        "Renderable Distance Label",
+        "vislab_renderable_distance_label",
+        {
+        }
+    };
+}
+
+RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
+    : RenderableLabels(dictionary)
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableDistanceLabel"
+    );
+}
+
+//void RenderableDistanceLabel::update(const UpdateData& data) {
+//
+//    if (global::renderEngine.scene()->sceneGraphNode(_nodeLine)) {
+//
+//        // Calculate distance
+//        SceneGraphNode* nodelineNode = global::renderEngine.scene()->sceneGraphNode(_nodeLine);
+//        RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(nodelineNode->renderable());
+//        double myDistance = nodeline->getDistance();
+//
+//        // format string
+//        float scale = getUnit(Kilometer);
+//        std::string distanceText = std::to_string(std::round(myDistance / scale));
+//        int pos = distanceText.find(".");
+//        std::string subStr = distanceText.substr(pos);
+//        distanceText.erase(pos, subStr.size());
+//        std::string finalText = distanceText + " " + KilometerUnit;
+//        setLabelText(finalText);
+//
+//        // Update placement of label with transformation matrix
+//        glm::dvec3 start = global::renderEngine.scene()->sceneGraphNode(nodeline->_start)->worldPosition();
+//        glm::dvec3 end = global::renderEngine.scene()->sceneGraphNode(nodeline->_end)->worldPosition();
+//        glm::dvec3 goalPos = start + (end - start) / 2.0;
+//        _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
+//    }
 //}
 
 } // namespace openspace
