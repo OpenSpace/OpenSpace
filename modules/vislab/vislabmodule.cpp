@@ -24,6 +24,11 @@
 
 #include <modules/vislab/vislabmodule.h>
 
+#include <modules/vislab/rendering/renderabledistancelabel.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
+#include <openspace/util/factorymanager.h>
+
 namespace openspace {
 
 VisLabModule::VisLabModule() : OpenSpaceModule(Name) {

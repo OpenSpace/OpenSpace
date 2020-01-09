@@ -27,12 +27,6 @@
 
 
 #include <openspace/util/openspacemodule.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <modules/vislab/rendering/renderabledistancelabel.h>
 
 namespace openspace {
 
