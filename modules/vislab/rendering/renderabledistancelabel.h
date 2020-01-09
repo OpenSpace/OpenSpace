@@ -39,13 +39,10 @@ public:
      void update(const UpdateData& data) override;
      static documentation::Documentation Documentation();
 
-     properties::StringProperty _nodeLine;
-
-private:
+     properties::StringProperty _nodelineId;
+     bool _errorThrown = false;
 };
 
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
-
-

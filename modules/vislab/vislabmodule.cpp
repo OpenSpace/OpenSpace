@@ -25,7 +25,6 @@
 #include <modules/vislab/vislabmodule.h>
 
 namespace openspace {
-constexpr const char* _loggerCat = "VisLab Module";
 
 VisLabModule::VisLabModule() : OpenSpaceModule(Name) {
 }
