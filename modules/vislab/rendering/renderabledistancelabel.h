@@ -28,7 +28,6 @@
 
 #include <modules/base/rendering/renderablelabels.h>
 
-
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -37,8 +36,10 @@ class RenderableDistanceLabel : public RenderableLabels {
 public:
      RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
 
-     // void update(const UpdateData& data) override;
+     void update(const UpdateData& data) override;
      static documentation::Documentation Documentation();
+
+     properties::StringProperty _nodeLine;
 
 private:
 };

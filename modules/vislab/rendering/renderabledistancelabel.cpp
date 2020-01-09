@@ -24,8 +24,24 @@
 
 #include <modules/vislab/rendering/renderabledistancelabel.h>
 
+#include <modules/base/rendering/renderablenodeline.h>
 #include <openspace/documentation/documentation.h>
-//#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <string>
+
+namespace {
+    constexpr const char* _loggerCat = "RenderableDistanceLabel";
+
+    constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
+        "NodeLine",
+        "Node Line",
+        "Property to track a nodeline. When tracking the label text will be updating the distance "
+        "from the nodeline start and end. "
+    };
+}
 
 namespace openspace {
 
@@ -35,45 +51,57 @@ documentation::Documentation RenderableDistanceLabel::Documentation() {
         "Renderable Distance Label",
         "vislab_renderable_distance_label",
         {
+            {
+                NodeLineInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                NodeLineInfo.description
+            },
         }
     };
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
     : RenderableLabels(dictionary)
+    , _nodeLine(NodeLineInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
         "RenderableDistanceLabel"
     );
+
+    if (dictionary.hasKey(NodeLineInfo.identifier)) {
+        _nodeLine = dictionary.value<std::string>(NodeLineInfo.identifier);
+        addProperty(_nodeLine);
+    }
 }
 
-//void RenderableDistanceLabel::update(const UpdateData& data) {
-//
-//    if (global::renderEngine.scene()->sceneGraphNode(_nodeLine)) {
-//
-//        // Calculate distance
-//        SceneGraphNode* nodelineNode = global::renderEngine.scene()->sceneGraphNode(_nodeLine);
-//        RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(nodelineNode->renderable());
-//        double myDistance = nodeline->getDistance();
-//
-//        // format string
-//        float scale = getUnit(Kilometer);
-//        std::string distanceText = std::to_string(std::round(myDistance / scale));
-//        int pos = distanceText.find(".");
-//        std::string subStr = distanceText.substr(pos);
-//        distanceText.erase(pos, subStr.size());
-//        std::string finalText = distanceText + " " + KilometerUnit;
-//        setLabelText(finalText);
-//
-//        // Update placement of label with transformation matrix
-//        glm::dvec3 start = global::renderEngine.scene()->sceneGraphNode(nodeline->_start)->worldPosition();
-//        glm::dvec3 end = global::renderEngine.scene()->sceneGraphNode(nodeline->_end)->worldPosition();
-//        glm::dvec3 goalPos = start + (end - start) / 2.0;
-//        _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
-//    }
-//}
+void RenderableDistanceLabel::update(const UpdateData& data) {
+
+    if (global::renderEngine.scene()->sceneGraphNode(_nodeLine)) {
+
+        // Calculate distance
+        SceneGraphNode* nodelineNode = global::renderEngine.scene()->sceneGraphNode(_nodeLine);
+        RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(nodelineNode->renderable());
+        double myDistance = nodeline->getDistance();
+
+        // format string
+        float scale = getUnit(Kilometer);
+        std::string distanceText = std::to_string(std::round(myDistance / scale));
+        int pos = distanceText.find(".");
+        std::string subStr = distanceText.substr(pos);
+        distanceText.erase(pos, subStr.size());
+        std::string finalText = distanceText + " Km";
+        setLabelText(finalText);
+
+        // Update placement of label with transformation matrix
+        glm::dvec3 start = global::renderEngine.scene()->sceneGraphNode(nodeline->_start)->worldPosition();
+        glm::dvec3 end = global::renderEngine.scene()->sceneGraphNode(nodeline->_end)->worldPosition();
+        glm::dvec3 goalPos = start + (end - start) / 2.0;
+        _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
+    }
+}
 
 } // namespace openspace
 

@@ -72,7 +72,12 @@ public:
 protected:
     properties::OptionProperty _blendMode;
 
-private:
+    float getUnit(int unit) const;
+
+    // Data may require some type of transformation prior the spice transformation being
+    // applied.
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
     enum Unit {
         Meter = 0,
         Kilometer,
@@ -88,6 +93,7 @@ private:
         GigalightYears
     };
 
+private:
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
@@ -95,8 +101,6 @@ private:
     
     float linearSmoothStepFunc(float x, float startX, float endX, float sUnit,
         float eUnit) const;
-
-    float getUnit(int unit) const;
 
     properties::Vec4Property _labelColor;
     properties::FloatProperty _labelSize;
@@ -106,7 +110,6 @@ private:
     properties::BoolProperty _pixelSizeControl;
     properties::BoolProperty _enableFadingEffect;
     properties::StringProperty _labelText;
-    properties::StringProperty _nodeLine;
     properties::FloatProperty _fadeStartDistance;
     properties::FloatProperty _fadeEndDistance;
     properties::FloatProperty _fadeStartSpeed;
@@ -123,10 +126,6 @@ private:
     std::string _labelFile;
     std::string _colorOptionString;
     std::string _datavarSizeOptionString;
-
-    // Data may require some type of transformation prior the spice transformation being
-    // applied.
-    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 };
 
 } // namespace openspace

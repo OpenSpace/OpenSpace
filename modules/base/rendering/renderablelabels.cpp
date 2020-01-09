@@ -46,11 +46,6 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <string> 
-#include <modules/base/rendering/renderablenodeline.h>
-
 namespace {
     constexpr const char* _loggerCat = "base::RenderableLabels";
     
@@ -181,12 +176,6 @@ namespace {
         "Fade-In/-Out ending speed."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
-        "NodeLine",
-        "Node Line",
-        "Optional property to track a nodeline. When tracking the label text will be updating the distance "
-        "from the nodeline start and end. "
-    };
 } // namespace
 
 namespace openspace {
@@ -327,7 +316,6 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _enableFadingEffect(EnableFadingEffectInfo, false)
     , _labelText(LabelTextInfo)
-    , _nodeLine(NodeLineInfo)
     , _fadeStartDistance(FadeStartDistInfo, 1.f, 0.f, 100.f)
     , _fadeEndDistance(FadeEndDistInfo, 1.f, 0.f, 100.f)
     , _fadeStartSpeed(FadeStartSpeedInfo, 1.f, 1.f, 100.f)
@@ -458,11 +446,6 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(FadeStartDistInfo.identifier)) {
         _fadeStartDistance = dictionary.value<float>(FadeStartDistInfo.identifier);
-    }
-
-    if (dictionary.hasKey(NodeLineInfo.identifier)) {
-        _nodeLine = dictionary.value<std::string>(NodeLineInfo.identifier);
-        addProperty(_nodeLine);
     }
 
     addProperty(_fadeStartDistance);
@@ -701,31 +684,6 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
     //}
 }
 
-//void RenderableLabels::update(const UpdateData& data) {
-//
-//    if (global::renderEngine.scene()->sceneGraphNode(_nodeLine)) {
-//
-//        // Calculate distance
-//        SceneGraphNode* nodelineNode = global::renderEngine.scene()->sceneGraphNode(_nodeLine);
-//        RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(nodelineNode->renderable());
-//        double myDistance = nodeline->getDistance();
-//        
-//        // format string
-//        float scale = getUnit(Kilometer); 
-//        std::string distanceText = std::to_string(std::round(myDistance / scale));
-//        int pos = distanceText.find(".");
-//        std::string subStr = distanceText.substr(pos);
-//        distanceText.erase(pos, subStr.size());
-//        std::string finalText = distanceText + " " + KilometerUnit;
-//        setLabelText(finalText);
-//
-//        // Update placement of label with transformation matrix
-//        glm::dvec3 start = global::renderEngine.scene()->sceneGraphNode(nodeline->_start)->worldPosition();
-//        glm::dvec3 end = global::renderEngine.scene()->sceneGraphNode(nodeline->_end)->worldPosition();
-//        glm::dvec3 goalPos = start + (end - start) / 2.0;
-//        _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
-//    }
-//}
 
 void RenderableLabels::setLabelText(const std::string & newText) {
     _labelText = newText;
