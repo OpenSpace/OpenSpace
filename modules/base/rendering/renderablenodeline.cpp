@@ -34,22 +34,26 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr const char* _loggerCat = "RenderableNodeLine";
     constexpr const char* ProgramName = "NodeLineProgram";
     constexpr const char* Root = "Root";
 
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
-        "The identifier of the node the line starts from. Defaults to 'Root' if not specified. "
+        "The identifier of the node the line starts from. "
+        "Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
-        "The identifier of the node the line ends at. Defaults to 'Root' if not specified. "
+        "The identifier of the node the line ends at. "
+        "Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
@@ -129,6 +133,9 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         _lineWidth = static_cast<float>(dictionary.value<double>(LineWidthInfo.identifier));
     }
 
+    _start.onChange([&]() { validateNodes(); });
+    _end.onChange([&]() { validateNodes(); });
+
     addProperty(_start);
     addProperty(_end);
     addProperty(_lineColor);
@@ -139,6 +146,16 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
 double RenderableNodeLine::getDistance()
 {
     return glm::distance(_startPos, _endPos);
+}
+
+const std::string RenderableNodeLine::getStart()
+{
+    return _start.value();
+}
+
+const std::string RenderableNodeLine::getEnd()
+{
+    return _end.value();
 }
 
 void RenderableNodeLine::initializeGL() {
@@ -291,6 +308,18 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     }
     if (!isLineSmoothEnabled) {
         glDisable(GL_LINE_SMOOTH);
+    }
+}
+
+void RenderableNodeLine::validateNodes()
+{
+    if (!global::renderEngine.scene()->sceneGraphNode(_start)) {
+        LERROR(fmt::format("There is no scenegraph node with id {}, defaults to 'Root'", _start));
+        _start = Root;
+    }
+    if (!global::renderEngine.scene()->sceneGraphNode(_end)) {
+        LERROR(fmt::format("There is no scenegraph node with id {}, defaults to 'Root'", _end));
+        _end = Root;
     }
 }
 
