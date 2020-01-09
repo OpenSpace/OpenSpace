@@ -35,6 +35,10 @@ namespace openspace {
 class Camera;
 class SceneGraphNode;
 
+/**
+ * The DirectInputSolver is used to minimize the L2 error of touch input
+ * to 3D camera position. It uses the levmarq algorithm in order to do this.
+ * */
 class DirectInputSolver {
 public:
     // Stores the selected node, the cursor ID as well as the surface coordinates the
@@ -46,12 +50,20 @@ public:
     };
 
     DirectInputSolver();
+
+    /**
+     * Returns true if the error could be minimized within certain bounds.
+     * If the error is found to be outside the bounds after a certain amount of
+     * iterations, this function fails.
+     * */
     bool solve(const std::vector<TouchInputHolder>& list,
         const std::vector<SelectedBody>& selectedBodies,
         std::vector<double>* calculatedValues, const Camera& camera);
+
     int getNDof() const;
 
     const LMstat& getLevMarqStat();
+
     void setLevMarqVerbosity(bool verbose);
 
 private:
