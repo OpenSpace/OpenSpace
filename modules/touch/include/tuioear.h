@@ -47,53 +47,51 @@
 #endif // __clang__
 
 #include <openspace/util/touch.h>
-
 #include <ghoul/glm.h>
-
+#include <algorithm>
 #include <math.h>
-#include <vector>
 #include <mutex>
 #include <numeric>
-#include <algorithm>
+#include <vector>
 
 namespace openspace {
 
 class TuioEar : public TUIO::TuioListener {
-    public:
-        TuioEar();
-        ~TuioEar();
+public:
+    TuioEar();
+    ~TuioEar();
 
-        /**
-        * Callback functions, listens to the TUIO server
-        */
-        void addTuioObject(TUIO::TuioObject *tobj);
-        void updateTuioObject(TUIO::TuioObject *tobj);
-        void removeTuioObject(TUIO::TuioObject *tobj);
+    /**
+    * Callback functions, listens to the TUIO server
+    */
+    void addTuioObject(TUIO::TuioObject *tobj);
+    void updateTuioObject(TUIO::TuioObject *tobj);
+    void removeTuioObject(TUIO::TuioObject *tobj);
 
-        void addTuioCursor(TUIO::TuioCursor *tcur);
-        void updateTuioCursor(TUIO::TuioCursor *tcur);
-        void removeTuioCursor(TUIO::TuioCursor *tcur);
+    void addTuioCursor(TUIO::TuioCursor *tcur);
+    void updateTuioCursor(TUIO::TuioCursor *tcur);
+    void removeTuioCursor(TUIO::TuioCursor *tcur);
 
-        void addTuioBlob(TUIO::TuioBlob *tblb);
-        void updateTuioBlob(TUIO::TuioBlob *tblb);
-        void removeTuioBlob(TUIO::TuioBlob *tblb);
+    void addTuioBlob(TUIO::TuioBlob *tblb);
+    void updateTuioBlob(TUIO::TuioBlob *tblb);
+    void removeTuioBlob(TUIO::TuioBlob *tblb);
 
-        void refresh(TUIO::TuioTime frameTime);
+    void refresh(TUIO::TuioTime frameTime);
 
-        /**
+    /**
         * Lock-swap the containers of this listener
         */
-        std::vector<TouchInput> takeInput();
-        std::vector<TouchInput> takeRemovals();
+    std::vector<TouchInput> takeInput();
+    std::vector<TouchInput> takeRemovals();
 
-    private:
-        TUIO::TuioClient _tuioClient;
+private:
+    TUIO::TuioClient _tuioClient;
 
-        std::vector<TouchInput> _inputList;
-        std::vector<TouchInput> _removalList;
-        std::mutex _mx;
+    std::vector<TouchInput> _inputList;
+    std::vector<TouchInput> _removalList;
+    std::mutex _mx;
 };
 
-}
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__

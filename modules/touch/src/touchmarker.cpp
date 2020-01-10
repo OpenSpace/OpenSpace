@@ -27,9 +27,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     constexpr const std::array<const char*, 4> UniformNames = {
@@ -75,7 +74,6 @@ TouchMarker::TouchMarker()
     , _transparency(TransparencyInfo, 0.8f, 0.f, 1.f)
     , _thickness(ThicknessInfo, 2.f, 0.f, 4.f )
     , _color(ColorInfo, glm::vec3(0.96f, 0.2f, 0.2f), glm::vec3(0.f), glm::vec3(1.f))
-    , _shader(nullptr)
 {
     addProperty(_visible);
     addProperty(_radiusSize);
@@ -139,8 +137,8 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
 
     int i = 0;
     for (const openspace::TouchInputHolder& inputHolder : list) {
-        _vertexData[i] = 2 * (inputHolder.getLatestInput().x - 0.5f);
-        _vertexData[i + 1] = -2 * (inputHolder.getLatestInput().y - 0.5f);
+        _vertexData[i] = 2 * (inputHolder.latestInput().x - 0.5f);
+        _vertexData[i + 1] = -2 * (inputHolder.latestInput().y - 0.5f);
         i += 2;
     }
 

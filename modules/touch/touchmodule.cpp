@@ -23,27 +23,28 @@
  ****************************************************************************************/
 
 #include <modules/touch/touchmodule.h>
+
 #include <modules/touch/include/tuioear.h>
 #include <modules/touch/include/win32_touch.h>
-
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <ghoul/logging/logmanager.h>
 #include <sstream>
 #include <string>
-#include <iostream>
 
 using namespace TUIO;
+
 namespace {
-    constexpr double ONE_MS = 0.001;
-}
+    constexpr const double ONE_MS = 0.001;
+} // namespace
+
 namespace openspace {
 
 bool TouchModule::processNewInput() {
@@ -71,12 +72,13 @@ bool TouchModule::processNewInput() {
             _lastTouchInputs.begin(),
             _lastTouchInputs.end(),
             [this](const TouchInput& input) {
-                return std::find_if(
-                    _touchPoints.begin(),
-                    _touchPoints.end(),
+                return !std::any_of(
+                    _touchPoints.cbegin(),
+                    _touchPoints.cend(),
                     [&input](const TouchInputHolder& holder) {
                         return holder.holdsInput(input);
-                    }) == _touchPoints.end();
+                    }
+                );
             }
         ),
         _lastTouchInputs.end()
@@ -118,8 +120,8 @@ bool TouchModule::processNewInput() {
 }
 
 void TouchModule::clearInputs() {
-    for(const auto& input : _deferredRemovals) {
-        for(TouchInputHolder& inputHolder : _touchPoints) {
+    for (const TouchInput& input : _deferredRemovals) {
+        for (TouchInputHolder& inputHolder : _touchPoints) {
             if (inputHolder.holdsInput(input)) {
                 inputHolder = std::move(_touchPoints.back());
                 _touchPoints.pop_back();
@@ -130,35 +132,34 @@ void TouchModule::clearInputs() {
     _deferredRemovals.clear();
 }
 
-bool TouchModule::addTouchInput(TouchInput input) {
+void TouchModule::addTouchInput(TouchInput input) {
     _touchPoints.emplace_back(input);
-    return true;
 }
 
-bool TouchModule::updateOrAddTouchInput(TouchInput input) {
-    for(TouchInputHolder& inputHolder : _touchPoints) {
+void TouchModule::updateOrAddTouchInput(TouchInput input) {
+    for (TouchInputHolder& inputHolder : _touchPoints) {
         if (inputHolder.holdsInput(input)){
             inputHolder.tryAddInput(input);
-            return true;
+            return;
         }
     }
     _touchPoints.emplace_back(input);
-    return true;
 }
 
 void TouchModule::removeTouchInput(TouchInput input) {
     _deferredRemovals.emplace_back(input);
     //Check for "tap" gesture:
-    for(TouchInputHolder& inputHolder : _touchPoints) {
+    for (TouchInputHolder& inputHolder : _touchPoints) {
         if (inputHolder.holdsInput(input)) {
             inputHolder.tryAddInput(input);
-            double totalTime = inputHolder.getGestureTime();
-            float totalDistance = inputHolder.getGestureDistance();
+            const double totalTime = inputHolder.gestureTime();
+            const float totalDistance = inputHolder.gestureDistance();
             //Magic values taken from tuioear.cpp:
-            bool isWithinTapTime = totalTime < 0.18;
-            bool wasStationary = totalDistance < 0.0004f;
-            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1
-                && _deferredRemovals.size() == 1) {
+            const bool isWithinTapTime = totalTime < 0.18;
+            const bool wasStationary = totalDistance < 0.0004f;
+            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 && 
+                _deferredRemovals.size() == 1)
+            {
                 _tap = true;
             }
             return;
@@ -168,16 +169,14 @@ void TouchModule::removeTouchInput(TouchInput input) {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
-    , _ear(nullptr)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
 }
 
 TouchModule::~TouchModule() {
-    //intentionally left empty
+    // intentionally left empty
 }
-
 
 void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     _ear.reset(new TuioEar());
@@ -190,7 +189,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
         // so here we grab the first window-handle and use it.
         void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
         if (nativeWindowHandle) {
-            _win32TouchHook.reset(new Win32TouchHook(nativeWindowHandle));
+            _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
         }
 #endif
     });
@@ -203,13 +202,22 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
     // thread so we don't need a mutex here
     global::callback::touchDetected.push_back(
-        std::bind(&TouchModule::addTouchInput, this, std::placeholders::_1));
+        [this](TouchInput i) {
+            addTouchInput(i);
+            return true;
+        }
+    );
 
     global::callback::touchUpdated.push_back(
-        std::bind(&TouchModule::updateOrAddTouchInput, this, std::placeholders::_1));
+        [this](TouchInput i) {
+            updateOrAddTouchInput(i);
+        return true;
+        }
+    );
 
     global::callback::touchExit.push_back(
-        std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1));
+        std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1)
+    );
 
 
     global::callback::preSync.push_back([&]() {
@@ -223,16 +231,11 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
             _touch.resetAfterInput();
         }
 
-
-
         // update lastProcessed
         _lastTouchInputs.clear();
-        for(const TouchInputHolder& points : _touchPoints) {
-            _lastTouchInputs.emplace_back(points.getLatestInput());
+        for (const TouchInputHolder& points : _touchPoints) {
+            _lastTouchInputs.emplace_back(points.latestInput());
         }
-        // used to save data from solver, only calculated for one frame when user chooses
-        // in GUI
-        _touch.unitTest();
         // calculate the new camera state for this frame
         _touch.step(global::windowDelegate.deltaTime());
         clearInputs();

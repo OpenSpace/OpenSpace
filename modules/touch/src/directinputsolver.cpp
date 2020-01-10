@@ -37,7 +37,7 @@ namespace {
         openspace::SceneGraphNode* node;
         LMstat stats;
     };
-}
+} // namespace
 
 namespace openspace {
 
@@ -45,7 +45,8 @@ DirectInputSolver::DirectInputSolver() {
     levmarq_init(&_lmstat);
 }
 
-// project back a 3D point in model view to clip space [-1,1] coordinates on the view plane
+// project back a 3D point in model view to clip space [-1,1] coordinates on the view
+// plane
 glm::dvec2 castToNDC(const glm::dvec3& vec, Camera& camera, SceneGraphNode* node) {
     glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
         (node->worldRotationMatrix() * vec +
@@ -82,20 +83,24 @@ double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
         dvec3(0, 0, 0),
         directionToCenter,
         // To avoid problem with lookup in up direction
-        normalize(camDirection + lookUp));
+        normalize(camDirection + lookUp)
+    );
     dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
     dquat localCamRot = inverse(globalCamRot) * ptr->camera->rotationQuaternion();
 
-    { // Roll
+    {
+        // Roll
         dquat rollRot = angleAxis(q[3], dvec3(0.0, 0.0, 1.0));
         localCamRot = localCamRot * rollRot;
     }
-    { // Panning (local rotation)
+    {
+        // Panning (local rotation)
         dvec3 eulerAngles(q[5], q[4], 0);
         dquat panRot = dquat(eulerAngles);
         localCamRot = localCamRot * panRot;
     }
-    { // Orbit (global rotation)
+    {
+        // Orbit (global rotation)
         dvec3 eulerAngles(q[1], q[0], 0);
         dquat rotationDiffCamSpace = dquat(eulerAngles);
 
@@ -169,15 +174,17 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
                 }
 
                 // calculate f1 with good h for finite difference
-                dPar.at(i) += h;
+                dPar[i] += h;
                 f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
-                dPar.at(i) = par[i];
+                dPar[i] = par[i];
                 break;
             }
-            else if ((f1 - f0) != 0 && lastG != 0) { // h too big
+            else if ((f1 - f0) != 0 && lastG != 0) {
+                // h too big
                 h /= scale;
             }
-            else if ((f1 - f0) == 0) { // h too small
+            else if ((f1 - f0) == 0) {
+                // h too small
                 h *= scale;
             }
             lastG = f1 - f0;
@@ -216,8 +223,8 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
         const SelectedBody& sb = selectedBodies.at(i);
         selectedPoints.push_back(sb.coordinates);
         screenPoints.emplace_back(
-            2 * (list[i].getLatestInput().x - 0.5),
-            -2 * (list[i].getLatestInput().y - 0.5)
+            2.0 * (list[i].latestInput().x - 0.5),
+            -2.0 * (list[i].latestInput().y - 0.5)
         );
     }
 
@@ -245,11 +252,11 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
     return result;
 }
 
-int DirectInputSolver::getNDof() const {
+int DirectInputSolver::nDof() const {
     return _nDof;
 }
 
-const LMstat& DirectInputSolver::getLevMarqStat() {
+const LMstat& DirectInputSolver::levMarqStat() {
     return _lmstat;
 }
 

@@ -41,14 +41,17 @@
 
 namespace {
     constexpr const char* _loggerCat = "win32_touch";
-    HHOOK gTouchHook{ nullptr };
+    HHOOK gTouchHook = nullptr;
     std::thread* gMouseHookThread;
-    HHOOK gMouseHook{ nullptr };
-    bool gStarted{ false };
-    std::chrono::microseconds gStartTime{ 0 };
-    std::unordered_map<UINT32, std::unique_ptr<openspace::TouchInputHolder>> gTouchInputsMap;
+    HHOOK gMouseHook = nullptr;
+    bool gStarted = false;
+    std::chrono::microseconds gStartTime = std::chrono::microseconds(0);
+    std::unordered_map<
+        UINT32,
+        std::unique_ptr<openspace::TouchInputHolder>
+    > gTouchInputsMap;
 #ifdef ENABLE_TUIOMESSAGES
-    TUIO::TuioServer* gTuioServer{ nullptr };
+    TUIO::TuioServer* gTuioServer = nullptr;
     std::unordered_map<UINT, TUIO::TuioCursor*> gCursorMap;
 #endif
 } // namespace
@@ -70,87 +73,84 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
         case WM_POINTERUPDATE:
         case WM_POINTERUP:
         {
-            POINTER_INFO pointerInfo = {};
-            if (GetPointerInfo(GET_POINTERID_WPARAM(pStruct->wParam), &pointerInfo)) {
-                std::chrono::microseconds timestamp =
-                std::chrono::duration_cast<std::chrono::microseconds>(
-                            std::chrono::high_resolution_clock::now().time_since_epoch());
-                timestamp = timestamp - gStartTime;
-                RECT rect;
-                GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
+            POINTER_INFO info = {};
+            BOOL hasInfo = GetPointerInfo(GET_POINTERID_WPARAM(pStruct->wParam), &info);
+            if (!hasInfo) {
+                break;
+            }
 
-                POINT p = pointerInfo.ptPixelLocation;
-                // native touch to screen conversion
-                ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
+            using namespace std::chrono;
+            const microseconds timestamp = duration_cast<microseconds>(
+                high_resolution_clock::now().time_since_epoch()
+            ) - gStartTime;
+            RECT rect;
+            GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
 
-                float xPos = static_cast<float>(p.x) /
-                                static_cast<float>(rect.right - rect.left);
-                float yPos = static_cast<float>(p.y) /
-                                static_cast<float>(rect.bottom - rect.top);
+            POINT p = info.ptPixelLocation;
+            // native touch to screen conversion
+            ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-                openspace::TouchInput touchInput(
-                    reinterpret_cast<size_t>(pointerInfo.sourceDevice),
-                    static_cast<size_t>(pointerInfo.pointerId),
+            float xPos = static_cast<float>(p.x) /
+                         static_cast<float>(rect.right - rect.left);
+            float yPos = static_cast<float>(p.y) /
+                         static_cast<float>(rect.bottom - rect.top);
+
+            TouchInput touchInput(
+                reinterpret_cast<size_t>(info.sourceDevice),
+                static_cast<size_t>(info.pointerId),
+                xPos,
+                yPos,
+                static_cast<double>(timestamp.count())/1'000'000.0
+            );
+
+            if (info.pointerFlags & POINTER_FLAG_DOWN) {
+#ifdef ENABLE_DIRECTMSG
+                std::unique_ptr<TouchInputHolder> points =
+                    std::make_unique<TouchInputHolder>(touchInput);
+                gTouchInputsMap.emplace(info.pointerId, std::move(points));
+                global::openSpaceEngine.touchDetectionCallback(touchInput);
+#endif
+#ifdef ENABLE_TUIOMESSAGES
+                // Handle new touchpoint
+                gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
+                gCursorMap[info.pointerId] = gTuioServer->addTuioCursor(
                     xPos,
-                    yPos,
-                    static_cast<double>(timestamp.count())/1'000'000.0
+                    yPos
                 );
+                gTuioServer->commitFrame();
+#endif
+            }
+            else if (info.pointerFlags & POINTER_FLAG_UPDATE) {
+                // Handle update of touchpoint
+#ifdef ENABLE_DIRECTMSG
+                TouchInputHolder* points = gTouchInputsMap[info.pointerId].get();
 
-                if (pointerInfo.pointerFlags & POINTER_FLAG_DOWN) {
-#ifdef ENABLE_DIRECTMSG
-                    std::unique_ptr<TouchInputHolder> points(new TouchInputHolder(touchInput));
-                    gTouchInputsMap.emplace(pointerInfo.pointerId, std::move(points));
-                    global::openSpaceEngine.touchDetectionCallback(touchInput);
+                if (points->tryAddInput(touchInput)) {
+                    global::openSpaceEngine.touchUpdateCallback(points->latestInput());
+                }
 #endif
 #ifdef ENABLE_TUIOMESSAGES
-                    // Handle new touchpoint
-                    gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
-                    gCursorMap[pointerInfo.pointerId] = gTuioServer->addTuioCursor(
-                        xPos,
-                        yPos
-                    );
-                    gTuioServer->commitFrame();
-#endif
+                TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
+                if (gCursorMap[info.pointerId]->getTuioTime() == frameTime) {
+                    break;
                 }
-                else if (pointerInfo.pointerFlags & POINTER_FLAG_UPDATE) {
-                    // Handle update of touchpoint
+                gTuioServer->initFrame(frameTime);
+                gTuioServer->updateTuioCursor(gCursorMap[info.pointerId], xPos, yPos);
+                gTuioServer->commitFrame();
+#endif
+            }
+            else if (info.pointerFlags & POINTER_FLAG_UP) {
 #ifdef ENABLE_DIRECTMSG
-                    TouchInputHolder* points =
-                                            gTouchInputsMap[pointerInfo.pointerId].get();
-
-                    if (points->tryAddInput(touchInput)) {
-                        global::openSpaceEngine.touchUpdateCallback(
-                                                                points->getLatestInput());
-                    }
+                gTouchInputsMap.erase(info.pointerId);
+                global::openSpaceEngine.touchExitCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
-                    TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
-                    if (gCursorMap[pointerInfo.pointerId]->getTuioTime() == frameTime)
-                    {
-                        break;
-                    }
-                    gTuioServer->initFrame(frameTime);
-                    gTuioServer->updateTuioCursor(
-                        gCursorMap[pointerInfo.pointerId],
-                        xPos,
-                        yPos
-                    );
-                    gTuioServer->commitFrame();
+                // Handle removed touchpoint
+                gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
+                gTuioServer->removeTuioCursor(gCursorMap[info.pointerId]);
+                gTuioServer->commitFrame();
+                gCursorMap.erase(info.pointerId);
 #endif
-                }
-                else if (pointerInfo.pointerFlags & POINTER_FLAG_UP) {
-#ifdef ENABLE_DIRECTMSG
-                    gTouchInputsMap.erase(pointerInfo.pointerId);
-                    global::openSpaceEngine.touchExitCallback(touchInput);
-#endif
-#ifdef ENABLE_TUIOMESSAGES
-                    // Handle removed touchpoint
-                    gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
-                    gTuioServer->removeTuioCursor(gCursorMap[pointerInfo.pointerId]);
-                    gTuioServer->commitFrame();
-                    gCursorMap.erase(pointerInfo.pointerId);
-#endif
-                }
             }
             break;
         }
@@ -168,10 +168,10 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
         return;
     }
 
-    //HACK: This hack is required as long as our GLFW version is based on the touch
-    //branch. There is no convenient way to set a GLFWBool (uint32_t) which sets the state
-    //of touch-to-mouseinput interpretation. It happens to be 116 bytes into an internal
-    //glfw struct...
+    // HACK: This hack is required as long as our GLFW version is based on the touch
+    // branch. There is no convenient way to set a GLFWBool (uint32_t) which sets the
+    // state of touch-to-mouseinput interpretation. It happens to be 116 bytes into an
+    // internal glfw struct...
     uint32_t* HACKY_PTR = (uint32_t *)GetPropW(hWnd, L"GLFW");
     HACKY_PTR += 116/sizeof(uint32_t);
     *HACKY_PTR = 1;
@@ -214,7 +214,8 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
     if (!gStarted) {
         gStarted = true;
         gStartTime = std::chrono::duration_cast<std::chrono::microseconds>(
-                            std::chrono::high_resolution_clock::now().time_since_epoch());
+            std::chrono::high_resolution_clock::now().time_since_epoch()
+        );
 #ifdef ENABLE_TUIOMESSAGES
         gTuioServer = new TUIO::TuioServer("localhost", 3333);
         TUIO::TuioTime::initSession();
@@ -228,7 +229,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
 
         // In theory, if our UI is pumped from a different thread, we can
         // handle Low-level mouse events in that thread as well.
-        // this might help reduce mouse lag while running openspace?
+        // this might help reduce mouse lag while running OpenSpace?
         // gMouseHookThread = new std::thread([](){
         //     gMouseHook = SetWindowsHookExW(
         //         WH_MOUSE_LL,
@@ -240,7 +241,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
         //         LINFO("Could not setup mousehook!");
         //     }
 
-	    //     MSG msg;
+        //     MSG msg;
         //     while (GetMessage(&msg, NULL, 0, 0))
         //     {
         //         DispatchMessage(&msg);
@@ -277,11 +278,11 @@ Win32TouchHook::~Win32TouchHook() {
 // - If we ourselves would pump windows for events, we can handle this in the
 // pump-loop
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
-    if (nCode < 0)  // do not process message
-    {
+    if (nCode < 0) {
+        // do not process message
         return CallNextHookEx(0, nCode, wParam, lParam);
     }
-    LPMSLLHOOKSTRUCT msg = (LPMSLLHOOKSTRUCT)lParam;
+    LPMSLLHOOKSTRUCT msg = reinterpret_cast<LPMSLLHOOKSTRUCT>(lParam);
     // block injected events (in most cases generated by touches)
     if (msg->flags & LLMHF_INJECTED || msg->dwExtraInfo == 0xFF515700) {
         return 1;
@@ -292,4 +293,5 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 } // namespace openspace
+
 #endif // WIN32

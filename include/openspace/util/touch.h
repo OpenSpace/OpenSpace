@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #ifndef __OPENSPACE_CORE___TOUCH___H__
 #define __OPENSPACE_CORE___TOUCH___H__
 
@@ -35,18 +34,18 @@ namespace openspace {
 
 struct TouchInput {
     TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
-    glm::vec2 getScreenCoordinates(glm::vec2 resolution) const;
-    glm::vec2 getCurrentWindowCoordinates() const;
+    glm::vec2 screenCoordinates(glm::vec2 resolution) const;
+    glm::vec2 currentWindowCoordinates() const;
     bool isMoving() const;
-    float getDistanceToPos(float otherX, float otherY) const;
-    float getAngleToPos(float otherX, float otherY) const;
+    float distanceToPos(float otherX, float otherY) const;
+    float angleToPos(float otherX, float otherY) const;
 
     size_t touchDeviceId;
     size_t fingerId;
     float x;
     float y;
-    float dx;         // movement in x direction since last touch input
-    float dy;         // movement in y direction since last touch input
+    float dx = 0.f;         // movement in x direction since last touch input
+    float dy = 0.f;         // movement in y direction since last touch input
     double timestamp; // timestamp in seconds from global touch initialization
 };
 
@@ -62,23 +61,21 @@ public:
 
     bool holdsInput(const TouchInput &input) const;
 
-    const size_t getTouchDeviceId() const;
-    const size_t getFingerId() const;
+    size_t touchDeviceId() const;
+    size_t fingerId() const;
 
-    float getSpeedX() const;
-    float getSpeedY() const;
+    float speedX() const;
+    float speedY() const;
 
     bool isMoving() const;
-    float getGestureDistance() const;
-    double getGestureTime() const;
+    float gestureDistance() const;
+    double gestureTime() const;
 
-    size_t getNumInputs() const;
-    const TouchInput& getLatestInput() const;
+    size_t numInputs() const;
+    const TouchInput& latestInput() const;
     const std::deque<TouchInput>& peekInputs() const;
 
 private:
-    static constexpr size_t MAX_INPUTS = 128;
-
     //A deque of recorded inputs. Adding newer points to the front of the queue
     std::deque<TouchInput> _inputs;
 

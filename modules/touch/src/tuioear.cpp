@@ -29,7 +29,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
-
 #include <ghoul/logging/logmanager.h>
 
 using namespace TUIO;
@@ -44,18 +43,26 @@ void TuioEar::removeTuioObject(TuioObject*) { }
 
 void TuioEar::addTuioCursor(TuioCursor* tcur) {
     _mx.lock();
-    TouchInput input(size_t(tcur->getTuioSourceID()),
-        size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
-        double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
+    TouchInput input(
+        static_cast<size_t>(tcur->getTuioSourceID()),
+        static_cast<size_t>(tcur->getCursorID()),
+        tcur->getX(),
+        tcur->getY(),
+        static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
+    );
     _inputList.emplace_back(input);
     _mx.unlock();
 }
 
 void TuioEar::updateTuioCursor(TuioCursor* tcur) {
     _mx.lock();
-    TouchInput input(size_t(tcur->getTuioSourceID()),
-        size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
-        double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
+    TouchInput input(
+        static_cast<size_t>(tcur->getTuioSourceID()),
+        static_cast<size_t>(tcur->getCursorID()),
+        tcur->getX(),
+        tcur->getY(),
+        static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
+    );
     _inputList.emplace_back(input);
     _mx.unlock();
 }
@@ -63,9 +70,13 @@ void TuioEar::updateTuioCursor(TuioCursor* tcur) {
 // save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor* tcur) {
     _mx.lock();
-    TouchInput input(size_t(tcur->getTuioSourceID()),
-        size_t(tcur->getCursorID()), tcur->getX(), tcur->getY(),
-        double(tcur->getTuioTime().getTotalMilliseconds())/1000.0);
+    TouchInput input(
+        static_cast<size_t>(tcur->getTuioSourceID()),
+        static_cast<size_t>(tcur->getCursorID()),
+        tcur->getX(),
+        tcur->getY(),
+        static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
+    );
     _removalList.emplace_back(input);
     _mx.unlock();
 }
@@ -108,5 +119,4 @@ TuioEar::~TuioEar() {
     _tuioClient.disconnect();
 }
 
-
-}
+} // namespace openspace

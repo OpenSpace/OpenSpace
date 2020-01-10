@@ -1020,9 +1020,6 @@ void FramebufferRenderer::updateHDRAndFiltering() {
         absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
         absPath("${SHADERS}/framebuffer/hdrAndFiltering.frag")
     );
-    //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    //_hdrFilteringProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    //_hdrFilteringProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
 void FramebufferRenderer::updateFXAA() {
@@ -1031,9 +1028,6 @@ void FramebufferRenderer::updateFXAA() {
         absPath("${SHADERS}/framebuffer/fxaa.vert"),
         absPath("${SHADERS}/framebuffer/fxaa.frag")
     );
-    //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    //_fxaaProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    //_fxaaProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
 void FramebufferRenderer::updateDownscaledVolume() {
@@ -1042,9 +1036,6 @@ void FramebufferRenderer::updateDownscaledVolume() {
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
     );
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    //_downscaledVolumeProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    //_downscaledVolumeProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {

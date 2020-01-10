@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/touch/include/directinputsolver.h>
-
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -36,7 +35,6 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-
 #include <chrono>
 #include <memory>
 
@@ -100,9 +98,6 @@ public:
     // Calculates the new camera state with velocities and time since last frame
     void step(double dt);
 
-    // Used to save LMA data for one frame if the user chose to
-    void unitTest();
-
     // Called each frame we have no new input, used to reset data
     void resetAfterInput();
 
@@ -119,11 +114,10 @@ public:
     void setCamera(Camera* camera);
 
 private:
-
     /* Returns true if we have the GUI window open. If so, emulates the incoming touch
      * input to a mouse such that we can interact with the GUI
      */
-    bool guiMode(glm::dvec2 screenPosition, size_t numFingers);
+    bool isGuiMode(glm::dvec2 screenPosition, size_t numFingers);
 
     /* Function that calculates the new camera state such that it minimizes the L2 error
      * in screenspace
@@ -152,11 +146,6 @@ private:
 
     //Compute coefficient for velocity decay to be applied in decceleration
     double computeConstTimeDecayCoefficient(double velocity);
-
-    //Compute coefficient of decay based on current frametime; if frametime has been
-    // longer than usual then multiple decay steps may be applied to keep the decay
-    // relative to user time
-    double computeDecayCoeffFromFrametime(double coeff, int times);
 
     /* Decelerate the velocities. Function is called in step() but is dereferenced from
      * frame time to assure same behaviour on all systems
@@ -219,25 +208,25 @@ private:
     VelocityStates _lastVel;
     VelocityStates _sensitivity;
 
-    double _projectionScaleFactor;
-    double _currentRadius;
-    double _slerpdT;
-    double _timeSlack;
-    int _numOfTests;
+    double _projectionScaleFactor = 1.000004;
+    double _currentRadius = 1.0;
+    double _slerpdT = 10001.0;
+    double _timeSlack = 0.0;
+    int _numOfTests = 0;
     std::chrono::milliseconds _time;
-    bool _directTouchMode;
-    bool _wasPrevModeDirectTouch;
-    bool _tap;
-    bool _doubleTap;
-    bool _zoomOutTap;
-    bool _lmSuccess;
-    bool _guiON;
+    bool _directTouchMode = false;
+    bool _wasPrevModeDirectTouch = false;
+    bool _tap = false;
+    bool _doubleTap = false;
+    bool _zoomOutTap = false;
+    bool _lmSuccess = true;
+    bool _guiON = false;
     std::vector<DirectInputSolver::SelectedBody> _selected;
     SceneGraphNode* _pickingSelected = nullptr;
     DirectInputSolver _solver;
 
     glm::dquat _toSlerp;
-    glm::fvec2 _centroid;
+    glm::vec2 _centroid = glm::vec2(0.f);
 
     FrameTimeAverage _frameTimeAvg;
 

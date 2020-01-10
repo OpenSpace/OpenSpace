@@ -60,9 +60,9 @@ public:
         const std::vector<SelectedBody>& selectedBodies,
         std::vector<double>* calculatedValues, const Camera& camera);
 
-    int getNDof() const;
+    int nDof() const;
 
-    const LMstat& getLevMarqStat();
+    const LMstat& levMarqStat();
 
     void setLevMarqVerbosity(bool verbose);
 
