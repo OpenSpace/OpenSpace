@@ -301,24 +301,8 @@ void OpenSpaceEngine::initialize() {
             global::configuration.profile));
         ghoul::lua::LuaState lState;
 
-        // Generate path to temp dir where output .scene file will reside.
-        // Needs to handle either windows (which seems to require double back-slashes)
-        // or unix path slashes.
-        std::string outputScenePath = absPath("${TEMPORARY}");
-        const std::string search = "\\";
-        const std::string replace = "\\\\";
-        if (outputScenePath.find(search) != std::string::npos) {
-            size_t start_pos = 0;
-            while((start_pos = outputScenePath.find(search, start_pos)) != std::string::npos) {
-                outputScenePath.replace(start_pos, search.length(), replace);
-                start_pos += replace.length();
-            }
-            outputScenePath.append(replace);
-        }
-        else {
-            outputScenePath.append("/");
-        }
-        outputScenePath.append(global::configuration.profile);
+        std::string inputProfilePath = generateFilePath("${BASE}/data/assets");
+        std::string outputScenePath = generateFilePath("${TEMPORARY}");
 
         std::string setProfileFilenameInLuaState = fmt::format(R"(
             openspace = {{}}
@@ -326,11 +310,14 @@ void OpenSpaceEngine::initialize() {
             function openspace.profile.getFilename()
               return "{}.profile"
             end
-            function openspace.profile.getPath()
+            function openspace.profile.getProfileInputPath()
+              return "{}"
+            end
+            function openspace.profile.getSceneOutputPath()
               return "{}"
             end
             )",
-            global::configuration.profile, outputScenePath
+            global::configuration.profile, inputProfilePath, outputScenePath
         );
 
         ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
@@ -383,6 +370,26 @@ void OpenSpaceEngine::initialize() {
     scheduleLoadSingleAsset(global::configuration.asset);
 
     LTRACE("OpenSpaceEngine::initialize(end)");
+}
+
+std::string OpenSpaceEngine::generateFilePath(std::string openspaceRelativePath) {
+    std::string path = absPath(openspaceRelativePath);
+    // Needs to handle either windows (which seems to require double back-slashes)
+    // or unix path slashes.
+    const std::string search = "\\";
+    const std::string replace = "\\\\";
+    if (path.find(search) != std::string::npos) {
+        size_t start_pos = 0;
+        while ((start_pos = path.find(search, start_pos)) != std::string::npos) {
+            path.replace(start_pos, search.length(), replace);
+            start_pos += replace.length();
+        }
+        path.append(replace);
+    }
+    else {
+        path.append("/");
+    }
+    return path.append(global::configuration.profile);
 }
 
 void OpenSpaceEngine::initializeGL() {

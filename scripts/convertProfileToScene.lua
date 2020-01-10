@@ -464,10 +464,11 @@ parsingSections = {
   {section = "MarkNodes", func = parseMarkNodes}
 }
 
-profileFilename = openspace.profile.getFilename()
-profilePath = openspace.profile.getPath()
+profilePathIn = openspace.profile.getProfileInputPath()
+scenePathOut = openspace.profile.getSceneOutputPath()
 
-assetOut  = profilePath..".scene"
+profileIn = profilePathIn..".profile"
+assetOut  = scenePathOut..".scene"
 
-local resultTable = parseProfile(profilePath)
+local resultTable = parseProfile(profileIn)
 generateAsset(resultTable, assetOut)
