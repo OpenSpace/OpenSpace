@@ -52,26 +52,22 @@ public:
     const double pathDuration() const;
     PathSegment& currentPathSegment();
 
-    void createPath(PathSpecification& spec);
-
     void updateCamera(double deltaTime);
-    void addToPath(const SceneGraphNode* node, double duration = 5.0); // TODO: remove
+    void createPath(PathSpecification& spec);
     void clearPath();
     void startPath();
-
-    // TODO: move to privates
-    glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node, 
-        const glm::dvec3 prevPos, std::optional<double> height = std::nullopt);
-    // TODO: move to privates
-    CameraState cameraStateFromTargetPosition(glm::dvec3 targetPos, 
-        glm::dvec3 lookAtPos, std::string node);
 
 private:
     CameraState getStartState();
 
     bool handleInstruction(const Instruction& instruction, int index);
+
     bool endFromTargetNodeInstruction(CameraState& endState, CameraState& prevState, const Instruction& instruction, int index);
+
     bool endFromNavigationStateInstruction(CameraState& endState, const Instruction& instruction, int index);
+
+    glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
+        glm::dvec3 prevPos, double height);
 
     std::vector<PathSegment> _pathSegments;
 

@@ -67,23 +67,6 @@ PathSegment& AutoNavigationHandler::currentPathSegment() {
     }
 }
 
-void AutoNavigationHandler::createPath(PathSpecification& spec) {
-    clearPath();
-    bool success = true;
-    for (int i = 0; i < spec.instructions()->size(); i++) {
-        const Instruction& ins = spec.instructions()->at(i);
-        success = handleInstruction(ins, i);
-
-        if (!success) 
-            break;
-    }
-
-    if (success) 
-        startPath();
-    else 
-        LINFO("Could not create path.");
-}
-
 void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
@@ -115,26 +98,24 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
         // TODO: implement suitable stop behaviour
     }
 }
-//TODO: remove! No londer used
-void AutoNavigationHandler::addToPath(const SceneGraphNode* node, const double duration) {
-    ghoul_assert(node != nullptr, "Target node must not be nullptr");
-    ghoul_assert(duration > 0, "Duration must be larger than zero.");
 
-    CameraState start = getStartState();
+void AutoNavigationHandler::createPath(PathSpecification& spec) {
+    clearPath();
+    bool success = true;
+    for (int i = 0; i < spec.instructions()->size(); i++) {
+        const Instruction& ins = spec.instructions()->at(i);
+        success = handleInstruction(ins, i);
 
-    glm::dvec3 targetPos = computeTargetPositionAtNode(node, start.position);
-    CameraState end = cameraStateFromTargetPosition(
-        targetPos, node->worldPosition(), node->identifier());
-
-    // compute startTime 
-    double startTime = 0.0;
-    if (!_pathSegments.empty()) {
-        PathSegment last = _pathSegments.back();
-        startTime = last.startTime() + last.duration();
+        if (!success)
+            break;
     }
 
-    PathSegment newSegment{ start, end, duration, startTime };
-    _pathSegments.push_back(newSegment);
+    if (success) {
+        LINFO("Succefully generated camera path. Starting.");
+        startPath();
+    }
+    else
+        LINFO("Could not create path.");
 }
 
 void AutoNavigationHandler::clearPath() {
@@ -154,46 +135,6 @@ void AutoNavigationHandler::startPath() {
     _isPlaying = true;
 }
 
-glm::dvec3 AutoNavigationHandler::computeTargetPositionAtNode(
-    const SceneGraphNode* node, glm::dvec3 prevPos, std::optional<double> height) 
-{
-    glm::dvec3 targetPos = node->worldPosition();
-    glm::dvec3 targetToPrevVector = prevPos - targetPos;
-
-    double radius = static_cast<double>(node->boundingSphere());
-
-    double desiredDistance;
-    if (height.has_value()) {
-        desiredDistance = height.value();
-    } 
-    else {
-        desiredDistance = 2 * radius;
-    }
-
-    // TODO: compute actual distance above surface and validate negative values
-
-    // move target position out from surface, along vector to camera
-    targetPos += glm::normalize(targetToPrevVector) * (radius + desiredDistance);
-
-    return targetPos;
-}
-
-CameraState AutoNavigationHandler::cameraStateFromTargetPosition(
-    glm::dvec3 targetPos, glm::dvec3 lookAtPos, std::string node)
-{
-    ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
-
-    glm::dmat4 lookAtMat = glm::lookAt(
-        targetPos,
-        lookAtPos,
-        camera()->lookUpVectorWorldSpace()
-    );
-
-    glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
-
-    return CameraState{ targetPos, targetRot, node};
-}
-
 CameraState AutoNavigationHandler::getStartState() {
     CameraState cs;
     if (_pathSegments.empty()) {
@@ -210,30 +151,28 @@ CameraState AutoNavigationHandler::getStartState() {
 
 bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index)
 {
-    CameraState startState, endState;
+    CameraState startState = getStartState();
+    CameraState endState;
     double duration, startTime;
     bool success = true;
-
-    startState = getStartState();
 
     switch (instruction.type)
     {
     case InstructionType::TargetNode:
-        LINFO("Handle target node instruction");
         success = endFromTargetNodeInstruction(
             endState, startState, instruction, index
         );
         break;
 
     case InstructionType::NavigationState:
-        LINFO("Handle navigation state instruction");
         success = endFromNavigationStateInstruction(
             endState, instruction, index
         );
         break;
 
     default:
-        // TODO: error message
+        LERROR(fmt::format("Non-implemented instruction type: {}.", instruction.type));
+        success = false;
         break;
     }
 
@@ -293,15 +232,28 @@ bool AutoNavigationHandler::endFromTargetNodeInstruction(
         targetPos = targetNode->worldPosition() + targetNode->worldRotationMatrix() * props->position.value();
     }
     else {
+        bool hasHeight = props->height.has_value();
+
+        // TODO: compute defualt height in a better way
+        double defaultHeight = 2 * targetNode->boundingSphere();
+        double height = hasHeight? props->height.value() : defaultHeight;
+
         targetPos = computeTargetPositionAtNode(
             targetNode, 
             prevState.position, 
-            props->height
+            height
         );
     }
 
-    endState = cameraStateFromTargetPosition(
-        targetPos, targetNode->worldPosition(), identifier);
+    glm::dmat4 lookAtMat = glm::lookAt(
+        targetPos,
+        targetNode->worldPosition(),
+        camera()->lookUpVectorWorldSpace()
+    );
+
+    glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
+
+    endState = CameraState{ targetPos, targetRot, identifier };
 
     return true;
 }
@@ -355,6 +307,22 @@ bool AutoNavigationHandler::endFromNavigationStateInstruction(
 
     endState = CameraState{ targetPositionWorld, targetRotation, ns.anchor };
     return true;
+}
+
+glm::dvec3 AutoNavigationHandler::computeTargetPositionAtNode(
+    const SceneGraphNode* node, glm::dvec3 prevPos, double height)
+{
+    // TODO: compute actual distance above surface and validate negative values
+
+    glm::dvec3 targetPos = node->worldPosition();
+    glm::dvec3 targetToPrevVector = prevPos - targetPos;
+
+    double radius = static_cast<double>(node->boundingSphere());
+
+    // move target position out from surface, along vector to camera
+    targetPos += glm::normalize(targetToPrevVector) * (radius + height);
+
+    return targetPos;
 }
 
 } // namespace openspace::autonavigation
