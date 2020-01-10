@@ -22,64 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
-#define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
+#ifndef __OPENSPACE_MODULE___EASINGFUNCTIONS___H__
+#define __OPENSPACE_MODULE___EASINGFUNCTIONS___H__
 
-#include <modules/autonavigation/pathsegment.h>
-#include <modules/autonavigation/pathspecification.h>
-#include <openspace/interaction/interpolator.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/logging/logmanager.h>
+#include <vector>
+#include <cmath>
 
-namespace openspace {
-    class Camera;
-} // namespace openspace
+namespace openspace::autonavigation::helpers {
 
-namespace openspace::autonavigation {
+    // Make interpolator parameter t [0,1] progress only inside a subinterval
+    double shiftAndScale(double t, double newStart, double newEnd);
 
-struct CameraState;
+} // helpers
 
-class AutoNavigationHandler : public properties::PropertyOwner {
-public:
-    AutoNavigationHandler();
-    ~AutoNavigationHandler();
+namespace openspace::autonavigation::easingfunctions {
 
-    // Mutators
+// Based on functions from https://github.com/warrenm/AHEasing/blob/master/AHEasing/easing.c 
 
-    // Accessors
-    Camera* camera() const;
-    const double pathDuration() const;
-    PathSegment& currentPathSegment();
+double linear(double t);
 
-    void createPath(PathSpecification& spec);
+double step(double t);
 
-    void updateCamera(double deltaTime);
-    void addToPath(const SceneGraphNode* node, double duration = 5.0); // TODO: remove
-    void clearPath();
-    void startPath();
+double circularEaseOut(double p);
 
-    // TODO: move to privates
-    glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node, 
-        const glm::dvec3 prevPos, std::optional<double> height = std::nullopt);
-    // TODO: move to privates
-    CameraState cameraStateFromTargetPosition(glm::dvec3 targetPos, 
-        glm::dvec3 lookAtPos, std::string node);
+double cubicEaseIn(double t);
 
-private:
-    CameraState getStartState();
+double cubicEaseOut(double t);
 
-    bool handleInstruction(const Instruction& instruction, int index);
-    bool endFromTargetNodeInstruction(CameraState& endState, CameraState& prevState, const Instruction& instruction, int index);
-    bool endFromNavigationStateInstruction(CameraState& endState, const Instruction& instruction, int index);
+double cubicEaseInOut(double t);
 
-    std::vector<PathSegment> _pathSegments;
+double quadraticEaseInOut(double t);
 
-    double _pathDuration;
-    double _currentTime; 
-    bool _isPlaying = false;
-};
+double exponentialEaseInOut(double t);
 
-} // namespace openspace::autonavigation
+}
 
-#endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
+// TODO: include interpolator.h to helperfunctions
+// error when interpolator.h is included and used both here and in pathsegment
+namespace openspace::autonavigation::interpolator {
+
+    glm::dvec3 cubicBezier(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2, 
+                                     const glm::dvec3 &cp3, const glm::dvec3 &cp4);
+
+    glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3> &controlPoints);
+
+    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3> &controlPoints);
+
+} // namespace
+#endif

@@ -22,64 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
-#define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
+#ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
+#define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
-#include <modules/autonavigation/pathsegment.h>
-#include <modules/autonavigation/pathspecification.h>
-#include <openspace/interaction/interpolator.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/glm.h>
-
-namespace openspace {
-    class Camera;
-} // namespace openspace
+#include <vector>
 
 namespace openspace::autonavigation {
 
-struct CameraState;
+struct CameraState {
+    glm::dvec3 position;
+    glm::dquat rotation;
+    std::string referenceNode;
+};
 
-class AutoNavigationHandler : public properties::PropertyOwner {
+enum CurveType {
+    Bezier, 
+    Bezier2,
+    Linear,
+    Linear2
+};
+
+class PathSegment {
 public:
-    AutoNavigationHandler();
-    ~AutoNavigationHandler();
+    PathSegment(CameraState start, CameraState end, double duration, double startTime, CurveType type = Bezier);
 
-    // Mutators
+    CameraState start() const;
+    CameraState end() const;
+    double duration() const;
+    double startTime() const;
 
-    // Accessors
-    Camera* camera() const;
-    const double pathDuration() const;
-    PathSegment& currentPathSegment();
+    glm::vec3 getPositionAt(double t);
+    glm::dquat getRotationAt(double t);
+    glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up);
 
-    void createPath(PathSpecification& spec);
+private: 
+    void generateBezier();
+    void generateBezier2();
+    void generateLinear2();
 
-    void updateCamera(double deltaTime);
-    void addToPath(const SceneGraphNode* node, double duration = 5.0); // TODO: remove
-    void clearPath();
-    void startPath();
-
-    // TODO: move to privates
-    glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node, 
-        const glm::dvec3 prevPos, std::optional<double> height = std::nullopt);
-    // TODO: move to privates
-    CameraState cameraStateFromTargetPosition(glm::dvec3 targetPos, 
-        glm::dvec3 lookAtPos, std::string node);
-
-private:
-    CameraState getStartState();
-
-    bool handleInstruction(const Instruction& instruction, int index);
-    bool endFromTargetNodeInstruction(CameraState& endState, CameraState& prevState, const Instruction& instruction, int index);
-    bool endFromNavigationStateInstruction(CameraState& endState, const Instruction& instruction, int index);
-
-    std::vector<PathSegment> _pathSegments;
-
-    double _pathDuration;
-    double _currentTime; 
-    bool _isPlaying = false;
+    CameraState _start;
+    CameraState _end;
+    double _duration;
+    double _startTime; 
+    CurveType _curveType; 
+    std::vector<glm::dvec3> _controlPoints;
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
+#endif // __OPENSPACE_MODULE___PATHSEGMENT___H__
