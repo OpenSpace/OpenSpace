@@ -1350,7 +1350,9 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 }
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
-    const ShadowComponent::ShadowMapData& shadowData, const bool renderGeomOnly) {
+                                         const ShadowComponent::ShadowMapData& shadowData,
+                                         bool renderGeomOnly)
+{
     //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;

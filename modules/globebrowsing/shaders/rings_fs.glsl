@@ -50,8 +50,9 @@ Fragment getFragment() {
     float radius = length(st);
 
     // We only want to consider ring-like objects so we need to discard everything else
-    if (radius > 1.0)
+    if (radius > 1.0) {
         discard;
+    }
 
     // Remapping the texture coordinates
     // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
@@ -61,7 +62,7 @@ Fragment getFragment() {
     if (texCoord < 0.f || texCoord > 1.f) {
         discard;
     }
-        
+
     vec4 diffuse = texture(ringTexture, texCoord);
     float colorValue = length(diffuse.rgb);
     // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
@@ -90,7 +91,7 @@ Fragment getFragment() {
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  nShadowSamples - i));
         }
         sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
-        shadow = sum / (8.f * nShadowSamples + 1.f);
+        shadow = sum / (8.0 * nShadowSamples + 1.f);
     }
     
     // The normal for the one plane depends on whether we are dealing

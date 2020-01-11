@@ -38,80 +38,74 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul { 
-    class Dictionary;
-}
-
+namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
     struct RenderData;
     struct UpdateData;
 
-    namespace documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
-    class RingsComponent : public properties::PropertyOwner {
-    public:
-        enum RenderPass {
-            GeometryOnly,
-            GeometryAndShading
-        };
-    public:
-        RingsComponent(const ghoul::Dictionary& dictionary);
-
-        void initialize();
-        void initializeGL();
-        void deinitializeGL();
-      
-        bool isReady() const;
-
-        void draw(
-            const RenderData& data, 
-            const RingsComponent::RenderPass renderPass, 
-            const ShadowComponent::ShadowMapData& shadowData = {}
-        );
-        void update(const UpdateData& data);
-
-        static documentation::Documentation Documentation();
-
-        bool isEnabled() const;
-
-    private:
-        void loadTexture();
-        void createPlane();
-
-        properties::StringProperty _texturePath;
-        properties::FloatProperty _size;
-        properties::Vec2Property _offset;
-        properties::FloatProperty _nightFactor;
-        properties::FloatProperty _transparency;
-        properties::BoolProperty _enabled;
-        properties::FloatProperty _zFightingPercentage;
-        properties::IntProperty _nShadowSamples;
-
-        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
-        UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
-                     sunPosition, ringTexture, shadowMatrix, shadowMapTexture,
-                     nShadowSamples, zFightingPercentage
-        ) _uniformCache;
-        UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) 
-            _geomUniformCache;
-        std::unique_ptr<ghoul::opengl::Texture> _texture;
-        std::unique_ptr<ghoul::filesystem::File> _textureFile;
-
-        ghoul::Dictionary _ringsDictionary;
-        bool _textureIsDirty = false;
-        GLuint _quad = 0;
-        GLuint _vertexPositionBuffer = 0;
-        bool _planeIsDirty = false;
-
-        glm::vec3 _sunPosition;
+class RingsComponent : public properties::PropertyOwner {
+public:
+    enum RenderPass {
+        GeometryOnly,
+        GeometryAndShading
     };
+    
+    RingsComponent(const ghoul::Dictionary& dictionary);
+
+    void initialize();
+    void initializeGL();
+    void deinitializeGL();
+      
+    bool isReady() const;
+
+    void draw(
+        const RenderData& data, 
+        const RingsComponent::RenderPass renderPass, 
+        const ShadowComponent::ShadowMapData& shadowData = {}
+    );
+    void update(const UpdateData& data);
+
+    static documentation::Documentation Documentation();
+
+    bool isEnabled() const;
+
+private:
+    void loadTexture();
+    void createPlane();
+
+    properties::StringProperty _texturePath;
+    properties::FloatProperty _size;
+    properties::Vec2Property _offset;
+    properties::FloatProperty _nightFactor;
+    properties::FloatProperty _transparency;
+    properties::BoolProperty _enabled;
+    properties::FloatProperty _zFightingPercentage;
+    properties::IntProperty _nShadowSamples;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
+    UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
+        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, nShadowSamples,
+        zFightingPercentage
+    ) _uniformCache;
+    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture)  
+        _geomUniformCache;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
+    ghoul::Dictionary _ringsDictionary;
+    bool _textureIsDirty = false;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
+    bool _planeIsDirty = false;
+
+    glm::vec3 _sunPosition;
+};
 
 } // namespace openspace
 

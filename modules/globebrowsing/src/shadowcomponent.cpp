@@ -75,6 +75,8 @@ namespace {
         "The depth map size in pixels. You must entry the width and height values."
     };
 
+    constexpr const GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
+
     void checkFrameBufferState(const std::string& codePosition) {
         if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framework not built. " + codePosition);
@@ -232,7 +234,6 @@ void ShadowComponent::deinitializeGL() {
     glDeleteTextures(1, &_shadowDepthTexture);
     glDeleteTextures(1, &_positionInLightSpaceTexture);
     glDeleteFramebuffers(1, &_shadowFBO);
-    checkGLError("ShadowComponent::deinitializeGL() -- Deleted Textures and Framebuffer");
 }
 
 RenderData ShadowComponent::begin(const RenderData& data) {
@@ -245,15 +246,15 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     glm::dvec3 lightDirection = glm::normalize(diffVector);
         
     // Percentage of the original light source distance (to avoid artifacts)
-    /*double multiplier = originalLightDistance * 
-        (static_cast<double>(_distanceFraction)/1.0E5);*/
+    //double multiplier = originalLightDistance * 
+    //    (static_cast<double>(_distanceFraction)/1.0E5);
 
     double multiplier = originalLightDistance *
         (static_cast<double>(_distanceFraction) / 1E17);
         
     // New light source position
-    /*glm::dvec3 lightPosition = data.modelTransform.translation + 
-        (lightDirection * multiplier);*/
+    //glm::dvec3 lightPosition = data.modelTransform.translation + 
+    //    (lightDirection * multiplier);
     glm::dvec3 lightPosition = data.modelTransform.translation +
         (diffVector * multiplier);
 
@@ -338,14 +339,14 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         
-    /*glEnable(GL_CULL_FACE);
-    checkGLError("begin() -- enabled cull face");
-    glCullFace(GL_FRONT);
-    checkGLError("begin() -- set cullface to front");*/
-    /*glEnable(GL_POLYGON_OFFSET_FILL);
-    checkGLError("begin() -- enabled polygon offset fill");
-    glPolygonOffset(2.5f, 10.0f);
-    checkGLError("begin() -- set values for polygon offset");*/
+    //glEnable(GL_CULL_FACE);
+    //checkGLError("begin() -- enabled cull face");
+    //glCullFace(GL_FRONT);
+    //checkGLError("begin() -- set cullface to front");
+    //glEnable(GL_POLYGON_OFFSET_FILL);
+    //checkGLError("begin() -- enabled polygon offset fill");
+    //glPolygonOffset(2.5f, 10.0f);
+    //checkGLError("begin() -- set values for polygon offset");
 
     RenderData lightRenderData{
         *_lightCamera,
@@ -437,12 +438,13 @@ void ShadowComponent::end() {
     }
 }
 
-void ShadowComponent::update(const UpdateData& /*data*/) {
+void ShadowComponent::update(const UpdateData&) {
     _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition();
         
     glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
-        (_shadowDepthTextureHeight != renderingResolution.y))) {
+        (_shadowDepthTextureHeight != renderingResolution.y)))
+    {
         _shadowDepthTextureWidth = renderingResolution.x * 2;
         _shadowDepthTextureHeight = renderingResolution.y * 2;
         updateDepthTexture();
@@ -452,8 +454,6 @@ void ShadowComponent::update(const UpdateData& /*data*/) {
 void ShadowComponent::createDepthTexture() {
     glGenTextures(1, &_shadowDepthTexture);
     updateDepthTexture();
-        
-    checkGLError("createDepthTexture() -- Depth texture created");
         
     _shadowData.shadowDepthTexture = _shadowDepthTexture;
     //_shadowData.positionInLightSpaceTexture = _positionInLightSpaceTexture;
@@ -472,14 +472,13 @@ void ShadowComponent::createShadowFBO() {
         0
     );
 
-    /*glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        _positionInLightSpaceTexture,
-        0
-    );*/
+    //glFramebufferTexture(
+    //    GL_FRAMEBUFFER,
+    //    GL_COLOR_ATTACHMENT0,
+    //    _positionInLightSpaceTexture,
+    //    0
+    //);
         
-    checkGLError("createShadowFBO() -- Created Shadow Framebuffer");
     //GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
     GLenum drawBuffers[] = { GL_NONE, GL_NONE, GL_NONE };
     glDrawBuffers(3, drawBuffers);
@@ -492,15 +491,15 @@ void ShadowComponent::createShadowFBO() {
 
 void ShadowComponent::updateDepthTexture() {
     glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-    /*
-    glTexStorage2D(
-        GL_TEXTURE_2D,
-        1,
-        GL_DEPTH_COMPONENT32F,
-        _shadowDepthTextureWidth,
-        _shadowDepthTextureHeight
-    );
-    */
+
+    //glTexStorage2D(
+    //    GL_TEXTURE_2D,
+    //    1,
+    //    GL_DEPTH_COMPONENT32F,
+    //    _shadowDepthTextureWidth,
+    //    _shadowDepthTextureHeight
+    //);
+
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -521,30 +520,30 @@ void ShadowComponent::updateDepthTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
-    /*glGenTextures(1, &_positionInLightSpaceTexture);
-    glBindTexture(GL_TEXTURE_2D, _positionInLightSpaceTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGB32F,
-        _shadowDepthTextureWidth,
-        _shadowDepthTextureHeight,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);*/
+    //glGenTextures(1, &_positionInLightSpaceTexture);
+    //glBindTexture(GL_TEXTURE_2D, _positionInLightSpaceTexture);
+    //glTexImage2D(
+    //    GL_TEXTURE_2D,
+    //    0,
+    //    GL_RGB32F,
+    //    _shadowDepthTextureWidth,
+    //    _shadowDepthTextureHeight,
+    //    0,
+    //    GL_RGBA,
+    //    GL_FLOAT,
+    //    nullptr
+    //);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void ShadowComponent::saveDepthBuffer() {
     int size = _shadowDepthTextureWidth * _shadowDepthTextureHeight;
-    GLubyte* buffer = new GLubyte[size];
+    std::vector<GLubyte> buffer(size);
 
     glReadPixels(
         0,
@@ -553,10 +552,9 @@ void ShadowComponent::saveDepthBuffer() {
         _shadowDepthTextureHeight,
         GL_DEPTH_COMPONENT,
         GL_UNSIGNED_BYTE,
-        buffer
+        buffer.data()
     );
 
-    checkGLError("readDepthBuffer To buffer");
     std::fstream ppmFile;
 
     ppmFile.open("depthBufferShadowMapping.ppm", std::fstream::out);
@@ -582,9 +580,9 @@ void ShadowComponent::saveDepthBuffer() {
         std::cout << "Texture saved to file depthBufferShadowMapping.ppm\n\n";
     }
 
-    delete[] buffer;
+    buffer.clear();
 
-    GLfloat* bBuffer = new GLfloat[size * 4];
+    std::vector<GLfloat> bBuffer(size * 4);
 
     glReadBuffer(GL_COLOR_ATTACHMENT3);
     glReadPixels(
@@ -594,10 +592,9 @@ void ShadowComponent::saveDepthBuffer() {
         _shadowDepthTextureHeight,
         GL_RGBA,
         GL_FLOAT,
-        bBuffer
+        bBuffer.data()
     );
 
-    checkGLError("readPositionBuffer To buffer");
     ppmFile.clear();
 
     ppmFile.open("positionBufferShadowMapping.ppm", std::fstream::out);
@@ -636,56 +633,7 @@ void ShadowComponent::saveDepthBuffer() {
 
         ppmFile.close();
 
-        std::cout << "Texture saved to file positionBufferShadowMapping.ppm\n\n";
-    }
-
-    delete[] bBuffer;
-}
-
-void ShadowComponent::checkGLError(const std::string & where) const {
-    const GLenum error = glGetError();
-    switch (error) {
-        case GL_NO_ERROR:
-            break;
-        case GL_INVALID_ENUM:
-            LERRORC(
-                "OpenGL Invalid State",
-                fmt::format("Function {}: GL_INVALID_ENUM", where)
-            );
-            break;
-        case GL_INVALID_VALUE:
-            LERRORC(
-                "OpenGL Invalid State",
-                fmt::format("Function {}: GL_INVALID_VALUE", where)
-            );
-            break;
-        case GL_INVALID_OPERATION:
-            LERRORC(
-                "OpenGL Invalid State",
-                fmt::format(
-                    "Function {}: GL_INVALID_OPERATION", where
-                ));
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            LERRORC(
-                "OpenGL Invalid State",
-                fmt::format(
-                    "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION",
-                    where
-                )
-            );
-            break;
-        case GL_OUT_OF_MEMORY:
-            LERRORC(
-                "OpenGL Invalid State",
-                fmt::format("Function {}: GL_OUT_OF_MEMORY", where)
-            );
-            break;
-        default:
-            LERRORC(
-                "OpenGL Invalid State",
-                fmt::format("Unknown error code: {0:x}", static_cast<int>(error))
-            );
+        LINFO("Texture saved to file positionBufferShadowMapping.ppm");
     }
 }
 

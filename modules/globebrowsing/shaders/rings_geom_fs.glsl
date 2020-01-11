@@ -39,8 +39,9 @@ Fragment getFragment() {
     float radius = length(st);
 
     // We only want to consider ring-like objects so we need to discard everything else
-    if (radius > 1.0)
+    if (radius > 1.0) {
         discard;
+    }
 
     // Remapping the texture coordinates
     // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]

@@ -41,23 +41,15 @@
 #include <string>
 #include <sstream>
 
-namespace ghoul {
-    class Dictionary;
-}
-   
+namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
     struct RenderData;
     struct UpdateData;
 
 namespace documentation { struct Documentation; }
-
-static const GLfloat ShadowBorder[] = { 1.f, 1.f, 1.f, 1.f };
 
 class ShadowComponent : public properties::PropertyOwner {
 public:
@@ -94,7 +86,6 @@ private:
 
     // Debug
     void saveDepthBuffer();
-    void checkGLError(const std::string & where) const;
 
     ShadowMapData _shadowData;
 

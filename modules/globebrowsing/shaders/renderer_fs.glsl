@@ -267,12 +267,12 @@ Fragment getFragment() {
 
 #if SHADOW_MAPPING_ENABLED
     float shadow = 1.0;
-    if ( shadowCoords.w > 1 ) {
+    if (shadowCoords.w > 1) {
         vec4 normalizedShadowCoords = shadowCoords;
         normalizedShadowCoords.z    = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
         normalizedShadowCoords.xy   = normalizedShadowCoords.xy / normalizedShadowCoords.w;
         normalizedShadowCoords.w    = 1.0;
-        
+
        float sum = 0;
         for (int i = 0; i < nShadowSamples; ++i) {
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i, -nShadowSamples + i));
@@ -285,7 +285,7 @@ Fragment getFragment() {
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  nShadowSamples - i));
         }
         sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
-        shadow = sum / (8.f * nShadowSamples + 1.f);
+        shadow = sum / (8.0 * nShadowSamples + 1.f);
     }
     frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.5, 0.0, 1.0) : shadow;
 #endif
