@@ -1,0 +1,11 @@
+local assetHelper = asset.require('util/asset_helper')
+local shared = asset.require('../satellites_shared')
+
+local group = {
+    Title = "ISS",
+    Url = "https://live.ariss.org/iss.txt",
+    TrailColor = { 0.0, 1.0, 0.0 }
+}
+
+local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+shared.registerSatelliteGroupObjects(asset, group, tle, true)
