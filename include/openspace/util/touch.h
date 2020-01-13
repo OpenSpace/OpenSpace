@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,76 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
-#define __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
+#ifndef __OPENSPACE_CORE___TOUCH___H__
+#define __OPENSPACE_CORE___TOUCH___H__
 
-// -Wold-style-cast
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif // defined(__GNUC__) && !defined(__clang__)
+#include <glm/detail/type_vec2.hpp>
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#endif // __clang__
-
-#include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
-#include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
-
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic pop
-#endif // defined(__GNUC__) && !defined(__clang__)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
-
-#include <openspace/util/touch.h>
-#include <ghoul/glm.h>
-#include <algorithm>
-#include <math.h>
-#include <mutex>
-#include <numeric>
-#include <vector>
+#include <cstdint>
+#include <deque>
 
 namespace openspace {
 
-class TuioEar : public TUIO::TuioListener {
+struct TouchInput {
+    TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
+    glm::vec2 screenCoordinates(glm::vec2 resolution) const;
+    glm::vec2 currentWindowCoordinates() const;
+    bool isMoving() const;
+    float distanceToPos(float otherX, float otherY) const;
+    float angleToPos(float otherX, float otherY) const;
+
+    size_t touchDeviceId;
+    size_t fingerId;
+    float x;
+    float y;
+    float dx = 0.f;         // movement in x direction since last touch input
+    float dy = 0.f;         // movement in y direction since last touch input
+    double timestamp; // timestamp in seconds from global touch initialization
+};
+
+class TouchInputHolder {
 public:
-    TuioEar();
-    ~TuioEar();
+    TouchInputHolder(TouchInput input);
 
-    /**
-    * Callback functions, listens to the TUIO server
-    */
-    void addTuioObject(TUIO::TuioObject *tobj);
-    void updateTuioObject(TUIO::TuioObject *tobj);
-    void removeTuioObject(TUIO::TuioObject *tobj);
+    // tryAddInput:
+    // Succeeds upon a different input than last.
+    // Fails upon a too similar input as last.
+    bool tryAddInput(TouchInput input);
+    void clearInputs();
 
-    void addTuioCursor(TUIO::TuioCursor *tcur);
-    void updateTuioCursor(TUIO::TuioCursor *tcur);
-    void removeTuioCursor(TUIO::TuioCursor *tcur);
+    bool holdsInput(const TouchInput &input) const;
 
-    void addTuioBlob(TUIO::TuioBlob *tblb);
-    void updateTuioBlob(TUIO::TuioBlob *tblb);
-    void removeTuioBlob(TUIO::TuioBlob *tblb);
+    size_t touchDeviceId() const;
+    size_t fingerId() const;
 
-    void refresh(TUIO::TuioTime frameTime);
+    float speedX() const;
+    float speedY() const;
 
-    /**
-        * Lock-swap the containers of this listener
-        */
-    std::vector<TouchInput> takeInput();
-    std::vector<TouchInput> takeRemovals();
+    bool isMoving() const;
+    float gestureDistance() const;
+    double gestureTime() const;
+
+    size_t numInputs() const;
+    const TouchInput& latestInput() const;
+    const std::deque<TouchInput>& peekInputs() const;
 
 private:
-    TUIO::TuioClient _tuioClient;
+    //A deque of recorded inputs. Adding newer points to the front of the queue
+    std::deque<TouchInput> _inputs;
 
-    std::vector<TouchInput> _inputList;
-    std::vector<TouchInput> _removalList;
-    std::mutex _mx;
+    size_t _touchDeviceId;
+    size_t _fingerId;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
+#endif // __OPENSPACE_CORE___TOUCH___H__

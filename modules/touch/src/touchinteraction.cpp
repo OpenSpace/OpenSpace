@@ -24,39 +24,35 @@
 
 #include <openspace/engine/globals.h>
 
-#include <modules/touch/include/touchinteraction.h>
-#include <modules/touch/include/directinputsolver.h>
-#include <modules/imgui/imguimodule.h>
-
-#include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/logging/logmanager.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/updatestructures.h>
-
-#include <glm/gtx/quaternion.hpp>
-
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #endif
 
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-#include <modules/webbrowser/webbrowsermodule.h>
-#endif
-
-#include <cmath>
+#include <modules/imgui/imguimodule.h>
+#include <modules/touch/include/touchinteraction.h>
+#include <modules/touch/include/directinputsolver.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/keys.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/invariants.h>
+#include <glm/gtx/quaternion.hpp>
+#include <cmath>
 #include <functional>
 #include <fstream>
+#include <numeric>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -68,10 +64,6 @@
 #ifdef WIN32
 #pragma warning (pop)
 #endif // WIN32
-
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
 
 namespace {
     constexpr const char* _loggerCat = "TouchInteraction";
@@ -246,9 +238,19 @@ namespace {
         "Its purpose is to limit zooming in on a node. If this value is not set it "
         "defaults to the surface of the current anchor. "
     };
-} // namespace
 
-using namespace TUIO;
+    // Compute coefficient of decay based on current frametime; if frametime has been
+    // longer than usual then multiple decay steps may be applied to keep the decay
+    // relative to user time
+    double computeDecayCoeffFromFrametime(double coeff, int times) {
+        if (coeff > 0.00001) {
+            return std::pow(coeff, times);
+        }
+        else {
+            return 0.0;
+        }
+    }
+} // namespace
 
 namespace openspace {
 
@@ -310,22 +312,6 @@ TouchInteraction::TouchInteraction()
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
-    , _projectionScaleFactor(1.000004)
-    , _currentRadius(1.0)
-    , _slerpdT(1000)
-    , _timeSlack(0.0)
-    , _numOfTests(0)
-    , _directTouchMode(false)
-    , _wasPrevModeDirectTouch(false)
-    , _tap(false)
-    , _doubleTap(false)
-    , _zoomOutTap(false)
-    , _lmSuccess(true)
-    , _guiON(false)
-#ifdef TOUCH_DEBUG_PROPERTIES
-    , _debugProperties()
-#endif
-    , _centroid(glm::dvec3(0.0))
 {
     addProperty(_touchActive);
     addProperty(_unitTest);
@@ -370,41 +356,42 @@ TouchInteraction::TouchInteraction()
             ));
         }
     });
-
-    _time.initSession();
+    _time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()
+    );
 }
-// Called each frame if there is any input
-void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
-                                            std::vector<Point>& lastProcessed)
+
+void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>& list,
+                                            std::vector<TouchInput>& lastProcessed)
 {
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.nFingers = list.size();
 #endif
-    if (_tap) { // check for doubletap
-        if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
+    if (_tap) {
+        // check for doubletap
+        using namespace std::chrono;
+        milliseconds timestamp = duration_cast<milliseconds>(
+            high_resolution_clock::now().time_since_epoch()
+        );
+        if ((timestamp - _time).count() < _maxTapTime) {
             _doubleTap = true;
             _tap = false;
         }
-        _time.initSession();
+        _time = timestamp;
     }
+    // Code for lower-right corner double-tap to zoom-out
+    const glm::vec2 res = global::windowDelegate.currentWindowSize();
+    const glm::vec2 pos = list[0].latestInput().screenCoordinates(res);
 
-    bool hasWebContent = webContent(list);
-
-    //Code for lower-right corner double-tap to zoom-out
-    glm::ivec2 res = global::windowDelegate.currentWindowSize();
-    glm::dvec2 pos = glm::vec2(
-        list.at(0).getScreenX(res.x),
-        list.at(0).getScreenY(res.y)
-    );
     const float bottomCornerSizeForZoomTap_fraction = 0.08f;
-    int zoomTapThresholdX = static_cast<int>(
-        res.x * (1.0f - bottomCornerSizeForZoomTap_fraction)
+    const int zoomTapThresholdX = static_cast<int>(
+        res.x * (1.f - bottomCornerSizeForZoomTap_fraction)
     );
-    int zoomTapThresholdY = static_cast<int>(
-        res.y * (1.0f - bottomCornerSizeForZoomTap_fraction)
+    const int zoomTapThresholdY = static_cast<int>(
+        res.y * (1.f - bottomCornerSizeForZoomTap_fraction)
     );
 
-    bool isTapInLowerRightCorner =
+    const bool isTapInLowerRightCorner =
         (std::abs(pos.x) > zoomTapThresholdX && std::abs(pos.y) > zoomTapThresholdY);
 
     if (_doubleTap && isTapInLowerRightCorner) {
@@ -413,22 +400,18 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _doubleTap = false;
     }
 
-    if (!guiMode(list) && !hasWebContent) {
-        bool isThisFrameTransitionBetweenTouchModes
-            = (_wasPrevModeDirectTouch != _directTouchMode);
-        if (isThisFrameTransitionBetweenTouchModes) {
+    size_t numFingers = list.size();
+    if (!isGuiMode(pos, numFingers)) {
+        bool isTransitionBetweenModes = (_wasPrevModeDirectTouch != _directTouchMode);
+        if (isTransitionBetweenModes) {
             _vel.orbit = glm::dvec2(0.0, 0.0);
             _vel.zoom = 0.0;
             _vel.roll = 0.0;
             _vel.pan = glm::dvec2(0.0, 0.0);
             resetAfterInput();
-            /*if( _directTouchMode )
-                LINFO("Touch -> Direct-touch");
-            else
-                LINFO("Direct-touch -> Touch");*/
         }
 
-        if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
+        if (_directTouchMode && _selected.size() > 0 && numFingers == _selected.size()) {
 #ifdef TOUCH_DEBUG_PROPERTIES
             _debugProperties.interactionMode = "Direct";
 #endif
@@ -448,41 +431,21 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _wasPrevModeDirectTouch = _directTouchMode;
         // evaluates if current frame is in directTouchMode (will be used next frame)
         _directTouchMode =
-            (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size());
+            (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
     }
 }
 
-bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-    glm::ivec2 res = global::windowDelegate.currentWindowSize();
-    glm::dvec2 pos = glm::vec2(
-        list.at(0).getScreenX(res.x),
-        list.at(0).getScreenY(res.y)
-    );
-
-    WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
-    return module.eventHandler().hasContentCallback(pos.x, pos.y);
-#else
-    return false;
-#endif
-}
-
-// Activates/Deactivates gui input mode (if active it voids all other interactions)
-bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
+bool TouchInteraction::isGuiMode(glm::dvec2 screenPosition, size_t numFingers) {
     if (_ignoreGui) {
         return false;
     }
-    glm::ivec2 res = global::windowDelegate.currentWindowSize();
-    glm::dvec2 pos = glm::vec2(
-        list.at(0).getScreenX(res.x),
-        list.at(0).getScreenY(res.y)
-    );
 
     ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
     _guiON = module.gui.isEnabled();
 
-    if (_tap && list.size() == 1 &&
-        std::abs(pos.x) < _guiButton.value().x && std::abs(pos.y) < _guiButton.value().y)
+    if (_tap && numFingers == 1 &&
+        std::abs(screenPosition.x) < _guiButton.value().x &&
+        std::abs(screenPosition.y) < _guiButton.value().y)
     {
         // pressed invisible button
         _guiON = !_guiON;
@@ -491,19 +454,19 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
         LINFO(fmt::format(
             "GUI mode is {}. Inside box by: ({}%, {}%)",
             _guiON ? "activated" : "deactivated",
-            static_cast<int>(100 * (pos.x / _guiButton.value().x)),
-            static_cast<int>(100 * (pos.y / _guiButton.value().y))
+            static_cast<int>(100 * (screenPosition.x / _guiButton.value().x)),
+            static_cast<int>(100 * (screenPosition.y / _guiButton.value().y))
         ));
     }
     else if (_guiON) {
-        module.touchInput = { _guiON, pos, 1 }; // emulate touch input as a mouse
+        // emulate touch input as a mouse
+        module.touchInput = { _guiON, screenPosition, 1 };
     }
 
     return _guiON;
 }
 
-// Sets _vel to update _camera according to direct-manipulation (L2 error)
-void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
+void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
     // Reset old velocities upon new interaction
     _vel.orbit = glm::dvec2(0.0, 0.0);
     _vel.zoom = 0.0;
@@ -515,10 +478,10 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 
     // finds best transform values for the new camera state and stores them in par
     std::vector<double> par(6, 0.0);
-    par.at(0) = _lastVel.orbit.x; // use _lastVel for orbit
-    par.at(1) = _lastVel.orbit.y;
+    par[0] = _lastVel.orbit.x; // use _lastVel for orbit
+    par[1] = _lastVel.orbit.y;
     _lmSuccess = _solver.solve(list, _selected, &par, *_camera);
-    int nDof = _solver.getNDof();
+    int nDof = _solver.nDof();
 
     if (_lmSuccess && !_unitTest) {
          // if good values were found set new camera state
@@ -543,19 +506,17 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     else {
         // prevents touch to infinitely be active (due to windows bridge case where event
         // doesnt get consumed sometimes when LMA fails to converge)
-        global::moduleEngine.module<ImGUIModule>()->touchInput = {
-            true,
-            glm::dvec2(0.0, 0.0),
-            1
-        };
+        Touch touch;
+        touch.active = true;
+        touch.pos = glm::dvec2(0.0, 0.0);
+        touch.action = 1;
+        global::moduleEngine.module<ImGUIModule>()->touchInput = touch;
         resetAfterInput();
     }
 }
 
-// Traces the touch input into the scene and finds the surface coordinates of touched
-// planets (if occuring)
-void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
-    //trim list to only contain visible nodes that make sense
+void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& list) {
+    // trim list to only contain visible nodes that make sense
     std::string selectables[30] = {
         "Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus",
         "Neptune", "Pluto", "Moon", "Titan", "Rhea", "Mimas", "Iapetus", "Enceladus",
@@ -574,30 +535,31 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
     std::vector<DirectInputSolver::SelectedBody> newSelected;
-    
-    //node & distance
-    std::tuple<SceneGraphNode*, double> currentlyPicked = {
+
+    // node & distance
+    std::pair<SceneGraphNode*, double> currentlyPicked = {
         nullptr,
         std::numeric_limits<double>::max()
     };
-    
 
-    for (const TuioCursor& c : list) {
-        double xCo = 2 * (c.getX() - 0.5);
-        double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
+
+    for (const TouchInputHolder& inputHolder : list) {
+        // normalized -1 to 1 coordinates on screen
+        double xCo = 2 * (inputHolder.latestInput().x - 0.5);
+        double yCo = -2 * (inputHolder.latestInput().y - 0.5);
         glm::dvec3 cursorInWorldSpace = camToWorldSpace *
             glm::dvec3(glm::inverse(_camera->projectionMatrix()) *
             glm::dvec4(xCo, yCo, -1.0, 1.0));
         glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
 
-        long id = c.getSessionID();
+        size_t id = inputHolder.fingerId();
 
         for (SceneGraphNode* node : selectableNodes) {
             double boundingSphereSquared = static_cast<double>(node->boundingSphere()) *
                                            static_cast<double>(node->boundingSphere());
             glm::dvec3 camToSelectable = node->worldPosition() - camPos;
             double intersectionDist = 0.0;
-            bool intersected = glm::intersectRaySphere(
+            const bool intersected = glm::intersectRaySphere(
                 camPos,
                 raytrace,
                 node->worldPosition(),
@@ -616,7 +578,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     [id](const DirectInputSolver::SelectedBody& s) { return s.id == id; }
                 );
                 if (oldNode != newSelected.end()) {
-                    double oldNodeDist = glm::length(
+                    const double oldNodeDist = glm::length(
                         oldNode->node->worldPosition() - camPos
                     );
                     if (glm::length(camToSelectable) < oldNodeDist) {
@@ -637,11 +599,12 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                               glm::vec4(node->worldPosition(), 1.0);
             glm::dvec2 ndc = clip / clip.w;
 
-            // If the object is not in the screen, we dont want to consider it at all
-            if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0) {
+            const bool isVisibleX = (ndc.x >= -1.0 && ndc.x <= 1.0);
+            const bool isVisibleY = (ndc.y >= -1.0 && ndc.y <= 1.0);
+            if (isVisibleX && isVisibleY) {
                 glm::dvec2 cursor = { xCo, yCo };
 
-                double ndcDist = glm::length(ndc - cursor);
+                const double ndcDist = glm::length(ndc - cursor);
                 // We either want to select the object if it's bounding sphere as been
                 // touched (checked by the first part of this loop above) or if the touch
                 // point is within a minimum distance of the center
@@ -668,12 +631,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                         "Picking candidate based on proximity"
                     );
 #endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
-                    double dist = length(camToSelectable);
-                    if (dist < std::get<1>(currentlyPicked)) {
-                        currentlyPicked = {
-                            node,
-                            dist
-                        };
+                    const double dist = length(camToSelectable);
+                    if (dist < currentlyPicked.second) {
+                        currentlyPicked = std::make_pair(node, dist);
                     }
                 }
             }
@@ -681,7 +641,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     }
 
     // If an item has been picked, it's in the first position of the vector now
-    if (SceneGraphNode* node = std::get<0>(currentlyPicked)) {
+    if (SceneGraphNode* node = currentlyPicked.first) {
         _pickingSelected = node;
 #ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
         LINFOC("Picking", "Picked node: " + _pickingSelected->identifier());
@@ -691,65 +651,60 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     _selected = std::move(newSelected);
 }
 
-// Interprets the input gesture to a specific interaction
-int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
-                                           const std::vector<Point>& lastProcessed)
+int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list,
+                                           const std::vector<TouchInput>& lastProcessed)
 {
-    glm::dvec3 lastCentroid = _centroid;
-    _centroid.x = std::accumulate(
-        list.begin(),
-        list.end(),
-        0.0,
-        [](double x, const TuioCursor& c) { return x + c.getX(); }
-    ) / list.size();
-    _centroid.y = std::accumulate(
-        list.begin(),
-        list.end(),
-        0.0,
-        [](double y, const TuioCursor& c) { return y + c.getY(); }
-    ) / list.size();
+    glm::fvec2 lastCentroid = _centroid;
+    _centroid = { 0.f, 0.f };
+    for (const TouchInputHolder& inputHolder : list) {
+        _centroid += glm::vec2(
+            inputHolder.latestInput().x,
+            inputHolder.latestInput().y
+        );
+    }
+    _centroid /= static_cast<float>(list.size());
 
     // see if the distance between fingers changed - used in pan interpretation
     double dist = 0;
     double lastDist = 0;
-    TuioCursor cursor = list.at(0);
-    for (const TuioCursor& c : list) {
+    TouchInput distInput = list[0].latestInput();
+    for (const TouchInputHolder& inputHolder : list) {
+        const TouchInput& latestInput = inputHolder.latestInput();
         dist += glm::length(
-            glm::dvec2(c.getX(), c.getY()) - glm::dvec2(cursor.getX(), cursor.getY())
+            glm::dvec2(latestInput.x, latestInput.y) -
+            glm::dvec2(distInput.x, distInput.y)
         );
-        cursor = c;
+        distInput = latestInput;
     }
-    TuioPoint point = lastProcessed.at(0).second;
-    for (const Point& p : lastProcessed) {
-        lastDist += glm::length(glm::dvec2(p.second.getX(), p.second.getY()) -
-                    glm::dvec2(point.getX(), point.getY()));
-        point = p.second;
+    distInput = lastProcessed[0];
+    for (const TouchInput& p : lastProcessed) {
+        lastDist += glm::length(glm::dvec2(p.x, p.y) -
+                    glm::dvec2(distInput.x, distInput.y));
+        distInput = p;
     }
     // find the slowest moving finger - used in roll interpretation
     double minDiff = 1000;
-    long id = 0;
-    for (const TuioCursor& c : list) {
-        auto it = std::find_if(
-            lastProcessed.begin(),
-            lastProcessed.end(),
-            [&c](const Point& p) {
-                return p.first == c.getSessionID();
+    for (const TouchInputHolder& inputHolder : list) {
+        const auto it = std::find_if(
+            lastProcessed.cbegin(),
+            lastProcessed.cend(),
+            [&inputHolder](const TouchInput& input) {
+                return inputHolder.holdsInput(input);
         });
 
-        if (it == lastProcessed.end()) {
+        if (it == lastProcessed.cend()) {
             continue;
         }
+        const TouchInput& latestInput = inputHolder.latestInput();
+        const TouchInput& prevInput = *it;
 
-        TuioPoint itPoint = it->second;
-        double diff = c.getX() - itPoint.getX() + c.getY() - itPoint.getY();
+        double diff = latestInput.x - prevInput.x + latestInput.y - prevInput.y;
 
-        if (!c.isMoving()) {
-            diff = minDiff = 0.0;
-            id = c.getSessionID();
+        if (!inputHolder.isMoving()) {
+            minDiff = 0.0;
         }
         else if (std::abs(diff) < std::abs(minDiff)) {
             minDiff = diff;
-            id = c.getSessionID();
         }
     }
     // find if all fingers angles are high - used in roll interpretation
@@ -757,26 +712,22 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         list.begin(),
         list.end(),
         0.0,
-        [&](double diff, const TuioCursor& c) {
-            TuioPoint point = std::find_if(
+        [&](double diff, const TouchInputHolder& inputHolder) {
+            const TouchInput& lastPoint = *std::find_if(
                 lastProcessed.begin(),
                 lastProcessed.end(),
-                [&c](const Point& p) { return p.first == c.getSessionID(); }
-            )->second;
+                [&inputHolder](const TouchInput& input) {
+                    return inputHolder.holdsInput(input);
+                });
             double res = 0.0;
-            float lastAngle = point.getAngle(
-                static_cast<float>(_centroid.x),
-                static_cast<float>(_centroid.y)
-            );
-            float currentAngle = c.getAngle(
-                static_cast<float>(_centroid.x),
-                static_cast<float>(_centroid.y)
-            );
-            if (lastAngle > currentAngle + 1.5 * M_PI) {
-                res = currentAngle + (2 * M_PI - lastAngle);
+
+            float lastAngle = lastPoint.angleToPos(_centroid.x, _centroid.y);
+            float currentAngle = inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
+            if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
+                res = currentAngle + (2.0 * glm::pi<float>() - lastAngle);
             }
-            else if (currentAngle > lastAngle + 1.5 * M_PI) {
-                res = (2 * M_PI - currentAngle) + lastAngle;
+            else if (currentAngle > lastAngle + 1.5 * glm::pi<float>()) {
+                res = (2.0 * glm::pi<float>() - currentAngle) + lastAngle;
             }
             else {
                 res = currentAngle - lastAngle;
@@ -810,9 +761,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         return ROT;
     }
     else {
-        float avgDistance = static_cast<float>(
-            std::abs(dist - lastDist) / list.at(0).getMotionSpeed()
-        );
+        float avgDistance = static_cast<float>(std::abs(dist - lastDist));
         // if average distance between 3 fingers are constant we have panning
         if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
             return PAN;
@@ -833,11 +782,9 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
     }
 }
 
-// Calculate how much interpreted interaction (_vel) should change the camera state
-void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
-                                         const std::vector<Point>& lastProcessed)
+void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& list,
+                                         const std::vector<TouchInput>& lastProcessed)
 {
-    const TuioCursor& cursor = list.at(0);
     const int action = interpretInteraction(list, lastProcessed);
     const SceneGraphNode* anchor =
         global::navigationHandler.orbitalNavigator().anchorNode();
@@ -868,14 +815,16 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
     }
 #endif
 
+    const TouchInputHolder& inputHolder = list.at(0);
     switch (action) {
         case ROT: { // add rotation velocity
-            _vel.orbit += glm::dvec2(cursor.getXSpeed() *
-                          _sensitivity.orbit.x, cursor.getYSpeed() *
+            _vel.orbit += glm::dvec2(inputHolder.speedX() *
+                          _sensitivity.orbit.x, inputHolder.speedY() *
                           _sensitivity.orbit.y);
-            double orbitVelocityAvg = glm::distance(_vel.orbit.x, _vel.orbit.y);
-            _constTimeDecayCoeff.orbit
-                = computeConstTimeDecayCoefficient(orbitVelocityAvg);
+            const double orbitVelocityAvg = glm::distance(_vel.orbit.x, _vel.orbit.y);
+            _constTimeDecayCoeff.orbit = computeConstTimeDecayCoefficient(
+                orbitVelocityAvg
+            );
             break;
         }
         case PINCH: {
@@ -885,22 +834,18 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 list.begin(),
                 list.end(),
                 0.0,
-                [&](double d, const TuioCursor& c) {
-                    return d + c.getDistance(
-                        static_cast<float>(_centroid.x),
-                        static_cast<float>(_centroid.y)
-                    );
+                [&](double d, const TouchInputHolder& c) {
+                    const glm::vec2 currPos = { c.latestInput().x, c.latestInput().y };
+                    return d + glm::distance(currPos, _centroid);
                 }
             ) / list.size();
             double lastDistance = std::accumulate(
                 lastProcessed.begin(),
                 lastProcessed.end(),
-                0.0f,
-                [&](float d, const Point& p) {
-                    return d + p.second.getDistance(
-                        static_cast<float>(_centroid.x),
-                        static_cast<float>(_centroid.y)
-                    );
+                0.f,
+                [&](float d, const TouchInput& p) {
+                    const glm::vec2 lastPos = { p.x, p.y };
+                    return d + glm::distance(lastPos, _centroid);
                 }
             ) / lastProcessed.size();
 
@@ -908,7 +853,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             glm::dvec3 centerPos = anchor->worldPosition();
             glm::dvec3 currDistanceToFocusNode = camPos - centerPos;
 
-            double distanceFromFocusSurface =
+            const double distanceFromFocusSurface =
                 length(currDistanceToFocusNode) - anchor->boundingSphere();
             double zoomFactor = (distance - lastDistance);
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -918,11 +863,11 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 
             _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
             if (distanceFromFocusSurface > 0.1) {
-                double ratioOfDistanceToNodeVsSurface =
+                const double ratioOfDistanceToNodeVsSurface =
                     length(currDistanceToFocusNode) / distanceFromFocusSurface;
                 if (ratioOfDistanceToNodeVsSurface > _zoomSensitivityDistanceThreshold) {
                     zoomFactor *= pow(
-                std::abs(distanceFromFocusSurface),
+                        std::abs(distanceFromFocusSurface),
                         static_cast<float>(_zoomSensitivityExponential)
                     );
                 }
@@ -940,27 +885,26 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 list.begin(),
                 list.end(),
                 0.0,
-                [&](double diff, const TuioCursor& c) {
-                    TuioPoint point = std::find_if(
+                [&](double diff, const TouchInputHolder& inputHolder) {
+                    TouchInput point = *std::find_if(
                         lastProcessed.begin(),
                         lastProcessed.end(),
-                        [&c](const Point& p) { return p.first == c.getSessionID(); }
-                    )->second;
-                    double res = diff;
-                    double lastAngle = point.getAngle(
-                        static_cast<float>(_centroid.x),
-                        static_cast<float>(_centroid.y)
+                        [&inputHolder](const TouchInput& input) {
+                            return inputHolder.holdsInput(input);
+                        }
                     );
-                    double currentAngle = c.getAngle(
-                        static_cast<float>(_centroid.x),
-                        static_cast<float>(_centroid.y)
+                    double res = diff;
+                    float lastAngle = point.angleToPos(_centroid.x, _centroid.y);
+                    float currentAngle = inputHolder.latestInput().angleToPos(
+                        _centroid.x,
+                        _centroid.y
                     );
                     // if's used to set angles 359 + 1 = 0 and 0 - 1 = 359
-                    if (lastAngle > currentAngle + 1.5 * M_PI) {
-                        res += currentAngle + (2 * M_PI - lastAngle);
+                    if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
+                        res += currentAngle + (2 * glm::pi<float>() - lastAngle);
                     }
-                    else if (currentAngle > lastAngle + 1.5 * M_PI) {
-                        res += (2 * M_PI - currentAngle) + lastAngle;
+                    else if (currentAngle > lastAngle + 1.5 * glm::pi<float>()) {
+                        res += (2 * glm::pi<float>() - currentAngle) + lastAngle;
                     }
                     else {
                         res += currentAngle - lastAngle;
@@ -968,15 +912,14 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                     return res;
                 }
             ) / list.size();
-
             _vel.roll += -rollFactor * _sensitivity.roll;
             _constTimeDecayCoeff.roll = computeConstTimeDecayCoefficient(_vel.roll);
             break;
         }
         case PAN: {
              // add local rotation velocity
-            _vel.pan += glm::dvec2(cursor.getXSpeed() *
-                        _sensitivity.pan.x, cursor.getYSpeed() * _sensitivity.pan.y);
+            _vel.pan += glm::dvec2(inputHolder.speedX() *
+                        _sensitivity.pan.x, inputHolder.speedY() * _sensitivity.pan.y);
             double panVelocityAvg = glm::distance(_vel.pan.x, _vel.pan.y);
             _constTimeDecayCoeff.pan = computeConstTimeDecayCoefficient(panVelocityAvg);
             break;
@@ -1015,8 +958,8 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 }
 
 double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
-    const double postDecayVelocityTarget = 1e-6;
-    double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.averageFrameTime();
+    constexpr const double postDecayVelocityTarget = 1e-6;
+    const double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.averageFrameTime();
 
     if (stepsToDecay > 0.0 && std::abs(velocity) > postDecayVelocityTarget) {
         return std::pow(postDecayVelocityTarget / std::abs(velocity), 1.0 / stepsToDecay);
@@ -1061,17 +1004,17 @@ void TouchInteraction::step(double dt) {
     if (anchor && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();
-        dvec3 centerPos = anchor->worldPosition();
+        const dvec3 centerPos = anchor->worldPosition();
 
         dvec3 directionToCenter = normalize(centerPos - camPos);
-        dvec3 centerToCamera = camPos - centerPos;
-        dvec3 lookUp = _camera->lookUpVectorWorldSpace();
-        dvec3 camDirection = _camera->viewDirectionWorldSpace();
+        const dvec3 centerToCamera = camPos - centerPos;
+        const dvec3 lookUp = _camera->lookUpVectorWorldSpace();
+        const dvec3 camDirection = _camera->viewDirectionWorldSpace();
 
         // Make a representation of the rotation quaternion with local and global
         // rotations
         // To avoid problem with lookup in up direction
-        dmat4 lookAtMat = lookAt(
+        const dmat4 lookAtMat = lookAt(
             dvec3(0, 0, 0),
             directionToCenter,
             normalize(camDirection + lookUp)
@@ -1079,60 +1022,61 @@ void TouchInteraction::step(double dt) {
         dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
         dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();
 
-        double boundingSphere = anchor->boundingSphere();
-        double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
-        _currentRadius = boundingSphere /
-                         std::max(distance * _projectionScaleFactor, 1.0);
+        const double boundingSphere = anchor->boundingSphere();
+        const double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
+        _currentRadius = boundingSphere / 
+            std::max(distance * _projectionScaleFactor, 1.0);
 
         {
             // Roll
-            dquat camRollRot = angleAxis(_vel.roll * dt, dvec3(0.0, 0.0, 1.0));
+            const dquat camRollRot = angleAxis(_vel.roll * dt, dvec3(0.0, 0.0, 1.0));
             localCamRot = localCamRot * camRollRot;
         }
         {
             // Panning (local rotation)
-            dvec3 eulerAngles(_vel.pan.y * dt, _vel.pan.x * dt, 0);
-            dquat rotationDiff = dquat(eulerAngles);
+            const dvec3 eulerAngles(_vel.pan.y * dt, _vel.pan.x * dt, 0);
+            const dquat rotationDiff = dquat(eulerAngles);
             localCamRot = localCamRot * rotationDiff;
 
             // if we have chosen a new focus node
             if (_slerpdT < _slerpTime) {
-                _slerpdT += 0.1*dt;
+                _slerpdT += 0.1 * dt;
                 localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime);
             }
         }
         {
             // Orbit (global rotation)
-            dvec3 eulerAngles(_vel.orbit.y*dt, _vel.orbit.x*dt, 0);
-            dquat rotationDiffCamSpace = dquat(eulerAngles);
+            const dvec3 eulerAngles(_vel.orbit.y*dt, _vel.orbit.x*dt, 0);
+            const dquat rotationDiffCamSpace = dquat(eulerAngles);
 
-            dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
-                                           inverse(globalCamRot);
-            dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace -
-                                     centerToCamera;
+            const dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
+                                                 inverse(globalCamRot);
+            const dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace -
+                                           centerToCamera;
             camPos += rotationDiffVec3;
 
-            dvec3 centerToCam = camPos - centerPos;
+            const dvec3 centerToCam = camPos - centerPos;
             directionToCenter = normalize(-centerToCam);
-            dvec3 lookUpWhenFacingCenter = globalCamRot *
+            const dvec3 lookUpWhenFacingCenter = globalCamRot *
                                            dvec3(_camera->lookUpVectorCameraSpace());
-            dmat4 lookAtMatrix = lookAt(
+            const dmat4 lookAtMatrix = lookAt(
                 dvec3(0, 0, 0),
                 directionToCenter,
                 lookUpWhenFacingCenter);
             globalCamRot = normalize(quat_cast(inverse(lookAtMatrix)));
         }
-        { // Zooming
+        {
+            // Zooming
 
             // This is a rough estimate of the node surface
-            double zoomInBounds = boundingSphere * _zoomBoundarySphereMultiplier;
+            const double zoomInBounds = boundingSphere * _zoomBoundarySphereMultiplier;
 
             // If nobody has set another zoom in limit, use the default zoom in bounds
             if (_zoomInLimit.value() < 0) {
                 _zoomInLimit.setValue(zoomInBounds);
             }
             else if (_zoomInLimit.value() < zoomInBounds) {
-                // If zoom in limit is less than the estimated node radius we need to 
+                // If zoom in limit is less than the estimated node radius we need to
                 // make sure we do not get too close to possible height maps
                 SurfacePositionHandle posHandle = anchor->calculateSurfacePositionHandle(
                     camPos
@@ -1142,7 +1086,7 @@ void TouchInteraction::step(double dt) {
                     posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
                 glm::dvec3 centerToActualSurface = glm::dmat3(anchor->modelTransform()) *
                     centerToActualSurfaceModelSpace;
-                double nodeRadius = length(centerToActualSurface);
+                const double nodeRadius = length(centerToActualSurface);
 
                 // Because of heightmaps we should make sure we do not go through the surface
                 if (_zoomInLimit.value() < nodeRadius) {
@@ -1151,28 +1095,28 @@ void TouchInteraction::step(double dt) {
                         "center to surface, setting it to {}", _loggerCat, zoomInBounds));
 #endif
                     _zoomInLimit.setValue(zoomInBounds);
-                }     
+                }
             }
-           
+
             // Make sure zoom in limit is not larger than zoom out limit
             if (_zoomInLimit.value() > _zoomOutLimit.value()) {
                LWARNING(fmt::format(
-                   "{}: Zoom In Limit should be smaller than Zoom Out Limit", 
+                   "{}: Zoom In Limit should be smaller than Zoom Out Limit",
                     _loggerCat, _zoomOutLimit.value()
                ));
             }
 
             //Apply the velocity to update camera position
             glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
-            double newPosDistance = length(centerToCamera + zoomDistanceIncrement);
-            double currentPosDistance = length(centerToCamera);
+            const double newPosDistance = length(centerToCamera + zoomDistanceIncrement);
+            const double currentPosDistance = length(centerToCamera);
 
             // Possible with other navigations performed outside touch interaction
-            bool currentPosViolatingZoomOutLimit =
+            const bool currentPosViolatingZoomOutLimit =
                 (currentPosDistance >= _zoomOutLimit.value());
-            bool willNewPositionViolateZoomOutLimit =
+            const bool willNewPositionViolateZoomOutLimit =
                 (newPosDistance >= _zoomOutLimit.value());
-            bool willNewPositionViolateZoomInLimit =
+            const bool willNewPositionViolateZoomInLimit =
                 (newPosDistance < _zoomInLimit.value());
 
             if (!willNewPositionViolateZoomInLimit && !willNewPositionViolateZoomOutLimit){
@@ -1185,8 +1129,7 @@ void TouchInteraction::step(double dt) {
                     _loggerCat, _zoomOutLimit.value());
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
-                if (newPosDistance < currentPosDistance)
-                {
+                if (newPosDistance < currentPosDistance) {
                     camPos += zoomDistanceIncrement;
                 }
             }
@@ -1224,46 +1167,6 @@ void TouchInteraction::step(double dt) {
     }
 }
 
-void TouchInteraction::unitTest() {
-    if (_unitTest) {
-        _solver.setLevMarqVerbosity(true);
-
-        // set _selected pos and new pos (on screen)
-        std::vector<TuioCursor> lastFrame = {
-            { TuioCursor(0, 10, 0.45f, 0.4f) }, // session id, cursor id, x, y
-            { TuioCursor(1, 11, 0.55f, 0.6f) }
-        };
-        std::vector<TuioCursor> currFrame = {
-            { TuioCursor(0, 10, 0.2f, 0.6f) }, // (-0.6,-0.2)
-            { TuioCursor(1, 11, 0.8f, 0.4f) } // (0.6, 0.2)
-        };
-
-        // call update
-        findSelectedNode(lastFrame);
-        directControl(currFrame);
-
-        // save lmstats.data into a file and clear it
-        char buffer[32];
-        snprintf(buffer, sizeof(char) * 32, "lmdata%i.csv", _numOfTests);
-        _numOfTests++;
-        std::ofstream file(buffer);
-        file << _solver.getLevMarqStat().data;
-
-        // clear everything
-        _selected.clear();
-        _pickingSelected = nullptr;
-        _vel.orbit = glm::dvec2(0.0, 0.0);
-        _vel.zoom = 0.0;
-        _vel.roll = 0.0;
-        _vel.pan = glm::dvec2(0.0, 0.0);
-        _lastVel = _vel;
-        _unitTest = false;
-
-        _solver.setLevMarqVerbosity(false);
-        // could be the camera copy in func
-    }
-}
-
 // Decelerate velocities, called a set number of times per second to dereference it from
 // frame time
 // Example:
@@ -1287,15 +1190,6 @@ void TouchInteraction::decelerate(double dt) {
     _vel.roll  *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.roll,  times);
     _vel.pan   *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.pan,   times);
     _vel.zoom  *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.zoom,  times);
-}
-
-double TouchInteraction::computeDecayCoeffFromFrametime(double coeff, int times) {
-    if (coeff > 0.00001) {
-        return std::pow(coeff, times);
-    }
-    else {
-        return 0.0;
-    }
 }
 
 // Called if all fingers are off the screen
@@ -1403,12 +1297,13 @@ void FrameTimeAverage::updateWithNewFrame(double sample) {
 }
 
 double FrameTimeAverage::averageFrameTime() const {
-    double ft;
-    if (_nSamples == 0)
-        ft = 1.0 / 60.0; //Just guess at 60fps if no data is available yet
-    else
-        ft = std::accumulate(_samples, _samples + _nSamples, 0.0) / (double)(_nSamples);
-    return ft;
+    if (_nSamples == 0) {
+        // Just guess at 60fps if no data is available yet
+        return 1.0 / 60.0;
+    }
+    else {
+        return std::accumulate(_samples, _samples + _nSamples, 0.0) / (double)(_nSamples);
+    }
 }
 
 #ifdef TOUCH_DEBUG_PROPERTIES

@@ -96,6 +96,21 @@ std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
     return g;
 }
 
+std::vector<std::function<bool(TouchInput)>>& gTouchDetected() {
+    static std::vector<std::function<bool(TouchInput)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(TouchInput)>>& gTouchUpdated() {
+    static std::vector<std::function<bool(TouchInput)>> g;
+    return g;
+}
+
+std::vector<std::function<void(TouchInput)>>& gTouchExit() {
+    static std::vector<std::function<void(TouchInput)>> g;
+    return g;
+}
+
 } // namespace openspace::global::detail
 
 namespace openspace::global::callback {
