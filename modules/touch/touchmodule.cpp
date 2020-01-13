@@ -42,9 +42,13 @@
 using namespace TUIO;
 
 namespace {
-    constexpr const double ONE_MS = 0.001;
-} // namespace
-
+    constexpr openspace::properties::Property::PropertyInfo TouchActiveInfo = {
+        "TouchActive",
+        "True if we want to use touch input as 3d navigation",
+        "Use this if we want to turn on or off Touch input navigation. "
+        "Disabling this will reset all current touch inputs to the navigation. "
+    };
+}
 namespace openspace {
 
 bool TouchModule::processNewInput() {
@@ -157,7 +161,7 @@ void TouchModule::removeTouchInput(TouchInput input) {
             //Magic values taken from tuioear.cpp:
             const bool isWithinTapTime = totalTime < 0.18;
             const bool wasStationary = totalDistance < 0.0004f;
-            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 && 
+            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&
                 _deferredRemovals.size() == 1)
             {
                 _tap = true;
@@ -169,9 +173,14 @@ void TouchModule::removeTouchInput(TouchInput input) {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
+    , _touchActive(TouchActiveInfo, true)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
+    _touchActive.onChange([&] {
+        _touch.resetAfterInput();
+        _lastTouchInputs.clear();
+    });
 }
 
 TouchModule::~TouchModule() {
@@ -224,7 +233,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
         _touch.setCamera(global::navigationHandler.camera());
         _touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
 
-        if (processNewInput() && global::windowDelegate.isMaster()) {
+        if (processNewInput() && global::windowDelegate.isMaster() && _touchActive) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {
