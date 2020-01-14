@@ -177,6 +177,7 @@ TouchModule::TouchModule()
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
+    addProperty(_touchActive);
     _touchActive.onChange([&] {
         _touch.resetAfterInput();
         _lastTouchInputs.clear();
