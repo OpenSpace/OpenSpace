@@ -102,16 +102,16 @@ namespace openspace::autonavigation::interpolator {
         size_t n = controlPoints.size();
         ghoul_assert(n > 4, "Minimum of four control points needed for interpolation!");
 
-        double n_seg = (n - 1.0) / 3.0;
-        ghoul_assert(std::fmod(n_seg, 1.0) == 0, "A vector containing 3n + 1 control points must be provided!");
+        double nSeg = (n - 1.0) / 3.0;
+        ghoul_assert(std::fmod(nSeg, 1.0) == 0, "A vector containing 3n + 1 control points must be provided!");
 
         // for control points equally spaced in time
-        double t_seg = std::fmod(t * n_seg, 1.0);
-        t_seg = std::max(0.0, std::min(t_seg, 1.0));
+        double tSeg = std::fmod(t * nSeg, 1.0);
+        tSeg = std::max(0.0, std::min(tSeg, 1.0));
 
-        size_t idx = std::floor(t * n_seg) * 3;
+        size_t idx = std::floor(t * nSeg) * 3;
 
-        return  cubicBezier(t_seg, controlPoints[idx], controlPoints[idx + 1],
+        return  cubicBezier(tSeg, controlPoints[idx], controlPoints[idx + 1],
             controlPoints[idx + 2], controlPoints[idx + 3]);
     }
 
@@ -119,15 +119,15 @@ namespace openspace::autonavigation::interpolator {
         size_t n = controlPoints.size();
         ghoul_assert(n > 2, "Minimum of two control points needed for interpolation!");
 
-        size_t n_seg = n - 1;
+        size_t nSeg = n - 1;
 
         // for control points equally spaced in time
-        double t_seg = std::fmod( t*n_seg, 1.0 ); 
-        t_seg = std::max(0.0, std::min(t_seg, 1.0));
+        double tSeg = std::fmod( t*nSeg, 1.0 ); 
+        tSeg = std::max(0.0, std::min(tSeg, 1.0));
 
-        size_t idx = std::floor(t*n_seg);
+        size_t idx = std::floor(t*nSeg);
 
-        return  (1.0 - t_seg) * controlPoints[idx] + t_seg * controlPoints[idx + 1];
+        return  (1.0 - tSeg) * controlPoints[idx] + tSeg * controlPoints[idx + 1];
     }
 
 } // interpolator
