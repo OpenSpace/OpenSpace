@@ -211,6 +211,11 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
         );
         break;
 
+    case InstructionType::Pause:
+        endState = startState;
+        success = true;
+        break;
+
     default:
         LERROR(fmt::format("Non-implemented instruction type: {}.", instruction.type));
         success = false;
