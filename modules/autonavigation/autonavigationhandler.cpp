@@ -55,7 +55,11 @@ Camera* AutoNavigationHandler::camera() const {
 }
 
 const double AutoNavigationHandler::pathDuration() const {
-    return _pathDuration;
+    double sum = 0.0;
+    for (auto ps : _pathSegments) {
+        sum += ps.duration;
+    }
+    return sum;
 }
 
 PathSegment& AutoNavigationHandler::currentPathSegment() {
@@ -97,7 +101,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     _currentTime += deltaTime;
 
     // reached the end of the path => stop playing
-    if (_currentTime > _pathDuration) {
+    if (_currentTime > pathDuration()) {
         _isPlaying = false;
         // TODO: implement suitable stop behaviour
     }
@@ -124,17 +128,11 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 
 void AutoNavigationHandler::clearPath() {
     _pathSegments.clear();
-    _pathDuration = 0.0;
     _currentTime = 0.0;
 }
 
 void AutoNavigationHandler::startPath() {
     ghoul_assert(!_pathSegments.empty(), "Cannot start an empty path");
-    
-    _pathDuration = 0.0;
-    for (auto ps : _pathSegments) {
-        _pathDuration += ps.duration;
-    }
     _currentTime = 0.0;
     _isPlaying = true;
 }

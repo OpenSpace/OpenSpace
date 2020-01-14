@@ -81,7 +81,6 @@ private:
 
     std::vector<PathSegment> _pathSegments;
 
-    double _pathDuration;
     double _currentTime; 
     bool _isPlaying = false;
 };
