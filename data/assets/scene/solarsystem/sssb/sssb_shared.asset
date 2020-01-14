@@ -34,7 +34,7 @@ local registerSssbGroupObjects = function(containingAsset, filename, sssbFolder,
     function sssBodies(title, file, color)
         return {
            Identifier = title,
-           Parent = transforms.SolarSystemBarycenter.Identifier,
+           Parent = transforms.SunECLIPJ2000.Identifier,
            Renderable = {
                 Type = "RenderableSmallBody",
                 Path = file,
