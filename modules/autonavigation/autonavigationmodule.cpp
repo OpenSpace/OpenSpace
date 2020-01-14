@@ -53,6 +53,13 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
     res.name = "autonavigation";
     res.functions = {
         {
+            "continuePath",
+            &autonavigation::luascriptfunctions::continuePath,
+            {},
+            "",
+            "Continue playing a paused camera path."
+        },
+        {
             "goTo",
             &autonavigation::luascriptfunctions::goTo,
             {},

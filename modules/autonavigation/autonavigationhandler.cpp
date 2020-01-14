@@ -62,13 +62,26 @@ const double AutoNavigationHandler::pathDuration() const {
     return sum;
 }
 
-PathSegment& AutoNavigationHandler::currentPathSegment() {
-    for (PathSegment& ps : _pathSegments) {
+const bool AutoNavigationHandler::hasFinished() const {
+    return _currentTime > pathDuration();
+}
+
+const int AutoNavigationHandler::currentPathSegmentIndex() const {
+    for (int i = 0; i < _pathSegments.size(); ++i) {
+        const PathSegment& ps = _pathSegments[i];
         double endTime = ps.startTime + ps.duration;
         if (endTime > _currentTime) {
-            return ps;
+            return i;
         }
     }
+}
+
+CameraState AutoNavigationHandler::currentCameraState() {
+    CameraState cs;
+    cs.position = camera()->positionVec3();
+    cs.rotation = camera()->rotationQuaternion();
+    cs.referenceNode = global::navigationHandler.anchorNode()->identifier();
+    return cs;
 }
 
 void AutoNavigationHandler::updateCamera(double deltaTime) {
@@ -76,15 +89,23 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     if (!_isPlaying || _pathSegments.empty()) return;
 
-    PathSegment cps = currentPathSegment(); 
+    const int currentIndex = currentPathSegmentIndex();
+
+    if (_stopAtTargets && (currentIndex != _activeSegmentIndex)) {
+        _activeSegmentIndex = currentIndex; 
+        pausePath();
+        return;
+    }
 
     // INTERPOLATE (TODO: make a function, and allow different methods)
+
+    const PathSegment& cps = _pathSegments[currentIndex];
 
     double t = (_currentTime - cps.startTime) / cps.duration;
     t = transferfunctions::cubicEaseInOut(t); // TEST
     t = std::max(0.0, std::min(t, 1.0));
 
-    // TODO: don't set every frame and 
+    // TODO: don't set every frame  
     // Set anchor node in orbitalNavigator, to render visible nodes and 
     // add possibility to navigate when we reach the end.
     CameraState cs = (t < 0.5) ? cps.start : cps.end;
@@ -100,10 +121,11 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     _currentTime += deltaTime;
 
-    // reached the end of the path => stop playing
-    if (_currentTime > pathDuration()) {
+    _activeSegmentIndex = currentIndex;
+
+    if (hasFinished()) {
+        LINFO("Reached end of path.");
         _isPlaying = false;
-        // TODO: implement suitable stop behaviour
     }
 }
 
@@ -118,42 +140,59 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
             break;
     }
 
+    // TODO: set stop at target variable based on spec
+
     if (success) {
-        LINFO("Succefully generated camera path. Starting.");
+        LINFO("Succefully generated camera path.");
         startPath();
     }
     else
-        LINFO("Could not create path.");
+        LERROR("Could not create path.");
 }
 
 void AutoNavigationHandler::clearPath() {
+    LINFO("Clearing path...");
     _pathSegments.clear();
     _currentTime = 0.0;
+    _activeSegmentIndex = 0;
 }
 
 void AutoNavigationHandler::startPath() {
     ghoul_assert(!_pathSegments.empty(), "Cannot start an empty path");
+    LINFO("Starting path...");
     _currentTime = 0.0;
     _isPlaying = true;
 }
 
-CameraState AutoNavigationHandler::getStartState() {
-    CameraState cs;
-    if (_pathSegments.empty()) {
-        cs.position = camera()->positionVec3();
-        cs.rotation = camera()->rotationQuaternion();
-        cs.referenceNode = global::navigationHandler.anchorNode()->identifier();
-    }
-    else {
-        cs = _pathSegments.back().end;
+void AutoNavigationHandler::pausePath() {
+    ghoul_assert(!_isPlaying, "Cannot pause a path that isn't playing");
+    LINFO(fmt::format("Paused path at target {} / {}", _activeSegmentIndex, _pathSegments.size()));
+    _isPlaying = false;
+}
+
+void AutoNavigationHandler::continuePath() {
+    ghoul_assert(_isPlaying, "Cannot start a path that is already playing");
+    ghoul_assert(!_pathSegments.empty(), "No path to continue on");
+
+    if (hasFinished()) {
+        LERROR("Path has ended, cannot continue.");
+        return;
     }
 
-    return cs;
+    LINFO("Continuing path...");
+
+    // Recompute start camera state for the upcoming path segment, to avoid clipping to
+    // the old camera state.
+    _pathSegments[_activeSegmentIndex].start = currentCameraState(); // TODO: adapt to new PathSegment code 
+
+    _isPlaying = true;
 }
 
 bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index)
 {
-    CameraState startState = getStartState();
+    CameraState& currentLast = _pathSegments.back().end;
+    CameraState startState = _pathSegments.empty() ? currentCameraState() : currentLast;
+
     CameraState endState;
     double duration, startTime;
     bool success = true;
