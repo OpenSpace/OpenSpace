@@ -43,9 +43,44 @@ enum CurveType {
     Linear2
 };
 
+// TODO: move to their own file
+class PathCurve {
+public:
+    virtual ~PathCurve() = 0;
+    virtual glm::dvec3 interpolate(double t) = 0;
+protected:
+    // the points used for creating the curve (e.g. control points of a Bezier curve)
+    std::vector<glm::dvec3> _points; 
+};
+
+class BezierCurve : public PathCurve {
+public :
+    BezierCurve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
+};
+
+class Bezier2Curve : public PathCurve {
+public:
+    Bezier2Curve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
+};
+
+class LinearCurve : public PathCurve {
+public:
+    LinearCurve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
+};
+
+class Linear2Curve : public PathCurve {
+public:
+    Linear2Curve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
+};
+
 class PathSegment {
 public:
-    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Bezier);
+    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Linear2);
+    ~PathSegment() = default;
 
     // Mutators
     void setStart(CameraState cs);
@@ -62,16 +97,13 @@ public:
     const glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up) const;
 
 private: 
-    void generateBezier();
-    void generateBezier2();
-    void generateLinear2();
-
     CameraState _start;
     CameraState _end;
     double _duration; 
     double _startTime; 
-    CurveType _curveType; 
-    std::vector<glm::dvec3> _controlPoints;
+    CurveType _curveType; // Ideally, we don't want to need to save this
+
+    std::shared_ptr<PathCurve> _curve; // OBS! Does it make more sense to use unique_ptr? However, then PathSegments cannot be copied.
 };
 
 } // namespace openspace::autonavigation

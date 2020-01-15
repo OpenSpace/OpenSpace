@@ -39,6 +39,93 @@ namespace {
 
 namespace openspace::autonavigation {
 
+// TODO: move all these later --------------------
+PathCurve::~PathCurve() {}
+
+BezierCurve::BezierCurve(CameraState& start, CameraState& end) {
+    glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
+    glm::dvec3 endNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
+    // vectors pointing away from target nodes
+    glm::dvec3 startDirection = start.position - startNodePos;
+    glm::dvec3 endDirection = end.position - endNodePos;
+
+    _points.push_back(start.position);
+    _points.push_back(start.position + 10.0 * startDirection);
+    _points.push_back(end.position + 10.0 * endDirection);
+    _points.push_back(end.position);
+}
+
+glm::dvec3 BezierCurve::interpolate(double t) {
+    return interpolator::cubicBezier(t,
+        _points[0], _points[1], _points[2], _points[3]);
+}
+
+Bezier2Curve::Bezier2Curve(CameraState& start, CameraState& end) {
+    // START: 
+    glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
+    glm::dvec3 startDirection = start.position - startNodePos;
+
+    // END:   
+    glm::dvec3 endNodePos = sceneGraphNode(end.referenceNode)->worldPosition();
+    glm::dvec3 endDirection = end.position - endNodePos;
+
+    // MIDDLE: one knot and two control points parallell to target nodes
+    glm::dvec3 AB = endNodePos - startNodePos;
+    glm::dvec3 C = normalize(startDirection + endDirection);
+    glm::dvec3 CparAB = glm::dot(C, normalize(AB))* normalize(AB);
+    glm::dvec3 CortAB = normalize(C - CparAB);
+    double d = length(AB);
+
+    // TODO: set points that actually look good
+    _points.push_back(start.position);
+    _points.push_back(start.position + 2.0 * startDirection);
+
+    _points.push_back(start.position + 1.5 * d * CortAB);
+    _points.push_back(start.position + 1.5 * d * CortAB + 0.5 * AB);
+    _points.push_back(end.position + 1.5 * d * CortAB);
+
+    _points.push_back(end.position + 2.0 * endDirection);
+    _points.push_back(end.position);
+}
+
+glm::dvec3 Bezier2Curve::interpolate(double t) {
+    return interpolator::piecewiseCubicBezier(t, _points);
+}
+
+LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
+    _points.push_back(start.position);
+    _points.push_back(end.position);
+}
+
+glm::dvec3 LinearCurve::interpolate(double t) {
+    return ghoul::interpolateLinear(t, _points[0], _points[1]);
+}
+
+Linear2Curve::Linear2Curve(CameraState& start, CameraState& end) {
+    // START: 
+    glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
+    glm::dvec3 startDirection = start.position - startNodePos;
+
+    // END:   
+    glm::dvec3 endNodePos = sceneGraphNode(end.referenceNode)->worldPosition();
+    glm::dvec3 endDirection = end.position - endNodePos;
+
+    // MIDDLE: 
+    glm::dvec3 AB = endNodePos - startNodePos;
+    glm::dvec3 C = normalize(startDirection + endDirection);
+    glm::dvec3 CparAB = glm::dot(C, normalize(AB))* normalize(AB);
+    glm::dvec3 CortAB = normalize(C - CparAB);
+    double d = length(AB);
+
+    _points.push_back(start.position);
+    _points.push_back(start.position + 2.0 * d * CortAB + 0.5 * AB); //TODO: use scale instead of 2.0
+    _points.push_back(end.position);
+}
+
+glm::dvec3 Linear2Curve::interpolate(double t) {
+    return interpolator::piecewiseLinear(t, _points);
+}
+
 PathSegment::PathSegment(
     CameraState start, CameraState end, double startTime, CurveType type)
     : _start(start), _end(end), _startTime(startTime), _curveType(type)
@@ -46,17 +133,18 @@ PathSegment::PathSegment(
     // TODO: compute duration based on method later
     _duration = 5;
 
-    switch(_curveType) {
+    switch(type) {
     case Bezier:
-        generateBezier();
+        _curve = std::make_shared<BezierCurve>(start, end);
         break;
     case Bezier2:
-        generateBezier2();
+        _curve = std::make_shared<Bezier2Curve>(start, end);
         break;
     case Linear:
+        _curve = std::make_shared<LinearCurve>(start, end);
         break;
     case Linear2:
-        generateLinear2(); 
+        _curve = std::make_shared<Linear2Curve>(start, end);
         break;
     default:
         LERROR(fmt::format("Cannot create curve of type {}. Type does not exist!", _curveType));
@@ -81,24 +169,7 @@ const double PathSegment::startTime() const { return _startTime; }
 
 const glm::vec3 PathSegment::getPositionAt(double t) const {
     t = easingfunctions::cubicEaseInOut(t);
-
-    switch(_curveType) {
-    case Bezier: 
-        return interpolator::cubicBezier(t,
-            _controlPoints[0], _controlPoints[1], _controlPoints[2], _controlPoints[3]);
-        break;
-    case Bezier2:
-        return interpolator::piecewiseCubicBezier(t, _controlPoints);
-        break;
-    case Linear:
-        return ghoul::interpolateLinear(t, _start.position, _end.position);
-        break;
-    case Linear2:
-        return interpolator::piecewiseLinear(t, _controlPoints);
-        break;
-    default:
-        LERROR(fmt::format("Cannot get position for curve type {}. Type does not exist!", _curveType));
-    }        
+    return _curve.get()->interpolate(t);    
 }
 
 const glm::dquat PathSegment::getRotationAt(double t) const {
@@ -134,66 +205,4 @@ const glm::dquat PathSegment::getLookAtRotation(
     return glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 }
 
-// A single bezier segment with four control points
-void PathSegment::generateBezier() {
-    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
-    // vectors pointing away from target nodes
-    glm::dvec3 startDirection =_start.position - startNodePos; 
-    glm::dvec3 endDirection = _end.position - endNodePos; 
-
-    _controlPoints.push_back(_start.position);
-    _controlPoints.push_back(_start.position + 10.0 * startDirection);
-    _controlPoints.push_back(_end.position + 10.0 * endDirection);
-    _controlPoints.push_back(_end.position);
-}
-
-void PathSegment::generateBezier2() {
-    // START: 
-    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
-    glm::dvec3 startDirection = _start.position - startNodePos;
-
-    // END:   
-    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
-    glm::dvec3 endDirection = _end.position - endNodePos;
-
-    // MIDDLE: one knot and two control points parallell to target nodes
-    glm::dvec3 AB = endNodePos - startNodePos;
-    glm::dvec3 C = normalize(startDirection + endDirection);
-    glm::dvec3 CparAB = glm::dot(C, normalize(AB))* normalize(AB);
-    glm::dvec3 CortAB = normalize(C - CparAB);
-    double d = length(AB);
-
-    // TODO: set points that actually look good
-    _controlPoints.push_back(_start.position);
-    _controlPoints.push_back(_start.position + 2.0 * startDirection);
-
-    _controlPoints.push_back(_start.position + 1.5 * d * CortAB);
-    _controlPoints.push_back(_start.position + 1.5 * d * CortAB + 0.5 * AB);
-    _controlPoints.push_back(_end.position + 1.5 * d * CortAB);
-
-    _controlPoints.push_back(_end.position + 2.0 * endDirection);
-    _controlPoints.push_back(_end.position);
-}
-
-void PathSegment::generateLinear2() {
-    // START: 
-    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
-    glm::dvec3 startDirection = _start.position - startNodePos;
-
-    // END:   
-    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
-    glm::dvec3 endDirection = _end.position - endNodePos;
-
-    // MIDDLE: 
-    glm::dvec3 AB = endNodePos - startNodePos;
-    glm::dvec3 C = normalize(startDirection + endDirection);
-    glm::dvec3 CparAB = glm::dot(C, normalize(AB))* normalize(AB);
-    glm::dvec3 CortAB = normalize(C - CparAB);
-    double d = length(AB);
-
-    _controlPoints.push_back(_start.position);
-    _controlPoints.push_back(_start.position + 2.0 * d * CortAB + 0.5 * AB); //TODO: use scale instead of 2.0
-    _controlPoints.push_back(_end.position);
-}
 } // namespace openspace::autonavigation

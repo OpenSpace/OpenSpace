@@ -56,7 +56,7 @@ Camera* AutoNavigationHandler::camera() const {
 
 const double AutoNavigationHandler::pathDuration() const {
     double sum = 0.0;
-    for (auto ps : _pathSegments) {
+    for (const PathSegment& ps : _pathSegments) {
         sum += ps.duration();
     }
     return sum;
@@ -65,7 +65,6 @@ const double AutoNavigationHandler::pathDuration() const {
 const bool AutoNavigationHandler::hasFinished() const {
     return _currentTime > pathDuration();
 }
-
 
 const int AutoNavigationHandler::currentPathSegmentIndex() const {
     for (int i = 0; i < _pathSegments.size(); ++i) {
