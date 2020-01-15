@@ -140,7 +140,8 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
             break;
     }
 
-    // TODO: set stop at target variable based on spec
+    // OBS! Would it be better to save the spec in the handler class? 
+    _stopAtTargets = spec.stopAtTargets();
 
     if (success) {
         LINFO("Succefully generated camera path.");
@@ -213,6 +214,7 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
 
     case InstructionType::Pause:
         endState = startState;
+        // TODO: implement more complex behavior later
         success = true;
         break;
 

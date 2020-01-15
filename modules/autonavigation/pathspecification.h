@@ -84,9 +84,11 @@ public:
 
     // Accessors
     const std::vector<Instruction>* instructions() const;
+    const bool stopAtTargets() const;
 
 private:
     std::vector<Instruction> _instructions;
+    bool _stopAtTargets = false; // default is tp play the entire path without stops
     // TODO: maxSpeed or speedFactor or something?
 };
 

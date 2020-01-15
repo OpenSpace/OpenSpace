@@ -87,7 +87,7 @@ private:
     bool _isPlaying = false;
 
     int _activeSegmentIndex = 0; 
-    bool _stopAtTargets = false; // TODO: ask if this should be a setting for the module or the path
+    bool _stopAtTargets;
 };
 
 } // namespace openspace::autonavigation

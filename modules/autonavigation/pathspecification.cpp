@@ -31,6 +31,7 @@ namespace {
     constexpr const char* _loggerCat = "PathInstruction";
 
     constexpr const char* KeyInstructions = "Instructions";
+    constexpr const char* KeyStopAtTargets = "StopAtTargets";
 
     constexpr const char* KeyTarget = "Target";
     constexpr const char* KeyDuration = "Duration";
@@ -180,6 +181,7 @@ PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
         return;
     }
 
+    // Read instructions from dictionary
     ghoul::Dictionary instructions = dictionary.value<ghoul::Dictionary>(KeyInstructions); 
 
     for (size_t i = 1; i <= instructions.size(); ++i) {
@@ -187,14 +189,24 @@ PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
 
         _instructions.push_back(Instruction{ insDict });
     }
+
+    // Read stop at targets flag
+    if (dictionary.hasValue<bool>(KeyStopAtTargets)) {
+        _stopAtTargets = dictionary.value<bool>(KeyStopAtTargets);
+    }
 }
 
 PathSpecification::PathSpecification(const Instruction instruction) {
     _instructions.push_back(instruction);
+    _stopAtTargets = false;
 }
 
 const std::vector<Instruction>* PathSpecification::instructions() const {
     return &_instructions;
+}
+
+const bool PathSpecification::stopAtTargets() const {
+    return _stopAtTargets;
 }
 
 documentation::Documentation PathSpecification::Documentation() {
@@ -209,6 +221,12 @@ documentation::Documentation PathSpecification::Documentation() {
                 new TableVerifier,
                 Optional::No,
                 "A list of path instructions."
+            },
+            {
+                KeyStopAtTargets,
+                new BoolVerifier,
+                Optional::Yes,
+                "A bool that decides whether we should pause when reaching a target when playing a path."
             },
         }
     };
