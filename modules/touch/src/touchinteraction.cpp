@@ -277,8 +277,8 @@ TouchInteraction::TouchInteraction()
         0.25f
     )
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
-    , _zoomOutLimit(ZoomOutLimitInfo, std::numeric_limits<double>::max(), 1000.0f, std::numeric_limits<double>::max())
-    , _zoomInLimit(ZoomInLimitInfo, -1.0f, 0.0f, std::numeric_limits<double>::max())
+    , _zoomOutLimit(ZoomOutLimitInfo, std::numeric_limits<double>::max(), 1000.0, std::numeric_limits<double>::max())
+    , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
@@ -1024,7 +1024,7 @@ void TouchInteraction::step(double dt) {
 
         const double boundingSphere = anchor->boundingSphere();
         const double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
-        _currentRadius = boundingSphere / 
+        _currentRadius = boundingSphere /
             std::max(distance * _projectionScaleFactor, 1.0);
 
         {
@@ -1069,13 +1069,11 @@ void TouchInteraction::step(double dt) {
             // Zooming
 
             // This is a rough estimate of the node surface
-            const double zoomInBounds = boundingSphere * _zoomBoundarySphereMultiplier;
+            // If nobody has set another zoom in limit, use this as default zoom in bounds
+            double zoomInBounds = boundingSphere * _zoomBoundarySphereMultiplier;
+            bool isZoomInLimitSet = (_zoomInLimit.value() >= 0.0);
 
-            // If nobody has set another zoom in limit, use the default zoom in bounds
-            if (_zoomInLimit.value() < 0) {
-                _zoomInLimit.setValue(zoomInBounds);
-            }
-            else if (_zoomInLimit.value() < zoomInBounds) {
+            if (isZoomInLimitSet && _zoomInLimit.value() < zoomInBounds) {
                 // If zoom in limit is less than the estimated node radius we need to
                 // make sure we do not get too close to possible height maps
                 SurfacePositionHandle posHandle = anchor->calculateSurfacePositionHandle(
@@ -1094,12 +1092,12 @@ void TouchInteraction::step(double dt) {
                     LINFO(fmt::format("{}: Zoom In limit should be larger than anchor "
                         "center to surface, setting it to {}", _loggerCat, zoomInBounds));
 #endif
-                    _zoomInLimit.setValue(zoomInBounds);
+                    zoomInBounds = _zoomInLimit.value();
                 }
             }
 
             // Make sure zoom in limit is not larger than zoom out limit
-            if (_zoomInLimit.value() > _zoomOutLimit.value()) {
+            if (zoomInBounds > _zoomOutLimit.value()) {
                LWARNING(fmt::format(
                    "{}: Zoom In Limit should be smaller than Zoom Out Limit",
                     _loggerCat, _zoomOutLimit.value()
@@ -1116,10 +1114,11 @@ void TouchInteraction::step(double dt) {
                 (currentPosDistance >= _zoomOutLimit.value());
             const bool willNewPositionViolateZoomOutLimit =
                 (newPosDistance >= _zoomOutLimit.value());
-            const bool willNewPositionViolateZoomInLimit =
-                (newPosDistance < _zoomInLimit.value());
+            bool willNewPositionViolateZoomInLimit =
+                (newPosDistance < zoomInBounds);
 
-            if (!willNewPositionViolateZoomInLimit && !willNewPositionViolateZoomOutLimit){
+            if (!willNewPositionViolateZoomInLimit
+                && !willNewPositionViolateZoomOutLimit) {
                 camPos += zoomDistanceIncrement;
             }
             else if (currentPosViolatingZoomOutLimit) {
