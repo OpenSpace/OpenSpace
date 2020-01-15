@@ -200,15 +200,15 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
     switch (instruction.type)
     {
     case InstructionType::TargetNode:
-        success = handleTargetNodeInstruction(instruction, index, startTime);
+        success = handleTargetNodeInstruction(instruction, startTime);
         break;
 
     case InstructionType::NavigationState:
-        success = handleNavigationStateInstruction(instruction, index, startTime);
+        success = handleNavigationStateInstruction(instruction, startTime);
         break;
 
     case InstructionType::Pause:
-        success = handlePauseInstruction(instruction, index, startTime);
+        success = handlePauseInstruction(instruction, startTime);
         break;
 
     default:
@@ -217,20 +217,23 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
         break;
     }
 
-    if (!success) return false;
+    if (!success) {
+        LERROR(fmt::format("Failed handling instruction number {}.", index + 1));
+        return false;
+    }
 
     return true;
 }
 
 bool AutoNavigationHandler::handleTargetNodeInstruction(
-    const Instruction& instruction, int index, double startTime)
+    const Instruction& instruction, double startTime)
 {
     // Verify instruction type
     TargetNodeInstructionProps* props = 
         dynamic_cast<TargetNodeInstructionProps*>(instruction.props.get());
 
     if (!props) {
-        LERROR(fmt::format("Could not handle target node instruction (number {}).", index + 1));
+        LERROR("Could not handle target node instruction.");
         return false;
     }
 
@@ -241,11 +244,7 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(
     std::string& identifier = props->targetNode;
     const SceneGraphNode* targetNode = sceneGraphNode(identifier);
     if (!targetNode) {
-        LERROR(fmt::format(
-            "Failed handling instruction number {}. Could not find node '{}' to target", 
-            index + 1, 
-            identifier)
-        );
+        LERROR(fmt::format("Could not find node '{}' to target", identifier));
         return false;
     }
 
@@ -291,17 +290,14 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(
 }
 
 bool AutoNavigationHandler::handleNavigationStateInstruction(
-    const Instruction& instruction, int index, double startTime)
+    const Instruction& instruction, double startTime)
 {
     // Verify instruction type
     NavigationStateInstructionProps* props =
         dynamic_cast<NavigationStateInstructionProps*>(instruction.props.get());
 
     if (!props) {
-        LERROR(fmt::format(
-            "Could not handle navigation state instruction (number {}).", 
-            index + 1)
-        );
+        LERROR(fmt::format("Could not handle navigation state instruction."));
         return false;
     }
 
@@ -316,11 +312,7 @@ bool AutoNavigationHandler::handleNavigationStateInstruction(
     const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
 
     if (!anchorNode) {
-        LERROR(fmt::format(
-            "Failed handling instruction number {}. Could not find node '{}' to target", 
-            index + 1, 
-            ns.anchor)
-        );
+        LERROR(fmt::format("Could not find node '{}' to target", ns.anchor));
         return false;
     }
 
@@ -362,14 +354,14 @@ bool AutoNavigationHandler::handleNavigationStateInstruction(
 }
 
 bool AutoNavigationHandler::handlePauseInstruction(
-    const Instruction& instruction, int index, double startTime)
+    const Instruction& instruction, double startTime)
 {
     // Verify instruction type
     PauseInstructionProps* props =
         dynamic_cast<PauseInstructionProps*>(instruction.props.get());
 
     if (!props) {
-        LERROR(fmt::format("Could not handle pause instruction (number {}).", index + 1));
+        LERROR(fmt::format("Could not handle pause instruction."));
         return false;
     }
 
