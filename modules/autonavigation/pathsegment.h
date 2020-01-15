@@ -47,14 +47,18 @@ class PathSegment {
 public:
     PathSegment(CameraState start, CameraState end, double duration, double startTime, CurveType type = Bezier);
 
-    CameraState start() const;
-    CameraState end() const;
-    double duration() const;
-    double startTime() const;
+    // Mutators
+    void setStart(CameraState cs);
 
-    glm::vec3 getPositionAt(double t);
-    glm::dquat getRotationAt(double t);
-    glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up);
+    // Accessors
+    const CameraState start() const;
+    const CameraState end() const;
+    const double duration() const;
+    const double startTime() const;
+
+    const glm::vec3 getPositionAt(double t) const;
+    const glm::dquat getRotationAt(double t) const;
+    const glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up) const;
 
 private: 
     void generateBezier();

@@ -32,7 +32,7 @@
 
 namespace openspace::autonavigation {
 
-enum InstructionType { TargetNode, NavigationState };
+enum InstructionType { TargetNode, NavigationState, Pause };
 
 struct InstructionProps {
     InstructionProps() = default;
@@ -58,6 +58,13 @@ struct NavigationStateInstructionProps : public InstructionProps {
     NavigationState navState;
 };
 
+struct PauseInstructionProps : public InstructionProps {
+    PauseInstructionProps(const ghoul::Dictionary& dictionary);
+
+    // For now, a pause instruction does not have any special props.
+    // Might be added later
+};
+
 struct Instruction {
     Instruction() = default;
     Instruction(const ghoul::Dictionary& dictionary);
@@ -77,9 +84,11 @@ public:
 
     // Accessors
     const std::vector<Instruction>* instructions() const;
+    const bool stopAtTargets() const;
 
 private:
     std::vector<Instruction> _instructions;
+    bool _stopAtTargets = false; // default is tp play the entire path without stops
     // TODO: maxSpeed or speedFactor or something?
 };
 

@@ -50,16 +50,18 @@ public:
     // Accessors
     Camera* camera() const;
     const double pathDuration() const;
-    PathSegment& currentPathSegment();
+    const bool hasFinished() const;
+    const int currentPathSegmentIndex() const;
+    CameraState currentCameraState();
 
     void updateCamera(double deltaTime);
     void createPath(PathSpecification& spec);
     void clearPath();
     void startPath();
+    void pausePath();
+    void continuePath();
 
 private:
-    CameraState getStartState();
-
     bool handleInstruction(const Instruction& instruction, int index);
 
     bool endFromTargetNodeInstruction(CameraState& endState, CameraState& prevState, const Instruction& instruction, int index);
@@ -69,11 +71,14 @@ private:
     glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
         glm::dvec3 prevPos, double height);
 
+    // This list essentially represents the camera path
     std::vector<PathSegment> _pathSegments;
 
-    double _pathDuration;
     double _currentTime; 
     bool _isPlaying = false;
+
+    int _activeSegmentIndex = 0; 
+    bool _stopAtTargets;
 };
 
 } // namespace openspace::autonavigation

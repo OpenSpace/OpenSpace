@@ -60,15 +60,19 @@ PathSegment::PathSegment(
     }  
 }
 
-CameraState PathSegment::start() const { return _start; }
+void PathSegment::setStart(CameraState cs) {
+    _start = std::move(cs);
+}
 
-CameraState PathSegment::end() const { return _end; }
+const CameraState PathSegment::start() const { return _start; }
 
-double PathSegment::duration() const { return _duration; }
+const CameraState PathSegment::end() const { return _end; }
 
-double PathSegment::startTime() const { return _startTime; }
+const double PathSegment::duration() const { return _duration; }
 
-glm::vec3 PathSegment::getPositionAt(double t) {
+const double PathSegment::startTime() const { return _startTime; }
+
+const glm::vec3 PathSegment::getPositionAt(double t) const {
     t = easingfunctions::cubicEaseInOut(t);
 
     switch(_curveType) {
@@ -90,7 +94,7 @@ glm::vec3 PathSegment::getPositionAt(double t) {
     }        
 }
 
-glm::dquat PathSegment::getRotationAt(double t) {
+const glm::dquat PathSegment::getRotationAt(double t) const {
     double tRot = helpers::shiftAndScale(t, 0.1, 0.9);
     tRot = easingfunctions::cubicEaseInOut(tRot);
 
@@ -107,7 +111,9 @@ glm::dquat PathSegment::getRotationAt(double t) {
     }
 }
 
-glm::dquat PathSegment::getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up) {
+const glm::dquat PathSegment::getLookAtRotation(
+    double t, glm::dvec3 currentPos, glm::dvec3 up) const 
+{
     glm::dvec3 startLookAtPos = sceneGraphNode(_start.referenceNode)->worldPosition();
     glm::dvec3 endLookAtPos = sceneGraphNode(_end.referenceNode)->worldPosition();
     glm::dvec3 lookAtPos = ghoul::interpolateLinear(t, startLookAtPos, endLookAtPos);
