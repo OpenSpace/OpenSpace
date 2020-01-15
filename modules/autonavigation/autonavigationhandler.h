@@ -81,6 +81,7 @@ private:
     glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
         glm::dvec3 prevPos, double height);
 
+    // This list essentially represents the camera path
     std::vector<PathSegment> _pathSegments;
 
     double _currentTime; 

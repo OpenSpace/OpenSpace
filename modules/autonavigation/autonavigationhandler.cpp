@@ -191,8 +191,7 @@ void AutoNavigationHandler::continuePath() {
 
 bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index)
 {
-    CameraState& currentLast = _pathSegments.back().end;
-    CameraState startState = _pathSegments.empty() ? currentCameraState() : currentLast;
+    CameraState startState = _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end;
 
     CameraState endState;
     double duration, startTime;
