@@ -40,9 +40,12 @@ namespace {
 namespace openspace::autonavigation {
 
 PathSegment::PathSegment(
-    CameraState start, CameraState end, double duration, double startTime, CurveType type)
-    : _start(start), _end(end), _duration(duration), _startTime(startTime), _curveType(type)
+    CameraState start, CameraState end, double startTime, CurveType type)
+    : _start(start), _end(end), _startTime(startTime), _curveType(type)
 { 
+    // TODO: compute duration based on method later
+    _duration = 5;
+
     switch(_curveType) {
     case Bezier:
         generateBezier();
@@ -62,6 +65,10 @@ PathSegment::PathSegment(
 
 void PathSegment::setStart(CameraState cs) {
     _start = std::move(cs);
+}
+
+void PathSegment::setDuration(double d) {
+    _duration = d;
 }
 
 const CameraState PathSegment::start() const { return _start; }

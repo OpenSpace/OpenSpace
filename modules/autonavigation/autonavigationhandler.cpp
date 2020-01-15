@@ -188,30 +188,27 @@ void AutoNavigationHandler::continuePath() {
 
 bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index)
 {
-    CameraState startState = _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+    // compute startTime 
+    double startTime = 0.0;
+    if (!_pathSegments.empty()) {
+        PathSegment& last = _pathSegments.back();
+        startTime = last.startTime() + last.duration();
+    }
 
-    CameraState endState;
-    double duration, startTime;
     bool success = true;
 
     switch (instruction.type)
     {
     case InstructionType::TargetNode:
-        success = endFromTargetNodeInstruction(
-            endState, startState, instruction, index
-        );
+        success = handleTargetNodeInstruction(instruction, index, startTime);
         break;
 
     case InstructionType::NavigationState:
-        success = endFromNavigationStateInstruction(
-            endState, instruction, index
-        );
+        success = handleNavigationStateInstruction(instruction, index, startTime);
         break;
 
     case InstructionType::Pause:
-        endState = startState;
-        // TODO: implement more complex behavior later
-        success = true;
+        success = handlePauseInstruction(instruction, index, startTime);
         break;
 
     default:
@@ -222,37 +219,13 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
 
     if (!success) return false;
 
-    // compute duration 
-    if (instruction.props->duration.has_value()) {
-        duration = instruction.props->duration.value();
-        if (duration <= 0) {
-            LERROR(fmt::format("Failed creating path segment number {}. Duration can not be negative.", index + 1));
-            return false;
-        }
-    }
-    else {
-        // TODO: compute default duration
-        duration = 5.0;
-    }
-
-    // compute startTime 
-    startTime = 0.0;
-    if (!_pathSegments.empty()) {
-        PathSegment& last = _pathSegments.back();
-        startTime = last.startTime() + last.duration();
-    }
-
-    // create new path
-    _pathSegments.push_back(
-        PathSegment{ startState, endState, duration, startTime }
-    );
-
     return true;
 }
 
-bool AutoNavigationHandler::endFromTargetNodeInstruction(
-    CameraState& endState, CameraState& prevState, const Instruction& instruction, int index)
+bool AutoNavigationHandler::handleTargetNodeInstruction(
+    const Instruction& instruction, int index, double startTime)
 {
+    // Verify instruction type
     TargetNodeInstructionProps* props = 
         dynamic_cast<TargetNodeInstructionProps*>(instruction.props.get());
 
@@ -261,11 +234,18 @@ bool AutoNavigationHandler::endFromTargetNodeInstruction(
         return false;
     }
 
+    CameraState startState = 
+        _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+
     // Compute end state 
     std::string& identifier = props->targetNode;
     const SceneGraphNode* targetNode = sceneGraphNode(identifier);
     if (!targetNode) {
-        LERROR(fmt::format("Failed handling instruction number {}. Could not find node '{}' to target", index + 1, identifier));
+        LERROR(fmt::format(
+            "Failed handling instruction number {}. Could not find node '{}' to target", 
+            index + 1, 
+            identifier)
+        );
         return false;
     }
 
@@ -273,7 +253,8 @@ bool AutoNavigationHandler::endFromTargetNodeInstruction(
     if (props->position.has_value()) {
         // note that the anchor and reference frame is our targetnode. 
         // The position in instruction is given is relative coordinates.
-        targetPos = targetNode->worldPosition() + targetNode->worldRotationMatrix() * props->position.value();
+        targetPos = targetNode->worldPosition() + 
+            targetNode->worldRotationMatrix() * props->position.value();
     }
     else {
         bool hasHeight = props->height.has_value();
@@ -284,7 +265,7 @@ bool AutoNavigationHandler::endFromTargetNodeInstruction(
 
         targetPos = computeTargetPositionAtNode(
             targetNode, 
-            prevState.position, 
+            startState.position,
             height
         );
     }
@@ -297,30 +278,49 @@ bool AutoNavigationHandler::endFromTargetNodeInstruction(
 
     glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 
-    endState = CameraState{ targetPos, targetRot, identifier };
+    CameraState endState = CameraState{ targetPos, targetRot, identifier };
+
+    // TODO: Handle duration better
+    PathSegment newSegment{ startState, endState, startTime };
+    if (instruction.props->duration.has_value()) {
+        newSegment.setDuration(instruction.props->duration.value());
+    }
+    _pathSegments.push_back(newSegment);
 
     return true;
 }
 
-bool AutoNavigationHandler::endFromNavigationStateInstruction(
-    CameraState& endState, const Instruction& instruction, int index)
+bool AutoNavigationHandler::handleNavigationStateInstruction(
+    const Instruction& instruction, int index, double startTime)
 {
+    // Verify instruction type
     NavigationStateInstructionProps* props =
         dynamic_cast<NavigationStateInstructionProps*>(instruction.props.get());
 
     if (!props) {
-        LERROR(fmt::format("Could not handle navigation state instruction (number {}).", index + 1));
+        LERROR(fmt::format(
+            "Could not handle navigation state instruction (number {}).", 
+            index + 1)
+        );
         return false;
     }
 
+    CameraState startState =
+        _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+
     interaction::NavigationHandler::NavigationState ns = props->navState;
 
-    // OBS! The following code is exactly the same as used in NavigationHandler::applyNavigationState. Should probably be made into a function.
+    // OBS! The following code is exactly the same as used in 
+    // NavigationHandler::applyNavigationState. Should probably be made into a function.
     const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
     const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
 
     if (!anchorNode) {
-        LERROR(fmt::format("Failed handling instruction number {}. Could not find node '{}' to target", index + 1, ns.anchor));
+        LERROR(fmt::format(
+            "Failed handling instruction number {}. Could not find node '{}' to target", 
+            index + 1, 
+            ns.anchor)
+        );
         return false;
     }
 
@@ -349,7 +349,44 @@ bool AutoNavigationHandler::endFromNavigationStateInstruction(
 
     glm::quat targetRotation = neutralCameraRotation * yawRotation * pitchRotation;
 
-    endState = CameraState{ targetPositionWorld, targetRotation, ns.anchor };
+    CameraState endState = CameraState{ targetPositionWorld, targetRotation, ns.anchor };
+
+    // TODO: Handle duration better
+    PathSegment newSegment{ startState, endState, startTime };
+    if (instruction.props->duration.has_value()) {
+        newSegment.setDuration(instruction.props->duration.value());
+    }
+    _pathSegments.push_back(newSegment);
+
+    return true;
+}
+
+bool AutoNavigationHandler::handlePauseInstruction(
+    const Instruction& instruction, int index, double startTime)
+{
+    // Verify instruction type
+    PauseInstructionProps* props =
+        dynamic_cast<PauseInstructionProps*>(instruction.props.get());
+
+    if (!props) {
+        LERROR(fmt::format("Could not handle pause instruction (number {}).", index + 1));
+        return false;
+    }
+
+    CameraState startState =
+        _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+
+    CameraState endState = startState;
+
+    // TODO: implement more complex behavior later
+
+    // TODO: Handle duration better
+    PathSegment newSegment{ startState, endState, startTime };
+    if (instruction.props->duration.has_value()) {
+        newSegment.setDuration(instruction.props->duration.value());
+    }
+    _pathSegments.push_back(newSegment);
+
     return true;
 }
 

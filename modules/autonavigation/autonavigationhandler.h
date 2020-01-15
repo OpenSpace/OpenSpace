@@ -64,9 +64,9 @@ public:
 private:
     bool handleInstruction(const Instruction& instruction, int index);
 
-    bool endFromTargetNodeInstruction(CameraState& endState, CameraState& prevState, const Instruction& instruction, int index);
-
-    bool endFromNavigationStateInstruction(CameraState& endState, const Instruction& instruction, int index);
+    bool handleTargetNodeInstruction(const Instruction& instruction, int index, double startTime);
+    bool handleNavigationStateInstruction(const Instruction& instruction, int index, double startTime);
+    bool handlePauseInstruction(const Instruction& instruction, int index, double startTime);
 
     glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
         glm::dvec3 prevPos, double height);

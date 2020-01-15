@@ -45,10 +45,11 @@ enum CurveType {
 
 class PathSegment {
 public:
-    PathSegment(CameraState start, CameraState end, double duration, double startTime, CurveType type = Bezier);
+    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Bezier);
 
     // Mutators
     void setStart(CameraState cs);
+    void setDuration(double d);
 
     // Accessors
     const CameraState start() const;
@@ -67,7 +68,7 @@ private:
 
     CameraState _start;
     CameraState _end;
-    double _duration;
+    double _duration; 
     double _startTime; 
     CurveType _curveType; 
     std::vector<glm::dvec3> _controlPoints;
