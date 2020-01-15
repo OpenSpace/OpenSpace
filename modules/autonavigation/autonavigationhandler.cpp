@@ -74,6 +74,7 @@ const int AutoNavigationHandler::currentPathSegmentIndex() const {
             return i;
         }
     }
+    return -1;
 }
 
 CameraState AutoNavigationHandler::currentCameraState() {
@@ -90,6 +91,8 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     if (!_isPlaying || _pathSegments.empty()) return;
 
     const int currentIndex = currentPathSegmentIndex();
+
+    if (currentIndex < 0) return; // no path
 
     if (_stopAtTargets && (currentIndex != _activeSegmentIndex)) {
         _activeSegmentIndex = currentIndex; 
