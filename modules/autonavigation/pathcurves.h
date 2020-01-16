@@ -22,58 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
-#define __OPENSPACE_MODULE___PATHSEGMENT___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
 
 #include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace::autonavigation {
 
-struct CameraState {
-    glm::dvec3 position;
-    glm::dquat rotation;
-    std::string referenceNode;
-};
+struct CameraState;
 
-enum CurveType {
-    Bezier, 
-    Bezier2,
-    Linear,
-    Linear2
-};
-
-class PathCurve;
-
-class PathSegment {
+class PathCurve {
 public:
-    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Linear2);
-    ~PathSegment() = default;
+    virtual ~PathCurve() = 0;
+    virtual glm::dvec3 interpolate(double t) = 0;
+protected:
+    // the points used for creating the curve (e.g. control points of a Bezier curve)
+    std::vector<glm::dvec3> _points; 
+};
 
-    // Mutators
-    void setStart(CameraState cs);
-    void setDuration(double d);
+class BezierCurve : public PathCurve {
+public :
+    BezierCurve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
+};
 
-    // Accessors
-    const CameraState start() const;
-    const CameraState end() const;
-    const double duration() const;
-    const double startTime() const;
+class Bezier2Curve : public PathCurve {
+public:
+    Bezier2Curve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
+};
 
-    const glm::vec3 getPositionAt(double t) const;
-    const glm::dquat getRotationAt(double t) const;
-    const glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up) const;
+class LinearCurve : public PathCurve {
+public:
+    LinearCurve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
+};
 
-private: 
-    CameraState _start;
-    CameraState _end;
-    double _duration; 
-    double _startTime; 
-    CurveType _curveType; // Ideally, we don't want to need to save this
-
-    std::shared_ptr<PathCurve> _curve; // OBS! Does it make more sense to use unique_ptr? However, then PathSegments cannot be copied.
+class Linear2Curve : public PathCurve {
+public:
+    Linear2Curve(CameraState& start, CameraState& end);
+    glm::dvec3 interpolate(double t);
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___PATHSEGMENT___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
