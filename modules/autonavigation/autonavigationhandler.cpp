@@ -162,24 +162,32 @@ void AutoNavigationHandler::clearPath() {
 }
 
 void AutoNavigationHandler::startPath() {
-    ghoul_assert(!_pathSegments.empty(), "Cannot start an empty path");
+    if (_pathSegments.empty()) {
+        LERROR("Cannot start an empty path.");
+        return;
+    }
     LINFO("Starting path...");
     _currentTime = 0.0;
     _isPlaying = true;
 }
 
 void AutoNavigationHandler::pausePath() {
-    ghoul_assert(!_isPlaying, "Cannot pause a path that isn't playing");
+    if (!_isPlaying) {
+        LERROR("Cannot pause a path that isn't playing");
+        return;
+    }
     LINFO(fmt::format("Paused path at target {} / {}", _activeSegmentIndex, _pathSegments.size()));
     _isPlaying = false;
 }
 
 void AutoNavigationHandler::continuePath() {
-    ghoul_assert(_isPlaying, "Cannot start a path that is already playing");
-    ghoul_assert(!_pathSegments.empty(), "No path to continue on");
+    if (_pathSegments.empty() || hasFinished()) {
+        LERROR("No path to resume (path is empty or has finished).");
+        return;
+    }
 
-    if (hasFinished()) {
-        LERROR("Path has ended, cannot continue.");
+    if (_isPlaying) {
+        LERROR("Cannot resume a path that is already playing");
         return;
     }
 
