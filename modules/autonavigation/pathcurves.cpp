@@ -51,7 +51,7 @@ BezierCurve::BezierCurve(CameraState& start, CameraState& end) {
 }
 
 glm::dvec3 BezierCurve::interpolate(double t) {
-    return interpolator::cubicBezier(t,
+    return interpolation::cubicBezier(t,
         _points[0], _points[1], _points[2], _points[3]);
 }
 
@@ -84,7 +84,7 @@ Bezier2Curve::Bezier2Curve(CameraState& start, CameraState& end) {
 }
 
 glm::dvec3 Bezier2Curve::interpolate(double t) {
-    return interpolator::piecewiseCubicBezier(t, _points);
+    return interpolation::piecewiseCubicBezier(t, _points);
 }
 
 LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
@@ -93,7 +93,7 @@ LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
 }
 
 glm::dvec3 LinearCurve::interpolate(double t) {
-    return interpolator::linear(t, _points[0], _points[1]);
+    return interpolation::linear(t, _points[0], _points[1]);
 }
 
 Linear2Curve::Linear2Curve(CameraState& start, CameraState& end) {
@@ -118,7 +118,7 @@ Linear2Curve::Linear2Curve(CameraState& start, CameraState& end) {
 }
 
 glm::dvec3 Linear2Curve::interpolate(double t) {
-    return interpolator::piecewiseLinear(t, _points);
+    return interpolation::piecewiseLinear(t, _points);
 }
 
 } // namespace openspace::autonavigation

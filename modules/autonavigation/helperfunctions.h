@@ -65,7 +65,7 @@ double exponentialEaseInOut(double t);
 
 // TODO: also make these template functions instead
 
-namespace openspace::autonavigation::interpolator {
+namespace openspace::autonavigation::interpolation {
 
     glm::dvec3 cubicBezier(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2, 
                                      const glm::dvec3 &cp3, const glm::dvec3 &cp4);
