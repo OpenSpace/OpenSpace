@@ -31,7 +31,6 @@
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
-#include <ghoul/Misc/interpolator.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -108,7 +107,7 @@ const glm::dquat PathSegment::getLookAtRotation(
 {
     glm::dvec3 startLookAtPos = sceneGraphNode(_start.referenceNode)->worldPosition();
     glm::dvec3 endLookAtPos = sceneGraphNode(_end.referenceNode)->worldPosition();
-    glm::dvec3 lookAtPos = ghoul::interpolateLinear(t, startLookAtPos, endLookAtPos);
+    glm::dvec3 lookAtPos = interpolator::linear(t, startLookAtPos, endLookAtPos);
 
     glm::dmat4 lookAtMat = glm::lookAt(
         currentPos,

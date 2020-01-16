@@ -25,10 +25,8 @@
 #include <modules/autonavigation/pathcurves.h>
 
 #include <modules/autonavigation/helperfunctions.h>
-#include <modules/autonavigation/pathsegment.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/Misc/interpolator.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -95,7 +93,7 @@ LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
 }
 
 glm::dvec3 LinearCurve::interpolate(double t) {
-    return ghoul::interpolateLinear(t, _points[0], _points[1]);
+    return interpolator::linear(t, _points[0], _points[1]);
 }
 
 Linear2Curve::Linear2Curve(CameraState& start, CameraState& end) {

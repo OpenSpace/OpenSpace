@@ -25,16 +25,11 @@
 #ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
 #define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
+#include <modules/autonavigation/camerastate.h>
 #include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace::autonavigation {
-
-struct CameraState {
-    glm::dvec3 position;
-    glm::dquat rotation;
-    std::string referenceNode;
-};
 
 enum CurveType {
     Bezier, 

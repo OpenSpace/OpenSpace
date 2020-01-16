@@ -22,48 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
-#define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
+#ifndef __OPENSPACE_MODULE___CAMERASTATE___H__
+#define __OPENSPACE_MODULE___CAMERASTATE___H__
 
-#include <modules/autonavigation/camerastate.h>
 #include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace::autonavigation {
 
-class PathCurve {
-public:
-    virtual ~PathCurve() = 0;
-    virtual glm::dvec3 interpolate(double t) = 0;
-protected:
-    // the points used for creating the curve (e.g. control points of a Bezier curve)
-    std::vector<glm::dvec3> _points; 
-};
-
-class BezierCurve : public PathCurve {
-public :
-    BezierCurve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
-};
-
-class Bezier2Curve : public PathCurve {
-public:
-    Bezier2Curve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
-};
-
-class LinearCurve : public PathCurve {
-public:
-    LinearCurve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
-};
-
-class Linear2Curve : public PathCurve {
-public:
-    Linear2Curve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
+struct CameraState {
+    glm::dvec3 position;
+    glm::dquat rotation;
+    std::string referenceNode;
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
+#endif // __OPENSPACE_MODULE___CAMERASTATE___H__
