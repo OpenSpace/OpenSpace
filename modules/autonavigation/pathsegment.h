@@ -42,7 +42,7 @@ class PathCurve;
 
 class PathSegment {
 public:
-    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Linear2);
+    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Linear);
     ~PathSegment() = default;
 
     // Mutators

@@ -61,7 +61,12 @@ PathSegment::PathSegment(
         break;
     default:
         LERROR(fmt::format("Cannot create curve of type {}. Type does not exist!", _curveType));
+        return;
     }  
+
+    // TEST:
+    double length = _curve->arcLength();
+    LINFO(fmt::format("Curve length: {}", length));
 }
 
 void PathSegment::setStart(CameraState cs) {
@@ -82,7 +87,7 @@ const double PathSegment::startTime() const { return _startTime; }
 
 const glm::vec3 PathSegment::getPositionAt(double t) const {
     t = easingfunctions::cubicEaseInOut(t);
-    return _curve->interpolate(t);    
+    return _curve->valueAt(t);    
 }
 
 const glm::dquat PathSegment::getRotationAt(double t) const {
