@@ -418,6 +418,24 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         0 :
         _primaryRenderInformation.first;
 
+    // Culling
+    const double scaledRadius = glm::length(
+        glm::dmat3(modelTransform) * glm::dvec3(_boundingSphere, 0.0, 0.0)
+    );
+
+    glm::dvec3 trailPosWorld = glm::dvec3(
+        modelTransform * _primaryRenderInformation._localTransform * 
+        glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    const double distance = glm::distance(
+        trailPosWorld,
+        data.camera.eyePositionVec3()
+    );
+
+    if (distance > scaledRadius * DISTANCE_CULLING_RADII) {
+        return;
+    }
+
     // Render the primary batch of vertices
     render(_primaryRenderInformation, totalNumber, primaryOffset);
 

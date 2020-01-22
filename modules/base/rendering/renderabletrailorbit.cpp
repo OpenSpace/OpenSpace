@@ -356,6 +356,25 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
+
+    // Updating bounding sphere
+    glm::vec3 maxVertex(std::numeric_limits<float>::min());
+    glm::vec3 minVertex(std::numeric_limits<float>::max());
+
+    auto setMax = [&maxVertex, &minVertex](TrailVBOLayout &vertexData)
+    {
+        maxVertex.x = maxVertex.x < vertexData.x ? vertexData.x : maxVertex.x;
+        maxVertex.y = maxVertex.y < vertexData.y ? vertexData.y : maxVertex.y;
+        maxVertex.z = maxVertex.z < vertexData.z ? vertexData.z : maxVertex.z;
+
+        minVertex.x = minVertex.x > vertexData.x ? vertexData.x : minVertex.x;
+        minVertex.y = minVertex.y > vertexData.y ? vertexData.y : minVertex.y;
+        minVertex.z = minVertex.z > vertexData.z ? vertexData.z : minVertex.z;
+    };
+
+    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
+
+    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.0);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(

@@ -72,6 +72,8 @@ class Translation;
 class RenderableTrail : public Renderable {
 public:
 
+const double DISTANCE_CULLING_RADII = 800.0;
+
 struct Appearance : properties::PropertyOwner {
         Appearance();
         /// Specifies the base color of the line before fading
