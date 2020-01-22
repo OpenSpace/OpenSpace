@@ -27,6 +27,7 @@
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <chrono>
 
@@ -59,10 +60,6 @@ public:
     void initialize();
     void setBrowserInstance(BrowserInstance* browserInstance);
     void resetBrowserInstance();
-
-    void touchPressCallback(const double x, const double y);
-    void touchReleaseCallback(const double x, const double y);
-    bool hasContentCallback(const double, const double);
 
 private:
     bool mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
@@ -106,6 +103,9 @@ private:
 
     MouseButtonState _leftButton;
     MouseButtonState _rightButton;
+
+    //This vector assumes first element to be the active one:
+    std::vector<TouchInput> _validTouchStates;
 
     /**
      * determines if a click should be sent as a double click or not

@@ -187,8 +187,12 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                 std::chrono::system_clock::now(),
                 &progressCb
             };
+            #if LIBCURL_VERSION_NUM >= 0x072000
+            // xferinfo was introduced in 7.32.0, if a lower curl version is used the progress
+            // will not be shown for downloads on the splash screen
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo); // NOLINT
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p); // NOLINT
+            #endif
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
 
             CURLcode res = curl_easy_perform(curl);
