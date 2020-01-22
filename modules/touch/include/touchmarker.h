@@ -25,9 +25,6 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 
-#include <modules/touch/include/tuioear.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -35,10 +32,10 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
 #include <memory>
 #include <vector>
 
@@ -54,10 +51,10 @@ public:
     void initialize();
     void deinitialize();
 
-    void render(const std::vector<TUIO::TuioCursor>& list);
+    void render(const std::vector<openspace::TouchInputHolder>& list);
 
 private:
-    void createVertexList(const std::vector<TUIO::TuioCursor>& list);
+    void createVertexList(const std::vector<openspace::TouchInputHolder>& list);
 
     properties::BoolProperty _visible;
     properties::FloatProperty _radiusSize;

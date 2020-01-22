@@ -335,7 +335,7 @@ RenderEngine::RenderEngine()
 
     _hue.onChange([this]() {
         if (_renderer) {
-            const float h = _hue / 360.0;
+            const float h = _hue / 360.f;
             _renderer->setHue(h);
         }
     });

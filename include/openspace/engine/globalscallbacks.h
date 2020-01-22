@@ -27,6 +27,7 @@
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <functional>
 #include <vector>
 
@@ -53,6 +54,10 @@ std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>& gMouseB
 std::vector<std::function<void(double, double)>>& gMousePosition();
 std::vector<std::function<bool(double, double)>>& gMouseScrollWheel();
 
+std::vector<std::function<bool(TouchInput)>>& gTouchDetected();
+std::vector<std::function<bool(TouchInput)>>& gTouchUpdated();
+std::vector<std::function<void(TouchInput)>>& gTouchExit();
+
 } // namespace detail
 
 namespace callback {
@@ -76,7 +81,12 @@ static std::vector<std::function<void(double, double)>>& mousePosition =
     detail::gMousePosition();
 static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
     detail::gMouseScrollWheel();
-
+static std::vector<std::function<bool(TouchInput)>>& touchDetected =
+    detail::gTouchDetected();
+static std::vector<std::function<bool(TouchInput)>>& touchUpdated =
+    detail::gTouchUpdated();
+static std::vector<std::function<void(TouchInput)>>& touchExit =
+    detail::gTouchExit();
 
 /**
  * If the framerate becomes slow, Chromium Embedded Framework (used in Web Browser Module)
