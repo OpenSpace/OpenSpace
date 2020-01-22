@@ -69,6 +69,9 @@ Fragment getFragment() {
     // to normalize the transparency value to [0,1]
     if (colorValue < 3.0 * transparency) {
         diffuse.a = pow(colorValue / (3.0 * transparency), 1);
+        //diffuse.a = (colorValue / 3.0) * transparency;
+        if (diffuse.a < 0.65)
+            discard;
     }
 
     // shadow == 1.0 means it is not in shadow
@@ -114,7 +117,7 @@ Fragment getFragment() {
 
     Fragment frag;
 
-    frag.color      = (0.55 * diffuse * shadow) + diffuse * 0.45;
+    frag.color      = (0.65 * diffuse * shadow) + diffuse * 0.35;
     frag.depth      = vs_screenSpaceDepth;
     frag.gPosition  = vec4(1e30, 1e30, 1e30, 1.0);
     frag.gNormal    = vec4(normal, 1.0);

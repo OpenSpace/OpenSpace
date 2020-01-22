@@ -287,7 +287,7 @@ Fragment getFragment() {
         sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
         shadow = sum / (8.0 * nShadowSamples + 1.f);
     }
-    frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.5, 0.0, 1.0) : shadow;
+    frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.3, 0.0, 1.0) : shadow;
 #endif
 
     return frag;

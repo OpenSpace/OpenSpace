@@ -346,7 +346,6 @@ void RingsComponent::draw(const RenderData& data,
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
         
         _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
-
     }
     else if (renderPass == GeometryOnly) {
         _geometryOnlyShader->setUniform(
