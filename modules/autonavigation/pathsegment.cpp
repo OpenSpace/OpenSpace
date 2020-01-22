@@ -43,9 +43,6 @@ PathSegment::PathSegment(
     CameraState start, CameraState end, double startTime, CurveType type)
     : _start(start), _end(end), _startTime(startTime), _curveType(type)
 { 
-    // TODO: compute duration based on method later
-    _duration = 5;
-
     switch(type) {
     case Bezier:
         _curve = std::make_shared<BezierCurve>(start, end);
@@ -64,9 +61,11 @@ PathSegment::PathSegment(
         return;
     }  
 
-    // TEST:
-    double length = _curve->arcLength();
-    LINFO(fmt::format("Curve length: {}", length));
+    _length = _curve->arcLength();
+    //LINFO(fmt::format("Curve length: {}", _length));
+
+    // TODO: compute default duration based on curve length 
+    _duration = 5;
 }
 
 void PathSegment::setStart(CameraState cs) {
