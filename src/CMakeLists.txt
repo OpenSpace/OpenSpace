@@ -195,6 +195,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/touch.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
@@ -389,6 +390,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
