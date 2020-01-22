@@ -65,6 +65,8 @@ PathSegment::PathSegment(
     //LINFO(fmt::format("Curve length: {}", _length));
 
     // TODO: compute default duration based on curve length 
+    // Also, when compensatng for simulation time later we need to make a guess for 
+    // the duration, based on the current position of the target. 
     _duration = 5;
 }
 
