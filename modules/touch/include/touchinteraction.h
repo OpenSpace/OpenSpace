@@ -28,8 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/touch/include/directinputsolver.h>
-#include <modules/touch/include/tuioear.h>
-
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -37,7 +35,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-
+#include <chrono>
 #include <memory>
 
 //#define TOUCH_DEBUG_PROPERTIES
@@ -66,8 +64,6 @@ private:
 
 class TouchInteraction : public properties::PropertyOwner {
 public:
-    using Point = std::pair<int, TUIO::TuioPoint>;
-
     TouchInteraction();
 
     // for interpretInteraction()
@@ -95,14 +91,12 @@ public:
      * 8 Evaluate if directControl should be called next frame- true if all contact points
      * select the same node and said node is larger than _nodeRadiusThreshold
     */
-    void updateStateFromInput(const std::vector<TUIO::TuioCursor>& list,
-        std::vector<Point>& lastProcessed);
+
+    void updateStateFromInput(const std::vector<TouchInputHolder>& list,
+        std::vector<TouchInput>& lastProcessed);
 
     // Calculates the new camera state with velocities and time since last frame
     void step(double dt);
-
-    // Used to save LMA data for one frame if the user chose to
-    void unitTest();
 
     // Called each frame we have no new input, used to reset data
     void resetAfterInput();
@@ -120,48 +114,38 @@ public:
     void setCamera(Camera* camera);
 
 private:
-    /* Returns true if the clicked position contains WebGui content and the event will
-    * be parsed to the webbrowser
-    */
-    bool webContent(const std::vector<TUIO::TuioCursor>& list);
-
     /* Returns true if we have the GUI window open. If so, emulates the incoming touch
      * input to a mouse such that we can interact with the GUI
      */
-    bool guiMode(const std::vector<TUIO::TuioCursor>& list);
+    bool isGuiMode(glm::dvec2 screenPosition, size_t numFingers);
 
     /* Function that calculates the new camera state such that it minimizes the L2 error
      * in screenspace
      * between contact points and surface coordinates projected to clip space using LMA
      */
-    void directControl(const std::vector<TUIO::TuioCursor>& list);
+    void directControl(const std::vector<TouchInputHolder>& list);
 
     /* Traces each contact point into the scene as a ray
      * if the ray hits a node, save the id, node and surface coordinates the cursor hit
      * in the list _selected
      */
-    void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
+    void findSelectedNode(const std::vector<TouchInputHolder>& list);
 
     /* Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
      * depending on what input was gotten
      */
-    int interpretInteraction(const std::vector<TUIO::TuioCursor>& list,
-        const std::vector<Point>& lastProcessed);
+    int interpretInteraction(const std::vector<TouchInputHolder>& list,
+        const std::vector<TouchInput>& lastProcessed);
 
     // Compute new velocity according to the interpreted action
-    void computeVelocities(const std::vector<TUIO::TuioCursor>& list,
-        const std::vector<Point>& lastProcessed);
+    void computeVelocities(const std::vector<TouchInputHolder>& list,
+        const std::vector<TouchInput>& lastProcessed);
 
     //Compute velocity based on double-tap for zooming
     double computeTapZoomDistance(double zoomGain);
 
     //Compute coefficient for velocity decay to be applied in decceleration
     double computeConstTimeDecayCoefficient(double velocity);
-
-    //Compute coefficient of decay based on current frametime; if frametime has been
-    // longer than usual then multiple decay steps may be applied to keep the decay
-    // relative to user time
-    double computeDecayCoeffFromFrametime(double coeff, int times);
 
     /* Decelerate the velocities. Function is called in step() but is dereferenced from
      * frame time to assure same behaviour on all systems
@@ -224,25 +208,25 @@ private:
     VelocityStates _lastVel;
     VelocityStates _sensitivity;
 
-    double _projectionScaleFactor;
-    double _currentRadius;
-    double _slerpdT;
-    double _timeSlack;
-    int _numOfTests;
-    TUIO::TuioTime _time;
-    bool _directTouchMode;
-    bool _wasPrevModeDirectTouch;
-    bool _tap;
-    bool _doubleTap;
-    bool _zoomOutTap;
-    bool _lmSuccess;
-    bool _guiON;
+    double _projectionScaleFactor = 1.000004;
+    double _currentRadius = 1.0;
+    double _slerpdT = 10001.0;
+    double _timeSlack = 0.0;
+    int _numOfTests = 0;
+    std::chrono::milliseconds _time;
+    bool _directTouchMode = false;
+    bool _wasPrevModeDirectTouch = false;
+    bool _tap = false;
+    bool _doubleTap = false;
+    bool _zoomOutTap = false;
+    bool _lmSuccess = true;
+    bool _guiON = false;
     std::vector<DirectInputSolver::SelectedBody> _selected;
     SceneGraphNode* _pickingSelected = nullptr;
     DirectInputSolver _solver;
 
     glm::dquat _toSlerp;
-    glm::dvec3 _centroid;
+    glm::vec2 _centroid = glm::vec2(0.f);
 
     FrameTimeAverage _frameTimeAvg;
 
