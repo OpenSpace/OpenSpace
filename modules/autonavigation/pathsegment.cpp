@@ -53,6 +53,9 @@ PathSegment::PathSegment(
     case Bezier2:
         _curve = std::make_shared<Bezier2Curve>(start, end);
         break;
+    case Bezier3:
+        _curve = std::make_shared<Bezier3Curve>(start, end);
+        break;
     case Linear:
         _curve = std::make_shared<LinearCurve>(start, end);
         break;
