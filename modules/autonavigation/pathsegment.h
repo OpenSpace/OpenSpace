@@ -34,6 +34,7 @@ namespace openspace::autonavigation {
 enum CurveType {
     Bezier, 
     Bezier2,
+    Bezier3,
     Linear,
     Linear2
 };
@@ -42,7 +43,7 @@ class PathCurve;
 
 class PathSegment {
 public:
-    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Linear);
+    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = Bezier3);
     ~PathSegment() = default;
 
     // Mutators

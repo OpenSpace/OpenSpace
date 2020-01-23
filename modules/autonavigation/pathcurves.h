@@ -55,6 +55,12 @@ public:
     glm::dvec3 valueAt(double t);
 };
 
+class Bezier3Curve : public PathCurve {
+public:
+    Bezier3Curve(CameraState& start, CameraState& end);
+    glm::dvec3 valueAt(double t);
+};
+
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(CameraState& start, CameraState& end);

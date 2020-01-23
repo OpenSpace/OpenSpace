@@ -119,6 +119,9 @@ void PathSegment::initCurve() {
     case Bezier2:
         _curve = std::make_shared<Bezier2Curve>(_start, _end);
         break;
+    case Bezier3:
+        _curve = std::make_shared<Bezier3Curve>(_start, _end);
+        break;
     case Linear:
         _curve = std::make_shared<LinearCurve>(_start, _end);
         break;

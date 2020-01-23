@@ -99,6 +99,48 @@ glm::dvec3 Bezier2Curve::valueAt(double t) {
     return interpolation::piecewiseCubicBezier(t, _points);
 }
 
+Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
+    // TODO: CALCULATE AND SET CONDITION BOOLS IN CURVE CONSTRUCTOR
+    glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
+    glm::dvec3 startDirection = start.position - startNodePos;
+    double startRadius = sceneGraphNode(start.referenceNode)->boundingSphere();
+
+    glm::dvec3 endNodePos = sceneGraphNode(end.referenceNode)->worldPosition();
+    glm::dvec3 endDirection = end.position - endNodePos;
+
+    glm::dvec3 nodePosDiff = endNodePos - startNodePos;
+    double cosStartAngle = glm::dot(normalize(startDirection), normalize(nodePosDiff));
+
+    // TODO: Test with raycaster, value can vary depending on how close we are to surface!!
+    bool TARGET_BEHIND_STARTNODE = cosStartAngle < -0.8; 
+    bool TARGET_IN_OPPOSITE_DIRECTION = cosStartAngle > 0.8;
+
+
+    // SET CONTROL POINTS
+    _points.push_back(start.position);
+    _points.push_back(start.position + 2.0 * startRadius * normalize(startDirection));
+
+    if (TARGET_BEHIND_STARTNODE)
+    {
+        glm::dvec3 parallell = normalize(nodePosDiff) * glm::dot(startDirection, normalize(nodePosDiff));
+        glm::dvec3 orthogonal = normalize(startDirection - parallell);
+        //Point on the side of start node
+        double dist = 5.0 * startRadius;
+        glm::dvec3 extraKnot = startNodePos + dist * orthogonal;
+        
+        _points.push_back(extraKnot - parallell);
+        _points.push_back(extraKnot); 
+        _points.push_back(extraKnot + parallell);
+    }
+
+    _points.push_back(end.position + 2.0 * endDirection);
+    _points.push_back(end.position);
+}
+
+glm::dvec3 Bezier3Curve::valueAt(double t) {
+    return interpolation::piecewiseCubicBezier(t, _points);
+}
+
 LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
     _points.push_back(start.position);
     _points.push_back(end.position);
