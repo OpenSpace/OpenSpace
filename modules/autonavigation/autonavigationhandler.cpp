@@ -142,6 +142,12 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
     // OBS! Would it be better to save the spec in the handler class? 
     _stopAtTargets = spec.stopAtTargets();
 
+    // Check if we have a specified start state. If so, update the first segment
+    if (spec.hasStartState() && _pathSegments.size() > 0) {
+        CameraState startState = cameraStateFromNavigationState(spec.startState());
+        _pathSegments[0].setStart(startState);
+    }
+
     if (success) {
         LINFO("Succefully generated camera path.");
         startPath();
@@ -192,6 +198,8 @@ void AutoNavigationHandler::continuePath() {
     // Recompute start camera state for the upcoming path segment, to avoid clipping to
     // the old camera state.
     _pathSegments[_activeSegmentIndex].setStart(currentCameraState());
+
+    LINFO(fmt::format("Next segment: {}", _activeSegmentIndex));
 
     _isPlaying = true;
 }
@@ -315,43 +323,7 @@ bool AutoNavigationHandler::handleNavigationStateInstruction(
         _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
 
     interaction::NavigationHandler::NavigationState ns = props->navState;
-
-    // OBS! The following code is exactly the same as used in 
-    // NavigationHandler::applyNavigationState. Should probably be made into a function.
-    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
-    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
-
-    if (!anchorNode) {
-        LERROR(fmt::format("Could not find node '{}' to target", ns.anchor));
-        return false;
-    }
-
-    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
-    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
-
-    const glm::dvec3 targetPositionWorld = anchorWorldPosition +
-        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
-
-    glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(referenceFrameTransform * ns.up.value()) :
-        glm::dvec3(0.0, 1.0, 0.0);
-
-    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
-    glm::dvec3 neutralView =
-        glm::normalize(anchorWorldPosition - targetPositionWorld);
-
-    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0),
-        neutralView,
-        up
-    )));
-
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
-
-    glm::quat targetRotation = neutralCameraRotation * yawRotation * pitchRotation;
-
-    CameraState endState = CameraState{ targetPositionWorld, targetRotation, ns.anchor };
+    CameraState endState = cameraStateFromNavigationState(ns);
 
     // TODO: Handle duration better
     PathSegment newSegment{ startState, endState, startTime };
@@ -406,6 +378,47 @@ glm::dvec3 AutoNavigationHandler::computeTargetPositionAtNode(
     targetPos += glm::normalize(targetToPrevVector) * (radius + height);
 
     return targetPos;
+}
+
+CameraState AutoNavigationHandler::cameraStateFromNavigationState(
+    const interaction::NavigationHandler::NavigationState& ns) 
+{
+    // OBS! The following code is exactly the same as used in 
+    // NavigationHandler::applyNavigationState. Should probably be made into a function.
+    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
+    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
+
+    if (!anchorNode) {
+        LERROR(fmt::format("Could not find node '{}' to target. Returning empty state.", ns.anchor));
+        return CameraState{};
+    }
+
+    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
+    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
+
+    const glm::dvec3 targetPositionWorld = anchorWorldPosition +
+        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
+
+    glm::dvec3 up = ns.up.has_value() ?
+        glm::normalize(referenceFrameTransform * ns.up.value()) :
+        glm::dvec3(0.0, 1.0, 0.0);
+
+    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
+    glm::dvec3 neutralView =
+        glm::normalize(anchorWorldPosition - targetPositionWorld);
+
+    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
+        glm::dvec3(0.0),
+        neutralView,
+        up
+    )));
+
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
+
+    glm::quat targetRotation = neutralCameraRotation * yawRotation * pitchRotation;
+
+    return CameraState{ targetPositionWorld, targetRotation, ns.anchor };
 }
 
 } // namespace openspace::autonavigation

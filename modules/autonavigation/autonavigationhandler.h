@@ -39,6 +39,7 @@ namespace openspace {
 namespace openspace::autonavigation {
 
 struct CameraState;
+struct interaction::NavigationHandler::NavigationState;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
 public:
@@ -70,6 +71,9 @@ private:
 
     glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
         glm::dvec3 prevPos, double height);
+
+    CameraState cameraStateFromNavigationState(
+        const interaction::NavigationHandler::NavigationState& ns);
 
     // This list essentially represents the camera path
     std::vector<PathSegment> _pathSegments;

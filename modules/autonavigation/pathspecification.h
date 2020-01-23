@@ -51,11 +51,9 @@ struct TargetNodeInstructionProps : public InstructionProps {
 };
 
 struct NavigationStateInstructionProps : public InstructionProps {
-    using NavigationState = interaction::NavigationHandler::NavigationState;
-
     NavigationStateInstructionProps(const ghoul::Dictionary& dictionary);
 
-    NavigationState navState;
+    interaction::NavigationHandler::NavigationState navState;
 };
 
 struct PauseInstructionProps : public InstructionProps {
@@ -84,11 +82,16 @@ public:
 
     // Accessors
     const std::vector<Instruction>* instructions() const;
-    const bool stopAtTargets() const;
+    const bool stopAtTargets() const; 
+    const interaction::NavigationHandler::NavigationState& startState() const;
+
+    const bool hasStartState() const;
 
 private:
     std::vector<Instruction> _instructions;
-    bool _stopAtTargets = false; // default is tp play the entire path without stops
+    bool _stopAtTargets = false; // default is to play the entire path without stops
+    std::optional<interaction::NavigationHandler::NavigationState> _startState;
+
     // TODO: maxSpeed or speedFactor or something?
 };
 

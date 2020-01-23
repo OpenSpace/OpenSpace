@@ -42,27 +42,8 @@ namespace openspace::autonavigation {
 PathSegment::PathSegment(
     CameraState start, CameraState end, double startTime, CurveType type)
     : _start(start), _end(end), _startTime(startTime), _curveType(type)
-{ 
-    switch(type) {
-    case Bezier:
-        _curve = std::make_shared<BezierCurve>(start, end);
-        break;
-    case Bezier2:
-        _curve = std::make_shared<Bezier2Curve>(start, end);
-        break;
-    case Linear:
-        _curve = std::make_shared<LinearCurve>(start, end);
-        break;
-    case Linear2:
-        _curve = std::make_shared<Linear2Curve>(start, end);
-        break;
-    default:
-        LERROR(fmt::format("Cannot create curve of type {}. Type does not exist!", _curveType));
-        return;
-    }  
-
-    _length = _curve->arcLength();
-    //LINFO(fmt::format("Curve length: {}", _length));
+{
+    initCurve();
 
     // TODO: compute default duration based on curve length 
     // Also, when compensatng for simulation time later we need to make a guess for 
@@ -72,6 +53,8 @@ PathSegment::PathSegment(
 
 void PathSegment::setStart(CameraState cs) {
     _start = std::move(cs);
+    initCurve();
+    // TODO later: maybe recompute duration as well...
 }
 
 void PathSegment::setDuration(double d) {
@@ -122,6 +105,33 @@ const glm::dquat PathSegment::getLookAtRotation(
     );
 
     return glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
+}
+
+// Initialise the curve, based on the start, end state and curve type
+void PathSegment::initCurve() {
+    // in case there already is a curve object, reset the pointer. 
+    _curve.reset();
+
+    switch (_curveType) {
+    case Bezier:
+        _curve = std::make_shared<BezierCurve>(_start, _end);
+        break;
+    case Bezier2:
+        _curve = std::make_shared<Bezier2Curve>(_start, _end);
+        break;
+    case Linear:
+        _curve = std::make_shared<LinearCurve>(_start, _end);
+        break;
+    case Linear2:
+        _curve = std::make_shared<Linear2Curve>(_start, _end);
+        break;
+    default:
+        LERROR(fmt::format("Cannot create curve of type {}. Type does not exist!", _curveType));
+        return;
+    }
+
+    _length = _curve->arcLength();
+    //LINFO(fmt::format("Curve length: {}", _length));
 }
 
 } // namespace openspace::autonavigation

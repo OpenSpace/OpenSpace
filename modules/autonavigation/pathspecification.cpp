@@ -32,6 +32,7 @@ namespace {
 
     constexpr const char* KeyInstructions = "Instructions";
     constexpr const char* KeyStopAtTargets = "StopAtTargets";
+    constexpr const char* KeyStartState = "StartState";
 
     constexpr const char* KeyTarget = "Target";
     constexpr const char* KeyDuration = "Duration";
@@ -126,7 +127,7 @@ NavigationStateInstructionProps::NavigationStateInstructionProps(
 
         try {
             openspace::documentation::testSpecificationAndThrow(
-                NavigationState::Documentation(),
+                interaction::NavigationHandler::NavigationState::Documentation(),
                 navStateDict,
                 "NavigationState"
             );
@@ -136,7 +137,7 @@ NavigationStateInstructionProps::NavigationStateInstructionProps(
             return;
         }
 
-        navState = NavigationState(navStateDict);
+        navState = interaction::NavigationHandler::NavigationState(navStateDict);
     }
 }
 
@@ -194,6 +195,25 @@ PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
     if (dictionary.hasValue<bool>(KeyStopAtTargets)) {
         _stopAtTargets = dictionary.value<bool>(KeyStopAtTargets);
     }
+
+    // Read start state
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyStartState)) {
+        auto navStateDict = dictionary.value<ghoul::Dictionary>(KeyStartState);
+
+        try {
+            openspace::documentation::testSpecificationAndThrow(
+                interaction::NavigationHandler::NavigationState::Documentation(),
+                navStateDict,
+                "NavigationState"
+            );
+        }
+        catch (ghoul::RuntimeError& e) {
+            LERROR(fmt::format("Unable to read start navigation state. Does not match documentation: {}", e.message));
+            return;
+        }
+
+        _startState = interaction::NavigationHandler::NavigationState(navStateDict);
+    }
 }
 
 PathSpecification::PathSpecification(const Instruction instruction) {
@@ -207,6 +227,14 @@ const std::vector<Instruction>* PathSpecification::instructions() const {
 
 const bool PathSpecification::stopAtTargets() const {
     return _stopAtTargets;
+}
+
+const interaction::NavigationHandler::NavigationState& PathSpecification::startState() const {
+    return _startState.value();
+}
+
+const bool PathSpecification::hasStartState() const {
+    return _startState.has_value();
 }
 
 documentation::Documentation PathSpecification::Documentation() {
@@ -227,6 +255,12 @@ documentation::Documentation PathSpecification::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 "A bool that decides whether we should pause when reaching a target when playing a path."
+            },
+            {
+                KeyStartState,
+                new TableVerifier,
+                Optional::Yes,
+                "A navigation state that determines the start state for the camera path."
             },
         }
     };

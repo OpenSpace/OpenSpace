@@ -60,12 +60,14 @@ public:
     const glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up) const;
 
 private: 
+    void initCurve();
+
     CameraState _start;
     CameraState _end;
-    double _duration; 
     double _startTime; 
     double _length;
-    CurveType _curveType; // Ideally, we don't want to need to save this
+    double _duration;
+    CurveType _curveType; 
 
     std::shared_ptr<PathCurve> _curve; // OBS! Does it make more sense to use unique_ptr? However, then PathSegments cannot be copied.
 };
