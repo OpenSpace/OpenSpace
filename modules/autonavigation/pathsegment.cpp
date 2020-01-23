@@ -43,9 +43,6 @@ PathSegment::PathSegment(
     CameraState start, CameraState end, double startTime, CurveType type)
     : _start(start), _end(end), _startTime(startTime), _curveType(type)
 { 
-    // TODO: compute duration based on method later
-    _duration = 5;
-
     switch(type) {
     case Bezier:
         _curve = std::make_shared<BezierCurve>(start, end);
@@ -64,7 +61,16 @@ PathSegment::PathSegment(
         break;
     default:
         LERROR(fmt::format("Cannot create curve of type {}. Type does not exist!", _curveType));
+        return;
     }  
+
+    _length = _curve->arcLength();
+    //LINFO(fmt::format("Curve length: {}", _length));
+
+    // TODO: compute default duration based on curve length 
+    // Also, when compensatng for simulation time later we need to make a guess for 
+    // the duration, based on the current position of the target. 
+    _duration = 5;
 }
 
 void PathSegment::setStart(CameraState cs) {
@@ -85,7 +91,7 @@ const double PathSegment::startTime() const { return _startTime; }
 
 const glm::vec3 PathSegment::getPositionAt(double t) const {
     t = easingfunctions::cubicEaseInOut(t);
-    return _curve->interpolate(t);    
+    return _curve->valueAt(t);    
 }
 
 const glm::dquat PathSegment::getRotationAt(double t) const {

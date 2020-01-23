@@ -94,11 +94,15 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     if (currentIndex < 0) return; // no path
 
-    if (_stopAtTargets && (currentIndex != _activeSegmentIndex)) {
+    if (currentIndex != _activeSegmentIndex) {
         _activeSegmentIndex = currentIndex; 
-        pausePath();
-        return;
+        if (_stopAtTargets) {
+            pausePath();
+            return;
+        }
     }
+
+    _currentTime += deltaTime;
 
     const PathSegment& cps = _pathSegments[currentIndex];
 
@@ -117,10 +121,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     camera()->setPositionVec3(cameraPosition); 
     camera()->setRotation(cameraRotation);
-
-    _currentTime += deltaTime;
-
-    _activeSegmentIndex = currentIndex;
 
     if (hasFinished()) {
         LINFO("Reached end of path.");

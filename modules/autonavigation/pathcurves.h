@@ -31,10 +31,13 @@
 
 namespace openspace::autonavigation {
 
+// OBS! Path curves has curve parameter in range [0,1]
 class PathCurve {
 public:
     virtual ~PathCurve() = 0;
-    virtual glm::dvec3 interpolate(double t) = 0;
+    virtual glm::dvec3 valueAt(double t) = 0;
+
+    double arcLength(double tLimit = 1.0);
 protected:
     // the points used for creating the curve (e.g. control points of a Bezier curve)
     std::vector<glm::dvec3> _points; 
@@ -43,31 +46,31 @@ protected:
 class BezierCurve : public PathCurve {
 public :
     BezierCurve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
+    glm::dvec3 valueAt(double t);
 };
 
 class Bezier2Curve : public PathCurve {
 public:
     Bezier2Curve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
+    glm::dvec3 valueAt(double t);
 };
 
 class Bezier3Curve : public PathCurve {
 public:
     Bezier3Curve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
+    glm::dvec3 valueAt(double t);
 };
 
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
+    glm::dvec3 valueAt(double t);
 };
 
 class Linear2Curve : public PathCurve {
 public:
     Linear2Curve(CameraState& start, CameraState& end);
-    glm::dvec3 interpolate(double t);
+    glm::dvec3 valueAt(double t);
 };
 
 } // namespace openspace::autonavigation

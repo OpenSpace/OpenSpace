@@ -1,0 +1,89 @@
+
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+-- Specifying which other assets should be loaded in this scene
+asset.require('spice/base')
+
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+asset.require('scene/solarsystem/sun/sun')
+asset.require('scene/solarsystem/sun/glare')
+asset.require('scene/solarsystem/planets')
+asset.request('scene/milkyway/milkyway/volume')
+
+-- TODO: add non planet object
+local modelFolder = asset.syncedResource({
+    Name = "Apollo Models",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_11_models",
+    Version = 1
+})
+
+local object = {
+    Identifier = "ExampleModel",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {100000000, 1000, 10000}
+        }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = modelFolder .. "/Apollo_CSM_shrunk_rotated_xy_double_size.obj"
+        },
+        ColorTexture = modelFolder .. "/gray.png",
+        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    },
+    GUI = {
+        Name = "Example Model",
+        Path = ""
+    }
+}
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+
+-- Load web gui
+local webGui = asset.require('util/webgui')
+
+asset.request('customization/globebrowsing')
+
+-- Keybindings that are specific for this scene
+local Keybindings = {
+     {
+        Key = "right",
+        Name = "Continue camera path",
+        Command = "openspace.autonavigation.continuePath()",
+        Documentation = "Continue a paused camera path.",
+        GuiPath = "/Interaction",
+        Local = false
+    },
+}
+
+asset.onInitialize(function ()
+    webGui.setCefRoute("onscreen")
+
+    local now = openspace.time.currentWallTime()
+    -- Jump back one day to be able to show complete weather data on Earth.
+    openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+
+    openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
+
+    sceneHelper.bindKeys(Keybindings)
+    openspace.setDefaultGuiSorting()
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+end)

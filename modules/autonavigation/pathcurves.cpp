@@ -37,6 +37,18 @@ namespace openspace::autonavigation {
 
 PathCurve::~PathCurve() {}
 
+// Approximate the curve length by dividing the curve into smaller linear 
+// segments and accumulate their length
+double PathCurve::arcLength(double tLimit) {
+    double dt = 0.01; // TODO: choose a good dt
+    double sum = 0.0;
+    for (double t = 0.0; t <= tLimit - dt; t += dt) {
+        double ds = glm::length(valueAt(t + dt) - valueAt(t));
+        sum += ds;
+    }
+    return sum;
+}
+
 BezierCurve::BezierCurve(CameraState& start, CameraState& end) {
     glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
     glm::dvec3 endNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
@@ -50,7 +62,7 @@ BezierCurve::BezierCurve(CameraState& start, CameraState& end) {
     _points.push_back(end.position);
 }
 
-glm::dvec3 BezierCurve::interpolate(double t) {
+glm::dvec3 BezierCurve::valueAt(double t) {
     return interpolation::cubicBezier(t,
         _points[0], _points[1], _points[2], _points[3]);
 }
@@ -69,7 +81,7 @@ Bezier2Curve::Bezier2Curve(CameraState& start, CameraState& end) {
     glm::dvec3 C = normalize(startDirection + endDirection);
     glm::dvec3 CparAB = glm::dot(C, normalize(AB))* normalize(AB);
     glm::dvec3 CortAB = normalize(C - CparAB);
-    double d = length(AB);
+    double d = glm::length(AB);
 
     // TODO: set points that actually look good
     _points.push_back(start.position);
@@ -83,7 +95,7 @@ Bezier2Curve::Bezier2Curve(CameraState& start, CameraState& end) {
     _points.push_back(end.position);
 }
 
-glm::dvec3 Bezier2Curve::interpolate(double t) {
+glm::dvec3 Bezier2Curve::valueAt(double t) {
     return interpolation::piecewiseCubicBezier(t, _points);
 }
 
@@ -125,8 +137,7 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
     _points.push_back(end.position);
 }
 
-
-glm::dvec3 Bezier3Curve::interpolate(double t) {
+glm::dvec3 Bezier3Curve::valueAt(double t) {
     return interpolation::piecewiseCubicBezier(t, _points);
 }
 
@@ -135,7 +146,7 @@ LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
     _points.push_back(end.position);
 }
 
-glm::dvec3 LinearCurve::interpolate(double t) {
+glm::dvec3 LinearCurve::valueAt(double t) {
     return interpolation::linear(t, _points[0], _points[1]);
 }
 
@@ -153,14 +164,14 @@ Linear2Curve::Linear2Curve(CameraState& start, CameraState& end) {
     glm::dvec3 C = normalize(startDirection + endDirection);
     glm::dvec3 CparAB = glm::dot(C, normalize(AB))* normalize(AB);
     glm::dvec3 CortAB = normalize(C - CparAB);
-    double d = length(AB);
+    double d = glm::length(AB);
 
     _points.push_back(start.position);
     _points.push_back(start.position + 2.0 * d * CortAB + 0.5 * AB); //TODO: use scale instead of 2.0
     _points.push_back(end.position);
 }
 
-glm::dvec3 Linear2Curve::interpolate(double t) {
+glm::dvec3 Linear2Curve::valueAt(double t) {
     return interpolation::piecewiseLinear(t, _points);
 }
 
