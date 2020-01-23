@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/autonavigation/pathspecification.h>
+#include <modules/autonavigation/instruction.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>

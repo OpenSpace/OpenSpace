@@ -22,70 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
-#define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
+#ifndef __OPENSPACE_MODULE___PATHINSTRUCTION___H__
+#define __OPENSPACE_MODULE___PATHINSTRUCTION___H__
 
-#include <modules/autonavigation/pathsegment.h>
-#include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <ghoul/glm.h>
-
-namespace openspace {
-    class Camera;
-} // namespace openspace
+#include <optional>
 
 namespace openspace::autonavigation {
 
-struct CameraState;
-struct Instruction;
-class PathSpecification;
+enum InstructionType { TargetNode, NavigationState, Pause };
 
-class AutoNavigationHandler : public properties::PropertyOwner {
-public:
-    AutoNavigationHandler();
-    ~AutoNavigationHandler();
+struct InstructionProps {
+    InstructionProps() = default;
+    InstructionProps(const ghoul::Dictionary& dictionary);
+    virtual ~InstructionProps() = 0; 
 
-    // Mutators
+    std::optional<double> duration;
+};
 
-    // Accessors
-    Camera* camera() const;
-    const double pathDuration() const;
-    const bool hasFinished() const;
-    const int currentPathSegmentIndex() const;
-    CameraState currentCameraState();
+struct TargetNodeInstructionProps : public InstructionProps {
+    TargetNodeInstructionProps(const ghoul::Dictionary& dictionary);
 
-    void updateCamera(double deltaTime);
-    void createPath(PathSpecification& spec);
-    void clearPath();
-    void startPath();
-    void pausePath();
-    void continuePath();
+    std::string targetNode;
+    std::optional<glm::dvec3> position; // relative to target node (model space)
+    std::optional<double> height;
+};
 
-private:
-    bool handleInstruction(const Instruction& instruction, int index);
+struct NavigationStateInstructionProps : public InstructionProps {
+    NavigationStateInstructionProps(const ghoul::Dictionary& dictionary);
 
-    bool handleTargetNodeInstruction(const Instruction& instruction, double startTime);
-    bool handleNavigationStateInstruction(const Instruction& instruction, double startTime);
-    bool handlePauseInstruction(const Instruction& instruction, double startTime);
+    interaction::NavigationHandler::NavigationState navState;
+};
 
-    glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
-        glm::dvec3 prevPos, double height);
+struct PauseInstructionProps : public InstructionProps {
+    PauseInstructionProps(const ghoul::Dictionary& dictionary);
 
-    CameraState cameraStateFromNavigationState(
-        const interaction::NavigationHandler::NavigationState& ns);
+    // For now, a pause instruction does not have any special props.
+    // Might be added later
+};
 
-    // This list essentially represents the camera path
-    std::vector<PathSegment> _pathSegments;
+struct Instruction {
+    Instruction() = default;
+    Instruction(const ghoul::Dictionary& dictionary);
 
-    double _currentTime; 
-    bool _isPlaying = false;
-
-    int _activeSegmentIndex = 0; 
-    bool _stopAtTargets;
+    InstructionType type;
+    std::shared_ptr<InstructionProps> props;
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
+#endif // __OPENSPACE_MODULE___PATHINSTRUCTION___H__

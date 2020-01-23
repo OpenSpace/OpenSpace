@@ -22,54 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___PATHINSTRUCTION___H__
-#define __OPENSPACE_MODULE___PATHINSTRUCTION___H__
+#ifndef __OPENSPACE_MODULE___PATHSPECIFICATION___H__
+#define __OPENSPACE_MODULE___PATHSPECIFICATION___H__
 
+#include <modules/autonavigation/instruction.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <ghoul/glm.h>
 #include <optional>
 
 namespace openspace::autonavigation {
-
-enum InstructionType { TargetNode, NavigationState, Pause };
-
-struct InstructionProps {
-    InstructionProps() = default;
-    InstructionProps(const ghoul::Dictionary& dictionary);
-    virtual ~InstructionProps() {} // abstract
-
-    std::optional<double> duration;
-};
-
-struct TargetNodeInstructionProps : public InstructionProps {
-    TargetNodeInstructionProps(const ghoul::Dictionary& dictionary);
-
-    std::string targetNode;
-    std::optional<glm::dvec3> position; // relative to target node (model space)
-    std::optional<double> height;
-};
-
-struct NavigationStateInstructionProps : public InstructionProps {
-    NavigationStateInstructionProps(const ghoul::Dictionary& dictionary);
-
-    interaction::NavigationHandler::NavigationState navState;
-};
-
-struct PauseInstructionProps : public InstructionProps {
-    PauseInstructionProps(const ghoul::Dictionary& dictionary);
-
-    // For now, a pause instruction does not have any special props.
-    // Might be added later
-};
-
-struct Instruction {
-    Instruction() = default;
-    Instruction(const ghoul::Dictionary& dictionary);
-
-    InstructionType type;
-    std::shared_ptr<InstructionProps> props;
-};
 
 class PathSpecification {
 
@@ -97,4 +59,4 @@ private:
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___NAVIGATIONHANDLER___H__
+#endif // __OPENSPACE_MODULE___PATHSPECIFICATION___H__
