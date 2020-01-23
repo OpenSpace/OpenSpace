@@ -102,6 +102,8 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
         }
     }
 
+    _currentTime += deltaTime;
+
     const PathSegment& cps = _pathSegments[currentIndex];
 
     // Interpolation variable
@@ -119,8 +121,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     camera()->setPositionVec3(cameraPosition); 
     camera()->setRotation(cameraRotation);
-
-    _currentTime += deltaTime;
 
     if (hasFinished()) {
         LINFO("Reached end of path.");
