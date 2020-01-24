@@ -34,9 +34,11 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr const char* _loggerCat = "RenderableNodeLine";
     constexpr const char* ProgramName = "NodeLineProgram";
     constexpr const char* Root = "Root";
 
@@ -44,12 +46,14 @@ namespace {
         "StartNode",
         "Start Node",
         "The identifier of the node the line starts from. "
+        "Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
         "The identifier of the node the line ends at. "
+        "Defaults to 'Root' if not specified. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
@@ -63,6 +67,22 @@ namespace {
         "Line Width",
         "This value specifies the line width."
     };
+
+    // Returns a position that is relative to the current anchor node. This is a method to
+    // handle precision problems that occur when approaching a line end point
+    glm::dvec3 coordinatePosFromAnchorNode(const glm::dvec3& worldPos) {
+        using namespace openspace;
+        glm::dvec3 anchorNodePos(0.0);
+
+        const interaction::OrbitalNavigator& nav =
+            global::navigationHandler.orbitalNavigator();
+
+        if (nav.anchorNode()) {
+            anchorNodePos = nav.anchorNode()->worldPosition();
+        }
+        glm::dvec3 diffPos = worldPos - anchorNodePos;
+        return diffPos;
+    }
 } // namespace
 
 namespace openspace {
@@ -76,13 +96,13 @@ documentation::Documentation RenderableNodeLine::Documentation() {
             {
                 StartNodeInfo.identifier,
                 new StringVerifier,
-                Optional::No,
+                Optional::Yes,
                 StartNodeInfo.description
             },
             {
                 EndNodeInfo.identifier,
                 new StringVerifier,
-                Optional::No,
+                Optional::Yes,
                 EndNodeInfo.description
             },
             {
@@ -114,8 +134,13 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         "RenderableNodeLine"
     );
 
-    _start = dictionary.value<std::string>(StartNodeInfo.identifier);
-    _end = dictionary.value<std::string>(EndNodeInfo.identifier);
+    if (dictionary.hasKey(StartNodeInfo.identifier)) {
+        _start = dictionary.value<std::string>(StartNodeInfo.identifier);
+    }
+
+    if (dictionary.hasKey(EndNodeInfo.identifier)) {
+        _end = dictionary.value<std::string>(EndNodeInfo.identifier);
+    }
 
     if (dictionary.hasKey(LineColorInfo.identifier)) {
         _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
@@ -124,11 +149,26 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         _lineWidth = static_cast<float>(dictionary.value<double>(LineWidthInfo.identifier));
     }
 
+    _start.onChange([&]() { validateNodes(); });
+    _end.onChange([&]() { validateNodes(); });
+
     addProperty(_start);
     addProperty(_end);
     addProperty(_lineColor);
     addProperty(_lineWidth);
     addProperty(_opacity);
+}
+
+double RenderableNodeLine::distance() const {
+    return glm::distance(_startPos, _endPos);
+}
+
+std::string RenderableNodeLine::start() const {
+    return _start;
+}
+
+std::string RenderableNodeLine::end() const {
+    return _end;
 }
 
 void RenderableNodeLine::initializeGL() {
@@ -156,7 +196,6 @@ void RenderableNodeLine::initializeGL() {
 }
 
 void RenderableNodeLine::deinitializeGL() {
-
     glDeleteVertexArrays(1, &_vaoId);
     _vaoId = 0;
 
@@ -183,19 +222,21 @@ void RenderableNodeLine::unbindGL() {
     glBindVertexArray(0);
 }
 
-void RenderableNodeLine::bindGL()
-{
+void RenderableNodeLine::bindGL() {
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
 }
 
-void RenderableNodeLine::updateVertexData()
-{
+void RenderableNodeLine::updateVertexData() {
     _vertexArray.clear();
 
     // Update the positions of the nodes
-    _startPos = getCoordinatePosFromAnchorNode(global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition());
-    _endPos = getCoordinatePosFromAnchorNode(global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition());
+    _startPos = coordinatePosFromAnchorNode(
+        global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition()
+    );
+    _endPos = coordinatePosFromAnchorNode(
+        global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition()
+    );
 
     _vertexArray.push_back(_startPos.x);
     _vertexArray.push_back(_startPos.y);
@@ -215,14 +256,13 @@ void RenderableNodeLine::updateVertexData()
         GL_DYNAMIC_DRAW
     );
 
-    //update vertex attributes
+    // update vertex attributes
     glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
     unbindGL();
 }
 
 void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
-
     updateVertexData();
     
     _program->activate();
@@ -230,7 +270,10 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 anchorTranslation(1.0);
     // Update anchor node information, used to counter precision problems
     if (global::navigationHandler.orbitalNavigator().anchorNode()) {
-        anchorTranslation = glm::translate(glm::dmat4(1.0), global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition());
+        anchorTranslation = glm::translate(
+            glm::dmat4(1.0),
+            global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition()
+        );
     }
 
     const glm::dmat4 modelTransform =
@@ -251,8 +294,12 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     GLfloat currentLineWidth;
     glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
 
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
-        blendDestRGB, blendSrcAlpha, blendSrcRGB;
+    GLenum blendEquationRGB;
+    GLenum blendEquationAlpha;
+    GLenum blendDestAlpha;
+    GLenum blendDestRGB;
+    GLenum blendSrcAlpha;
+    GLenum blendSrcRGB;
     glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
     glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
     glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
@@ -284,22 +331,19 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     }
 }
 
-
-/*  Returns a position that is relative to the current
-    anchor node. This is a method to handle precision
-    problems that occur when approaching a line end point */
-glm::dvec3 RenderableNodeLine::getCoordinatePosFromAnchorNode(glm::dvec3 worldPos) {
-
-    glm::dvec3 anchorNodePos(0);
-
-    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
-        anchorNodePos = global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition();
+void RenderableNodeLine::validateNodes() {
+    if (!global::renderEngine.scene()->sceneGraphNode(_start)) {
+        LERROR(fmt::format(
+            "There is no scenegraph node with id {}, defaults to 'Root'", _start
+        ));
+        _start = Root;
     }
-    glm::dvec3 diffPos = glm::dvec3(worldPos.x - anchorNodePos.x, worldPos.y - anchorNodePos.y,
-        worldPos.z - anchorNodePos.z);
-
-    return diffPos;
+    if (!global::renderEngine.scene()->sceneGraphNode(_end)) {
+        LERROR(fmt::format(
+            "There is no scenegraph node with id {}, defaults to 'Root'", _end
+        ));
+        _end = Root;
+    }
 }
-
 
 } // namespace openspace
