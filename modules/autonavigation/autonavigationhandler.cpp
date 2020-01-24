@@ -36,12 +36,42 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <algorithm>
 
 namespace {
     constexpr const char* _loggerCat = "AutoNavigationHandler";
 } // namespace
 
 namespace openspace::autonavigation {
+
+// Temporary function to convert a string to one of the bools above. 
+// TODO: move to a better place / rewrite
+CurveType stringToCurveType(std::string str) {
+    if (str.empty()) 
+        return CurveType::None;
+
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+    if (str == "bezier") {
+        return CurveType::Bezier;
+    }
+    else if (str == "bezier2") {
+        return CurveType::Bezier2;
+    }
+    else if (str == "bezier3") {
+        return CurveType::Bezier3;
+    }
+    else if (str == "linear") {
+        return CurveType::Linear;
+    }
+    else if (str == "linear2") {
+        return CurveType::Linear2;
+    }
+    else {
+        LERROR(fmt::format("'{}' is not a valid curve type! Choosing default.", str));
+        return CurveType::None;
+    }
+}
 
 AutoNavigationHandler::AutoNavigationHandler()
     : properties::PropertyOwner({ "AutoNavigationHandler" })
@@ -132,6 +162,9 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
     clearPath();
+
+    _pathCurveType = stringToCurveType(spec.curveType());
+
     bool success = true;
     for (int i = 0; i < spec.instructions()->size(); i++) {
         const Instruction& ins = spec.instructions()->at(i);
@@ -200,35 +233,23 @@ void AutoNavigationHandler::continuePath() {
     // Recompute start camera state for the upcoming path segment, to avoid clipping to
     // the old camera state.
     _pathSegments[_activeSegmentIndex].setStart(currentCameraState());
-
-    LINFO(fmt::format("Next segment: {}", _activeSegmentIndex));
-
     _isPlaying = true;
 }
 
-bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index)
-{
-    // compute startTime 
-    double startTime = 0.0;
-    if (!_pathSegments.empty()) {
-        PathSegment& last = _pathSegments.back();
-        startTime = last.startTime() + last.duration();
-    }
-
+bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index) {
     bool success = true;
-
     switch (instruction.type)
     {
     case InstructionType::TargetNode:
-        success = handleTargetNodeInstruction(instruction, startTime);
+        success = handleTargetNodeInstruction(instruction);
         break;
 
     case InstructionType::NavigationState:
-        success = handleNavigationStateInstruction(instruction, startTime);
+        success = handleNavigationStateInstruction(instruction);
         break;
 
     case InstructionType::Pause:
-        success = handlePauseInstruction(instruction, startTime);
+        success = handlePauseInstruction(instruction);
         break;
 
     default:
@@ -245,9 +266,7 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
     return true;
 }
 
-bool AutoNavigationHandler::handleTargetNodeInstruction(
-    const Instruction& instruction, double startTime)
-{
+bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& instruction) {
     // Verify instruction type
     TargetNodeInstructionProps* props = 
         dynamic_cast<TargetNodeInstructionProps*>(instruction.props.get());
@@ -299,18 +318,12 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(
 
     CameraState endState = CameraState{ targetPos, targetRot, identifier };
 
-    // TODO: Handle duration better
-    PathSegment newSegment{ startState, endState, startTime };
-    if (instruction.props->duration.has_value()) {
-        newSegment.setDuration(instruction.props->duration.value());
-    }
-    _pathSegments.push_back(newSegment);
-
+    addSegment(startState, endState, instruction.props->duration);
     return true;
 }
 
 bool AutoNavigationHandler::handleNavigationStateInstruction(
-    const Instruction& instruction, double startTime)
+    const Instruction& instruction)
 {
     // Verify instruction type
     NavigationStateInstructionProps* props =
@@ -327,18 +340,11 @@ bool AutoNavigationHandler::handleNavigationStateInstruction(
     interaction::NavigationHandler::NavigationState ns = props->navState;
     CameraState endState = cameraStateFromNavigationState(ns);
 
-    // TODO: Handle duration better
-    PathSegment newSegment{ startState, endState, startTime };
-    if (instruction.props->duration.has_value()) {
-        newSegment.setDuration(instruction.props->duration.value());
-    }
-    _pathSegments.push_back(newSegment);
-
+    addSegment(startState, endState, instruction.props->duration);
     return true;
 }
 
-bool AutoNavigationHandler::handlePauseInstruction(
-    const Instruction& instruction, double startTime)
+bool AutoNavigationHandler::handlePauseInstruction(const Instruction& instruction)
 {
     // Verify instruction type
     PauseInstructionProps* props =
@@ -349,21 +355,39 @@ bool AutoNavigationHandler::handlePauseInstruction(
         return false;
     }
 
-    CameraState startState =
-        _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+    CameraState startState =_pathSegments.empty() 
+        ?  currentCameraState() 
+        : _pathSegments.back().end();
 
     CameraState endState = startState;
 
     // TODO: implement more complex behavior later
 
-    // TODO: Handle duration better
-    PathSegment newSegment{ startState, endState, startTime };
-    if (instruction.props->duration.has_value()) {
-        newSegment.setDuration(instruction.props->duration.value());
+    addSegment(startState, endState, instruction.props->duration);
+    return true;
+}
+
+void AutoNavigationHandler::addSegment(CameraState& start, 
+    CameraState& end, std::optional<double> duration) 
+{
+    // compute startTime 
+    double startTime = 0.0;
+    if (!_pathSegments.empty()) {
+        PathSegment& last = _pathSegments.back();
+        startTime = last.startTime() + last.duration();
+    }
+
+    bool hasType = (_pathCurveType != CurveType::None);
+
+    PathSegment newSegment = hasType 
+        ? PathSegment{ start, end, startTime, _pathCurveType } 
+        : PathSegment{ start, end, startTime };
+
+    // TODO: handle duration better
+    if (duration.has_value()) {
+        newSegment.setDuration(duration.value());
     }
     _pathSegments.push_back(newSegment);
-
-    return true;
 }
 
 glm::dvec3 AutoNavigationHandler::computeTargetPositionAtNode(

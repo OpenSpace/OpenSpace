@@ -66,9 +66,11 @@ public:
 private:
     bool handleInstruction(const Instruction& instruction, int index);
 
-    bool handleTargetNodeInstruction(const Instruction& instruction, double startTime);
-    bool handleNavigationStateInstruction(const Instruction& instruction, double startTime);
-    bool handlePauseInstruction(const Instruction& instruction, double startTime);
+    bool handleTargetNodeInstruction(const Instruction& instruction);
+    bool handleNavigationStateInstruction(const Instruction& instruction);
+    bool handlePauseInstruction(const Instruction& instruction);
+
+    void addSegment(CameraState& start, CameraState& end, std::optional<double> duration);
 
     glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
         glm::dvec3 prevPos, double height);
@@ -78,6 +80,7 @@ private:
 
     // This list essentially represents the camera path
     std::vector<PathSegment> _pathSegments;
+    CurveType _pathCurveType; // TEST: create a path with just one type of curve
 
     double _currentTime; 
     bool _isPlaying = false;

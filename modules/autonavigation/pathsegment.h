@@ -36,7 +36,8 @@ enum CurveType {
     Bezier2,
     Bezier3,
     Linear,
-    Linear2
+    Linear2, 
+    None
 };
 
 class PathCurve;
