@@ -107,14 +107,20 @@ namespace openspace::autonavigation::interpolation {
         size_t n = points.size();
         ghoul_assert(n > 4, "Minimum of four control points needed for interpolation!");
 
-        double nrSegments = (n - 1.0) / 3.0;
-        ghoul_assert(std::fmod(nrSegments, 1.0) == 0, "A vector containing 3n + 1 control points must be provided!");
+        ghoul_assert((n - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
+
+        size_t nrSegments = (size_t)std::floor((n - 1) / 3.0);
 
         // for points equally spaced in time
-        double tSegment = std::fmod(t * nrSegments, 1.0);
+        double tSegment = std::fmod(t*nrSegments, 1.0);
         tSegment = std::max(0.0, std::min(tSegment, 1.0));
 
-        size_t idx = std::floor(t * nrSegments) * 3;
+        size_t idx = std::floor(t*nrSegments) * 3;
+
+        // prevent stepping past the last segment if t = 1.0
+        if (idx > n - 4) {
+            return points.back();
+        }
 
         return cubicBezier(tSegment, points[idx], points[idx + 1], 
             points[idx + 2], points[idx + 3]);
@@ -131,6 +137,11 @@ namespace openspace::autonavigation::interpolation {
         tSegment = std::max(0.0, std::min(tSegment, 1.0));
 
         size_t idx = std::floor(t*nrSegments);
+
+        // prevent stepping past the last segment if t = 1.0
+        if (idx > n - 1) {
+            return points.back();
+        }
 
         return linear(tSegment, points[idx], points[idx + 1]); 
     }
