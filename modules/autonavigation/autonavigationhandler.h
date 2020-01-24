@@ -72,6 +72,8 @@ private:
 
     void addSegment(CameraState& start, CameraState& end, std::optional<double> duration);
 
+    void addPause(CameraState& state, std::optional<double> duration);
+
     glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
         glm::dvec3 prevPos, double height);
 

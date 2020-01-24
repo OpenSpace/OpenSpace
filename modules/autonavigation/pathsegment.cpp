@@ -79,7 +79,7 @@ const glm::dquat PathSegment::getRotationAt(double t) const {
     tRot = easingfunctions::cubicEaseInOut(tRot);
 
     switch (_curveType) {
-    case Linear2:
+    case CurveType::Linear2:
         return getLookAtRotation(
             tRot, 
             getPositionAt(t), 
@@ -113,23 +113,26 @@ void PathSegment::initCurve() {
     _curve.reset();
 
     switch (_curveType) {
-    case Bezier:
+    case CurveType::Bezier:
         _curve = std::make_shared<BezierCurve>(_start, _end);
         break;
-    case Bezier2:
+    case CurveType::Bezier2:
         _curve = std::make_shared<Bezier2Curve>(_start, _end);
         break;
-    case Bezier3:
+    case CurveType::Bezier3:
         _curve = std::make_shared<Bezier3Curve>(_start, _end);
         break;
-    case Linear:
+    case CurveType::Linear:
         _curve = std::make_shared<LinearCurve>(_start, _end);
         break;
-    case Linear2:
+    case CurveType::Linear2:
         _curve = std::make_shared<Linear2Curve>(_start, _end);
         break;
+    case CurveType::Pause:
+        _curve = std::make_shared<PauseCurve>(_start);
+        break;
     default:
-        LERROR(fmt::format("Cannot create curve of type {}. Type does not exist!", _curveType));
+        LERROR("Could not create curve. Type does not exist!");
         return;
     }
 

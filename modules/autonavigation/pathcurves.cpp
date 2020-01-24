@@ -175,4 +175,13 @@ glm::dvec3 Linear2Curve::valueAt(double t) {
     return interpolation::piecewiseLinear(t, _points);
 }
 
+// TODO: Iprove handling of pauses
+PauseCurve::PauseCurve(CameraState& state) {
+    _points.push_back(state.position);
+}
+
+glm::dvec3 PauseCurve::valueAt(double t) {
+    return _points[0];
+}
+
 } // namespace openspace::autonavigation

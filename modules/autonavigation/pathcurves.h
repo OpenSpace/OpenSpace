@@ -73,6 +73,14 @@ public:
     glm::dvec3 valueAt(double t);
 };
 
+// OBS! This is a temporary class specialised for handling pauses. 
+// TODO: handle better in the future. 
+class PauseCurve : public PathCurve {
+public:
+    PauseCurve(CameraState& state);
+    glm::dvec3 valueAt(double t);
+};
+
 } // namespace openspace::autonavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__

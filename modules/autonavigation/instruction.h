@@ -30,7 +30,7 @@
 
 namespace openspace::autonavigation {
 
-enum InstructionType { TargetNode, NavigationState, Pause };
+enum class InstructionType { TargetNode, NavigationState, Pause };
 
 struct InstructionProps {
     InstructionProps() = default;

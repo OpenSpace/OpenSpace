@@ -253,7 +253,7 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
         break;
 
     default:
-        LERROR(fmt::format("Non-implemented instruction type: {}.", instruction.type));
+        LERROR("Non-implemented instruction type.");
         success = false;
         break;
     }
@@ -355,15 +355,13 @@ bool AutoNavigationHandler::handlePauseInstruction(const Instruction& instructio
         return false;
     }
 
-    CameraState startState =_pathSegments.empty() 
+    CameraState state =_pathSegments.empty() 
         ?  currentCameraState() 
         : _pathSegments.back().end();
 
-    CameraState endState = startState;
-
     // TODO: implement more complex behavior later
 
-    addSegment(startState, endState, instruction.props->duration);
+    addPause(state, instruction.props->duration);
     return true;
 }
 
@@ -382,6 +380,23 @@ void AutoNavigationHandler::addSegment(CameraState& start,
     PathSegment newSegment = hasType 
         ? PathSegment{ start, end, startTime, _pathCurveType } 
         : PathSegment{ start, end, startTime };
+
+    // TODO: handle duration better
+    if (duration.has_value()) {
+        newSegment.setDuration(duration.value());
+    }
+    _pathSegments.push_back(newSegment);
+}
+
+void AutoNavigationHandler::addPause(CameraState& state, std::optional<double> duration) {
+    // compute startTime 
+    double startTime = 0.0;
+    if (!_pathSegments.empty()) {
+        PathSegment& last = _pathSegments.back();
+        startTime = last.startTime() + last.duration();
+    }
+
+    PathSegment newSegment = PathSegment{ state, state, startTime, CurveType::Pause };
 
     // TODO: handle duration better
     if (duration.has_value()) {
