@@ -59,6 +59,13 @@ uniform vec3 lightDirectionCameraSpace;
 uniform float orenNayarRoughness;
 #endif
 
+#if SHADOW_MAPPING_ENABLED
+in vec4 shadowCoords;
+uniform sampler2DShadow shadowMapTexture;
+uniform int nShadowSamples;
+uniform float zFightingPercentage;
+#endif
+
 #if USE_ECLIPSE_SHADOWS
 
 /*******************************************************************************
@@ -257,6 +264,31 @@ Fragment getFragment() {
         frag.color.rgb += BorderColor;
     }
 #endif // SHOW_CHUNK_EDGES
+
+#if SHADOW_MAPPING_ENABLED
+    float shadow = 1.0;
+    if (shadowCoords.w > 1) {
+        vec4 normalizedShadowCoords = shadowCoords;
+        normalizedShadowCoords.z    = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
+        normalizedShadowCoords.xy   = normalizedShadowCoords.xy / normalizedShadowCoords.w;
+        normalizedShadowCoords.w    = 1.0;
+
+       float sum = 0;
+        for (int i = 0; i < nShadowSamples; ++i) {
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i, -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  nShadowSamples - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 , -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 ,  nShadowSamples - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i, -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  nShadowSamples - i));
+        }
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
+        shadow = sum / (8.0 * nShadowSamples + 1.f);
+    }
+    frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.3, 0.0, 1.0) : shadow;
+#endif
 
     return frag;
 }
