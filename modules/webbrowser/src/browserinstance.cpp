@@ -74,10 +74,11 @@ BrowserInstance::~BrowserInstance() {
 
 void BrowserInstance::initialize() {
     reshape(static_cast<glm::ivec2>(
-        static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+        static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
         global::windowDelegate.dpiScaling()
     ));
     _isInitialized = true;
+    _shouldReshape = true;
 }
 
 void BrowserInstance::loadUrl(std::string url) {
