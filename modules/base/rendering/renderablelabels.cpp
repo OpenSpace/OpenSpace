@@ -31,19 +31,19 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/crc32.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 
 namespace {
@@ -175,7 +175,6 @@ namespace {
         "Fade-In/-Out ending speed.",
         "Fade-In/-Out ending speed."
     };
-
 } // namespace
 
 namespace openspace {
@@ -641,8 +640,8 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
             data.camera.positionVec3(),
             data.modelTransform.translation
         );
-        float sUnit = getUnit(_fadeStartUnitOption);
-        float eUnit = getUnit(_fadeEndUnitOption);
+        float sUnit = unit(_fadeStartUnitOption);
+        float eUnit = unit(_fadeEndUnitOption);
         float startX = _fadeStartDistance * sUnit;
         float endX = _fadeEndDistance * eUnit;
         //fadeInVariable = changedPerlinSmoothStepFunc(distanceNodeToCamera, startX, endX);
@@ -767,49 +766,22 @@ float RenderableLabels::linearSmoothStepFunc(float x, float startX, float endX,
     }
 }
 
-float RenderableLabels::getUnit(int unit) const {
-
-    float scale = 0.f;
+float RenderableLabels::unit(int unit) const {
     switch (static_cast<Unit>(unit)) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3;
-            break;
-        case Megameter:
-            scale = 1e6;
-            break;
-        case Gigameter:
-            scale = 1e9;
-            break;
-        case AU:
-            scale = 149597870700.f;
-            break;
-        case Terameter:
-            scale = 1e12;
-            break;
-        case Petameter:
-            scale = 1e15;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
+        case Meter: return 1.f;
+        case Kilometer: return 1e3;
+        case Megameter: return  1e6;
+        case Gigameter: return 1e9;
+        case AU: return 149597870700.f;
+        case Terameter: return 1e12;
+        case Petameter: return 1e15;
+        case Parsec: return static_cast<float>(PARSEC);
+        case Kiloparsec: return static_cast<float>(1e3 * PARSEC);
+        case Megaparsec: return static_cast<float>(1e6 * PARSEC);
+        case Gigaparsec: return static_cast<float>(1e9 * PARSEC);
+        case GigalightYears: return static_cast<float>(306391534.73091 * PARSEC);
+        default: throw std::logic_error("Missing case label");
     }
-
-    return scale;
 }
 
 } // namespace openspace
