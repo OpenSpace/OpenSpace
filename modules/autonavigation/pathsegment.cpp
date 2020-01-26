@@ -75,19 +75,23 @@ const glm::vec3 PathSegment::getPositionAt(double t) const {
 }
 
 const glm::dquat PathSegment::getRotationAt(double t) const {
-    double tRot = helpers::shiftAndScale(t, 0.1, 0.9);
-    tRot = easingfunctions::cubicEaseInOut(tRot);
+    double tSlerp = helpers::shiftAndScale(t, 0.1, 0.9);
+    tSlerp = easingfunctions::cubicEaseInOut(tSlerp);
+
+    double tLookAt = helpers::shiftAndScale(t, 0.2, 0.8);
+    tLookAt = easingfunctions::cubicEaseInOut(tLookAt);
 
     switch (_curveType) {
     case CurveType::Linear2:
+    case CurveType::Bezier3:
         return getLookAtRotation(
-            tRot, 
+            tLookAt, 
             getPositionAt(t), 
             global::navigationHandler.camera()->lookUpVectorWorldSpace()
         );
         break;
     default:
-        return glm::slerp(_start.rotation, _end.rotation, tRot);
+        return glm::slerp(_start.rotation, _end.rotation, tSlerp);
     }
 }
 

@@ -104,23 +104,26 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
     glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
     glm::dvec3 startDirection = start.position - startNodePos;
     double startRadius = sceneGraphNode(start.referenceNode)->boundingSphere();
+    double endRadius = sceneGraphNode(end.referenceNode)->boundingSphere();
 
     glm::dvec3 endNodePos = sceneGraphNode(end.referenceNode)->worldPosition();
     glm::dvec3 endDirection = end.position - endNodePos;
 
     glm::dvec3 nodePosDiff = endNodePos - startNodePos;
     double cosStartAngle = glm::dot(normalize(startDirection), normalize(nodePosDiff));
+    double cosEndAngle = glm::dot(normalize(endDirection), normalize(nodePosDiff));
 
-    // TODO: Test with raycaster, value can vary depending on how close we are to surface!!
+    // TODO: Test with raycaster, test is dependent on start position
     bool TARGET_BEHIND_STARTNODE = cosStartAngle < -0.8; 
-    bool TARGET_IN_OPPOSITE_DIRECTION = cosStartAngle > 0.8;
+    bool TARGET_ON_BACKSIDE = cosEndAngle > 0.8;
+    bool TARGET_IN_OPPOSITE_DIRECTION = cosStartAngle > 0.7;
 
 
     // SET CONTROL POINTS
     _points.push_back(start.position);
     _points.push_back(start.position + 2.0 * startRadius * normalize(startDirection));
 
-    if (TARGET_BEHIND_STARTNODE)
+    if ( TARGET_BEHIND_STARTNODE )
     {
         glm::dvec3 parallell = normalize(nodePosDiff) * glm::dot(startDirection, normalize(nodePosDiff));
         glm::dvec3 orthogonal = normalize(startDirection - parallell);
@@ -133,7 +136,32 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
         _points.push_back(extraKnot + parallell);
     }
 
-    _points.push_back(end.position + 2.0 * endDirection);
+    if (TARGET_IN_OPPOSITE_DIRECTION && ! TARGET_ON_BACKSIDE) {
+        glm::dvec3 parallell = normalize(nodePosDiff * glm::dot(startDirection, normalize(nodePosDiff)));
+        glm::dvec3 orthogonal = normalize(normalize(startDirection) - parallell);
+        // Distant middle point
+        double dist = 0.5 * length(nodePosDiff);
+        glm::dvec3 extraKnot = startNodePos - dist * parallell + 3.0 * dist * orthogonal;
+
+        _points.push_back(extraKnot - 0.5 * dist * parallell);
+        _points.push_back(extraKnot);
+        _points.push_back(extraKnot + 0.5 * dist * parallell);
+    }
+    
+    if (TARGET_ON_BACKSIDE)
+    {
+        glm::dvec3 parallell = normalize(nodePosDiff) * glm::dot(endDirection, normalize(nodePosDiff));
+        glm::dvec3 orthogonal = normalize(endDirection - parallell);
+        //Point on the side of start node
+        double dist = 5.0 * endRadius;
+        glm::dvec3 extraKnot = endNodePos + dist * orthogonal;
+
+        _points.push_back(extraKnot - parallell);
+        _points.push_back(extraKnot);
+        _points.push_back(extraKnot + parallell);
+    }
+
+    _points.push_back(end.position + 2.0 * endRadius * normalize(endDirection));
     _points.push_back(end.position);
 }
 
