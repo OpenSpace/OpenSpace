@@ -42,11 +42,21 @@ namespace openspace::autonavigation::luascriptfunctions {
     const double EPSILON = 1e-12;
 
     int continuePath(lua_State* L) {
-        int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
 
         AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         handler.continuePath();
+
+        return 0;
+    }
+
+    int stopPath(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
+
+        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationHandler& handler = module->AutoNavigationHandler();
+        handler.stopPath();
 
         return 0;
     }

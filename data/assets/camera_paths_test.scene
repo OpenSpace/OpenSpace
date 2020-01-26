@@ -69,6 +69,14 @@ local Keybindings = {
         GuiPath = "/Interaction",
         Local = false
     },
+    {
+        Key = "Q",
+        Name = "Stop camera path",
+        Command = "openspace.autonavigation.stopPath()",
+        Documentation = "Stop a camera path.",
+        GuiPath = "/Interaction",
+        Local = false
+    },
 }
 
 asset.onInitialize(function ()

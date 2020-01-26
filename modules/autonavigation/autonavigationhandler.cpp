@@ -236,6 +236,10 @@ void AutoNavigationHandler::continuePath() {
     _isPlaying = true;
 }
 
+void AutoNavigationHandler::stopPath() {
+    _isPlaying = false;
+}
+
 bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index) {
     bool success = true;
     switch (instruction.type)

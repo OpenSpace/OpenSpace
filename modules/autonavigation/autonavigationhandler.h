@@ -62,6 +62,7 @@ public:
     void startPath();
     void pausePath();
     void continuePath();
+    void stopPath();
 
 private:
     bool handleInstruction(const Instruction& instruction, int index);

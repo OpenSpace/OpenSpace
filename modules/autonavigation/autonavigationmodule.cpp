@@ -60,6 +60,13 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             "Continue playing a paused camera path."
         },
         {
+            "stopPath",
+            &autonavigation::luascriptfunctions::stopPath,
+            {},
+            "",
+            "Stops a path, if one is being played."
+        },
+        {
             "goTo",
             &autonavigation::luascriptfunctions::goTo,
             {},
