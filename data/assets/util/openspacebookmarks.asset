@@ -1,0 +1,27 @@
+local assetHelper = asset.require("util/asset_helper")
+local bookmarkHelper = asset.require("util/generate_bookmarks")
+
+local dataProvider = "https://pastebin.com/raw/k17aC8VW" -- "http://data.openspaceproject.com/bookmarks.csv"
+
+local bookmarksCSV = asset.syncedResource({
+    Identifier = "openspace_bookmarks",
+    Name = "OpenSpace Bookmarks",
+    Type = "UrlSynchronization",
+    UseHash = false,
+    Override = true,
+    Url = dataProvider
+})
+
+asset.onInitialize(function ()
+	local nodes = bookmarkHelper.getBookmarks("OpenSpace Bookmarks", bookmarksCSV .. '/k17aC8VW')
+	for i, n in ipairs(nodes) do
+		openspace.addSceneGraphNode(n);
+	end
+end)
+
+asset.onDeinitialize(function ()
+	local nodes = bookmarkHelper.addBookmarks("OpenSpace Bookmarks", bookmarksCSV .. '/k17aC8VW')
+	for i, n in ipairs(nodes) do
+		openspace.removeSceneGraphNode(n);
+	end
+end)

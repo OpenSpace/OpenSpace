@@ -1,0 +1,2 @@
+Group (optional),Name (required),Globe (optional),Lat (required if globe),Lon (required if globe),Altitude (optional if globe),x (required if not globe),y (required if not globe),z (required if not globe),Scale (optional),LineWidth (optional)
+Local Bookmarks,Murrow,Earth,40.619,-73.959,,,,,,
