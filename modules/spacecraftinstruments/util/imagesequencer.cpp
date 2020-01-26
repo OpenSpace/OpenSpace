@@ -416,6 +416,8 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
             source.begin(),
             source.end()
         );
+
+        _subsetMap[key]._range.include(it.second._range);
     }
 
     _instrumentTimes.insert(
