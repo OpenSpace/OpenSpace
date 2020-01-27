@@ -1,6 +1,7 @@
 asset.request('./bennu')
 asset.request('./model')
 asset.request('./trail')
+asset.request('scene/solarsystem/sun/marker')
 
 asset.require('./script_schedule')
 
