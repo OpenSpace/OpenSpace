@@ -6,31 +6,29 @@ local getBookmarks = function (guiPath, bookmarkfile)
   local PARSEC_CONSTANT = 3.0856776E16;
   for line in io.lines(openspace.absPath(bookmarkfile)) do
       if (notFirstLine) then
-        local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
-        local group, name, globe, lat, lon, altitude, x, y, z, scale, linewitdh = line:match(matchstring)
+        local matchstring = '(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$'
+        local group, name, globe, lat, lon, altitude, x, y, z, scale, linewidth = line:match(matchstring)
 
         scale = (scale == '' and 75000 or scale)
-        linewitdh = (linewitdh == '' and 2.0 or tonumber(linewitdh))
-        group = (group == "" and globe or group)
+        linewidth = (linewidth == '' and 2.0 or tonumber(linewidth))
+        group = (group == '' and globe or group)
 
-        local parent = (globe == "" and 'Root' or globe)
+        local parent = (globe == '' and 'Root' or globe)
 
         local sgn = {
-          Identifier = guiPath .. "-" .. name,
+          Identifier = guiPath .. '-' .. name,
           Parent = parent,
           Transform = {
-              Translation = {
-              },
               Scale = {
-                  Type = "StaticScale",
+                  Type = 'StaticScale',
                   Scale = tonumber(scale);
               }
           },
           Renderable = {
-              Type = "RenderableSphericalGrid",
+              Type = 'RenderableSphericalGrid',
               Enabled = false,
               GridColor = { 0.3, 0.84, 1.0, 0.3},
-              LineWidth = linewitdh,
+              LineWidth = linewidth,
               GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
                              -0.9938214 , -0.1109906, -0.0003515167, 0.0,
                              -0.09647644,  0.8622859,  0.4971472   , 0.0,
@@ -38,25 +36,29 @@ local getBookmarks = function (guiPath, bookmarkfile)
           },
           GUI = {
               Name = name,
-              Path = "/" .. guiPath
+              Path = '/' .. guiPath
           }
         }
 
-        if (group ~= "") then
-          sgn.GUI.Path  = sgn.GUI.Path .. "/" .. group
+        if (group ~= '') then
+          sgn.GUI.Path  = sgn.GUI.Path .. '/' .. group
         end
 
-        if (globe == "") then
+        if (globe == '') then
           sgn.Transform.Translation = {
-            Type = "StaticTranslation",
-            Position = {tonumber(x) * PARSEC_CONSTANT, tonumber(y) * PARSEC_CONSTANT , tonumber(z) * PARSEC_CONSTANT}
+            Type = 'StaticTranslation',
+            Position = {
+              tonumber(x) * PARSEC_CONSTANT,
+              tonumber(y) * PARSEC_CONSTANT,
+              tonumber(z) * PARSEC_CONSTANT
+            }
           }
         else
           sgn.Transform.Translation = {
-              Type = "GlobeTranslation",
+              Type = 'GlobeTranslation',
               Globe = globe,
               Latitude = tonumber(lat),
-              Longitude = tonumber(lon),            
+              Longitude = tonumber(lon)
           }
           if (altitude == nil) then
               sgn.Transform.Translation.UseHeightMap = true;
@@ -64,9 +66,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
               sgn.Transform.Translation.UseHeightMap = false;
               sgn.Transform.Translation.Altitude = tonumber(altitude);
           end
-
         end
-
 
         table.insert(genBookmarks, sgn);
       else
@@ -76,5 +76,5 @@ local getBookmarks = function (guiPath, bookmarkfile)
   return genBookmarks
 end
 
-asset.export("getBookmarks", getBookmarks)
+asset.export('getBookmarks', getBookmarks)
 
