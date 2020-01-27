@@ -1102,10 +1102,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     const bool hasWaterLayer = !_layerManager.layerGroup(
         layergroupid::GroupID::WaterMasks
     ).activeLayers().empty();
-    if (hasNightLayers || hasWaterLayer || _generalProperties.performShading) {
-        _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
-    }
-
+    
+    _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
+    
     const bool hasHeightLayer = !_layerManager.layerGroup(
         layergroupid::HeightLayers
     ).activeLayers().empty();

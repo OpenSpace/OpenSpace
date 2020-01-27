@@ -51,9 +51,9 @@ uniform Layer WaterMasks[NUMLAYERS_WATERMASK];
 uniform vec2 vertexResolution;
 #endif
 
-#if USE_NIGHTTEXTURE || USE_WATERMASK || PERFORM_SHADING
+//#if USE_NIGHTTEXTURE || USE_WATERMASK || PERFORM_SHADING
 uniform vec3 lightDirectionCameraSpace;
-#endif
+//#endif
 
 #if PERFORM_SHADING
 uniform float orenNayarRoughness;
@@ -239,7 +239,7 @@ Fragment getFragment() {
     // Water reflectance is added to the G-Buffer.
     frag.gNormal.w = waterReflectance;
 #else
-    frag.gNormal.w = 0;
+    frag.gNormal.w = 0.0;
 #endif
     // Normal is written View Space (Including SGCT View Matrix).
     frag.gNormal.xyz = normal;
