@@ -119,6 +119,8 @@ public:
 
     bool hasContent(int x, int y);
 
+    bool _shouldReshape = false;
+
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;

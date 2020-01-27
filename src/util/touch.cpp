@@ -44,7 +44,7 @@ glm::vec2 TouchInput::screenCoordinates(glm::vec2 resolution) const {
 }
 
 glm::vec2 TouchInput::currentWindowCoordinates() const {
-    glm::vec2 res = global::windowDelegate.currentWindowSize();
+    glm::vec2 res = global::windowDelegate.currentSubwindowSize();
     return { std::floor(x * res.x + 0.5f), std::floor(y * res.y + 0.5f) };
 }
 

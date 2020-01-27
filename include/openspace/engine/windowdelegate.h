@@ -74,8 +74,6 @@ struct WindowDelegate {
 
     int (*currentNumberOfAaSamples)() = []() { return 1; };
 
-    bool (*isRegularRendering)() = []() { return true; };
-
     bool (*hasGuiWindow)() = []() { return false; };
 
     bool (*isGuiWindow)() = []() { return false; };
