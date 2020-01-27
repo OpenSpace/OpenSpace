@@ -22,44 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
-#define __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+layout (location = 0) out vec4 finalColor;
 
-namespace openspace {
+uniform sampler2D downscaledRenderedVolume;
+uniform sampler2D downscaledRenderedVolumeDepth;
 
-class PowerScaledSphere;
+in vec2 texCoord;
 
-class PowerScaledSphere {
-public:
-    PowerScaledSphere(float radius, int segments = 8);
-    PowerScaledSphere(glm::vec3 radius, int segments);
-    PowerScaledSphere(const PowerScaledSphere& cpy);
-    ~PowerScaledSphere();
-
-    bool initialize();
-
-    void render();
-
-//private:
-    struct Vertex {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-    };
-
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
-    GLuint _iBufferID = 0;
-
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+void main() {
+    finalColor   = texture(downscaledRenderedVolume, texCoord);
+    gl_FragDepth = texture(downscaledRenderedVolumeDepth, texCoord).r;
+}

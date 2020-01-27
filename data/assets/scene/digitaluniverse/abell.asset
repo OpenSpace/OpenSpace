@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
     Name = "Abell Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_abell_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({
@@ -25,7 +25,7 @@ local object = {
         Opacity = 1.0,
         --ColorMap = speck .. "/abell.cmap",
         File = speck .. "/abell.speck",
-        Texture = textures .. "/point3.png",
+        Texture = textures .. "/point3A.png",
         LabelFile = speck .. "/abell.label",
         TextColor = { 0.0, 0.8, 0.0, 1.0 },
         TextSize = 22,

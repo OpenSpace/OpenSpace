@@ -461,11 +461,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
         lightTime
     );
 
-    // @TODO:  Remove this and replace with cpos = p * 1000 ?
-    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-
-    position[3] += 4;
-    const glm::vec3 cpos = position.vec3();
+    const glm::vec3 cpos = p * 10000.0;
 
     const float distance = glm::length(cpos);
     const float radius = boundingSphere();

@@ -42,6 +42,25 @@ local Uranus = {
     }
 }
 
+local UranusLabel = {
+    Identifier = "UranusLabel",
+    Parent = Uranus.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Uranus",
+        FontSize = 100.0,
+        LabelSize = 8.7,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Neptune Label",
+        Path = "/Solar System/Planets/Uranus"
+    }
+}
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus, UranusLabel })

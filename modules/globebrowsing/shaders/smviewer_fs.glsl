@@ -22,42 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scene.h>
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-#include <openspace/util/powerscaledcoordinate.h>
+precision highp float;
 
-class PowerscaleCoordinatesTest : public testing::Test {
-protected:
-    PowerscaleCoordinatesTest() {
-    }
+in vec2 texCoord;
 
-    ~PowerscaleCoordinatesTest() {
-    }
+uniform highp sampler2D shadowMapTexture;
 
-    void reset() {
-    }
-
-    openspace::Scene* scenegraph;
-};
-
-
-TEST_F(PowerscaleCoordinatesTest, psc) {
-
-    openspace::psc reference(2.f, 1.f, 1.1f, 1.f);
+Fragment getFragment() {
+    Fragment frag;
+    frag.color = vec4(vec3(1.f) - texture(shadowMapTexture, texCoord).rrr, 1.f);
+    frag.depth = 0.f;
     
-    openspace::psc first(1.f, 0.f, 1.f, 0.f);
-    openspace::psc second(1.9f, 1.f, 1.f, 1.f);
-    
-    EXPECT_EQ(reference, first + second);
-    EXPECT_TRUE(reference == (first + second));
-    
-    openspace::psc third = first;
-    first[0] = 0.0;
-    
-    EXPECT_TRUE(third != first);
-    
-    
+    return frag;
 }
-
-
-

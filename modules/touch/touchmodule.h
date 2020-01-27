@@ -25,36 +25,53 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 
-#include <openspace/util/openspacemodule.h>
 #include <modules/touch/include/touchmarker.h>
 #include <modules/touch/include/touchinteraction.h>
-
+#include <openspace/util/openspacemodule.h>
+#include <openspace/util/touch.h>
+#include <memory>
 
 namespace openspace {
 
-    class TouchModule : public OpenSpaceModule {
-        using Point = std::pair<int, TUIO::TuioPoint>;
-    public:
-        TouchModule();
+    class TuioEar;
 
-    private:
-        /**
-        * Returns true if new touch input occured since the last frame
-        */
-        bool hasNewInput();
-        /**
-        * Checks if touchevent should be parsed to the webgui
-        */
-        void hasNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
+#ifdef WIN32
+class Win32TouchHook;
+#endif //WIN32
 
-        TuioEar ear;
-        TouchInteraction touch;
-        TouchMarker markers;
-        std::vector<TUIO::TuioCursor> listOfContactPoints;
-        // contains an id and the TuioPoint that was processed last frame
-        std::vector<Point> lastProcessed;
-        glm::ivec2 webPositionCallback = glm::ivec2(0,0);
-    };
+class TouchModule : public OpenSpaceModule {
+public:
+    TouchModule();
+    ~TouchModule();
+
+protected:
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+
+private:
+    /// Returns true if new touch input occured since the last frame
+    bool processNewInput();
+
+    void clearInputs();
+
+    void addTouchInput(TouchInput input);
+    void updateOrAddTouchInput(TouchInput input);
+    void removeTouchInput(TouchInput input);
+
+    std::unique_ptr<TuioEar> _ear;
+    TouchInteraction _touch;
+    TouchMarker _markers;
+    std::vector<TouchInputHolder> _touchPoints;
+    std::vector<TouchInput> _deferredRemovals;
+    std::vector<TouchInput> _lastTouchInputs;
+
+    properties::BoolProperty _touchActive;
+    // contains an id and the Point that was processed last frame
+    glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
+#ifdef WIN32
+    std::unique_ptr<Win32TouchHook> _win32TouchHook;
+#endif //WIN32
+    bool _tap = false;
+};
 
 } // namespace openspace
 

@@ -383,7 +383,10 @@ void mainInitFunc() {
 
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        constexpr const char* screenshotNames = "OpenSpace";
+        const std::string screenshotNames = nWindows > 1 ?
+            fmt::format("OpenSpace_{}", i) :
+            "OpenSpace";
+
         sgct_core::ScreenCapture* cpt0 = w->getScreenCapturePointer(0);
         sgct_core::ScreenCapture* cpt1 = w->getScreenCapturePointer(1);
 
@@ -1014,6 +1017,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
         sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
         sgct::Engine::instance()->takeScreenshot();
+        return sgct::Engine::instance()->getScreenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
         GLFWwindow* w = glfwGetCurrentContext();
@@ -1038,6 +1042,16 @@ void setSgctDelegateFunctions() {
         sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(0);
         w->setHorizFieldOfView(hFovDeg);
     };
+    #ifdef WIN32
+    sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(windowIndex);
+        if(w) {
+                HWND hWnd = glfwGetWin32Window(w->getWindowHandle());
+                return reinterpret_cast<void*>(hWnd);
+        }
+        return nullptr;
+    };
+    #endif // WIN32
     sgctDelegate.frustumMode = []() {
         using FM = sgct_core::Frustum::FrustumMode;
         switch (sgct::Engine::instance()->getCurrentFrustumMode()) {

@@ -94,4 +94,31 @@ SpacecraftInstrumentsModule::documentations() const
     };
 }
 
+bool SpacecraftInstrumentsModule::addFrame(std::string body, std::string frame) {
+    if (body.empty() || frame.empty()) {
+        return false;
+    }
+    else {
+        _frameByBody.emplace_back(body, frame);
+        return true;
+    }
+}
+
+std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) {
+    for (const std::pair<std::string, std::string>& pair : _frameByBody) {
+        if (pair.first == body) {
+            return pair.second;
+        }
+    }
+
+    constexpr const char* unionPrefix = "IAU_";
+
+    if (body.find(unionPrefix) == std::string::npos) {
+        return unionPrefix + body;
+    }
+    else {
+        return body;
+    }
+}
+
 } // namespace openspace

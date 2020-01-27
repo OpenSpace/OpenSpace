@@ -94,10 +94,6 @@ private:
     /// trail.
     std::vector<TrailVBOLayout> _vertexBufferData;
 
-    /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
-    std::vector<unsigned int> _indexBufferData;
-
     GLuint _vertexArray;
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
@@ -112,8 +108,6 @@ private:
 
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
-
-    properties::DoubleProperty _lineFade;
 
     RenderableTrail::Appearance _appearance;
 

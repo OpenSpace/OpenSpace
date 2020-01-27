@@ -51,6 +51,8 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtile.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtiledatareader.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/renderableglobe.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ringscomponent.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/shadowcomponent.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/skirtedgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tileindex.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tileloadjob.h
@@ -80,6 +82,8 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtile.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtiledatareader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/renderableglobe.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ringscomponent.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/shadowcomponent.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/skirtedgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tileindex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tileloadjob.cpp
@@ -94,6 +98,10 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalrenderer_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localrenderer_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderer_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_geom_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_geom_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tileheight.hglsl

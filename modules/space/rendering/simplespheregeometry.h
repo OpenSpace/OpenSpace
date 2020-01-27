@@ -32,7 +32,7 @@
 
 namespace openspace {
     class Renderable;
-    class PowerScaledSphere;
+    class Sphere;
 } // namespace openspace
 
 namespace openspace::documentation { struct Documentation; }
@@ -57,7 +57,7 @@ private:
 
     properties::Vec3Property _radius;
     properties::IntProperty _segments;
-    PowerScaledSphere* _sphere;
+    Sphere* _sphere;
 };
 
 } // namespace openspace::planetgeometry

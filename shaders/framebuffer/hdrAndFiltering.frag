@@ -38,7 +38,6 @@ uniform float Hue;
 uniform float Saturation;
 uniform float Value;
 uniform float Lightness;
-uniform int nAaSamples;
 
 uniform sampler2D hdrFeedingTexture;
 

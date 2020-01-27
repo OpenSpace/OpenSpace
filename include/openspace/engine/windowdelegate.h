@@ -107,7 +107,7 @@ struct WindowDelegate {
 
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    void (*takeScreenshot)(bool applyWarping) = [](bool) { };
+    unsigned int(*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };
 
     void (*swapBuffer)() = []() {};
 
@@ -118,6 +118,10 @@ struct WindowDelegate {
     double (*getHorizFieldOfView)() = []() { return 0.0; };
 
     void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
+    
+    void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* { 
+        return nullptr; 
+    };
 
     using GLProcAddress = void(*)(void);
 

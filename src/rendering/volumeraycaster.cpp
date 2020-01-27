@@ -33,4 +33,20 @@ bool VolumeRaycaster::isCameraInside(const RenderData&, glm::vec3&) {
     return false;
 }
 
+void VolumeRaycaster::setMaxSteps(int nsteps) {
+    _rayCastMaxSteps = nsteps;
+}
+
+int VolumeRaycaster::maxSteps() const {
+    return _rayCastMaxSteps;
+}
+
+void VolumeRaycaster::setDownscaleRender(float value) {
+    _downscaleRenderConst = value;
+}
+
+float VolumeRaycaster::downscaleRender() const {
+    return _downscaleRenderConst;
+}
+
 } // namespace openspace
