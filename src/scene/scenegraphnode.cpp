@@ -684,7 +684,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
         return;
     }
 
-    glm::ivec2 res = global::windowDelegate.currentWindowSize();
+    glm::ivec2 res = global::windowDelegate.currentSubwindowSize();
     
     // Get the radius of node
     double nodeRadius = static_cast<double>(this->boundingSphere());

@@ -555,12 +555,7 @@ void RenderEngine::updateScreenSpaceRenderables() {
 }
 
 glm::ivec2 RenderEngine::renderingResolution() const {
-    if (global::windowDelegate.isRegularRendering()) {
-        return global::windowDelegate.currentWindowResolution();
-    }
-    else {
-        return global::windowDelegate.currentDrawBufferResolution();
-    }
+    return global::windowDelegate.currentDrawBufferResolution();
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
@@ -569,7 +564,7 @@ glm::ivec2 RenderEngine::fontResolution() const {
         return global::windowDelegate.currentViewportSize();
     }
     else {
-        return global::windowDelegate.currentWindowSize();
+        return global::windowDelegate.currentSubwindowSize();
     }
 }
 
@@ -770,6 +765,11 @@ void RenderEngine::renderEndscreen() {
         glm::vec2(1.f, 1.f),
         glm::vec4(0.f, 0.f, 0.f, 0.5f)
     );
+
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::ivec2 res =
+        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
+    glViewport(0, 0, res.x, res.y);
 
     using FR = ghoul::fontrendering::FontRenderer;
     using BBox = FR::BoundingBoxInformation;
