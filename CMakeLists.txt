@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2019                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,9 +27,9 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 14)
-set(OPENSPACE_VERSION_PATCH 1)
-set(OPENSPACE_VERSION_STRING "Beta-4")
+set(OPENSPACE_VERSION_MINOR 15)
+set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_STRING "Beta-5")
 
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
@@ -283,6 +283,11 @@ endif ()
 option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
 if (OPENSPACE_WITH_ABUFFER_RENDERER)
   target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+endif ()
+
+option(OPENSPACE_WITH_INSTRUMENTATION "Add instrumentation options" OFF)
+if (OPENSPACE_WITH_INSTRUMENTATION)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_INSTRUMENTATION")
 endif ()
 
 

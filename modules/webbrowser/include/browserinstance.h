@@ -86,7 +86,6 @@ public:
 
     void sendTouchPressEvent(const CefMouseEvent & event,
         CefBrowserHost::MouseButtonType button, const int clickCount);
-
     void sendResleasePressEvent(const CefMouseEvent & event,
         CefBrowserHost::MouseButtonType button, const int clickCount);
 
@@ -119,6 +118,8 @@ public:
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
     bool hasContent(int x, int y);
+
+    bool _shouldReshape = false;
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;

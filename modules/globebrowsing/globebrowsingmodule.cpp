@@ -28,7 +28,11 @@
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/layer.h>
+#include <modules/globebrowsing/src/layeradjustment.h>
+#include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -101,6 +105,14 @@ namespace {
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
     };
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    constexpr const openspace::properties::Property::PropertyInfo InstrumentationInfo = {
+        "SaveInstrumentationInfo",
+        "Save Instrumentation Info",
+        "If enabled, the instrumentation data is saved to disk at the end of the frame."
+    };
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+
 
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
@@ -163,12 +175,24 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
     , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    , _saveInstrumentation(InstrumentationInfo, false)
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 {
     addProperty(_wmsCacheEnabled);
     addProperty(_offlineMode);
     addProperty(_wmsCacheLocation);
     addProperty(_wmsCacheSizeMB);
     addProperty(_tileCacheSizeMB);
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    _saveInstrumentation.onChange([&]() {
+        if (_saveInstrumentation) {
+            _frameInfo.lastSavedFrame = global::renderEngine.frameNumber();
+        }
+    });
+    addProperty(_saveInstrumentation);
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
@@ -234,6 +258,43 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Render
     global::callback::render.emplace_back([&]() { _tileCache->update(); });
+
+    // Postdraw
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+    global::callback::postDraw.emplace_back([&]() {
+        // >= as we might have multiple frames per postDraw call (stereo rendering,
+        // fisheye, etc)
+        const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
+        const bool shouldSave = _saveInstrumentation &&
+                                global::renderEngine.frameNumber() >= next;
+        if (shouldSave) {
+            using K = const globebrowsing::RenderableGlobe*;
+            using V = std::vector<FrameInfo>;
+            for (const std::pair<K, V>& i : _frameInfo.frames) {
+                std::string filename = fmt::format(
+                    "_inst_globebrowsing_{}_{}_{}.txt",
+                    i.first->owner()->identifier(), // Owner of the renderable has a name
+                    _frameInfo.lastSavedFrame,
+                    _frameInfo.saveEveryNthFrame
+                );
+                std::ofstream file(absPath("${BIN}/" + filename));
+                for (const FrameInfo& f : i.second) {
+                    std::string line = fmt::format(
+                        "{}\t{}\t{}\t{}",
+                        f.iFrame,
+                        f.nTilesRenderedLocal,
+                        f.nTilesRenderedGlobal,
+                        f.nTilesUploaded
+                    );
+                    file << line << '\n';
+                }
+            }
+
+            _frameInfo.frames.clear();
+            _frameInfo.lastSavedFrame = global::renderEngine.frameNumber();
+        }
+    });
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     // Deinitialize
     global::callback::deinitialize.emplace_back([&]() { GdalWrapper::destroy(); });
@@ -329,6 +390,27 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "defining the layer."
         },
         {
+            "getLayers",
+            &globebrowsing::luascriptfunctions::getLayers,
+            {},
+            "string, string",
+            "Returns the list of layers for the scene graph node specified in the first "
+            "parameter. The second parameter specifies which layer type should be "
+            "queried."
+        },
+        {
+            "moveLayer",
+            &globebrowsing::luascriptfunctions::moveLayer,
+            {},
+            "string, string, number, number",
+            "Rearranges the order of a single layer in a scene graph node. The first "
+            "parameter specifies the scene graph node, the second parameter specifies "
+            "the name of the layer group, the third parameter is the original position "
+            "of the layer that should be moved and the last parameter is the new "
+            "position. The new position may be -1 to place the layer at the top or any "
+            "large number bigger than the number of layers to place it at the bottom."
+        },
+        {
             "goToChunk",
             &globebrowsing::luascriptfunctions::goToChunk,
             {},
@@ -404,6 +486,15 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     return res;
 }
 
+std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() const {
+    return {
+        globebrowsing::Layer::Documentation(),
+        globebrowsing::LayerAdjustment::Documentation(),
+        globebrowsing::LayerManager::Documentation(),
+        GlobeLabelsComponent::Documentation()
+    };
+}
+
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     int x, int y, int level)
 {
@@ -421,7 +512,7 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
     );
 }
 
-void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe, 
+void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
                                   double latitude, double longitude, double altitude)
 {
     using namespace globebrowsing;
@@ -480,7 +571,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
         cameraPositionModelSpace
     );
-    
+
     const Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );
@@ -728,5 +819,28 @@ uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
 }
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+void GlobeBrowsingModule::addFrameInfo(globebrowsing::RenderableGlobe* globe,
+                                       uint32_t nTilesRenderedLocal,
+                                       uint32_t nTilesRenderedGlobal,
+                                       uint32_t nTilesUploaded)
+{
+    auto it = _frameInfo.frames.find(globe);
+    if (it == _frameInfo.frames.end()) {
+        _frameInfo.frames[globe] = std::vector<FrameInfo>();
+        _frameInfo.frames[globe].reserve(_frameInfo.saveEveryNthFrame);
+    }
+    else {
+        it->second.push_back({
+            global::renderEngine.frameNumber(),
+            nTilesRenderedLocal,
+            nTilesRenderedGlobal,
+            nTilesUploaded
+        });
+    }
+}
+
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
 } // namespace openspace

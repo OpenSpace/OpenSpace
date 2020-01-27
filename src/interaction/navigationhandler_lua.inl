@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <numeric>
+#include <openspace/interaction/scriptcamerastates.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -45,15 +46,84 @@ int loadNavigationState(lua_State* L) {
     return 0;
 }
 
+int getNavigationState(lua_State* L) {
+    const int n = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 0, 1 },
+        "lua::getNavigationState"
+    );
+
+    interaction::NavigationHandler::NavigationState state;
+    if (n == 1) {
+        const std::string referenceFrameIdentifier = ghoul::lua::value<std::string>(L, 1);
+        const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
+        if (!referenceFrame) {
+            LERROR(fmt::format(
+                "Could not find node '{}' to use as reference frame",
+                referenceFrameIdentifier
+            ));
+            lua_settop(L, 0);
+            return 0;
+        }
+        state = global::navigationHandler.navigationState(*referenceFrame);
+    }
+    else {
+        state = global::navigationHandler.navigationState();
+    }
+
+    lua_settop(L, 0);
+
+    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
+        lua_newtable(L);
+        ghoul::lua::push(L, 1, v.x);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, v.y);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 3, v.z);
+        lua_rawset(L, -3);
+    };
+
+    lua_newtable(L);
+    ghoul::lua::push(L, "Anchor", state.anchor);
+    lua_rawset(L, -3);
+
+    if (!state.aim.empty()) {
+        ghoul::lua::push(L, "Aim", state.aim);
+        lua_rawset(L, -3);
+    }
+    if (!state.referenceFrame.empty()) {
+        ghoul::lua::push(L, "ReferenceFrame", state.referenceFrame);
+        lua_rawset(L, -3);
+    }
+    ghoul::lua::push(L, "Position");
+    pushVector(L, state.position);
+    lua_rawset(L, -3);
+
+    if (state.up.has_value()) {
+        ghoul::lua::push(L, "Up");
+        pushVector(L, state.up.value());
+        lua_rawset(L, -3);
+    }
+    if (state.yaw != 0) {
+        ghoul::lua::push(L, "Yaw", state.yaw);
+        lua_rawset(L, -3);
+    }
+    if (state.pitch != 0) {
+        ghoul::lua::push(L, "Pitch", state.pitch);
+        lua_rawset(L, -3);
+    }
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
 int setNavigationState(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setNavigationState");
 
     ghoul::Dictionary navigationStateDictionary;
     ghoul::lua::luaDictionaryFromState(L, navigationStateDictionary);
 
-    using namespace openspace::documentation;
-
-    TestResult r = testSpecification(
+    openspace::documentation::TestResult r = openspace::documentation::testSpecification(
         interaction::NavigationHandler::NavigationState::Documentation(),
         navigationStateDictionary
     );
@@ -61,8 +131,7 @@ int setNavigationState(lua_State* L) {
     if (!r.success) {
         lua_settop(L, 0);
         return ghoul::lua::luaError(
-            L,
-            fmt::format("Could not set camera state: {}", ghoul::to_string(r))
+            L, fmt::format("Could not set camera state: {}", ghoul::to_string(r))
         );
     }
 
@@ -248,6 +317,76 @@ int joystickButton(lua_State* L) {
     ghoul::lua::push(L, cmd);
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
+}
+
+int addGlobalRotation(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addGlobalRotation");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addGlobalRotation(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addLocalRotation(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addLocalRotation");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addLocalRotation(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addTruckMovement(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTruckMovement");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addTruckMovement(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addLocalRoll(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addLocalRoll");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addLocalRoll(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int addGlobalRoll(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addGlobalRoll");
+
+    const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
+    const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
+
+    global::navigationHandler.orbitalNavigator().scriptStates().addGlobalRoll(
+        glm::dvec2(v1, v2)
+    );
+
+    lua_settop(L, 0);
+    return 0;
 }
 
 } // namespace openspace::luascriptfunctions

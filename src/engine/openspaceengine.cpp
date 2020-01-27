@@ -36,6 +36,7 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -104,10 +105,7 @@ namespace openspace {
 
 class Scene;
 
-OpenSpaceEngine::OpenSpaceEngine()
-    : _scene(nullptr)
-    , _loadingScreen(nullptr)
-{
+OpenSpaceEngine::OpenSpaceEngine() {
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -164,19 +162,20 @@ void OpenSpaceEngine::registerPathTokens() {
             ghoul::filesystem::FileSystem::TokenClosingBraces;
         LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
 
-        const bool override = (fullKey == "${BASE}");
-        if (override) {
+        const bool overrideBase = (fullKey == "${BASE}");
+        if (overrideBase) {
             LINFO(fmt::format("Overriding base path with '{}'", path.second));
         }
+
+        const bool overrideTemporary = (fullKey == "${TEMPORARY}");
 
         using Override = ghoul::filesystem::FileSystem::Override;
         FileSys.registerPathToken(
             std::move(fullKey),
             std::move(path.second),
-            Override(override)
+            Override(overrideBase || overrideTemporary)
         );
     }
-
     LTRACE("OpenSpaceEngine::initialize(end)");
 }
 
@@ -708,6 +707,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     bool loading = true;
     while (loading) {
+        if (_shouldAbortLoading) {
+            global::windowDelegate.terminate();
+            break;
+        }
         _loadingScreen->render();
         _assetManager->update();
 
@@ -719,10 +722,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 progressInfo.progress = (*it)->progress();
 
                 if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.currentSize = static_cast<int>(
+                    progressInfo.currentSize = static_cast<uint64_t>(
                         (*it)->nSynchronizedBytes()
                     );
-                    progressInfo.totalSize = static_cast<int>(
+                    progressInfo.totalSize = static_cast<uint64_t>(
                         (*it)->nTotalBytes()
                     );
                 }
@@ -749,6 +752,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 it = resourceSyncs.erase(it);
             }
         }
+    }
+    if (_shouldAbortLoading) {
+        _loadingScreen = nullptr;
+        return;
     }
 
     _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
@@ -800,6 +807,7 @@ void OpenSpaceEngine::deinitialize() {
         );
     }
     global::sessionRecording.deinitialize();
+    global::versionChecker.cancel();
 
     global::deinitialize();
 
@@ -811,7 +819,6 @@ void OpenSpaceEngine::deinitialize() {
 
     ghoul::logging::LogManager::deinitialize();
 
-    ghoul::deinitialize();
     LTRACE("deinitialize(end)");
 
 
@@ -993,7 +1000,8 @@ void OpenSpaceEngine::preSynchronization() {
 
     global::syncEngine.preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
-        double dt = global::windowDelegate.averageDeltaTime();
+
+        double dt = global::windowDelegate.deltaTime();
 
         if (global::sessionRecording.isSavingFramesDuringPlayback()) {
             dt = global::sessionRecording.fixedDeltaTimeDuringFrameOutput();
@@ -1023,6 +1031,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
         global::sessionRecording.preSynchronization();
         global::parallelPeer.preSynchronization();
+        global::interactionMonitor.updateActivityState();
     }
 
     for (const std::function<void()>& func : global::callback::preSync) {
@@ -1184,6 +1193,16 @@ void OpenSpaceEngine::postDraw() {
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
+    if (_loadingScreen) {
+        // If the loading screen object exists, we are currently loading and want key
+        // presses to behave differently
+        if (key == Key::Escape) {
+            _shouldAbortLoading = true;
+        }
+
+        return;
+    }
+
     using F = std::function<bool (Key, KeyModifier, KeyAction)>;
     for (const F& func : global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action);
@@ -1201,6 +1220,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 
     global::navigationHandler.keyboardCallback(key, mod, action);
     global::keybindingManager.keyboardCallback(key, mod, action);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -1213,6 +1233,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     }
 
     global::luaConsole.charCallback(codepoint, modifier);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
@@ -1248,6 +1269,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
     }
 
     global::navigationHandler.mouseButtonCallback(button, action);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
@@ -1257,6 +1279,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     }
 
     global::navigationHandler.mousePositionCallback(x, y);
+    global::interactionMonitor.markInteraction();
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
@@ -1269,7 +1292,36 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     }
 
     global::navigationHandler.mouseScrollWheelCallback(posY);
+    global::interactionMonitor.markInteraction();
 }
+
+void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
+    using F = std::function<bool (TouchInput)>;
+    for (const F& func : global::callback::touchDetected) {
+        bool isConsumed = func(input);
+        if (isConsumed) {
+            return;
+        }
+    }
+}
+
+void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
+    using F = std::function<bool(TouchInput)>;
+    for (const F& func : global::callback::touchUpdated) {
+        bool isConsumed = func(input);
+        if (isConsumed) {
+            return;
+        }
+    }
+}
+
+void OpenSpaceEngine::touchExitCallback(TouchInput input) {
+    using F = std::function<void(TouchInput)>;
+    for (const F& func : global::callback::touchExit) {
+        func(input);
+    }
+}
+
 
 std::vector<char> OpenSpaceEngine::encode() {
     std::vector<char> buffer = global::syncEngine.encodeSyncables();

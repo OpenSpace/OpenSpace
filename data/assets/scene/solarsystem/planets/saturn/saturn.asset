@@ -20,10 +20,6 @@ local Saturn = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_SATURN",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {
@@ -38,7 +34,16 @@ local Saturn = {
                     Enabled = true
                 }
             }
-        }
+        },
+        Rings = {
+            Texture = textures .. "/saturn_rings.png",
+            Size = 140445000,
+            Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
+        },
+        Shadows = {
+            Enabled = true,
+            DistanceFraction = 40.0
+        } 
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
@@ -46,21 +51,25 @@ local Saturn = {
     }
 }
 
-local SaturnRings = {
-    Identifier = "SaturnRings",
+local SaturnLabel = {
+    Identifier = "SaturnLabel",
     Parent = Saturn.Identifier,
     Renderable = {
-        Type = "RenderableRings",
-        Texture = textures .. "/saturn_rings.png",
-        Size = 140445000,
-        Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Saturn",
+        FontSize = 100.0,
+        LabelSize = 8.7,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        BlendMode = "Additive",
+        LabelOrientationOption = "Camera View Direction"
     },
+    Tag = { "solarsystem_labels" },
     GUI = {
-        Name = "Saturn Rings",
+        Name = "Saturn Label",
         Path = "/Solar System/Planets/Saturn"
     }
 }
 
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnRings })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })

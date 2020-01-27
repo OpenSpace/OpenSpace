@@ -44,6 +44,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
@@ -54,11 +55,14 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -173,11 +177,10 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
   ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
   ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/sphere.cpp
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
@@ -192,6 +195,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/touch.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
@@ -202,7 +206,6 @@ if (APPLE)
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
   )
 endif ()
-
 set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/json.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
@@ -226,6 +229,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmonitor.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
@@ -236,9 +240,12 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
@@ -364,11 +371,10 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledcoordinate.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledsphere.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/sphere.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
@@ -384,6 +390,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h

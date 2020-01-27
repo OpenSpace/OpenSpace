@@ -77,7 +77,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
-    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
     addProperty(_size);
     _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 }
@@ -103,18 +103,20 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
 }
 
 void ScreenSpaceFramebuffer::render() {
-    const glm::vec2& resolution = global::windowDelegate.currentWindowResolution();
+    const glm::vec2& resolution = global::windowDelegate.currentDrawBufferResolution();
     const glm::vec4& size = _size.value();
 
-    const float xratio = _originalViewportSize.x / (size.z - size.x);
-    const float yratio = _originalViewportSize.y / (size.w - size.y);;
+    const float xratio = resolution.x / (size.z - size.x);
+    const float yratio = resolution.y / (size.w - size.y);;
 
     if (!_renderFunctions.empty()) {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
         glViewport(
             static_cast<GLint>(-size.x * xratio),
             static_cast<GLint>(-size.y * yratio),
-            static_cast<GLsizei>(_originalViewportSize.x * xratio),
-            static_cast<GLsizei>(_originalViewportSize.y * yratio)
+            static_cast<GLsizei>(resolution.x * xratio),
+            static_cast<GLsizei>(resolution.y * yratio)
         );
         GLint defaultFBO = _framebuffer->getActiveObject();
         _framebuffer->activate();
@@ -127,12 +129,7 @@ void ScreenSpaceFramebuffer::render() {
         _framebuffer->deactivate();
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        glViewport(
-            0,
-            0,
-            static_cast<GLsizei>(resolution.x),
-            static_cast<GLsizei>(resolution.y)
-        );
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
         const glm::mat4 globalRotation = globalRotationMatrix();
         const glm::mat4 translation = translationMatrix();
@@ -170,14 +167,16 @@ void ScreenSpaceFramebuffer::removeAllRenderFunctions() {
 }
 
 void ScreenSpaceFramebuffer::createFramebuffer() {
+    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
+
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
     _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(
-        _originalViewportSize.x,
-        _originalViewportSize.y,
+        resolution.x,
+        resolution.y,
         1
     ));
-    _objectSize = glm::ivec2(_originalViewportSize);
+    _objectSize = glm::ivec2(resolution);
 
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

@@ -2,7 +2,7 @@ local modelFolder = asset.syncedResource({
     Name = "Apollo Lem Models",
     Type = "HttpSynchronization",
     Identifier = "apollo_lem_model",
-    Version = 2
+    Version = 3
 })
 
 asset.export('modelFolder', modelFolder)

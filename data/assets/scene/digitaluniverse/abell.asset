@@ -6,14 +6,14 @@ local textures = asset.syncedResource({
     Name = "Abell Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_abell_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({
     Name = "Abell Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_abell_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,10 +22,10 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 1.0, 0.4, 0.2 },
-        Transparency = 1.0,
-        ScaleFactor = 525.0,
+        Opacity = 1.0,
+        --ColorMap = speck .. "/abell.cmap",
         File = speck .. "/abell.speck",
-        Texture = textures .. "/point3.png",
+        Texture = textures .. "/point3A.png",
         LabelFile = speck .. "/abell.label",
         TextColor = { 0.0, 0.8, 0.0, 1.0 },
         TextSize = 22,
@@ -36,7 +36,10 @@ local object = {
             -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
             0.67314530211,    0.73127116582,  0.11008126223, 0.0,
             0.0,              0.0,            0.0,           1.0
-        }
+        },
+        ScaleFactor = 520.0,
+        BillboardMaxSize = 7.0,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Abell Galaxy Clusters",

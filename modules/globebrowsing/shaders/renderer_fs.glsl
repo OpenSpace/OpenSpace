@@ -51,12 +51,19 @@ uniform Layer WaterMasks[NUMLAYERS_WATERMASK];
 uniform vec2 vertexResolution;
 #endif
 
-#if USE_NIGHTTEXTURE || USE_WATERMASK || PERFORM_SHADING
+//#if USE_NIGHTTEXTURE || USE_WATERMASK || PERFORM_SHADING
 uniform vec3 lightDirectionCameraSpace;
-#endif
+//#endif
 
 #if PERFORM_SHADING
 uniform float orenNayarRoughness;
+#endif
+
+#if SHADOW_MAPPING_ENABLED
+in vec4 shadowCoords;
+uniform sampler2DShadow shadowMapTexture;
+uniform int nShadowSamples;
+uniform float zFightingPercentage;
 #endif
 
 #if USE_ECLIPSE_SHADOWS
@@ -129,7 +136,6 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows],
 #endif
 
 in vec4 fs_position;
-in vec3 fs_normal;
 in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
 in vec3 levelWeights;
@@ -138,10 +144,6 @@ in vec3 positionCameraSpace;
 #if USE_ACCURATE_NORMALS
     in vec3 ellipsoidTangentThetaCameraSpace;
     in vec3 ellipsoidTangentPhiCameraSpace;
-
-    // Once deferred light calculations are done in view space this can be removed
-    // so that we only need one normal; in view space.
-    uniform mat4 invViewModelTransform;
 #endif // USE_ACCURATE_NORMALS
 
 #if USE_ECLIPSE_SHADOWS
@@ -152,11 +154,10 @@ in vec3 positionWorldSpace;
 
 Fragment getFragment() {
     Fragment frag;
-
     frag.color = vec4(0.3, 0.3, 0.3, 1.0);
 
     vec3 normal = normalize(ellipsoidNormalCameraSpace);
-    vec3 normalModelSpace = normalize(fs_normal);
+
 #if USE_ACCURATE_NORMALS
     normal = getTileNormal(
         fs_uv,
@@ -165,9 +166,6 @@ Fragment getFragment() {
         normalize(ellipsoidTangentThetaCameraSpace),
         normalize(ellipsoidTangentPhiCameraSpace)
     );
-    // Once deferred light calculations are done in view space this can be removed
-    // so that we only need one normal; in view space.
-    normalModelSpace = normalize(mat3(invViewModelTransform) * normal);
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
@@ -241,13 +239,10 @@ Fragment getFragment() {
     // Water reflectance is added to the G-Buffer.
     frag.gNormal.w = waterReflectance;
 #else
-    frag.gNormal.w = 0;
+    frag.gNormal.w = 0.0;
 #endif
-    // Normal is written Object Space.
-    // Right now the only renderable using this info is the atm and,
-    // because all calculation for light interactions are done in Object
-    // Space, we avoid a new computation saving the normals in Object Space.
-    frag.gNormal.xyz = normalModelSpace;
+    // Normal is written View Space (Including SGCT View Matrix).
+    frag.gNormal.xyz = normal;
 
     if (dot(positionCameraSpace, vec3(1.0)) != 0.0) {
         frag.gPosition   = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
@@ -269,6 +264,31 @@ Fragment getFragment() {
         frag.color.rgb += BorderColor;
     }
 #endif // SHOW_CHUNK_EDGES
+
+#if SHADOW_MAPPING_ENABLED
+    float shadow = 1.0;
+    if (shadowCoords.w > 1) {
+        vec4 normalizedShadowCoords = shadowCoords;
+        normalizedShadowCoords.z    = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
+        normalizedShadowCoords.xy   = normalizedShadowCoords.xy / normalizedShadowCoords.w;
+        normalizedShadowCoords.w    = 1.0;
+
+       float sum = 0;
+        for (int i = 0; i < nShadowSamples; ++i) {
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i, -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  nShadowSamples - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 , -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 ,  nShadowSamples - i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i, -nShadowSamples + i));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  nShadowSamples - i));
+        }
+        sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
+        shadow = sum / (8.0 * nShadowSamples + 1.f);
+    }
+    frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.3, 0.0, 1.0) : shadow;
+#endif
 
     return frag;
 }

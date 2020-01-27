@@ -32,6 +32,8 @@
 namespace openspace {
 
 struct WindowDelegate {
+    enum class Frustum { Mono, LeftEye, RightEye };
+
     void (*terminate)() = [](){};
 
     void (*setBarrier)(bool enabled) = [](bool) {};
@@ -72,8 +74,6 @@ struct WindowDelegate {
 
     int (*currentNumberOfAaSamples)() = []() { return 1; };
 
-    bool (*isRegularRendering)() = []() { return true; };
-
     bool (*hasGuiWindow)() = []() { return false; };
 
     bool (*isGuiWindow)() = []() { return false; };
@@ -105,7 +105,7 @@ struct WindowDelegate {
 
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    void (*takeScreenshot)(bool applyWarping) = [](bool) { };
+    unsigned int(*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };
 
     void (*swapBuffer)() = []() {};
 
@@ -116,11 +116,19 @@ struct WindowDelegate {
     double (*getHorizFieldOfView)() = []() { return 0.0; };
 
     void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
+    
+    void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* { 
+        return nullptr; 
+    };
 
     using GLProcAddress = void(*)(void);
 
     GLProcAddress (*openGLProcedureAddress)(const char*) =
         [](const char*) -> GLProcAddress { return []() {}; };
+
+    Frustum (*frustumMode)() = []() { return Frustum::Mono; };
+
+    uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 };
 
 } // namespace openspace

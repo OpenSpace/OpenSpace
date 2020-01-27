@@ -35,9 +35,9 @@ namespace {
     constexpr const char* GlslRaycastPath =
         "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
     constexpr const char* GlslBoundsVsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds.vs";
+        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
     constexpr const char* GlslBoundsFsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds.fs";
+        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
 } // namespace
 
 namespace openspace {
@@ -55,14 +55,8 @@ void GalaxyRaycaster::initialize() {
 void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
                                         ghoul::opengl::ProgramObject& program)
 {
-    program.setUniform("modelTransform", _modelTransform);
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    program.setUniform("blendMode", static_cast<unsigned int>(1));
-
-    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
-    program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
-    program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
-    program.setUniform("scaling", glm::vec2(1.f, 0.f));
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -76,14 +70,8 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
                                        ghoul::opengl::ProgramObject& program)
 {
     // Uniforms
-    program.setUniform("modelTransform", _modelTransform);
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    program.setUniform("blendMode", static_cast<unsigned int>(1));
-
-    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
-    program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
-    program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
-    program.setUniform("scaling", glm::vec2(1.f, 0.f));
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
     glEnable(GL_CULL_FACE);
@@ -94,6 +82,16 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
 
     // Restore defaults
     glCullFace(GL_BACK);
+}
+
+glm::dmat4 GalaxyRaycaster::modelViewTransform(const RenderData& data) {
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+        glm::dmat4(_modelTransform);
+
+    return data.camera.combinedViewMatrix() * modelTransform;
 }
 
 void GalaxyRaycaster::preRaycast(const RaycastData& data,
@@ -107,9 +105,17 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
     const std::string opacityCoefficientUniformName = "opacityCoefficient" +
                                                       std::to_string(data.id);
 
+    const std::string absorptionMultiplyUniformName = "absorptionMultiply" +
+                                                  std::to_string(data.id);
+
+    const std::string emissionMultiplyUniformName = "emissionMultiply" +
+                                                    std::to_string(data.id);
+
     program.setUniform(volumeAspectUniformName, _aspect);
     program.setUniform(stepSizeUniformName, _stepSize);
     program.setUniform(opacityCoefficientUniformName, _opacityCoefficient);
+    program.setUniform(absorptionMultiplyUniformName, _absorptionMultiply);
+    program.setUniform(emissionMultiplyUniformName, _emissionMultiply);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _textureUnit->activate();
@@ -122,35 +128,14 @@ void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObje
 }
 
 bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
-    // Camera rig position in world coordinates.
-    const glm::vec4 rigWorldPos = glm::vec4(data.camera.positionVec3(), 1.0);
-    //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-    //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
-
-    // Camera position in world coordinates.
-    const glm::vec4 camWorldPos = rigWorldPos;
-    const glm::vec3 objPos = static_cast<glm::vec3>(data.modelTransform.translation);
-
-    const glm::mat4 modelTransform = glm::translate(_modelTransform, objPos);
-
-    float divisor = 1.f;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (abs(modelTransform[i][j] > divisor)) {
-                divisor = modelTransform[i][j];
-            }
-        }
-    }
-
-    const glm::mat4 scaledModelTransform = modelTransform / divisor;
-
-    const glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) *
-                               camWorldPos;
+    glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
+        glm::vec4(0.f, 0.f, 0.f, 1.f);
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
-    return (localPosition.x > 0 && localPosition.y > 0 &&
-            localPosition.z > 0 && localPosition.x < 1 &&
-            localPosition.y < 1 && localPosition.z < 1);
+
+    return (localPosition.x > 0 && localPosition.x < 1 &&
+        localPosition.y > 0 && localPosition.y < 1 &&
+        localPosition.z > 0 && localPosition.z < 1);
 }
 
 std::string GalaxyRaycaster::boundsVertexShaderPath() const {
@@ -179,6 +164,14 @@ void GalaxyRaycaster::setModelTransform(glm::mat4 transform) {
 
 void GalaxyRaycaster::setOpacityCoefficient(float opacityCoefficient) {
     _opacityCoefficient = opacityCoefficient;
+}
+
+void GalaxyRaycaster::setAbsorptionMultiplier(float absorptionMultiply) {
+    _absorptionMultiply = absorptionMultiply;
+}
+
+void GalaxyRaycaster::setEmissionMultiplier(float emissionMultiply) {
+    _emissionMultiply = emissionMultiply;
 }
 
 void GalaxyRaycaster::setTime(double time) {

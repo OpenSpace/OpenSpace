@@ -109,7 +109,7 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     const bool pause = isPaused();
 
     const TimeKeyframeData current = { time(), deltaTime(), false, false };
-    const TimeKeyframeData next = { targetTime, targetDeltaTime(), pause, false };
+    const TimeKeyframeData next = { Time(targetTime), targetDeltaTime(), pause, false };
 
     clearKeyframes();
     addKeyframe(now, current);
@@ -193,12 +193,12 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
     } else if (hasPastKeyframes) {
         // Extrapolate based on last past keyframe
         const double deltaApplicationTime = applicationTime - lastPastKeyframe->timestamp;
-        Time predictedTime = {
+        Time predictedTime(
             lastPastKeyframe->data.time.j2000Seconds() +
             deltaApplicationTime *
                 (lastPastKeyframe->data.pause ? 0.0 : lastPastKeyframe->data.delta)
-        };
-        return TimeKeyframeData{
+        );
+        return TimeKeyframeData {
             predictedTime,
             lastPastKeyframe->data.delta,
             false,
@@ -206,7 +206,7 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
         };
     }
     // As the last option, fall back on the current time.
-    return TimeKeyframeData{ _currentTime, _targetDeltaTime, _timePaused, false };
+    return TimeKeyframeData { _currentTime, _targetDeltaTime, _timePaused, false };
 }
 
 void TimeManager::progressTime(double dt) {
@@ -316,7 +316,7 @@ TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past
         deltaAppTime;
 
     TimeKeyframeData data {
-        interpolatedTime,
+        Time(interpolatedTime),
         interpolatedDeltaTime,
         past.data.pause,
         past.data.jump
@@ -532,9 +532,9 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
     }
 
     const double now = global::windowDelegate.applicationTime();
-
-    Time newTime = time().j2000Seconds() +
-        (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration;
+    Time newTime(
+        time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
+    );
 
     TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
     TimeKeyframeData futureKeyframe = { newTime, newDeltaTime, false, false };
@@ -556,8 +556,9 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
 
     const double now = global::windowDelegate.applicationTime();
     double targetDelta = pause ? 0.0 : _targetDeltaTime;
-    Time newTime = time().j2000Seconds() +
-        (_deltaTime + targetDelta) * 0.5 * interpolationDuration;
+    Time newTime(
+        time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
+    );
 
     TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
     TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };

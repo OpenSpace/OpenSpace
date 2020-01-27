@@ -33,7 +33,6 @@
 layout(location = 1) in vec2 in_uv;
 
 out vec4 fs_position;
-out vec3 fs_normal;
 out vec2 fs_uv;
 out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
@@ -47,6 +46,14 @@ out vec3 positionCameraSpace;
 #if USE_ECLIPSE_SHADOWS
     out vec3 positionWorldSpace;
     uniform dmat4 modelTransform;
+#endif
+
+#if SHADOW_MAPPING_ENABLED
+    // ShadowMatrix is the matrix defined by:
+    // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
+    // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
+    uniform dmat4 shadowMatrix;
+    out vec4 shadowCoords;
 #endif
 
 uniform mat4 modelViewProjectionTransform;
@@ -126,10 +133,13 @@ void main() {
     fs_position = z_normalization(positionClippingSpace);
     gl_Position = fs_position;
     ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
-    fs_normal = pair.normal;
     positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1.0));
 
 #if USE_ECLIPSE_SHADOWS
     positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
+#endif
+
+#if SHADOW_MAPPING_ENABLED
+    shadowCoords = vec4(shadowMatrix * dvec4(pair.position, 1.0));
 #endif
 }

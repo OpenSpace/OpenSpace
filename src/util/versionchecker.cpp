@@ -35,6 +35,10 @@ namespace {
 
 namespace openspace {
 
+VersionChecker::~VersionChecker() {
+    cancel();
+}
+
 void VersionChecker::requestLatestVersion(const std::string& url) {
     HttpRequest::RequestOptions opt;
     opt.requestTimeoutSeconds = 0;
@@ -51,6 +55,15 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
 
     _request = std::make_unique<AsyncHttpMemoryDownload>(std::move(fullUrl));
     _request->start(opt);
+}
+
+void VersionChecker::cancel() {
+    if (!_request) {
+        return;
+    }
+    _request->cancel();
+    _request->wait();
+    _request = nullptr;
 }
 
  bool VersionChecker::hasLatestVersionInfo() {

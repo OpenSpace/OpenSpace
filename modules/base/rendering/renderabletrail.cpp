@@ -38,10 +38,10 @@ namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr const std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase"
+        "renderPhase", "resolution", "lineWidth"
     };
 
     // The possible values for the _renderingModes property
@@ -57,6 +57,13 @@ namespace {
         { "Points", RenderingModePoints },
         { "Lines+Points", RenderingModeLinesPoints },
         { "Points+Lines", RenderingModeLinesPoints }
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        AppearanceInfo = {
+            "Appearance",
+            "Appearance",
+            "The appearance of the trail."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
@@ -166,68 +173,79 @@ documentation::Documentation RenderableTrail::Documentation() {
     };
 }
 
-RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _useLineFade(EnableFadeInfo, true)
-    , _lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
-    , _pointSize(PointSizeInfo, 1, 1, 64)
-    , _renderingModes(
-        RenderingModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
+RenderableTrail::Appearance::Appearance()
+    : properties::PropertyOwner(AppearanceInfo)
+    , lineColor(LineColorInfo, glm::vec3(1.0f, 1.0f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , useLineFade(EnableFadeInfo, true)
+    , lineFade(FadeInfo, 1.f, 0.f, 30.f)
+    , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
+    , pointSize(PointSizeInfo, 1, 1, 64)
+    , renderingModes(
+          RenderingModeInfo,
+          properties::OptionProperty::DisplayType::Dropdown
     )
 {
+    renderingModes.addOptions({
+        { RenderingModeLines, "Lines" },
+        { RenderingModePoints, "Points" },
+        { RenderingModeLinesPoints, "Lines+Points" }
+    });
+
+    addProperty(lineColor);
+    addProperty(useLineFade);
+    addProperty(lineFade);
+    addProperty(lineWidth);
+    addProperty(pointSize);
+    addProperty(renderingModes);
+}
+
+RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+{
+    setRenderBin(RenderBin::Overlay);
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
     addPropertySubOwner(_translation.get());
 
-    _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
-    addProperty(_lineColor);
+    _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
 
     if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
-        _useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
+        _appearance.useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
     }
-    addProperty(_useLineFade);
 
     if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
-        _lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
+        _appearance.lineFade = static_cast<float>(
+            dictionary.value<double>(FadeInfo.identifier)
+        );
     }
-    addProperty(_lineFade);
 
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(dictionary.value<double>(
+        _appearance.lineWidth = static_cast<float>(dictionary.value<double>(
             LineWidthInfo.identifier
         ));
     }
-    addProperty(_lineWidth);
 
     if (dictionary.hasKeyAndValue<double>(PointSizeInfo.identifier)) {
-        _pointSize = static_cast<int>(dictionary.value<double>(PointSizeInfo.identifier));
+        _appearance.pointSize = static_cast<int>(
+            dictionary.value<double>(PointSizeInfo.identifier)
+        );
     }
-    addProperty(_pointSize);
-
-    _renderingModes.addOptions({
-        { RenderingModeLines, "Lines" },
-        { RenderingModePoints, "Points" },
-        { RenderingModeLinesPoints, "Lines+Points" }
-    });
 
     // This map is not accessed out of order as long as the Documentation is adapted
     // whenever the map changes. The documentation will check for valid values
     if (dictionary.hasKeyAndValue<std::string>(RenderingModeInfo.identifier)) {
-        _renderingModes = RenderingModeConversion.at(
+        _appearance.renderingModes = RenderingModeConversion.at(
             dictionary.value<std::string>(RenderingModeInfo.identifier)
         );
     }
     else {
-        _renderingModes = RenderingModeLines;
+        _appearance.renderingModes = RenderingModeLines;
     }
-    addProperty(_renderingModes);
+
+    addPropertySubOwner(_appearance);
 }
 
 void RenderableTrail::initializeGL() {
@@ -270,11 +288,14 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
-    _programObject->setUniform(_uniformCache.color, _lineColor);
-    _programObject->setUniform(_uniformCache.useLineFade, _useLineFade);
-    if (_useLineFade) {
-        _programObject->setUniform(_uniformCache.lineFade, _lineFade);
+    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     }
+
+    /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
+    _programObject->setUniform(_uniformCache.resolution, resolution);*/
 
     static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
         // Fragile! Keep in sync with shader
@@ -289,24 +310,25 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     if (usingFramebufferRenderer) {
         glDepthMask(false);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    const bool renderLines = (_renderingModes == RenderingModeLines) |
-                             (_renderingModes == RenderingModeLinesPoints);
+    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) |
+                             (_appearance.renderingModes == RenderingModeLinesPoints);
 
-    const bool renderPoints = (_renderingModes == RenderingModePoints) |
-                              (_renderingModes == RenderingModeLinesPoints);
+    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) |
+                              (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-        glLineWidth(_lineWidth);
+        glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
     auto render = [renderLines, renderPoints, p = _programObject, &data,
-                   &modelTransform, pointSize = _pointSize.value(), c = _uniformCache]
+                   &modelTransform, pointSize = _appearance.pointSize.value(), 
+                   c = _uniformCache, lw = _appearance.lineWidth]
                   (RenderInformation& info, int nVertices, int offset)
     {
         // We pass in the model view transformation matrix as double in order to maintain
@@ -327,6 +349,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
+        glm::ivec2 resolution = global::renderEngine.renderingResolution();
+        p->setUniform(c.resolution, resolution);
+        
+        p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+        
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and
             // smaller ones
@@ -390,6 +417,24 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     const int primaryOffset = (_primaryRenderInformation._iBufferID == 0) ?
         0 :
         _primaryRenderInformation.first;
+
+    // Culling
+    const double scaledRadius = glm::length(
+        glm::dmat3(modelTransform) * glm::dvec3(_boundingSphere, 0.0, 0.0)
+    );
+
+    glm::dvec3 trailPosWorld = glm::dvec3(
+        modelTransform * _primaryRenderInformation._localTransform * 
+        glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    const double distance = glm::distance(
+        trailPosWorld,
+        data.camera.eyePositionVec3()
+    );
+
+    if (distance > scaledRadius * DISTANCE_CULLING_RADII) {
+        return;
+    }
 
     // Render the primary batch of vertices
     render(_primaryRenderInformation, totalNumber, primaryOffset);

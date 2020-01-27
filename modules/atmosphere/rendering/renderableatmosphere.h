@@ -122,6 +122,7 @@ private:
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
+    float _mieScattExtPropCoefProp;
 
     glm::vec3 _mieExtinctionCoeff;
     glm::vec3 _rayleighScatteringCoeff;

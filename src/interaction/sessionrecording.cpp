@@ -848,7 +848,7 @@ void SessionRecording::playbackCamera() {
         pbFrame.followFocusNodeRotation = (rotationFollowing == "F");
     }
     if (_setSimulationTimeWithNextCameraKeyframe) {
-        global::timeManager.setTimeNextFrame(timeSim);
+        global::timeManager.setTimeNextFrame(Time(timeSim));
         _setSimulationTimeWithNextCameraKeyframe = false;
         _saveRenderingCurrentRecordedTime = timeRec;
     }
@@ -1033,7 +1033,7 @@ void SessionRecording::moveAheadInTime() {
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            global::renderEngine.takeScreenShot();
+            global::renderEngine.takeScreenshot();
         }
     }
 }

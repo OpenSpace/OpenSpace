@@ -94,8 +94,6 @@ template <>
 std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value)
 {
     switch (value) {
-        case openspace::documentation::TestResult::Offense::Reason::ExtraKey:
-            return "Extra key";
         case openspace::documentation::TestResult::Offense::Reason::MissingKey:
             return "Missing key";
         case openspace::documentation::TestResult::Offense::Reason::UnknownIdentifier:

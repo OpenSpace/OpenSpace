@@ -383,7 +383,10 @@ void mainInitFunc() {
 
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        constexpr const char* screenshotNames = "OpenSpace";
+        const std::string screenshotNames = nWindows > 1 ?
+            fmt::format("OpenSpace_{}", i) :
+            "OpenSpace";
+
         sgct_core::ScreenCapture* cpt0 = w->getScreenCapturePointer(0);
         sgct_core::ScreenCapture* cpt1 = w->getScreenCapturePointer(1);
 
@@ -887,6 +890,11 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.currentSubwindowSize = []() {
         auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+        if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
+            sgct_core::Viewport* viewport =
+                sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+            return glm::ivec2(window->getXResolution()*viewport->getXSize(), window->getYResolution()*viewport->getYSize());
+        }
         switch (window->getStereoMode()) {
             case sgct::SGCTWindow::Side_By_Side_Stereo:
             case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
@@ -911,6 +919,12 @@ void setSgctDelegateFunctions() {
             if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
                 int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
                 return glm::ivec2(res, res);
+            }
+            else if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
+                int x, y;
+                auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+                window->getFinalFBODimensions(x, y);
+                return glm::ivec2(x*viewport->getXSize(), y*viewport->getYSize());
             }
             else {
                 int x, y;
@@ -940,16 +954,6 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.currentNumberOfAaSamples = []() {
         return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-    };
-    sgctDelegate.isRegularRendering = []() {
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
-        ghoul_assert(
-            w->getNumberOfViewports() > 0,
-            "At least one viewport must exist at this time"
-        );
-        sgct_core::Viewport* vp = w->getViewport(0);
-        sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();
-        return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
         auto engine = sgct::Engine::instance();
@@ -1014,6 +1018,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
         sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
         sgct::Engine::instance()->takeScreenshot();
+        return sgct::Engine::instance()->getScreenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
         GLFWwindow* w = glfwGetCurrentContext();
@@ -1037,6 +1042,29 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
         sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(0);
         w->setHorizFieldOfView(hFovDeg);
+    };
+    #ifdef WIN32
+    sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(windowIndex);
+        if(w) {
+                HWND hWnd = glfwGetWin32Window(w->getWindowHandle());
+                return reinterpret_cast<void*>(hWnd);
+        }
+        return nullptr;
+    };
+    #endif // WIN32
+    sgctDelegate.frustumMode = []() {
+        using FM = sgct_core::Frustum::FrustumMode;
+        switch (sgct::Engine::instance()->getCurrentFrustumMode()) {
+            case FM::MonoEye: return WindowDelegate::Frustum::Mono;
+            case FM::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
+            case FM::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+        }
+    };
+    sgctDelegate.swapGroupFrameNumber = []() {
+        unsigned int fn = 0;
+        sgct::Engine::instance()->getCurrentWindowPtr()->getSwapGroupFrameNumber(fn);
+        return static_cast<uint64_t>(fn);
     };
 }
 
@@ -1118,7 +1146,7 @@ int main(int argc, char** argv) {
         "evaluated before it is passed to OpenSpace."
     ));
 
-    // setCommandLine returns a referece to the vector that will be filled later
+    // setCommandLine returns a reference to the vector that will be filled later
     const std::vector<std::string>& sgctArguments = parser.setCommandLine(
         { argv, argv + argc }
     );

@@ -94,13 +94,14 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _boundingSphere;
     properties::StringProperty _renderableType;
 
+    void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
 private:
     RenderBin _renderBin = RenderBin::Opaque;
-    float _boundingSphere = 0.f;
 };
 
 } // namespace openspace

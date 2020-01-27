@@ -27,10 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#ifdef SYNC_USE_LIBTORRENT
-#include <modules/sync/torrentclient.h>
-#endif // SYNC_USE_LIBTORRENT
-
 namespace openspace {
 
 class SyncModule : public OpenSpaceModule {
@@ -44,20 +40,12 @@ public:
     void addHttpSynchronizationRepository(std::string repository);
     std::vector<std::string> httpSynchronizationRepositories() const;
 
-#ifdef SYNC_USE_LIBTORRENT
-    TorrentClient& torrentClient();
-#endif // SYNC_USE_LIBTORRENT
-
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
-    void internalDeinitialize() override;
 
 private:
-#ifdef SYNC_USE_LIBTORRENT
-    TorrentClient _torrentClient;
-#endif // SYNC_USE_LIBTORRENT
     std::vector<std::string> _synchronizationRepositories;
     std::string _synchronizationRoot;
 };

@@ -159,7 +159,7 @@ void LoadingScreen::render() {
 
     const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentDrawBufferResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -178,7 +178,7 @@ void LoadingScreen::render() {
     //
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(ClearBufferMask::GL_COLOR_BUFFER_BIT);
-
+    glViewport(0, 0, res.x, res.y);
     glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -440,11 +440,7 @@ void LoadingScreen::render() {
                     if (info.totalSize < 1024 * 1024) { // 1MB
                         text = fmt::format(
                             "{} ({}%)\n{}/{} {}",
-                            text,
-                            p,
-                            info.currentSize,
-                            info.totalSize,
-                            "bytes"
+                            text, p, info.currentSize, info.totalSize, "bytes"
                         );
                     }
                     else {
@@ -453,11 +449,7 @@ void LoadingScreen::render() {
 
                         text = fmt::format(
                             "{} ({}%)\n{:.3f}/{:.3f} {}",
-                            text,
-                            p,
-                            curr,
-                            total,
-                            "MB"
+                            text, p, curr, total, "MB"
                         );
                     }
                 }

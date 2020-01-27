@@ -40,42 +40,39 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-const uint32_t ProtocolVersion = 3;
-const size_t MaxLatencyDiffs = 64;
-const char* _loggerCat = "ExternInteraction";
+    constexpr const uint32_t ProtocolVersion = 3;
+    constexpr const size_t MaxLatencyDiffs = 64;
 
-constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
-    "BufferTime",
-    "Buffer Time",
-    "" // @TODO Missing documentation
-};
+    constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+        "BufferTime",
+        "Buffer Time",
+        "" // @TODO Missing documentation
+    };
 
-constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
-    "TimeKeyframeInterval",
-    "Time keyframe interval",
-    "" // @TODO Missing documentation
-};
+    constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+        "TimeKeyframeInterval",
+        "Time keyframe interval",
+        "" // @TODO Missing documentation
+    };
 
-constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
-    "CameraKeyframeInterval",
-    "Camera Keyframe interval",
-    "" // @TODO Missing documentation
-};
+    constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+        "CameraKeyframeInterval",
+        "Camera Keyframe interval",
+        "" // @TODO Missing documentation
+    };
 
-constexpr openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
-    "TimeTolerance",
-    "Time tolerance",
-    "" // @TODO Missing documentation
-};
-
+    constexpr openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
+        "TimeTolerance",
+        "Time tolerance",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 ExternInteraction::ExternInteraction()
     : properties::PropertyOwner({ "ExternInteration", "External Interaction" })
-{
-}
+{}
 
 void ExternInteraction::cameraInteraction(datamessagestructures::CameraKeyframe kf) {
     interaction::KeyframeNavigator::CameraPose pose;
@@ -116,7 +113,7 @@ datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe(
     //kf._position = global::navigationHandler.camera()->positionVec3();
     kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
 
-    kf._followNodeRotation = navHandler.orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
         kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();

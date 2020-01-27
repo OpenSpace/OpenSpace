@@ -15,6 +15,7 @@ asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
+asset.request('scene/milkyway/milkyway/volume')
 
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
@@ -24,7 +25,7 @@ asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
 -- Load web gui
-asset.require('util/webgui')
+local webGui = asset.require('util/webgui')
 
 asset.request('customization/globebrowsing')
 
@@ -62,9 +63,27 @@ local Keybindings = {
         GuiPath = "/Rendering",
         Local = false
     },
+    {
+        Key = "l",
+        Name = "Turn on labels",
+        Command = "openspace.setPropertyValue('{solarsystem_labels}.Renderable.Enabled', true)",
+        Documentation = "Turns on visibility for all solar system labels",
+        GuiPath = "/Rendering",
+        Local = false
+    },
+    {
+        Key = "Shift+l",
+        Name = "Turn off labels",
+        Command = "openspace.setPropertyValue('{solarsystem_labels}.Renderable.Enabled', false)",
+        Documentation = "Turns off visibility for all solar system labels",
+        GuiPath = "/Rendering",
+        Local = false
+    }
 }
 
 asset.onInitialize(function ()
+    webGui.setCefRoute("onscreen")
+
     sceneHelper.bindKeys(Keybindings)
     openspace.setDefaultGuiSorting()
 

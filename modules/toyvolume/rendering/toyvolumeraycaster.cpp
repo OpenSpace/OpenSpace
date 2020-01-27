@@ -24,7 +24,6 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
 #include <vector>
@@ -63,7 +62,7 @@ void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data,
                                            ghoul::opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -78,7 +77,7 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
 {
     // Uniforms
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
     glEnable(GL_CULL_FACE);

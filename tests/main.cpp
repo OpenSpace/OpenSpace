@@ -66,7 +66,6 @@
 #include <test_documentation.inl>
 #include <test_luaconversions.inl>
 #include <test_optionproperty.inl>
-#include <test_powerscalecoordinates.inl>
 #include <test_scriptscheduler.inl>
 #include <test_spicemanager.inl>
 #include <test_timeline.inl>

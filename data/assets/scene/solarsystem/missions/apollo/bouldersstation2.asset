@@ -33,8 +33,8 @@ local Station2Boulder1Holder = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.5294692,
             Latitude = 20.098824,
-            FixedAltitude = -2442.8,
-            UseFixedAltitude = true
+            Altitude = -2442.8,
+            UseHeightMap = false
         }
     },
     GUI = {
@@ -78,8 +78,8 @@ local Station2Boulder2Holder = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.5287892,
             Latitude = 20.098240,
-            FixedAltitude = -2434.6,
-            UseFixedAltitude = true
+            Altitude = -2434.6,
+            UseHeightMap = false
         }
     },
     GUI = {
@@ -123,8 +123,8 @@ local Station2Boulder3Holder = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+30.5294692,
             Latitude = 20.098610,
-            FixedAltitude = -2441.55,
-            UseFixedAltitude = true
+            Altitude = -2441.55,
+            UseHeightMap = false
         }
     },
     GUI = {

@@ -89,4 +89,14 @@ int removeScreenSpaceRenderable(lua_State* L) {
     return 0;
 }
 
+int takeScreenshot(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::takeScreenshot");
+
+    global::renderEngine.takeScreenshot();
+    const unsigned int screenshotNumber = global::renderEngine.latestScreenshotNumber();
+
+    lua_pushinteger(L, screenshotNumber);
+    return 1;
+}
+
 }// namespace openspace::luascriptfunctions

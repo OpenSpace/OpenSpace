@@ -7,8 +7,8 @@ local Keybindings = {
     {
         Key = "F7",
         Name = "Take Screenshot",
-        Command = "openspace.setPropertyValueSingle('RenderEngine.TakeScreenshot', nil)",
-        Documentation = "Saves the contents of the screen to a file in the working directory.",
+        Command = "openspace.takeScreenshot()",
+        Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
         GuiPath = "/Rendering",
         Local = true
     }

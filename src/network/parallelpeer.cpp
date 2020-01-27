@@ -325,7 +325,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
                 TimeKeyframeData timeKeyframeData;
                 timeKeyframeData.delta = kfMessage._dt;
                 timeKeyframeData.pause = kfMessage._paused;
-                timeKeyframeData.time = kfMessage._time;
+                timeKeyframeData.time = Time(kfMessage._time);
                 timeKeyframeData.jump = kfMessage._requiresTimeJump;
 
                 const double kfTimestamp = convertTimestamp(kfMessage._timestamp);
@@ -597,7 +597,7 @@ void ParallelPeer::sendCameraKeyframe() {
     datamessagestructures::CameraKeyframe kf;
     kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
 
-    kf._followNodeRotation = navHandler.orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
         kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();

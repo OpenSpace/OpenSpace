@@ -333,12 +333,12 @@ int time_setTime(lua_State* L) {
     if (nArguments == 1) {
         if (isNumber) {
             double value = lua_tonumber(L, 1);
-            global::timeManager.setTimeNextFrame(value);
+            global::timeManager.setTimeNextFrame(Time(value));
             return 0;
         }
         if (isString) {
             const char* time = lua_tostring(L, 1);
-            global::timeManager.setTimeNextFrame(Time::convertTime(time));
+            global::timeManager.setTimeNextFrame(Time(Time::convertTime(time)));
             return 0;
         }
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -424,7 +424,7 @@ int time_interpolateTime(lua_State* L) {
             global::timeManager.interpolateTime(targetTime, duration);
         }
         else {
-            global::timeManager.setTimeNextFrame(targetTime);
+            global::timeManager.setTimeNextFrame(Time(targetTime));
         }
     }
     return 0;
@@ -486,7 +486,7 @@ int time_interpolateTimeRelative(lua_State* L) {
         }
         else {
             global::timeManager.setTimeNextFrame(
-                global::timeManager.time().j2000Seconds() + delta
+                Time(global::timeManager.time().j2000Seconds() + delta)
             );
         }
     }

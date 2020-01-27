@@ -60,7 +60,6 @@
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderable.h>
@@ -147,7 +146,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _ozoneHeightScale(0.f)
     , _mieHeightScale(0.f)
     , _miePhaseConstant(0.f)
-    , _sunRadianceIntensity(50.0f)
+    , _sunRadianceIntensity(5.f)
     , _rayleighScatteringCoeff(glm::vec3(0.f))
     , _ozoneExtinctionCoeff(glm::vec3(0.f))
     , _mieScatteringCoeff(glm::vec3(0.f))

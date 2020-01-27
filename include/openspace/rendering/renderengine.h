@@ -92,6 +92,9 @@ public:
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float opacity);
 
+    float hdrExposure() const;
+    bool isHdrDisabled() const;
+
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
     void removeScreenSpaceRenderable(const std::string& identifier);
@@ -139,9 +142,14 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-     * Mark that one screenshot should be taken
+     * Take a screenshot and store in the ${SCREENSHOTS} directory
      */
-    void takeScreenShot();
+    void takeScreenshot();
+
+    /**
+     * Get the filename of the latest screenshot
+     */
+    unsigned int latestScreenshotNumber() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -184,28 +192,48 @@ private:
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
-    properties::TriggerProperty _takeScreenshot;
-    bool _shouldTakeScreenshot = false;
     properties::BoolProperty _applyWarping;
-    properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _showFrameInformation;
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    struct FrameInfo {
+        uint64_t iFrame;
+        double deltaTime;
+        double avgDeltaTime;
+    };
+
+    struct {
+        std::vector<FrameInfo> frames;
+        uint64_t lastSavedFrame = 0;
+        uint16_t saveEveryNthFrame = 2048;
+    } _frameInfo;
+    properties::BoolProperty _saveFrameInformation;
+#endif // OPENSPACE_WITH_INSTRUMENTATION
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
-    properties::IntProperty _nAaSamples;
+    
+    properties::BoolProperty _enableFXAA;
+
+    properties::BoolProperty _disableHDRPipeline;
     properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
+
+    properties::FloatProperty _hue;
+    properties::FloatProperty _saturation;
+    properties::FloatProperty _value;
+    
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
-
+    
     uint64_t _frameNumber = 0;
+    unsigned int _latestScreenshotNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontBig;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;

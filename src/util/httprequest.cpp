@@ -65,7 +65,7 @@ int progressCallback(void* userData, int64_t nTotalDownloadBytes,
     HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
     return r->_onProgress(
         HttpRequest::Progress{
-            true,
+            nTotalDownloadBytes > 0,
             static_cast<size_t>(nTotalDownloadBytes),
             static_cast<size_t>(nDownloadedBytes)
         }
@@ -124,9 +124,13 @@ void HttpRequest::perform(RequestOptions opt) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
 
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
+    #if LIBCURL_VERSION_NUM >= 0x072000
+    // xferinfo was introduced in 7.32.0, if a lower curl version is used the progress
+    // will not be shown for downloads on the splash screen
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this); // NOLINT
     // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
+    #endif
 
     if (opt.requestTimeoutSeconds > 0) {
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds); // NOLINT

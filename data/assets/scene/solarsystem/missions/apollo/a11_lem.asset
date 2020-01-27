@@ -15,8 +15,8 @@ local Apollo11Lem = {
             Globe = moonAsset.Moon.Identifier,
             Longitude = -360+23.47306,
             Latitude = 0.67402,
-            FixedAltitude = -1927.65,
-            UseFixedAltitude = true
+            Altitude = -1927.65,
+            UseHeightMap = false
         },
     },
     GUI = {

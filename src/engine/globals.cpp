@@ -31,8 +31,10 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
@@ -149,8 +151,18 @@ configuration::Configuration& gConfiguration() {
     return g;
 }
 
+interaction::InteractionMonitor& gInteractionMonitor() {
+    static interaction::InteractionMonitor g;
+    return g;
+}
+
 interaction::JoystickInputStates& gJoystickInputStates() {
     static interaction::JoystickInputStates g;
+    return g;
+}
+
+interaction::WebsocketInputStates& gWebsocketInputStates() {
+    static interaction::WebsocketInputStates g;
     return g;
 }
 
@@ -208,6 +220,7 @@ void initialize() {
     global::navigationHandler.setPropertyOwner(&global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
     global::rootPropertyOwner.addPropertySubOwner(global::navigationHandler);
+    global::rootPropertyOwner.addPropertySubOwner(global::interactionMonitor);
     global::rootPropertyOwner.addPropertySubOwner(global::sessionRecording);
     global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
 

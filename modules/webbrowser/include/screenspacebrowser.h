@@ -63,9 +63,11 @@ class WebKeyboardHandler;
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
     ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceBrowser() = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
+    bool initializeGL() override;
+    bool deinitializeGL() override;
+
     void render() override;
     void update() override;
     bool isReady() const override;

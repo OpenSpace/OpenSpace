@@ -75,6 +75,8 @@ public:
 
 protected:
     void createShaders();
+    std::string makeUniqueIdentifier(std::string name);
+
     glm::mat4 scaleMatrix();
     glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
@@ -106,10 +108,8 @@ protected:
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize;
-    UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
+    UniformCache(alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-
-    glm::vec2 _originalViewportSize;
 };
 
 } // namespace openspace

@@ -1,6 +1,7 @@
 asset.request('./planets/mercury/mercury')
 
 asset.request('./planets/venus/venus')
+asset.request('./planets/venus/atmosphere')
 
 asset.request('./planets/earth/earth')
 asset.request('./planets/earth/atmosphere')

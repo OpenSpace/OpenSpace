@@ -1,3 +1,4 @@
+asset.request('./debris/debris_asat')
 asset.request('./debris/debris_breezem')
 asset.request('./debris/debris_fengyun')
 asset.request('./debris/debris_iridium33')

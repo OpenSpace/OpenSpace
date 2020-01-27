@@ -52,6 +52,8 @@ public:
 
     static documentation::Documentation Documentation();
 
+    bool storyStyleActive();
+
 private:
     enum Type {
         Node = 0,

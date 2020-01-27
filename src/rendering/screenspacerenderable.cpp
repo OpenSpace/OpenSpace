@@ -42,8 +42,8 @@ namespace {
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyTag = "Tag";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
-        "OcclusionDepth", "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -206,8 +206,6 @@ namespace {
             wrap(elevation, -glm::pi<float>(), glm::pi<float>())
         );
     }
-
-
 } // namespace
 
 namespace openspace {
@@ -312,6 +310,27 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
         renderableType,
         dictionary
     );
+}
+
+std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
+    std::vector<ScreenSpaceRenderable*> r = global::renderEngine.screenSpaceRenderables();
+
+    auto nameTaken = [&r](const std::string& name) {
+        bool nameTaken = std::any_of(
+            r.begin(),
+            r.end(),
+            [&name](ScreenSpaceRenderable* r) { return r->identifier() == name; }
+        );
+        return nameTaken;
+    };
+
+    std::string baseName = name;
+    int i = 1;
+    while (nameTaken(name)) {
+        name = baseName + std::to_string(i);
+        i++;
+    }
+    return name;
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
@@ -451,7 +470,6 @@ bool ScreenSpaceRenderable::initialize() {
 }
 
 bool ScreenSpaceRenderable::initializeGL() {
-    _originalViewportSize = global::windowDelegate.currentWindowResolution();
     createShaders();
     return isReady();
 }
@@ -497,11 +515,13 @@ float ScreenSpaceRenderable::depth() {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = global::windowDelegate.currentWindowResolution();
+    auto res = global::windowDelegate.currentDrawBufferResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
-        { "windowHeight" , res.y }
+        { "windowHeight" , res.y },
+        { "hdrExposure", global::renderEngine.hdrExposure() },
+        { "disableHDR", global::renderEngine.isHdrDisabled() }
     };
 
     dict.setValue("rendererData", rendererData);
@@ -517,21 +537,15 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
 
     //to scale the plane
     float textureRatio =
         static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
-    float scalingRatioX = _originalViewportSize.x / resolution.x;
-    float scalingRatioY = _originalViewportSize.y / resolution.y;
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(
-            _scale * scalingRatioX,
-            _scale * scalingRatioY * textureRatio,
-            1.f
-        )
+        glm::vec3(_scale, _scale * textureRatio, 1.f)
     );
 
     // Simulate orthographic projection by distance to plane.

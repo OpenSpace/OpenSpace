@@ -25,7 +25,6 @@
 #include <modules/cefwebgui/cefwebguimodule.h>
 
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webgui/webguimodule.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
@@ -104,7 +103,13 @@ void CefWebGuiModule::startOrStopGui() {
                 new GUIKeyboardHandler
             );
             _instance->initialize();
-            _instance->loadUrl(_url);
+            _instance->reshape(static_cast<glm::ivec2>(
+                static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
+                global::windowDelegate.dpiScaling()
+                ));
+            if (!_url.value().empty()) {
+                _instance->loadUrl(_url);
+            }
         }
         if (_visible) {
             webBrowserModule->attachEventHandler(_instance.get());
@@ -161,13 +166,21 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    if (configuration.hasValue<std::string>(GuiUrlInfo.identifier)) {
-        _url = configuration.value<std::string>(GuiUrlInfo.identifier);
-    } else {
-        WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
-        _url = "http://127.0.0.1:" +
-            std::to_string(webGuiModule->port()) + "/#/onscreen";
-    }
+    // We need this to make sure that the browser is reloaded
+    // once the endpoint comes online, on OpenSpace startup.
+
+    // TODO: See if the hardcoded endpoint `frontend` below can be removed.
+    // Possible fix: Reload browser if cefwebgui is routed to localhost
+    // and the same endpoint that just came online.
+    WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+
+    _endpointCallback = webGuiModule->addEndpointChangeCallback(
+        [this](const std::string& endpoint, bool exists) {
+            if (exists && endpoint == "frontend" && _instance) {
+                _instance->reloadBrowser();
+            }
+        }
+    );
 
     if (configuration.hasValue<float>(GuiScaleInfo.identifier)) {
         _guiScale = configuration.value<float>(GuiScaleInfo.identifier);
@@ -191,11 +204,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         const bool isMaster = global::windowDelegate.isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
-            if (global::windowDelegate.windowHasResized()) {
+            if (global::windowDelegate.windowHasResized() || _instance->_shouldReshape) {
                 _instance->reshape(static_cast<glm::ivec2>(
-                    static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+                    static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
                     global::windowDelegate.dpiScaling()
                 ));
+                _instance->_shouldReshape = false;
             }
             if (_visible) {
                 _instance->draw();
@@ -204,6 +218,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::deinitializeGL.emplace_back([this]() {
+        if (_endpointCallback != -1) {
+            WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+            webGuiModule->removeEndpointChangeCallback(_endpointCallback);
+            _endpointCallback = -1;
+        }
         _enabled = false;
         startOrStopGui();
     });

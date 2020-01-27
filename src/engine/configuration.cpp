@@ -296,7 +296,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyMasterRotation, c.masterRotation);
     getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
-
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);
     getValue(s, KeyLoadingScreen, c.loadingScreen);

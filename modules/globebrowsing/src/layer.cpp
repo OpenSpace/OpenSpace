@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/src/layer.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/tileindex.h>
@@ -93,6 +95,114 @@ namespace {
     };
 } // namespace
 
+documentation::Documentation Layer::Documentation() {
+    using namespace documentation;
+    return {
+        "Layer",
+        "globebrowsing_layer",
+        {
+            {
+                KeyIdentifier,
+                new StringVerifier,
+                Optional::No,
+                "The unique identifier for this layer. May not contain '.' or spaces."
+            },
+            {
+                KeyName,
+                new StringVerifier,
+                Optional::Yes,
+                "A human-readable name for the user interface. If this is omitted, the "
+                "identifier is used instead."
+            },
+            {
+                KeyDesc,
+                new StringVerifier,
+                Optional::Yes,
+                "A human-readable description of the layer to be used in informational "
+                "texts presented to the user."
+            },
+            {
+                "Type",
+                new StringInListVerifier({
+                    "DefaultTileLayer", "SingleImageTileLayer", "SizeReferenceTileLayer",
+                    "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
+                    "ByLevelTileLayer", "SolidColor"
+                }),
+                Optional::Yes,
+                "Specifies the type of layer that is to be added. If this value is not "
+                "specified, the layer is a DefaultTileLayer."
+            },
+            {
+                EnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                "Determine whether the layer is enabled or not. If this value is not "
+                "specified, the layer is disabled."
+            },
+            {
+                KeyPadTiles,
+                new BoolVerifier,
+                Optional::Yes,
+                "Determines whether the downloaded tiles should have a padding added to "
+                "the borders."
+            },
+            {
+                KeySettings,
+                new TableVerifier({
+                    {
+                        KeyOpacity,
+                        new DoubleInRangeVerifier(0.0, 1.0),
+                        Optional::Yes,
+                        "The opacity value of the layer."
+                    },
+                    {
+                        KeyGamma,
+                        new DoubleVerifier,
+                        Optional::Yes,
+                        "The gamma value that is applied to each pixel of the layer."
+                    },
+                    {
+                        KeyMultiplier,
+                        new DoubleVerifier,
+                        Optional::Yes,
+                        "The multiplicative factor that is applied to each pixel of the "
+                        "layer."
+                    },
+                    {
+                        KeyOffset,
+                        new DoubleVerifier,
+                        Optional::Yes,
+                        "An additive offset that is applied to each pixel of the layer."
+                    }
+                }),
+                Optional::Yes,
+                "Specifies the render settings that should be applied to this layer."
+            },
+            {
+                KeyAdjustment,
+                new ReferencingVerifier("globebrowsing_layeradjustment"),
+                Optional::Yes,
+                ""
+            },
+            {
+                BlendModeInfo.identifier,
+                new StringInListVerifier({
+                    "Normal", "Multiply", "Add", "Subtract", "Color"
+                }),
+                Optional::Yes,
+                "Sets the blend mode of this layer to determine how it interacts with "
+                "other layers on top of this."
+            },
+            {
+                "Fallback",
+                new ReferencingVerifier("globebrowsing_layer"),
+                Optional::Yes,
+                "If the primary layer creation fails, this layer is used as a fallback"
+            }
+        }
+    };
+}
+
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
              LayerGroup& parent)
     : properties::PropertyOwner({
@@ -109,13 +219,15 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _layerGroupId(id)
 {
+    documentation::testSpecificationAndThrow(Documentation(), layerDict, "Layer");
+
     layergroupid::TypeID typeID;
     if (layerDict.hasKeyAndValue<std::string>("Type")) {
         const std::string& typeString = layerDict.value<std::string>("Type");
         typeID = ghoul::from_string<layergroupid::TypeID>(typeString);
     }
     else {
- typeID = layergroupid::TypeID::DefaultTileLayer;
+        typeID = layergroupid::TypeID::DefaultTileLayer;
     }
     if (typeID == layergroupid::TypeID::Unknown) {
         throw ghoul::RuntimeError("Unknown layer type!");
@@ -341,9 +453,12 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-void Layer::update() {
+int Layer::update() {
     if (_tileProvider) {
-        tileprovider::update(*_tileProvider);
+        return tileprovider::update(*_tileProvider);
+    }
+    else {
+        return 0;
     }
 }
 

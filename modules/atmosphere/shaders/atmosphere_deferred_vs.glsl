@@ -27,9 +27,11 @@
 layout(location = 0) in vec4 in_position;
 
 out vec3 interpolatedNDCPos;
+out vec2 texCoord;
 
 void main()
 {
+    texCoord = 0.5 + in_position.xy * 0.5;
     interpolatedNDCPos       = in_position.xyz;
     gl_Position              = in_position;
 }

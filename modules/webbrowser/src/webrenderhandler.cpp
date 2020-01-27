@@ -151,7 +151,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
     if (_browserBuffer.empty()) {
         return false;
     }
-    int index = x + (_browserBufferSize.x * y);
+    int index = x + _browserBufferSize.x * (_browserBufferSize.y - y - 1);
     index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
     return _browserBuffer[index].a;
 }

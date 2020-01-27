@@ -164,7 +164,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             {
                 keyColor,
                 new Vector3Verifier<float>,
-                Optional::No,
+                Optional::Yes,
                 "Astronomical Object Color (r,g,b)."
             },
             {
@@ -710,14 +710,17 @@ bool RenderableDUMeshes::readSpeckFile() {
             continue;
         }
 
-        if (line.substr(0, 4) != "mesh") {
+        std::size_t found = line.find("mesh");
+        if (found == std::string::npos) {
+        //if (line.substr(0, 4) != "mesh") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
-            file.seekg(position);
-            break;
-        }
+            //file.seekg(position);
+            //break;
+            continue;
+        } else {
 
-        if (line.substr(0, 4) == "mesh") {
+        //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
             // mesh -t texnum -c colorindex -s style {
             // where textnum is the index of the texture;

@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Kepler Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_kepler_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,13 +22,15 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 1.0, 1.0, 0.0 },
-        Transparency = 0.99,
-        ScaleFactor = 395.0,
+        Opacity = 0.99,
+        ScaleFactor = 410.0,
         File = speck .. "/kepler.speck",
         Texture = textures .. "/halo.png",
         CorrectionSizeEndDistance = 15.86,
         CorrectionSizeFactor = 8.59,
-        Unit = "pc"
+        Unit = "pc",
+        BillboardMaxSize = 23.0,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Kepler Planetary Candidates",

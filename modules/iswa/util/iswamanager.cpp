@@ -107,12 +107,15 @@ IswaManager::IswaManager()
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
-    global::downloadManager.fetchFile(
-        "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
-        [this](const DownloadManager::MemoryFile& file) {
-            fillCygnetInfo(std::string(file.buffer));
-        }
-    );
+    // @TODO (abock, 2019-09-17): I commented this out as the webpage has been down for a
+    // while and would probably not work anymore either way
+
+    // global::downloadManager.fetchFile(
+    //     "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
+    //     [this](const DownloadManager::MemoryFile& file) {
+    //         fillCygnetInfo(std::string(file.buffer));
+    //     }
+    // );
 }
 
 IswaManager::~IswaManager() {
