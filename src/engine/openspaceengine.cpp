@@ -99,6 +99,9 @@
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const int CacheVersion = 1;
+    constexpr const char* ProfileToSceneConverter
+                                         = "${BASE}/scripts/convert_profile_to_scene.lua";
+
 } // namespace
 
 namespace openspace {
@@ -293,6 +296,48 @@ void OpenSpaceEngine::initialize() {
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(global::scriptEngine);
 
+    // Convert profile to scene file (if was provided in configuration file)
+    if (!global::configuration.profile.empty()) {
+        LINFO(
+            fmt::format("Run Lua script to convert {}.profile to scene",
+            global::configuration.profile)
+        );
+        ghoul::lua::LuaState lState;
+
+        // We can't use the absPath function here because we pass the path into the Lua
+        // function, which requires additional escaping
+        std::string inputProfilePath = generateFilePath("${ASSETS}");
+        std::string outputScenePath = generateFilePath("${TEMPORARY}");
+
+        std::string setProfileFilenameInLuaState = fmt::format(R"(
+            openspace = {{}}
+            openspace.profile = {{}}
+            function openspace.profile.getFilename()
+              return "{}.profile"
+            end
+            function openspace.profile.getProfileInputPath()
+              return "{}"
+            end
+            function openspace.profile.getSceneOutputPath()
+              return "{}"
+            end
+            )",
+            global::configuration.profile,
+            inputProfilePath,
+            outputScenePath
+        );
+
+        ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
+        ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
+
+
+        // Set asset name to that of the profile because a new scene file will be
+        // created with that name, and also because the profile name will override
+        // an asset name if both are provided.
+        global::configuration.asset =
+            absPath("${TEMPORARY}/") + global::configuration.profile;
+    }
+
     // Set up asset loader
     std::unique_ptr<SynchronizationWatcher> w =
         std::make_unique<SynchronizationWatcher>();
@@ -339,6 +384,26 @@ void OpenSpaceEngine::initialize() {
     scheduleLoadSingleAsset(global::configuration.asset);
 
     LTRACE("OpenSpaceEngine::initialize(end)");
+}
+
+std::string OpenSpaceEngine::generateFilePath(std::string openspaceRelativePath) {
+    std::string path = absPath(openspaceRelativePath);
+    // Needs to handle either windows (which seems to require double back-slashes)
+    // or unix path slashes.
+    const std::string search = "\\";
+    const std::string replace = "\\\\";
+    if (path.find(search) != std::string::npos) {
+        size_t start_pos = 0;
+        while ((start_pos = path.find(search, start_pos)) != std::string::npos) {
+            path.replace(start_pos, search.length(), replace);
+            start_pos += replace.length();
+        }
+        path.append(replace);
+    }
+    else {
+        path.append("/");
+    }
+    return path.append(global::configuration.profile);
 }
 
 void OpenSpaceEngine::initializeGL() {

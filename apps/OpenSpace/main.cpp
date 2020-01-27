@@ -1187,7 +1187,7 @@ int main(int argc, char** argv) {
             configurationFilePath
         );
 
-        // If the user requested a commandline-based configuation script that should
+        // If the user requested a commandline-based configuration script that should
         // overwrite some of the values, this is the time to do it
         if (!commandlineArguments.configurationOverride.empty()) {
             LDEBUG("Executing Lua script passed through the commandline:");
