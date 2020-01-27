@@ -100,7 +100,7 @@ namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const int CacheVersion = 1;
     constexpr const char* ProfileToSceneConverter
-                                           = "${BASE}/scripts/convertProfileToScene.lua";
+                                         = "${BASE}/scripts/convert_profile_to_scene.lua";
 
 } // namespace
 
@@ -298,11 +298,15 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration.profile.empty()) {
-        LINFO(fmt::format("Run Lua script to convert {}.profile to scene",
-            global::configuration.profile));
+        LINFO(
+            fmt::format("Run Lua script to convert {}.profile to scene",
+            global::configuration.profile)
+        );
         ghoul::lua::LuaState lState;
 
-        std::string inputProfilePath = generateFilePath("${BASE}/data/assets");
+        // We can't use the absPath function here because we pass the path into the Lua
+        // function, which requires additional escaping
+        std::string inputProfilePath = generateFilePath("${ASSETS}");
         std::string outputScenePath = generateFilePath("${TEMPORARY}");
 
         std::string setProfileFilenameInLuaState = fmt::format(R"(
@@ -318,11 +322,20 @@ void OpenSpaceEngine::initialize() {
               return "{}"
             end
             )",
-            global::configuration.profile, inputProfilePath, outputScenePath
+            global::configuration.profile,
+            inputProfilePath,
+            outputScenePath
         );
 
         ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
         ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
+
+
+        // Set asset name to that of the profile because a new scene file will be
+        // created with that name, and also because the profile name will override
+        // an asset name if both are provided.
+        global::configuration.asset =
+            absPath("${TEMPORARY}/") + global::configuration.profile;
     }
 
     // Set up asset loader

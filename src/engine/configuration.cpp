@@ -358,13 +358,6 @@ Configuration loadConfigurationFromFile(const std::string& filename) {
 
     parseLuaState(result);
 
-    // Set asset name to that of the profile because a new scene file will be
-    // created with that name, and also because the profile name will override
-    // an asset name if both are provided.
-    if (!result.profile.empty()) {
-        result.asset = "../../temp/" + result.profile;
-    }
-
     return result;
 }
 
