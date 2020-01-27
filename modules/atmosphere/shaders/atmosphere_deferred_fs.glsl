@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -279,7 +279,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        const vec3 v, const vec3 s, out float r, out float mu,
                        out vec3 attenuation, const vec3 fragPosObj, out bool groundHit,
                        const double maxLength, const double pixelDepth,
-                       const vec4 spaceColor, const float sunIntensity, const vec3 normal) {
+                       const vec4 spaceColor, const float sunIntensity) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -301,11 +301,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // we will subtract the attenuated scattering light from that path in the
     // current path.
     vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);
-<<<<<<< HEAD
-    
-=======
       
->>>>>>> master
     // After removing the initial path from camera pos to top of atmosphere (for an
     // observer in the space) we test if the light ray is hitting the atmosphere
     vec3  x0     = fragPosObj;
@@ -352,11 +348,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
         // We want an interpolation value close to 1/2, so the
         // contribution of each radiance value is almost the same
-<<<<<<< HEAD
-        // or it has a hevy weight if from above or below horizon
-=======
         // or it has a heavy weight if from above or below horizon
->>>>>>> master
         float interpolationValue = ((mu - muHorizon) + INTERPOLATION_EPS) / (2.0f * INTERPOLATION_EPS);
 
         //float t2 = t * t;
@@ -421,18 +413,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-<<<<<<< HEAD
-        // The final color is given by the attenuated light arriving at the observer's eye
-        // plus the scattered light in the atmosphere (only inscattered light taken into account here)
-        return attenuation * (spaceColor.rgb * backgroundConstant) + finalScatteringRadiance;
-=======
         //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
-        return attenuation * spaceColor.rgb + finalScatteringRadiance;
+        return spaceColor.rgb + finalScatteringRadiance;
         // return attenuation * spaceColor.rgb +
         // (vec3(1.0) - attenuation) * finalScatteringRadiance;
->>>>>>> master
-    }
-    
+    }    
 }
 
 /* 
@@ -570,17 +555,10 @@ void main() {
         double offset      = 0.0;   // in Km
         double maxLength   = 0.0;   // in Km  
 
-<<<<<<< HEAD
-        for (int i = 0; i < nSamples; i++) {
-            // Color from G-Buffer
-            //vec4 color = texelFetch(mainColorTexture, fragCoords, i);
-            vec4 color = colorArray[i];
-=======
         bool  intersectATM = false;
 
         intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  
                                                 Rt - (ATM_EPSILON * 0.001), insideATM, offset, maxLength);
->>>>>>> master
             
         if ( intersectATM ) {
             // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
@@ -681,76 +659,6 @@ void main() {
                                                 color, normal.xyz, irradianceFactor, 
                                                 normal.a, sunIntensityGround);
                 } else {
-<<<<<<< HEAD
-                    // Following paper nomenclature      
-                    double t = offset;                  
-                    vec3 attenuation;     
-
-                    // Moving observer from camera location to top atmosphere
-                    // If the observer is already inside the atm, offset = 0.0
-                    // and no changes at all.
-                    vec3  x  = vec3(ray.origin.xyz + t*ray.direction.xyz);
-                    float r  = 0.0f;//length(x);
-                    vec3  v  = vec3(ray.direction.xyz);
-                    float mu = 0.0f;//dot(x, v) / r;
-                    vec3  s  = vec3(sunDirectionObj);
-                    float tF = float(maxLength - t);
-
-                    // Because we may move the camera origin to the top of atmosphere 
-                    // we also need to adjust the pixelDepth for tdCalculateRayRenderableGlobe' offset so the
-                    // next comparison with the planet's ground make sense:
-                    pixelDepth -= offset;
-                    
-                    dvec4 onATMPos           = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
-                    vec4 eclipseShadowATM    = calcShadow(shadowDataArray, onATMPos.xyz, false);            
-                    float sunIntensityInscatter = sunRadiance * eclipseShadowATM.x;
-
-                    float irradianceFactor = 0.0;
-
-                    bool groundHit = false;
-                    vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
-                                                            s, r, mu, attenuation, 
-                                                            vec3(positionObjectsCoords.xyz),
-                                                            groundHit, maxLength, pixelDepth,
-                                                            color, sunIntensityInscatter,
-                                                            normal.xyz); 
-                    vec3 groundColorV = vec3(0.0);
-                    vec3 sunColorV = vec3(0.0);                                                
-                    if (groundHit) {
-                        vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
-                        float sunIntensityGround = sunRadiance * eclipseShadowPlanet.x;
-                        groundColorV = groundColor(x, tF, v, s, r, mu, attenuation,
-                                                   color, normal.xyz, irradianceFactor, 
-                                                   normal.a, sunIntensityGround);
-                    } else {
-                        // In order to get better performance, we are not tracing
-                        // multiple rays per pixel when the ray doesn't intersect
-                        // the ground.
-                        sunColorV = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
-                    } 
-                    
-                    // Final Color of ATM plus terrain:
-                    vec4 finalRadiance = vec4(HDR(inscatterColor + groundColorV + sunColorV, atmExposure), 1.0);
-                    
-                    atmosphereFinalColor += finalRadiance;
-                }
-            } 
-            else { // no intersection
-                atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
-            }           
-        }  
-
-        renderTarget = atmosphereFinalColor / float(nSamples);        
-        renderTarget.a *= blackoutFactor;
-        // if (complex)
-        //     renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
-    } 
-    else { // culling
-        if (firstPaint) {
-            vec4 bColor = vec4(0.0f);
-            for (int f = 0; f < nAaSamples; f++) {
-                bColor += texelFetch(mainColorTexture, fragCoords, f);
-=======
                     // In order to get better performance, we are not tracing
                     // multiple rays per pixel when the ray doesn't intersect
                     // the ground.
@@ -761,15 +669,8 @@ void main() {
                 vec4 finalRadiance = vec4(inscatterColor + groundColorV + sunColorV, 1.0);
 
                 atmosphereFinalColor += finalRadiance;
->>>>>>> master
             }
         } 
-<<<<<<< HEAD
-        else {
-            discard;
-        }
-        //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
-=======
         else { // no intersection
             // Buffer color
             atmosphereFinalColor += color;
@@ -781,7 +682,6 @@ void main() {
     else { // culling
         vec4 bColor = texture(mainColorTexture, texCoord);
         renderTarget = bColor;
->>>>>>> master
     }
 }
 
