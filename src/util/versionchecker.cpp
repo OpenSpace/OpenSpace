@@ -132,7 +132,7 @@ void VersionChecker::cancel() {
 }
 
  VersionChecker::SemanticVersion VersionChecker::latestVersion() {
-    return _latestVersion.value();
+    return *_latestVersion;
 }
 
 bool operator<(const VersionChecker::SemanticVersion a,

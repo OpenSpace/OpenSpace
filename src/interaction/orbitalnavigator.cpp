@@ -424,7 +424,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
     const glm::dvec3 anchorDisplacement = _previousAnchorNodePosition.has_value() ?
-        (anchorPos - _previousAnchorNodePosition.value()) :
+        (anchorPos - *_previousAnchorNodePosition) :
         glm::dvec3(0.0);
 
     CameraPose pose = {
@@ -464,10 +464,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (_aimNode && _aimNode != _anchorNode && hasPreviousPositions) {
         const glm::dvec3 aimPos = _aimNode->worldPosition();
         const glm::dvec3 cameraToAnchor =
-            _previousAnchorNodePosition.value() - prevCameraPosition;
+            *_previousAnchorNodePosition - prevCameraPosition;
 
         Displacement anchorToAim = {
-            _previousAimNodePosition.value() - _previousAnchorNodePosition.value(),
+            *_previousAimNodePosition - *_previousAnchorNodePosition,
             aimPos - anchorPos
         };
 
@@ -502,7 +502,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         glm::quat_cast(_anchorNode->worldRotationMatrix());
 
     glm::dquat anchorNodeRotationDiff = _previousAnchorNodeRotation.has_value() ?
-        _previousAnchorNodeRotation.value() * glm::inverse(anchorRotation) :
+        *_previousAnchorNodeRotation * glm::inverse(anchorRotation) :
         glm::dquat();
 
     _previousAnchorNodeRotation = anchorRotation;

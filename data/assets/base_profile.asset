@@ -15,7 +15,6 @@ asset.require('util/default_joystick')
 
 -- Load web gui
 asset.require('util/webgui')
-asset.request('customization/globebrowsing')
 
 asset.onInitialize(function ()
     openspace.setDefaultGuiSorting()

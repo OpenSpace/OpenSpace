@@ -50,7 +50,7 @@ namespace openspace::scripting {
  */
 class ScriptEngine : public Syncable, public DocumentationGenerator {
 public:
-    using ScriptCallback = std::optional<std::function<void(ghoul::Dictionary)>>;
+    using ScriptCallback = std::function<void(ghoul::Dictionary)>;
     BooleanType(RemoteScripting);
 
     struct QueueItem {

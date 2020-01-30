@@ -77,7 +77,7 @@ ghoul::Dictionary NavigationHandler::NavigationState::dictionary() const {
         cameraDict.setValue(KeyAim, aim);
     }
     if (up.has_value()) {
-        cameraDict.setValue(KeyUp, up.value());
+        cameraDict.setValue(KeyUp, *up);
 
         if (std::abs(yaw) > Epsilon) {
             cameraDict.setValue(KeyYaw, yaw);
@@ -213,7 +213,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
     if (_pendingNavigationState.has_value()) {
-        applyNavigationState(_pendingNavigationState.value());
+        applyNavigationState(*_pendingNavigationState);
         _orbitalNavigator.resetVelocities();
         _pendingNavigationState.reset();
     }
@@ -269,7 +269,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
 
     glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(referenceFrameTransform * ns.up.value()) :
+        glm::normalize(referenceFrameTransform * *ns.up) :
         glm::dvec3(0.0, 1.0, 0.0);
 
     // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
