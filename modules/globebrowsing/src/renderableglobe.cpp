@@ -517,7 +517,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseHardShadowsInfo, false),
         BoolProperty(ShadowMappingInfo, false),
         FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
-        IntProperty(NumberShadowSamplesInfo, 5, 1, 20),
+        IntProperty(NumberShadowSamplesInfo, 5, 1, 7),
         FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
