@@ -86,6 +86,13 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             {},
             "string",
             "Read an input file with lua instructions and use those to generate a camera path. TODO: Describe how a path instruction is defined?. " //TODO also make this one start path from file
+        },
+        {
+            "getPathPositions",
+            &autonavigation::luascriptfunctions::getPathPositions,
+            {},
+            "number",
+            "TODO: " 
         }
     };
     return res;  

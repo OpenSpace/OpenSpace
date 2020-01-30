@@ -168,4 +168,37 @@ namespace openspace::autonavigation::luascriptfunctions {
         return 0;
     }
 
+    int getPathPositions(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathPositions");
+
+        const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
+
+        // Get sample positions from the current curve
+        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationHandler& handler = module->AutoNavigationHandler();
+        std::vector<glm::dvec3> points = handler.getCurvePositions(pointsPerSegment);
+
+        // Push the points to the Lua stack:
+        lua_settop(L, 0);
+        const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
+            lua_newtable(L);
+            ghoul::lua::push(L, 1, v.x);
+            lua_rawset(L, -3);
+            ghoul::lua::push(L, 2, v.y);
+            lua_rawset(L, -3);
+            ghoul::lua::push(L, 3, v.z);
+            lua_rawset(L, -3);
+        };
+
+        lua_newtable(L);
+        for (int i = 0; i < points.size(); ++i) {
+            ghoul::lua::push(L, i);
+            pushVector(L, points[i]);
+            lua_rawset(L, -3);
+        }
+
+        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+        return 1;
+    }
+
 } // namespace openspace::autonavigation::luascriptfunctions

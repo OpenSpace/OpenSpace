@@ -54,7 +54,7 @@ public:
     const double pathDuration() const;
     const bool hasFinished() const;
     const int currentPathSegmentIndex() const;
-    CameraState currentCameraState();
+    CameraState currentCameraState();         
 
     void updateCamera(double deltaTime);
     void createPath(PathSpecification& spec);
@@ -63,6 +63,8 @@ public:
     void pausePath();
     void continuePath();
     void stopPath();
+
+    std::vector<glm::dvec3> getCurvePositions(int nPerSegment);
 
 private:
     bool handleInstruction(const Instruction& instruction, int index);

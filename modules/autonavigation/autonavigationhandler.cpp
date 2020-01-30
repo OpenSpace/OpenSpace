@@ -240,6 +240,26 @@ void AutoNavigationHandler::stopPath() {
     _isPlaying = false;
 }
 
+std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment) {
+    std::vector<glm::dvec3> positions;
+
+    if (_pathSegments.empty()) {
+        LERROR("There is no current path to sample points from.");
+        return positions;
+    }
+
+    const double dt = 1.0 / nPerSegment;
+
+    for (PathSegment &p : _pathSegments) {
+        for (double t = 0.0; t < 1.0; t += dt) {
+            auto position = p.getPositionAt(t);
+            positions.push_back(position);
+        }
+    }
+
+    return positions;
+}
+
 bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index) {
     bool success = true;
     switch (instruction.type)
