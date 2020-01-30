@@ -565,6 +565,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.nShadowSamples);
+    _generalProperties.nShadowSamples.onChange([&]() {
+        _shadersNeedRecompilation = true;
+    });
     addPropertySubOwner(_shadowMappingPropertyOwner);
 
     _generalProperties.targetLodScaleFactor.onChange([this]() {
@@ -1330,7 +1333,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
-        program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
+        //program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
@@ -1458,7 +1461,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
-        program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
+        //program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
@@ -1725,6 +1728,9 @@ void RenderableGlobe::recompileShaders() {
     {
         shaderDictionary.setValue(p.first, p.second);
     }
+
+    // Shadow Mapping Samples
+    shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
     //
     // Create local shader
