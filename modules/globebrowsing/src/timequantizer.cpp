@@ -48,6 +48,8 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
 
     char* p;
     double value = strtol(numberString.c_str(), &p, 10);
+    _resolutionValue = value;
+    _resolutionUnit = unit;
     if (*p) { // not a number
         throw ghoul::RuntimeError("Cannot convert " + numberString + " to number");
     }
@@ -122,6 +124,66 @@ std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) c
     }
 
     return result;
+}
+
+bool TimeQuantizer::quantize2(Time& t, bool clamp) const {
+    const double unquantized = t.j2000Seconds();
+    if (_timerange.includes(unquantized)) {
+        switch (_resolutionUnit) {
+        case 'y':
+            incrementYear(_dt, const Time& start, const Time& simTime);
+            break;
+
+        default:
+            break;
+        }
+        t.setTime(_dt.ISO8601());
+        return true;
+    }
+    else if (clamp) {
+        const double clampedTime = glm::clamp(
+            unquantized,
+            _timerange.start,
+            _timerange.end
+        );
+        t.setTime(clampedTime);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+DateTime::DateTime(std::string initDateTime) {
+    year = std::stoi(initDateTime.substr(index_year, len_year));
+    month = std::stoi(initDateTime.substr(index_month, len_nonYear));
+    day = std::stoi(initDateTime.substr(index_day, len_nonYear));
+    hour = std::stoi(initDateTime.substr(index_hour, len_nonYear));
+    minute = std::stoi(initDateTime.substr(index_minute, len_nonYear));
+    second = std::stoi(initDateTime.substr(index_second, len_nonYear));
+};
+
+std::string DateTime::ISO8601() {
+    char str[19];
+    snprintf(str + index_year, len_year + 1, "%04d-", year);
+    snprintf(str + index_month, len_nonYear + 1, "%02d-", month);
+    snprintf(str + index_day, len_nonYear + 1, "%02dT", day);
+    snprintf(str + index_hour, len_nonYear + 1, "%02d:", hour);
+    snprintf(str + index_minute, len_nonYear + 1, "%02d:", minute);
+    snprintf(str + index_second, len_nonYear, "%02d", second);
+    return std::string(str);
+};
+
+void DateTime::incrementYear(double start, double unquantizedTime, double resolution) {
+    double quantized = std::floor((unquantizedTime - start) / resolution);
+    int incYears = static_cast<int>(quantized);
+    double remainder = quantized - static_cast<double>(incYears);
+    year += incYears;
+};
+
+void TimeQuantizer::incrementYear(DateTime& dt, const Time& start, const Time& simTime) {
+    dt.incrementYear(start.j2000Seconds(), simTime.j2000Seconds(),
+        parseTimeResolutionStr("1y"));
 }
 
 } // namespace openspace::globebrowsing

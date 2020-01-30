@@ -73,9 +73,41 @@ struct TimeQuantizer {
     */
     std::vector<Time> quantized(const Time& start, const Time& end) const;
 
+    bool quantize2(Time& t, bool clamp) const;
+    void incrementYear(DateTime& dt, const Time& start, const Time& simTime);
+
 private:
     TimeRange _timerange;
     double _resolution;
+    double _resolutionValue;
+    char _resolutionUnit;
+    DateTime _dt;
+};
+
+struct DateTime {
+    DateTime(std::string initDateTime);
+
+    std::string ISO8601();
+
+    void incrementYear(double start, double unquantizedTime, double resolution);
+
+    const int index_year = 0;
+    const int index_month = 5;
+    const int index_day = 8;
+    const int index_hour = 11;
+    const int index_minute = 14;
+    const int index_second = 17;
+
+    const int len_year = 4;
+    const int len_nonYear = 2;
+
+private:
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
 };
 
 } // namespace openspace::globebrowsing
