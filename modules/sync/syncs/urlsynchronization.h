@@ -58,6 +58,7 @@ private:
     bool _forceOverride = false;
     std::string _synchronizationRoot;
     std::string _identifier;
+    std::string _filename;
 
     std::atomic_bool _nTotalBytesKnown = false;
     std::atomic_size_t _nTotalBytes = 0;

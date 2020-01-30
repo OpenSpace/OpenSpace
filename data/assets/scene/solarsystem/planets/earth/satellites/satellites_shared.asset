@@ -8,17 +8,77 @@ local satImageFolder = asset.syncedResource({
     Version = 1
 })
 
-function downloadTLEFile(sceneAsset, url, name)
+function downloadTLEFile(sceneAsset, url, name, filename)
     local identifier = name
     identifier = identifier:gsub(" ", "")
     identifier = identifier:gsub("&", "")
     identifier = identifier:gsub("-", "")
-    return sceneAsset.syncedResource({
+
+    local resTable = {
         Name = "Satellite TLE Data (" .. name .. ")",
         Type = "UrlSynchronization",
         Identifier = "satellite_tle_data_" .. identifier,
         Url = url
-    })
+    }
+
+    if (filename ~= '')  then
+        resTable.Filename = filename
+    end
+
+    return sceneAsset.syncedResource(resTable)
+end
+
+-- Check format of a set of 3 TLE file lines and return nonzero if there is a format error
+function isValidTLEFileFormat(lineArr)
+    function isEmpty(s) return s == nil or s == '' end
+
+    if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
+        return false
+    end
+    if string.sub(lineArr[2], 1, 2) ~= "1 " then
+        return false
+    end
+    if string.sub(lineArr[3], 1, 2) ~= "2 " then
+        return false
+    end
+    return true
+end
+
+local makeSingleLineElement = function(tle, filename)
+  local path = tle .. "\\" .. filename
+  local file = io.open(path, "r")
+  assert(file, "File not found: " .. path)
+
+    local line = {
+    file:read('*l'), --title line
+    file:read('*l'),
+    file:read('*l')
+  }
+
+  assert(isValidTLEFileFormat(line), "TLE file syntax error on line " .. 1 .. ": " .. path)
+
+  -- Trim string
+  line[1] = line[1]:gsub("^%s*(.-)%s*$", "%1")
+  line[1] = line[1]:gsub("%s+", "_")
+  line[1] = line[1]:gsub("[%-()]", "")
+  --local title = line[1]
+
+  return line
+end
+
+function numLinesInFile(filename)
+    local ctr = 0
+    for _ in io.lines(filename) do ctr = ctr + 1 end
+    return ctr
+end
+
+local getPeriodFromElement = function(element)
+  -- Get period from correct location of the string
+  local per = tonumber(string.sub(element[3], 53, 63))
+  -- Trail for 2x a single revolution
+  per = 1.0 / per * 2.0
+
+  return per
 end
 
 local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder, shouldAddDuplicates)
@@ -26,28 +86,6 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
      local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
 
      local path = tleFolder .. "/" .. filename
-
-    function numLinesInFile(filename)
-        local ctr = 0
-        for _ in io.lines(filename) do ctr = ctr + 1 end
-        return ctr
-    end
-
-    -- Check format of a set of 3 TLE file lines and return nonzero if there is a format error
-    function isValidTLEFileFormat(lineArr)
-        function isEmpty(s) return s == nil or s == '' end
-
-        if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
-            return false
-        end
-        if string.sub(lineArr[2], 1, 2) ~= "1 " then
-            return false
-        end
-        if string.sub(lineArr[3], 1, 2) ~= "2 " then
-            return false
-        end
-        return true
-    end
 
     function satellites(title, file, color)
         return {
@@ -72,4 +110,8 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
 end
 
 asset.export("downloadTLEFile", downloadTLEFile)
+asset.export("isValidTLEFileFormat", isValidTLEFileFormat)
+asset.export("numLinesInFile", numLinesInFile)
+asset.export("makeSingleLineElement", makeSingleLineElement)
+asset.export("getPeriodFromElement", getPeriodFromElement)
 asset.export("registerSatelliteGroupObjects", registerSatelliteGroupObjects)

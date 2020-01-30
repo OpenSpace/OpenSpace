@@ -1,11 +1,124 @@
 local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local satelliteHelper = asset.require('../satellites_shared')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-local group = {
-    Title = "ISS",
-    Url = "https://live.ariss.org/iss.txt",
-    TrailColor = { 0.0, 1.0, 0.0 }
-}
+local url = "https://celestrak.com/satcat/tle.php?CATNR=25544"
+local identifier = "ISS"
+local filename = "ISS.txt"
+local nodes = {}
 
-local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
-shared.registerSatelliteGroupObjects(asset, group, tle, true)
+local modelsLocation = asset.syncedResource({
+    Name = "ISS Models",
+    Type = "HttpSynchronization",
+    Identifier = "iss_model",
+    Version = 1
+})
+
+
+local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
+
+local initializeAndAddNodes = function()
+
+  local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
+  local period = satelliteHelper.getPeriodFromElement(lineElement)
+  local path = tle .. "\\" .. filename
+
+  local iss = {
+    Identifier = identifier,
+    Parent = transforms.EarthInertial.Identifier,
+    Transform = {
+      Translation = {
+        Type = "TLETranslation",
+        Body = identifier,
+        Observer = transforms.EarthInertial.Identifier,
+        File = path,
+        LineNumber = 1
+      },
+      Scale = {
+        Type = "StaticScale",
+        Scale = 1
+      }
+    },
+    Tag = { "earth_satellite", "ISS" },
+    GUI = {
+        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+    }
+  }
+
+  local issModel = {
+    Identifier = identifier .. "_model",
+    Parent = iss.Identifier,
+    Renderable = {
+      Type = "RenderableModel",
+      Geometry = {
+        Type = "MultiModelGeometry",
+        GeometryFile = modelsLocation .. "/iss.obj"
+      },
+      ColorTexture =  modelsLocation .. "/gray.png",
+      --ModelTransform = RotationMatrix,
+      LightSources = { 
+        {
+          Type = "SceneGraphLightSource",
+          Identifier = "Sun",
+          Node = sunTransforms.SolarSystemBarycenter.Identifier,
+          Intensity = 1.0
+        },
+        {
+          Type = "SceneGraphLightSource",
+          Identifier = "Earth",
+          Node = "Earth",
+          Intensity = 1.0
+        },
+        {
+          Identifier = "Camera",
+          Type = "CameraLightSource",
+           Intensity = 0.5
+        }
+      }
+    },
+    Tag = { "earth_satellite", "ISS" },
+    GUI = {
+      Path = "/Solar System/Planets/Earth/Satellites/ISS/Model"
+      }
+  }
+
+  local issTrail = {
+    Identifier = identifier .. "_trail",
+    Parent = transforms.EarthInertial.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+          Type = "TLETranslation",
+          Body = identifier,
+          Observer = transforms.EarthInertial.Identifier,
+          File = path,
+          LineNumber = 1
+        },
+        Color = { 0.9, 0.0, 0.0 },
+        Period = period,
+        Resolution = 160
+      },
+    Tag = { "earth_satellite", "ISS" },
+    GUI = {
+        Path = "/Solar System/Planets/Earth/Satellites/ISS/Trail"
+    }
+  }
+
+  local myNodes = { iss, issModel, issTrail }
+
+  for _, node in ipairs(myNodes) do
+    openspace.addSceneGraphNode(node)
+  end
+
+  return myNodes
+end
+
+asset.onInitialize(function ()
+  nodes = initializeAndAddNodes()
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(nodes[3].Identifier) -- Removing trail
+  openspace.removeSceneGraphNode(nodes[1].Identifier) -- Removing ISS and model recursively
+end)
