@@ -77,6 +77,7 @@ public:
 private:
     void loadTexture();
     void createPlane();
+    void compileShadowShader();
 
     properties::StringProperty _texturePath;
     properties::FloatProperty _size;
@@ -90,8 +91,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, nShadowSamples,
-        zFightingPercentage
+        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture)  
         _geomUniformCache;
