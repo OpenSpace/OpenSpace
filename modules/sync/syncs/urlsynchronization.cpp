@@ -203,6 +203,7 @@ void UrlSynchronization::start() {
                 const size_t lastSlash = url.find_last_of('/');
                 std::string lastPartOfUrl = url.substr(lastSlash + 1);
 
+                // We can not create filenames with questionmarks
                 lastPartOfUrl.erase(std::remove(lastPartOfUrl.begin(), lastPartOfUrl.end(), '?'), lastPartOfUrl.end());
 
                 std::size_t foundExt = lastPartOfUrl.find(ext);

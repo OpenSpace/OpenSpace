@@ -7,6 +7,7 @@ local url = "https://celestrak.com/satcat/tle.php?CATNR=25544"
 local identifier = "ISS"
 local filename = "ISS.txt"
 local nodes = {}
+local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
 
 local modelsLocation = asset.syncedResource({
     Name = "ISS Models",
@@ -15,8 +16,6 @@ local modelsLocation = asset.syncedResource({
     Version = 1
 })
 
-
-local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
 
 local initializeAndAddNodes = function()
 
