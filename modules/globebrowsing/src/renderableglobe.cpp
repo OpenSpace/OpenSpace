@@ -1333,7 +1333,6 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
-        //program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
@@ -1461,7 +1460,6 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
-        //program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
