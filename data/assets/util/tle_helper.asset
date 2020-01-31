@@ -81,31 +81,31 @@ local getPeriodFromElement = function(element)
   return per
 end
 
+function satellites(title, file, color, group)
+    return {
+       Identifier = title,
+       Parent = transforms.EarthInertial.Identifier,
+       Renderable = {
+            Type = "RenderableSatellites",
+            Path = file,
+            Segments = 120,
+            Color = color,
+            Fade = 0.5
+        },
+        Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
+        GUI = {
+            Path = "/Solar System/Planets/Earth/Satellites"
+       }
+    }
+end
+
 local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder, shouldAddDuplicates)
      local filename = group.Url:match("([^/]+)$")
      local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
 
      local path = tleFolder .. "/" .. filename
 
-    function satellites(title, file, color)
-        return {
-           Identifier = title,
-           Parent = transforms.EarthInertial.Identifier,
-           Renderable = {
-                Type = "RenderableSatellites",
-                Path = file,
-                Segments = 120,
-                Color = color,
-                Fade = 0.5
-            },
-            --Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
-            GUI = {
-                Path = "/Solar System/Planets/Earth/Satellites"
-           }
-        }
-    end
-
-    local SatelliteBatch = satellites(filenameSansExt, path, group.TrailColor)
+    local SatelliteBatch = satellites(filenameSansExt, path, group.TrailColor, group)
     assetHelper.registerSceneGraphNodesAndExport(containingAsset, { SatelliteBatch })
 end
 
