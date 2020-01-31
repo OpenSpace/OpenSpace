@@ -39,7 +39,6 @@ uniform float transparency;
 
 uniform vec3 sunPosition;
 uniform float _nightFactor;
-//uniform int nShadowSamples;
 uniform float zFightingPercentage;
 
 // temp
@@ -87,7 +86,6 @@ Fragment getFragment() {
         normalizedShadowCoords.w    = 1.0;
         
         float sum = 0;
-        //for (int i = 0; i < NSSamples; ++i) {
         #for i in 0..#{nShadowSamples}
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
@@ -97,7 +95,6 @@ Fragment getFragment() {
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
-        //}
         #endfor
         sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
         shadow = clamp(sum / (8.0 * NSSamples + 1.f), 0.35, 1.0);

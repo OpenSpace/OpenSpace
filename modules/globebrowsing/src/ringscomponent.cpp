@@ -325,7 +325,6 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.transparency, _transparency);
         _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
         _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-        //_shader->setUniform(_uniformCache.nShadowSamples, _nShadowSamples);
         _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
         
         ringTextureUnit.activate();
@@ -376,7 +375,6 @@ void RingsComponent::draw(const RenderData& data,
 
 void RingsComponent::update(const UpdateData& data) {
     if (_shader->isDirty()) {
-        //_shader->rebuildFromFile();
         compileShadowShader();
     }
 

@@ -66,7 +66,6 @@ uniform float orenNayarRoughness;
 
 in vec4 shadowCoords;
 uniform sampler2DShadow shadowMapTexture;
-//uniform int nShadowSamples;
 uniform float zFightingPercentage;
 #endif
 
@@ -278,19 +277,6 @@ Fragment getFragment() {
         normalizedShadowCoords.w    = 1.0;
 
         float sum = 0;
-        // for (int i = 0; i < nShadowSamples; ++i) {
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i, -nShadowSamples + i));
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  0));
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-nShadowSamples + i,  nShadowSamples - i));
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 , -nShadowSamples + i));
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0                 ,  nShadowSamples - i));
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i, -nShadowSamples + i));
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  0));
-        //     sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( nShadowSamples - i,  nShadowSamples - i));
-        // }
-        // sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
-        // shadow = sum / (8.0 * nShadowSamples + 1.f);
-
         #for i in 0..#{nShadowSamples}
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
@@ -300,7 +286,6 @@ Fragment getFragment() {
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
             sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
-        //}
         #endfor
         sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
         shadow = sum / (8.0 * NSSamples + 1.f);
