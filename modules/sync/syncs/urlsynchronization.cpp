@@ -46,7 +46,7 @@ namespace {
     constexpr const char* KeyFilename = "Filename";
 
     constexpr const char* TempSuffix = ".tmp";
-    constexpr const char* ext = ".txt";
+    constexpr const char* FileSuffix = ".txt";
 } // namespace
 
 namespace openspace {
@@ -97,8 +97,8 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 KeyFilename,
                 new StringVerifier,
                 Optional::Yes,
-                "Optional to provide filename to override the one which is automatically "
-                "created from the url. "
+                "Optional to provide filename to override the one which is otherwise "
+                "automatically created from the url. "
             }
         }
     };
@@ -128,9 +128,9 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
 
     if (dict.hasValue<std::string>(KeyFilename)) {
         _filename = dict.value<std::string>(KeyFilename);
-        std::size_t foundExt = _filename.find(ext);
+        std::size_t foundExt = _filename.find(FileSuffix);
         if (foundExt == std::string::npos) {
-            _filename += ext;
+            _filename += FileSuffix;
         }
     }
 
@@ -206,9 +206,9 @@ void UrlSynchronization::start() {
                 // We can not create filenames with questionmarks
                 lastPartOfUrl.erase(std::remove(lastPartOfUrl.begin(), lastPartOfUrl.end(), '?'), lastPartOfUrl.end());
 
-                std::size_t foundExt = lastPartOfUrl.find(ext);
+                std::size_t foundExt = lastPartOfUrl.find(FileSuffix);
                 if (foundExt == std::string::npos) {
-                    lastPartOfUrl += ext;
+                    lastPartOfUrl += FileSuffix;
                 }
                 _filename = lastPartOfUrl;
             }
