@@ -37,8 +37,7 @@ TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
     : _start(start)
     , _resolution(resolution)
 {
-    _timerange.setStart(start);
-    _timerange.setEnd(end);
+    setStartEndRange(start, end);
 }
 
 TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
@@ -60,6 +59,16 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
     else {
         return computeSecondsFromResolution(value, unit);
     }
+}
+
+void TimeQuantizer::setStartEndRange(const std::string& start, const std::string& end) {
+    _start.setTime(start);
+    _timerange.setStart(start);
+    _timerange.setEnd(end);
+}
+
+void TimeQuantizer::setResolution(const std::string& resolutionString) {
+    _resolution = parseTimeResolutionStr(resolutionString);
 }
 
 double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char unit) {
@@ -95,7 +104,7 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
     return value;
 }
 
-bool TimeQuantizer::quantize(Time& t, bool clamp) const {
+bool TimeQuantizer::quantize(Time& t, bool clamp) {
     const std::string unquantized = t.ISO8601();
     DateTime unquantizedDt(unquantized);
     double error = 0.0;
@@ -103,16 +112,16 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) const {
     if (_timerange.includes(unquantized)) {
         DateTime quantized = DateTime(_timerange.start());
         doFastForwardApproximation(quantized, _resolutionValue, _resolutionUnit);
-        while (error = diff(quantized, unquantized) > 0 && error > _resolution) {
+        while (error = diff(quantized, unquantizedDt) > 0 && error > _resolution) {
             if (error > _resolution) {
                 quantized.increment(_resolutionValue, _resolutionUnit);
             }
             else {
-                quantized.decrement();
+                quantized.decrement(_resolutionValue, _resolutionUnit);
             }
         }
-        quantized = _timerange.clamp(quantized.ISO8601());
-        t.setTime(quantized);
+        quantized.setTime(_timerange.clamp(quantized.ISO8601()));
+        t.setTime(quantized.J2000());
         return true;
     }
     else if (clamp) {
@@ -173,36 +182,43 @@ void TimeQuantizer::doFastForwardApproximation(DateTime& dt, double value, char 
 
 }
 
-std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) const {
-    Time s = start;
-    quantize(s, true);
+std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
+    DateTime s(start.ISO8601());
+    quantize(start, true);
 
-    Time e = end;
-    quantize(e, true);
+    DateTime e(end.ISO8601());
+    quantize(end, true);
 
-    const double startSeconds = s.j2000Seconds();
-    const double endSeconds = e.j2000Seconds();
+    const double startSeconds = s.J2000();
+    const double endSeconds = e.J2000();
     const double delta = endSeconds - startSeconds;
 
     ghoul_assert(int(delta) % int(_resolution) == 0, "Quantization error");
     const int nSteps = static_cast<int>(delta / _resolution);
 
-    std::vector<Time> result(nSteps + 1);
-    for (int i = 0; i <= nSteps; ++i) {
-        result[i].setTime(startSeconds + i * _resolution);
+    std::vector<std::string> result;
+    DateTime itr = s;
+    RangedTime range(start.ISO8601(), end.ISO8601());
+    while (range.includes(itr.ISO8601())) {
+        itr.increment(_resolutionValue, _resolutionUnit);
+        result.push_back(itr.ISO8601());
     }
 
     return result;
 }
 
 DateTime::DateTime(std::string initDateTime) {
-    _year = std::stoi(initDateTime.substr(index_year, len_year));
-    _month = std::stoi(initDateTime.substr(index_month, len_nonYear));
-    _day = std::stoi(initDateTime.substr(index_day, len_nonYear));
-    _hour = std::stoi(initDateTime.substr(index_hour, len_nonYear));
-    _minute = std::stoi(initDateTime.substr(index_minute, len_nonYear));
-    _second = std::stoi(initDateTime.substr(index_second, len_nonYear));
+    setTime(initDateTime);
 };
+
+void DateTime::setTime(const std::string& input) {
+    _year = std::stoi(input.substr(index_year, len_year));
+    _month = std::stoi(input.substr(index_month, len_nonYear));
+    _day = std::stoi(input.substr(index_day, len_nonYear));
+    _hour = std::stoi(input.substr(index_hour, len_nonYear));
+    _minute = std::stoi(input.substr(index_minute, len_nonYear));
+    _second = std::stoi(input.substr(index_second, len_nonYear));
+}
 
 std::string DateTime::ISO8601() {
     char str[19];
@@ -221,7 +237,7 @@ double DateTime::J2000() {
     return t.j2000Seconds();
 }
 
-void DateTime::operator= (const DateTime& src) {
+void DateTime::operator= (DateTime& src) {
     _year = src.year();
     _month = src.month();
     _day = src.day();

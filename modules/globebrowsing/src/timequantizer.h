@@ -33,78 +33,85 @@ namespace openspace { class Time; }
 
 namespace openspace::globebrowsing {
 
-    class RangedTime {
-    public:
-        RangedTime() {};
-        RangedTime(const std::string start, const std::string end);
-        bool includes(const std::string& checkTime);
-        std::string clamp(const std::string& checkTime);
-        std::string start();
-        std::string end();
-        void setStart(const std::string start);
-        void setEnd(const std::string start);
+class RangedTime {
+public:
+    RangedTime() {};
+    RangedTime(const std::string start, const std::string end);
+    bool includes(const std::string& checkTime);
+    std::string clamp(const std::string& checkTime);
+    std::string start();
+    std::string end();
+    void setStart(const std::string start);
+    void setEnd(const std::string start);
 
-    private:
-        std::string _start;
-        std::string _end;
-        double _startJ2000;
-        double _endJ2000;
-    };
+private:
+    std::string _start;
+    std::string _end;
+    double _startJ2000;
+    double _endJ2000;
+};
 
-    class DateTime {
-    public:
-        DateTime() {};
-        DateTime(std::string initDateTime);
-        void operator= (const DateTime& src);
+class DateTime {
+public:
+    DateTime() {};
+    DateTime(std::string initDateTime);
+    void setTime(const std::string& input);
+    void operator= (DateTime& src);
 
-        std::string ISO8601();
-        double J2000();
-        void increment(int value, char unit);
-        void decrement(int value, char unit);
-        bool singleIncrement(int& oper, int& val, int min, int max);
-        bool singleDecrement(int& oper, int& val, int min, int max);
-        int monthSize(int month, int year);
+    std::string ISO8601();
+    double J2000();
 
-        int year();
-        int month();
-        int day();
-        int hour();
-        int minute();
-        int second();
-        void setYear(int);
-        void setMonth(int);
-        void setDay(int);
-        void setHour(int);
-        void setMinute(int);
-        void setSecond(int);
+    int year();
+    int month();
+    int day();
+    int hour();
+    int minute();
+    int second();
+    void setYear(int);
+    void setMonth(int);
+    void setDay(int);
+    void setHour(int);
+    void setMinute(int);
+    void setSecond(int);
 
-        const int index_year = 0;
-        const int index_month = 5;
-        const int index_day = 8;
-        const int index_hour = 11;
-        const int index_minute = 14;
-        const int index_second = 17;
+    void increment(int value, char unit);
+    void decrement(int value, char unit);
 
-        const int len_year = 4;
-        const int len_nonYear = 2;
+private:
+    bool singleIncrement(int& oper, int& val, int min, int max);
+    bool singleDecrement(int& oper, int& val, int min, int max);
+    int monthSize(int month, int year);
 
-    private:
-        int _year;
-        int _month;
-        int _day;
-        int _hour;
-        int _minute;
-        int _second;
-    };
+    const int index_year = 0;
+    const int index_month = 5;
+    const int index_day = 8;
+    const int index_hour = 11;
+    const int index_minute = 14;
+    const int index_second = 17;
+
+    const int len_year = 4;
+    const int len_nonYear = 2;
+
+    int _year = 2000;
+    int _month = 1;
+    int _day = 1;
+    int _hour = 0;
+    int _minute = 0;
+    int _second = 0;
+};
 
 /**
 * Used to quantize time to descrete values.
 */
 class TimeQuantizer {
+public:
     TimeQuantizer() = default;
     TimeQuantizer(const std::string& start, const std::string& end, double resolution);
     TimeQuantizer(const std::string& start, const std::string& end,
         const std::string& resolution);
+
+    void setStartEndRange(const std::string& start, const std::string& end);
+    void setResolution(const std::string& resolutionString);
 
     /**
     * Takes a time resulition string and parses it into a double
@@ -126,25 +133,23 @@ class TimeQuantizer {
     * \param clamp Whether or not time should be clamped if not t is in the time range
     * \return wether or not time was quantized
     */
-    bool quantize(Time& t, bool clamp) const;
+    bool quantize(Time& t, bool clamp);
 
     /**
-    * Returns a list of quantized Time objects that represent all the valid quantized
-    * Time%s between \p start and \p end.
+    * Returns a list of quantized Time strings that represent all the valid quantized
+    * time%s between \p start and \p end.
     *
     * \param start The start time for the time range quantization
     * \param end The end time for the time range quantization
     * \return A list of quantized times between \p start and \end
     */
-    std::vector<Time> quantized(const Time& start, const Time& end) const;
-
-    double diff(DateTime& from, DateTime& to);
-
-    void doFastForwardApproximation(DateTime& dt, double value, char unit);
+    std::vector<std::string> quantized(Time& start, Time& end);
 
 private:
-    double computeSecondsFromResolution(const int valueIn, const char unit);
+    double diff(DateTime& from, DateTime& to);
+    void doFastForwardApproximation(DateTime& dt, double value, char unit);
     RangedTime _timerange;
+    double computeSecondsFromResolution(const int valueIn, const char unit);
     double _resolution = 0.0;
     double _resolutionValue = 0.0;
     char _resolutionUnit = 'd';
