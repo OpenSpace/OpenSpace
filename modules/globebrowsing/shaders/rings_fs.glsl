@@ -25,7 +25,8 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-#define NSSamples #{nShadowSamples}
+#define NSSamplesMinusOne #{nShadowSamples}
+#define NSSamples (NSSamplesMinusOne + 1)
 
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
@@ -43,6 +44,7 @@ uniform float zFightingPercentage;
 
 // temp
 in vec4 fragPosInLightSpace;
+
 
 Fragment getFragment() {
     // Moving the origin to the center
@@ -85,20 +87,22 @@ Fragment getFragment() {
         normalizedShadowCoords.w    = 1.0;
         
         float sum = 0;
-        for (int i = 0; i < NSSamples; ++i) {
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + i, -NSSamples + i));
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + i,  0));
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + i,  NSSamples - i));
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0            , -NSSamples + i));
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0            ,  NSSamples - i));
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - i, -NSSamples + i));
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - i,  0));
-            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - i,  NSSamples - i));
-        }
+        //for (int i = 0; i < NSSamples; ++i) {
+        #for i in 0..#{nShadowSamples}
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  NSSamples - #{i}));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               , -NSSamples + #{i}));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( 0               ,  NSSamples - #{i}));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
+            sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
+        //}
+        #endfor
         sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
-        shadow = sum / (8.0 * NSSamples + 1.f);
+        shadow = clamp(sum / (8.0 * NSSamples + 1.f), 0.35, 1.0);
     }
-    
+
     // The normal for the one plane depends on whether we are dealing
     // with a front facing or back facing fragment
     vec3 normal;
@@ -119,7 +123,7 @@ Fragment getFragment() {
 
     Fragment frag;
 
-    frag.color      = (0.65 * diffuse * shadow) + diffuse * 0.35;
+    frag.color      = diffuse * shadow;
     frag.depth      = vs_screenSpaceDepth;
     frag.gPosition  = vec4(1e30, 1e30, 1e30, 1.0);
     frag.gNormal    = vec4(normal, 1.0);

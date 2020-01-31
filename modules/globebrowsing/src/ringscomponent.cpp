@@ -176,7 +176,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
     , _enabled({ "Enabled", "Enabled", "Enable/Disable Rings" }, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
-    , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 20)
+    , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
     , _ringsDictionary(dictionary)
 {
     using ghoul::filesystem::File;
@@ -327,7 +327,7 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
         //_shader->setUniform(_uniformCache.nShadowSamples, _nShadowSamples);
         _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
-
+        
         ringTextureUnit.activate();
         _texture->bind();
         _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
@@ -475,9 +475,10 @@ void RingsComponent::createPlane() {
 
 void RingsComponent::compileShadowShader() {
     ghoul::Dictionary dict;
-    dict.setValue("nShadowSamples", std::to_string(_nShadowSamples.value()));
+    dict.setValue("nShadowSamples", std::to_string(_nShadowSamples - 1));
 
     try {
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = global::renderEngine.buildRenderProgram(
             "RingsProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
