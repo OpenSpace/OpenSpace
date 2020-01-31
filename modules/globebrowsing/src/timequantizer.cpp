@@ -32,12 +32,16 @@
 
 namespace openspace::globebrowsing {
 
-TimeQuantizer::TimeQuantizer(const Time& start, const Time& end, double resolution)
-    : _timerange(start.j2000Seconds(), end.j2000Seconds())
+TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
+    double resolution)
+    : _start(start)
     , _resolution(resolution)
-{}
+{
+    _timerange.setStart(start);
+    _timerange.setEnd(end);
+}
 
-TimeQuantizer::TimeQuantizer(const Time& start, const Time& end,
+TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
                              const std::string& resolution)
     : TimeQuantizer(start, end, parseTimeResolutionStr(resolution))
 {}
@@ -54,54 +58,119 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
         throw ghoul::RuntimeError("Cannot convert " + numberString + " to number");
     }
     else {
-        // convert value to seconds, based on unit.
-        // The switch statment has intentional fall throughs
-        switch (unit) {
-            case 'y':
-                value *= 365;
-                [[fallthrough]];
-            case 'd':
-                value *= 24.0;
-                [[fallthrough]];
-            case 'h': value *= 60.0;
-                [[fallthrough]];
-            case 'm':
-                value *= 60.0;
-                [[fallthrough]];
-            case 's':
-                value *= 1.0;
-                break;
-            default:
-                throw ghoul::RuntimeError(
-                    "Invalid unit format '" + std::string(1, unit) +
-                    "'. Expected 'y', 'd', 'h', 'm' or 's'."
-                );
-        }
-        return value;
+        return computeSecondsFromResolution(value, unit);
     }
 }
 
+double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char unit) {
+    double value = static_cast<double>(valueIn);
+    // convert value to seconds, based on unit.
+    // The switch statment has intentional fall throughs
+    switch (unit) {
+    case 'y':
+        value *= 365;
+        [[fallthrough]];
+    case 'd':
+        value *= 24.0;
+        [[fallthrough]];
+    case 'h': value *= 60.0;
+        [[fallthrough]];
+    case 'm':
+        value *= 60.0;
+        [[fallthrough]];
+    case 's':
+        value *= 1.0;
+        break;
+
+    case 'M':
+        value *= (30.4 * 24.0 * 60.0 * 60.0);
+        break;
+
+    default:
+        throw ghoul::RuntimeError(
+            "Invalid unit format '" + std::string(1, unit) +
+            "'. Expected 'y', 'd', 'h', 'm' or 's'."
+        );
+    }
+    return value;
+}
+
 bool TimeQuantizer::quantize(Time& t, bool clamp) const {
-    const double unquantized = t.j2000Seconds();
+    const std::string unquantized = t.ISO8601();
+    DateTime unquantizedDt(unquantized);
+    double error = 0.0;
+
     if (_timerange.includes(unquantized)) {
-        const double quantized = std::floor((unquantized - _timerange.start) /
-                                 _resolution) *
-                                 _resolution + _timerange.start;
+        DateTime quantized = DateTime(_timerange.start());
+        doFastForwardApproximation(quantized, _resolutionValue, _resolutionUnit);
+        while (error = diff(quantized, unquantized) > 0 && error > _resolution) {
+            if (error > _resolution) {
+                quantized.increment(_resolutionValue, _resolutionUnit);
+            }
+            else {
+                quantized.decrement();
+            }
+        }
+        quantized = _timerange.clamp(quantized.ISO8601());
         t.setTime(quantized);
         return true;
     }
     else if (clamp) {
-        const double clampedTime = glm::clamp(
-            unquantized,
-            _timerange.start,
-            _timerange.end
-        );
+        const std::string clampedTime = _timerange.clamp(unquantized);
         t.setTime(clampedTime);
         return true;
     }
     else {
         return false;
     }
+}
+
+double TimeQuantizer::diff(DateTime& from, DateTime& to) {
+    return to.J2000() - from.J2000();
+}
+
+void TimeQuantizer::doFastForwardApproximation(DateTime& dt, double value, char unit) {
+    switch (unit) {
+    case 'y':
+        _start.setYear(_start.year() + static_cast<int>((dt.year() - _start.year()) / unit));
+        break;
+
+    case 'M':
+        _start.setYear((dt.month() > unit) ? dt.year() : dt.year() - 1);
+        break;
+
+    case 'd':
+        if (dt.month() > 1) {
+            _start.setYear(dt.year());
+            _start.setMonth(dt.month() - 1);
+        }
+        else {
+            _start.setYear(dt.year() - 1);
+            _start.setMonth(12);
+        }
+        break;
+
+    case 'h':
+        _start = dt;
+        if (dt.hour() >= 12) {
+            _start.setHour(0);
+        }
+        else {
+            dt.decrement(1, 'd');
+        }
+        break;
+
+    case 'm':
+        _start = dt;
+        if (dt.hour() > 0) {
+            _start.setHour(dt.hour() - 1);
+        }
+        else {
+            dt.decrement(1, 'd');
+        }
+        break;
+    }
+
 }
 
 std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) const {
@@ -126,64 +195,235 @@ std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) c
     return result;
 }
 
-bool TimeQuantizer::quantize2(Time& t, bool clamp) const {
-    const double unquantized = t.j2000Seconds();
-    if (_timerange.includes(unquantized)) {
-        switch (_resolutionUnit) {
-        case 'y':
-            incrementYear(_dt, const Time& start, const Time& simTime);
-            break;
-
-        default:
-            break;
-        }
-        t.setTime(_dt.ISO8601());
-        return true;
-    }
-    else if (clamp) {
-        const double clampedTime = glm::clamp(
-            unquantized,
-            _timerange.start,
-            _timerange.end
-        );
-        t.setTime(clampedTime);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 DateTime::DateTime(std::string initDateTime) {
-    year = std::stoi(initDateTime.substr(index_year, len_year));
-    month = std::stoi(initDateTime.substr(index_month, len_nonYear));
-    day = std::stoi(initDateTime.substr(index_day, len_nonYear));
-    hour = std::stoi(initDateTime.substr(index_hour, len_nonYear));
-    minute = std::stoi(initDateTime.substr(index_minute, len_nonYear));
-    second = std::stoi(initDateTime.substr(index_second, len_nonYear));
+    _year = std::stoi(initDateTime.substr(index_year, len_year));
+    _month = std::stoi(initDateTime.substr(index_month, len_nonYear));
+    _day = std::stoi(initDateTime.substr(index_day, len_nonYear));
+    _hour = std::stoi(initDateTime.substr(index_hour, len_nonYear));
+    _minute = std::stoi(initDateTime.substr(index_minute, len_nonYear));
+    _second = std::stoi(initDateTime.substr(index_second, len_nonYear));
 };
 
 std::string DateTime::ISO8601() {
     char str[19];
-    snprintf(str + index_year, len_year + 1, "%04d-", year);
-    snprintf(str + index_month, len_nonYear + 1, "%02d-", month);
-    snprintf(str + index_day, len_nonYear + 1, "%02dT", day);
-    snprintf(str + index_hour, len_nonYear + 1, "%02d:", hour);
-    snprintf(str + index_minute, len_nonYear + 1, "%02d:", minute);
-    snprintf(str + index_second, len_nonYear, "%02d", second);
+    snprintf(str + index_year, len_year + 1, "%04d-", _year);
+    snprintf(str + index_month, len_nonYear + 1, "%02d-", _month);
+    snprintf(str + index_day, len_nonYear + 1, "%02dT", _day);
+    snprintf(str + index_hour, len_nonYear + 1, "%02d:", _hour);
+    snprintf(str + index_minute, len_nonYear + 1, "%02d:", _minute);
+    snprintf(str + index_second, len_nonYear, "%02d", _second);
     return std::string(str);
 };
 
-void DateTime::incrementYear(double start, double unquantizedTime, double resolution) {
-    double quantized = std::floor((unquantizedTime - start) / resolution);
-    int incYears = static_cast<int>(quantized);
-    double remainder = quantized - static_cast<double>(incYears);
-    year += incYears;
-};
+double DateTime::J2000() {
+    Time t;
+    t.setTime(ISO8601());
+    return t.j2000Seconds();
+}
 
-void TimeQuantizer::incrementYear(DateTime& dt, const Time& start, const Time& simTime) {
-    dt.incrementYear(start.j2000Seconds(), simTime.j2000Seconds(),
-        parseTimeResolutionStr("1y"));
+void DateTime::operator= (const DateTime& src) {
+    _year = src.year();
+    _month = src.month();
+    _day = src.day();
+    _hour = src.hour();
+    _minute = src.minute();
+    _second = src.second();
+}
+
+void DateTime::increment(int value, char unit) {
+    int min, max = 0;
+
+    switch (unit) {
+    case 'm':
+        if (singleIncrement(_minute, value, 0, 59))
+            break;
+        //fall-through...
+
+    case 'h':
+        if (singleIncrement(_hour, value, 0, 23))
+            break;
+        //fall-through...
+
+    case 'd':
+        if (singleIncrement(_day, value, 1, monthSize(_month, _year)))
+            break;
+        //fall-through...
+
+    case 'M':
+        if (singleIncrement(_minute, value, 1, 12))
+            break;
+        //fall-through...
+
+    case 'Y':
+        _year += value;
+        break;
+    }
+}
+
+bool DateTime::singleIncrement(int& oper, int& val, int min, int max) {
+    oper += val;
+    if (oper <= max) {
+        return true;
+    }
+    oper = oper - max - (1 - min);
+    //Only single increments for the less-significant units on rollover
+    val = 1;
+    return false;
+}
+
+void DateTime::decrement(int value, char unit) {
+    int min, max = 0;
+
+    switch (unit) {
+    case 'm':
+        if (singleDecrement(_minute, value, 0, 59))
+            break;
+        //fall-through...
+
+    case 'h':
+        if (singleDecrement(_hour, value, 0, 23))
+            break;
+        //fall-through...
+
+    case 'd':
+        if (singleDecrement(_day, value, 1, monthSize(_month, _year)))
+            break;
+        //fall-through...
+
+    case 'M':
+        if (singleDecrement(_minute, value, 1, 12))
+            break;
+        //fall-through...
+
+    case 'Y':
+        _year += value;
+        break;
+    }
+}
+
+bool DateTime::singleDecrement(int& oper, int& val, int min, int max) {
+    oper -= val;
+    if (oper >= min) {
+        return true;
+    }
+    oper = oper + max + (1 - min);
+    //Only single increments for the less-significant units on rollover
+    val = 1;
+    return false;
+}
+
+int DateTime::monthSize(int month, int year) {
+    bool leap = ((year - 2000) % 4) == 0;
+
+    switch (month) {
+    case 2:
+        return (leap) ? 29 : 28;
+        break;
+
+    case 4:
+    case 6:
+    case 9:
+    case 11:
+        return 30;
+
+    case 1:
+    case 3:
+    case 5:
+    case 7:
+    case 8:
+    case 10:
+    case 12:
+    default:
+        return 31;
+    }
+}
+
+int DateTime::year() {
+    return _year;
+}
+int DateTime::month() {
+    return _month;
+}
+int DateTime::day() {
+    return _day;
+}
+int DateTime::hour() {
+    return _hour;
+}
+int DateTime::minute() {
+    return _minute;
+}
+int DateTime::second() {
+    return _second;
+}
+
+void DateTime::setYear(int y) {
+    _year = y;
+}
+void DateTime::setMonth(int m) {
+    _month = m;
+}
+void DateTime::setDay(int d) {
+    _day = d;
+}
+void DateTime::setHour(int h) {
+    _hour = h;
+}
+void DateTime::setMinute(int m) {
+    _minute = m;
+}
+void DateTime::setSecond(int s) {
+    _second = (s > 0) ? ((s <= 59) ? s : 59) : 0;
+}
+
+RangedTime::RangedTime(const std::string start, const std::string end)
+    : _start(start),
+      _end(end)
+{
+    Time t1;
+    t1.setTime(start);
+    _startJ2000 = t1.j2000Seconds();
+    Time t2;
+    t2.setTime(start);
+    _endJ2000 = t2.j2000Seconds();
+}
+
+void RangedTime::setStart(const std::string start) {
+    _start = start;
+}
+
+void RangedTime::setEnd(const std::string end) {
+    _end = end;
+}
+
+bool RangedTime::includes(const std::string& checkTime) {
+    Time t;
+    t.setTime(checkTime);
+    double tj = t.j2000Seconds();
+    return (_startJ2000 <= tj && tj <= _endJ2000);
+}
+
+std::string RangedTime::clamp(const std::string& checkTime) {
+    Time t;
+    t.setTime(checkTime);
+    double tj = t.j2000Seconds();
+    if (tj < _startJ2000) {
+        return _start;
+    }
+    else if (tj > _endJ2000) {
+        return _end;
+    }
+    else {
+        return checkTime;
+    }
+}
+
+std::string RangedTime::start() {
+    return _start;
+}
+
+std::string RangedTime::end() {
+    return _end;
 }
 
 } // namespace openspace::globebrowsing

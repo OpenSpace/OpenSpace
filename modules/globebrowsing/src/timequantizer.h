@@ -33,13 +33,78 @@ namespace openspace { class Time; }
 
 namespace openspace::globebrowsing {
 
+    class RangedTime {
+    public:
+        RangedTime() {};
+        RangedTime(const std::string start, const std::string end);
+        bool includes(const std::string& checkTime);
+        std::string clamp(const std::string& checkTime);
+        std::string start();
+        std::string end();
+        void setStart(const std::string start);
+        void setEnd(const std::string start);
+
+    private:
+        std::string _start;
+        std::string _end;
+        double _startJ2000;
+        double _endJ2000;
+    };
+
+    class DateTime {
+    public:
+        DateTime() {};
+        DateTime(std::string initDateTime);
+        void operator= (const DateTime& src);
+
+        std::string ISO8601();
+        double J2000();
+        void increment(int value, char unit);
+        void decrement(int value, char unit);
+        bool singleIncrement(int& oper, int& val, int min, int max);
+        bool singleDecrement(int& oper, int& val, int min, int max);
+        int monthSize(int month, int year);
+
+        int year();
+        int month();
+        int day();
+        int hour();
+        int minute();
+        int second();
+        void setYear(int);
+        void setMonth(int);
+        void setDay(int);
+        void setHour(int);
+        void setMinute(int);
+        void setSecond(int);
+
+        const int index_year = 0;
+        const int index_month = 5;
+        const int index_day = 8;
+        const int index_hour = 11;
+        const int index_minute = 14;
+        const int index_second = 17;
+
+        const int len_year = 4;
+        const int len_nonYear = 2;
+
+    private:
+        int _year;
+        int _month;
+        int _day;
+        int _hour;
+        int _minute;
+        int _second;
+    };
+
 /**
 * Used to quantize time to descrete values.
 */
-struct TimeQuantizer {
+class TimeQuantizer {
     TimeQuantizer() = default;
-    TimeQuantizer(const Time& start, const Time& end, double resolution);
-    TimeQuantizer(const Time& start, const Time& end, const std::string& resolution);
+    TimeQuantizer(const std::string& start, const std::string& end, double resolution);
+    TimeQuantizer(const std::string& start, const std::string& end,
+        const std::string& resolution);
 
     /**
     * Takes a time resulition string and parses it into a double
@@ -51,7 +116,7 @@ struct TimeQuantizer {
     *        (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears
     * \return the time resolution in seconds
     */
-    static double parseTimeResolutionStr(const std::string& resolutionStr);
+    double parseTimeResolutionStr(const std::string& resolutionStr);
 
     /**
     * Quantizes a OpenSpace Time into descrete values. If the provided Time \p t is
@@ -73,41 +138,18 @@ struct TimeQuantizer {
     */
     std::vector<Time> quantized(const Time& start, const Time& end) const;
 
-    bool quantize2(Time& t, bool clamp) const;
-    void incrementYear(DateTime& dt, const Time& start, const Time& simTime);
+    double diff(DateTime& from, DateTime& to);
+
+    void doFastForwardApproximation(DateTime& dt, double value, char unit);
 
 private:
-    TimeRange _timerange;
-    double _resolution;
-    double _resolutionValue;
-    char _resolutionUnit;
+    double computeSecondsFromResolution(const int valueIn, const char unit);
+    RangedTime _timerange;
+    double _resolution = 0.0;
+    double _resolutionValue = 0.0;
+    char _resolutionUnit = 'd';
     DateTime _dt;
-};
-
-struct DateTime {
-    DateTime(std::string initDateTime);
-
-    std::string ISO8601();
-
-    void incrementYear(double start, double unquantizedTime, double resolution);
-
-    const int index_year = 0;
-    const int index_month = 5;
-    const int index_day = 8;
-    const int index_hour = 11;
-    const int index_minute = 14;
-    const int index_second = 17;
-
-    const int len_year = 4;
-    const int len_nonYear = 2;
-
-private:
-    int year;
-    int month;
-    int day;
-    int hour;
-    int minute;
-    int second;
+    DateTime _start;
 };
 
 } // namespace openspace::globebrowsing
