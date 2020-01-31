@@ -32,10 +32,6 @@ local initializeAndAddNodes = function()
         Observer = transforms.EarthInertial.Identifier,
         File = path,
         LineNumber = 1
-      },
-      Scale = {
-        Type = "StaticScale",
-        Scale = 1
       }
     },
     Tag = { "earth_satellite", "ISS" },
