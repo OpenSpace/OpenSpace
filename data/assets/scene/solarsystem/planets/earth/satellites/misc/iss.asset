@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local satelliteHelper = asset.require('../satellites_shared')
+local satelliteHelper = asset.require('util/tle_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
@@ -15,7 +15,6 @@ local modelsLocation = asset.syncedResource({
     Identifier = "iss_model",
     Version = 1
 })
-
 
 local initializeAndAddNodes = function()
 

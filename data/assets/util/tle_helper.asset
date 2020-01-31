@@ -14,7 +14,7 @@ function downloadTLEFile(sceneAsset, url, name, filename)
     identifier = identifier:gsub("&", "")
     identifier = identifier:gsub("-", "")
 
-    local resTable = {
+    local urlSyncTable = {
         Name = "Satellite TLE Data (" .. name .. ")",
         Type = "UrlSynchronization",
         Identifier = "satellite_tle_data_" .. identifier,
@@ -22,10 +22,10 @@ function downloadTLEFile(sceneAsset, url, name, filename)
     }
 
     if (filename ~= '')  then
-        resTable.Filename = filename
+        urlSyncTable.Filename = filename
     end
 
-    return sceneAsset.syncedResource(resTable)
+    return sceneAsset.syncedResource(urlSyncTable)
 end
 
 -- Check format of a set of 3 TLE file lines and return nonzero if there is a format error
