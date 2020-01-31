@@ -22,6 +22,10 @@ local initializeAndAddNodes = function()
   local period = satelliteHelper.getPeriodFromElement(lineElement)
   local path = tle .. "\\" .. filename
 
+-- TLE data is only relevant in EarthInertial frame which means the model
+-- will inherit some irrelevant rotations from its parent. To get around that
+-- we perform the reverse rotation back to EarthBarycenter frame after applying
+-- the TLE translation
   local iss = {
     Identifier = identifier,
     Parent = transforms.EarthInertial.Identifier,
@@ -32,17 +36,32 @@ local initializeAndAddNodes = function()
         Observer = transforms.EarthInertial.Identifier,
         File = path,
         LineNumber = 1
+      },
+      Rotation = {
+          Type = "SpiceRotation",
+          SourceFrame = "GALACTIC",
+          DestinationFrame = "J2000",
       }
     },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hiden = true
     }
   }
 
   local issModel = {
     Identifier = identifier .. "_model",
     Parent = iss.Identifier,
+    Transform = {
+      Rotation = {
+        Type = "FixedRotation",
+        Attached = "ISS_model",
+        XAxis = { 1.0, 0.0, 0.0 },
+        XAxisOrthogonal = true,
+        ZAxis = transforms.EarthInertial.Identifier
+      }
+    },
     Renderable = {
       Type = "RenderableModel",
       Geometry = {
@@ -50,31 +69,12 @@ local initializeAndAddNodes = function()
         GeometryFile = modelsLocation .. "/iss.obj"
       },
       ColorTexture =  modelsLocation .. "/gray.png",
-      --ModelTransform = RotationMatrix,
-      LightSources = { 
-        {
-          Type = "SceneGraphLightSource",
-          Identifier = "Sun",
-          Node = sunTransforms.SolarSystemBarycenter.Identifier,
-          Intensity = 1.0
-        },
-        {
-          Type = "SceneGraphLightSource",
-          Identifier = "Earth",
-          Node = "Earth",
-          Intensity = 1.0
-        },
-        {
-          Identifier = "Camera",
-          Type = "CameraLightSource",
-           Intensity = 0.5
-        }
-      }
+      LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
     },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-      Path = "/Solar System/Planets/Earth/Satellites/ISS/Model"
-      }
+      Path = "/Solar System/Planets/Earth/Satellites/ISS/ISS"
+    }
   }
 
   local issTrail = {
