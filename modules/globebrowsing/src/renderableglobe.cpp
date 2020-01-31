@@ -186,7 +186,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShadowMappingInfo = {
         "ShadowMapping",
-        "Shadow-Mapping",
+        "Shadow Mapping",
         "Enables shadow mapping algorithm. Used by renderable rings too."
     };
 
@@ -524,7 +524,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
         IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
     })
-    , _shadowMappingPropertyOwner({ "Shadow-Mapping" })
+    , _shadowMappingPropertyOwner({ "ShadowMapping" })
     , _debugPropertyOwner({ "Debug" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
