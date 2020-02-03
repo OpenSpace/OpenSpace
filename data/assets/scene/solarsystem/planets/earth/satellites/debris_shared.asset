@@ -1,13 +1,6 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local assetHelper = asset.require('util/asset_helper')
 
-local satImageFolder = asset.syncedResource({
-    Name = "Satellite Image Files",
-    Type = "HttpSynchronization",
-    Identifier = "tle_satellites_images",
-    Version = 1
-})
-
 function downloadTLEFile(sceneAsset, url, name)
     local identifier = name
     identifier = identifier:gsub(" ", "")
@@ -58,7 +51,7 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
                 Path = file,
                 Segments = 160,
                 Color = color,
-                Fade = 0.5                
+                Fade = 0.5
             },
             GUI = {
                 Path = "/Solar System/Planets/Earth/Satellites"
