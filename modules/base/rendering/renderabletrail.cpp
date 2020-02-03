@@ -249,6 +249,18 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
+#ifdef __APPLE__
+    _programObject = BaseModule::ProgramObjectManager.request(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine.buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
+            );
+        }
+    );
+#else
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -259,6 +271,7 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
+#endif
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 }
@@ -320,7 +333,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
+#ifdef __APPLE__
+        glLineWidth(1.f);
+#else
         glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+#endif
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
