@@ -58,7 +58,7 @@ public:
     const double duration() const;
     const double startTime() const;
 
-    const glm::vec3 getPositionAt(double t) const;
+    const glm::dvec3 getPositionAt(double t) const;
     const glm::dquat getRotationAt(double t) const;
     const glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up) const;
 

@@ -69,12 +69,14 @@ const double PathSegment::duration() const { return _duration; }
 
 const double PathSegment::startTime() const { return _startTime; }
 
-const glm::vec3 PathSegment::getPositionAt(double t) const {
+const glm::dvec3 PathSegment::getPositionAt(double t) const {
     t = easingfunctions::cubicEaseInOut(t);
     return _curve->valueAt(t);    
 }
 
 const glm::dquat PathSegment::getRotationAt(double t) const {
+    // TODO: improve how rotation is computed
+
     double tSlerp = helpers::shiftAndScale(t, 0.1, 0.9);
     tSlerp = easingfunctions::cubicEaseInOut(tSlerp);
 
