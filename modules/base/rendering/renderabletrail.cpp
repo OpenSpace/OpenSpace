@@ -255,7 +255,7 @@ void RenderableTrail::initializeGL() {
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine.buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
             );
         }
