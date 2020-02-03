@@ -240,6 +240,8 @@ void AutoNavigationHandler::stopPath() {
     _isPlaying = false;
 }
 
+// TODO: remove when not needed
+// Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment) {
     std::vector<glm::dvec3> positions;
 
@@ -258,6 +260,24 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
     }
 
     return positions;
+}
+
+// TODO: remove when not needed
+// Created for debugging
+std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
+    std::vector<glm::dvec3> points;
+
+    if (_pathSegments.empty()) {
+        LERROR("There is no current path to sample points from.");
+        return points;
+    }
+
+    for (PathSegment &p : _pathSegments) {
+        std::vector<glm::dvec3> curvePoints = p.getControlPoints();
+        points.insert(points.end(), curvePoints.begin(), curvePoints.end());
+    }
+
+    return points;
 }
 
 bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index) {

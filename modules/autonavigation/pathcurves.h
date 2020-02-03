@@ -36,6 +36,7 @@ class PathCurve {
 public:
     virtual ~PathCurve() = 0;
     virtual glm::dvec3 valueAt(double t) = 0;
+    std::vector<glm::dvec3> getPoints(); // for debugging
 
     double arcLength(double tLimit = 1.0);
 protected:

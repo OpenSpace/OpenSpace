@@ -64,7 +64,9 @@ public:
     void continuePath();
     void stopPath();
 
-    std::vector<glm::dvec3> getCurvePositions(int nPerSegment);
+    // TODO: remove functions for debugging
+    std::vector<glm::dvec3> getCurvePositions(int nPerSegment); //debug
+    std::vector<glm::dvec3> getControlPoints(); //debug
 
 private:
     bool handleInstruction(const Instruction& instruction, int index);
