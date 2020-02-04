@@ -36,8 +36,9 @@ TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
     double resolution)
     : _start(start)
     , _resolution(resolution)
+    , _timerange(start, end)
 {
-    setStartEndRange(start, end);
+    //setStartEndRange(start, end);
 }
 
 TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
@@ -57,7 +58,7 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
         throw ghoul::RuntimeError("Cannot convert " + numberString + " to number");
     }
     else {
-        return computeSecondsFromResolution(value, unit);
+        return computeSecondsFromResolution(static_cast<int>(value), unit);
     }
 }
 
@@ -108,16 +109,24 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     const std::string unquantized = t.ISO8601();
     DateTime unquantizedDt(unquantized);
     double error = 0.0;
+    const int iterationLimit = 50;
+    int iterations = 0;
 
     if (_timerange.includes(unquantized)) {
         DateTime quantized = DateTime(_timerange.start());
-        doFastForwardApproximation(quantized, _resolutionValue, _resolutionUnit);
-        while (error = diff(quantized, unquantizedDt) > 0 && error > _resolution) {
-            if (error > _resolution) {
-                quantized.increment(_resolutionValue, _resolutionUnit);
+        doFastForwardApproximation(quantized, unquantizedDt, _resolutionValue,
+            _resolutionUnit);
+        error = diff(quantized, unquantizedDt);
+        while (error > _resolution) {
+            if (error > 0) {
+                quantized.increment(static_cast<int>(_resolutionValue), _resolutionUnit);
             }
             else {
-                quantized.decrement(_resolutionValue, _resolutionUnit);
+                quantized.decrement(static_cast<int>(_resolutionValue), _resolutionUnit);
+            }
+            error = diff(quantized, unquantizedDt);
+            if (++iterations > iterationLimit) {
+                break;
             }
         }
         quantized.setTime(_timerange.clamp(quantized.ISO8601()));
@@ -138,48 +147,59 @@ double TimeQuantizer::diff(DateTime& from, DateTime& to) {
     return to.J2000() - from.J2000();
 }
 
-void TimeQuantizer::doFastForwardApproximation(DateTime& dt, double value, char unit) {
+void TimeQuantizer::doFastForwardApproximation(DateTime& quantized, DateTime& unQ,
+                                               double value, char unit)
+{
+    double minYearsToAdjust;
+    double minIncrementsToAdjust;
+    bool isSimMonthPastQuantizedMonth;
+
     switch (unit) {
     case 'y':
-        _start.setYear(_start.year() + static_cast<int>((dt.year() - _start.year()) / unit));
+        minYearsToAdjust = static_cast<double>(unQ.year()) -
+            static_cast<double>(_start.year());
+        minIncrementsToAdjust = minYearsToAdjust / value;
+        quantized.setYear(_start.year() + static_cast<int>(minIncrementsToAdjust));
         break;
 
     case 'M':
-        _start.setYear((dt.month() > unit) ? dt.year() : dt.year() - 1);
+        isSimMonthPastQuantizedMonth = unQ.month() > static_cast<int>(value);
+        quantized.setYear((isSimMonthPastQuantizedMonth) ? unQ.year() : unQ.year() - 1);
         break;
 
     case 'd':
-        if (dt.month() > 1) {
-            _start.setYear(dt.year());
-            _start.setMonth(dt.month() - 1);
+        if (unQ.month() > 1) {
+            quantized.setYear(unQ.year());
+            quantized.setMonth(unQ.month() - 1);
         }
         else {
-            _start.setYear(dt.year() - 1);
-            _start.setMonth(12);
+            quantized.setYear(unQ.year() - 1);
+            quantized.setMonth(12);
         }
         break;
 
     case 'h':
-        _start = dt;
-        if (dt.hour() >= 12) {
-            _start.setHour(0);
+        quantized = unQ;
+        quantized.setSecond(0);
+        if (unQ.hour() >= 12) {
+            quantized.setHour(0);
         }
         else {
-            dt.decrement(1, 'd');
+            quantized.decrement(1, 'd');
         }
         break;
 
     case 'm':
-        _start = dt;
-        if (dt.hour() > 0) {
-            _start.setHour(dt.hour() - 1);
+        quantized = unQ;
+        quantized.setSecond(0);
+        if (quantized.hour() > 0) {
+            quantized.decrement(1, 'h');
         }
         else {
-            dt.decrement(1, 'd');
+            quantized.decrement(1, 'd');
         }
         break;
     }
-
 }
 
 std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
@@ -200,7 +220,7 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
     DateTime itr = s;
     RangedTime range(start.ISO8601(), end.ISO8601());
     while (range.includes(itr.ISO8601())) {
-        itr.increment(_resolutionValue, _resolutionUnit);
+        itr.increment(static_cast<int>(_resolutionValue), _resolutionUnit);
         result.push_back(itr.ISO8601());
     }
 
@@ -247,8 +267,6 @@ void DateTime::operator= (DateTime& src) {
 }
 
 void DateTime::increment(int value, char unit) {
-    int min, max = 0;
-
     switch (unit) {
     case 'm':
         if (singleIncrement(_minute, value, 0, 59))
@@ -288,8 +306,6 @@ bool DateTime::singleIncrement(int& oper, int& val, int min, int max) {
 }
 
 void DateTime::decrement(int value, char unit) {
-    int min, max = 0;
-
     switch (unit) {
     case 'm':
         if (singleDecrement(_minute, value, 0, 59))

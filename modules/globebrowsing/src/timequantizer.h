@@ -147,7 +147,7 @@ public:
 
 private:
     double diff(DateTime& from, DateTime& to);
-    void doFastForwardApproximation(DateTime& dt, double value, char unit);
+    void doFastForwardApproximation(DateTime& q, DateTime& unQ, double value, char unit);
     RangedTime _timerange;
     double computeSecondsFromResolution(const int valueIn, const char unit);
     double _resolution = 0.0;
