@@ -49,6 +49,12 @@ double PathCurve::arcLength(double tLimit) {
     return sum;
 }
 
+// TODO: remove when not needed
+// Created for debugging
+std::vector<glm::dvec3> PathCurve::getPoints() {
+    return _points;
+}
+
 BezierCurve::BezierCurve(CameraState& start, CameraState& end) {
     glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
     glm::dvec3 endNodePos = sceneGraphNode(start.referenceNode)->worldPosition();

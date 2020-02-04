@@ -168,6 +168,8 @@ namespace openspace::autonavigation::luascriptfunctions {
         return 0;
     }
 
+    // TODO: remove when not needed
+    // Created for debugging. Access info for rendereable path
     int getPathPositions(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathPositions");
 
@@ -177,6 +179,39 @@ namespace openspace::autonavigation::luascriptfunctions {
         AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         std::vector<glm::dvec3> points = handler.getCurvePositions(pointsPerSegment);
+
+        // Push the points to the Lua stack:
+        lua_settop(L, 0);
+        const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
+            lua_newtable(L);
+            ghoul::lua::push(L, 1, v.x);
+            lua_rawset(L, -3);
+            ghoul::lua::push(L, 2, v.y);
+            lua_rawset(L, -3);
+            ghoul::lua::push(L, 3, v.z);
+            lua_rawset(L, -3);
+        };
+
+        lua_newtable(L);
+        for (int i = 0; i < points.size(); ++i) {
+            ghoul::lua::push(L, i);
+            pushVector(L, points[i]);
+            lua_rawset(L, -3);
+        }
+
+        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+        return 1;
+    }
+
+    // TODO: remove when not needed
+    // Created for debugging. Access info for rendering of control points
+    int getControlPoints(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getControlPoints");
+
+        // Get sample positions from the current curve
+        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationHandler& handler = module->AutoNavigationHandler();
+        std::vector<glm::dvec3> points = handler.getControlPoints();
 
         // Push the points to the Lua stack:
         lua_settop(L, 0);

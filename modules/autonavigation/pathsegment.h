@@ -58,6 +58,7 @@ public:
     const double duration() const;
     const double startTime() const;
 
+    const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
     const glm::dvec3 getPositionAt(double t) const;
     const glm::dquat getRotationAt(double t) const;
     const glm::dquat getLookAtRotation(double t, glm::dvec3 currentPos, glm::dvec3 up) const;

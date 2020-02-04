@@ -93,6 +93,13 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             {},
             "number",
             "TODO: " 
+        },
+        {
+            "getControlPoints",
+            &autonavigation::luascriptfunctions::getControlPoints,
+            {},
+            "",
+            "FOR DEBUG. Get control point positions from all pathsegments"
         }
     };
     return res;  

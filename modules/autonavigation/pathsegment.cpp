@@ -70,6 +70,11 @@ const double PathSegment::duration() const { return _duration; }
 
 const double PathSegment::startTime() const { return _startTime; }
 
+// TODO: remove function for debugging
+const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
+    return _curve->getPoints();
+}
+
 const glm::dvec3 PathSegment::getPositionAt(double t) const {
     t = ghoul::cubicEaseInOut(t); 
     return _curve->valueAt(t);    
