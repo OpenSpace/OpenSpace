@@ -72,6 +72,8 @@ class Translation;
 class RenderableTrail : public Renderable {
 public:
 
+const double DISTANCE_CULLING_RADII = 800.0;
+
 struct Appearance : properties::PropertyOwner {
         Appearance();
         /// Specifies the base color of the line before fading
@@ -182,7 +184,8 @@ private:
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
+        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase,
+        resolution, lineWidth) _uniformCache;
 };
 
 } // namespace openspace

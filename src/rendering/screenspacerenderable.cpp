@@ -515,7 +515,7 @@ float ScreenSpaceRenderable::depth() {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = global::windowDelegate.currentWindowResolution();
+    auto res = global::windowDelegate.currentDrawBufferResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
@@ -537,7 +537,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
 
     //to scale the plane
     float textureRatio =

@@ -74,18 +74,24 @@ BrowserInstance::~BrowserInstance() {
 
 void BrowserInstance::initialize() {
     reshape(static_cast<glm::ivec2>(
-        static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+        static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
         global::windowDelegate.dpiScaling()
     ));
     _isInitialized = true;
+    _shouldReshape = true;
 }
 
 void BrowserInstance::loadUrl(std::string url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
-    LDEBUG(fmt::format("Loading URL: {}", url));
-    CefString cefUrl = std::move(url);
-    _browser->GetMainFrame()->LoadURL(cefUrl);
+    if (!url.empty()) {
+        LDEBUG(fmt::format("Loading URL: {}", url));
+        CefString cefUrl = std::move(url);
+        _browser->GetMainFrame()->LoadURL(cefUrl);
+    }
+    else {
+        LWARNING("Provided browser URL is empty");
+    }
 }
 
 bool BrowserInstance::loadLocalPath(std::string path) {

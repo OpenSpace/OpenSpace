@@ -890,6 +890,11 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.currentSubwindowSize = []() {
         auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+        if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
+            sgct_core::Viewport* viewport =
+                sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+            return glm::ivec2(window->getXResolution()*viewport->getXSize(), window->getYResolution()*viewport->getYSize());
+        }
         switch (window->getStereoMode()) {
             case sgct::SGCTWindow::Side_By_Side_Stereo:
             case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
@@ -914,6 +919,12 @@ void setSgctDelegateFunctions() {
             if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
                 int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
                 return glm::ivec2(res, res);
+            }
+            else if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
+                int x, y;
+                auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+                window->getFinalFBODimensions(x, y);
+                return glm::ivec2(x*viewport->getXSize(), y*viewport->getYSize());
             }
             else {
                 int x, y;
@@ -943,16 +954,6 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.currentNumberOfAaSamples = []() {
         return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-    };
-    sgctDelegate.isRegularRendering = []() {
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
-        ghoul_assert(
-            w->getNumberOfViewports() > 0,
-            "At least one viewport must exist at this time"
-        );
-        sgct_core::Viewport* vp = w->getViewport(0);
-        sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();
-        return nlp == nullptr;
     };
     sgctDelegate.hasGuiWindow = []() {
         auto engine = sgct::Engine::instance();
@@ -1186,7 +1187,7 @@ int main(int argc, char** argv) {
             configurationFilePath
         );
 
-        // If the user requested a commandline-based configuation script that should
+        // If the user requested a commandline-based configuration script that should
         // overwrite some of the values, this is the time to do it
         if (!commandlineArguments.configurationOverride.empty()) {
             LDEBUG("Executing Lua script passed through the commandline:");

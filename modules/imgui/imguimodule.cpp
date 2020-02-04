@@ -151,8 +151,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         WindowDelegate& delegate = global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
-            const glm::ivec2 windowSize = delegate.currentWindowSize();
-            const glm::ivec2 resolution = delegate.currentWindowResolution();
+            const glm::ivec2 windowSize = delegate.currentSubwindowSize();
+            const glm::ivec2 resolution = delegate.currentDrawBufferResolution();
 
             if (windowSize.x <= 0 || windowSize.y <= 0) {
                 return;

@@ -1731,7 +1731,7 @@ void RenderableBillboardsCloud::renderToTexture(GLuint textureToRenderTo,
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
 
-    glViewport(0, 0, textureWidth, textureHeight);
+    glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
 
     loadPolygonGeometryForRendering();
     renderPolygonGeometry(_polygonVao);
