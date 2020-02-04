@@ -32,6 +32,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/easing.h>
 
 namespace {
     constexpr const char* _loggerCat = "PathSegment";
@@ -70,7 +71,7 @@ const double PathSegment::duration() const { return _duration; }
 const double PathSegment::startTime() const { return _startTime; }
 
 const glm::dvec3 PathSegment::getPositionAt(double t) const {
-    t = easingfunctions::cubicEaseInOut(t);
+    t = ghoul::cubicEaseInOut(t); 
     return _curve->valueAt(t);    
 }
 
@@ -78,10 +79,10 @@ const glm::dquat PathSegment::getRotationAt(double t) const {
     // TODO: improve how rotation is computed
 
     double tSlerp = helpers::shiftAndScale(t, 0.1, 0.9);
-    tSlerp = easingfunctions::cubicEaseInOut(tSlerp);
+    tSlerp = ghoul::cubicEaseInOut(tSlerp);
 
     double tLookAt = helpers::shiftAndScale(t, 0.2, 0.8);
-    tLookAt = easingfunctions::cubicEaseInOut(tLookAt);
+    tLookAt = ghoul::cubicEaseInOut(tLookAt);
 
     switch (_curveType) {
     case CurveType::Linear2:
