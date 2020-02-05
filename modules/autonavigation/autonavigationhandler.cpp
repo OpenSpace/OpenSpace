@@ -303,7 +303,7 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
     }
 
     if (!success) {
-        LERROR(fmt::format("Failed handling instruction number {}.", index + 1));
+        LERROR(fmt::format("Failed handling instruction number {}.", std::to_string(index + 1)));
         return false;
     }
 
