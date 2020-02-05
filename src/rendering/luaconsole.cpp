@@ -615,7 +615,7 @@ void LuaConsole::update() {
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
-    const glm::ivec2 res = global::windowDelegate.currentWindowResolution();
+    const glm::ivec2 res = global::windowDelegate.currentSubwindowSize();
     const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const double dHeight = (_targetHeight - _currentHeight) *
         std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
@@ -636,7 +636,7 @@ void LuaConsole::render() {
 
     const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentWindowResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
 
 
     // Render background

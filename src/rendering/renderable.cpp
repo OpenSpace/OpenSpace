@@ -141,15 +141,26 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(OpacityInfo.identifier)) {
-        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
+        _opacity = static_cast<float>(dictionary.value<double>(
+            OpacityInfo.identifier)
+       );
     }
 
     addProperty(_enabled);
 
     //set type for UI
     if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        _renderableType = dictionary.value<std::string>(RenderableTypeInfo.identifier);
+        _renderableType = dictionary.value<std::string>(
+            RenderableTypeInfo.identifier
+       );
     }
+
+    if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
+        _boundingSphere = static_cast<float>(
+            dictionary.value<double>(BoundingSphereInfo.identifier)
+       );
+    }
+
     addProperty(_renderableType);
     addProperty(_boundingSphere);
 }

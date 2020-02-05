@@ -103,6 +103,10 @@ void CefWebGuiModule::startOrStopGui() {
                 new GUIKeyboardHandler
             );
             _instance->initialize();
+            _instance->reshape(static_cast<glm::ivec2>(
+                static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
+                global::windowDelegate.dpiScaling()
+                ));
             if (!_url.value().empty()) {
                 _instance->loadUrl(_url);
             }
@@ -200,11 +204,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         const bool isMaster = global::windowDelegate.isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
-            if (global::windowDelegate.windowHasResized()) {
+            if (global::windowDelegate.windowHasResized() || _instance->_shouldReshape) {
                 _instance->reshape(static_cast<glm::ivec2>(
-                    static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+                    static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
                     global::windowDelegate.dpiScaling()
                 ));
+                _instance->_shouldReshape = false;
             }
             if (_visible) {
                 _instance->draw();

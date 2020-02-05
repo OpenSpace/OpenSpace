@@ -34,10 +34,9 @@
 #include <ghoul/glm.h>
 
 namespace ghoul::opengl { class ProgramObject; }
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class Translation;
 
@@ -52,10 +51,10 @@ public:
     static documentation::Documentation Documentation();
 
     // Get the distance between the start and end node
-    double getDistance();
+    double distance() const;
 
-    const std::string getStart();
-    const std::string getEnd();
+    std::string start() const;
+    std::string end() const;
 
 private:
     void initializeGL() override;
@@ -68,8 +67,6 @@ private:
 
     void unbindGL();
     void bindGL();
-
-    glm::dvec3 getCoordinatePosFromAnchorNode(glm::dvec3 worldPos);
 
     ghoul::opengl::ProgramObject* _program;
     /// The vertex attribute location for position

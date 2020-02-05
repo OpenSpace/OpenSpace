@@ -38,10 +38,10 @@ namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr const std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase"
+        "renderPhase", "resolution", "lineWidth"
     };
 
     // The possible values for the _renderingModes property
@@ -178,7 +178,7 @@ RenderableTrail::Appearance::Appearance()
     , lineColor(LineColorInfo, glm::vec3(1.0f, 1.0f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,
@@ -294,6 +294,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     }
 
+    /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
+    _programObject->setUniform(_uniformCache.resolution, resolution);*/
+
     static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
         // Fragile! Keep in sync with shader
         { RenderInformation::VertexSorting::NewestFirst, 0 },
@@ -317,15 +320,15 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-        glLineWidth(_appearance.lineWidth);
+        glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
     auto render = [renderLines, renderPoints, p = _programObject, &data,
-                   &modelTransform, pointSize = _appearance.pointSize.value(),
-                   c = _uniformCache]
+                   &modelTransform, pointSize = _appearance.pointSize.value(), 
+                   c = _uniformCache, lw = _appearance.lineWidth]
                   (RenderInformation& info, int nVertices, int offset)
     {
         // We pass in the model view transformation matrix as double in order to maintain
@@ -346,6 +349,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
+        glm::ivec2 resolution = global::renderEngine.renderingResolution();
+        p->setUniform(c.resolution, resolution);
+        
+        p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+        
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and
             // smaller ones
@@ -361,8 +369,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         glBindVertexArray(info._vaoID);
         if (renderLines) {
-            glEnable(GL_LINE_SMOOTH);
-            glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
             p->setUniform(c.renderPhase, RenderPhaseLines);
             // Subclasses of this renderer might be using the index array or might now be
             // so we check if there is data available and if there isn't, we use the
@@ -382,7 +388,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                     reinterpret_cast<void*>(info.first * sizeof(unsigned int))
                 );
             }
-            glDisable(GL_LINE_SMOOTH);
         }
         if (renderPoints) {
             // Subclasses of this renderer might be using the index array or might now be
@@ -412,6 +417,24 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     const int primaryOffset = (_primaryRenderInformation._iBufferID == 0) ?
         0 :
         _primaryRenderInformation.first;
+
+    // Culling
+    const double scaledRadius = glm::length(
+        glm::dmat3(modelTransform) * glm::dvec3(_boundingSphere, 0.0, 0.0)
+    );
+
+    glm::dvec3 trailPosWorld = glm::dvec3(
+        modelTransform * _primaryRenderInformation._localTransform * 
+        glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    const double distance = glm::distance(
+        trailPosWorld,
+        data.camera.eyePositionVec3()
+    );
+
+    if (distance > scaledRadius * DISTANCE_CULLING_RADII) {
+        return;
+    }
 
     // Render the primary batch of vertices
     render(_primaryRenderInformation, totalNumber, primaryOffset);

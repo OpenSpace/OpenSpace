@@ -41,6 +41,7 @@ namespace {
     // These are also used in the _doc include file
     constexpr const char* KeySGCTConfig = "SGCTConfig";
     constexpr const char* KeyAsset = "Asset";
+    constexpr const char* KeyProfile = "Profile";
     constexpr const char* KeyGlobalCustomizationScripts = "GlobalCustomizationScripts";
     constexpr const char* KeyPaths = "Paths";
     constexpr const char* KeyFonts = "Fonts";
@@ -277,6 +278,7 @@ void parseLuaState(Configuration& configuration) {
 
     getValue(s, KeySGCTConfig, c.windowConfiguration);
     getValue(s, KeyAsset, c.asset);
+    getValue(s, KeyProfile, c.profile);
     getValue(s, KeyGlobalCustomizationScripts, c.globalCustomizationScripts);
     getValue(s, KeyPaths, c.pathTokens);
     getValue(s, KeyFonts, c.fonts);

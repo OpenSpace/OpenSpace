@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
 #define __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
 
-
 #include <openspace/util/openspacemodule.h>
 
 namespace openspace {
@@ -38,7 +37,6 @@ public:
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
-
 };
 
 } // namespace openspace

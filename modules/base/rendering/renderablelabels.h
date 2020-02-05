@@ -72,7 +72,7 @@ public:
 protected:
     properties::OptionProperty _blendMode;
 
-    float getUnit(int unit) const;
+    float unit(int unit) const;
 
     // Data may require some type of transformation prior the spice transformation being
     // applied.
