@@ -29,6 +29,8 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <algorithm>
+#include <sstream>
+#include <iomanip>
 
 namespace openspace::globebrowsing {
 
@@ -106,25 +108,26 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 }
 
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
-    const std::string unquantized = t.ISO8601();
-    DateTime unquantizedDt(unquantized);
+    const std::string unquantizedStr = t.ISO8601();
+    DateTime unquantized(unquantizedStr);
     double error = 0.0;
     const int iterationLimit = 50;
     int iterations = 0;
 
-    if (_timerange.includes(unquantized)) {
+    if (_timerange.includes(unquantizedStr)) {
         DateTime quantized = DateTime(_timerange.start());
-        doFastForwardApproximation(quantized, unquantizedDt, _resolutionValue,
-            _resolutionUnit);
-        error = diff(quantized, unquantizedDt);
+        doFirstApproximation(quantized, unquantized, _resolutionValue, _resolutionUnit);
+        error = diff(quantized, unquantized);
         while (error > _resolution) {
             if (error > 0) {
-                quantized.increment(static_cast<int>(_resolutionValue), _resolutionUnit);
+                quantized.increment(static_cast<int>(_resolutionValue), _resolutionUnit,
+                    error, _resolution);
             }
             else {
-                quantized.decrement(static_cast<int>(_resolutionValue), _resolutionUnit);
+                quantized.decrement(static_cast<int>(_resolutionValue), _resolutionUnit,
+                    error, _resolution);
             }
-            error = diff(quantized, unquantizedDt);
+            error = diff(quantized, unquantized);
             if (++iterations > iterationLimit) {
                 break;
             }
@@ -134,7 +137,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
         return true;
     }
     else if (clamp) {
-        const std::string clampedTime = _timerange.clamp(unquantized);
+        const std::string clampedTime = _timerange.clamp(unquantizedStr);
         t.setTime(clampedTime);
         return true;
     }
@@ -147,8 +150,8 @@ double TimeQuantizer::diff(DateTime& from, DateTime& to) {
     return to.J2000() - from.J2000();
 }
 
-void TimeQuantizer::doFastForwardApproximation(DateTime& quantized, DateTime& unQ,
-                                               double value, char unit)
+void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
+                                         double value, char unit)
 {
     double minYearsToAdjust;
     double minIncrementsToAdjust;
@@ -185,7 +188,7 @@ void TimeQuantizer::doFastForwardApproximation(DateTime& quantized, DateTime& un
             quantized.setHour(0);
         }
         else {
-            quantized.decrement(1, 'd');
+            quantized.decrementOnce(1, 'd');
         }
         break;
 
@@ -193,10 +196,10 @@ void TimeQuantizer::doFastForwardApproximation(DateTime& quantized, DateTime& un
         quantized = unQ;
         quantized.setSecond(0);
         if (quantized.hour() > 0) {
-            quantized.decrement(1, 'h');
+            quantized.decrementOnce(1, 'h');
         }
         else {
-            quantized.decrement(1, 'd');
+            quantized.decrementOnce(1, 'd');
         }
         break;
     }
@@ -220,7 +223,7 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
     DateTime itr = s;
     RangedTime range(start.ISO8601(), end.ISO8601());
     while (range.includes(itr.ISO8601())) {
-        itr.increment(static_cast<int>(_resolutionValue), _resolutionUnit);
+        itr.incrementOnce(static_cast<int>(_resolutionValue), _resolutionUnit);
         result.push_back(itr.ISO8601());
     }
 
@@ -241,19 +244,20 @@ void DateTime::setTime(const std::string& input) {
 }
 
 std::string DateTime::ISO8601() {
-    char str[19];
-    snprintf(str + index_year, len_year + 1, "%04d-", _year);
-    snprintf(str + index_month, len_nonYear + 1, "%02d-", _month);
-    snprintf(str + index_day, len_nonYear + 1, "%02dT", _day);
-    snprintf(str + index_hour, len_nonYear + 1, "%02d:", _hour);
-    snprintf(str + index_minute, len_nonYear + 1, "%02d:", _minute);
-    snprintf(str + index_second, len_nonYear, "%02d", _second);
-    return std::string(str);
+    std::stringstream sstr = std::stringstream();
+    sstr << std::setfill('0') << std::setw(4) << _year << "-";
+    sstr << std::setfill('0') << std::setw(2) << _month << "-";
+    sstr << std::setfill('0') << std::setw(2) << _day << "T";
+    sstr << std::setfill('0') << std::setw(2) << _hour << ":";
+    sstr << std::setfill('0') << std::setw(2) << _minute << ":";
+    sstr << std::setfill('0') << std::setw(2) << _second;
+    return sstr.str();
 };
 
 double DateTime::J2000() {
     Time t;
-    t.setTime(ISO8601());
+    std::string timeString = ISO8601();
+    t.setTime(timeString);
     return t.j2000Seconds();
 }
 
@@ -266,7 +270,14 @@ void DateTime::operator= (DateTime& src) {
     _second = src.second();
 }
 
-void DateTime::increment(int value, char unit) {
+void DateTime::increment(int value, char unit, double error, double resolution) {
+    unsigned int nIncrements = std::abs(static_cast<int>(error / resolution));
+    for (unsigned int i = 0; i < nIncrements; ++i) {
+        incrementOnce(value, unit);
+    }
+}
+
+void DateTime::incrementOnce(int value, char unit) {
     switch (unit) {
     case 'm':
         if (singleIncrement(_minute, value, 0, 59))
@@ -284,7 +295,7 @@ void DateTime::increment(int value, char unit) {
         //fall-through...
 
     case 'M':
-        if (singleIncrement(_minute, value, 1, 12))
+        if (singleIncrement(_month, value, 1, 12))
             break;
         //fall-through...
 
@@ -305,7 +316,14 @@ bool DateTime::singleIncrement(int& oper, int& val, int min, int max) {
     return false;
 }
 
-void DateTime::decrement(int value, char unit) {
+void DateTime::decrement(int value, char unit, double error, double resolution) {
+    unsigned int nDecrements = std::abs(static_cast<int>(error / resolution));
+    for (unsigned int i = 0; i < nDecrements; ++i) {
+        incrementOnce(value, unit);
+    }
+}
+
+void DateTime::decrementOnce(int value, char unit) {
     switch (unit) {
     case 'm':
         if (singleDecrement(_minute, value, 0, 59))
@@ -412,19 +430,21 @@ RangedTime::RangedTime(const std::string start, const std::string end)
     : _start(start),
       _end(end)
 {
-    Time t1;
-    t1.setTime(start);
-    _startJ2000 = t1.j2000Seconds();
-    Time t2;
-    t2.setTime(start);
-    _endJ2000 = t2.j2000Seconds();
+    setStart(start);
+    setEnd(end);
 }
 
 void RangedTime::setStart(const std::string start) {
+    Time t1;
+    t1.setTime(start);
+    _startJ2000 = t1.j2000Seconds();
     _start = start;
 }
 
 void RangedTime::setEnd(const std::string end) {
+    Time t2;
+    t2.setTime(end);
+    _endJ2000 = t2.j2000Seconds();
     _end = end;
 }
 

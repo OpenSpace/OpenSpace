@@ -74,8 +74,10 @@ public:
     void setMinute(int);
     void setSecond(int);
 
-    void increment(int value, char unit);
-    void decrement(int value, char unit);
+    void increment(int value, char unit, double error, double resolution);
+    void incrementOnce(int value, char unit);
+    void decrement(int value, char unit, double error, double resolution);
+    void decrementOnce(int value, char unit);
 
 private:
     bool singleIncrement(int& oper, int& val, int min, int max);
@@ -147,7 +149,7 @@ public:
 
 private:
     double diff(DateTime& from, DateTime& to);
-    void doFastForwardApproximation(DateTime& q, DateTime& unQ, double value, char unit);
+    void doFirstApproximation(DateTime& q, DateTime& unQ, double value, char unit);
     RangedTime _timerange;
     double computeSecondsFromResolution(const int valueIn, const char unit);
     double _resolution = 0.0;
