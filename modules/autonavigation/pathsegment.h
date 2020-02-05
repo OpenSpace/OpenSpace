@@ -32,11 +32,8 @@
 namespace openspace::autonavigation {
 
 enum class CurveType {
-    Bezier, 
-    Bezier2,
     Bezier3,
     Linear,
-    Linear2, 
     Pause, // OBS! Temporary special case for handling pauses
     None
 };

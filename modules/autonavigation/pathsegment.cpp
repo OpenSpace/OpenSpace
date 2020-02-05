@@ -149,20 +149,11 @@ void PathSegment::initCurve() {
     _curve.reset();
 
     switch (_curveType) {
-    case CurveType::Bezier:
-        _curve = std::make_shared<BezierCurve>(_start, _end);
-        break;
-    case CurveType::Bezier2:
-        _curve = std::make_shared<Bezier2Curve>(_start, _end);
-        break;
     case CurveType::Bezier3:
         _curve = std::make_shared<Bezier3Curve>(_start, _end);
         break;
     case CurveType::Linear:
         _curve = std::make_shared<LinearCurve>(_start, _end);
-        break;
-    case CurveType::Linear2:
-        _curve = std::make_shared<Linear2Curve>(_start, _end);
         break;
     case CurveType::Pause:
         _curve = std::make_shared<PauseCurve>(_start);

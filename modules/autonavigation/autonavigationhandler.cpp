@@ -52,20 +52,11 @@ CurveType stringToCurveType(std::string str) {
 
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 
-    if (str == "bezier") {
-        return CurveType::Bezier;
-    }
-    else if (str == "bezier2") {
-        return CurveType::Bezier2;
-    }
-    else if (str == "bezier3") {
+    if (str == "bezier3") {
         return CurveType::Bezier3;
     }
     else if (str == "linear") {
         return CurveType::Linear;
-    }
-    else if (str == "linear2") {
-        return CurveType::Linear2;
     }
     else {
         LERROR(fmt::format("'{}' is not a valid curve type! Choosing default.", str));
