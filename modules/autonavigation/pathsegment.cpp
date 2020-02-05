@@ -106,7 +106,6 @@ const glm::dquat PathSegment::piecewiseSlerpRotation(double t) const {
     glm::dvec3 posAtT1 = getPositionAt(t1);
     glm::dvec3 posAtT2 = getPositionAt(t2);
 
-    // TODO: test looking at start resp. end position instead
     glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
     glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
 
