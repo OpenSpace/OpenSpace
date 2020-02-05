@@ -75,48 +75,73 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
     return _curve->getPoints();
 }
 
-const glm::dvec3 PathSegment::getPositionAt(double t) const {
+glm::dvec3 PathSegment::getPositionAt(double t) const {
     t = ghoul::cubicEaseInOut(t); 
     return _curve->valueAt(t);    
 }
 
-const glm::dquat PathSegment::getRotationAt(double t) const {
+glm::dquat PathSegment::getRotationAt(double t) const {
     // TODO: improve how rotation is computed
 
-    double tSlerp = helpers::shiftAndScale(t, 0.1, 0.9);
-    tSlerp = ghoul::cubicEaseInOut(tSlerp);
-
-    double tLookAt = helpers::shiftAndScale(t, 0.2, 0.8);
-    tLookAt = ghoul::cubicEaseInOut(tLookAt);
-
     switch (_curveType) {
-    case CurveType::Linear2:
-    case CurveType::Bezier3:
-        return getLookAtRotation(
-            tLookAt, 
-            getPositionAt(t), 
-            global::navigationHandler.camera()->lookUpVectorWorldSpace()
-        );
+    case CurveType::Bezier3: 
+    {
+        return piecewiseSlerpRotation(t);
         break;
+    }
     default:
+    {
+        double tSlerp = helpers::shiftAndScale(t, 0.1, 0.9);
+        tSlerp = ghoul::cubicEaseInOut(tSlerp);
         return glm::slerp(_start.rotation, _end.rotation, tSlerp);
+    }
     }
 }
 
-const glm::dquat PathSegment::getLookAtRotation(
-    double t, glm::dvec3 currentPos, glm::dvec3 up) const 
-{
-    glm::dvec3 startLookAtPos = sceneGraphNode(_start.referenceNode)->worldPosition();
-    glm::dvec3 endLookAtPos = sceneGraphNode(_end.referenceNode)->worldPosition();
-    glm::dvec3 lookAtPos = interpolation::linear(t, startLookAtPos, endLookAtPos);
+const glm::dquat PathSegment::piecewiseSlerpRotation(double t) const {
+    // breakpoints for subintervals
+    const double t1 = 0.3;
+    const double t2 = 0.8; // TODO: these should probably be based on distance
 
-    glm::dmat4 lookAtMat = glm::lookAt(
-        currentPos,
-        lookAtPos, 
-        up
-    );
+    glm::dvec3 posAtT1 = getPositionAt(t1);
+    glm::dvec3 posAtT2 = getPositionAt(t2);
 
-    return glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
+    // TODO: test looking at start resp. end position instead
+    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
+    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
+
+    glm::dvec3 startUpVec = _start.rotation * glm::dvec3(0.0, 1.0, 0.0);
+    glm::dmat4 lookAtStartMat = glm::lookAt(posAtT1, startNodePos, startUpVec);
+    glm::dquat lookAtStartQuad = glm::normalize(glm::inverse(glm::quat_cast(lookAtStartMat)));
+
+    glm::dvec3 endUpVec = _end.rotation * glm::dvec3(0.0, 1.0, 0.0);
+    glm::dmat4 lookAtEndMat = glm::lookAt(posAtT2, endNodePos, endUpVec);
+    glm::dquat lookAtEndQuad = glm::normalize(glm::inverse(glm::quat_cast(lookAtEndMat)));
+
+    // Interpolate based on the subintervals
+    double tScaled;
+    glm::dquat startQuad, endQuad;
+
+    if (t < t1) {
+        tScaled = t / t1;
+        startQuad = _start.rotation;
+        endQuad = lookAtStartQuad;
+    }
+    else if (t < t2) {
+        tScaled = (t - t1) / (t2 - t1);
+        startQuad = lookAtStartQuad;
+        endQuad = lookAtEndQuad;
+    }
+    else { // t <= 1.0
+        tScaled = (t - t2) / (1.0 - t2);
+        startQuad = lookAtEndQuad;
+        endQuad = _end.rotation;
+    }
+
+    // TODO: experiment with easing functions
+    tScaled = ghoul::quadraticEaseInOut(tScaled);
+
+    return glm::slerp(startQuad, endQuad, tScaled);
 }
 
 // Initialise the curve, based on the start, end state and curve type
