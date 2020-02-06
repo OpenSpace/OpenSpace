@@ -38,28 +38,6 @@ namespace openspace::autonavigation::helpers {
 
 } // helpers
 
-namespace openspace::autonavigation::easingfunctions {
-
-// Based on functions from https://github.com/warrenm/AHEasing/blob/master/AHEasing/easing.c 
-
-double linear(double t);
-
-double step(double t);
-
-double circularEaseOut(double p);
-
-double cubicEaseIn(double t);
-
-double cubicEaseOut(double t);
-
-double cubicEaseInOut(double t);
-
-double quadraticEaseInOut(double t);
-
-double exponentialEaseInOut(double t);
-
-}
-
 // TODO: include interpolator.h to helperfunctions
 // error when interpolator.h is included and used both here and in pathsegment
 
