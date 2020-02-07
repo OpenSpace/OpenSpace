@@ -113,22 +113,26 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     double error = 0.0;
     const int iterationLimit = 50;
     int iterations = 0;
+    int lastIncr = 0;
+    int lastDecr = 0;
 
     if (_timerange.includes(unquantizedStr)) {
         DateTime quantized = DateTime(_timerange.start());
         doFirstApproximation(quantized, unquantized, _resolutionValue, _resolutionUnit);
         error = diff(quantized, unquantized);
-        while (error > _resolution) {
+        while (error > (_resolution * 0.7) || error < 0) {
             if (error > 0) {
-                quantized.increment(static_cast<int>(_resolutionValue), _resolutionUnit,
-                    error, _resolution);
+                lastIncr = quantized.increment(static_cast<int>(_resolutionValue),
+                    _resolutionUnit, error, _resolution);
             }
-            else {
-                quantized.decrement(static_cast<int>(_resolutionValue), _resolutionUnit,
-                    error, _resolution);
+            else if (error < 0) {
+                lastDecr = quantized.decrement(static_cast<int>(_resolutionValue),
+                    _resolutionUnit, error, _resolution);
             }
             error = diff(quantized, unquantized);
-            if (++iterations > iterationLimit) {
+            bool hasSettled = (lastIncr == 1 && lastDecr == 1);
+            iterations++;
+            if (hasSettled || iterations > iterationLimit) {
                 break;
             }
         }
@@ -156,6 +160,10 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
     double minYearsToAdjust;
     double minIncrementsToAdjust;
     bool isSimMonthPastQuantizedMonth;
+    double error = 0.0;
+    int originalHour, originalMinute, originalSecond;
+    Time testDay;
+    double addToTime;
 
     switch (unit) {
     case 'y':
@@ -171,18 +179,22 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
         break;
 
     case 'd':
-        if (unQ.month() > 1) {
-            quantized.setYear(unQ.year());
-            quantized.setMonth(unQ.month() - 1);
-        }
-        else {
-            quantized.setYear(unQ.year() - 1);
-            quantized.setMonth(12);
-        }
+        error = diff(quantized, unQ);
+        error /= 86400;
+        originalHour = quantized.hour();
+        originalMinute = quantized.minute();
+        originalSecond = quantized.second();
+        addToTime = std::round(error) * 86400;
+        testDay.setTime(quantized.J2000() + addToTime);
+        quantized.setTime(testDay.ISO8601());
+        quantized.setHour(originalHour);
+        quantized.setMinute(originalMinute);
+        quantized.setSecond(originalSecond);
         break;
 
     case 'h':
         quantized = unQ;
+        quantized.setMinute(0);
         quantized.setSecond(0);
         if (unQ.hour() >= 12) {
             quantized.setHour(0);
@@ -194,6 +206,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
 
     case 'm':
         quantized = unQ;
+        quantized.setMinute(0);
         quantized.setSecond(0);
         if (quantized.hour() > 0) {
             quantized.decrementOnce(1, 'h');
@@ -270,14 +283,19 @@ void DateTime::operator= (DateTime& src) {
     _second = src.second();
 }
 
-void DateTime::increment(int value, char unit, double error, double resolution) {
+int DateTime::increment(int value, char unit, double error, double resolution) {
     unsigned int nIncrements = std::abs(static_cast<int>(error / resolution));
+    if (nIncrements == 0) {
+        nIncrements = 1;
+    }
     for (unsigned int i = 0; i < nIncrements; ++i) {
         incrementOnce(value, unit);
     }
+    return nIncrements;
 }
 
 void DateTime::incrementOnce(int value, char unit) {
+    bool inBounds = true;
     switch (unit) {
     case 'm':
         if (singleIncrement(_minute, value, 0, 59))
@@ -295,7 +313,9 @@ void DateTime::incrementOnce(int value, char unit) {
         //fall-through...
 
     case 'M':
-        if (singleIncrement(_month, value, 1, 12))
+        inBounds = singleIncrement(_month, value, 1, 12);
+        _day = std::clamp(_day, 1, monthSize(_month, _year));
+        if (inBounds)
             break;
         //fall-through...
 
@@ -316,14 +336,19 @@ bool DateTime::singleIncrement(int& oper, int& val, int min, int max) {
     return false;
 }
 
-void DateTime::decrement(int value, char unit, double error, double resolution) {
+int DateTime::decrement(int value, char unit, double error, double resolution) {
     unsigned int nDecrements = std::abs(static_cast<int>(error / resolution));
-    for (unsigned int i = 0; i < nDecrements; ++i) {
-        incrementOnce(value, unit);
+    if (nDecrements == 0) {
+        nDecrements = 1;
     }
+    for (unsigned int i = 0; i < nDecrements; ++i) {
+        decrementOnce(value, unit);
+    }
+    return nDecrements;
 }
 
 void DateTime::decrementOnce(int value, char unit) {
+    bool inBounds = true;
     switch (unit) {
     case 'm':
         if (singleDecrement(_minute, value, 0, 59))
@@ -336,17 +361,22 @@ void DateTime::decrementOnce(int value, char unit) {
         //fall-through...
 
     case 'd':
-        if (singleDecrement(_day, value, 1, monthSize(_month, _year)))
+        if (singleDecrement(_day, value, 1,
+            monthSize(_month == 1 ? 12 : _month - 1, _year)))
+        {
             break;
+        }
         //fall-through...
 
     case 'M':
-        if (singleDecrement(_minute, value, 1, 12))
+        inBounds = singleDecrement(_month, value, 1, 12);
+        _day = std::clamp(_day, 1, monthSize(_month, _year));
+        if (inBounds)
             break;
         //fall-through...
 
     case 'Y':
-        _year += value;
+        _year -= value;
         break;
     }
 }

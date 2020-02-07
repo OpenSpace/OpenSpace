@@ -76,6 +76,7 @@
 #include <test_concurrentqueue.inl>
 #include <test_lrucache.inl>
 #include <test_gdalwms.inl>
+#include <test_timequantizer.inl>
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED

@@ -74,9 +74,9 @@ public:
     void setMinute(int);
     void setSecond(int);
 
-    void increment(int value, char unit, double error, double resolution);
+    int increment(int value, char unit, double error, double resolution);
     void incrementOnce(int value, char unit);
-    void decrement(int value, char unit, double error, double resolution);
+    int decrement(int value, char unit, double error, double resolution);
     void decrementOnce(int value, char unit);
 
 private:
