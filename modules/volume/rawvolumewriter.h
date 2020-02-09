@@ -48,9 +48,9 @@ public:
     glm::ivec3 indexToCoords(size_t linear) const;
 
 private:
-    glm::ivec3 _dimensions;
+    glm::ivec3 _dimensions = glm::ivec3(0);
     std::string _path;
-    size_t _bufferSize;
+    size_t _bufferSize = 0;
 };
 
 } // namespace openspace::volume

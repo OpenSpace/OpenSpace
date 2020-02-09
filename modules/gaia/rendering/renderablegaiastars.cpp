@@ -2325,7 +2325,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Update FBO texture resolution if we haven't already.
         glm::vec2 screenSize = glm::vec2(global::renderEngine.renderingResolution());
         const bool hasChanged = glm::any(
-            glm::notEqual(_fboTexture->dimensions(), glm::uvec3(screenSize, 1.0))
+            glm::notEqual(_fboTexture->dimensions(), glm::uvec3(screenSize, 1))
         );
 
         if (hasChanged) {

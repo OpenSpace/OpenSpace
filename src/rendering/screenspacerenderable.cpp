@@ -132,7 +132,7 @@ namespace {
         float phi = spherical.z;
 
         // Sanitize coordinates.
-        float theta = wrap(spherical.y, 0.0, glm::two_pi<float>());
+        float theta = wrap(spherical.y, 0.f, glm::two_pi<float>());
         if (theta > glm::pi<float>()) {
             theta = glm::two_pi<float>() - theta;
             phi += glm::pi<float>();

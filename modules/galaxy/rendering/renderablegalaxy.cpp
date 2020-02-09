@@ -183,7 +183,12 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     )
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _rotation(
+        RotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(0.f),
+        glm::vec3(glm::two_pi<float>())
+    )
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
     , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo, 1000.f, 1.f, 1000.f)
 {
@@ -545,7 +550,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
     _pointTransform = transform;
     //_pointTransform = glm::scale(transform, _pointScaling);
 
-    const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.0);
+    const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.f);
 
     // Todo: handle floating point overflow, to actually support translation.
 

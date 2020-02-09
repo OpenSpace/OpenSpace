@@ -239,9 +239,9 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
-        glm::ivec4 rotation;
-        glm::ivec4 zoom;
-        glm::ivec4 roll;
+        glm::ivec4 rotation = glm::ivec4(0);
+        glm::ivec4 zoom = glm::ivec4(0);
+        glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
 };
 

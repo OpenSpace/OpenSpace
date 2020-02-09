@@ -59,13 +59,13 @@ struct ShadowConfiguration {
 };
 
 struct ShadowRenderingStruct {
-    double xu;
-    double xp;
-    double rs;
-    double rc;
-    glm::dvec3 sourceCasterVec;
-    glm::dvec3 casterPositionVec;
-    bool isShadowing;
+    double xu = 0.0;
+    double xp = 0.0;
+    double rs = 0.0;
+    double rc = 0.0;
+    glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
+    glm::dvec3 casterPositionVec = glm::dvec3(0.0);
+    bool isShadowing = false;
 };
 
 namespace documentation { struct Documentation; }
@@ -110,35 +110,35 @@ private:
     properties::BoolProperty  _sunFollowingCameraEnabledP;
     properties::BoolProperty  _hardShadowsEnabledP;
 
-    bool _atmosphereEnabled;
-    bool _ozoneLayerEnabled;
-    bool _sunFollowingCameraEnabled;
-    float _atmosphereRadius;
-    float _atmospherePlanetRadius;
-    float _planetAverageGroundReflectance;
-    float _planetGroundRadianceEmittion;
-    float _rayleighHeightScale;
-    float _ozoneHeightScale;
-    float _mieHeightScale;
-    float _miePhaseConstant;
-    float _sunRadianceIntensity;
-    float _mieScattExtPropCoefProp;
+    bool _atmosphereEnabled = false;
+    bool _ozoneLayerEnabled = false;
+    bool _sunFollowingCameraEnabled = false;
+    float _atmosphereRadius = 0.f;
+    float _atmospherePlanetRadius = 0.f;
+    float _planetAverageGroundReflectance = 0.f;
+    float _planetGroundRadianceEmittion = 0.f;
+    float _rayleighHeightScale = 0.f;
+    float _ozoneHeightScale = 0.f;
+    float _mieHeightScale = 0.f;
+    float _miePhaseConstant = 0.f;
+    float _sunRadianceIntensity = 5.f;
+    float _mieScattExtPropCoefProp = 1.f;
 
-    glm::vec3 _mieExtinctionCoeff;
-    glm::vec3 _rayleighScatteringCoeff;
-    glm::vec3 _ozoneExtinctionCoeff;
-    glm::vec3 _mieScatteringCoeff;
+    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.0);
+    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.0);
+    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.0);
+    glm::vec3 _mieScatteringCoeff = glm::dvec3(0.0);
 
     // Atmosphere Debug
-    bool _saveCalculationsToTexture;
-    float _preCalculatedTexturesScale;
+    bool _saveCalculationsToTexture = false;
+    float _preCalculatedTexturesScale = 1.f;
 
     std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
 
-    bool _shadowEnabled;
-    bool _hardShadows;
+    bool _shadowEnabled = false;
+    bool _hardShadows = false;
 
-    glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 
     std::vector<ShadowConfiguration> _shadowConfArray;
 };

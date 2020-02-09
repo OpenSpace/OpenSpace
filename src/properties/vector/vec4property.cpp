@@ -39,11 +39,11 @@ glm::vec4 fromLuaConversion(lua_State* state, bool& success) {
         int hasNext = lua_next(state, -2);
         if (hasNext != 1) {
             success = false;
-            return glm::vec4(0);
+            return glm::vec4(0.f);
         }
         if (lua_isnumber(state, -1) != 1) {
             success = false;
-            return glm::vec4(0);
+            return glm::vec4(0.f);
         }
         else {
             result[i] = static_cast<glm::vec4::value_type>(lua_tonumber(state, -1));
@@ -69,7 +69,7 @@ bool toLuaConversion(lua_State* state, glm::vec4 value) {
 }
 
 glm::vec4 fromStringConversion(const std::string& val, bool& success) {
-    glm::vec4 result;
+    glm::vec4 result = glm::vec4(0.f);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {
         success = false;
@@ -108,7 +108,7 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Vec4Property,
     glm::vec4,
-    glm::vec4(0),
+    glm::vec4(0.f),
     glm::vec4(std::numeric_limits<float>::lowest()),
     glm::vec4(std::numeric_limits<float>::max()),
     glm::vec4(0.01f),

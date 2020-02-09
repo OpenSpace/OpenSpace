@@ -647,6 +647,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                 case WindowDelegate::Frustum::Mono: return "";
                 case WindowDelegate::Frustum::LeftEye: return "(left)";
                 case WindowDelegate::Frustum::RightEye: return "(right)";
+                default: throw std::logic_error("Unhandled case label");
             }
         }(frustum);
 
@@ -761,8 +762,8 @@ void RenderEngine::renderEndscreen() {
     glEnable(GL_BLEND);
 
     rendering::helper::renderBox(
-        glm::vec2(0.f, 0.f),
-        glm::vec2(1.f, 1.f),
+        glm::vec2(0.f),
+        glm::vec2(1.f),
         glm::vec4(0.f, 0.f, 0.f, 0.5f)
     );
 
@@ -1414,7 +1415,7 @@ void RenderEngine::renderScreenLog() {
             white
         );
 
-        glm::vec4 color(glm::uninitialize);
+        glm::vec4 color = glm::vec4(0.f);
         switch (e->level) {
             case ghoul::logging::LogLevel::Debug:
                 color = glm::vec4(0.f, 1.f, 0.f, alpha);

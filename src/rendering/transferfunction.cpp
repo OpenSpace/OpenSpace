@@ -141,7 +141,7 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
             upper = glm::clamp(upper, lower, 1.f);
         } else if (key == "mappingkey") {
             float intensity;
-            glm::vec4 rgba = glm::vec4(0.0f);
+            glm::vec4 rgba = glm::vec4(0.f);
             iss >> intensity;
             for(int i = 0; i < 4; ++i) {
                 iss >> rgba[i];

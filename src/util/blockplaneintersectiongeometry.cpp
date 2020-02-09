@@ -120,7 +120,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
         float sinA = glm::dot(glm::cross(vector1, vectorI), _normal);
         float cosA = glm::dot(vector1, vectorI);
-        angles[i - 1] = { i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)) };
+        angles[i - 1] = { i, glm::sign(sinA) * (1.f - cosA) };
     }
 
     // Sort the vectors by angle in the plane

@@ -503,7 +503,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     glm::dquat anchorNodeRotationDiff = _previousAnchorNodeRotation.has_value() ?
         _previousAnchorNodeRotation.value() * glm::inverse(anchorRotation) :
-        glm::dquat();
+        glm::dquat(1.0, 0.0, 0.0, 0.0);
 
     _previousAnchorNodeRotation = anchorRotation;
 
