@@ -265,14 +265,14 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     else {
         LERROR("No volume filename specified.");
     }
-    glm::vec3 volumeDimensions;
+    glm::vec3 volumeDimensions = glm::vec3(0.f);
     if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
         _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
     }
     else {
         LERROR("No volume dimensions specified.");
     }
-    glm::vec3 volumeSize;
+    glm::vec3 volumeSize = glm::vec3(0.f);
     if (volumeDictionary.getValue("Size", volumeSize)) {
         _volumeSize = volumeSize;
     }
@@ -539,12 +539,12 @@ void RenderableGalaxy::update(const UpdateData& data) {
     //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
     const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
     glm::mat4 transform = glm::rotate(
-        glm::mat4(1.0),
+        glm::mat4(1.f),
         eulerRotation.x,
-        glm::vec3(1, 0, 0)
+        glm::vec3(1.f, 0.f, 0.f)
     );
-    transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
-    transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
+    transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0.f, 1.f, 0.f));
+    transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0.f, 0.f, 1.f));
 
     glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
     _pointTransform = transform;

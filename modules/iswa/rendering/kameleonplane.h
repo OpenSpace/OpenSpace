@@ -89,7 +89,7 @@ private:
     std::string _var;
     float _scale = 0.f;
 
-    glm::vec3 _origOffset;
+    glm::vec3 _origOffset = glm::vec3(0.f);
 
     /**
      * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple

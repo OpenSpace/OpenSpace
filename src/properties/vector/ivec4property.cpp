@@ -33,7 +33,7 @@
 namespace {
 
 glm::ivec4 fromLuaConversion(lua_State* state, bool& success) {
-    glm::ivec4 result;
+    glm::ivec4 result = glm::ivec4(0);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec4>::value; ++i) {
         int hasNext = lua_next(state, -2);

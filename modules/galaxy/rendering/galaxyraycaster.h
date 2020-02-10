@@ -78,7 +78,7 @@ private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
     BoxGeometry _boundingBox;
-    float _stepSize = 0.f
+    float _stepSize = 0.f;
     glm::mat4 _modelTransform = glm::mat4(1.f);
     glm::vec3 _aspect = glm::vec3(0.f);
     double _time = 0.0;

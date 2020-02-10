@@ -989,7 +989,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.viewportPixelCoordinates = []() {
         sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();
         if (!window || !window->getCurrentViewport()) {
-            return glm::ivec4(0, 0, 0, 0);
+            return glm::ivec4(0);
         }
         else {
             const int* data = sgct::Engine::instance()->getCurrentViewportPixelCoords();

@@ -265,14 +265,14 @@ void RenderableBoxGrid::update(const UpdateData&) {
         //  0 -> 1 -> 2 -> 3 -> 0 -> 4 -> 5 -> 6 -> 7 -> 4 -> 5(d) -> 1 -> 2(d) -> 6
         //  -> 7(d) -> 3
 
-        const glm::vec3 v0 = { llf.x, llf.y, llf.z };
-        const glm::vec3 v1 = { urb.x, llf.y, llf.z };
-        const glm::vec3 v2 = { urb.x, urb.y, llf.z };
-        const glm::vec3 v3 = { llf.x, urb.y, llf.z };
-        const glm::vec3 v4 = { llf.x, llf.y, urb.z };
-        const glm::vec3 v5 = { urb.x, llf.y, urb.z };
-        const glm::vec3 v6 = { urb.x, urb.y, urb.z };
-        const glm::vec3 v7 = { llf.x, urb.y, urb.z };
+        const glm::vec3 v0 = glm::vec3(llf.x, llf.y, llf.z);
+        const glm::vec3 v1 = glm::vec3(urb.x, llf.y, llf.z);
+        const glm::vec3 v2 = glm::vec3(urb.x, urb.y, llf.z);
+        const glm::vec3 v3 = glm::vec3(llf.x, urb.y, llf.z);
+        const glm::vec3 v4 = glm::vec3(llf.x, llf.y, urb.z);
+        const glm::vec3 v5 = glm::vec3(urb.x, llf.y, urb.z);
+        const glm::vec3 v6 = glm::vec3(urb.x, urb.y, urb.z);
+        const glm::vec3 v7 = glm::vec3(llf.x, urb.y, urb.z);
 
         // First add the bounds
         _varray.push_back({ v0.x, v0.y, v0.z });

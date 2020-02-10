@@ -33,7 +33,7 @@
 namespace {
 
 glm::dvec2 fromLuaConversion(lua_State* state, bool& success) {
-    glm::dvec2 result;
+    glm::dvec2 result = glm::dvec2(0.0);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec2>::value; ++i) {
         int hasNext = lua_next(state, -2);

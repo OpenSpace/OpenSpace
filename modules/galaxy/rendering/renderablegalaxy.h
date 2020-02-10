@@ -93,7 +93,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     glm::mat4 _pointTransform = glm::mat4(1.f);
     glm::vec3 _aspect = glm::vec3(0.f);
-    float _opacityCoefficient = 0.f
+    float _opacityCoefficient = 0.f;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;

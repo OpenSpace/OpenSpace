@@ -372,7 +372,7 @@ void RenderableFieldlines::loadSeedPointsFromTable() {
     ghoul::Dictionary seedpointsDictionary;
     _seedPointsInfo.getValue(KeySeedPointsTable, seedpointsDictionary);
     for (const std::string& index : seedpointsDictionary.keys()) {
-        glm::vec3 seedPos;
+        glm::vec3 seedPos = glm::vec3(0.f);
         _fieldlineInfo.getValue(std::string(KeySeedPointsTable) + "." + index, seedPos);
         _seedPoints.push_back(seedPos);
     }

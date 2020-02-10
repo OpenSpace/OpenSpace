@@ -79,6 +79,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 
     const glm::vec3 halfSize = _size * 0.5f;
     glm::vec3 intersections[12];
+    std::fill(std::begin(intersections), std::end(intersections), glm::vec3(0.f));
     int nIntersections = 0;
 
     for (int i = 0; i < 12; i++) {

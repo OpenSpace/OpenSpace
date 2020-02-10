@@ -35,7 +35,7 @@ using std::numeric_limits;
 namespace {
 
 glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) {
-    glm::mat4x4 result;
+    glm::mat4x4 result = glm::mat4x4(1.f);
     lua_pushnil(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat4x4>::value; ++i) {
@@ -43,11 +43,11 @@ glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::mat4x4(0.f);
+                return glm::mat4x4(1.f);
             }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::mat4x4(0.f);
+                return glm::mat4x4(1.f);
             } else {
                 result[i][j]
                         = static_cast<glm::mat4x4::value_type>(lua_tonumber(state, -1));
@@ -125,7 +125,7 @@ using nl = std::numeric_limits<float>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Mat4Property,
     glm::mat4x4,
-    glm::mat4x4(0.f),
+    glm::mat4x4(1.f),
     glm::mat4x4(
         nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest(),
         nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest(),

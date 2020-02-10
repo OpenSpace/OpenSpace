@@ -88,7 +88,7 @@ private:
         float z = 0.f;
         float time = 0.f;
         double epoch = 0.0;
-        dobule period = 0.0;
+        double period = 0.0;
     };
 
     KeplerTranslation _keplerTranslator;

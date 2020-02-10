@@ -719,7 +719,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
     if (_raycaster) {
         glm::mat4 transform = glm::translate(
-            glm::mat4(1.0),
+            glm::mat4(1.f),
             static_cast<glm::vec3>(_translation) *
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );

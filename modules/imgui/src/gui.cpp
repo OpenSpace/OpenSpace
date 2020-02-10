@@ -338,7 +338,7 @@ void GUI::initializeGL() {
 
     {
         unsigned char* texData;
-        glm::ivec2 texSize;
+        glm::ivec2 texSize = glm::ivec2(0);
         for (int i = 0; i < nWindows; ++i) {
             //_contexts[i] = ImGui::CreateContext();
             ImGui::SetCurrentContext(_contexts[i]);

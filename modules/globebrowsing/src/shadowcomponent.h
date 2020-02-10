@@ -130,13 +130,13 @@ private:
     GLfloat _colorClearValue[4];
     GLfloat _depthClearValue;
 
-    glm::vec3 _sunPosition;
+    glm::vec3 _sunPosition = glm::vec3(0.f);
 
     glm::dmat4 _shadowMatrix = glm::dmat4(1.0);
 
     glm::dvec3 _cameraPos = glm::dvec3(0.0);
-    glm::dvec3 _cameraFocus;
-    glm::dquat _cameraRotation;
+    glm::dvec3 _cameraFocus = glm::dvec3(0.0);
+    glm::dquat _cameraRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
 
     std::stringstream _serializedCamera;
 

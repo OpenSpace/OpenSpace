@@ -416,7 +416,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
 
         std::array<std::string, 3> gridUnits = kw.gridUnits();
 
-        glm::vec4 spatialScale;
+        glm::vec4 spatialScale = glm::vec4(0.f);
         std::string coordinateType;
         if (gridUnits[0] == "R" && gridUnits[1] == "R" && gridUnits[2] == "R") {
             spatialScale.x = 6.371f;

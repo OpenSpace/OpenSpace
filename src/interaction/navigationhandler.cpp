@@ -360,7 +360,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     }
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
+        glm::dvec3(0.0),
         aim->worldPosition() - _camera->positionVec3(),
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));

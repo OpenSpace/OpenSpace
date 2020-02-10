@@ -180,9 +180,9 @@ bool RenderableToyVolume::isReady() const {
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
         glm::mat4 transform = glm::translate(
-            glm::mat4(1.0),
+            glm::mat4(1.f),
             static_cast<glm::vec3>(_translation) *
-                std::pow(10.0f, static_cast<float>(_scalingExponent))
+                std::pow(10.f, static_cast<float>(_scalingExponent))
         );
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1.f, 0.f, 0.f));

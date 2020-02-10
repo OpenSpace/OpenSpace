@@ -33,7 +33,7 @@
 namespace {
 
 glm::mat3x2 fromLuaConversion(lua_State* state, bool& success) {
-    glm::mat3x2 result;
+    glm::mat3x2 result = glm::mat3x2(1.f);
     lua_pushnil(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat3x2>::value; ++i) {
@@ -123,7 +123,7 @@ using nl = std::numeric_limits<float>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Mat3x2Property,
     glm::mat3x2,
-    glm::mat3x2(0.f),
+    glm::mat3x2(1.f),
     glm::mat3x2(
         nl::lowest(), nl::lowest(), nl::lowest(),
         nl::lowest(), nl::lowest(), nl::lowest()

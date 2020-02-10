@@ -189,7 +189,7 @@ private:
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;
-    bool _hardShadowsEnabled = false
+    bool _hardShadowsEnabled = false;
 
     // Atmosphere Debugging
     float _calculationTextureScale = 1.f;

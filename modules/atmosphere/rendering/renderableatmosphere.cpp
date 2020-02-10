@@ -412,7 +412,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
         if (success) {
             // Not using right now.
-            glm::vec3 rayleighWavelengths;
+            glm::vec3 rayleighWavelengths = glm::vec3(0.f);
             rayleighDictionary.getValue(
                 "Coefficients.Wavelengths",
                 rayleighWavelengths

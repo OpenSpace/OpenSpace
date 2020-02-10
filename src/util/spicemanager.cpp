@@ -525,7 +525,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
-        glm::dvec3 position;
+        glm::dvec3 position = glm::dvec3(0.0);
         spkpos_c(
             target.c_str(),
             ephemerisTime,
