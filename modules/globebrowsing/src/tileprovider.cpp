@@ -173,7 +173,7 @@ bool initTexturesFromLoadedData(DefaultTileProvider& t) {
         if (tile) {
             const cache::ProviderTileKey key = { tile->tileIndex, t.uniqueIdentifier };
             ghoul_assert(!t.tileCache->exist(key), "Tile must not be existing in cache");
-            t.tileCache->createTileAndPut(key, std::move(tile.value()));
+            t.tileCache->createTileAndPut(key, std::move(*tile));
             return true;
         }
     }

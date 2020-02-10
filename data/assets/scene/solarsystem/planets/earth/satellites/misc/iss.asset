@@ -20,7 +20,7 @@ local initializeAndAddNodes = function()
 
   local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
   local period = satelliteHelper.getPeriodFromElement(lineElement)
-  local path = tle .. "\\" .. filename
+  local path = tle .. "/" .. filename
 
 -- TLE data is only relevant in EarthInertial frame which means the model
 -- will inherit some irrelevant rotations from its parent. To get around that

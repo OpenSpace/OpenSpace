@@ -304,7 +304,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
         const bool hasTileMetaData = chunkTile.tile.metaData.has_value();
 
         if (goodTile && hasTileMetaData) {
-            const TileMetaData& tileMetaData = chunkTile.tile.metaData.value();
+            const TileMetaData& tileMetaData = *chunkTile.tile.metaData;
 
             const float minValue = settings->performLayerSettings(
                 tileMetaData.minValues[HeightChannel]
@@ -518,7 +518,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseHardShadowsInfo, false),
         BoolProperty(ShadowMappingInfo, false),
         FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
-        IntProperty(NumberShadowSamplesInfo, 5, 1, 20),
+        IntProperty(NumberShadowSamplesInfo, 5, 1, 7),
         FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
@@ -566,6 +566,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.nShadowSamples);
+    _generalProperties.nShadowSamples.onChange([&]() {
+        _shadersNeedRecompilation = true;
+    });
     addPropertySubOwner(_shadowMappingPropertyOwner);
 
     _generalProperties.targetLodScaleFactor.onChange([this]() {
@@ -1338,7 +1341,6 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
-        program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
@@ -1469,7 +1471,6 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
-        program.setUniform("nShadowSamples", _generalProperties.nShadowSamples);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
 
@@ -1743,6 +1744,9 @@ void RenderableGlobe::recompileShaders() {
     {
         shaderDictionary.setValue(p.first, p.second);
     }
+
+    // Shadow Mapping Samples
+    shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
     //
     // Create local shader

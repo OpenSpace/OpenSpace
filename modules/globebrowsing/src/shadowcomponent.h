@@ -108,13 +108,10 @@ private:
     int _shadowDepthTextureWidth = 4096;
     bool _dynamicDepthTextureRes = true;
         
-    // All of these initializations should probably be 0 since they are GLuints?
-    GLuint _shadowDepthTexture = -1;
-    GLuint _positionInLightSpaceTexture = -1;
-    GLuint _shadowFBO = -1;
-    GLuint _firstPassSubroutine = -1;
-    GLuint _secondPassSubroutine = 1;
-    GLint _defaultFBO = -1;
+    GLuint _shadowDepthTexture = 0;
+    GLuint _positionInLightSpaceTexture = 0;
+    GLuint _shadowFBO = 0;
+    GLint _defaultFBO = 0;
     GLint _mViewport[4];
 
     GLboolean _faceCulling;

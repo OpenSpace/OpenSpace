@@ -366,10 +366,13 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
-        glm::ivec2 resolution = global::renderEngine.renderingResolution();
-        p->setUniform(c.resolution, resolution);
         
-        p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+        #ifndef __APPLE__
+                glm::ivec2 resolution = global::renderEngine.renderingResolution();
+                p->setUniform(c.resolution, resolution);
+
+                p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+        #endif
         
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and

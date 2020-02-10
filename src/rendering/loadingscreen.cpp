@@ -166,7 +166,7 @@ void LoadingScreen::render() {
 
     const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentSubwindowSize()) * dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -316,7 +316,6 @@ void LoadingScreen::render() {
             ProgressbarCenter.x + progressbarSize.x ,
             ProgressbarCenter.y + progressbarSize.y
         };
-
 
         for (Item& item : _items) {
             if (!item.hasLocation) {

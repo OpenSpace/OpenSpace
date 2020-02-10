@@ -101,7 +101,7 @@ int getNavigationState(lua_State* L) {
 
     if (state.up.has_value()) {
         ghoul::lua::push(L, "Up");
-        pushVector(L, state.up.value());
+        pushVector(L, *state.up);
         lua_rawset(L, -3);
     }
     if (state.yaw != 0) {

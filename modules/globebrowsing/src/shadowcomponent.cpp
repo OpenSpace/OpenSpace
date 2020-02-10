@@ -166,7 +166,7 @@ documentation::Documentation ShadowComponent::Documentation() {
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "ShadowsComponent" })		
+    : properties::PropertyOwner({ "ShadowsComponent" })
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
     , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)

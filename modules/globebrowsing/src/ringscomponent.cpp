@@ -49,10 +49,12 @@
 #include <locale>
 
 namespace {
-    constexpr const std::array<const char*, 10> UniformNames = {
+    constexpr const char* _loggerCat = "RingsComponent";
+
+    constexpr const std::array<const char*, 9> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "transparency", "_nightFactor", 
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
-        "nShadowSamples", "zFightingPercentage"
+        "zFightingPercentage"
     };
 
     constexpr const std::array<const char*, 3> GeomUniformNames = {
@@ -174,7 +176,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
     , _enabled({ "Enabled", "Enabled", "Enable/Disable Rings" }, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
-    , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 20)
+    , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
     , _ringsDictionary(dictionary)
 {
     using ghoul::filesystem::File;
@@ -243,6 +245,7 @@ void RingsComponent::initialize() {
     if (_ringsDictionary.hasKey(NumberShadowSamplesInfo.identifier)) {
         _nShadowSamples = _ringsDictionary.value<int>(NumberShadowSamplesInfo.identifier);
     }
+    _nShadowSamples.onChange([this]() { compileShadowShader(); });
     addProperty(_nShadowSamples);
 
     addProperty(_transparency);
@@ -253,11 +256,7 @@ bool RingsComponent::isReady() const {
 }
 
 void RingsComponent::initializeGL() {
-    _shader = global::renderEngine.buildRenderProgram(
-        "RingsProgram",
-        absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl")
-    );
+    compileShadowShader();
 
     _geometryOnlyShader = global::renderEngine.buildRenderProgram(
         "RingsGeomOnlyProgram",
@@ -326,7 +325,6 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.transparency, _transparency);
         _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
         _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-        _shader->setUniform(_uniformCache.nShadowSamples, _nShadowSamples);
         _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
 
         ringTextureUnit.activate();
@@ -377,8 +375,7 @@ void RingsComponent::draw(const RenderData& data,
 
 void RingsComponent::update(const UpdateData& data) {
     if (_shader->isDirty()) {
-        _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        compileShadowShader();
     }
 
     if (_geometryOnlyShader->isDirty()) {
@@ -472,6 +469,25 @@ void RingsComponent::createPlane() {
         sizeof(VertexData),
         reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
     );
+}
+
+void RingsComponent::compileShadowShader() {
+    ghoul::Dictionary dict;
+    dict.setValue("nShadowSamples", std::to_string(_nShadowSamples - 1));
+
+    try {
+        global::renderEngine.removeRenderProgram(_shader.get());
+        _shader = global::renderEngine.buildRenderProgram(
+            "RingsProgram",
+            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
+            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
+            dict
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR(e.message);
+    }
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 bool RingsComponent::isEnabled() const {
