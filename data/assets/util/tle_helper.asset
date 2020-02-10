@@ -38,7 +38,7 @@ function isValidTLEFileFormat(lineArr)
 end
 
 local makeSingleLineElement = function(tle, filename)
-  local path = tle .. "\\" .. filename
+  local path = tle .. "/" .. filename
   local file = io.open(path, "r")
   assert(file, "File not found: " .. path)
 
