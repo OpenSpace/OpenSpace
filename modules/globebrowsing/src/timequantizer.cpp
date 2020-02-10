@@ -110,6 +110,8 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
     const std::string unquantizedStr = t.ISO8601();
     DateTime unquantized(unquantizedStr);
+    //resolutionFraction helps to improve iteration performance
+    const double resolutionFraction = 0.7;
     double error = 0.0;
     const int iterationLimit = 50;
     int iterations = 0;
@@ -120,7 +122,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
         DateTime quantized = DateTime(_timerange.start());
         doFirstApproximation(quantized, unquantized, _resolutionValue, _resolutionUnit);
         error = diff(quantized, unquantized);
-        while (error > (_resolution * 0.7) || error < 0) {
+        while (error > (_resolution * resolutionFraction) || error < 0) {
             if (error > 0) {
                 lastIncr = quantized.increment(static_cast<int>(_resolutionValue),
                     _resolutionUnit, error, _resolution);
