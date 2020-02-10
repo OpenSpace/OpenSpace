@@ -22,37 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gdal.h"
-#include "gdal_priv.h"
+#include "catch2/catch.hpp"
 
-#include <ogr_spatialref.h>
+#include <openspace/util/concurrentqueue.h>
 
+TEST_CASE("ConcurrentQueue: Basic", "[concurrentqueue]") {
+    using namespace openspace;
 
-#include "cpl_conv.h"
-#include "cpl_string.h"
-
-// Error: cannot open source file "wms/wmsdriver.h"
-//#include "wms/wmsdriver.h" 
-
-// Error: cannot open source file "wms/wmsmetadataset.h"
-//#include "wms/wmsmetadataset.h"
-
-
-class GdalWmsTest : public testing::Test {};
-
-TEST_F(GdalWmsTest, Simple) {
-    //GDALDatasetH poDataset;
-    //GDALAllRegister();
-
-    //
-    //std::string res = GDALVersionInfo("format");
-    //
-    //std::cout << res << std::endl;
-
-    //std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
-
-    //poDataset = GDALOpen(testFile.c_str(), GA_ReadOnly);
-
-    // This assertion fails
-    //ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";
+    ConcurrentQueue<int> q1;
+    q1.push(4);
+    int val = q1.pop();
+    REQUIRE(val == 4);
 }

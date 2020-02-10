@@ -22,20 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/optionproperty.h>
+#include "catch2/catch.hpp"
 
-class Issue527 : public testing::Test {};
+#include <modules/globebrowsing/src/tileprovider.h>
+#include <openspace/util/time.h>
+#include <glm/glm.hpp>
 
-TEST_F(Issue527, Regression) {
-    // Error in OptionProperty if values not starting at 0 are used
-    openspace::properties::OptionProperty p({ "id", "gui", "desc"});
+namespace {
+    constexpr const char* fileName = "data/scene/debugglobe/map_service_configs/"
+        "VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
+} // namespace
 
-    p.addOptions({
-        { -1, "a" },
-        { -2, "b" }
-    });
-
-
-    p = -1;
-    ASSERT_EQ("a", p.option().description);
-}

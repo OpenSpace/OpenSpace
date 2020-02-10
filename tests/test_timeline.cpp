@@ -22,60 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "catch2/catch.hpp"
+
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
 
-class TimelineTest : public testing::Test {};
-
-TEST_F(TimelineTest, AddAndCountKeyframes) {
+TEST_CASE("TimeLine: Add and Count Keyframes", "[timeline]") {
     openspace::Timeline<openspace::Time> timeline;
     timeline.addKeyframe(0.0, openspace::Time::now());
     timeline.addKeyframe(1.0, openspace::Time::now());
 
-    ASSERT_EQ(timeline.nKeyframes(), 2);
+    REQUIRE(timeline.nKeyframes() == 2);
+
 }
 
-TEST_F(TimelineTest, QueryKeyframes) {
+TEST_CASE("TimeLine: Query Keyframes", "[timeline]") {
     openspace::Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
 
-    ASSERT_EQ(timeline.nKeyframes(), 2);
+    REQUIRE(timeline.nKeyframes() == 2);
 
-    ASSERT_EQ(timeline.firstKeyframeAfter(0.0)->data, 1.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, false)->data, 1.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, true)->data, 0.f) << "Incorrect keyframe returned";
+    REQUIRE(timeline.firstKeyframeAfter(0.0)->data == Approx(1.f));
+    REQUIRE(timeline.firstKeyframeAfter(0.0, false)->data == Approx(1.f));
+    REQUIRE(timeline.firstKeyframeAfter(0.0, true)->data == Approx(0.f));
 
-    ASSERT_EQ(timeline.lastKeyframeBefore(1.0)->data, 0.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, false)->data, 0.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, true)->data, 1.f) << "Incorrect keyframe returned";
+    REQUIRE(timeline.lastKeyframeBefore(1.0)->data == Approx(0.f));
+    REQUIRE(timeline.lastKeyframeBefore(1.0, false)->data == Approx(0.f));
+    REQUIRE(timeline.lastKeyframeBefore(1.0, true)->data == Approx(1.f));
 }
 
-TEST_F(TimelineTest, RemoveKeyframes) {
+TEST_CASE("TimeLine: Remove Keyframes", "[timeline]") {
     openspace::Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
 
     timeline.removeKeyframesBefore(0.0);
-    ASSERT_EQ(timeline.nKeyframes(), 2);
+    REQUIRE(timeline.nKeyframes() == 2);
 
     timeline.removeKeyframesBefore(0.0, false);
-    ASSERT_EQ(timeline.nKeyframes(), 2);
+    REQUIRE(timeline.nKeyframes() == 2);
 
     timeline.removeKeyframesBefore(0.0, true);
-    ASSERT_EQ(timeline.nKeyframes(), 1);
+    REQUIRE(timeline.nKeyframes() == 1);
 
     timeline.removeKeyframesAfter(1.0);
-    ASSERT_EQ(timeline.nKeyframes(), 1);
+    REQUIRE(timeline.nKeyframes() == 1);
 
     timeline.removeKeyframesAfter(1.0, false);
-    ASSERT_EQ(timeline.nKeyframes(), 1);
+    REQUIRE(timeline.nKeyframes() == 1);
 
     timeline.removeKeyframesAfter(1.0, true);
-    ASSERT_EQ(timeline.nKeyframes(), 0);
+    REQUIRE(timeline.nKeyframes() == 0);
 }
 
-TEST_F(TimelineTest, RemoveKeyframesInRange) {
+TEST_CASE("TimeLine: Remove Keyframes In Range", "[timeline]") {
     openspace::Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
@@ -83,14 +84,14 @@ TEST_F(TimelineTest, RemoveKeyframesInRange) {
     timeline.addKeyframe(3.0, 3.f);
 
     timeline.removeKeyframesBetween(1.0, 2.0);
-    ASSERT_EQ(timeline.nKeyframes(), 4);
+    REQUIRE(timeline.nKeyframes() == 4);
 
     timeline.removeKeyframesBetween(1.0, 2.0, false, true);
-    ASSERT_EQ(timeline.nKeyframes(), 3);
+    REQUIRE(timeline.nKeyframes() == 3);
 
     timeline.removeKeyframesBetween(1.0, 2.0, true, true);
-    ASSERT_EQ(timeline.nKeyframes(), 2);
+    REQUIRE(timeline.nKeyframes() == 2);
 
     timeline.removeKeyframesBetween(-1.0, 4.0);
-    ASSERT_EQ(timeline.nKeyframes(), 0);
+    REQUIRE(timeline.nKeyframes() == 0);
 }

@@ -22,62 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scenegraphnode.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/globes/chunknode.h>
+#include "catch2/catch.hpp"
 
-#include <fstream>
-#include <glm/glm.hpp>
+#include <openspace/properties/optionproperty.h>
 
-using namespace openspace;
+TEST_CASE("Regression: 527", "[regression]") {
+    // Error in OptionProperty if values not starting at 0 are used
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-class ChunkNodeTest : public testing::Test {};
+    p.addOptions({
+        { -1, "a" },
+        { -2, "b" }
+        });
 
-/*
-TEST_F(ChunkNodeTest, Split) {
-	
-	ghoul::Dictionary dict;
-	ChunkLodGlobe chunkLodNode(dict);
-	chunkLodNode.initialize();
 
-	BoundingRect bounds(Vec2(2, 2), Vec2(2, 2));
-	ChunkNode cn(chunkLodNode,bounds);
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
-
-	cn.split();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_FALSE(cn.isLeaf()) << "Chunk node is not leaf";
-
-	ASSERT_EQ(cn.bounds.center.x, cn.child(Quad::NORTH_WEST).bounds.center.x * 2);
-	ASSERT_EQ(cn.bounds.center.x, cn.child(Quad::NORTH_EAST).bounds.center.x * 2/3);
-
-	ASSERT_EQ(cn.bounds.halfSize.x, cn.child(Quad::NORTH_WEST).bounds.halfSize.x * 2);
-	ASSERT_EQ(cn.bounds.halfSize.y, cn.child(Quad::NORTH_WEST).bounds.halfSize.y * 2);
-
-	chunkLodNode.deinitialize();
+    p = -1;
+    REQUIRE(p.option().description == "a");
 }
-
-TEST_F(ChunkNodeTest, Merge) {
-	ghoul::Dictionary dict;
-	ChunkLodGlobe chunkLodNode(dict);
-	chunkLodNode.initialize();
-
-
-	BoundingRect bounds(Vec2(2, 2), Vec2(2, 2));
-	ChunkNode cn(chunkLodNode,bounds);
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
-
-	cn.split();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_FALSE(cn.isLeaf()) << "Chunk node is not leaf";
-
-	cn.merge();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
-
-	chunkLodNode.deinitialize();
-
-}
-*/

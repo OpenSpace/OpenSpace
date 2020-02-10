@@ -218,6 +218,13 @@ handle_applications()
 end_header("End: Configuring Applications")
 message(STATUS "")
 
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+if (OPENSPACE_HAVE_TESTS)
+  begin_header("Generating OpenSpace unit test")
+  add_subdirectory("${OPENSPACE_BASE_DIR}/tests")
+  end_header()
+endif (OPENSPACE_HAVE_TESTS)
+
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
@@ -236,11 +243,6 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-
-  if (TARGET OpenSpaceTest)
-    set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
-    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-  endif ()
 elseif (OPENSPACE_MODULE_WEBBROWSER)
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()

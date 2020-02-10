@@ -22,66 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include "catch2/catch.hpp"
 
-#define private public
-#include <modules/iswa/util/iswamanager.h>
-#define private private
-
-#include <openspace/engine/downloadmanager.h>
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rawvolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timeline.h>
+#include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
 
+TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
+    using namespace openspace::volume;
 
-/*
- * For each test the following is run:
- * Constructor() -> setUp() -> test -> tearDown() -> Deconstructor()
- */
+    glm::uvec3 dims(1);
+    float value = 0.5f;
 
-namespace openspace {
+    RawVolume<float> vol(dims);
 
-class IswaManagerTest : public testing::Test {
-protected:
+    vol.set({ 0, 0, 0 }, value);
+    REQUIRE(vol.get({ 0, 0, 0 }) == value);
 
-    IswaManagerTest()
-        : _downloadManager("", 0)
-    {
-        IswaManager::initialize();
-    }
+    std::string volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
 
-    ~IswaManagerTest() {
-        IswaManager::deinitialize();
-    }
+    // Write the 1x1x1 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
 
-    void reset() {}
-    
-    DownloadManager _downloadManager;
-};
-
-TEST_F(IswaManagerTest, initialize){
-    IswaManager::deinitialize();
-
-    ASSERT_FALSE(IswaManager::isInitialized()) << "IswaManager is initialized before initialize call";
-
-    IswaManager::initialize();
-
-    ASSERT_TRUE(IswaManager::isInitialized()) << "IswaManager is not initialized after initialize call";
-
-    ASSERT_NE(&IswaManager::ref(), nullptr) << "IswaManager ref() is not a nullptr";
-
-    EXPECT_EQ(&IswaManager::ref(), &IswaManager::ref()) << "IswaManager ref() returns the same object twice";
+    // Read the 1x1x1 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    REQUIRE(storedVolume->get({ 0, 0, 0 }) == value);
 }
 
-TEST_F(IswaManagerTest, iswaUrl){
+TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
+    using namespace openspace::volume;
 
-    //OsEng.loadSpiceKernels();
-    //Time::ref().setTime(double(100000.0));
-    //Time::ref().preSynchronization();
-    //Time::ref().postSynchronizationPreDraw();
-    //std::string url = ISWAManager::ref().iSWAurl(7);
-    //std::string expectedUrl = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=2000-01-02%2015:45:35&window=-1&cygnetId=7";
+    glm::uvec3 dims(2, 4, 8);
+    auto value = [dims](glm::uvec3 v) {
+        return static_cast<float>(v.z * dims.z * dims.y + v.y * dims.y + v.x);
+    };
 
-    //EXPECT_EQ(expectedUrl, url);
+    RawVolume<float> vol(dims);
+    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float) { vol.set(x, value(x)); });
+
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) { REQUIRE(v == value(x)); });
+
+    std::string volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
+
+    // Write the 2x4x8 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
+
+    // Read the 2x4x8 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        REQUIRE(v == value(x));
+    });
 }
-
-}//namespace openspace
-#endif
