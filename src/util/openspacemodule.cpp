@@ -51,6 +51,7 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
                                  const ghoul::Dictionary& configuration)
 {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     std::string upperIdentifier = identifier();
     std::transform(
@@ -76,18 +77,21 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
 
 void OpenSpaceModule::initializeGL() {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     internalInitializeGL();
 }
 
 void OpenSpaceModule::deinitialize() {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     internalDeinitialize();
 }
 
 void OpenSpaceModule::deinitializeGL() {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     internalDeinitializeGL();
 }

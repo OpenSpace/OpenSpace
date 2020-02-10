@@ -65,7 +65,7 @@ private:
 
     bool _planeIsDirty = false;
 
-    glm::dmat3 _stateMatrix = glm::dmat3(0.0);
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
     std::string _frame;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

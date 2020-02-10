@@ -163,7 +163,7 @@ private:
     mutable glm::dmat3 _orbitPlaneRotation = glm::dmat3(1.0);
 
     /// The cached position for the last time with which the update method was called
-    glm::dvec3 _position = glm::vec3(0.f);
+    glm::dvec3 _position = glm::dvec3(0.0);
 };
 
 } // namespace openspace

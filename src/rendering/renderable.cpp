@@ -181,12 +181,11 @@ void Renderable::update(const UpdateData&) {}
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
-
-    _boundingSphere.setValue(boundingSphere);
+    _boundingSphere = boundingSphere;
 }
 
 float Renderable::boundingSphere() const {
-    return _boundingSphere.value();
+    return _boundingSphere;
 }
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(

@@ -183,6 +183,7 @@ if (OS_WINDOWS)
   add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
 endif (OS_WINDOWS)
 
+set_property(TARGET ${CEF_HELPER_TARGET} PROPERTY FOLDER "Helper")
 
 ##########################################################################################
 # Create OpenSpace module.

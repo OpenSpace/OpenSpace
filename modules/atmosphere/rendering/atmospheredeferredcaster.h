@@ -166,11 +166,11 @@ private:
     float _miePhaseConstant = 0.f;
     float _sunRadianceIntensity = 5.f;
 
-    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.0);
-    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.0);
-    glm::vec3 _mieScatteringCoeff = glm::vec3(0.0);
-    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.0);
-    glm::dvec3 _ellipsoidRadii = glm::vec3(0.0);
+    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
+    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
+    glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
+    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
+    glm::dvec3 _ellipsoidRadii = glm::vec3(0.f);
 
     // Atmosphere Textures Dimmensions
     int _transmittance_table_width = 256;

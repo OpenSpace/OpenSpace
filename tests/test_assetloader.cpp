@@ -55,7 +55,7 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
-        *state,
+        state,
         &syncWatcher,
         FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
     );
@@ -69,7 +69,7 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
     ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
-        *state,
+        state,
         &syncWatcher,
         FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
     );
@@ -82,7 +82,7 @@ TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
     ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
-        *state,
+        state,
         &syncWatcher,
         FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
     );
@@ -95,7 +95,7 @@ TEST_CASE("AssetLoader: Asset Initialization", "[assetloader]") {
     ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
-        *state,
+        state,
         &syncWatcher,
         FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
     );

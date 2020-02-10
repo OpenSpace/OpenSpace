@@ -96,12 +96,8 @@ struct WindowDelegate {
 
     glm::ivec4 (*viewportPixelCoordinates)() = []() { return glm::ivec4(0, 0, 0, 0); };
 
-    bool (*isExternalControlConnected)() = []() { return false; };
-
     void (*sendMessageToExternalControl)(const std::vector<char>& message) =
         [](const std::vector<char>&) {};
-
-    bool (*isSimpleRendering)() = []() { return true; };
 
     bool (*isFisheyeRendering)() = []() { return false; };
 

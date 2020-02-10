@@ -53,7 +53,9 @@ ScriptEngine::ScriptEngine()
             { "scriptingTemplate","${WEB}/documentation/scripting.hbs" },
         }
     )
-{}
+{
+    tracy::LuaRegister(_state);
+}
 
 void ScriptEngine::initialize() {
     ZoneScoped

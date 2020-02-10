@@ -1118,7 +1118,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             ));
         }
         else {
-            return glm::dmat3();
+            return glm::dmat3(1.0);
         }
     }
 

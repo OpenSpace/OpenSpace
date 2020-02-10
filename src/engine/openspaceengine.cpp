@@ -347,7 +347,7 @@ void OpenSpaceEngine::initialize() {
 
     global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
         std::make_unique<AssetLoader>(
-            *global::scriptEngine.luaState(),
+            global::scriptEngine.luaState(),
             rawWatcher,
             FileSys.absPath("${ASSETS}")
         ),
@@ -889,6 +889,8 @@ void OpenSpaceEngine::deinitialize() {
     }
     global::sessionRecording.deinitialize();
     global::versionChecker.cancel();
+
+    _assetManager = nullptr;
 
     global::deinitialize();
 

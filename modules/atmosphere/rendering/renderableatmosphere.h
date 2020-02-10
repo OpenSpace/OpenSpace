@@ -124,10 +124,10 @@ private:
     float _sunRadianceIntensity = 5.f;
     float _mieScattExtPropCoefProp = 1.f;
 
-    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.0);
-    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.0);
-    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.0);
-    glm::vec3 _mieScatteringCoeff = glm::dvec3(0.0);
+    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
+    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
+    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
+    glm::vec3 _mieScatteringCoeff = glm::dvec3(0.f);
 
     // Atmosphere Debug
     bool _saveCalculationsToTexture = false;

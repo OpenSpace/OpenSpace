@@ -123,7 +123,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
     ghoul::lua::LuaState luaState;
     scriptEngine.initializeLuaState(luaState);
 
-    AssetLoader loader(luaState, &watcher, "${ASSETS}");
+    AssetLoader loader(&luaState, &watcher, "${ASSETS}");
 
     RequestListener listener;
     loader.addAssetListener(&listener);

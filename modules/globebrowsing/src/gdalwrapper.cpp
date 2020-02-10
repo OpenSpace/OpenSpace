@@ -75,7 +75,6 @@ void GdalWrapper::create(size_t maximumCacheSize, size_t maximumMaximumCacheSize
 }
 
 void GdalWrapper::destroy() {
-    ghoul_assert(_singleton, "Cannot delete null");
     delete _singleton;
 }
 

@@ -313,6 +313,7 @@ SceneGraphNode::~SceneGraphNode() {} // NOLINT
 
 void SceneGraphNode::initialize() {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     LDEBUG(fmt::format("Initializing: {}", identifier()));
 
@@ -336,6 +337,7 @@ void SceneGraphNode::initialize() {
 
 void SceneGraphNode::initializeGL() {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     LDEBUG(fmt::format("Initializing GL: {}", identifier()));
 
@@ -349,6 +351,7 @@ void SceneGraphNode::initializeGL() {
 
 void SceneGraphNode::deinitialize() {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
@@ -365,6 +368,7 @@ void SceneGraphNode::deinitialize() {
 
 void SceneGraphNode::deinitializeGL() {
     ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
 
     LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
 
@@ -537,6 +541,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _performanceRecord.renderTime = (end - start).count();
     }
     else {
+        TracyGpuZone("Render")
+
         _renderable->render(newData, tasks);
         if (_computeScreenSpaceValues) {
             computeScreenSpaceData(newData);

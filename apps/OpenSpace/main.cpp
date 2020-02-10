@@ -1105,11 +1105,6 @@ void setSgctDelegateFunctions() {
             return glm::ivec4(data[0], data[2], data[1], data[3]);
         }
     };
-    sgctDelegate.isExternalControlConnected = []() {
-        ZoneScoped
-
-        return sgct::Engine::instance()->isExternalControlConnected();
-    };
     sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
         ZoneScoped
 
@@ -1117,12 +1112,6 @@ void setSgctDelegateFunctions() {
             message.data(),
             static_cast<int>(message.size())
         );
-    };
-    sgctDelegate.isSimpleRendering = []() {
-        ZoneScoped
-
-        return (sgct::Engine::instance()->getCurrentRenderTarget() !=
-                sgct::Engine::NonLinearBuffer);
     };
     sgctDelegate.isFisheyeRendering = []() {
         ZoneScoped

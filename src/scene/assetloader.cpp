@@ -89,13 +89,13 @@ namespace {
 
 namespace openspace {
 
-AssetLoader::AssetLoader(ghoul::lua::LuaState& luaState,
+AssetLoader::AssetLoader(ghoul::lua::LuaState* luaState,
                          SynchronizationWatcher* syncWatcher,
                          std::string assetRootDirectory)
     : _rootAsset(std::make_shared<Asset>(this, syncWatcher))
     , _synchronizationWatcher(syncWatcher)
     , _assetRootDirectory(std::move(assetRootDirectory))
-    , _luaState(&luaState)
+    , _luaState(luaState)
 {
     setCurrentAsset(_rootAsset);
 

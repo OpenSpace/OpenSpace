@@ -61,7 +61,7 @@ class AssetListener;
 
 class AssetLoader {
 public:
-    AssetLoader(ghoul::lua::LuaState& luaState, SynchronizationWatcher* syncWatcher,
+    AssetLoader(ghoul::lua::LuaState* luaState, SynchronizationWatcher* syncWatcher,
         std::string assetRootDirectory);
 
     ~AssetLoader();
