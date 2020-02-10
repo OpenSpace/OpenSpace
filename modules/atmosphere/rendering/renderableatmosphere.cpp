@@ -254,27 +254,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunIntensityP(SunIntensityInfo, 50.0f, 0.1f, 1000.0f)
     , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
-    , _atmosphereEnabled(false)
-    , _ozoneLayerEnabled(false)
-    , _sunFollowingCameraEnabled(false)
-    , _atmosphereRadius(0.f)
-    , _atmospherePlanetRadius(0.f)
-    , _planetAverageGroundReflectance(0.f)
-    , _planetGroundRadianceEmittion(0.f)
-    , _rayleighHeightScale(0.f)
-    , _ozoneHeightScale(0.f)
-    , _mieHeightScale(0.f)
-    , _miePhaseConstant(0.f)
-    , _sunRadianceIntensity(5.f)
-    , _mieScattExtPropCoefProp(1.f)
-    , _mieExtinctionCoeff(glm::vec3(0.f))
-    , _rayleighScatteringCoeff(glm::vec3(0.f))
-    , _ozoneExtinctionCoeff(glm::vec3(0.f))
-    , _mieScatteringCoeff(glm::vec3(0.f))
-    , _saveCalculationsToTexture(false)
-    , _preCalculatedTexturesScale(1.0)
-    , _shadowEnabled(false)
-    , _hardShadows(false)
  {
     ghoul_precondition(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyIdentifier),
@@ -433,7 +412,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
         if (success) {
             // Not using right now.
-            glm::vec3 rayleighWavelengths;
+            glm::vec3 rayleighWavelengths = glm::vec3(0.f);
             rayleighDictionary.getValue(
                 "Coefficients.Wavelengths",
                 rayleighWavelengths
@@ -452,8 +431,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             }
 
             if (!rayleighDictionary.getValue(
-                    keyRayleighHeightScale,
-                    _rayleighHeightScale))
+                keyRayleighHeightScale,
+                _rayleighHeightScale)
+            )
             {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(

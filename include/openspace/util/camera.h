@@ -58,9 +58,8 @@ public:
      */
     template<typename T>
     struct Cached {
-        Cached() { isDirty = true; }
-        T datum;
-        bool isDirty;
+        T datum = T(0);
+        bool isDirty = true;
     };
 
     Camera() = default;
@@ -125,9 +124,9 @@ public:
         SgctInternal() = default;
         SgctInternal(const SgctInternal& o);
 
-        glm::mat4 _sceneMatrix;
-        glm::mat4 _viewMatrix;
-        glm::mat4 _projectionMatrix;
+        glm::mat4 _sceneMatrix = glm::mat4(1.f);
+        glm::mat4 _viewMatrix = glm::mat4(1.f);
+        glm::mat4 _projectionMatrix = glm::mat4(1.f);
 
         mutable Cached<glm::mat4> _cachedViewProjectionMatrix;
         mutable std::mutex _mutex;
@@ -155,7 +154,7 @@ private:
     SceneGraphNode* _parent = nullptr;
 
     // _focusPosition to be removed
-    glm::dvec3 _focusPosition;
+    glm::dvec3 _focusPosition = glm::dvec3(0.0);
     float _maxFov = 0.f;
 
     // Cached data

@@ -94,8 +94,8 @@ private:
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 
-    glm::ivec2 _padTilePixelStartOffset;
-    glm::ivec2 _padTilePixelSizeDifference;
+    glm::ivec2 _padTilePixelStartOffset = glm::ivec2(0);
+    glm::ivec2 _padTilePixelSizeDifference = glm::ivec2(0);
 
     const layergroupid::GroupID _layerGroupId;
 

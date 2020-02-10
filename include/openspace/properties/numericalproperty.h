@@ -90,13 +90,13 @@ protected:
      */
     std::string luaToJson(std::string luaValue) const;
 
-    T _minimumValue;
-    T _maximumValue;
-    T _stepping;
-    float _exponent;
+    T _minimumValue = T(0);
+    T _maximumValue = T(0);
+    T _stepping = T(0);
+    float _exponent = 0.f;
 
-    T _interpolationStart;
-    T _interpolationEnd;
+    T _interpolationStart = T(0);
+    T _interpolationEnd = T(0);
 };
 
 } // namespace openspace::properties

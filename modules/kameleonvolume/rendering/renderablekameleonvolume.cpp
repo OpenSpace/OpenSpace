@@ -155,7 +155,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
     else {
         LWARNING("No dimensions specified for volumetric data, falling back to 32^3");
-        _dimensions = glm::uvec3(32, 32, 32);
+        _dimensions = glm::uvec3(32);
     }
 
     _stepSize = dictionary.value<float>(KeyStepSize);
@@ -302,7 +302,7 @@ void RenderableKameleonVolume::updateRaycasterModelTransform() {
     const glm::vec3 translation = (lBBoxBound + uBBoxBound) * 0.5f;
 
     const glm::mat4 modelTransform = glm::scale(
-        glm::translate(glm::mat4(1.0), translation),
+        glm::translate(glm::mat4(1.f), translation),
         scale
     );
     _raycaster->setModelTransform(modelTransform);

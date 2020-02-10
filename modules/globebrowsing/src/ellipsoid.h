@@ -54,7 +54,7 @@ public:
     /**
      * \param radii defines three radii for the Ellipsoid
      */
-    Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0, 1.0, 1.0));
+    Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0));
 
     /**
      * Scales a point along the geocentric normal and places it on the surface of the
@@ -95,16 +95,16 @@ public:
 
 private:
     struct EllipsoidCache {
-        glm::dvec3 radiiSquared;
-        glm::dvec3 oneOverRadiiSquared;
-        glm::dvec3 radiiToTheFourth;
-        double minimumRadius;
-        double maximumRadius;
+        glm::dvec3 radiiSquared = glm::dvec3(0.0);
+        glm::dvec3 oneOverRadiiSquared = glm::dvec3(0.0);
+        glm::dvec3 radiiToTheFourth = glm::dvec3(0.0);
+        double minimumRadius = 0.0;
+        double maximumRadius = 0.0;
     } _cached;
 
     void updateInternalCache();
 
-    glm::dvec3 _radii;
+    glm::dvec3 _radii = glm::dvec3(0.0);
 
     // Eclipse shadows conf
     std::vector<Ellipsoid::ShadowConfiguration> _shadowConfArray;

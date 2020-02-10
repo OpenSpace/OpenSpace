@@ -215,7 +215,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     );
     glm::dvec3 newUp = glm::cross(normal, newRight);
 
-    glm::dmat4 cameraOrientedRotation;
+    glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
     cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
     cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);

@@ -85,7 +85,12 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
     , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
-    , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
+    , _rotation(
+        RotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(0.f),
+        glm::vec3(glm::two_pi<float>())
+    )
     , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
 {
@@ -175,19 +180,19 @@ bool RenderableToyVolume::isReady() const {
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
         glm::mat4 transform = glm::translate(
-            glm::mat4(1.0),
+            glm::mat4(1.f),
             static_cast<glm::vec3>(_translation) *
-                std::pow(10.0f, static_cast<float>(_scalingExponent))
+                std::pow(10.f, static_cast<float>(_scalingExponent))
         );
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
-        transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));
-        transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
-        transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
+        transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1.f, 0.f, 0.f));
+        transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0.f, 1.f, 0.f));
+        transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0.f, 0.f, 1.f));
 
         transform = glm::scale(
             transform,
             static_cast<glm::vec3>(_size) *
-                std::pow(10.0f, static_cast<float>(_scalingExponent))
+                std::pow(10.f, static_cast<float>(_scalingExponent))
         );
 
         _raycaster->setColor(_color);

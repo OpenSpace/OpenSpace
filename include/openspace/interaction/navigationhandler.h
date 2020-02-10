@@ -67,7 +67,7 @@ public:
         std::string anchor;
         std::string aim;
         std::string referenceFrame;
-        glm::dvec3 position;
+        glm::dvec3 position = glm::dvec3(0.0);
         std::optional<glm::dvec3> up;
         double yaw = 0.0;
         double pitch = 0.0;

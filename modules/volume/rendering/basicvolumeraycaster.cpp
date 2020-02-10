@@ -153,7 +153,7 @@ bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
     glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
                          glm::vec4(0.f, 0.f, 0.f, 1.f);
 
-    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
+    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 
     return (localPosition.x > 0 && localPosition.x < 1 &&
             localPosition.y > 0 && localPosition.y < 1 &&

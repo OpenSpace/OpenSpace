@@ -64,13 +64,13 @@ namespace {
 
     // Shadow structure
     struct ShadowRenderingStruct {
-        double xu;
-        double xp;
-        double rs;
-        double rc;
-        glm::dvec3 sourceCasterVec;
-        glm::dvec3 casterPositionVec;
-        bool isShadowing;
+        double xu = 0.0;
+        double xp = 0.0;
+        double rs = 0.0;
+        double rc = 0.0;
+        glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
+        glm::dvec3 casterPositionVec = glm::dvec3(0.0);
+        bool isShadowing = false;
     };
 
     constexpr const char* KeyRadii = "Radii";

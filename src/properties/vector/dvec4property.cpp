@@ -33,17 +33,17 @@
 namespace {
 
 glm::dvec4 fromLuaConversion(lua_State* state, bool& success) {
-    glm::dvec4 result;
+    glm::dvec4 result = glm::dvec4(0.0);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec4>::value; ++i) {
         int hasNext = lua_next(state, -2);
         if (hasNext != 1) {
             success = false;
-            return glm::dvec4(0);
+            return glm::dvec4(0.0);
         }
         if (lua_isnumber(state, -1) != 1) {
             success = false;
-            return glm::dvec4(0);
+            return glm::dvec4(0.0);
         }
         else {
             result[i] = lua_tonumber(state, -1);
@@ -69,7 +69,7 @@ bool toLuaConversion(lua_State* state, glm::dvec4 value) {
 }
 
 glm::dvec4 fromStringConversion(const std::string& val, bool& success) {
-    glm::dvec4 result;
+    glm::dvec4 result = glm::dvec4(0.0);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {
         success = false;
@@ -108,7 +108,7 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DVec4Property,
     glm::dvec4,
-    glm::dvec4(0),
+    glm::dvec4(0.0),
     glm::dvec4(std::numeric_limits<double>::lowest()),
     glm::dvec4(std::numeric_limits<double>::max()),
     glm::dvec4(0.01),

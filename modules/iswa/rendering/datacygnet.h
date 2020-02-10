@@ -91,7 +91,7 @@ protected:
 
     std::shared_ptr<DataProcessor> _dataProcessor;
     std::string _dataBuffer;
-    glm::size3_t _textureDimensions;
+    glm::size3_t _textureDimensions = glm::size3_t(0);
 
 private:
     bool readyToRender() const override;

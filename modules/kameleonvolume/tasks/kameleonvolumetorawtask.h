@@ -48,10 +48,10 @@ private:
 
     std::string _variable;
     std::string _units;
-    glm::uvec3 _dimensions;
+    glm::uvec3 _dimensions = glm::uvec3(0);
     bool _autoDomainBounds = false;
-    glm::vec3 _lowerDomainBound;
-    glm::vec3 _upperDomainBound;
+    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
+    glm::vec3 _upperDomainBound = glm::vec3(0.f);
 };
 
 } // namespace openspace::kameleon

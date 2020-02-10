@@ -53,7 +53,7 @@ private:
     ghoul::opengl::Texture& getSlice(int sliceIndex) const;
     std::vector<std::string> _paths;
     mutable LinearLruCache<std::shared_ptr<ghoul::opengl::Texture>> _cache;
-    glm::ivec2 _sliceDimensions;
+    glm::ivec2 _sliceDimensions = glm::ivec2(0);
     bool _isInitialized = false;
 };
 

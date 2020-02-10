@@ -175,7 +175,7 @@ documentation::Documentation RenderableTrail::Documentation() {
 
 RenderableTrail::Appearance::Appearance()
     : properties::PropertyOwner(AppearanceInfo)
-    , lineColor(LineColorInfo, glm::vec3(1.0f, 1.0f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)

@@ -84,12 +84,12 @@ private:
 
     std::string _kwPath;
 
-    glm::size3_t _dimensions;
-    float* _dataSlice;
+    glm::size3_t _dimensions = glm::size3_t(0);
+    float* _dataSlice = nullptr;
     std::string _var;
-    float _scale;
+    float _scale = 0.f;
 
-    glm::vec3 _origOffset;
+    glm::vec3 _origOffset = glm::vec3(0.f);
 
     /**
      * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple
@@ -108,8 +108,8 @@ private:
     };
     Cut _cut;
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 };
 
 } // namespace openspace

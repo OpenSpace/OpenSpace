@@ -52,7 +52,7 @@ public:
     VoxelType* data();
 
 private:
-    glm::uvec3 _dimensions;
+    glm::uvec3 _dimensions = glm::uvec3(0);
     std::vector<VoxelType> _data;
 };
 

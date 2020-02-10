@@ -100,14 +100,14 @@ private:
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
-    glm::mat4 _modelTransform;
+    glm::mat4 _modelTransform = glm::mat4(1.f);
     float _opacity = 20.f;
     float _rNormalization = 0.f;
     float _rUpperBound = 1.f;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
-    float _stepSize;
+    float _stepSize = 0.f;
 };
 
 } // namespace openspace::volume

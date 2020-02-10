@@ -146,7 +146,7 @@ private:
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     int _nValuesPerAstronomicalObject = 0;
 
-    glm::dmat4 _transformationMatrix;
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;

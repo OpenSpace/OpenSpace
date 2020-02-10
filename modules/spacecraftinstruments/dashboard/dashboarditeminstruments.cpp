@@ -310,12 +310,12 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemInstruments::size() const {
-    glm::vec2 size = { 0.f, 0.f };
+    glm::vec2 size = glm::vec2(0.f);
     //return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
     double currentTime = global::timeManager.time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
-        return { 0.f, 0.f };
+        return glm::vec2(0.f);
     }
     ImageSequencer& sequencer = ImageSequencer::ref();
 
