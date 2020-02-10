@@ -77,8 +77,8 @@ public:
 
 private:
     BoxGeometry _boundingBox;
-    glm::mat4 _modelTransform;
-    float _stepSizeCoefficient;
+    glm::mat4 _modelTransform = glm::mat4(1.f);
+    float _stepSizeCoefficient = 0.f;
 
     std::shared_ptr<TSP> _tsp;
     std::shared_ptr<AtlasManager> _atlasManager;

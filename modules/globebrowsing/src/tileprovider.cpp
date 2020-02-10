@@ -40,6 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <fstream>
 #include "cpl_minixml.h"
 
@@ -152,6 +153,8 @@ namespace temporal {
 //
 
 void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initData) {
+    ZoneScoped
+
     t.asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         t.name,
         std::make_unique<RawTileDataReader>(
@@ -163,6 +166,8 @@ void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initDat
 }
 
 bool initTexturesFromLoadedData(DefaultTileProvider& t) {
+    ZoneScoped
+
     if (t.asyncTextureDataProvider) {
         std::optional<RawTile> tile = t.asyncTextureDataProvider->popFinishedRawTile();
         if (tile) {
@@ -181,6 +186,8 @@ bool initTexturesFromLoadedData(DefaultTileProvider& t) {
 //
 
 void initialize(TextTileProvider& t) {
+    ZoneScoped
+
     t.font = global::fontManager.font("Mono", static_cast<float>(t.fontSize));
     t.fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
     t.fontRenderer->setFramebufferSize(glm::vec2(t.initData.dimensions));
@@ -192,6 +199,9 @@ void deinitialize(TextTileProvider& t) {
 }
 
 Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
+    ZoneScoped
+    TracyGpuZone("tile")
+
     cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
     Tile tile = t.tileCache->get(key);
     if (!tile.texture) {
@@ -231,6 +241,8 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
 }
 
 void reset(TextTileProvider& t) {
+    ZoneScoped
+
     t.tileCache->clear();
 }
 
@@ -240,6 +252,8 @@ void reset(TextTileProvider& t) {
 //
 
 TileProvider* levelProvider(TileProviderByLevel& t, int level) {
+    ZoneScoped
+
     if (!t.levelTileProviders.empty()) {
         int clampedLevel = glm::clamp(
             level,
@@ -296,6 +310,8 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
 std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
                                              const TemporalTileProvider::TimeKey& timekey)
 {
+    ZoneScoped
+
     static const std::vector<std::string> IgnoredTokens = {
         // From: http://www.gdal.org/frmt_wms.html
         "${x}",
@@ -324,6 +340,8 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
 TileProvider* getTileProvider(TemporalTileProvider& t,
                               const TemporalTileProvider::TimeKey& timekey)
 {
+    ZoneScoped
+
     const auto it = t.tileProviderMap.find(timekey);
     if (it != t.tileProviderMap.end()) {
         return it->second.get();
@@ -339,6 +357,8 @@ TileProvider* getTileProvider(TemporalTileProvider& t,
 }
 
 TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
+    ZoneScoped
+
     Time tCopy(time);
     if (t.timeQuantizer.quantize(tCopy, true)) {
         TemporalTileProvider::TimeKey timeKey = timeStringify(t.timeFormat, tCopy);
@@ -354,6 +374,8 @@ TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
 }
 
 void ensureUpdated(TemporalTileProvider& t) {
+    ZoneScoped
+
     if (!t.currentTileProvider) {
         update(t);
     }
@@ -374,6 +396,8 @@ std::string xmlValue(TemporalTileProvider& t, CPLXMLNode* node, const std::strin
 }
 
 std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& xml) {
+    ZoneScoped
+
     CPLXMLNode* node = CPLParseXMLString(xml.c_str());
 
     std::string timeStart = xmlValue(t, node, temporal::TimeStart, "2000 Jan 1");
@@ -420,6 +444,8 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
 }
 
 bool readFilePath(TemporalTileProvider& t) {
+    ZoneScoped
+
     std::ifstream in(t.filePath.value().c_str());
     std::string xml;
     if (in.is_open()) {
@@ -453,6 +479,8 @@ unsigned int TileProvider::NumTileProviders = 0;
 // General functions
 //
 void initializeDefaultTile() {
+    ZoneScoped
+
     ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
     using namespace ghoul::opengl;
 
@@ -486,6 +514,8 @@ void deinitializeDefaultTile() {
 std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTypeID,
                                                    const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped
+
     const char* type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
     std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
@@ -498,6 +528,8 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     : filePath(defaultprovider::FilePathInfo, "")
     , tilePixelSize(defaultprovider::TilePixelSizeInfo, 32, 32, 2048)
 {
+    ZoneScoped
+
     type = Type::DefaultTileProvider;
 
     tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
@@ -559,6 +591,8 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : filePath(singleimageprovider::FilePathInfo)
 {
+    ZoneScoped
+
     type = Type::SingleImageTileProvider;
 
     filePath = dictionary.value<std::string>(KeyFilePath);
@@ -575,6 +609,8 @@ TextTileProvider::TextTileProvider(TileTextureInitData initData, size_t fontSize
     : initData(std::move(initData))
     , fontSize(fontSize)
 {
+    ZoneScoped
+
     tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
 }
 
@@ -585,6 +621,8 @@ TextTileProvider::TextTileProvider(TileTextureInitData initData, size_t fontSize
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
+    ZoneScoped
+
     type = Type::SizeReferenceTileProvider;
 
     font = global::fontManager.font("Mono", static_cast<float>(fontSize));
@@ -601,6 +639,8 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
     : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
+    ZoneScoped
+
     type = Type::TileIndexTileProvider;
 }
 
@@ -609,6 +649,8 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
 
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
+    ZoneScoped
+
     type = Type::ByIndexTileProvider;
 
     const ghoul::Dictionary& defaultProviderDict = dictionary.value<ghoul::Dictionary>(
@@ -677,6 +719,8 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
+    ZoneScoped
+
     type = Type::ByLevelTileProvider;
 
     layergroupid::GroupID layerGroupID = dictionary.value<layergroupid::GroupID>(
@@ -753,6 +797,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : initDict(dictionary)
     , filePath(temporal::FilePathInfo)
 {
+    ZoneScoped
+
     type = Type::TemporalTileProvider;
 
     filePath = dictionary.value<std::string>(KeyFilePath);
@@ -771,6 +817,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
 
 bool initialize(TileProvider& tp) {
+    ZoneScoped
+
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
     tp.uniqueIdentifier = TileProvider::NumTileProviders++;
@@ -821,6 +869,8 @@ bool initialize(TileProvider& tp) {
 
 
 bool deinitialize(TileProvider& tp) {
+    ZoneScoped
+
     switch (tp.type) {
         case Type::DefaultTileProvider:
             break;
@@ -860,6 +910,8 @@ bool deinitialize(TileProvider& tp) {
 
 
 Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
+    ZoneScoped
+
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -973,6 +1025,8 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
 
 
 Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
+    ZoneScoped
+
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -1033,6 +1087,8 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
 
 
 TileDepthTransform depthTransform(TileProvider& tp) {
+    ZoneScoped
+
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -1076,6 +1132,8 @@ TileDepthTransform depthTransform(TileProvider& tp) {
 
 
 int update(TileProvider& tp) {
+    ZoneScoped
+
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -1146,6 +1204,8 @@ int update(TileProvider& tp) {
 
 
 void reset(TileProvider& tp) {
+    ZoneScoped
+
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -1232,6 +1292,8 @@ void reset(TileProvider& tp) {
 
 
 int maxLevel(TileProvider& tp) {
+    ZoneScoped
+
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -1277,6 +1339,8 @@ int maxLevel(TileProvider& tp) {
 
 
 float noDataValueAsFloat(TileProvider& tp) {
+    ZoneScoped
+
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
     switch (tp.type) {
         case Type::DefaultTileProvider: {
@@ -1307,6 +1371,8 @@ float noDataValueAsFloat(TileProvider& tp) {
 
 
 ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxParents) {
+    ZoneScoped
+
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
 
     auto ascendToParent = [](TileIndex& tileIndex, TileUvTransform& uv) {
@@ -1363,6 +1429,8 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
 
 
 ChunkTilePile chunkTilePile(TileProvider& tp, TileIndex tileIndex, int pileSize) {
+    ZoneScoped
+
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
 

@@ -127,12 +127,7 @@ public:
     /// Recombutes the rotation matrix used in the update method
     void computeOrbitPlane() const;
 
-protected:
-
-
 private:
-   
-
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
      * eccentricity into acount) based on the mean anomaly (location of the space craft
@@ -165,10 +160,10 @@ private:
     /// Dirty flag for the _orbitPlaneRotation parameters
     mutable bool _orbitPlaneDirty = true;
     /// The rotation matrix that defines the plane of the orbit
-    mutable glm::dmat3 _orbitPlaneRotation;
+    mutable glm::dmat3 _orbitPlaneRotation = glm::dmat3(1.0);
 
     /// The cached position for the last time with which the update method was called
-    glm::dvec3 _position;
+    glm::dvec3 _position = glm::vec3(0.f);
 };
 
 } // namespace openspace

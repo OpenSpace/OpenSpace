@@ -183,7 +183,12 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     )
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _rotation(
+        RotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(0.f),
+        glm::vec3(glm::two_pi<float>())
+    )
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
     , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo, 1000.f, 1.f, 1000.f)
 {
@@ -260,14 +265,14 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     else {
         LERROR("No volume filename specified.");
     }
-    glm::vec3 volumeDimensions;
+    glm::vec3 volumeDimensions = glm::vec3(0.f);
     if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
         _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
     }
     else {
         LERROR("No volume dimensions specified.");
     }
-    glm::vec3 volumeSize;
+    glm::vec3 volumeSize = glm::vec3(0.f);
     if (volumeDictionary.getValue("Size", volumeSize)) {
         _volumeSize = volumeSize;
     }
@@ -534,18 +539,18 @@ void RenderableGalaxy::update(const UpdateData& data) {
     //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
     const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
     glm::mat4 transform = glm::rotate(
-        glm::mat4(1.0),
+        glm::mat4(1.f),
         eulerRotation.x,
-        glm::vec3(1, 0, 0)
+        glm::vec3(1.f, 0.f, 0.f)
     );
-    transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
-    transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
+    transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0.f, 1.f, 0.f));
+    transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0.f, 0.f, 1.f));
 
     glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
     _pointTransform = transform;
     //_pointTransform = glm::scale(transform, _pointScaling);
 
-    const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.0);
+    const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.f);
 
     // Todo: handle floating point overflow, to actually support translation.
 

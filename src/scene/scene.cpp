@@ -36,7 +36,7 @@
 #include <openspace/util/camera.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/misc/profiling.h>
 #include <string>
 #include <stack>
 
@@ -120,6 +120,8 @@ void Scene::markNodeRegistryDirty() {
 }
 
 void Scene::updateNodeRegistry() {
+    ZoneScoped
+
     sortTopologically();
     _dirtyNodeRegistry = false;
 }
@@ -279,6 +281,8 @@ void Scene::initializeGL() {
 */
 
 void Scene::update(const UpdateData& data) {
+    ZoneScoped
+
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
 
     for (SceneGraphNode* node : initializedNodes) {
@@ -304,6 +308,8 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
+    ZoneScoped
+
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::render(begin '" + node->identifier() + "')");
@@ -316,15 +322,20 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         if (global::callback::webBrowserPerformanceHotfix) {
             (*global::callback::webBrowserPerformanceHotfix)();
         }
+        
+        {
+            ZoneScopedN("Get Error Hack")
 
-        // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
-        // thread and the CPU thread from diverging too much, particularly the uploading
-        // of a lot of textures for the globebrowsing planets can cause a hard stuttering
-        // effect. Asking for a glGetError after every rendering call will force the
-        // threads to implicitly synchronize and thus prevent the stuttering.  The better
-        // solution would be to reduce the number of uploads per frame, use a staggered
-        // buffer, or something else like that preventing a large spike in uploads
-        glGetError();
+            // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
+            // thread and the CPU thread from diverging too much, particularly the
+            // uploading of a lot of textures for the globebrowsing planets can cause a
+            // hard stuttering effect. Asking for a glGetError after every rendering call
+            // will force the threads to implicitly synchronize and thus prevent the
+            // stuttering.  The better solution would be to reduce the number of uploads
+            // per frame, use a staggered buffer, or something else like that preventing a
+            // large spike in uploads
+            glGetError();
+        }
     }
 }
 
@@ -509,6 +520,8 @@ void Scene::removePropertyInterpolation(properties::Property* prop) {
 }
 
 void Scene::updateInterpolations() {
+    ZoneScoped
+
     using namespace std::chrono;
 
     auto now = steady_clock::now();

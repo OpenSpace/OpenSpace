@@ -70,7 +70,7 @@ private:
 
     // Input from mouse
     std::vector<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
+    glm::dvec2 _mousePosition = glm::dvec2(0.0);
     double _mouseScrollDelta;
 };
 

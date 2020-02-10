@@ -50,10 +50,10 @@ public:
 private:
     std::string _inFilenamePrefix;
     std::string _inFilenameSuffix;
-    size_t _inFirstIndex;
-    size_t _inNSlices;
+    size_t _inFirstIndex = 0;
+    size_t _inNSlices = 0;
     std::string _outFilename;
-    glm::ivec3 _outDimensions;
+    glm::ivec3 _outDimensions = glm::ivec3(0);
 };
 
 } // namespace openspace

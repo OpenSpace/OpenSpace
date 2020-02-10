@@ -385,7 +385,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
-            glm::dvec3 otherPos;
+            glm::dvec3 otherPos = glm::dvec3(0.0);
             if (otherComp.type == Type::NodeSurface) {
                 // We are only interested in the direction, and we want to prevent
                 // infinite recursion

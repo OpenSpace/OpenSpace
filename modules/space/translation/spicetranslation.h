@@ -44,7 +44,7 @@ private:
     properties::StringProperty _observer;
     properties::StringProperty _frame;
 
-    glm::dvec3 _position;
+    glm::dvec3 _position = glm::vec3(0.f);
 };
 
 } // namespace openspace

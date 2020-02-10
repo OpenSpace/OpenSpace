@@ -34,6 +34,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -46,23 +47,27 @@ namespace {
     constexpr const float MessageFontSize = 22.f;
     constexpr const float ItemFontSize = 10.f;
 
-    const glm::vec2 LogoCenter = { 0.f, 0.525f };  // in NDC
-    const glm::vec2 LogoSize = { 0.275f, 0.275 };  // in NDC
+    constexpr const glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
+    constexpr const glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
 
-    const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };  // in NDC
-    const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };  // in NDC
+    constexpr const glm::vec2 ProgressbarCenter = glm::vec2(0.f, -0.75f);  // in NDC
+    constexpr const glm::vec2 ProgressbarSize = glm::vec2(0.7f, 0.0075f);  // in NDC
     constexpr const float ProgressbarLineWidth = 0.0025f;  // in NDC
 
-    const glm::vec4 ProgressbarOutlineColor = { 0.9f, 0.9f, 0.9f, 1.f };
+    constexpr const glm::vec4 ProgressbarOutlineColor =
+        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
-    const glm::vec4 PhaseColorConstruction = { 0.7f, 0.7f, 0.f, 1.f };
-    const glm::vec4 PhaseColorSynchronization = { 0.9f, 0.9f, 0.9f, 1.f };
-    const glm::vec4 PhaseColorInitialization = { 0.1f, 0.75f, 0.1f, 1.f };
+    constexpr const glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr const glm::vec4 PhaseColorSynchronization =
+        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
+    constexpr const glm::vec4 PhaseColorInitialization =
+        glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
 
-    const glm::vec4 ItemStatusColorStarted = { 0.5f, 0.5f, 0.5f, 1.f };
-    const glm::vec4 ItemStatusColorInitializing = { 0.7f, 0.7f, 0.f, 1.f };
-    const glm::vec4 ItemStatusColorFinished = { 0.1f, 0.75f, 0.1f, 1.f };
-    const glm::vec4 ItemStatusColorFailed = { 0.8f, 0.1f, 0.1f, 1.f };
+    constexpr const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    constexpr const glm::vec4 ItemStatusColorInitializing =
+        glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr const glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    constexpr const glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
 
     constexpr const float ItemStandoffDistance = 5.f; // in pixels
 
@@ -150,6 +155,8 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
+    ZoneScoped
+
     if (_phase == Phase::PreStart) {
         return;
     }
@@ -224,7 +231,7 @@ void LoadingScreen::render() {
             rendering::helper::Anchor::Center
         );
 
-        glm::vec4 color;
+        glm::vec4 color = glm::vec4(0.f);
         switch (_phase) {
             case Phase::PreStart:
                 break;
@@ -273,8 +280,8 @@ void LoadingScreen::render() {
 
     renderer.render(*_loadingFont, loadingLl, headline);
 
-    glm::vec2 messageLl;
-    glm::vec2 messageUr;
+    glm::vec2 messageLl = glm::vec2(0.f);
+    glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
         std::lock_guard<std::mutex> guard(_messageMutex);
 
@@ -325,8 +332,8 @@ void LoadingScreen::render() {
                 // we make use with an overlap in the worst case
                 bool foundSpace = false;
 
-                glm::vec2 ll;
-                glm::vec2 ur;
+                glm::vec2 ll = glm::vec2(0.f);
+                glm::vec2 ur = glm::vec2(0.f);
                 int i = 0;
                 for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(

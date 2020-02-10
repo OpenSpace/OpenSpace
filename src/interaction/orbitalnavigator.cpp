@@ -503,7 +503,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     glm::dquat anchorNodeRotationDiff = _previousAnchorNodeRotation.has_value() ?
         _previousAnchorNodeRotation.value() * glm::inverse(anchorRotation) :
-        glm::dquat();
+        glm::dquat(1.0, 0.0, 0.0, 0.0);
 
     _previousAnchorNodeRotation = anchorRotation;
 
@@ -834,7 +834,7 @@ OrbitalNavigator::CameraRotationDecomposition
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
     const glm::dmat4 lookAtMat = glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
+        glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
         normalize(cameraViewDirection + cameraUp)
     );
@@ -858,7 +858,7 @@ OrbitalNavigator::CameraRotationDecomposition
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
     const glm::dmat4 lookAtMat = glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
+        glm::dvec3(0.0),
         reference - cameraPose.position,
         normalize(cameraViewDirection + cameraUp)
     );
@@ -1040,7 +1040,7 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
             localCameraRotation * Camera::UpDirectionCameraSpace;
 
         const glm::dmat4 lookAtMat = glm::lookAt(
-            glm::dvec3(0.0, 0.0, 0.0),
+            glm::dvec3(0.0),
             Camera::ViewDirectionCameraSpace,
             normalize(localUp)
         );

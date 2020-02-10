@@ -27,6 +27,7 @@
 #include <modules/webbrowser/include/webbrowserapp.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <fmt/format.h>
 #include <include/wrapper/cef_helpers.h>
 
@@ -91,6 +92,8 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 }
 
 void CefHost::doMessageLoopWork() {
+    ZoneScoped
+
     CefDoMessageLoopWork();
 }
 

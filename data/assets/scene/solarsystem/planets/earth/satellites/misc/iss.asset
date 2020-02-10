@@ -73,7 +73,7 @@ local initializeAndAddNodes = function()
     },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-      Path = "/Solar System/Planets/Earth/Satellites/ISS/ISS"
+      Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
 
@@ -89,13 +89,14 @@ local initializeAndAddNodes = function()
           File = path,
           LineNumber = 1
         },
-        Color = { 0.9, 0.0, 0.0 },
+        Color = { 0.9, 0.6715, 0.0 },
+        Fade = 1.5,
         Period = period,
-        Resolution = 160
+        Resolution = 320
       },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS/Trail"
+        Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
 

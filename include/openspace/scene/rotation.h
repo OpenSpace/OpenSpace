@@ -61,7 +61,7 @@ protected:
 private:
     bool _needsUpdate = true;
     double _cachedTime = -std::numeric_limits<double>::max();
-    glm::dmat3 _cachedMatrix;
+    glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
 };
 
 }  // namespace openspace

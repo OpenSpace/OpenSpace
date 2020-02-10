@@ -112,7 +112,7 @@ private:
     void saveTextureToMemory(GLenum color_buffer_attachment, int width, int height,
         std::vector<double> & memory) const;
 
-    glm::ivec2 _resolution = glm::ivec2(0, 0);
+    glm::ivec2 _resolution = glm::ivec2(0);
 
     bool _dirtyResolution = true;
     bool _dirtyRendererData = true;

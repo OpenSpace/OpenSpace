@@ -42,6 +42,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
@@ -64,13 +65,13 @@ namespace {
 
     // Shadow structure
     struct ShadowRenderingStruct {
-        double xu;
-        double xp;
-        double rs;
-        double rc;
-        glm::dvec3 sourceCasterVec;
-        glm::dvec3 casterPositionVec;
-        bool isShadowing;
+        double xu = 0.0;
+        double xp = 0.0;
+        double rs = 0.0;
+        double rc = 0.0;
+        glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
+        glm::dvec3 casterPositionVec = glm::dvec3(0.0);
+        bool isShadowing = false;
     };
 
     constexpr const char* KeyRadii = "Radii";
@@ -968,6 +969,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                                    const ShadowComponent::ShadowMapData& shadowData,
                                    bool renderGeomOnly)
 {
+    ZoneScoped
+
     if (_shadersNeedRecompilation) {
         recompileShaders();
     }
@@ -1165,6 +1168,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     auto traversal = [&global, &globalCount, &local, &localCount,
           cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
     {
+        ZoneScopedN("traversal")
+
         std::vector<const Chunk*> Q;
         Q.reserve(256);
 
@@ -1269,6 +1274,9 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
                                          const ShadowComponent::ShadowMapData& shadowData,
                                                                       bool renderGeomOnly)
 {
+    ZoneScoped
+    TracyGpuZone("renderChunkGlobally")
+
     //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
@@ -1352,6 +1360,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
                                          const ShadowComponent::ShadowMapData& shadowData,
                                          bool renderGeomOnly)
 {
+    ZoneScoped
+    TracyGpuZone("renderChunkLocally")
+
     //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
@@ -1476,7 +1487,10 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
-                                       bool renderBounds, bool renderAABB) const {
+                                       bool renderBounds, bool renderAABB) const
+{
+    ZoneScoped
+
     const std::array<glm::dvec4, 8>& modelSpaceCorners = chunk.corners;
 
     std::vector<glm::vec4> clippingSpaceCorners(8);
@@ -1515,8 +1529,10 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
-    const Chunk& chunk, const RenderData& data)
+                                        const Chunk& chunk, const RenderData& data)
 {
+    ZoneScoped
+
     if (_generalProperties.useAccurateNormals &&
         !_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
@@ -1563,6 +1579,8 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
 }
 
 void RenderableGlobe::recompileShaders() {
+    ZoneScoped
+
     struct LayerShaderPreprocessingData {
         struct LayerGroupPreprocessingData {
             int lastLayerIdx;
@@ -1794,6 +1812,8 @@ void RenderableGlobe::recompileShaders() {
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
+    ZoneScoped
+
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
     glm::dvec3 ellipsoidSurfaceToTarget = targetModelSpace - centerToEllipsoidSurface;
@@ -1824,6 +1844,8 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
                                      const RenderData& renderData,
                                      const BoundingHeights& heights) const
 {
+    ZoneScoped
+
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
            (PerformFrustumCulling && isCullableByFrustum(chunk, renderData));
 }
@@ -1831,6 +1853,8 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
                                   const BoundingHeights& heights) const
 {
+    ZoneScoped
+
     const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
         desiredLevelByProjectedArea(chunk, renderData, heights) :
         desiredLevelByDistance(chunk, renderData, heights);
@@ -1846,6 +1870,8 @@ int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderDa
 }
 
 float RenderableGlobe::getHeight(const glm::dvec3& position) const {
+    ZoneScoped
+
     float height = 0;
 
     // Get the uv coordinates to sample from
@@ -1997,6 +2023,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
                                              const RenderData& data, ShadowCompType stype)
 {
+    ZoneScoped
+
     constexpr const double KM_TO_M = 1000.0;
 
     ghoul_assert(
@@ -2137,6 +2165,8 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
                                             const RenderData& data,
                                             const BoundingHeights& heights) const
 {
+    ZoneScoped
+
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
     // with the inverse model matrix
@@ -2171,6 +2201,8 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
                                                  const RenderData& data,
                                                  const BoundingHeights& heights) const
 {
+    ZoneScoped
+
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
     // with the inverse model matrix
@@ -2251,6 +2283,8 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
 }
 
 int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
+    ZoneScoped
+
     const int currLevel = chunk.tileIndex.level;
 
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
@@ -2274,6 +2308,8 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
 bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
                                           const RenderData& renderData) const
 {
+    ZoneScoped
+
     // Calculate the MVP matrix
     const glm::dmat4 viewTransform = glm::dmat4(renderData.camera.combinedViewMatrix());
     const glm::dmat4 modelViewProjectionTransform = glm::dmat4(
@@ -2299,6 +2335,8 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
                                           const RenderData& renderData,
                                           const BoundingHeights& heights) const
 {
+    ZoneScoped
+
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
     const GeodeticPatch& patch = chunk.surfacePatch;
@@ -2368,6 +2406,8 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
+    ZoneScoped
+
     if (depth > 0 && isLeaf(cn)) {
         std::vector<void*> memory = _chunkPool.allocate(
             static_cast<int>(cn.children.size())
@@ -2396,6 +2436,8 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
 }
 
 void RenderableGlobe::freeChunkNode(Chunk* n) {
+    ZoneScoped
+
     _chunkPool.free(n);
     for (Chunk* c : n->children) {
         if (c) {
@@ -2406,6 +2448,8 @@ void RenderableGlobe::freeChunkNode(Chunk* n) {
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {
+    ZoneScoped
+
     for (Chunk* child : cn.children) {
         if (child) {
             mergeChunkNode(*child);
@@ -2416,6 +2460,8 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
 }
 
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
+    ZoneScoped
+
     // abock:  I tried turning this into a queue and use iteration, rather than recursion
     //         but that made the code harder to understand as the breadth-first traversal
     //         requires parents to be passed through the pipe twice (first to add the

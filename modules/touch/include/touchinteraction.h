@@ -71,10 +71,10 @@ public:
 
     // Stores the velocity in all 6DOF
     struct VelocityStates {
-        glm::dvec2 orbit;
-        double zoom;
-        double roll;
-        glm::dvec2 pan;
+        glm::dvec2 orbit = glm::dvec2(0.0);
+        double zoom = 0.0;
+        double roll = 0.0;
+        glm::dvec2 pan = glm::dvec2(0.0);
     };
 
     /* Main function call
@@ -225,7 +225,7 @@ private:
     SceneGraphNode* _pickingSelected = nullptr;
     DirectInputSolver _solver;
 
-    glm::dquat _toSlerp;
+    glm::dquat _toSlerp = glm::dquat(1.0, 0.0, 0.0, 0.0);
     glm::vec2 _centroid = glm::vec2(0.f);
 
     FrameTimeAverage _frameTimeAvg;

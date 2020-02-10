@@ -147,8 +147,8 @@ public:
 
 
 struct TileUvTransform {
-    glm::vec2 uvOffset;
-    glm::vec2 uvScale;
+    glm::vec2 uvOffset = glm::vec2(0.f);
+    glm::vec2 uvScale = glm::vec2(0.f);
 };
 
 

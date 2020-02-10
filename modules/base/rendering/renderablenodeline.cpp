@@ -123,7 +123,7 @@ documentation::Documentation RenderableNodeLine::Documentation() {
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _start(StartNodeInfo, Root)
     , _end(EndNodeInfo, Root)

@@ -69,7 +69,7 @@ local getPeriodFromElement = function(element)
   -- Get period from correct location of the string
   local per = tonumber(string.sub(element[3], 53, 63))
   -- Trail for 2x a single revolution
-  per = 1.0 / per * 2.0
+  per = 1.0 / per
 
   return per
 end
@@ -83,9 +83,9 @@ function satellites(title, file, color, group)
             Path = file,
             Segments = 120,
             Color = color,
-            Fade = 0.5
+            Fade = 1.5
         },
-        Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
+        Tag = { "earth_satellites" },
         GUI = {
             Path = "/Solar System/Planets/Earth/Satellites"
        }
@@ -93,10 +93,10 @@ function satellites(title, file, color, group)
 end
 
 local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder, shouldAddDuplicates)
-     local filename = group.Url:match("([^/]+)$")
-     local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
+    local filename = group.Url:match("([^/]+)$")
+    local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
 
-     local path = tleFolder .. "/" .. filename
+    local path = tleFolder .. "/" .. filename
 
     local SatelliteBatch = satellites(filenameSansExt, path, group.TrailColor, group)
     assetHelper.registerSceneGraphNodesAndExport(containingAsset, { SatelliteBatch })

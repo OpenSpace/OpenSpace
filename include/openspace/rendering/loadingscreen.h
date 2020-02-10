@@ -120,8 +120,8 @@ private:
         ProgressInfo progress;
 
         bool hasLocation;
-        glm::vec2 ll;
-        glm::vec2 ur;
+        glm::vec2 ll = glm::vec2(0.f);
+        glm::vec2 ur = glm::vec2(0.f);
 
         std::chrono::system_clock::time_point finishedTime;
     };

@@ -41,11 +41,11 @@ glm::dmat2x4 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::dmat2x4(0);
+                return glm::dmat2x4(0.0);
             }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::dmat2x4(0);
+                return glm::dmat2x4(0.0);
             }
             else {
                 result[i][j] = lua_tonumber(state, -1);
@@ -74,7 +74,7 @@ bool toLuaConversion(lua_State* state, glm::dmat2x4 value) {
 }
 
 glm::dmat2x4 fromStringConversion(const std::string& val, bool& success) {
-    glm::dmat2x4 result;
+    glm::dmat2x4 result = glm::dmat2x4(1.0);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() !=
         (ghoul::glm_rows<glm::dmat2x4>::value * ghoul::glm_cols<glm::dmat2x4>::value))
@@ -123,7 +123,7 @@ using nl = std::numeric_limits<double>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DMat2x4Property,
     glm::dmat2x4,
-    glm::dmat2x4(0),
+    glm::dmat2x4(0.0),
     glm::dmat2x4(
         nl::lowest(), nl::lowest(),
         nl::lowest(), nl::lowest(),

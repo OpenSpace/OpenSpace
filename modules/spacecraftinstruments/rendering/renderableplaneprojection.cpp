@@ -203,7 +203,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
 
     std::string frame;
     std::vector<glm::dvec3> bounds;
-    glm::dvec3 boresight;
+    glm::dvec3 boresight = glm::dvec3(0.0);
     try {
         SpiceManager::FieldOfViewResult r = SpiceManager::ref().fieldOfView(_instrument);
 
@@ -230,6 +230,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     // The apparent position, CN+S, makes image align best with target
 
     glm::dvec3 projection[4];
+    std::fill(std::begin(projection), std::end(projection), glm::dvec3(0.0));
     for (size_t j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(
             frame,

@@ -6,7 +6,7 @@ local localFolder = asset.syncedResource({
     Name = "Mercury Magnetosphere",
     Type = "HttpSynchronization",
     Identifier = "mercury_magnetosphere",
-    Version = 1
+    Version = 2
 })
 
 
@@ -22,7 +22,7 @@ local Magnetosphere = {
         SourceDirectory = localFolder,
         TransferFunction = localFolder .. "/transferfunction.txt",
         Variable = "rho",
-        StepSize = "0.003",
+        StepSize = 0.003,
         Dimensions = {64, 64, 64},
         GridType = "Cartesian",
         SecondsBefore = 24*60*60*365*100,

@@ -100,14 +100,14 @@ private:
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
 
-    glm::vec2 _camScaling;
-    glm::vec3 _up;
-    glm::mat4 _transform;
-    glm::mat4 _projectorMatrix;
+    glm::vec2 _camScaling = glm::vec2(0.f);
+    glm::vec3 _up = glm::vec3(0.f);
+    glm::mat4 _transform = glm::mat4(1.f);
+    glm::mat4 _projectorMatrix = glm::mat4(1.f);
 
-    glm::dmat3 _stateMatrix;
-    glm::dmat3 _instrumentMatrix;
-    glm::vec3 _boresight;
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
+    glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
+    glm::vec3 _boresight = glm::vec3(0.f);
 
     std::vector<Image> _imageTimes;
 
