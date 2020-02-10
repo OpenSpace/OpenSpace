@@ -191,7 +191,7 @@ private:
     size_t _nRenderValuesPerStar = 0;
     int _nStarsToRender = 0;
     bool _firstDrawCalls = true;
-    glm::dquat _previousCameraRotation;
+    glm::dquat _previousCameraRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     bool _useVBO = false;
     long long _cpuRamBudgetInBytes = 0;
     long long _totalDatasetSizeInBytes = 0;

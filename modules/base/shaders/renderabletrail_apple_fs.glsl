@@ -22,32 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#include "fragment.glsl"
 
-#include <openspace/util/concurrentqueue.h>
+in float vs_positionDepth;
+in vec4 vs_gPosition;
+in float fade;
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+uniform vec3 color;
+uniform int renderPhase;
+uniform float opacity = 1.0;
 
-class ConcurrentQueueTest : public testing::Test {};
+// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
+#define RenderPhaseLines 0
+#define RenderPhasePoints 1
 
-TEST_F(ConcurrentQueueTest, Basic) {
-    using namespace openspace;
+#define Delta 0.25
 
-    ConcurrentQueue<int> q1;
-    q1.push(4);
-    int val = q1.pop();
-    std::cout << val << std::endl;
+
+Fragment getFragment() {
+    Fragment frag;
+    frag.color = vec4(color * fade, fade * opacity);
+    frag.depth = vs_positionDepth;
+    frag.blend = BLEND_MODE_ADDITIVE;
+
+    if (renderPhase == RenderPhasePoints) {
+        // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
+        // smoothstep to gradually decrease the alpha on the edges of the point
+        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+        //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));        
+        float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
+        float transparencyCorrection = frag.color.a * circleClipping;
+        if (transparencyCorrection < 0.9) {
+            discard;
+        }
+
+        frag.color.a = transparencyCorrection;
+    }
+
+    frag.gPosition = vs_gPosition;
+
+    // There is no normal here
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+
+    return frag;
 }
-
-/*
-TEST_F(ConcurrentQueueTest, SharedPtr) {
-    ConcurrentQueue<std::shared_ptr<int>> q1;
-    std::shared_ptr<int> i1 = std::shared_ptr<int>(new int(1337));
-
-    q1.push(i1);
-    auto val = q1.pop();
-    std::cout << *val << std::endl;
-}
-*/

@@ -71,6 +71,11 @@ namespace {
         "Color",
         "This value determines the RGB main color for the lines and points of the trail."
     };
+    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
+        "TrailFade",
+        "Trail Fade",
+        "This value determines how fast the trail fades and is an appearance property. "
+    };
     
     constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNum = "LineNumber";
@@ -321,13 +326,22 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     }
-    if (dictionary.hasKeyAndValue<double>("FadeInfo")) {
+    if (dictionary.hasKeyAndValue<double>(TrailFadeInfo.identifier)) {
         _appearance.lineFade = static_cast<float>(
-            dictionary.value<double>("FadeInfo")
+            dictionary.value<double>(TrailFadeInfo.identifier)
         );
     }
     else {
         _appearance.lineFade = 20;
+    }
+
+    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+        _appearance.lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
+        );
+    }
+    else {
+        _appearance.lineWidth = 2.0;
     }
 
     auto reinitializeTrailBuffers = [this]() {

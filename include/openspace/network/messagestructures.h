@@ -45,8 +45,8 @@ struct CameraKeyframe {
         deserialize(buffer);
     }
 
-    glm::dvec3 _position;
-    glm::dquat _rotation;
+    glm::dvec3 _position = glm::dvec3(0.0);
+    glm::dquat _rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     bool _followNodeRotation;
     std::string _focusNode;
     float _scale;

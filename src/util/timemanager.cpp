@@ -29,6 +29,7 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     // Properties for time interpolation
@@ -129,6 +130,8 @@ void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) 
 }
 
 void TimeManager::preSynchronization(double dt) {
+    ZoneScoped
+
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
 

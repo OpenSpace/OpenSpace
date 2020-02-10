@@ -36,6 +36,7 @@
 #include <ghoul/io/socket/websocket.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
@@ -72,7 +73,11 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
 }
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    global::callback::preSync.emplace_back([this]() { preSync(); });
+    global::callback::preSync.emplace_back([this]() {
+        ZoneScopedN("ServerModule")
+
+        preSync();
+    });
 
     if (!configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
         return;
@@ -156,6 +161,8 @@ void ServerModule::preSync() {
 }
 
 void ServerModule::cleanUpFinishedThreads() {
+    ZoneScoped
+
     for (ConnectionData& connectionData : _connections) {
         Connection& connection = *connectionData.connection;
         if (!connection.socket() || !connection.socket()->isConnected()) {
@@ -175,6 +182,8 @@ void ServerModule::cleanUpFinishedThreads() {
 }
 
 void ServerModule::disconnectAll() {
+    ZoneScoped
+
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (global::windowDelegate.isMaster()) {
             serverInterface->deinitialize();
@@ -192,6 +201,8 @@ void ServerModule::disconnectAll() {
 }
 
 void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
+    ZoneScoped
+
     std::string messageString;
     while (connection->socket()->getMessage(messageString)) {
         std::lock_guard<std::mutex> lock(_messageQueueMutex);
@@ -200,6 +211,8 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
 }
 
 void ServerModule::consumeMessages() {
+    ZoneScoped
+
     std::lock_guard<std::mutex> lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();

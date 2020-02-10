@@ -37,6 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/profiling.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <fstream>
 
@@ -151,6 +152,8 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {} // NOLINT
 
 void NavigationHandler::initialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
@@ -162,6 +165,8 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
@@ -282,8 +287,8 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         up
     )));
 
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.0, 0.0, 0.0));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.0, -1.0, 0.0));
 
     _camera->setPositionVec3(cameraPositionWorld);
     _camera->setRotation(neutralCameraRotation * yawRotation * pitchRotation);
@@ -360,7 +365,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     }
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
+        glm::dvec3(0.0),
         aim->worldPosition() - _camera->positionVec3(),
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
@@ -372,7 +377,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     const double yaw = -eulerAngles.y;
 
     // Need to compensate by redisual roll left in local rotation:
-    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0, 0, 1));
+    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0.0, 0.0, 1.0));
     const glm::dvec3 neutralUp =
         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();
 

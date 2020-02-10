@@ -104,7 +104,7 @@ private:
     GLuint _vertexPositionBuffer = 0;
     bool _planeIsDirty = false;
 
-    glm::vec3 _sunPosition;
+    glm::vec3 _sunPosition = glm::vec3(0.f);
 };
 
 } // namespace openspace

@@ -22,84 +22,78 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "catch2/catch.hpp"
+
 #include <openspace/properties/optionproperty.h>
 
-class OptionPropertyTest : public testing::Test {};
-
-TEST_F(OptionPropertyTest, NoOption) {
+TEST_CASE("OptionProperty: No Option", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-    ASSERT_EQ(false, p.hasOption());
+    REQUIRE_FALSE(p.hasOption());
 }
 
-TEST_F(OptionPropertyTest, SingleOptionSingleZero) {
+TEST_CASE("OptionProperty: Single Option Single Zero", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc"});
 
     p.addOption(0, "a");
 
     p = 0;
 
-    ASSERT_EQ(0, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == 0);
+    REQUIRE(p.option().description == "a");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionSingleNegative) {
+TEST_CASE("OptionProperty: Single Option Single Negative", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
     p = -1;
 
-    ASSERT_EQ(-1, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == -1);
+    REQUIRE(p.option().description == "a");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionSinglePositive) {
+TEST_CASE("OptionProperty: Single Option Single Positive", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-    p.addOptions({
-        { 1, "a" }
-    });
+    p.addOptions({ { 1, "a" } });
     p = 1;
 
-    ASSERT_EQ(1, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == 1);
+    REQUIRE(p.option().description == "a");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionMultipleZero) {
+TEST_CASE("OptionProperty: Single Option Multiple Zero", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({ "a" });
     p = 0;
 
-    ASSERT_EQ(0, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == 0);
+    REQUIRE(p.option().description == "a");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionMultipleNegative) {
+TEST_CASE("OptionProperty: Single Option Multiple Negative", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-    p.addOptions({
-        { -1, "a" }
-    });
+    p.addOptions({ { -1, "a" } });
     p = -1;
 
-    ASSERT_EQ(-1, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == -1);
+    REQUIRE(p.option().description == "a");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionMultiplePositive) {
+TEST_CASE("OptionProperty: Single Option Multiple Positive", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-    p.addOptions({
-        { 1, "a" }
-    });
+    p.addOptions({ { 1, "a" } });
     p = 1;
 
-    ASSERT_EQ(1, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == 1);
+    REQUIRE(p.option().description == "a");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionsZeroBasedConsecutive) {
+TEST_CASE("OptionProperty: Single Options Zero Based Consecutive", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
@@ -107,19 +101,20 @@ TEST_F(OptionPropertyTest, SingleOptionsZeroBasedConsecutive) {
     p.addOption(2, "c");
 
     p = 0;
-    ASSERT_EQ(0, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == 0);
+    REQUIRE(p.option().description == "a");
 
     p = 1;
-    ASSERT_EQ(1, p.option().value);
-    ASSERT_EQ("b", p.option().description);
+    REQUIRE(p.option().value == 1);
+    REQUIRE(p.option().description == "b");
 
     p = 2;
-    ASSERT_EQ(2, p.option().value);
-    ASSERT_EQ("c", p.option().description);
+    REQUIRE(p.option().value == 2);
+    REQUIRE(p.option().description == "c");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionsZeroBasedNonConsecutive) {
+TEST_CASE("OptionProperty: Single Options Zero Based Non Consecutive", "[optionproperty]")
+{
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
@@ -127,19 +122,20 @@ TEST_F(OptionPropertyTest, SingleOptionsZeroBasedNonConsecutive) {
     p.addOption(4, "c");
 
     p = 0;
-    ASSERT_EQ(0, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == 0);
+    REQUIRE(p.option().description == "a");
 
     p = 2;
-    ASSERT_EQ(2, p.option().value);
-    ASSERT_EQ("b", p.option().description);
+    REQUIRE(p.option().value == 2);
+    REQUIRE(p.option().description == "b");
 
     p = 4;
-    ASSERT_EQ(4, p.option().value);
-    ASSERT_EQ("c", p.option().description);
+    REQUIRE(p.option().value == 4);
+    REQUIRE(p.option().description == "c");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionsNegativeBasedConsecutive) {
+TEST_CASE("OptionProperty: Single Options Negative Based Consecutive", "[optionproperty]")
+{
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
@@ -147,19 +143,22 @@ TEST_F(OptionPropertyTest, SingleOptionsNegativeBasedConsecutive) {
     p.addOption(-3, "c");
 
     p = -1;
-    ASSERT_EQ(-1, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == -1);
+    REQUIRE(p.option().description == "a");
 
     p = -2;
-    ASSERT_EQ(-2, p.option().value);
-    ASSERT_EQ("b", p.option().description);
+    REQUIRE(p.option().value == -2);
+    REQUIRE(p.option().description == "b");
 
     p = -3;
-    ASSERT_EQ(-3, p.option().value);
-    ASSERT_EQ("c", p.option().description);
+    REQUIRE(p.option().value == -3);
+    REQUIRE(p.option().description == "c");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionsNonZeroBasedNonConsecutive) {
+TEST_CASE(
+    "OptionProperty: Single Options Non Zero Based Non Consecutive",
+    "[optionproperty]")
+{
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
@@ -167,19 +166,19 @@ TEST_F(OptionPropertyTest, SingleOptionsNonZeroBasedNonConsecutive) {
     p.addOption(-5, "c");
 
     p = -1;
-    ASSERT_EQ(-1, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == -1);
+    REQUIRE(p.option().description == "a");
 
     p = -3;
-    ASSERT_EQ(-3, p.option().value);
-    ASSERT_EQ("b", p.option().description);
+    REQUIRE(p.option().value == -3);
+    REQUIRE(p.option().description == "b");
 
     p = -5;
-    ASSERT_EQ(-5, p.option().value);
-    ASSERT_EQ("c", p.option().description);
+    REQUIRE(p.option().value == -5);
+    REQUIRE(p.option().description == "c");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionsZeroBasedAlternating) {
+TEST_CASE("OptionProperty: Single Options Zero Based Alternating", "[optionproperty]") {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
@@ -187,19 +186,20 @@ TEST_F(OptionPropertyTest, SingleOptionsZeroBasedAlternating) {
     p.addOption(-4, "c");
 
     p = 0;
-    ASSERT_EQ(0, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == 0);
+    REQUIRE(p.option().description == "a");
 
     p = 2;
-    ASSERT_EQ(2, p.option().value);
-    ASSERT_EQ("b", p.option().description);
+    REQUIRE(p.option().value == 2);
+    REQUIRE(p.option().description == "b");
 
     p = -4;
-    ASSERT_EQ(-4, p.option().value);
-    ASSERT_EQ("c", p.option().description);
+    REQUIRE(p.option().value == -4);
+    REQUIRE(p.option().description == "c");
 }
 
-TEST_F(OptionPropertyTest, SingleOptionsNonZeroBasedAlternating) {
+TEST_CASE("OptionProperty: Single Options Non Zero Based Alternating", "[optionproperty]")
+{
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-20, "a");
@@ -207,14 +207,14 @@ TEST_F(OptionPropertyTest, SingleOptionsNonZeroBasedAlternating) {
     p.addOption(-10, "c");
 
     p = -20;
-    ASSERT_EQ(-20, p.option().value);
-    ASSERT_EQ("a", p.option().description);
+    REQUIRE(p.option().value == -20);
+    REQUIRE(p.option().description == "a");
 
     p = 2;
-    ASSERT_EQ(2, p.option().value);
-    ASSERT_EQ("b", p.option().description);
+    REQUIRE(p.option().value == 2);
+    REQUIRE(p.option().description == "b");
 
     p = -10;
-    ASSERT_EQ(-10, p.option().value);
-    ASSERT_EQ("c", p.option().description);
+    REQUIRE(p.option().value == -10);
+    REQUIRE(p.option().description == "c");
 }

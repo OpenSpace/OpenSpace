@@ -110,11 +110,11 @@ struct TextTileProvider : public TileProvider {
 
     std::unique_ptr<ghoul::fontrendering::FontRenderer> fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> font;
-    size_t fontSize;
+    size_t fontSize = 0;
 
     std::string text;
-    glm::vec2 textPosition;
-    glm::vec4 textColor;
+    glm::vec2 textPosition = glm::vec2(0.f);
+    glm::vec4 textColor = glm::vec4(0.f);
 
     GLuint fbo = 0;
 

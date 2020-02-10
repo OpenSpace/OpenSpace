@@ -76,8 +76,8 @@ private:
     GLuint _vBufferId = 0;
     std::vector<float> _vertexArray;
 
-    glm::dvec3 _startPos;
-    glm::dvec3 _endPos;
+    glm::dvec3 _startPos = glm::dvec3(0.0);
+    glm::dvec3 _endPos = glm::dvec3(0.0);
 
     properties::StringProperty _start;
     properties::StringProperty _end;

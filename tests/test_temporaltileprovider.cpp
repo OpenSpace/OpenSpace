@@ -22,25 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/temporaltileprovider.h>
+#include "catch2/catch.hpp"
 
+#include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/util/time.h>
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <glm/glm.hpp>
-#include <iostream>
 
-
-class TemporalTileProviderTest : public testing::Test {};
-
-std::string fileName = "data/scene/debugglobe/map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
-
-TEST_F(TemporalTileProviderTest, Basic) {
-    double t = 2016.01;
-    openspace::Time::ref().setTime(t);
-    openspace::Time::ref().preSynchronization();
-    openspace::Time::ref().postSynchronizationPreDraw();
-    openspace::TemporalTileProvider provider(absPath(fileName));
-}
+namespace {
+    constexpr const char* fileName = "data/scene/debugglobe/map_service_configs/"
+        "VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
+} // namespace
 

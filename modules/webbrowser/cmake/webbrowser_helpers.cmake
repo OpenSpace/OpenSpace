@@ -22,7 +22,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-
 function(set_cef_targets cef_root main_target)
     # find cef cmake helpers
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")

@@ -208,7 +208,7 @@ void RenderableDebugPlane::deinitializeGL() {
 }
 
 void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {
-    glm::mat4 transform = glm::mat4(1.0);
+    glm::mat4 transform = glm::mat4(1.f);
     if (_billboard) {
         transform = glm::inverse(glm::mat4(data.camera.viewRotationMatrix()));
     }

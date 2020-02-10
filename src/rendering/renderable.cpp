@@ -29,6 +29,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -117,6 +118,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
 {
+    ZoneScoped
+
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
 

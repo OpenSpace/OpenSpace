@@ -40,6 +40,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -1039,16 +1040,21 @@ void FramebufferRenderer::updateDownscaledVolume() {
 }
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
-    // Set OpenGL default rendering state
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-    glEnablei(GL_BLEND, 0);
-    glDisablei(GL_BLEND, 1);
-    glDisablei(GL_BLEND, 2);
-    
-    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+    ZoneScoped
 
-    glEnable(GL_DEPTH_TEST);
+    {
+        // Set OpenGL default rendering state
+        ZoneScopedN("Setting OpenGL state")
 
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+        glEnablei(GL_BLEND, 0);
+        glDisablei(GL_BLEND, 1);
+        glDisablei(GL_BLEND, 2);
+
+        glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+
+        glEnable(GL_DEPTH_TEST);
+    }
     _pingPongIndex = 0;
     
     // Measurements cache variable
@@ -1065,11 +1071,15 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         return;
     }    
 
-    // deferred g-buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-    glDrawBuffers(3, ColorAttachment012Array);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+    {
+        // deferred g-buffer
+        ZoneScopedN("Deferred G-Buffer")
+        TracyGpuZone("Deferred G-Buffer")
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
+        glDrawBuffers(3, ColorAttachment012Array);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
     Time time = global::timeManager.time();
 
     RenderData data = {
@@ -1148,6 +1158,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
+    ZoneScoped
+
     for (const RaycasterTask& raycasterTask : tasks) {
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
 
@@ -1177,7 +1189,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         }
 
-        glm::vec3 cameraPosition;
+        glm::vec3 cameraPosition = glm::vec3(0.f);
         bool isCameraInside = raycaster->isCameraInside(
             raycasterTask.renderData,
             cameraPosition
@@ -1268,7 +1280,9 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
 void FramebufferRenderer::performDeferredTasks(
                                              const std::vector<DeferredcasterTask>& tasks)
-{   
+{
+    ZoneScoped
+
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 

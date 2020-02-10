@@ -22,37 +22,77 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gdal.h"
-#include "gdal_priv.h"
+#include "catch2/catch.hpp"
 
-#include <ogr_spatialref.h>
+#include <modules/globebrowsing/src/lrucache.h>
+#include <glm/glm.hpp>
+
+namespace {
+    struct DefaultHasher {
+        unsigned long long operator()(int var) const {
+            return static_cast<unsigned long long>(var);
+        }
+    };
+
+    struct MyKey {
+        int x, y;
+    };
+
+    bool operator==(const MyKey& a, const MyKey& b) {
+        return a.x == b.x && a.y == b.y;
+    }
+
+    std::ostream& operator<<(std::ostream& o, const MyKey& key) {
+        return o << key.x << ", " << key.y;
+    }
+
+    // custom specialization 
+    struct DefaultHasherMyKey {
+        unsigned long long operator()(const MyKey& s) const {
+            return s.x ^ (s.y << 1);
+        }
+    };
+} // namespace
+
+TEST_CASE("LRUCache: Get", "[lrucache]") {
+    openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
+    lru.put(1, "hej");
+    lru.put(12, "san");
+    REQUIRE(lru.get(1) == "hej");
+}
+
+TEST_CASE("LRUCache: CleaningCache", "[lrucache]") {
+    openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
+    lru.put(1, 1.2);
+    lru.put(12, 2.3);
+    lru.put(123, 33.4);
+    lru.put(1234, 4.5);
+    lru.put(12345, 6.7);
+    REQUIRE_FALSE(lru.exist(1));
+    REQUIRE(lru.exist(12));
+}
+
+TEST_CASE("LRUCache: StructKey", "[lrucache]") {
+    openspace::globebrowsing::cache::LRUCache<
+        MyKey, std::string, DefaultHasherMyKey
+    > lru(4);
+
+    // These two custom keys should be treated as equal
+    MyKey key1 = { 2, 3 };
+    MyKey key2 = { 2, 3 };
+
+    std::string val1 = "value 1";
+    std::string val2 = "value 2";
 
 
-#include "cpl_conv.h"
-#include "cpl_string.h"
+    lru.put(key1, val1);
+    REQUIRE(lru.exist(key1));
+    REQUIRE(lru.get(key1) == val1);
 
-// Error: cannot open source file "wms/wmsdriver.h"
-//#include "wms/wmsdriver.h" 
-
-// Error: cannot open source file "wms/wmsmetadataset.h"
-//#include "wms/wmsmetadataset.h"
-
-
-class GdalWmsTest : public testing::Test {};
-
-TEST_F(GdalWmsTest, Simple) {
-    //GDALDatasetH poDataset;
-    //GDALAllRegister();
-
-    //
-    //std::string res = GDALVersionInfo("format");
-    //
-    //std::cout << res << std::endl;
-
-    //std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
-
-    //poDataset = GDALOpen(testFile.c_str(), GA_ReadOnly);
-
-    // This assertion fails
-    //ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";
+    // Putting key2 should replace key1
+    lru.put(key2, val2);
+    REQUIRE(key1 == key2);
+    REQUIRE(lru.exist(key2));
+    REQUIRE(lru.get(key1) == val2);
+    REQUIRE(lru.get(key2) == val2);
 }

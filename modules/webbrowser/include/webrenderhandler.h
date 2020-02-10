@@ -61,11 +61,11 @@ public:
     void updateTexture();
 
 protected:
-    GLuint _texture;
+    GLuint _texture = 0;
 
 private:
-    glm::ivec2 _windowSize;
-    glm::ivec2 _browserBufferSize;
+    glm::ivec2 _windowSize = glm::ivec2(0);
+    glm::ivec2 _browserBufferSize = glm::ivec2(0);
 
     /**
      * RGBA buffer from browser
@@ -74,8 +74,8 @@ private:
     bool _needsRepaint = true;
     bool _textureSizeIsDirty = true;
     bool _textureIsDirty = true;
-    glm::ivec2 _lowerDirtyRectBound;
-    glm::ivec2 _upperDirtyRectBound;
+    glm::ivec2 _lowerDirtyRectBound = glm::ivec2(0);
+    glm::ivec2 _upperDirtyRectBound = glm::ivec2(0);
 
     IMPLEMENT_REFCOUNTING(WebRenderHandler);
 };

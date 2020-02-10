@@ -34,6 +34,7 @@
 #include <openspace/scene/timeframe.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
 
@@ -311,6 +312,8 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {} // NOLINT
 
 void SceneGraphNode::initialize() {
+    ZoneScoped
+
     LDEBUG(fmt::format("Initializing: {}", identifier()));
 
     if (_renderable) {
@@ -332,6 +335,8 @@ void SceneGraphNode::initialize() {
 }
 
 void SceneGraphNode::initializeGL() {
+    ZoneScoped
+
     LDEBUG(fmt::format("Initializing GL: {}", identifier()));
 
     if (_renderable) {
@@ -343,6 +348,8 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
+    ZoneScoped
+
     LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
     setScene(nullptr);
@@ -357,6 +364,8 @@ void SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::deinitializeGL() {
+    ZoneScoped
+
     LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
 
     if (_renderable) {
@@ -381,6 +390,9 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     State s = _state;
     if (s != State::Initialized && _state != State::GLInitialized) {
         return;
@@ -482,6 +494,9 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     if (_state != State::GLInitialized) {
         return;
     }
@@ -746,11 +761,7 @@ SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }
     else {
-        return {
-            glm::dvec3(0.0, 0.0, 0.0),
-            glm::normalize(targetModelSpace),
-            0.0
-        };
+        return { glm::dvec3(0.0), glm::normalize(targetModelSpace), 0.0 };
     }
 }
 
@@ -860,6 +871,8 @@ Scene* SceneGraphNode::scene() {
 }
 
 void SceneGraphNode::setScene(Scene* scene) {
+    ZoneScoped
+
     // Unregister from previous scene, bottom up
     traversePostOrder([](SceneGraphNode* node) {
         if (node->_scene) {

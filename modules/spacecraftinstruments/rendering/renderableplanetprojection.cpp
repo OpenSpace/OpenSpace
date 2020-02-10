@@ -514,7 +514,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
 
     _transform = glm::mat4(_stateMatrix);
 
-    glm::dvec3 bs;
+    glm::dvec3 bs = glm::dvec3(0.0);
     try {
         SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
             _projectionComponent.instrumentId()

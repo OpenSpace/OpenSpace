@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/ghoul_lua.h>
+#include <glm/ext/matrix_common.hpp>
 
 namespace openspace::properties {
 

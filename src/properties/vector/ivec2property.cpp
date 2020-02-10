@@ -33,7 +33,7 @@
 namespace {
 
 glm::ivec2 fromLuaConversion(lua_State* state, bool& success) {
-    glm::ivec2 result;
+    glm::ivec2 result = glm::ivec2(0);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec2>::value; ++i) {
         int hasNext = lua_next(state, -2);
@@ -69,7 +69,7 @@ bool toLuaConversion(lua_State* state, glm::ivec2 value) {
 }
 
 glm::ivec2 fromStringConversion(const std::string& val, bool& success) {
-    glm::ivec2 result;
+    glm::ivec2 result = glm::ivec2(0);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {
         success = false;

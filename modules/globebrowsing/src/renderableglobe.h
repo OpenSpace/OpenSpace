@@ -253,8 +253,8 @@ private:
     SkirtedGrid _grid;
     LayerManager _layerManager;
 
-    glm::dmat4 _cachedModelTransform;
-    glm::dmat4 _cachedInverseModelTransform;
+    glm::dmat4 _cachedModelTransform = glm::dmat4(1.0);
+    glm::dmat4 _cachedInverseModelTransform = glm::dmat4(1.0);
 
     ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
 

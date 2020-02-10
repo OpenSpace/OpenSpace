@@ -55,7 +55,7 @@ private:
     RenderableGlobe* _attachedNode = nullptr;
 
     mutable bool _positionIsDirty = true;
-    mutable glm::dvec3 _position;
+    mutable glm::dvec3 _position = glm::dvec3(0.0);
 };
 
 } // namespace openspace::globebrowsing

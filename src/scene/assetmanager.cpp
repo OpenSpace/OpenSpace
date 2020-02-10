@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 
 #include "assetmanager_lua.inl"
 
@@ -55,6 +56,8 @@ void AssetManager::deinitialize() {
 }
 
 bool AssetManager::update() {
+    ZoneScoped
+
     // Add assets
     for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
@@ -103,6 +106,8 @@ void AssetManager::remove(const std::string& path) {
 }
 
 void AssetManager::removeAll() {
+    ZoneScoped
+
     _pendingStateChangeCommands.clear();
     std::vector<std::shared_ptr<Asset>> allAssets =
         _assetLoader->rootAsset()->requestedAssets();

@@ -22,22 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <thread>
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+#include "catch2/catch.hpp"
 
-class EllipsoidTest : public testing::Test {};
+#include <modules/iswa/util/iswamanager.h>
+#include <openspace/engine/downloadmanager.h>
+#include <openspace/util/time.h>
 
-using namespace openspace;
+TEST_CASE("ISWAManager: Initialize", "[iswamanager]") {
+    openspace::IswaManager::deinitialize();
+    REQUIRE_FALSE(openspace::IswaManager::isInitialized());
 
-TEST_F(EllipsoidTest, GeodeticSurfaceNormal) {
-	Ellipsoid ellipsoid(Vec3(1, 1, 1));
-
-	Vec3 geodeticNormal = ellipsoid.geodeticSurfaceNormal(Vec3(0, 0, 1));
-	Vec3 expectedNormal = Vec3(0, 0, 1);
-
-	ASSERT_EQ(geodeticNormal, expectedNormal);
+    openspace::IswaManager::initialize();
+    REQUIRE(openspace::IswaManager::isInitialized());
+    REQUIRE(&openspace::IswaManager::ref() == &openspace::IswaManager::ref());
 }
+
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
