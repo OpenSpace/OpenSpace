@@ -46,23 +46,27 @@ namespace {
     constexpr const float MessageFontSize = 22.f;
     constexpr const float ItemFontSize = 10.f;
 
-    const glm::vec2 LogoCenter = { 0.f, 0.525f };  // in NDC
-    const glm::vec2 LogoSize = { 0.275f, 0.275 };  // in NDC
+    constexpr const glm::vec2 LogoCenter = glm::vec2(0.f, 0.525f);  // in NDC
+    constexpr const glm::vec2 LogoSize = glm::vec2(0.275f, 0.275);  // in NDC
 
-    const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };  // in NDC
-    const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };  // in NDC
+    constexpr const glm::vec2 ProgressbarCenter = glm::vec2(0.f, -0.75f);  // in NDC
+    constexpr const glm::vec2 ProgressbarSize = glm::vec2(0.7f, 0.0075f);  // in NDC
     constexpr const float ProgressbarLineWidth = 0.0025f;  // in NDC
 
-    const glm::vec4 ProgressbarOutlineColor = { 0.9f, 0.9f, 0.9f, 1.f };
+    constexpr const glm::vec4 ProgressbarOutlineColor =
+        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
-    const glm::vec4 PhaseColorConstruction = { 0.7f, 0.7f, 0.f, 1.f };
-    const glm::vec4 PhaseColorSynchronization = { 0.9f, 0.9f, 0.9f, 1.f };
-    const glm::vec4 PhaseColorInitialization = { 0.1f, 0.75f, 0.1f, 1.f };
+    constexpr const glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr const glm::vec4 PhaseColorSynchronization =
+        glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
+    constexpr const glm::vec4 PhaseColorInitialization =
+        glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
 
-    const glm::vec4 ItemStatusColorStarted = { 0.5f, 0.5f, 0.5f, 1.f };
-    const glm::vec4 ItemStatusColorInitializing = { 0.7f, 0.7f, 0.f, 1.f };
-    const glm::vec4 ItemStatusColorFinished = { 0.1f, 0.75f, 0.1f, 1.f };
-    const glm::vec4 ItemStatusColorFailed = { 0.8f, 0.1f, 0.1f, 1.f };
+    constexpr const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    constexpr const glm::vec4 ItemStatusColorInitializing =
+        glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    constexpr const glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    constexpr const glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
 
     constexpr const float ItemStandoffDistance = 5.f; // in pixels
 
