@@ -34,6 +34,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -154,6 +155,8 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
+    ZoneScoped
+
     if (_phase == Phase::PreStart) {
         return;
     }

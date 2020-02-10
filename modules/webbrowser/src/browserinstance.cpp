@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "CEF BrowserInstance";
@@ -105,11 +106,15 @@ bool BrowserInstance::loadLocalPath(std::string path) {
 }
 
 void BrowserInstance::reshape(const glm::ivec2& windowSize) {
+    ZoneScoped
+
     _renderHandler->reshape(windowSize.x, windowSize.y);
     _browser->GetHost()->WasResized();
 }
 
 void BrowserInstance::draw() {
+    ZoneScoped
+
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);
     }

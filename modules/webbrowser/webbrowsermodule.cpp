@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
@@ -72,7 +73,11 @@ WebBrowserModule::WebBrowserModule()
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
 {
-    global::callback::deinitialize.emplace_back([this]() { deinitialize(); });
+    global::callback::deinitialize.emplace_back([this]() {
+        ZoneScopedN("WebBrowserModule")
+
+        deinitialize();
+    });
 
     _browserUpdateInterval.onChange([this]() {
         webbrowser::interval = std::chrono::microseconds(
@@ -94,6 +99,8 @@ WebBrowserModule::WebBrowserModule()
 }
 
 void WebBrowserModule::internalDeinitialize() {
+    ZoneScoped
+
     if (!_enabled) {
         return;
     }
@@ -118,6 +125,8 @@ std::string WebBrowserModule::findHelperExecutable() {
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+    ZoneScoped
+
     if (dictionary.hasKeyAndValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
     } else {
@@ -162,6 +171,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 }
 
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
+    ZoneScoped
+
     if (_enabled) {
         _browsers.push_back(browser);
         if (_updateBrowserBetweenRenderables) {

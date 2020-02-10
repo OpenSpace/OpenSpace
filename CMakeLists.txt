@@ -43,7 +43,6 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
 
 begin_header("Configuring OpenSpace project")
 message(STATUS "CMake version: ${CMAKE_VERSION}")
@@ -207,37 +206,6 @@ if (MSVC)
   endif ()
 
 endif ()
-
-##########################################################################################
-# Tests                                                                                  #
-##########################################################################################
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-if (OPENSPACE_HAVE_TESTS)
-  include_gtest("${GHOUL_BASE_DIR}/ext/googletest")
-
-  file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-  add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
-
-  target_include_directories(OpenSpaceTest PUBLIC
-    "${OPENSPACE_BASE_DIR}/include"
-    "${OPENSPACE_BASE_DIR}/tests"
-    "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
-  )
-  target_compile_definitions(OpenSpaceTest PUBLIC
-    "GHL_THROW_ON_ASSERT" "GTEST_HAS_TR1_TUPLE=0"
-  )
-  target_link_libraries(OpenSpaceTest gtest openspace-core)
-
-  set_folder_location(OpenSpaceTest "Unit Tests")
-
-  if (MSVC)
-    set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
-      "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-    )
-  endif ()
-  set_openspace_compile_settings(OpenSpaceTest)
-endif (OPENSPACE_HAVE_TESTS)
-
 
 begin_header("Configuring Modules")
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")

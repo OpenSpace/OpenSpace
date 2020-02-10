@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace::globebrowsing {
 
@@ -454,6 +455,8 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
 }
 
 int Layer::update() {
+    ZoneScoped
+
     if (_tileProvider) {
         return tileprovider::update(*_tileProvider);
     }

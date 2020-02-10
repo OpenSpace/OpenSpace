@@ -41,6 +41,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -544,6 +545,8 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 }
 
 void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+    ZoneScoped
+
     const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
 
     PerfMeasure("ABufferRenderer::render");

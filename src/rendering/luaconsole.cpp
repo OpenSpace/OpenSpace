@@ -35,6 +35,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
@@ -166,6 +167,8 @@ LuaConsole::LuaConsole()
 LuaConsole::~LuaConsole() {} // NOLINT
 
 void LuaConsole::initialize() {
+    ZoneScoped
+
     const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
@@ -229,6 +232,8 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
+    ZoneScoped
+
     const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
@@ -589,6 +594,8 @@ void LuaConsole::charCallback(unsigned int codepoint,
 }
 
 void LuaConsole::update() {
+    ZoneScoped
+
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
@@ -627,6 +634,8 @@ void LuaConsole::update() {
 }
 
 void LuaConsole::render() {
+    ZoneScoped
+
     using namespace ghoul::fontrendering;
 
     // Don't render the console if it's collapsed.
