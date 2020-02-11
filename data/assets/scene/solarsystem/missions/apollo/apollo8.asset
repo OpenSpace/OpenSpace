@@ -35,7 +35,7 @@ local Apollo8Launch = {
             Type = "SpiceTranslation",
             Target = apolloSpiceId,
             Observer = "EARTH",
-            Frame = "IAU_EARTH",         
+            Frame = "IAU_EARTH",
             Kernels = kernels
         },
     },
@@ -59,7 +59,7 @@ local Apollo8 = {
             Type = "SpiceTranslation",
             Target = apolloSpiceId,
             Observer = "EARTH BARYCENTER",
-            Frame = "GALACTIC",         
+            Frame = "GALACTIC",
             Kernels = kernels
         },
         Rotation = {
@@ -124,7 +124,7 @@ local Apollo8Model = {
     }
 }
 
-local PivotOffset = { 0, 2.5, 0}
+local PivotOffset = { 0, 2.5, 0 }
 
 -- The pivot node is used for navigation inside the spacecraft
 
@@ -153,7 +153,7 @@ local Apollo8LaunchTrail = {
             Type = "SpiceTranslation",
             Target = apolloSpiceId,
             Observer = "EARTH",
-            Frame = "IAU_EARTH",            
+            Frame = "IAU_EARTH",
             Kernels = kernels
         },
         Color = { 0.70, 0.50, 0.20 },
@@ -176,7 +176,7 @@ local Apollo8MoonTrail = {
             Type = "SpiceTranslation",
             Target = apolloSpiceId,
             Observer = "MOON",
-            Frame = "IAU_MOON",            
+            Frame = "IAU_MOON",
             Kernels = kernels
         },
         Color = { 0.70, 0.50, 0.20 },
@@ -199,15 +199,15 @@ local Apollo8EarthBarycenterTrail = {
         Translation = {
             Type = "SpiceTranslation",
             Target = apolloSpiceId,
-            Observer = "EARTH BARYCENTER",
-            Frame = "GALACTIC",            
+            Observer = "EARTH",
+            Frame = "GALACTIC",
             Kernels = kernels
         },
-        Color = { 1, 0.0, 0.0 },
+        Color = { 0.8, 0.2, 0.2 },
         StartTime = "1968 DEC 21",
         EndTime = "1968 DEC 28",
         SampleInterval = 30,
-        Enabled = false,
+        Enabled = true,
     },
     GUI = {
         Name = "Apollo 8 Earth Barycenter Trail",
@@ -215,10 +215,11 @@ local Apollo8EarthBarycenterTrail = {
     }
 }
 
+
 local exportList = {
-    Apollo8, 
+    Apollo8,
     Apollo8Model,
-    Apollo8Launch, 
+    Apollo8Launch,
     Apollo8LaunchModel,
     Apollo8Pivot,
 
