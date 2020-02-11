@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,8 @@
 
 #include <openspace/util/syncbuffer.h>
 
+#include <ghoul/misc/profiling.h>
+
 namespace openspace {
 
 SyncBuffer::SyncBuffer(size_t n)
@@ -35,6 +37,8 @@ SyncBuffer::SyncBuffer(size_t n)
 SyncBuffer::~SyncBuffer() {} // NOLINT
 
 void SyncBuffer::encode(const std::string& s) {
+    ZoneScoped
+
     int32_t anticpatedBufferSize = _encodeOffset + (sizeof(char) * s.size())
         + sizeof(int32_t);
     if (anticpatedBufferSize >= _n) {
@@ -53,6 +57,8 @@ void SyncBuffer::encode(const std::string& s) {
 }
 
 std::string SyncBuffer::decode() {
+    ZoneScoped
+
     int32_t length;
     memcpy(
         reinterpret_cast<char*>(&length),

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -210,8 +210,8 @@ void Camera::serialize(std::ostream& os) const {
 
 void Camera::deserialize(std::istream& is) {
     glm::dvec3 p;
-    glm::dquat q;
     is >> p.x >> p.y >> p.z;
+    glm::dquat q;
     is >> q.x >> q.y >> q.z >> q.w;
     setPositionVec3(p);
     setRotation(q);

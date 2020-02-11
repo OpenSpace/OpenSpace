@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,44 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
-#include "gtest/gtest.h"
+#include "catch2/catch.hpp"
 
 #include <openspace/util/concurrentjobmanager.h>
-
 #include <ghoul/misc/threadpool.h>
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <glm/glm.hpp>
 
-class ConcurrentJobManagerTest : public testing::Test {};
+namespace {
+    struct TestJob : public openspace::Job<int> {
+        TestJob(int jobExecutingTime)
+            : _jobExecutingTime(jobExecutingTime)
+        {}
 
-struct TestJob : public openspace::Job<int> {
-    TestJob(int jobExecutingTime)
-        : _jobExecutingTime(jobExecutingTime)
-    {}
+        virtual void execute() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
+            prod = 1337;
+        }
 
-    virtual void execute() {
-        std::cout << "Executing job ... " << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
-        
-        prod = 1337;
-        std::cout << "Finished job" << std::endl;
-    }
+        virtual int product() {
+            return int(prod);
+        }
 
-    virtual int product() {
-        return int(prod);
-    }
-
-private:
-    int _jobExecutingTime;
-    int prod;
-};
+    private:
+        int _jobExecutingTime;
+        int prod;
+    };
 
 
+    struct VerboseProduct {
+        VerboseProduct(int v) : val(v) {}
 
-TEST_F(ConcurrentJobManagerTest, Basic) {
+        ~VerboseProduct() {}
+
+        int val;
+    };
+
+
+    struct VerboseJob : public openspace::Job<VerboseProduct> {
+        VerboseJob(int jobExecutingTime)
+            : _jobExecutingTime(jobExecutingTime)
+            , _product(-1)
+        {}
+
+        virtual void execute() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
+            _product = VerboseProduct(1337);
+        }
+
+        virtual VerboseProduct product() {
+            return _product;
+        }
+
+        int _jobExecutingTime;
+        VerboseProduct _product;
+    };
+
+} // namespace
+
+TEST_CASE("ConcurrentJobmanager: Basic", "[concurrentjobmanager]") {
     using namespace openspace;
 
     ConcurrentJobManager<int> jobManager(ThreadPool(1));
@@ -71,82 +91,36 @@ TEST_F(ConcurrentJobManagerTest, Basic) {
     jobManager.enqueueJob(testJob2);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    EXPECT_EQ(jobManager.numFinishedJobs(), 0) << "A 20ms job should not be done after 10ms";
+    REQUIRE(jobManager.numFinishedJobs() == 0);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    
-    EXPECT_EQ(jobManager.numFinishedJobs(), 1) << "A 20ms job should be done after 10+20 ms";
+
+    REQUIRE(jobManager.numFinishedJobs() == 1);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    EXPECT_EQ(jobManager.numFinishedJobs(), 2) << "A 20ms job and a 20ms job should be done after 10+20+20 ms"; 
-
+    REQUIRE(jobManager.numFinishedJobs() == 2); 
 
     auto finishedJob = jobManager.popFinishedJob();
 
     int product = finishedJob->product();
-    EXPECT_EQ(product, 1337) << "Expecting product to be 1337";
+    REQUIRE(product == 1337);
 }
 
-struct VerboseProduct {
-    VerboseProduct(int v)
-    : val(v) {
-        std::cout << "VerboseProduct constructor" << std::endl;
-    }
-
-    ~VerboseProduct() {
-        std::cout << "VerboseProduct destructor" << std::endl;
-    }
-
-    int val;
-};
-
-
-struct VerboseJob : public openspace::Job<VerboseProduct> {
-    VerboseJob(int jobExecutingTime)
-        : _jobExecutingTime(jobExecutingTime)
-        , _product(-1)
-    {
-        std::cout << "VerboseTestJob constructor" << std::endl;
-    }
-
-    ~VerboseJob() {
-        std::cout << "VerboseTestJob destructor" << std::endl;
-    }
-
-    virtual void execute() {
-        std::cout << " ** Executing job ... " << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
-        _product = VerboseProduct(1337);
-        std::cout << " ** Finished job" << std::endl;
-    }
-
-    virtual VerboseProduct product() {
-        return _product;
-    }
-
-    int _jobExecutingTime;
-    VerboseProduct _product;
-
-};
-
-TEST_F(ConcurrentJobManagerTest, JobCreation) {
+TEST_CASE("ConcurrentJobmanager: Job Creation", "[concurrentjobmanager]") {
     using namespace openspace;
-    
+
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     ConcurrentJobManager<VerboseProduct> jobManager(ThreadPool(1));
-
     auto testJob1 = std::shared_ptr<VerboseJob>(new VerboseJob(20));
 
     jobManager.enqueueJob(testJob1);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    EXPECT_EQ(jobManager.numFinishedJobs(), 0) << "A 20ms job should not be done after 10ms";
+    REQUIRE(jobManager.numFinishedJobs() == 0);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-    EXPECT_EQ(jobManager.numFinishedJobs(), 1) << "A 20ms job should be done after 10+20 ms";
-
+    REQUIRE(jobManager.numFinishedJobs() == 1);
 
     auto finishedJob = jobManager.popFinishedJob();
     {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,62 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scenegraphnode.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/globes/chunknode.h>
+#include "catch2/catch.hpp"
 
-#include <fstream>
-#include <glm/glm.hpp>
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rawvolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeline.h>
+#include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
 
-using namespace openspace;
+TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
+    using namespace openspace::volume;
 
-class ChunkNodeTest : public testing::Test {};
+    glm::uvec3 dims(1);
+    float value = 0.5f;
 
-/*
-TEST_F(ChunkNodeTest, Split) {
-	
-	ghoul::Dictionary dict;
-	ChunkLodGlobe chunkLodNode(dict);
-	chunkLodNode.initialize();
+    RawVolume<float> vol(dims);
 
-	BoundingRect bounds(Vec2(2, 2), Vec2(2, 2));
-	ChunkNode cn(chunkLodNode,bounds);
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
+    vol.set({ 0, 0, 0 }, value);
+    REQUIRE(vol.get({ 0, 0, 0 }) == value);
 
-	cn.split();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_FALSE(cn.isLeaf()) << "Chunk node is not leaf";
+    std::string volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
 
-	ASSERT_EQ(cn.bounds.center.x, cn.child(Quad::NORTH_WEST).bounds.center.x * 2);
-	ASSERT_EQ(cn.bounds.center.x, cn.child(Quad::NORTH_EAST).bounds.center.x * 2/3);
+    // Write the 1x1x1 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
 
-	ASSERT_EQ(cn.bounds.halfSize.x, cn.child(Quad::NORTH_WEST).bounds.halfSize.x * 2);
-	ASSERT_EQ(cn.bounds.halfSize.y, cn.child(Quad::NORTH_WEST).bounds.halfSize.y * 2);
-
-	chunkLodNode.deinitialize();
+    // Read the 1x1x1 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    REQUIRE(storedVolume->get({ 0, 0, 0 }) == value);
 }
 
-TEST_F(ChunkNodeTest, Merge) {
-	ghoul::Dictionary dict;
-	ChunkLodGlobe chunkLodNode(dict);
-	chunkLodNode.initialize();
+TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
+    using namespace openspace::volume;
 
+    glm::uvec3 dims(2, 4, 8);
+    auto value = [dims](glm::uvec3 v) {
+        return static_cast<float>(v.z * dims.z * dims.y + v.y * dims.y + v.x);
+    };
 
-	BoundingRect bounds(Vec2(2, 2), Vec2(2, 2));
-	ChunkNode cn(chunkLodNode,bounds);
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
+    RawVolume<float> vol(dims);
+    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float) { vol.set(x, value(x)); });
 
-	cn.split();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_FALSE(cn.isLeaf()) << "Chunk node is not leaf";
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) { REQUIRE(v == value(x)); });
 
-	cn.merge();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
+    std::string volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
 
-	chunkLodNode.deinitialize();
+    // Write the 2x4x8 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
 
+    // Read the 2x4x8 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        REQUIRE(v == value(x));
+    });
 }
-*/

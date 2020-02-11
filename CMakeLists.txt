@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2019                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -43,7 +43,6 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
 
 begin_header("Configuring OpenSpace project")
 message(STATUS "CMake version: ${CMAKE_VERSION}")
@@ -208,37 +207,6 @@ if (MSVC)
 
 endif ()
 
-##########################################################################################
-# Tests                                                                                  #
-##########################################################################################
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-if (OPENSPACE_HAVE_TESTS)
-  include_gtest("${GHOUL_BASE_DIR}/ext/googletest")
-
-  file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-  add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
-
-  target_include_directories(OpenSpaceTest PUBLIC
-    "${OPENSPACE_BASE_DIR}/include"
-    "${OPENSPACE_BASE_DIR}/tests"
-    "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
-  )
-  target_compile_definitions(OpenSpaceTest PUBLIC
-    "GHL_THROW_ON_ASSERT" "GTEST_HAS_TR1_TUPLE=0"
-  )
-  target_link_libraries(OpenSpaceTest gtest openspace-core)
-
-  set_folder_location(OpenSpaceTest "Unit Tests")
-
-  if (MSVC)
-    set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
-      "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-    )
-  endif ()
-  set_openspace_compile_settings(OpenSpaceTest)
-endif (OPENSPACE_HAVE_TESTS)
-
-
 begin_header("Configuring Modules")
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
 handle_modules("${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
@@ -249,6 +217,13 @@ begin_header("Configuring Applications")
 handle_applications()
 end_header("End: Configuring Applications")
 message(STATUS "")
+
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+if (OPENSPACE_HAVE_TESTS)
+  begin_header("Generating OpenSpace unit test")
+  add_subdirectory("${OPENSPACE_BASE_DIR}/tests")
+  end_header()
+endif (OPENSPACE_HAVE_TESTS)
 
 
 # Web Browser and Web gui
@@ -268,11 +243,6 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-
-  if (TARGET OpenSpaceTest)
-    set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
-    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-  endif ()
 elseif (OPENSPACE_MODULE_WEBBROWSER)
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()

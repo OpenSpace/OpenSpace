@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -175,7 +175,7 @@ documentation::Documentation RenderableTrail::Documentation() {
 
 RenderableTrail::Appearance::Appearance()
     : properties::PropertyOwner(AppearanceInfo)
-    , lineColor(LineColorInfo, glm::vec3(1.0f, 1.0f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
@@ -249,6 +249,18 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
+#ifdef __APPLE__
+    _programObject = BaseModule::ProgramObjectManager.request(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine.buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
+            );
+        }
+    );
+#else
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -259,6 +271,7 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
+#endif
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 }
@@ -320,7 +333,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
+#ifdef __APPLE__
+        glLineWidth(1.f);
+#else
         glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+#endif
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
@@ -349,10 +366,13 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
-        glm::ivec2 resolution = global::renderEngine.renderingResolution();
-        p->setUniform(c.resolution, resolution);
         
-        p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+        #ifndef __APPLE__
+                glm::ivec2 resolution = global::renderEngine.renderingResolution();
+                p->setUniform(c.resolution, resolution);
+
+                p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+        #endif
         
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and

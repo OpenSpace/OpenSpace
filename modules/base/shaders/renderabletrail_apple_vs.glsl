@@ -22,37 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gdal.h"
-#include "gdal_priv.h"
+#version __CONTEXT__
 
-#include <ogr_spatialref.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+layout(location = 0) in vec3 in_point_position;
+
+out float vs_positionDepth;
+out vec4 vs_gPosition;
+out float fade;
+
+uniform dmat4 modelViewTransform;
+uniform mat4 projectionTransform;
+uniform int idOffset;
+uniform int nVertices;
+uniform bool useLineFade;
+uniform float lineFade;
+uniform int vertexSortingMethod;
+uniform int pointSize;
+uniform int stride;
+
+uniform ivec2 resolution;
+
+// Fragile! Keep in sync with RenderableTrail::render
+#define VERTEX_SORTING_NEWESTFIRST 0
+#define VERTEX_SORTING_OLDESTFIRST 1
+#define VERTEX_SORTING_NOSORTING 2
 
 
-#include "cpl_conv.h"
-#include "cpl_string.h"
+void main() {
+    int modId = gl_VertexID;
 
-// Error: cannot open source file "wms/wmsdriver.h"
-//#include "wms/wmsdriver.h" 
+    if ((vertexSortingMethod != VERTEX_SORTING_NOSORTING) && useLineFade) {
+        // Account for a potential rolling buffer
+        modId = gl_VertexID - idOffset;
+        if (modId < 0) {
+            modId += nVertices;
+        }
 
-// Error: cannot open source file "wms/wmsmetadataset.h"
-//#include "wms/wmsmetadataset.h"
+        // Convert the index to a [0,1] ranger
+        float id = float(modId) / float(nVertices);
 
+        if (vertexSortingMethod == VERTEX_SORTING_NEWESTFIRST) {
+            id = 1.0 - id;
+        }
 
-class GdalWmsTest : public testing::Test {};
+        fade = clamp(id * lineFade, 0.0, 1.0); 
+    }
+    else {
+        fade = 1.0;
+    }
 
-TEST_F(GdalWmsTest, Simple) {
-    //GDALDatasetH poDataset;
-    //GDALAllRegister();
-
-    //
-    //std::string res = GDALVersionInfo("format");
-    //
-    //std::cout << res << std::endl;
-
-    //std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
-
-    //poDataset = GDALOpen(testFile.c_str(), GA_ReadOnly);
-
-    // This assertion fails
-    //ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";
+    vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+    vec4 vs_positionClipSpace = projectionTransform * vs_gPosition;
+    vs_positionDepth = vs_positionClipSpace.w;
+    
+    gl_PointSize = (stride == 1 || int(modId) % stride == 0) ? 
+                    float(pointSize) : float(pointSize) / 2;
+    gl_Position  = z_normalization(vs_positionClipSpace);
 }

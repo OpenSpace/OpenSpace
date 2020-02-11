@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/optionproperty.h>
+#include "catch2/catch.hpp"
 
-class Issue527 : public testing::Test {};
+#include <openspace/util/concurrentqueue.h>
 
-TEST_F(Issue527, Regression) {
-    // Error in OptionProperty if values not starting at 0 are used
-    openspace::properties::OptionProperty p({ "id", "gui", "desc"});
+TEST_CASE("ConcurrentQueue: Basic", "[concurrentqueue]") {
+    using namespace openspace;
 
-    p.addOptions({
-        { -1, "a" },
-        { -2, "b" }
-    });
-
-
-    p = -1;
-    ASSERT_EQ("a", p.option().description);
+    ConcurrentQueue<int> q1;
+    q1.push(4);
+    int val = q1.pop();
+    REQUIRE(val == 4);
 }

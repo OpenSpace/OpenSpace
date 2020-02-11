@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <modules/webbrowser/include/webbrowserapp.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <fmt/format.h>
 #include <include/wrapper/cef_helpers.h>
 
@@ -91,6 +92,8 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 }
 
 void CefHost::doMessageLoopWork() {
+    ZoneScoped
+
     CefDoMessageLoopWork();
 }
 

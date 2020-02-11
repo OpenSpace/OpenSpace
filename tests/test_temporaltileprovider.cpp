@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,22 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <thread>
+#include "catch2/catch.hpp"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <modules/globebrowsing/src/tileprovider.h>
+#include <openspace/util/time.h>
 #include <glm/glm.hpp>
 
-class EllipsoidTest : public testing::Test {};
+namespace {
+    constexpr const char* fileName = "data/scene/debugglobe/map_service_configs/"
+        "VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
+} // namespace
 
-using namespace openspace;
-
-TEST_F(EllipsoidTest, GeodeticSurfaceNormal) {
-	Ellipsoid ellipsoid(Vec3(1, 1, 1));
-
-	Vec3 geodeticNormal = ellipsoid.geodeticSurfaceNormal(Vec3(0, 0, 1));
-	Vec3 expectedNormal = Vec3(0, 0, 1);
-
-	ASSERT_EQ(geodeticNormal, expectedNormal);
-}

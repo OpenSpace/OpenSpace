@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
@@ -142,7 +143,7 @@ LuaConsole::LuaConsole()
     )
     , _historyTextColor(
         HistoryTextColorInfo,
-        glm::vec4(1.0f, 1.0f, 1.0f, 0.65f),
+        glm::vec4(1.f, 1.f, 1.f, 0.65f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -166,6 +167,8 @@ LuaConsole::LuaConsole()
 LuaConsole::~LuaConsole() {} // NOLINT
 
 void LuaConsole::initialize() {
+    ZoneScoped
+
     const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
@@ -229,6 +232,8 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
+    ZoneScoped
+
     const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
@@ -589,6 +594,8 @@ void LuaConsole::charCallback(unsigned int codepoint,
 }
 
 void LuaConsole::update() {
+    ZoneScoped
+
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
@@ -627,6 +634,8 @@ void LuaConsole::update() {
 }
 
 void LuaConsole::render() {
+    ZoneScoped
+
     using namespace ghoul::fontrendering;
 
     // Don't render the console if it's collapsed.
@@ -646,7 +655,7 @@ void LuaConsole::render() {
     glDisable(GL_DEPTH_TEST);
 
     rendering::helper::renderBox(
-        glm::vec2(0.f, 0.f),
+        glm::vec2(0.f),
         glm::vec2(1.f, _currentHeight / res.y),
         _backgroundColor
     );
@@ -793,7 +802,7 @@ void LuaConsole::render() {
     };
 
     if (_remoteScripting) {
-        const glm::vec4 Red(1, 0, 0, 1);
+        const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
         ParallelConnection::Status status = global::parallelPeer.status();
         const int nClients =
@@ -809,7 +818,7 @@ void LuaConsole::render() {
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
     } else if (global::parallelPeer.isHost()) {
-        const glm::vec4 LightBlue(0.4, 0.4, 1, 1);
+        const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText = "Local script execution";
         const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);

@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#include "catch2/catch.hpp"
+
 #include <openspace/util/time.h>
 #include "modules/globebrowsing/src/timequantizer.h"
 #include <openspace/util/spicemanager.h>
@@ -30,43 +31,26 @@
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+namespace {
+    constexpr const int FILLEN = 128;
+    constexpr const int TYPLEN = 32;
+    constexpr const int SRCLEN = 128;
 
-class TimeQuantizerTest : public testing::Test {
-protected:
-    void SetUp() override {
-        openspace::SpiceManager::initialize();
+    namespace spicemanager_constants {
+        const int nrMetaKernels = 9;
+        SpiceInt which, handle, count = 0;
+        char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
+        double abs_error = 0.00001;
+    } // namespace spicemanager_constants
+
+    int loadLSKKernel() {
+        int kernelID = openspace::SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        );
+        REQUIRE(kernelID == 1);
+        return kernelID;
     }
-
-    void TearDown() override {
-        openspace::SpiceManager::deinitialize();
-
-    }
-};
-
-//global constants 
-#define  FILLEN   128
-#define  TYPLEN   32
-#define  SRCLEN   128
-
-namespace spicemanager_constants {
-    const int nrMetaKernels = 9;
-    SpiceInt which, handle, count = 0;
-    char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
-    double abs_error = 0.00001;
-} // namespace spicemanager_constants
-
-#define LSK "C:\\Users\\OpenSpace\\Desktop\\profiles\\OpenSpace\\tests\\SpiceTest\\spicekernels\\naif0008.tls"
-
-int loadLSKKernel() {
-    int kernelID = openspace::SpiceManager::ref().loadKernel(
-        std::string(LSK)
-    );
-    EXPECT_EQ(1, kernelID) << "loadKernel did not return proper id";
-    return kernelID;
-}
+} // namespace
 
 static void singleTimeTest(openspace::Time& t,
                            openspace::globebrowsing::TimeQuantizer& tq, bool clamp,
@@ -74,7 +58,7 @@ static void singleTimeTest(openspace::Time& t,
 {
     t.setTime(input);
     tq.quantize(t, clamp);
-    EXPECT_EQ(t.ISO8601(), expected);
+    REQUIRE(t.ISO8601() == expected);
 }
 
 static void singleResolutionTest(openspace::globebrowsing::TimeQuantizer& tq,
@@ -91,11 +75,11 @@ static void singleResolutionTest(openspace::globebrowsing::TimeQuantizer& tq,
     }
 
     if (expectFailure) {
-        EXPECT_TRUE(res.find(search) != std::string::npos);
-        EXPECT_TRUE(res.find(expectedType) != std::string::npos);
+        REQUIRE(res.find(search) != std::string::npos);
+        REQUIRE(res.find(expectedType) != std::string::npos);
     }
     else {
-        EXPECT_TRUE(res.find(search) == std::string::npos);
+        REQUIRE(res.find(search) == std::string::npos);
     }
 }
 
@@ -112,10 +96,10 @@ static void singleStartTimeTest1(openspace::globebrowsing::TimeQuantizer& tq,
     }
 
     if (expectFailure) {
-        EXPECT_TRUE(res.find(expectedErrSubstring) != std::string::npos);
+        REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
     }
     else {
-        EXPECT_TRUE(res.find(expectedErrSubstring) == std::string::npos);
+        REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
     }
 }
 
@@ -132,14 +116,16 @@ static void singleStartTimeTest2(std::string startTime, std::string expectedErrS
     }
 
     if (expectFailure) {
-        EXPECT_TRUE(res.find(expectedErrSubstring) != std::string::npos);
+        REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
     }
     else {
-        EXPECT_TRUE(res.find(expectedErrSubstring) == std::string::npos);
+        REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
     }
 }
 
 static void LoadSpiceKernel () {
+    openspace::SpiceManager::initialize();
+
     loadLSKKernel();
     // naif0008.tls is a text file, check if loaded.
     SpiceBoolean found;
@@ -156,11 +142,14 @@ static void LoadSpiceKernel () {
         &found
     );
 
-    ASSERT_TRUE(found == SPICETRUE) << "Kernel not loaded";
+    REQUIRE(found == SPICETRUE);
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(TimeQuantizerTest, TestYears) {
-    LoadSpiceKernel();
+TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
+    openspace::SpiceManager::initialize();
+
+    loadLSKKernel();
     using namespace openspace::globebrowsing;
     TimeQuantizer t1;
     openspace::Time testT;
@@ -186,10 +175,14 @@ TEST_F(TimeQuantizerTest, TestYears) {
     singleTimeTest(testT, t1, true, "2022-12-09T00:00:00", "2022-12-09T00:00:00.000");
     singleTimeTest(testT, t1, true, "2028-12-08T23:59:59", "2025-12-09T00:00:00.000");
     singleTimeTest(testT, t1, true, "2028-12-09T00:00:01", "2028-12-09T00:00:00.000");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(TimeQuantizerTest, TestDays) {
-    LoadSpiceKernel();
+TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
+    openspace::SpiceManager::initialize();
+
+    loadLSKKernel();
     using namespace openspace::globebrowsing;
     TimeQuantizer t1;
     openspace::Time testT;
@@ -226,10 +219,14 @@ TEST_F(TimeQuantizerTest, TestDays) {
 
     singleTimeTest(testT, t1, true, "2020-03-01T00:30:00", "2020-03-01T00:00:00.000");
     singleTimeTest(testT, t1, true, "2019-03-04T00:00:02", "2019-03-04T00:00:00.000");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(TimeQuantizerTest, TestMonths) {
-    LoadSpiceKernel();
+TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
+    openspace::SpiceManager::initialize();
+
+    loadLSKKernel();
     using namespace openspace::globebrowsing;
     TimeQuantizer t1;
     openspace::Time testT;
@@ -262,10 +259,14 @@ TEST_F(TimeQuantizerTest, TestMonths) {
     singleTimeTest(testT, t1, true, "2016-11-28T00:00:05", "2016-11-28T00:00:00.000");
     singleTimeTest(testT, t1, true, "2017-05-30T04:15:45", "2017-05-28T00:00:00.000");
     singleTimeTest(testT, t1, true, "2017-10-17T05:01:00", "2017-05-28T00:00:00.000");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(TimeQuantizerTest, TestTimes) {
-    LoadSpiceKernel();
+TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
+    openspace::SpiceManager::initialize();
+
+    loadLSKKernel();
     using namespace openspace::globebrowsing;
     TimeQuantizer t1;
     openspace::Time testT;
@@ -298,10 +299,14 @@ TEST_F(TimeQuantizerTest, TestTimes) {
     singleTimeTest(testT, t1, true, "2019-02-28T22:15:01", "2019-02-28T22:15:00.000");
     singleTimeTest(testT, t1, true, "2019-02-28T22:29:59", "2019-02-28T22:15:00.000");
     singleTimeTest(testT, t1, true, "2019-02-28T22:59:59", "2019-02-28T22:45:00.000");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(TimeQuantizerTest, TestResolutionError) {
-    LoadSpiceKernel();
+TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
+    openspace::SpiceManager::initialize();
+
+    loadLSKKernel();
     using namespace openspace::globebrowsing;
     TimeQuantizer t1;
 
@@ -318,10 +323,14 @@ TEST_F(TimeQuantizerTest, TestResolutionError) {
     singleResolutionTest(t1, "30m", "(m)inute option.", false);
     singleResolutionTest(t1, "31m", "(m)inute option.", true);
     singleResolutionTest(t1, "10s", "unit format", true);
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(TimeQuantizerTest, TestStartTimeError1) {
-    LoadSpiceKernel();
+TEST_CASE("TimeQuantizer: Test start time pre-existing object", "[timequantizer]") {
+    openspace::SpiceManager::initialize();
+
+    loadLSKKernel();
     using namespace openspace::globebrowsing;
     TimeQuantizer t1;
 
@@ -330,14 +339,20 @@ TEST_F(TimeQuantizerTest, TestStartTimeError1) {
     singleStartTimeTest1(t1, "2017-01-28T12:00:00", "Invalid start time value", true);
     singleStartTimeTest1(t1, "2017-01-28T00:01:00", "Invalid start time value", true);
     singleStartTimeTest1(t1, "2017-01-28T00:00:01", "Invalid start time value", true);
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(TimeQuantizerTest, TestStartTimeError2) {
-    LoadSpiceKernel();
+TEST_CASE("TimeQuantizer: Test start time using constructor", "[timequantizer]") {
+    openspace::SpiceManager::initialize();
+
+    loadLSKKernel();
 
     singleStartTimeTest2("2017-01-20T00:00:00", "Invalid start", false);
     singleStartTimeTest2("2017-01-29T00:00:00", "Invalid start day value", true);
     singleStartTimeTest2("2017-01-28T12:00:00", "Invalid start time value", true);
     singleStartTimeTest2("2017-01-28T00:01:00", "Invalid start time value", true);
     singleStartTimeTest2("2017-01-28T00:00:01", "Invalid start time value", true);
+
+    openspace::SpiceManager::deinitialize();
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,11 +41,11 @@ glm::dmat3x2 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::dmat3x2(0);
+                return glm::dmat3x2(0.0);
             }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::dmat3x2(0);
+                return glm::dmat3x2(0.0);
             }
             else {
                 result[i][j] = lua_tonumber(state, -1);
@@ -74,7 +74,7 @@ bool toLuaConversion(lua_State* state, glm::dmat3x2 value) {
 }
 
 glm::dmat3x2 fromStringConversion(const std::string& val, bool& success) {
-    glm::dmat3x2 result;
+    glm::dmat3x2 result = glm::dmat3x2(1.0);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() !=
         (ghoul::glm_rows<glm::dmat3x2>::value * ghoul::glm_cols<glm::dmat3x2>::value))
@@ -123,7 +123,7 @@ using nl = std::numeric_limits<double>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DMat3x2Property,
     glm::dmat3x2,
-    glm::dmat3x2(0),
+    glm::dmat3x2(0.0),
     glm::dmat3x2(
         nl::lowest(), nl::lowest(), nl::lowest(),
         nl::lowest(), nl::lowest(), nl::lowest()

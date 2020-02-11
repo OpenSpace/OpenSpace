@@ -22,25 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/temporaltileprovider.h>
+#include "fragment.glsl"
 
-#include <openspace/util/time.h>
+in float vs_positionDepth;
+in vec4 vs_gPosition;
+in float fade;
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
-#include <iostream>
+uniform vec3 color;
+uniform int renderPhase;
+uniform float opacity = 1.0;
+
+// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
+#define RenderPhaseLines 0
+#define RenderPhasePoints 1
+
+#define Delta 0.25
 
 
-class TemporalTileProviderTest : public testing::Test {};
+Fragment getFragment() {
+    Fragment frag;
+    frag.color = vec4(color * fade, fade * opacity);
+    frag.depth = vs_positionDepth;
+    frag.blend = BLEND_MODE_ADDITIVE;
 
-std::string fileName = "data/scene/debugglobe/map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
+    if (renderPhase == RenderPhasePoints) {
+        // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
+        // smoothstep to gradually decrease the alpha on the edges of the point
+        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+        //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));        
+        float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
+        float transparencyCorrection = frag.color.a * circleClipping;
+        if (transparencyCorrection < 0.9) {
+            discard;
+        }
 
-TEST_F(TemporalTileProviderTest, Basic) {
-    double t = 2016.01;
-    openspace::Time::ref().setTime(t);
-    openspace::Time::ref().preSynchronization();
-    openspace::Time::ref().postSynchronizationPreDraw();
-    openspace::TemporalTileProvider provider(absPath(fileName));
+        frag.color.a = transparencyCorrection;
+    }
+
+    frag.gPosition = vs_gPosition;
+
+    // There is no normal here
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+
+    return frag;
 }
-

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,59 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/lrucache.h>
+#include "catch2/catch.hpp"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <modules/globebrowsing/src/lrucache.h>
 #include <glm/glm.hpp>
 
-class LRUCacheTest : public testing::Test {};
+namespace {
+    struct DefaultHasher {
+        unsigned long long operator()(int var) const {
+            return static_cast<unsigned long long>(var);
+        }
+    };
 
-struct DefaultHasher {
-    unsigned long long operator()(const int& var) const {
-        return static_cast<unsigned long long>(var);
+    struct MyKey {
+        int x, y;
+    };
+
+    bool operator==(const MyKey& a, const MyKey& b) {
+        return a.x == b.x && a.y == b.y;
     }
-};
 
-TEST_F(LRUCacheTest, Get) {
+    std::ostream& operator<<(std::ostream& o, const MyKey& key) {
+        return o << key.x << ", " << key.y;
+    }
+
+    // custom specialization 
+    struct DefaultHasherMyKey {
+        unsigned long long operator()(const MyKey& s) const {
+            return s.x ^ (s.y << 1);
+        }
+    };
+} // namespace
+
+TEST_CASE("LRUCache: Get", "[lrucache]") {
     openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
     lru.put(1, "hej");
     lru.put(12, "san");
-    ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
+    REQUIRE(lru.get(1) == "hej");
 }
 
-TEST_F(LRUCacheTest, CleaningCache) {
+TEST_CASE("LRUCache: CleaningCache", "[lrucache]") {
     openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
     lru.put(1, 1.2);
     lru.put(12, 2.3);
     lru.put(123, 33.4);
     lru.put(1234, 4.5);
     lru.put(12345, 6.7);
-    ASSERT_FALSE(lru.exist(1)) << "Element should have been cleaned out of cache";
-    ASSERT_TRUE(lru.exist(12)) << "Element should remain in cache";
+    REQUIRE_FALSE(lru.exist(1));
+    REQUIRE(lru.exist(12));
 }
 
-struct MyKey {
-    int x, y;
-};
-
-bool operator==(const MyKey& a, const MyKey& b) {
-    return a.x == b.x && a.y == b.y;
-}
-
-std::ostream& operator<<(std::ostream& o, const MyKey& key) {
-    return o << key.x << ", " << key.y;
-}
-
-// custom specialization 
-struct DefaultHasherMyKey {
-    unsigned long long operator()(const MyKey& s) const {
-        return s.x ^ (s.y << 1);
-    }
-};
-
-TEST_F(LRUCacheTest, StructKey) {
-    openspace::globebrowsing::cache::LRUCache<MyKey, std::string, DefaultHasherMyKey> lru(4);
+TEST_CASE("LRUCache: StructKey", "[lrucache]") {
+    openspace::globebrowsing::cache::LRUCache<
+        MyKey, std::string, DefaultHasherMyKey
+    > lru(4);
 
     // These two custom keys should be treated as equal
     MyKey key1 = { 2, 3 };
@@ -85,13 +86,13 @@ TEST_F(LRUCacheTest, StructKey) {
 
 
     lru.put(key1, val1);
-    ASSERT_TRUE(lru.exist(key1));
-    ASSERT_EQ(lru.get(key1), val1);
+    REQUIRE(lru.exist(key1));
+    REQUIRE(lru.get(key1) == val1);
 
     // Putting key2 should replace key1
     lru.put(key2, val2);
-    ASSERT_EQ(key1, key2) << "key 1 and key2 should be considered equal";
-    ASSERT_TRUE(lru.exist(key2));
-    ASSERT_EQ(lru.get(key1), val2);
-    ASSERT_EQ(lru.get(key2), val2);
+    REQUIRE(key1 == key2);
+    REQUIRE(lru.exist(key2));
+    REQUIRE(lru.get(key1) == val2);
+    REQUIRE(lru.get(key2) == val2);
 }

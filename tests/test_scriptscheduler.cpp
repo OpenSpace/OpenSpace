@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scripting/scriptscheduler.h>
+#include "catch2/catch.hpp"
 
-// This include should be removed after the time class is not dependent on
-// Spice anymore
+#include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
-
 #include <limits>
 
-class ScriptSchedulerTest : public testing::Test {
-protected:
-    void SetUp() override {
-        openspace::SpiceManager::initialize();
-        openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
-        );
-    }
-    
-    void TearDown() override {
-        openspace::SpiceManager::deinitialize();
-    }
-};
+TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
 
-TEST_F(ScriptSchedulerTest, SimpleForward) {
     using namespace openspace::scripting;
     using namespace std::string_literals;
     
@@ -59,21 +49,24 @@ TEST_F(ScriptSchedulerTest, SimpleForward) {
     };
     
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary }
-    });
+    scheduler.loadScripts({ { "1", testDictionary } });
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
     
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03")
-    );
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03"));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleForwardSingleJump) {
+TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -99,18 +92,25 @@ TEST_F(ScriptSchedulerTest, MultipleForwardSingleJump) {
     });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript2", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript2");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleForwardOrdering) {
+TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -135,15 +135,22 @@ TEST_F(ScriptSchedulerTest, MultipleForwardOrdering) {
     });
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
-    EXPECT_EQ("ForwardScript2", *(std::next(res.first)));
+    REQUIRE(std::distance(res.first, res.second) == 2);
+    REQUIRE(*(res.first) == "ForwardScript1");
+    REQUIRE(*(std::next(res.first)) == "ForwardScript2");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, SimpleBackward) {
+TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -161,14 +168,21 @@ TEST_F(ScriptSchedulerTest, SimpleBackward) {
     });
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleBackwardSingleJump) {
+TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -193,18 +207,25 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardSingleJump) {
     });
     
     auto res =  scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript2", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript2");
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleBackwardOrdering) {
+TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -229,15 +250,22 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardOrdering) {
     });
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript2", *(res.first));
-    EXPECT_EQ("BackwardScript1", *(std::next(res.first)));
+    REQUIRE(std::distance(res.first, res.second) == 2);
+    REQUIRE(*(res.first) == "BackwardScript2");
+    REQUIRE(*(std::next(res.first)) == "BackwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, Empty) {
+TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     
     static const std::vector<double> TestTimes = {
@@ -249,18 +277,25 @@ TEST_F(ScriptSchedulerTest, Empty) {
     for (double t : TestTimes) {
         ScriptScheduler scheduler;
         auto res = scheduler.progressTo(t);
-        EXPECT_EQ(res.first, res.second);
+        REQUIRE(res.first == res.second);
     }
     
     // Then test the same thing but keeping the same ScriptScheduler
     ScriptScheduler scheduler;
     for (double t : TestTimes) {
         auto res = scheduler.progressTo(t);
-        EXPECT_EQ(res.first, res.second);
+        REQUIRE(res.first == res.second);
     }
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, ForwardBackwards) {
+TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
     
@@ -285,22 +320,29 @@ TEST_F(ScriptSchedulerTest, ForwardBackwards) {
     });
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript1");
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
+    REQUIRE(std::distance(res.first, res.second) == 2);
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript2", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript2");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, Rewind) {
+TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -325,16 +367,23 @@ TEST_F(ScriptSchedulerTest, Rewind) {
     });
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
+    REQUIRE(std::distance(res.first, res.second) == 2);
     
     scheduler.rewind();
     
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, CurrentTime) {
+TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     
     static const std::vector<double> TestValues = {
@@ -345,16 +394,22 @@ TEST_F(ScriptSchedulerTest, CurrentTime) {
     for (double t : TestValues) {
         ScriptScheduler scheduler;
         scheduler.progressTo(t);
-        EXPECT_EQ(t, scheduler.currentTime());
+        REQUIRE(t == scheduler.currentTime());
     }
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, AllScripts) {
+TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
     
     ScriptScheduler scheduler;
-    
     
     ghoul::Dictionary testDictionary1 = {
         { "Time", "2000 JAN 03"s },
@@ -379,15 +434,22 @@ TEST_F(ScriptSchedulerTest, AllScripts) {
         { "2", testDictionary2 },
         { "3", testDictionary3 }
     });
-    
+
     auto allScripts = scheduler.allScripts();
-    ASSERT_EQ(3, allScripts.size());
-    
-    EXPECT_LE(allScripts[0].time, allScripts[1].time);
-    EXPECT_LE(allScripts[1].time, allScripts[2].time);
+    REQUIRE(allScripts.size() == 3);
+
+    REQUIRE(allScripts[0].time < allScripts[1].time);
+    REQUIRE(allScripts[1].time < allScripts[2].time);
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, JumpEqual) {
+TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -403,30 +465,29 @@ TEST_F(ScriptSchedulerTest, JumpEqual) {
         { "1", testDictionary1 }
     });
 
-    auto res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 11:00:00")
-    );
-    ASSERT_EQ(res.first, res.second);
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 11:00:00"));
+    REQUIRE(res.first == res.second);
 
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 12:00:00")
-    );
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
 
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 12:01:00")
-    );
-    ASSERT_EQ(res.first, res.second);
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:01:00"));
+    REQUIRE(res.first == res.second);
 
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 12:00:00")
-    );
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript1", *(res.first));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, SameTime) {
+TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -438,23 +499,24 @@ TEST_F(ScriptSchedulerTest, SameTime) {
         { "BackwardScript", "BackwardScript1"s }
     };
 
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
 
-    auto res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 12:00:00")
-    );
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
 
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 12:00:00")
-    );
-    ASSERT_EQ(res.first, res.second);
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
+    REQUIRE(res.first == res.second);
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultiInnerJump) {
+TEST_CASE("ScriptScheduler: Multi Inner Jump", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -466,33 +528,33 @@ TEST_F(ScriptSchedulerTest, MultiInnerJump) {
         { "BackwardScript", "BackwardScript1"s }
     };
 
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
 
-    auto res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 10:00:00")
-    );
-    ASSERT_EQ(res.first, res.second);
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 10:00:00"));
+    REQUIRE(res.first == res.second);
 
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 11:00:00")
-    );
-    ASSERT_EQ(res.first, res.second);
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 11:00:00"));
+    REQUIRE(res.first == res.second);
 
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 13:00:00")
-    );
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 13:00:00"));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
 
-    res = scheduler.progressTo(
-        openspace::Time::convertTime("2000 JAN 03 12:30:00")
-    );
-    ASSERT_EQ(res.first, res.second);
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:30:00"));
+    REQUIRE(res.first == res.second);
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleForwardSingleJumpMultipleLoad) {
+TEST_CASE(
+    "ScriptScheduler: Multiple Forward Single Jump Multiple Load",
+    "[scriptscheduler]")
+{
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -512,27 +574,31 @@ TEST_F(ScriptSchedulerTest, MultipleForwardSingleJumpMultipleLoad) {
     ScriptScheduler scheduler;
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
 
-    scheduler.loadScripts({
-        { "1", testDictionary2 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary2 } });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript2", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript2");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleForwardOrderingMultipleLoad) {
+TEST_CASE("ScriptScheduler: Multiple Forward Ordering Multiple Load" "[scriptscheduler]")
+{
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -551,23 +617,29 @@ TEST_F(ScriptSchedulerTest, MultipleForwardOrderingMultipleLoad) {
     ScriptScheduler scheduler;
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
-    scheduler.loadScripts({
-        { "1", testDictionary2 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts({ { "1", testDictionary2 } });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
-    EXPECT_EQ("ForwardScript2", *(std::next(res.first)));
+    REQUIRE(std::distance(res.first, res.second) == 2);
+    REQUIRE(*(res.first) == "ForwardScript1");
+    REQUIRE(*(std::next(res.first)) == "ForwardScript2");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleBackwardSingleJumpMultipleLoad) {
+TEST_CASE(
+    "ScriptScheduler: Multiple Backward Single Jump Multiple Load",
+    "[scriptscheduler]")
+{
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -586,26 +658,32 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardSingleJumpMultipleLoad) {
     };
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
-    scheduler.loadScripts({
-        { "1", testDictionary2 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts({ { "1", testDictionary2 } });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(res.first, res.second);
+    REQUIRE(res.first == res.second);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript2", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript2");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, MultipleBackwardOrderingMultipleLoad) {
+TEST_CASE(
+    "ScriptScheduler: Multiple Backward Ordering Multiple Load",
+    "[scriptscheduler]")
+{
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -624,23 +702,27 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardOrderingMultipleLoad) {
     };
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
-    scheduler.loadScripts({
-        { "1", testDictionary2 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts({ { "1", testDictionary2 } });
 
-    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    ASSERT_EQ(res.first, res.second);
+    std::pair<ScriptScheduler::ScriptIt, ScriptScheduler::ScriptIt> res =
+        scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
+    REQUIRE(res.first == res.second);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript2", *(res.first));
-    EXPECT_EQ("BackwardScript1", *(std::next(res.first)));
+    REQUIRE(std::distance(res.first, res.second) == 2);
+    REQUIRE(*(res.first) == "BackwardScript2");
+    REQUIRE(*(std::next(res.first)) == "BackwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, ForwardBackwardsMultipleLoad) {
+TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -659,30 +741,33 @@ TEST_F(ScriptSchedulerTest, ForwardBackwardsMultipleLoad) {
     };
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
-    scheduler.loadScripts({
-        { "1", testDictionary2 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts({ { "1", testDictionary2 } });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
+    REQUIRE(std::distance(res.first, res.second) == 2);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("BackwardScript2", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "BackwardScript2");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, RewindMultipleLoad) {
+TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -701,24 +786,27 @@ TEST_F(ScriptSchedulerTest, RewindMultipleLoad) {
     };
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
-    scheduler.loadScripts({
-        { "1", testDictionary2 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts({ { "1", testDictionary2 } });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    ASSERT_EQ(2, std::distance(res.first, res.second));
+    REQUIRE(std::distance(res.first, res.second) == 2);
 
     scheduler.rewind();
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    ASSERT_EQ(1, std::distance(res.first, res.second));
-    EXPECT_EQ("ForwardScript1", *(res.first));
+    REQUIRE(std::distance(res.first, res.second) == 1);
+    REQUIRE(*(res.first) == "ForwardScript1");
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, AllScriptsMultipleLoad) {
+TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -743,26 +831,25 @@ TEST_F(ScriptSchedulerTest, AllScriptsMultipleLoad) {
         { "BackwardScript", "BackwardScript3"s }
     };
 
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
-
-    scheduler.loadScripts({
-        { "1", testDictionary2 }
-    });
-
-    scheduler.loadScripts({
-        { "1", testDictionary3 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts({ { "1", testDictionary2 } });
+    scheduler.loadScripts({ { "1", testDictionary3 } });
 
     auto allScripts = scheduler.allScripts();
-    ASSERT_EQ(3, allScripts.size());
+    REQUIRE(allScripts.size() == 3);
 
-    EXPECT_LE(allScripts[0].time, allScripts[1].time);
-    EXPECT_LE(allScripts[1].time, allScripts[2].time);
+    REQUIRE(allScripts[0].time < allScripts[1].time);
+    REQUIRE(allScripts[1].time < allScripts[2].time);
+
+    openspace::SpiceManager::deinitialize();
 }
 
-TEST_F(ScriptSchedulerTest, AllScriptsMixedLoad) {
+TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
+    openspace::SpiceManager::initialize();
+    openspace::SpiceManager::ref().loadKernel(
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
@@ -787,18 +874,14 @@ TEST_F(ScriptSchedulerTest, AllScriptsMixedLoad) {
         { "BackwardScript", "BackwardScript3"s }
     };
 
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
-
-    scheduler.loadScripts({
-        { "1", testDictionary2 },
-        { "2", testDictionary3 }
-    });
+    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts({ { "1", testDictionary2 }, { "2", testDictionary3 } });
 
     auto allScripts = scheduler.allScripts();
-    ASSERT_EQ(3, allScripts.size());
+    REQUIRE(allScripts.size() == 3);
 
-    EXPECT_LE(allScripts[0].time, allScripts[1].time);
-    EXPECT_LE(allScripts[1].time, allScripts[2].time);
+    REQUIRE(allScripts[0].time < allScripts[1].time);
+    REQUIRE(allScripts[1].time < allScripts[2].time);
+
+    openspace::SpiceManager::deinitialize();
 }

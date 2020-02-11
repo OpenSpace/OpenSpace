@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2019                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -72,7 +72,15 @@ if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
   set(OPENSPACE_MODULE_SPOUT ON CACHE BOOL "Build OPENSPACE_MODULE_SPOUTModule" FORCE)
 endif ()
 
-set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
+
+#####
+# macos
+#####
+if (APPLE)
+  set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version" FORCE)
+  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep" CACHE STRING "Other Code Signing Flags" FORCE)
+endif()
 
 create_new_application(OpenSpace
   ${SGCT_OPENVR_FILES}

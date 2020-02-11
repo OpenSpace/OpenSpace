@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -56,6 +56,11 @@ set_folder_location(cfitsio "External")
 
 add_subdirectory(${CCFITS_ROOT_DIR})
 set_folder_location(CCfits "External")
+
+if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
+    disable_external_warnings(cfitsio)
+    disable_external_warnings(CCfits)
+endif ()
 
 target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
 target_link_libraries(${MODULE_NAME} PRIVATE CCfits)

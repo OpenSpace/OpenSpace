@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,32 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#include "catch2/catch.hpp"
 
-#include <openspace/util/concurrentqueue.h>
+#include <openspace/properties/optionproperty.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+TEST_CASE("Regression: 527", "[regression]") {
+    // Error in OptionProperty if values not starting at 0 are used
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-class ConcurrentQueueTest : public testing::Test {};
+    p.addOptions({
+        { -1, "a" },
+        { -2, "b" }
+        });
 
-TEST_F(ConcurrentQueueTest, Basic) {
-    using namespace openspace;
 
-    ConcurrentQueue<int> q1;
-    q1.push(4);
-    int val = q1.pop();
-    std::cout << val << std::endl;
+    p = -1;
+    REQUIRE(p.option().description == "a");
 }
-
-/*
-TEST_F(ConcurrentQueueTest, SharedPtr) {
-    ConcurrentQueue<std::shared_ptr<int>> q1;
-    std::shared_ptr<int> i1 = std::shared_ptr<int>(new int(1337));
-
-    q1.push(i1);
-    auto val = q1.pop();
-    std::cout << *val << std::endl;
-}
-*/

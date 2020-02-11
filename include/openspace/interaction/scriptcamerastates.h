@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,11 +42,11 @@ public:
     void addGlobalRoll(const glm::dvec2& delta);
 
 private:
-    glm::dvec2 _localRotation;
-    glm::dvec2 _globalRotation;
-    glm::dvec2 _truckMovement;
-    glm::dvec2 _localRoll;
-    glm::dvec2 _globalRoll;
+    glm::dvec2 _localRotation = glm::dvec2(0.0);
+    glm::dvec2 _globalRotation = glm::dvec2(0.0);
+    glm::dvec2 _truckMovement = glm::dvec2(0.0);
+    glm::dvec2 _localRoll = glm::dvec2(0.0);
+    glm::dvec2 _globalRoll = glm::dvec2(0.0);
 };
 
 } // namespace openspace::interaction

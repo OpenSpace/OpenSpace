@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,15 +70,15 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Id", renderableId);
     float updateTime;
     dictionary.getValue("UpdateTime", updateTime);
-    glm::vec4 spatialScale;
+    glm::vec4 spatialScale = glm::vec4(0.f);
     dictionary.getValue("SpatialScale", spatialScale);
-    glm::vec3 min;
+    glm::vec3 min = glm::vec3(0.f);
     dictionary.getValue("GridMin", min);
-    glm::vec3 max;
+    glm::vec3 max = glm::vec3(0.f);
     dictionary.getValue("GridMax", max);
     dictionary.getValue("Frame",_data.frame);
     dictionary.getValue("CoordinateType", _data.coordinateType);
-    float xOffset;
+    float xOffset = 0.f;
     dictionary.getValue("XOffset", xOffset);
 
     dictionary.getValue("Group", _data.groupName);
@@ -148,7 +148,7 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    glm::mat4 transform = glm::mat4(1.0);
+    glm::mat4 transform = glm::mat4(1.f);
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
             transform[i][j] = static_cast<float>(_stateMatrix[i][j]);

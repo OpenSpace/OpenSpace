@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -514,7 +514,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
 
     _transform = glm::mat4(_stateMatrix);
 
-    glm::dvec3 bs;
+    glm::dvec3 bs = glm::dvec3(0.0);
     try {
         SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
             _projectionComponent.instrumentId()
@@ -536,8 +536,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         lightTime
     ) * 1000.0;
 
-    float distance = glm::length(p);
-    float radius = boundingSphere();
+    const double distance = glm::length(p);
+    const double radius = boundingSphere();
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         p,
         bs,
@@ -545,8 +545,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        distance - radius,
-        distance + radius,
+        static_cast<float>(distance - radius),
+        static_cast<float>(distance + radius),
         _boresight
     );
 }

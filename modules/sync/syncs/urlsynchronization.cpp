@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,10 @@ namespace {
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyOverride = "Override";
     constexpr const char* KeyUseHash = "UseHash";
+    constexpr const char* KeyFilename = "Filename";
 
     constexpr const char* TempSuffix = ".tmp";
+    constexpr const char* FileSuffix = ".txt";
 } // namespace
 
 namespace openspace {
@@ -90,6 +92,13 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 "circumstances. If this is not desired, the URLSynchronization use the "
                 "bare directory name alone if this value is 'false'. If this value is "
                 "'false', the identifier has to be specified."
+            },
+            {
+                KeyFilename,
+                new StringVerifier,
+                Optional::Yes,
+                "Optional to provide filename to override the one which is otherwise "
+                "automatically created from the url. "
             }
         }
     };
@@ -114,6 +123,14 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
         for (size_t i = 1; i <= urls.size(); ++i) {
             std::string url = urls.value<std::string>(std::to_string(i));
             _urls.push_back(std::move(url));
+        }
+    }
+
+    if (dict.hasValue<std::string>(KeyFilename)) {
+        _filename = dict.value<std::string>(KeyFilename);
+        std::size_t foundExt = _filename.find(FileSuffix);
+        if (foundExt == std::string::npos) {
+            _filename += FileSuffix;
         }
     }
 
@@ -181,11 +198,22 @@ void UrlSynchronization::start() {
         std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
 
         for (const std::string& url : _urls) {
-            const size_t lastSlash = url.find_last_of('/');
-            const std::string filename = url.substr(lastSlash + 1);
 
+            if (_filename.empty()) {
+                const size_t lastSlash = url.find_last_of('/');
+                std::string lastPartOfUrl = url.substr(lastSlash + 1);
+
+                // We can not create filenames with questionmarks
+                lastPartOfUrl.erase(std::remove(lastPartOfUrl.begin(), lastPartOfUrl.end(), '?'), lastPartOfUrl.end());
+
+                std::size_t foundExt = lastPartOfUrl.find(FileSuffix);
+                if (foundExt == std::string::npos) {
+                    lastPartOfUrl += FileSuffix;
+                }
+                _filename = lastPartOfUrl;
+            }
             std::string fileDestination = directory() +
-                ghoul::filesystem::FileSystem::PathSeparator + filename + TempSuffix;
+                ghoul::filesystem::FileSystem::PathSeparator + _filename + TempSuffix;
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
