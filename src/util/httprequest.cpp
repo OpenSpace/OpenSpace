@@ -248,7 +248,12 @@ void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
     }
     markAsStarted();
     _downloadThread = std::thread([this, opt] {
-        download(opt);
+        try {
+            download(opt);
+        }
+        catch (const ghoul::filesystem::FileSystem::FileSystemException& e) {
+            LERRORC(e.component, e.message);
+        }
     });
 }
 

@@ -64,12 +64,9 @@ void KeybindingManager::resetKeyBindings() {
     _keyLua.clear();
 }
 
-void KeybindingManager::bindKeyLocal(Key key,
-                                     KeyModifier modifier,
-                                     std::string luaCommand,
-                                     std::string documentation,
-                                     std::string name,
-                                     std::string guiPath)
+void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
+                                     std::string luaCommand, std::string documentation,
+                                     std::string name, std::string guiPath)
 {
 #ifdef WIN32
     const bool isShift = hasKeyModifier(modifier, KeyModifier::Shift);
@@ -101,11 +98,8 @@ void KeybindingManager::bindKeyLocal(Key key,
     });
 }
 
-void KeybindingManager::bindKey(Key key,
-                                KeyModifier modifier,
-                                std::string luaCommand,
-                                std::string documentation,
-                                std::string name,
+void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCommand,
+                                std::string documentation, std::string name,
                                 std::string guiPath)
 {
 #ifdef WIN32
