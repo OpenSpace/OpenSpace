@@ -99,6 +99,46 @@ static void singleResolutionTest(openspace::globebrowsing::TimeQuantizer& tq,
     }
 }
 
+static void singleStartTimeTest1(openspace::globebrowsing::TimeQuantizer& tq,
+                                std::string startTime, std::string expectedErrSubstring,
+                                bool expectFailure)
+{
+    std::string res;
+    try {
+        tq.setStartEndRange(startTime, startTime);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        res = e.message;
+    }
+
+    if (expectFailure) {
+        EXPECT_TRUE(res.find(expectedErrSubstring) != std::string::npos);
+    }
+    else {
+        EXPECT_TRUE(res.find(expectedErrSubstring) == std::string::npos);
+    }
+}
+
+static void singleStartTimeTest2(std::string startTime, std::string expectedErrSubstring,
+                                 bool expectFailure)
+{
+    using namespace openspace::globebrowsing;
+    std::string res;
+    try {
+        TimeQuantizer tq(startTime, startTime, "1d");
+    }
+    catch (const ghoul::RuntimeError& e) {
+        res = e.message;
+    }
+
+    if (expectFailure) {
+        EXPECT_TRUE(res.find(expectedErrSubstring) != std::string::npos);
+    }
+    else {
+        EXPECT_TRUE(res.find(expectedErrSubstring) == std::string::npos);
+    }
+}
+
 static void LoadSpiceKernel () {
     loadLSKKernel();
     // naif0008.tls is a text file, check if loaded.
@@ -278,4 +318,26 @@ TEST_F(TimeQuantizerTest, TestResolutionError) {
     singleResolutionTest(t1, "30m", "(m)inute option.", false);
     singleResolutionTest(t1, "31m", "(m)inute option.", true);
     singleResolutionTest(t1, "10s", "unit format", true);
+}
+
+TEST_F(TimeQuantizerTest, TestStartTimeError1) {
+    LoadSpiceKernel();
+    using namespace openspace::globebrowsing;
+    TimeQuantizer t1;
+
+    singleStartTimeTest1(t1, "2017-01-20T00:00:00", "Invalid start", false);
+    singleStartTimeTest1(t1, "2017-01-29T00:00:00", "Invalid start day value", true);
+    singleStartTimeTest1(t1, "2017-01-28T12:00:00", "Invalid start time value", true);
+    singleStartTimeTest1(t1, "2017-01-28T00:01:00", "Invalid start time value", true);
+    singleStartTimeTest1(t1, "2017-01-28T00:00:01", "Invalid start time value", true);
+}
+
+TEST_F(TimeQuantizerTest, TestStartTimeError2) {
+    LoadSpiceKernel();
+
+    singleStartTimeTest2("2017-01-20T00:00:00", "Invalid start", false);
+    singleStartTimeTest2("2017-01-29T00:00:00", "Invalid start day value", true);
+    singleStartTimeTest2("2017-01-28T12:00:00", "Invalid start time value", true);
+    singleStartTimeTest2("2017-01-28T00:01:00", "Invalid start time value", true);
+    singleStartTimeTest2("2017-01-28T00:00:01", "Invalid start time value", true);
 }

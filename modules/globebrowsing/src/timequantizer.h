@@ -333,18 +333,6 @@ public:
      * and a time resolution within that range
      *
      * \params start the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for start
-     *               limitations on values include: day of month in range of 1 - 28,
-     *               and hour, minute, second values must be 0.
-     * \params end the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for end
-     * \params resolution the number of seconds between the temporal data set updates
-     */
-    //TimeQuantizer(const std::string& start, const std::string& end, double resolution);
-
-    /*
-     * Constructor that initializes with formatted strings for start & ends date/times,
-     * and a time resolution within that range
-     *
-     * \params start the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for start
      * \params end the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for end
      * \params resolution the formatted resolution, which consists of an integer & unit
      *         character. The acceptable unit characters are:

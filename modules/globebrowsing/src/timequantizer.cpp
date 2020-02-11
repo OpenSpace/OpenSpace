@@ -34,20 +34,11 @@
 
 namespace openspace::globebrowsing {
 
-/*TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
-    double resolution)
-    : _start(start)
-    , _resolution(resolution)
-    , _timerange(start, end)
-{
-    //setStartEndRange(start, end);
-}*/
 
 TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
                              const std::string& resolution)
     : _start(start)
     , _timerange(start, end)
-    //TimeQuantizer(start, end, parseTimeResolutionStr(resolution))
 {
     verifyStartTimeRestrictions();
     _resolution = parseTimeResolutionStr(resolution);
