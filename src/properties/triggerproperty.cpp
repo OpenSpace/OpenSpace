@@ -39,7 +39,7 @@ bool TriggerProperty::setLuaValue(lua_State*) {
     return true;
 }
 
-void TriggerProperty::set(ghoul::any) {
+void TriggerProperty::set(std::any) {
     notifyChangeListeners();
 }
 

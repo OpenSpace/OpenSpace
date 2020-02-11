@@ -411,7 +411,8 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
             return;
         }
         state = navigationState(*referenceFrame).dictionary();
-    } else {
+    }
+    else {
         state = navigationState().dictionary();
     }
 
@@ -419,9 +420,8 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
         std::string absolutePath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        ghoul::DictionaryLuaFormatter formatter;
         std::ofstream ofs(absolutePath.c_str());
-        ofs << "return " << formatter.format(state.dictionary());
+        ofs << "return " << ghoul::formatLua(state.dictionary());
         ofs.close();
     }
 }

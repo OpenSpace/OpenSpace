@@ -67,8 +67,6 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     KameleonVolumeReader reader(_inputPath);
     ghoul::Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
-    ghoul::DictionaryJsonFormatter formatter;
-
 
     ghoul::Dictionary dictionary = {
         { "kameleon", std::move(kameleonDictionary) },
@@ -80,7 +78,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
         { "input", _inputPath }
     };
 
-    std::string json = formatter.format(dictionary);
+    std::string json = ghoul::formatJson(dictionary);
     progressCallback(0.66f);
 
     std::ifstream handlebarsInput(absPath(HandlebarsFilename));

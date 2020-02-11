@@ -343,7 +343,7 @@ bool NumericalProperty<T>::setStringValue(std::string value) {
         value, success
     );
     if (success) {
-        TemplateProperty<T>::set(ghoul::any(std::move(thisValue)));
+        TemplateProperty<T>::set(std::any(std::move(thisValue)));
     }
     return success;
 }
@@ -422,8 +422,8 @@ std::string NumericalProperty<T>::jsonValue() const {
 }
 
 template <typename T>
-void NumericalProperty<T>::setInterpolationTarget(ghoul::any value) {
-    T v = ghoul::any_cast<T>(std::move(value));
+void NumericalProperty<T>::setInterpolationTarget(std::any value) {
+    T v = std::any_cast<T>(std::move(value));
 
     _interpolationStart = TemplateProperty<T>::_value;
     _interpolationEnd = std::move(v);

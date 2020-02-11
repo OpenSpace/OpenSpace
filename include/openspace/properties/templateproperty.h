@@ -86,7 +86,7 @@ public:
      *
      * \return The stored value packed into a ghoul::any object
      */
-    virtual ghoul::any get() const override;
+    virtual std::any get() const override;
 
     /**
      * Sets the value from the provided ghoul::any object. If the types between
@@ -95,7 +95,7 @@ public:
      *
      * \param value The value that is used to set this Property
      */
-    virtual void set(ghoul::any value) override;
+    virtual void set(std::any value) override;
 
     /**
      * Returns the <code>std::type_info</code> describing the template parameter

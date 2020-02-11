@@ -153,7 +153,7 @@ public:
      * \return The value that is encapsulated by this Property, or an empty ghoul::any
      *         object if the method was not overritten.
      */
-    virtual ghoul::any get() const;
+    virtual std::any get() const;
 
     /**
      * Sets the value encapsulated by this Property to the \p value passed to this
@@ -164,7 +164,7 @@ public:
      *
      * \param value The new value that should be stored in this Property
      */
-    virtual void set(ghoul::any value);
+    virtual void set(std::any value);
 
     /**
      * This method returns the type that is requested by this Property for the set method.
@@ -453,7 +453,7 @@ public:
     virtual std::string jsonValue() const;
 
     /// Interpolation methods
-    virtual void setInterpolationTarget(ghoul::any value);
+    virtual void setInterpolationTarget(std::any value);
     virtual void setLuaInterpolationTarget(lua_State* state);
     virtual void setStringInterpolationTarget(std::string value);
 

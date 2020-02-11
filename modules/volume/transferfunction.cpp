@@ -144,11 +144,10 @@ void TransferFunction::saveEnvelopesToFile(const std::string& path) {
     envelopesToLua(state);
 
     ghoul::lua::luaDictionaryFromState(state, dictionary);
-    ghoul::DictionaryLuaFormatter formatter;
     std::ofstream tfFile;
     tfFile.open(path);
     tfFile << "return {";
-    tfFile << formatter.format(dictionary);
+    tfFile << ghoul::formatLua(dictionary);
     tfFile << "}";
     tfFile.close();
 }

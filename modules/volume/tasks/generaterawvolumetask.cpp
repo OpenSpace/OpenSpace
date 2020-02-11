@@ -172,8 +172,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     metadata.maxValue = maxVal;
 
     ghoul::Dictionary outputDictionary = metadata.dictionary();
-    ghoul::DictionaryLuaFormatter formatter;
-    std::string metadataString = formatter.format(outputDictionary);
+    std::string metadataString = ghoul::formatLua(outputDictionary);
 
     std::fstream f(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;

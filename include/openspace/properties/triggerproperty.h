@@ -64,7 +64,7 @@ public:
      * listeners regardless of the value
      * \param value The ignored value
      */
-    void set(ghoul::any value) override;
+    void set(std::any value) override;
 
     std::string toJson() const override;
 

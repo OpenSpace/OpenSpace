@@ -67,7 +67,7 @@ public:
     using TemplateProperty<T>::operator=;
 
 
-    void setInterpolationTarget(ghoul::any value) override;
+    void setInterpolationTarget(std::any value) override;
     void setLuaInterpolationTarget(lua_State* state) override;
     void setStringInterpolationTarget(std::string value) override;
 

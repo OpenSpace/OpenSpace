@@ -197,8 +197,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue(KeyMaxValue, static_cast<float>(reader.maxValue(_variable)));
     outputMetadata.setValue<std::string>(KeyVisUnit, reader.getVisUnit(_variable));
 
-    ghoul::DictionaryLuaFormatter formatter;
-    std::string metadataString = formatter.format(outputMetadata);
+    std::string metadataString = ghoul::formatLua(outputMetadata);
 
     std::fstream f(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
