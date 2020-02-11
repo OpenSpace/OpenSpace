@@ -34,19 +34,24 @@
 
 namespace openspace::globebrowsing {
 
-TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
+/*TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
     double resolution)
     : _start(start)
     , _resolution(resolution)
     , _timerange(start, end)
 {
     //setStartEndRange(start, end);
-}
+}*/
 
 TimeQuantizer::TimeQuantizer(const std::string& start, const std::string& end,
                              const std::string& resolution)
-    : TimeQuantizer(start, end, parseTimeResolutionStr(resolution))
-{}
+    : _start(start)
+    , _timerange(start, end)
+    //TimeQuantizer(start, end, parseTimeResolutionStr(resolution))
+{
+    verifyStartTimeRestrictions();
+    _resolution = parseTimeResolutionStr(resolution);
+}
 
 double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
     const char unit = resolutionStr.back();
@@ -60,18 +65,108 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
         throw ghoul::RuntimeError("Cannot convert " + numberString + " to number");
     }
     else {
+        verifyResolutionRestrictions(static_cast<int>(value), unit);
         return computeSecondsFromResolution(static_cast<int>(value), unit);
     }
 }
 
 void TimeQuantizer::setStartEndRange(const std::string& start, const std::string& end) {
     _start.setTime(start);
+    verifyStartTimeRestrictions();
+
     _timerange.setStart(start);
     _timerange.setEnd(end);
 }
 
 void TimeQuantizer::setResolution(const std::string& resolutionString) {
     _resolution = parseTimeResolutionStr(resolutionString);
+}
+
+void TimeQuantizer::verifyStartTimeRestrictions() {
+    if (_start.day() < 1 || _start.day() > 28) {
+        throw ghoul::RuntimeError(
+            "Invalid start day value of " + std::to_string(_start.day()) +
+            " for day of month. Valid days are 1 - 28."
+        );
+    }
+    if (_start.hour() != 0 || _start.minute() != 0 || _start.second() != 0) {
+        throw ghoul::RuntimeError(
+            "Invalid start time value of " + std::to_string(_start.hour()) + ":" +
+            std::to_string(_start.minute()) + ":" + std::to_string(_start.second()) +
+            ". Time must be 00:00:00."
+        );
+    }
+}
+
+void TimeQuantizer::verifyResolutionRestrictions(const int value, const char unit) {
+    switch (unit) {
+    case 'y':
+        break;
+
+    case 'M':
+        switch (value) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 6:
+            break;
+
+        default:
+            throw ghoul::RuntimeError(
+                "Invalid resolution count of " + std::to_string(value) + " for (M)onth"
+                + " option. Valid counts are 1, 2, 3, 4, or 6."
+            );
+        }
+        break;
+
+    case 'd':
+        if (value < 1 || value > 28) {
+            throw ghoul::RuntimeError(
+                "Invalid resolution count of " + std::to_string(value) + " for (d)ay"
+                + " option. Valid counts are 1 - 28."
+            );
+        }
+        break;
+
+    case 'h':
+        switch (value) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 6:
+        case 12:
+            break;
+
+        default:
+            throw ghoul::RuntimeError(
+                "Invalid resolution count of " + std::to_string(value) + " for (h)our"
+                + " option. Valid counts are 1, 2, 3, 4, 6, or 12."
+            );
+        }
+        break;
+
+    case 'm':
+        switch (value) {
+        case 15:
+        case 30:
+            break;
+
+        default:
+            throw ghoul::RuntimeError(
+                "Invalid resolution count of " + std::to_string(value) + " for (m)inute"
+                + " option. Valid counts are 1, 2, 3, 4, 6, or 12."
+            );
+        }
+        break;
+
+    default:
+        throw ghoul::RuntimeError(
+            "Invalid resolution unit format '" + std::to_string(unit) +
+            "'. Expected 'y', 'M', 'd', 'h', or 'm'."
+        );
+    }
 }
 
 double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char unit) {
@@ -85,7 +180,8 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
     case 'd':
         value *= 24.0;
         [[fallthrough]];
-    case 'h': value *= 60.0;
+    case 'h':
+        value *= 60.0;
         [[fallthrough]];
     case 'm':
         value *= 60.0;
@@ -100,8 +196,8 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 
     default:
         throw ghoul::RuntimeError(
-            "Invalid unit format '" + std::string(1, unit) +
-            "'. Expected 'y', 'd', 'h', 'm' or 's'."
+            "Invalid resolution unit format '" + std::to_string(unit) +
+            "'. Expected 'y', 'M', 'd', 'h', 'm' or 's'."
         );
     }
     return value;
@@ -132,7 +228,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
                     _resolutionUnit, error, _resolution);
             }
             error = diff(quantized, unquantized);
-            bool hasSettled = (lastIncr == 1 && lastDecr == 1);
+            bool hasSettled = (lastIncr == 1 && lastDecr == 1 && error >= 0.0);
             iterations++;
             if (hasSettled || iterations > iterationLimit) {
                 break;
@@ -160,7 +256,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
                                          double value, char unit)
 {
     double minYearsToAdjust;
-    double minIncrementsToAdjust;
+    double minIncrementsAdjust;
     bool isSimMonthPastQuantizedMonth;
     double error = 0.0;
     int originalHour, originalMinute, originalSecond;
@@ -171,8 +267,8 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
     case 'y':
         minYearsToAdjust = static_cast<double>(unQ.year()) -
             static_cast<double>(_start.year());
-        minIncrementsToAdjust = minYearsToAdjust / value;
-        quantized.setYear(_start.year() + static_cast<int>(minIncrementsToAdjust));
+        minIncrementsAdjust = minYearsToAdjust / value;
+        quantized.setYear(_start.year() + static_cast<int>(minIncrementsAdjust) * value);
         break;
 
     case 'M':
@@ -217,6 +313,12 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
             quantized.decrementOnce(1, 'd');
         }
         break;
+
+    default:
+        throw ghoul::RuntimeError(
+            "Invalid unit format in doFirstApproximation '" + std::to_string(unit) +
+            "'. Expected 'y', 'M', 'd', 'h', or 'm'."
+        );
     }
 }
 
@@ -302,28 +404,34 @@ void DateTime::incrementOnce(int value, char unit) {
     case 'm':
         if (singleIncrement(_minute, value, 0, 59))
             break;
-        //fall-through...
+        //else fall-through if overflow...
 
     case 'h':
         if (singleIncrement(_hour, value, 0, 23))
             break;
-        //fall-through...
+        //else fall-through if overflow...
 
     case 'd':
         if (singleIncrement(_day, value, 1, monthSize(_month, _year)))
             break;
-        //fall-through...
+        //else fall-through if overflow...
 
     case 'M':
         inBounds = singleIncrement(_month, value, 1, 12);
         _day = std::clamp(_day, 1, monthSize(_month, _year));
         if (inBounds)
             break;
-        //fall-through...
+        //else fall-through if overflow...
 
-    case 'Y':
+    case 'y':
         _year += value;
         break;
+
+    default:
+        throw ghoul::RuntimeError(
+            "Invalid unit format in TQ incrementOnce '" + std::to_string(unit) +
+            "'. Expected 'y', 'M', 'd', 'h', or 'm'."
+        );
     }
 }
 
@@ -355,12 +463,12 @@ void DateTime::decrementOnce(int value, char unit) {
     case 'm':
         if (singleDecrement(_minute, value, 0, 59))
             break;
-        //fall-through...
+        //else fall-through if underflow...
 
     case 'h':
         if (singleDecrement(_hour, value, 0, 23))
             break;
-        //fall-through...
+        //else fall-through if underflow...
 
     case 'd':
         if (singleDecrement(_day, value, 1,
@@ -368,18 +476,24 @@ void DateTime::decrementOnce(int value, char unit) {
         {
             break;
         }
-        //fall-through...
+        //else fall-through if underflow...
 
     case 'M':
         inBounds = singleDecrement(_month, value, 1, 12);
         _day = std::clamp(_day, 1, monthSize(_month, _year));
         if (inBounds)
             break;
-        //fall-through...
+        //else fall-through if underflow...
 
-    case 'Y':
+    case 'y':
         _year -= value;
         break;
+
+    default:
+        throw ghoul::RuntimeError(
+            "Invalid unit format in TQ decrementOnce '" + std::to_string(unit) +
+            "'. Expected 'y', 'M', 'd', 'h', or 'm'."
+        );
     }
 }
 

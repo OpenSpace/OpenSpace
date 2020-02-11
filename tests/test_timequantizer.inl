@@ -69,15 +69,37 @@ int loadLSKKernel() {
 }
 
 static void singleTimeTest(openspace::Time& t,
-    openspace::globebrowsing::TimeQuantizer& tq, bool clamp,
-    const std::string& input, const std::string& expected)
+                           openspace::globebrowsing::TimeQuantizer& tq, bool clamp,
+                           const std::string& input, const std::string& expected)
 {
     t.setTime(input);
     tq.quantize(t, clamp);
     EXPECT_EQ(t.ISO8601(), expected);
 }
 
-TEST_F(TimeQuantizerTest, Basic) {
+static void singleResolutionTest(openspace::globebrowsing::TimeQuantizer& tq,
+                                 std::string resolution, std::string expectedType,
+                                 bool expectFailure)
+{
+    std::string res;
+    std::string search = "Invalid resolution ";
+    try {
+        tq.setResolution(resolution);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        res = e.message;
+    }
+
+    if (expectFailure) {
+        EXPECT_TRUE(res.find(search) != std::string::npos);
+        EXPECT_TRUE(res.find(expectedType) != std::string::npos);
+    }
+    else {
+        EXPECT_TRUE(res.find(search) == std::string::npos);
+    }
+}
+
+static void LoadSpiceKernel () {
     loadLSKKernel();
     // naif0008.tls is a text file, check if loaded.
     SpiceBoolean found;
@@ -95,8 +117,40 @@ TEST_F(TimeQuantizerTest, Basic) {
     );
 
     ASSERT_TRUE(found == SPICETRUE) << "Kernel not loaded";
-    using namespace openspace::globebrowsing;
+}
 
+TEST_F(TimeQuantizerTest, TestYears) {
+    LoadSpiceKernel();
+    using namespace openspace::globebrowsing;
+    TimeQuantizer t1;
+    openspace::Time testT;
+
+    t1.setStartEndRange("2019-12-09T00:00:00", "2030-03-01T00:00:00");
+    t1.setResolution("1y");
+
+    singleTimeTest(testT, t1, true, "2020-12-08T23:59:59", "2019-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2020-12-09T00:00:00", "2020-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2021-12-08T23:59:58", "2020-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2022-12-09T00:00:02", "2022-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2022-11-08T13:00:15", "2021-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2020-12-09T00:00:00", "2020-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2024-12-08T23:59:59", "2023-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2024-12-09T00:00:01", "2024-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2020-12-31T00:00:01", "2020-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2021-01-01T00:00:00", "2020-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2020-12-31T23:59:59", "2020-12-09T00:00:00.000");
+
+    t1.setResolution("3y");
+
+    singleTimeTest(testT, t1, true, "2020-12-08T23:59:59", "2019-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2022-12-09T00:00:00", "2022-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2028-12-08T23:59:59", "2025-12-09T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2028-12-09T00:00:01", "2028-12-09T00:00:00.000");
+}
+
+TEST_F(TimeQuantizerTest, TestDays) {
+    LoadSpiceKernel();
+    using namespace openspace::globebrowsing;
     TimeQuantizer t1;
     openspace::Time testT;
 
@@ -117,48 +171,64 @@ TEST_F(TimeQuantizerTest, Basic) {
     singleTimeTest(testT, t1, true, "2019-12-08T23:59:00", "2019-12-09T00:00:00.000");
     singleTimeTest(testT, t1, true, "2019-12-05T14:29:00", "2019-12-09T00:00:00.000");
 
-    t1.setStartEndRange("2017-01-28T08:00:00", "2020-09-01T08:00:00");
+    t1.setStartEndRange("2016-05-28T00:00:00", "2021-09-01T00:00:00");
+    t1.setResolution("4d");
+
+    singleTimeTest(testT, t1, true, "2016-06-01T00:00:00", "2016-06-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-06-01T00:00:01", "2016-06-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-07-03T10:00:00", "2016-07-03T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-07-07T00:00:00", "2016-07-07T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2021-11-07T00:00:00", "2021-09-01T00:00:00.000");
+    singleTimeTest(testT, t1, false, "2021-11-07T00:00:00", "2021-11-07T00:00:00.000");
+
+    t1.setStartEndRange("2019-02-21T00:00:00", "2021-09-01T00:00:00");
+    t1.setResolution("11d");
+
+    singleTimeTest(testT, t1, true, "2020-03-01T00:30:00", "2020-03-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2019-03-04T00:00:02", "2019-03-04T00:00:00.000");
+}
+
+TEST_F(TimeQuantizerTest, TestMonths) {
+    LoadSpiceKernel();
+    using namespace openspace::globebrowsing;
+    TimeQuantizer t1;
+    openspace::Time testT;
+
+    t1.setStartEndRange("2017-01-28T00:00:00", "2020-09-01T00:00:00");
     t1.setResolution("1M");
 
-    singleTimeTest(testT, t1, true, "2017-03-03T05:15:45", "2017-02-28T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2017-03-29T08:15:45", "2017-03-28T08:00:00.000");
+    singleTimeTest(testT, t1, true, "2017-03-03T05:15:45", "2017-02-28T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2017-03-29T00:15:45", "2017-03-28T00:00:00.000");
 
-    t1.setStartEndRange("2016-01-17T08:00:00", "2020-09-01T08:00:00");
+    t1.setStartEndRange("2016-01-17T00:00:00", "2020-09-01T00:00:00");
     t1.setResolution("2M");
 
-    singleTimeTest(testT, t1, true, "2016-01-27T05:15:45", "2016-01-17T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-03-16T08:15:45", "2016-01-17T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-03-17T18:00:02", "2016-03-17T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-05-18T08:00:02", "2016-05-17T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-11-17T10:15:45", "2016-11-17T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2017-01-18T05:15:45", "2017-01-17T08:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-01-27T05:15:45", "2016-01-17T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-03-16T08:15:45", "2016-01-17T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-03-17T18:00:02", "2016-03-17T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-05-18T00:00:02", "2016-05-17T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-11-17T10:15:45", "2016-11-17T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2017-01-18T05:15:45", "2017-01-17T00:00:00.000");
 
     t1.setResolution("3M");
 
-    singleTimeTest(testT, t1, true, "2016-04-16T05:15:45", "2016-01-17T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-07-27T05:15:45", "2016-07-17T08:00:00.000");
-    singleTimeTest(testT, t1, true, "2017-10-17T08:01:00", "2017-10-17T08:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-04-16T05:15:45", "2016-01-17T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-07-27T05:15:45", "2016-07-17T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2017-10-17T00:01:00", "2017-10-17T00:00:00.000");
 
-    t1.setStartEndRange("2016-05-29T03:00:00", "2021-09-01T08:00:00");
+    t1.setStartEndRange("2016-05-28T00:00:00", "2021-09-01T00:00:00");
     t1.setResolution("6M");
 
-    singleTimeTest(testT, t1, true, "2016-11-29T03:00:05", "2016-11-29T03:00:00.000");
-    singleTimeTest(testT, t1, true, "2017-05-29T04:15:45", "2017-05-29T03:00:00.000");
-    singleTimeTest(testT, t1, true, "2017-10-17T08:01:00", "2017-05-29T03:00:00.000");
+    singleTimeTest(testT, t1, true, "2016-11-28T00:00:05", "2016-11-28T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2017-05-30T04:15:45", "2017-05-28T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2017-10-17T05:01:00", "2017-05-28T00:00:00.000");
+}
 
-    t1.setStartEndRange("2016-05-29T03:00:00", "2021-09-01T08:00:00");
-    t1.setResolution("4d");
-
-    singleTimeTest(testT, t1, true, "2016-06-02T03:00:00", "2016-06-02T03:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-06-02T03:00:01", "2016-06-02T03:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-07-04T13:00:00", "2016-07-04T03:00:00.000");
-    singleTimeTest(testT, t1, true, "2016-07-08T03:00:00", "2016-07-08T03:00:00.000");
-
-    t1.setStartEndRange("2019-02-21T03:00:00", "2021-09-01T08:00:00");
-    t1.setResolution("11d");
-
-    singleTimeTest(testT, t1, true, "2020-03-01T03:30:00", "2020-03-01T03:00:00.000");
-    singleTimeTest(testT, t1, true, "2019-03-04T03:00:02", "2019-03-04T03:00:00.000");
+TEST_F(TimeQuantizerTest, TestTimes) {
+    LoadSpiceKernel();
+    using namespace openspace::globebrowsing;
+    TimeQuantizer t1;
+    openspace::Time testT;
 
     t1.setStartEndRange("2019-02-21T00:00:00", "2021-09-01T00:00:00");
     t1.setResolution("2h");
@@ -190,4 +260,22 @@ TEST_F(TimeQuantizerTest, Basic) {
     singleTimeTest(testT, t1, true, "2019-02-28T22:59:59", "2019-02-28T22:45:00.000");
 }
 
+TEST_F(TimeQuantizerTest, TestResolutionError) {
+    LoadSpiceKernel();
+    using namespace openspace::globebrowsing;
+    TimeQuantizer t1;
 
+    singleResolutionTest(t1, "29d", "(d)ay option.", true);
+    singleResolutionTest(t1, "0d", "(d)ay option.", true);
+    singleResolutionTest(t1, "5h", "(h)our option.", true);
+    singleResolutionTest(t1, "11h", "(h)our option.", true);
+    singleResolutionTest(t1, "12h", "(h)our option.", false);
+    singleResolutionTest(t1, "78y", "(y)ear option.", false);
+    singleResolutionTest(t1, "12m", "(m)inute option.", true);
+    singleResolutionTest(t1, "1m", "(m)inute option.", true);
+    singleResolutionTest(t1, "0m", "(m)inute option.", true);
+    singleResolutionTest(t1, "15m", "(m)inute option.", false);
+    singleResolutionTest(t1, "30m", "(m)inute option.", false);
+    singleResolutionTest(t1, "31m", "(m)inute option.", true);
+    singleResolutionTest(t1, "10s", "unit format", true);
+}

@@ -338,7 +338,7 @@ public:
      * \params end the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) for end
      * \params resolution the number of seconds between the temporal data set updates
      */
-    TimeQuantizer(const std::string& start, const std::string& end, double resolution);
+    //TimeQuantizer(const std::string& start, const std::string& end, double resolution);
 
     /*
      * Constructor that initializes with formatted strings for start & ends date/times,
@@ -407,6 +407,8 @@ public:
     std::vector<std::string> quantized(Time& start, Time& end);
 
 private:
+    void verifyStartTimeRestrictions();
+    void verifyResolutionRestrictions(const int value, const char unit);
     double diff(DateTime& from, DateTime& to);
     void doFirstApproximation(DateTime& q, DateTime& unQ, double value, char unit);
     RangedTime _timerange;
