@@ -925,6 +925,8 @@ void OpenSpaceEngine::deinitializeGL() {
         func();
     }
 
+    _loadingScreen = nullptr;
+
     global::deinitializeGL();
 
     rendering::helper::deinitialize();

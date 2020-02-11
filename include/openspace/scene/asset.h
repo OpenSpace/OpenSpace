@@ -61,8 +61,6 @@ public:
      */
     Asset(AssetLoader* loader, SynchronizationWatcher* watcher, std::string assetPath);
 
-    ~Asset() = default;
-
     std::string id() const;
     const std::string& assetFilePath() const;
     bool hasAssetFile() const;

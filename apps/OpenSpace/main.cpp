@@ -434,7 +434,13 @@ void mainPreSyncFunc() {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainPreSyncFunc(begin)");
 
-    global::openSpaceEngine.preSynchronization();
+    try {
+        global::openSpaceEngine.preSynchronization();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATALC(e.component, e.message);
+        sgct::Engine::instance()->terminate();
+    }
 
     // Query joystick status
     using namespace interaction;

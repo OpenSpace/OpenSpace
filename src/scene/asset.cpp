@@ -49,7 +49,8 @@ namespace {
                 if (sync->nTotalBytesIsKnown()) {
                     nTotalBytes += sync->nTotalBytes();
                     nSyncedBytes += sync->nSynchronizedBytes();
-                } else if (sync->isSyncing()) {
+                }
+                else if (sync->isSyncing()) {
                     // A resource is still synchronizing but its size is unknown.
                     // Impossible to know the global progress.
                     return 0;
@@ -144,20 +145,22 @@ void Asset::requiredAssetChangedState(Asset::State childState) {
         if (isSyncResolveReady()) {
             setState(State::SyncResolved);
         }
-    } else if (childState == State::SyncRejected) {
+    }
+    else if (childState == State::SyncRejected) {
         setState(State::SyncRejected);
     }
 }
 
-void Asset::requestedAssetChangedState(Asset* child, Asset::State childState)
-{
+void Asset::requestedAssetChangedState(Asset* child, Asset::State childState) {
     if (child->hasInitializedParent()) {
         if (childState == State::Loaded &&
-            child->state() == State::Loaded) {
+            child->state() == State::Loaded)
+        {
             child->startSynchronizations();
         }
         if (childState == State::SyncResolved &&
-            child->state() == State::SyncResolved) {
+            child->state() == State::SyncResolved)
+        {
             child->initialize();
         }
     }
@@ -195,7 +198,8 @@ void Asset::syncStateChanged(ResourceSynchronization* sync,
         if (!isSynchronized() && isSyncResolveReady()) {
             setState(State::SyncResolved);
         }
-    } else if (state == ResourceSynchronization::State::Rejected) {
+    }
+    else if (state == ResourceSynchronization::State::Rejected) {
         LERROR(fmt::format(
             "Failed to synchronize resource '{}'' in asset '{}'", sync->name(), id()
         ));
@@ -205,7 +209,7 @@ void Asset::syncStateChanged(ResourceSynchronization* sync,
 }
 
 bool Asset::isSyncResolveReady() {
-    std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
+    std::vector<std::shared_ptr<Asset>> requiredAssets = requiredAssets();
 
     auto unsynchronizedAsset = std::find_if(
         requiredAssets.begin(),
@@ -221,7 +225,7 @@ bool Asset::isSyncResolveReady() {
     }
 
     const std::vector<std::shared_ptr<ResourceSynchronization>>& syncs =
-        this->ownSynchronizations();
+        ownSynchronizations();
 
     auto unresolvedOwnSynchronization = std::find_if(
         syncs.begin(),
@@ -244,6 +248,12 @@ Asset::ownSynchronizations() const
 std::vector<std::shared_ptr<const Asset>> Asset::subTreeAssets() const {
     std::unordered_set<std::shared_ptr<const Asset>> assets({ shared_from_this() });
     for (const std::shared_ptr<Asset>& c : childAssets()) {
+        if (c.get() == this) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Detected cycle in asset inclusion for {} at {}", _assetName, _assetPath
+            ));
+        }
+
         const std::vector<std::shared_ptr<const Asset>>& subTree = c->subTreeAssets();
         std::copy(subTree.begin(), subTree.end(), std::inserter(assets, assets.end()));
     }
@@ -521,7 +531,8 @@ bool Asset::initialize() {
     // 3. Call lua onInitialize
     try {
         loader()->callOnInitialize(this);
-    } catch (const ghoul::lua::LuaRuntimeException& e) {
+    }
+    catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(
             "Failed to initialize asset {}; {}: {}", id(), e.component, e.message
         ));
@@ -537,7 +548,8 @@ bool Asset::initialize() {
     for (const std::shared_ptr<Asset>& child : _requiredAssets) {
         try {
             loader()->callOnDependencyInitialize(child.get(), this);
-        } catch (const ghoul::lua::LuaRuntimeException& e) {
+        }
+        catch (const ghoul::lua::LuaRuntimeException& e) {
             LERROR(fmt::format(
                 "Failed to initialize required asset {} of {}; {}: {}",
                 child->id(),
@@ -556,7 +568,8 @@ bool Asset::initialize() {
         if (child->isInitialized()) {
             try {
                 loader()->callOnDependencyInitialize(child.get(), this);
-            } catch (const ghoul::lua::LuaRuntimeException& e) {
+            }
+            catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
                     "Failed to initialize requested asset {} of {}; {}: {}",
                     child->id(),
@@ -575,7 +588,8 @@ bool Asset::initialize() {
         if (p && p->isInitialized()) {
             try {
                 loader()->callOnDependencyInitialize(this, p.get());
-            } catch (const ghoul::lua::LuaRuntimeException& e) {
+            }
+            catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
                     "Failed to initialize required asset {} of {}; {}: {}",
                     id(),
