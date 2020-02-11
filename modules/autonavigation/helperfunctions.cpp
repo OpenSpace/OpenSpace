@@ -34,6 +34,11 @@ namespace openspace::autonavigation::helpers {
         return std::max(0.0, std::min(tScaled, 1.0));
     }
 
+    glm::dquat getLookAtQuaternion(glm::dvec3 eye, glm::dvec3 center, glm::dvec3 up) {
+        glm::dmat4 lookAtMat = glm::lookAt(eye, center, up);
+        return glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
+    }
+
 } // helpers
 
 namespace openspace::autonavigation::interpolation {

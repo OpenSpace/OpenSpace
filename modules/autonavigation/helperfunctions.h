@@ -36,6 +36,8 @@ namespace openspace::autonavigation::helpers {
     // Make interpolator parameter t [0,1] progress only inside a subinterval
     double shiftAndScale(double t, double newStart, double newEnd);
 
+    glm::dquat getLookAtQuaternion(glm::dvec3 eye, glm::dvec3 center, glm::dvec3 up);
+
 } // helpers
 
 // TODO: include interpolator.h to helperfunctions
