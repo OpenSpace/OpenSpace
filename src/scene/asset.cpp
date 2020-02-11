@@ -209,7 +209,7 @@ void Asset::syncStateChanged(ResourceSynchronization* sync,
 }
 
 bool Asset::isSyncResolveReady() {
-    std::vector<std::shared_ptr<Asset>> requiredAssets = requiredAssets();
+    std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
 
     auto unsynchronizedAsset = std::find_if(
         requiredAssets.begin(),
