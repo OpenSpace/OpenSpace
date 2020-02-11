@@ -309,14 +309,9 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     });
 
     _remove.onChange([&]() {
-        try {
-            if (_tileProvider) {
-                tileprovider::reset(*_tileProvider);
-            }
-        }
-        catch (...) {
+        if (_tileProvider) {
+            tileprovider::reset(*_tileProvider);
             _parent.deleteLayer(identifier());
-            throw;
         }
     });
 
