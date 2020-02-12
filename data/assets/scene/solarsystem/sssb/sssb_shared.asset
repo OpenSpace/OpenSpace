@@ -1,23 +1,16 @@
 local transforms = asset.require('scene/solarsystem/sun/transforms')
 local assetHelper = asset.require('util/asset_helper')
 
---local satImageFolder = asset.syncedResource({
---    Name = "Satellite Image Files",
---    Type = "HttpSynchronization",
---    Identifier = "tle_satellites_images",
---    Version = 1
---})
-
-function downloadSssbDatabaseFile(sceneAsset, url, name)
+function downloadSssbDatabaseFile(sceneAsset, name)
     local identifier = name
     identifier = identifier:gsub(" ", "")
     identifier = identifier:gsub("&", "")
     identifier = identifier:gsub("-", "")
     return sceneAsset.syncedResource({
         Name = "Small SolarSystem Body Data (" .. name .. ")",
-        Type = "UrlSynchronization",
-        Identifier = "sssb_data_" .. identifier,
-        Url = url
+        Type = "HttpSynchronization",
+        Identifier = "sssb_data_pha",
+        Version = 1
     })
 end
 
@@ -31,13 +24,13 @@ local registerSssbGroupObjects = function(containingAsset, filename, sssbFolder,
         return ctr
     end
 
-    function sssBodies(title, file, color)
+    function sssBodies(title, folder, file, color)
         return {
            Identifier = title,
            Parent = transforms.SunECLIPJ2000.Identifier,
            Renderable = {
                 Type = "RenderableSmallBody",
-                Path = file,
+                Path = folder.."/"..file,
                 Segments = 200,
                 Color = trailColor,
                 Fade = 0.5,
@@ -48,7 +41,7 @@ local registerSssbGroupObjects = function(containingAsset, filename, sssbFolder,
         }
     end
 
-    local SssbBatch = sssBodies('sssb_'..filenameSansExt, sssbFolder, trailColor)
+    local SssbBatch = sssBodies('sssb_'..filenameSansExt, sssbFolder, filename, trailColor)
     assetHelper.registerSceneGraphNodesAndExport(containingAsset, { SssbBatch })
 end
 

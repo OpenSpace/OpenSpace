@@ -1,7 +1,0 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
-
-local filename = 'sample.csv'
-
-local telem = asset.localResource(filename)
-sharedSssb.registerSssbGroupObjects(asset, filename, telem, true)

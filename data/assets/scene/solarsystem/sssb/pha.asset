@@ -1,0 +1,6 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "pha")
+
+sharedSssb.registerSssbGroupObjects(asset, "sssb_data_pha.csv", filepath, true)
