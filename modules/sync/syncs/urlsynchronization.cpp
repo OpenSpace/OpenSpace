@@ -46,7 +46,6 @@ namespace {
     constexpr const char* KeyFilename = "Filename";
 
     constexpr const char* TempSuffix = ".tmp";
-    constexpr const char* FileSuffix = ".txt";
 } // namespace
 
 namespace openspace {
@@ -128,10 +127,6 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
 
     if (dict.hasValue<std::string>(KeyFilename)) {
         _filename = dict.value<std::string>(KeyFilename);
-        std::size_t foundExt = _filename.find(FileSuffix);
-        if (foundExt == std::string::npos) {
-            _filename += FileSuffix;
-        }
     }
 
     bool useHash = true;
@@ -204,12 +199,10 @@ void UrlSynchronization::start() {
                 std::string lastPartOfUrl = url.substr(lastSlash + 1);
 
                 // We can not create filenames with questionmarks
-                lastPartOfUrl.erase(std::remove(lastPartOfUrl.begin(), lastPartOfUrl.end(), '?'), lastPartOfUrl.end());
-
-                std::size_t foundExt = lastPartOfUrl.find(FileSuffix);
-                if (foundExt == std::string::npos) {
-                    lastPartOfUrl += FileSuffix;
-                }
+                lastPartOfUrl.erase(
+                    std::remove(lastPartOfUrl.begin(), lastPartOfUrl.end(), '?'),
+                    lastPartOfUrl.end()
+                );
                 _filename = lastPartOfUrl;
             }
             std::string fileDestination = directory() +
