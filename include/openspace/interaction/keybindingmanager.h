@@ -75,7 +75,6 @@ public:
     const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
 
 private:
-
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 };
 

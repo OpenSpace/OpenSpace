@@ -166,6 +166,7 @@ private:
 
     std::optional<NavigationState> _pendingNavigationState;
 
+    properties::BoolProperty _disableInputs;
     properties::BoolProperty _useKeyFrameInteraction;
 };
 
