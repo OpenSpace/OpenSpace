@@ -76,7 +76,8 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
 }
 
 glm::dvec3 PathSegment::getPositionAt(double t) const {
-    t = ghoul::cubicEaseInOut(t); 
+    //t = ghoul::cubicEaseInOut(t); 
+    // TODO: move along curve based on displacement instead
     return _curve->valueAt(t);    
 }
 

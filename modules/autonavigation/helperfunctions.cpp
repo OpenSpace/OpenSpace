@@ -58,36 +58,8 @@ namespace openspace::autonavigation::interpolation {
     glm::dvec3 linear(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2) {
         return cp1 * (1.0 - t) + cp2 * t;
     }
-    /*
-    // Interpolate a list of control points and knot times
-    glm::dvec3 piecewiseCubicBezier(double t, std::vector<double> &times, const std::vector<glm::dvec3> &points) {
-        size_t n = points.size();
-        ghoul_assert(n > 4, "Minimum of four control points needed for interpolation!");
-        ghoul_assert((n - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
 
-        size_t nrSegments = (size_t)std::floor((n - 1) / 3.0);
-        int nrTimes = times.size();
-        ghoul_assert(nrSegments == nrTimes - 1, "Number of interval times must match number of intervals");
-        
-        if (abs(1.0-t) < 0.00001) 
-            return points.back();
-        if (nrTimes < 1) {
-            return points[0];
-        }
-   
-        // find current segmant and scale time
-        std::vector<double>::iterator low = std::lower_bound(times.begin(), times.end(), t);
-        int segmentIdx = low - times.begin(); 
-
-        double tSegment = (t - times[segmentIdx]) / (times[segmentIdx + 1] - times[segmentIdx]);
-       
-        int idx = segmentIdx * 3;
-
-        return cubicBezier(tSegment, points[idx], points[idx + 1], 
-            points[idx + 2], points[idx + 3]);
-    }
-    */
-
+    // TODO: remove
     glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3> &points) {
         size_t n = points.size();
         ghoul_assert(n > 2, "Minimum of two control points needed for interpolation!");

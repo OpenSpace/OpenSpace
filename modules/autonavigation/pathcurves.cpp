@@ -141,42 +141,37 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
        
     reparameterizeByArcLength();
 }
-/*
-glm::dvec3 Bezier3Curve::valueAt(double t) {
-    return interpolation::piecewiseCubicBezier(t, _intervalTimes, _points);
-}
-*/
 
 // Interpolate a list of control points and knot times
 glm::dvec3 Bezier3Curve::valueAt(double t) {
-    size_t n = _points.size();
-    ghoul_assert(n > 4, "Minimum of four control points needed for interpolation!");
-    ghoul_assert((n - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
+    size_t nrPoints = _points.size();
+    size_t nrTimes = _intervalTimes.size();
+    unsigned int nrSegments = (unsigned int)std::floor((nrPoints - 1) / 3.0);
 
-    size_t nrSegments = (size_t)std::floor((n - 1) / 3.0);
-    int nrTimes = _intervalTimes.size();
-    ghoul_assert(nrSegments == nrTimes - 1, "Number of interval times must match number of intervals");
+    ghoul_assert(nrPoints > 4, "Minimum of four control points needed for interpolation!");
+    ghoul_assert((nrPoints - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
+    ghoul_assert(nrSegments == (nrTimes - 1), "Number of interval times must match number of intervals");
 
-    if (abs(1.0 - t) < 0.00001)
-        return _points.back();
-    if (nrTimes < 1) {
-        return _points[0];
-    }
+    if (abs(t) < 0.000001)
+        return _points.front();
 
-    // find current segmant and scale time
-    std::vector<double>::iterator low = std::lower_bound(_intervalTimes.begin(), _intervalTimes.end(), t);
-    int segmentIdx = low - _intervalTimes.begin();
+    // compute current segment, by first finding iterator to the first time that is larger than t 
+    std::vector<double>::iterator segmentEndIt = 
+        std::lower_bound(_intervalTimes.begin(), _intervalTimes.end(), t);
+    unsigned int segmentIdx = (segmentEndIt - 1) - _intervalTimes.begin();
 
-    double tSegment = (t - _intervalTimes[segmentIdx]) / (_intervalTimes[segmentIdx + 1] - _intervalTimes[segmentIdx]);
+    double segmentStart = _intervalTimes[segmentIdx];
+    double segmentDuration = (_intervalTimes[segmentIdx + 1] - _intervalTimes[segmentIdx]);
+    double tSegment = (t - segmentStart) / segmentDuration;
 
-    int idx = segmentIdx * 3;
+    unsigned int idx = segmentIdx * 3;
 
     return interpolation::cubicBezier(tSegment, _points[idx], _points[idx + 1],
         _points[idx + 2], _points[idx + 3]);
 }
 
 void Bezier3Curve::reparameterizeByArcLength() {
-    // For bezier every third is a knot shaed beetween segments
+    // For bezier every third is a knot shared beetween segments
     int nrIntervals = (int)std::floor((float)(_points.size() - 1) / 3.0); //TODO valivate!
 
     if (nrIntervals == 1) {

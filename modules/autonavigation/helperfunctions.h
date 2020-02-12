@@ -53,9 +53,7 @@ namespace openspace::autonavigation::interpolation {
 
     glm::dvec3 linear(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2);
 
-    // Inside bezier3
-    // glm::dvec3 piecewiseCubicBezier(double t, std::vector<double> &times, const std::vector<glm::dvec3> &points);
-
+    // TODO: remove
     glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3> &controlPoints);
 
 } // namespace
