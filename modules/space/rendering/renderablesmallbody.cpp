@@ -277,7 +277,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
     std::streamoff csvLine = -1;
     int fieldCount = 0;
     const std::string expectedHeaderLine =
-        "full_name,neo,pha,diameter,epoch_cal,e,a,i,om,w,ma,per";
+        "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
     try {
         std::getline(file, line); // get rid of first line (header)
@@ -297,12 +297,6 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             // Object designator string
             std::getline(file, name, ',');
             fieldCount++;
-
-            // (Ignore object status for NEO, PHA, diameter)
-            std::getline(file, field, ',');
-            std::getline(file, field, ',');
-            std::getline(file, field, ',');
-            fieldCount += 3;
 
             // Epoch
             if (!std::getline(file, field, ',')) {
