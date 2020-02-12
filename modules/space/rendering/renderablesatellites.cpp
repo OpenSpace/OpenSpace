@@ -1,26 +1,26 @@
- /****************************************************************************************
-  *                                                                                       *
-  * OpenSpace                                                                             *
-  *                                                                                       *
-  * Copyright (c) 2014-2018                                                               *
-  *                                                                                       *
-  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-  * software and associated documentation files (the "Software"), to deal in the Software *
-  * without restriction, including without limitation the rights to use, copy, modify,    *
-  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-  * permit persons to whom the Software is furnished to do so, subject to the following   *
-  * conditions:                                                                           *
-  *                                                                                       *
-  * The above copyright notice and this permission notice shall be included in all copies *
-  * or substantial portions of the Software.                                              *
-  *                                                                                       *
-  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-  ****************************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/space/rendering/renderablesatellites.h>
 
@@ -82,14 +82,6 @@ namespace {
 }
 
 namespace openspace {
-    
-    // The list of leap years only goes until 2056 as we need to touch this file then
-    // again anyway ;)
-    const std::vector<int> LeapYears = {
-        1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
-        2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
-        2044, 2048, 2052, 2056
-    };
 
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
