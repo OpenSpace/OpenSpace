@@ -421,7 +421,8 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
 
     try {
-        t.timeQuantizer = TimeQuantizer(start, end, timeResolution);
+        t.timeQuantizer.setStartEndRange(start.ISO8601(), end.ISO8601());
+        t.timeQuantizer.setResolution(timeResolution);
     }
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::RuntimeError(fmt::format(
