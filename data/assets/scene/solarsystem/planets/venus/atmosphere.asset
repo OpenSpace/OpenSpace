@@ -26,7 +26,7 @@ local Atmosphere = {
                     -- absorption and scattering are the same.
                 },
             -- Thichkness of atmosphere if its density were uniform, in Km
-                H_R = 6.7
+                H_R = 3.53
             },
             -- Default
             Mie = {
@@ -37,7 +37,7 @@ local Atmosphere = {
                     Extinction = { 53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979 }
                 },
                 -- Mie Height scale (atmosphere thickness for constant density) in Km
-                H_M = 9.8,
+                H_M = 5.42,
                 -- Mie Phase Function Value (G e [-1.0, 1.0]. 
                 -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
                 G = 0.85
