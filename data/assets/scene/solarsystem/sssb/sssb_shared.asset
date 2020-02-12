@@ -1,49 +1,39 @@
 local transforms = asset.require('scene/solarsystem/sun/transforms')
-local assetHelper = asset.require('util/asset_helper')
 
-function downloadSssbDatabaseFile(sceneAsset, name)
-    local identifier = name
-    identifier = identifier:gsub(" ", "")
-    identifier = identifier:gsub("&", "")
-    identifier = identifier:gsub("-", "")
+function downloadSssbDatabaseFile(sceneAsset, name, identifier)
+    assert(sceneAsset, "'asset' needs to be provided")
+    assert(name, "'name' needs to be provided")
+    assert(identifier, "'identifier'needs to be provided")
+
     return sceneAsset.syncedResource({
         Name = "Small SolarSystem Body Data (" .. name .. ")",
         Type = "HttpSynchronization",
-        Identifier = "sssb_data_pha",
+        Identifier = identifier,
         Version = 1
     })
 end
 
-local registerSssbGroupObjects = function(containingAsset, filename, sssbFolder, shouldAddDuplicates)
+local createSssbGroupObject = function(filename, sssbFolder, trailColor)
+    assert(filename, "'filename' needs to be provided")
+    assert(sssbFolder, "'sssbFolder' needs to be provided")
+    trailColor = trailColor or { 0.75, 0.1, 0.1 }
+
     local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
-    local trailColor = { 0.75, 0.1, 0.1 }
-
-    function numLinesInFile(filename)
-        local ctr = 0
-        for _ in io.lines(filename) do ctr = ctr + 1 end
-        return ctr
-    end
-
-    function sssBodies(title, folder, file, color)
-        return {
-           Identifier = title,
-           Parent = transforms.SunECLIPJ2000.Identifier,
-           Renderable = {
-                Type = "RenderableSmallBody",
-                Path = folder.."/"..file,
-                Segments = 200,
-                Color = trailColor,
-                Fade = 0.5,
-            },
-            GUI = {
-                Path = "/Solar System/sssb"
-           }
-        }
-    end
-
-    local SssbBatch = sssBodies('sssb_'..filenameSansExt, sssbFolder, filename, trailColor)
-    assetHelper.registerSceneGraphNodesAndExport(containingAsset, { SssbBatch })
+    return {
+       Identifier = 'sssb_'..filenameSansExt,
+       Parent = transforms.SunECLIPJ2000.Identifier,
+       Renderable = {
+            Type = "RenderableSmallBody",
+            Path = sssbFolder.."/"..filename,
+            Segments = 200,
+            Color = trailColor,
+            Fade = 0.5,
+        },
+        GUI = {
+            Path = "/Solar System/Small Solar System Body"
+       }
+    }
 end
 
 asset.export("downloadSssbDatabaseFile", downloadSssbDatabaseFile)
-asset.export("registerSssbGroupObjects", registerSssbGroupObjects)
+asset.export("createSssbGroupObject", createSssbGroupObject)
