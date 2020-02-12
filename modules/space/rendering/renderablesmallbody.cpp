@@ -247,6 +247,22 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
         _appearance.lineFade = 20;
     }
 
+    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+        _appearance.lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
+            );
+    }
+    else {
+        _appearance.lineWidth = 2.0;
+    }
+
+    auto reinitializeTrailBuffers = [this]() {
+        initializeGL();
+    };
+
+    _path.onChange(reinitializeTrailBuffers);
+    _nSegments.onChange(reinitializeTrailBuffers);
+
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
