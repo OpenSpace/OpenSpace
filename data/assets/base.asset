@@ -57,12 +57,20 @@ local Keybindings = {
     },
     {
         Key = "h",
-        Name="Toggle Trails",
-        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Toggles the visibility of all trails",
+        Name="Toggle Planet Trails",
+        Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Toggles the visibility of planet trails",
         GuiPath = "/Rendering",
         Local = false
     },
+    {
+        Key = "l",
+        Name = "Toggle planet labels",
+        Command = "local list = openspace.getProperty('{solarsystem_labels}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Turns on visibility for all solar system labels",
+        GuiPath = "/Rendering",
+        Local = false
+    }
 }
 
 asset.onInitialize(function ()

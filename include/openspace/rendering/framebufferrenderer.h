@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,6 +70,7 @@ public:
     void updateDeferredcastData();
     void updateHDRAndFiltering();
     void updateFXAA();
+    void updateDownscaledVolume();
     
     void setResolution(glm::ivec2 res) override;
     void setHDRExposure(float hdrExposure) override;
@@ -110,6 +111,9 @@ private:
     void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor);
     void applyFXAA();
+    void updateDownscaleTextures();
+    void updateExitVolumeTextures();
+    void writeDownscaledVolume();
     
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -122,10 +126,13 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
                  Hue, Saturation, Value) _hdrUniformCache;
     UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
+    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth) 
+        _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;
@@ -156,6 +163,13 @@ private:
         GLuint fxaaFramebuffer;
         GLuint fxaaTexture;
     } _fxaaBuffers;
+
+    struct {
+        GLuint framebuffer;
+        GLuint colorTexture;
+        GLuint depthbuffer;
+        float currentDownscaleFactor  = 1.f;
+    } _downscaleVolumeRendering;
 
     unsigned int _pingPongIndex = 0u;
 

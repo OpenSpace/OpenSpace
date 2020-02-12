@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -117,6 +118,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
 {
+    ZoneScoped
+
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
 
@@ -141,15 +144,26 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(OpacityInfo.identifier)) {
-        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
+        _opacity = static_cast<float>(dictionary.value<double>(
+            OpacityInfo.identifier)
+       );
     }
 
     addProperty(_enabled);
 
     //set type for UI
     if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        _renderableType = dictionary.value<std::string>(RenderableTypeInfo.identifier);
+        _renderableType = dictionary.value<std::string>(
+            RenderableTypeInfo.identifier
+       );
     }
+
+    if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
+        _boundingSphere = static_cast<float>(
+            dictionary.value<double>(BoundingSphereInfo.identifier)
+       );
+    }
+
     addProperty(_renderableType);
     addProperty(_boundingSphere);
 }
@@ -167,12 +181,11 @@ void Renderable::update(const UpdateData&) {}
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
-
-    _boundingSphere.setValue(boundingSphere);
+    _boundingSphere = boundingSphere;
 }
 
 float Renderable::boundingSphere() const {
-    return _boundingSphere.value();
+    return _boundingSphere;
 }
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(

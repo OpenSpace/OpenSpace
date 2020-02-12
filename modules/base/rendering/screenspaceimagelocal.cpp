@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,24 +78,15 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         "ScreenSpaceImageLocal"
     );
 
-    int iIdentifier = 0;
-    if (_identifier.empty()) {
-        static int id = 0;
-        iIdentifier = id;
-
-        if (iIdentifier == 0) {
-            setIdentifier("ScreenSpaceImageLocal");
-        }
-        else {
-            setIdentifier("ScreenSpaceImageLocal" + std::to_string(iIdentifier));
-        }
-        ++id;
+    std::string identifier;
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
     }
-
-    if (_guiName.empty()) {
-        // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("ScreenSpaceImageLocal " + std::to_string(iIdentifier));
+    else {
+        identifier = "ScreenSpaceImageLocal";
     }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(identifier);
 
     _texturePath.onChange([this]() {
         if (!FileSys.fileExists(FileSys.absolutePath(_texturePath))) {

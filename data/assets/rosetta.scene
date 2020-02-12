@@ -32,8 +32,8 @@ local Keybindings = {
         Local = false
     },
     {
-        Key = "F5",
-        Command = "openspace.time.setTime('2014-08-01T03:05:18.101')",
+        Key = "Shift+F6",
+        Command = "openspace.time.setTime('2014-08-01T03:05:18.10')",
         Documentation = "Jumps to the time of initial approach of Rosetta to 67P.",
         Name = "Set initial approach time",
         GuiPath = "/Missions/Rosetta",
@@ -81,7 +81,7 @@ local Keybindings = {
         Local = false
     },
     {
-        Key = "g",
+        Key = "o",
         Command = renderableHelper.toggle('Scene.PhilaeTrail'),
         Documentation = "Toggles the visibility of Philae's trail.",
         Name = "Toggle Philae trail",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,10 +41,16 @@ public:
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 
+    bool addFrame(std::string body, std::string frame);
+    std::string frameFromBody(const std::string& body);
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
     void internalDeinitializeGL() override;
+
+private:
+    std::vector<std::pair<std::string, std::string>> _frameByBody;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 
 namespace openspace {
 
-class PowerScaledSphere;
+class Sphere;
 
 /**
  * DataSphere is a concrete IswaCygnet with data files as its input source. The class
@@ -53,7 +53,7 @@ protected:
     void setUniforms() override;
     std::vector<float*> textureData() override;
 
-    std::unique_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<Sphere> _sphere;
     float _radius;
 };
 

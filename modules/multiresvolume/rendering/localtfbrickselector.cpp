@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -340,7 +340,7 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
     std::vector<float> gradients(tfWidth - 1);
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {
         const glm::vec4 prevRgba = tf->sample(offset);
-        const         glm::vec4 nextRgba = tf->sample(offset + 1);
+        const glm::vec4 nextRgba = tf->sample(offset + 1);
 
         const float colorDifference = glm::distance(prevRgba, nextRgba);
         const float alpha = (prevRgba.w + nextRgba.w) * 0.5f;

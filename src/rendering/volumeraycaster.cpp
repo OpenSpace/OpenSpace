@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,22 @@ void VolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObje
 
 bool VolumeRaycaster::isCameraInside(const RenderData&, glm::vec3&) {
     return false;
+}
+
+void VolumeRaycaster::setMaxSteps(int nsteps) {
+    _rayCastMaxSteps = nsteps;
+}
+
+int VolumeRaycaster::maxSteps() const {
+    return _rayCastMaxSteps;
+}
+
+void VolumeRaycaster::setDownscaleRender(float value) {
+    _downscaleRenderConst = value;
+}
+
+float VolumeRaycaster::downscaleRender() const {
+    return _downscaleRenderConst;
 }
 
 } // namespace openspace

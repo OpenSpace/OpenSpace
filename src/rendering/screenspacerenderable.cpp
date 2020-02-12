@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -132,7 +133,7 @@ namespace {
         float phi = spherical.z;
 
         // Sanitize coordinates.
-        float theta = wrap(spherical.y, 0.0, glm::two_pi<float>());
+        float theta = wrap(spherical.y, 0.f, glm::two_pi<float>());
         if (theta > glm::pi<float>()) {
             theta = glm::two_pi<float>() - theta;
             phi += glm::pi<float>();
@@ -206,8 +207,6 @@ namespace {
             wrap(elevation, -glm::pi<float>(), glm::pi<float>())
         );
     }
-
-
 } // namespace
 
 namespace openspace {
@@ -312,6 +311,27 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
         renderableType,
         dictionary
     );
+}
+
+std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
+    std::vector<ScreenSpaceRenderable*> r = global::renderEngine.screenSpaceRenderables();
+
+    auto nameTaken = [&r](const std::string& name) {
+        bool nameTaken = std::any_of(
+            r.begin(),
+            r.end(),
+            [&name](ScreenSpaceRenderable* r) { return r->identifier() == name; }
+        );
+        return nameTaken;
+    };
+
+    std::string baseName = name;
+    int i = 1;
+    while (nameTaken(name)) {
+        name = baseName + std::to_string(i);
+        i++;
+    }
+    return name;
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
@@ -469,6 +489,8 @@ bool ScreenSpaceRenderable::deinitializeGL() {
 }
 
 void ScreenSpaceRenderable::render() {
+    ZoneScoped
+
     draw(
         globalRotationMatrix() *
         translationMatrix() *
@@ -496,7 +518,7 @@ float ScreenSpaceRenderable::depth() {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = global::windowDelegate.currentWindowResolution();
+    auto res = global::windowDelegate.currentDrawBufferResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
@@ -518,7 +540,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
 
     //to scale the plane
     float textureRatio =

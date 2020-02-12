@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ public:
     glm::vec3 hexadecimalToRGBConversion(const std::string& hex) const;
     std::string hexadecimalFromVec3(const glm::vec3& vec) const;
 
-    glm::vec3 color;
+    glm::vec3 color = glm::vec3(0.f);
     std::string colorHex;
     std::pair<float, float> position;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/sphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -88,7 +88,7 @@ void DataSphere::initializeGL() {
 bool DataSphere::createGeometry() {
     const float radius = 6.371f * _radius * glm::pow(10.f, 6.f);
     int segments = 100;
-    _sphere = std::make_unique<PowerScaledSphere>(radius, segments);
+    _sphere = std::make_unique<Sphere>(radius, segments);
     _sphere->initialize();
     return true;
 }

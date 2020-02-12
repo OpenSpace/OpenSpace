@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -118,6 +118,8 @@ public:
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
     bool hasContent(int x, int y);
+
+    bool _shouldReshape = false;
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;

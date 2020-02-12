@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -414,11 +414,10 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         return finalScatteringRadiance;
     } else {
         //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
-        return attenuation * spaceColor.rgb + finalScatteringRadiance;
+        return spaceColor.rgb + finalScatteringRadiance;
         // return attenuation * spaceColor.rgb +
         // (vec3(1.0) - attenuation) * finalScatteringRadiance;
-    }
-    
+    }    
 }
 
 /* 

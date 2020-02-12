@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,10 +72,10 @@ private:
     // Labels Structures
     struct LabelEntry {
         char feature[256];
-        float diameter;
-        float latitude;
-        float longitude;
-        glm::vec3 geoPosition;
+        float diameter = 0.f;
+        float latitude = 0.f;
+        float longitude = 0.f;
+        glm::vec3 geoPosition = glm::vec3(0.f);
     };
 
     struct Labels {

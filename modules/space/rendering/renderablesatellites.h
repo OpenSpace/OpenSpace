@@ -74,9 +74,9 @@ public:
 
 private:
     struct Vertex {
-        glm::vec3 position;
-        glm::vec3 color;
-        glm::vec2 texcoord;
+        glm::vec3 position = glm::vec3(0.f);
+        glm::vec3 color = glm::vec3(0.f);
+        glm::vec2 texcoord = glm::vec2(0.f);
     };
 
     struct KeplerParameters {
@@ -93,8 +93,12 @@ private:
 
     /// The layout of the VBOs
     struct TrailVBOLayout {
-        float x, y, z, time;
-        double epoch, period; 
+        float x = 0.f;
+        float y = 0.f;
+        float z = 0.f;
+        float time = 0.f;
+        double epoch = 0.0;
+        double period = 0.0;
     };
 
     KeplerTranslation _keplerTranslator;
@@ -103,10 +107,6 @@ private:
     /// The backend storage for the vertex buffer object containing all points for this
     /// trail.
     std::vector<TrailVBOLayout> _vertexBufferData;
-
-    /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
-    std::vector<unsigned int> _indexBufferData;
 
     GLuint _vertexArray;
     GLuint _vertexBuffer;
@@ -123,11 +123,9 @@ private:
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
 
-    properties::DoubleProperty _lineFade;
-
     RenderableTrail::Appearance _appearance;
 
-    glm::vec3 _position;
+    glm::vec3 _position = glm::vec3(0.f);
 
     UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
         numberOfSegments) _uniformCache;

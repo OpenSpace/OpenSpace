@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -183,14 +183,14 @@ private:
     std::unique_ptr<TimeFrame> _timeFrame;
 
     // Cached transform data
-    glm::dvec3 _worldPositionCached;
-    glm::dmat3 _worldRotationCached;
+    glm::dvec3 _worldPositionCached = glm::dvec3(0.0);
+    glm::dmat3 _worldRotationCached = glm::dmat3(1.0);
     double _worldScaleCached = 1.0;
 
     float _fixedBoundingSphere = 0.f;
 
-    glm::dmat4 _modelTransformCached;
-    glm::dmat4 _inverseModelTransformCached;
+    glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
+    glm::dmat4 _inverseModelTransformCached = glm::dmat4(1.0);
 
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;

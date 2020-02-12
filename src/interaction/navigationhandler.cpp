@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/profiling.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <fstream>
 
@@ -77,7 +78,7 @@ ghoul::Dictionary NavigationHandler::NavigationState::dictionary() const {
         cameraDict.setValue(KeyAim, aim);
     }
     if (up.has_value()) {
-        cameraDict.setValue(KeyUp, up.value());
+        cameraDict.setValue(KeyUp, *up);
 
         if (std::abs(yaw) > Epsilon) {
             cameraDict.setValue(KeyYaw, yaw);
@@ -151,6 +152,8 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {} // NOLINT
 
 void NavigationHandler::initialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
@@ -162,6 +165,8 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
@@ -213,7 +218,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
     if (_pendingNavigationState.has_value()) {
-        applyNavigationState(_pendingNavigationState.value());
+        applyNavigationState(*_pendingNavigationState);
         _orbitalNavigator.resetVelocities();
         _pendingNavigationState.reset();
     }
@@ -269,7 +274,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
 
     glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(referenceFrameTransform * ns.up.value()) :
+        glm::normalize(referenceFrameTransform * *ns.up) :
         glm::dvec3(0.0, 1.0, 0.0);
 
     // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
@@ -282,8 +287,8 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         up
     )));
 
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.0, 0.0, 0.0));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.0, -1.0, 0.0));
 
     _camera->setPositionVec3(cameraPositionWorld);
     _camera->setRotation(neutralCameraRotation * yawRotation * pitchRotation);
@@ -337,6 +342,18 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     _inputState.keyboardCallback(key, modifier, action);
 }
 
+NavigationHandler::NavigationState NavigationHandler::navigationState() const {
+    const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
+        _orbitalNavigator.anchorNode() :
+        sceneGraph()->root();
+    ghoul_assert(
+        referenceFrame,
+        "The root will always exist and the anchor node ought to be reset when removed"
+    );
+
+    return navigationState(*referenceFrame);
+}
+
 NavigationHandler::NavigationState NavigationHandler::navigationState(
                                                const SceneGraphNode& referenceFrame) const
 {
@@ -348,7 +365,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     }
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
+        glm::dvec3(0.0),
         aim->worldPosition() - _camera->positionVec3(),
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
@@ -360,7 +377,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     const double yaw = -eulerAngles.y;
 
     // Need to compensate by redisual roll left in local rotation:
-    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0, 0, 1));
+    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0.0, 0.0, 1.0));
     const glm::dvec3 neutralUp =
         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();
 
@@ -383,12 +400,9 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
 void NavigationHandler::saveNavigationState(const std::string& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
-    const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
-        _orbitalNavigator.anchorNode() :
-        sceneGraph()->root();
-
+    NavigationHandler::NavigationState state;
     if (!referenceFrameIdentifier.empty()) {
-        referenceFrame = sceneGraphNode(referenceFrameIdentifier);
+        const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
         if (!referenceFrame) {
             LERROR(fmt::format(
                 "Could not find node '{}' to use as reference frame",
@@ -396,17 +410,18 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
             ));
             return;
         }
+        state = navigationState(*referenceFrame).dictionary();
+    }
+    else {
+        state = navigationState().dictionary();
     }
 
     if (!filepath.empty()) {
         std::string absolutePath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        ghoul::Dictionary cameraDict = navigationState(*referenceFrame).dictionary();
-        ghoul::DictionaryLuaFormatter formatter;
-
         std::ofstream ofs(absolutePath.c_str());
-        ofs << "return " << formatter.format(cameraDict);
+        ofs << "return " << ghoul::formatLua(state.dictionary());
         ofs.close();
     }
 }
@@ -559,12 +574,23 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
         "navigation",
         {
             {
+                "getNavigationState",
+                &luascriptfunctions::getNavigationState,
+                {},
+                "[string]",
+                "Return the current navigation state as a lua table. The optional "
+                "argument is the scene graph node to use as reference frame. By default, "
+                "the reference frame will picked based on whether the orbital navigator "
+                "is currently following the anchor node rotation. If it is, the anchor "
+                "will be chosen as reference frame. If not, the reference frame will be "
+                "set to the scene graph root."
+            },
+            {
                 "setNavigationState",
                 &luascriptfunctions::setNavigationState,
                 {},
                 "table",
-                "Set the navigation state. "
-                "The argument must be a valid Navigation State."
+                "Set the navigation state. The argument must be a valid Navigation State."
             },
             {
                 "saveNavigationState",
@@ -642,7 +668,7 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "locally or remotely. The latter being the default."
             },
             {
-                "clearJoystickButotn",
+                "clearJoystickButton",
                 &luascriptfunctions::clearJoystickButton,
                 {},
                 "int",

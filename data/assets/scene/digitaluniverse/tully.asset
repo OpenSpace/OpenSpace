@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
     Name = "Tully Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_tully_textures",
-    Version = 2
+    Version = 3
 })
 
 local speck = asset.syncedResource({
@@ -25,7 +25,7 @@ local tullyPoints = {
         Opacity = 0.99,
         ScaleFactor = 500.0,
         File = speck .. "/tully.speck",
-        Texture = textures .. "/point3.png",
+        Texture = textures .. "/point3A.png",
         --ColorMap = speck .. "/tully.cmap",
         ColorMap = speck .. "/lss.cmap",
         --ColorOption = { "proximity" },

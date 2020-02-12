@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,8 +55,11 @@ private:
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::Vec4Property _color;
+    properties::FloatProperty _downScaleVolumeRendering;
 
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;
+
+    int _rayCastSteps = 1000;
 };
 
 } // namespace openspace

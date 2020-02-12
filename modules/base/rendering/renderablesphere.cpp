@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -304,7 +304,7 @@ bool RenderableSphere::isReady() const {
 }
 
 void RenderableSphere::initializeGL() {
-    _sphere = std::make_unique<PowerScaledSphere>(_size, _segments);
+    _sphere = std::make_unique<Sphere>(_size, _segments);
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -467,7 +467,7 @@ void RenderableSphere::update(const UpdateData&) {
     }
 
     if (_sphereIsDirty) {
-        _sphere = std::make_unique<PowerScaledSphere>(_size, _segments);
+        _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
         _sphereIsDirty = false;
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -151,24 +151,15 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
         "ScreenSpaceDashboard"
     );
 
-    int iIdentifier = 0;
-    if (_identifier.empty()) {
-        static int id = 0;
-        iIdentifier = id;
-
-        if (iIdentifier == 0) {
-            setIdentifier("ScreenSpaceDashboard");
-        }
-        else {
-            setIdentifier("ScreenSpaceDashboard" + std::to_string(iIdentifier));
-        }
-        ++id;
+    std::string identifier;
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
     }
-
-    if (_guiName.empty()) {
-        // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("ScreenSpaceDashboard " + std::to_string(iIdentifier));
+    else {
+        identifier = "ScreenSpaceDashboard";
     }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(std::move(identifier));
 
     if (dictionary.hasKey(UseMainInfo.identifier)) {
         _useMainDashboard = dictionary.value<bool>(UseMainInfo.identifier);
@@ -210,7 +201,7 @@ bool ScreenSpaceDashboard::isReady() const {
 
 void ScreenSpaceDashboard::update() {
     if (global::windowDelegate.windowHasResized()) {
-        const glm::ivec2 size = global::windowDelegate.currentWindowResolution();
+        const glm::ivec2 size = global::windowDelegate.currentDrawBufferResolution();
         _size = { 0.f, 0.f, size.x, size.y };
         createFramebuffer();
     }

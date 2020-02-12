@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -124,9 +124,13 @@ void HttpRequest::perform(RequestOptions opt) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
 
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
+    #if LIBCURL_VERSION_NUM >= 0x072000
+    // xferinfo was introduced in 7.32.0, if a lower curl version is used the progress
+    // will not be shown for downloads on the splash screen
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this); // NOLINT
     // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
+    #endif
 
     if (opt.requestTimeoutSeconds > 0) {
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds); // NOLINT
@@ -244,7 +248,12 @@ void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
     }
     markAsStarted();
     _downloadThread = std::thread([this, opt] {
-        download(opt);
+        try {
+            download(opt);
+        }
+        catch (const ghoul::filesystem::FileSystem::FileSystemException& e) {
+            LERRORC(e.component, e.message);
+        }
     });
 }
 
