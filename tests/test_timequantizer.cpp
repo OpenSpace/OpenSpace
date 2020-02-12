@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,14 @@
 
 #include "catch2/catch.hpp"
 
-#include <openspace/util/time.h>
 #include "modules/globebrowsing/src/timequantizer.h"
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
+
+using namespace openspace;
 
 namespace {
     constexpr const int FILLEN = 128;
@@ -50,109 +52,81 @@ namespace {
         REQUIRE(kernelID == 1);
         return kernelID;
     }
+
+    void singleTimeTest(Time& t, globebrowsing::TimeQuantizer& tq, bool clamp,
+                        const std::string& input, const std::string& expected)
+    {
+        t.setTime(input);
+        tq.quantize(t, clamp);
+        REQUIRE(t.ISO8601() == expected);
+    }
+
+    void singleResolutionTest(globebrowsing::TimeQuantizer& tq, std::string resolution, 
+                              std::string expectedType, bool expectFailure)
+    {
+        std::string res;
+        const std::string search = "Invalid resolution ";
+        try {
+            tq.setResolution(resolution);
+        }
+        catch (const ghoul::RuntimeError & e) {
+            res = e.message;
+        }
+
+        if (expectFailure) {
+            REQUIRE(res.find(search) != std::string::npos);
+            REQUIRE(res.find(expectedType) != std::string::npos);
+        }
+        else {
+            REQUIRE(res.find(search) == std::string::npos);
+        }
+    }
+
+    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq, std::string startTime, 
+                             std::string expectedErrSubstring, bool expectFailure)
+    {
+        std::string res;
+        try {
+            tq.setStartEndRange(startTime, startTime);
+        }
+        catch (const ghoul::RuntimeError & e) {
+            res = e.message;
+        }
+
+        if (expectFailure) {
+            REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
+        }
+        else {
+            REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
+        }
+    }
+
+    void singleStartTimeTest(std::string startTime, std::string expectedErrSubstring,
+                             bool expectFailure)
+    {
+        std::string res;
+        try {
+            globebrowsing::TimeQuantizer tq(startTime, startTime, "1d");
+        }
+        catch (const ghoul::RuntimeError & e) {
+            res = e.message;
+        }
+
+        if (expectFailure) {
+            REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
+        }
+        else {
+            REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
+        }
+    }
 } // namespace
 
-static void singleTimeTest(openspace::Time& t,
-                           openspace::globebrowsing::TimeQuantizer& tq, bool clamp,
-                           const std::string& input, const std::string& expected)
-{
-    t.setTime(input);
-    tq.quantize(t, clamp);
-    REQUIRE(t.ISO8601() == expected);
-}
-
-static void singleResolutionTest(openspace::globebrowsing::TimeQuantizer& tq,
-                                 std::string resolution, std::string expectedType,
-                                 bool expectFailure)
-{
-    std::string res;
-    std::string search = "Invalid resolution ";
-    try {
-        tq.setResolution(resolution);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        res = e.message;
-    }
-
-    if (expectFailure) {
-        REQUIRE(res.find(search) != std::string::npos);
-        REQUIRE(res.find(expectedType) != std::string::npos);
-    }
-    else {
-        REQUIRE(res.find(search) == std::string::npos);
-    }
-}
-
-static void singleStartTimeTest1(openspace::globebrowsing::TimeQuantizer& tq,
-                                std::string startTime, std::string expectedErrSubstring,
-                                bool expectFailure)
-{
-    std::string res;
-    try {
-        tq.setStartEndRange(startTime, startTime);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        res = e.message;
-    }
-
-    if (expectFailure) {
-        REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
-    }
-    else {
-        REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
-    }
-}
-
-static void singleStartTimeTest2(std::string startTime, std::string expectedErrSubstring,
-                                 bool expectFailure)
-{
-    using namespace openspace::globebrowsing;
-    std::string res;
-    try {
-        TimeQuantizer tq(startTime, startTime, "1d");
-    }
-    catch (const ghoul::RuntimeError& e) {
-        res = e.message;
-    }
-
-    if (expectFailure) {
-        REQUIRE(res.find(expectedErrSubstring) != std::string::npos);
-    }
-    else {
-        REQUIRE(res.find(expectedErrSubstring) == std::string::npos);
-    }
-}
-
-static void LoadSpiceKernel () {
-    openspace::SpiceManager::initialize();
-
-    loadLSKKernel();
-    // naif0008.tls is a text file, check if loaded.
-    SpiceBoolean found;
-    kdata_c(
-        0,
-        "text",
-        FILLEN,
-        TYPLEN,
-        SRCLEN,
-        spicemanager_constants::file,
-        spicemanager_constants::filtyp,
-        spicemanager_constants::source,
-        &spicemanager_constants::handle,
-        &found
-    );
-
-    REQUIRE(found == SPICETRUE);
-    openspace::SpiceManager::deinitialize();
-}
-
 TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadLSKKernel();
-    using namespace openspace::globebrowsing;
-    TimeQuantizer t1;
-    openspace::Time testT;
+    globebrowsing::TimeQuantizer t1;
+    Time testT;
 
     t1.setStartEndRange("2019-12-09T00:00:00", "2030-03-01T00:00:00");
     t1.setResolution("1y");
@@ -176,16 +150,15 @@ TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
     singleTimeTest(testT, t1, true, "2028-12-08T23:59:59", "2025-12-09T00:00:00.000");
     singleTimeTest(testT, t1, true, "2028-12-09T00:00:01", "2028-12-09T00:00:00.000");
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadLSKKernel();
-    using namespace openspace::globebrowsing;
-    TimeQuantizer t1;
-    openspace::Time testT;
+    globebrowsing::TimeQuantizer t1;
+    Time testT;
 
     t1.setStartEndRange("2019-12-09T00:00:00", "2020-03-01T00:00:00");
     t1.setResolution("1d");
@@ -220,16 +193,15 @@ TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
     singleTimeTest(testT, t1, true, "2020-03-01T00:30:00", "2020-03-01T00:00:00.000");
     singleTimeTest(testT, t1, true, "2019-03-04T00:00:02", "2019-03-04T00:00:00.000");
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadLSKKernel();
-    using namespace openspace::globebrowsing;
-    TimeQuantizer t1;
-    openspace::Time testT;
+    globebrowsing::TimeQuantizer t1;
+    Time testT;
 
     t1.setStartEndRange("2017-01-28T00:00:00", "2020-09-01T00:00:00");
     t1.setResolution("1M");
@@ -260,16 +232,15 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
     singleTimeTest(testT, t1, true, "2017-05-30T04:15:45", "2017-05-28T00:00:00.000");
     singleTimeTest(testT, t1, true, "2017-10-17T05:01:00", "2017-05-28T00:00:00.000");
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadLSKKernel();
-    using namespace openspace::globebrowsing;
-    TimeQuantizer t1;
-    openspace::Time testT;
+    globebrowsing::TimeQuantizer t1;
+    Time testT;
 
     t1.setStartEndRange("2019-02-21T00:00:00", "2021-09-01T00:00:00");
     t1.setResolution("2h");
@@ -300,15 +271,14 @@ TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
     singleTimeTest(testT, t1, true, "2019-02-28T22:29:59", "2019-02-28T22:15:00.000");
     singleTimeTest(testT, t1, true, "2019-02-28T22:59:59", "2019-02-28T22:45:00.000");
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadLSKKernel();
-    using namespace openspace::globebrowsing;
-    TimeQuantizer t1;
+    globebrowsing::TimeQuantizer t1;
 
     singleResolutionTest(t1, "29d", "(d)ay option.", true);
     singleResolutionTest(t1, "0d", "(d)ay option.", true);
@@ -324,35 +294,34 @@ TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
     singleResolutionTest(t1, "31m", "(m)inute option.", true);
     singleResolutionTest(t1, "10s", "unit format", true);
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("TimeQuantizer: Test start time pre-existing object", "[timequantizer]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadLSKKernel();
-    using namespace openspace::globebrowsing;
-    TimeQuantizer t1;
+    globebrowsing::TimeQuantizer t1;
 
-    singleStartTimeTest1(t1, "2017-01-20T00:00:00", "Invalid start", false);
-    singleStartTimeTest1(t1, "2017-01-29T00:00:00", "Invalid start day value", true);
-    singleStartTimeTest1(t1, "2017-01-28T12:00:00", "Invalid start time value", true);
-    singleStartTimeTest1(t1, "2017-01-28T00:01:00", "Invalid start time value", true);
-    singleStartTimeTest1(t1, "2017-01-28T00:00:01", "Invalid start time value", true);
+    singleStartTimeTest(t1, "2017-01-20T00:00:00", "Invalid start", false);
+    singleStartTimeTest(t1, "2017-01-29T00:00:00", "Invalid start day value", true);
+    singleStartTimeTest(t1, "2017-01-28T12:00:00", "Invalid start time value", true);
+    singleStartTimeTest(t1, "2017-01-28T00:01:00", "Invalid start time value", true);
+    singleStartTimeTest(t1, "2017-01-28T00:00:01", "Invalid start time value", true);
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("TimeQuantizer: Test start time using constructor", "[timequantizer]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadLSKKernel();
 
-    singleStartTimeTest2("2017-01-20T00:00:00", "Invalid start", false);
-    singleStartTimeTest2("2017-01-29T00:00:00", "Invalid start day value", true);
-    singleStartTimeTest2("2017-01-28T12:00:00", "Invalid start time value", true);
-    singleStartTimeTest2("2017-01-28T00:01:00", "Invalid start time value", true);
-    singleStartTimeTest2("2017-01-28T00:00:01", "Invalid start time value", true);
+    singleStartTimeTest("2017-01-20T00:00:00", "Invalid start", false);
+    singleStartTimeTest("2017-01-29T00:00:00", "Invalid start day value", true);
+    singleStartTimeTest("2017-01-28T12:00:00", "Invalid start time value", true);
+    singleStartTimeTest("2017-01-28T00:01:00", "Invalid start time value", true);
+    singleStartTimeTest("2017-01-28T00:00:01", "Invalid start time value", true);
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }

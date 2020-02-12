@@ -48,7 +48,7 @@ public:
      * \param start The date/time start of the time range.
      * \param end   The date/time ending of the time range.
      */
-    RangedTime(const std::string start, const std::string end);
+    RangedTime(std::string start, std::string end);
 
     /*
      * Checks if a date/time value falls within the start/end range defined in this
@@ -76,14 +76,14 @@ public:
      *
      * \returns The ISO8601 date/time string that defines the start of the range
      */
-    std::string start();
+    std::string start() const;
 
     /*
      * Get the end date/time of the time range
      *
      * \returns The ISO8601 date/time string that defines the end of the range
      */
-    std::string end();
+    std::string end() const;
 
     /*
      * Set the start date/time of the time range
@@ -116,13 +116,13 @@ private:
  */
 class DateTime {
 public:
-    DateTime() {};
+    DateTime() = default;
     /*
      * Constructor that initializes with date/time string
      *
      * \params initDateTime the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss)
      */
-    DateTime(std::string initDateTime);
+    DateTime(const std::string& initDateTime);
 
     /*
      * Set the date/time value
@@ -136,14 +136,14 @@ public:
      *
      * \params src the DateTime object to copy from
      */
-    void operator= (DateTime& src);
+    void operator=(DateTime& src);
 
     /*
      * Get the date/time value in ISO8601 format
      *
      * \returns the date/time value string
      */
-    std::string ISO8601();
+    std::string ISO8601() const;
 
     /*
      * Get the J2000 seconds equivalent of the object's date/time, using
@@ -151,43 +151,43 @@ public:
      *
      * \returns J2000 seconds of date/time
      */
-    double J2000();
+    double J2000() const;
 
     /*
      * Get the year of the object's date/time (YYYY format)
      * \returns integer value of the year
      */
-    int year();
+    int year() const;
 
     /*
      * Get the month of the object's date/time (1 - 12)
      * \returns integer value of the month
      */
-    int month();
+    int month() const;
 
     /*
      * Get the day-of-month of the object's date/time (1 - 31)
      * \returns integer value of the day
      */
-    int day();
+    int day() const;
 
     /*
      * Get the hour of the object's date/time
      * \returns integer value of the hour (0 - 23)
      */
-    int hour();
+    int hour() const;
 
     /*
      * Get the minute of the object's date/time
      * \returns integer value of the minutes
      */
-    int minute();
+    int minute() const;
 
     /*
      * Get the seconds of the object's date/time
      * \returns integer value of the seconds
      */
-    int second();
+    int second() const;
 
     /*
      * Set the year of the object's date/time
@@ -276,34 +276,7 @@ public:
     void decrementOnce(int value, char unit);
 
 private:
-    /*
-     * singleIncrement is used for any of the date/time types, and handles overflow
-     * values using the min/max parameters
-     *
-     * oper the date/time variable to operate on (will be changed)
-     * val the value of the increment, which may be changed in this function
-     *     if an overflow occurs
-     * min the minimum allowable value
-     * max the maximum allowable value (determines where overflow occurs)
-     */
-    bool singleIncrement(int& oper, int& val, int min, int max);
-
-    /*
-     * singleDecrement is used for any of the date/time types, and handles underflow
-     * values using the min/max parameters
-     *
-     * oper the date/time variable to operate on (will be changed)
-     * val the value of the decrement, which may be changed in this function
-     *     if an underflow occurs
-     * min the minimum allowable value
-     * max the maximum allowable value (determines where underflow occurs)
-     */
-    bool singleDecrement(int& oper, int& val, int min, int max);
-
-    //returns the number of days in a given month and year (takes leap year into account)
-    int monthSize(int month, int year);
-
-    //index_ values are indices into an ISO8601 YYYY-MM-ddTHH:mm:ss string
+    // index_ values are indices into an ISO8601 YYYY-MM-ddTHH:mm:ss string
     const int index_year = 0;
     const int index_month = 5;
     const int index_day = 8;
@@ -342,8 +315,7 @@ public:
      *         (h)our   Example: '12h' = 12 hours.   Allowable values: 1, 2, 3, 4, 6, 12
      *         (m)inute Example: '15m' = 15 minutes. Allowable values: 0, 15, 30
      */
-    TimeQuantizer(const std::string& start, const std::string& end,
-        const std::string& resolution);
+    TimeQuantizer(std::string start, std::string end, const std::string& resolution);
 
     /*
      * Set the time range start & end date/time range.
