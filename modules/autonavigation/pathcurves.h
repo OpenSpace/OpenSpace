@@ -39,6 +39,7 @@ public:
     std::vector<glm::dvec3> getPoints(); // for debugging
 
     double arcLength(double tLimit = 1.0);
+
 protected:
     // the points used for creating the curve (e.g. control points of a Bezier curve)
     std::vector<glm::dvec3> _points; 
@@ -48,6 +49,11 @@ class Bezier3Curve : public PathCurve {
 public:
     Bezier3Curve(CameraState& start, CameraState& end);
     glm::dvec3 valueAt(double t);
+
+private:
+    void reparameterizeByArcLength();
+
+    std::vector<double> _intervalTimes;
 };
 
 class LinearCurve : public PathCurve {
