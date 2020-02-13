@@ -54,9 +54,12 @@ public:
     const CameraState end() const;
     const double duration() const;
     const double startTime() const;
+    const double endTime() const;
     const double length() const;
 
     const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
+
+    const double speedAt(double t) const;
 
     glm::dvec3 getPositionAt(double t) const;
     glm::dquat getRotationAt(double t) const;

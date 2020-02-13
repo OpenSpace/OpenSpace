@@ -89,10 +89,12 @@ private:
     std::vector<PathSegment> _pathSegments;
     CurveType _pathCurveType; // TEST: create a path with just one type of curve
 
-    double _currentTime; 
     bool _isPlaying = false;
 
-    int _activeSegmentIndex = 0; 
+    double _currentTime;
+    double _distanceAlongCurrentSegment = 0.0; 
+    unsigned int _currentSegmentIndex = 0;
+
     bool _stopAtTargets;
 };
 

@@ -113,27 +113,36 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     if (!_isPlaying || _pathSegments.empty()) return;
 
-    const int currentIndex = currentPathSegmentIndex();
+    _currentTime += deltaTime;
 
-    if (currentIndex < 0) return; // no path
+    PathSegment& cps = _pathSegments[_currentSegmentIndex];
 
-    if (currentIndex != _activeSegmentIndex) {
-        _activeSegmentIndex = currentIndex; 
+    // Have we walked past the current segment?
+    if (_currentTime > cps.endTime()) {
+        _currentSegmentIndex++;
+        _distanceAlongCurrentSegment = 0.0;
+
+        // WStepped past the last segment
+        if (_currentSegmentIndex > _pathSegments.size() - 1) {
+            LINFO("Reached end of path.");
+            _isPlaying = false;
+            return;
+        }
+
+        cps = _pathSegments[_currentSegmentIndex];
+
         if (_stopAtTargets) {
             pausePath();
             return;
         }
     }
 
-    _currentTime += deltaTime;
+    double prevDistance = _distanceAlongCurrentSegment;
+    double displacement = deltaTime * cps.speedAt(prevDistance / cps.length());
+    _distanceAlongCurrentSegment += displacement;
 
-    const PathSegment& cps = _pathSegments[currentIndex];
-
-    // Interpolation variable
-    double t = (_currentTime - cps.startTime()) / cps.duration();
+    double t = _distanceAlongCurrentSegment / cps.length();
     t = std::max(0.0, std::min(t, 1.0));
-
-    // TODO: compute interpolation variable using travelled distnace instead
 
     // TODO: don't set every frame
     // Set anchor node in orbitalNavigator, to render visible nodes and 
@@ -146,11 +155,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     camera()->setPositionVec3(cameraPosition); 
     camera()->setRotation(cameraRotation);
-
-    if (hasFinished()) {
-        LINFO("Reached end of path.");
-        _isPlaying = false;
-    }
 }
 
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
@@ -188,7 +192,7 @@ void AutoNavigationHandler::clearPath() {
     LINFO("Clearing path...");
     _pathSegments.clear();
     _currentTime = 0.0;
-    _activeSegmentIndex = 0;
+    _currentSegmentIndex = 0;
 }
 
 void AutoNavigationHandler::startPath() {
@@ -206,7 +210,7 @@ void AutoNavigationHandler::pausePath() {
         LERROR("Cannot pause a path that isn't playing");
         return;
     }
-    LINFO(fmt::format("Paused path at target {} / {}", _activeSegmentIndex, _pathSegments.size()));
+    LINFO(fmt::format("Paused path at target {} / {}", _currentSegmentIndex, _pathSegments.size()));
     _isPlaying = false;
 }
 
@@ -225,7 +229,7 @@ void AutoNavigationHandler::continuePath() {
 
     // Recompute start camera state for the upcoming path segment, to avoid clipping to
     // the old camera state.
-    _pathSegments[_activeSegmentIndex].setStart(currentCameraState());
+    _pathSegments[_currentSegmentIndex].setStart(currentCameraState());
     _isPlaying = true;
 }
 

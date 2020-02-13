@@ -70,6 +70,8 @@ const double PathSegment::duration() const { return _duration; }
 
 const double PathSegment::startTime() const { return _startTime; }
 
+const double PathSegment::endTime() const { return _startTime + _duration; }
+
 const double PathSegment::length() const { return _curve->length(); }
 
 // TODO: remove function for debugging
@@ -77,9 +79,15 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
     return _curve->getPoints();
 }
 
+// Speed function for a segment, per curve parameter t in range [0,1],
+// which is the relative arc length. OBS! If integrated over the full 
+// length of the curve it must match the total duration
+const double PathSegment::speedAt(double t) const {
+    // TODO: implement dampening near start and end
+    return length() / _duration;
+}
+
 glm::dvec3 PathSegment::getPositionAt(double t) const {
-    //t = ghoul::cubicEaseInOut(t); 
-    // TODO: move along curve based on displacement instead
     return _curve->valueAt(t);    
 }
 
