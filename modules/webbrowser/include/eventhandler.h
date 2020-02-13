@@ -84,6 +84,8 @@ private:
      */
     CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
 
+    CefTouchEvent touchEvent(const TouchInput& input,
+        const cef_touch_event_type_t eventType) const;
     /**
      * Find the CEF key event to use for a given action.
      *
