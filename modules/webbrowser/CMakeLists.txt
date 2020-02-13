@@ -163,6 +163,9 @@ if(OS_MACOSX)
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
   )
 
+  target_compile_options(${CEF_HELPER_TARGET} PRIVATE -Wno-deprecated-declarations)
+  target_compile_options(libcef_dll_wrapper PRIVATE -Wno-deprecated-declarations)
+
   if(USE_SANDBOX)
     # Logical target used to link the cef_sandbox library.
     ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
