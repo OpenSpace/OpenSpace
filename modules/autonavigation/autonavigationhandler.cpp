@@ -133,6 +133,8 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     double t = (_currentTime - cps.startTime()) / cps.duration();
     t = std::max(0.0, std::min(t, 1.0));
 
+    // TODO: compute interpolation variable using travelled distnace instead
+
     // TODO: don't set every frame
     // Set anchor node in orbitalNavigator, to render visible nodes and 
     // add possibility to navigate when we reach the end.

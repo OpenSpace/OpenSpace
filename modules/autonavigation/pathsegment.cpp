@@ -70,6 +70,8 @@ const double PathSegment::duration() const { return _duration; }
 
 const double PathSegment::startTime() const { return _startTime; }
 
+const double PathSegment::length() const { return _curve->length(); }
+
 // TODO: remove function for debugging
 const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
     return _curve->getPoints();
@@ -160,9 +162,6 @@ void PathSegment::initCurve() {
         LERROR("Could not create curve. Type does not exist!");
         return;
     }
-
-    _length = _curve->arcLength();
-    //LINFO(fmt::format("Curve length: {}", _length));
 }
 
 } // namespace openspace::autonavigation

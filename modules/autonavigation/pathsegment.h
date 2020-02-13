@@ -54,6 +54,7 @@ public:
     const CameraState end() const;
     const double duration() const;
     const double startTime() const;
+    const double length() const;
 
     const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
 
@@ -67,7 +68,6 @@ private:
     CameraState _start;
     CameraState _end;
     double _startTime; 
-    double _length;
     double _duration;
     CurveType _curveType; 
 

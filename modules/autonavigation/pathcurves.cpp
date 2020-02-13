@@ -38,12 +38,17 @@ namespace openspace::autonavigation {
 
 PathCurve::~PathCurve() {}
 
+const double PathCurve::length() const {
+    return _length;
+}
+
 // Approximate the curve length by dividing the curve into smaller linear 
 // segments and accumulate their length
-double PathCurve::arcLength(double tLimit) {
-    double dt = 0.01; // TODO: choose a good dt
+double PathCurve::arcLength(double limit) {
+    // TODO: possibly use Simpson's method instead
+    double dt = 0.01; 
     double sum = 0.0;
-    for (double t = 0.0; t <= tLimit - dt; t += dt) {
+    for (double t = 0.0; t <= limit - dt; t += dt) {
         double ds = glm::length(valueAt(t + dt) - valueAt(t));
         sum += ds;
     }
@@ -105,7 +110,7 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
         if (TARGET_IN_OPPOSITE_DIRECTION) {
             glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
             glm::dvec3 orthogonal = normalize(startNodeToStartPos - parallell);
-            double dist = 0.5 * length(startNodeToEndNode);
+            double dist = 0.5 * glm::length(startNodeToEndNode);
             // Distant middle point
             glm::dvec3 extraKnot = startNodePos + dist * normalize(parallell) + 3.0 * dist * orthogonal;
 
@@ -130,63 +135,53 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
     _points.push_back(end.position + endTangentLength * endTangentDirection);
     _points.push_back(end.position);
 
-  
-    // initial interval times
-    int nrIntervals = (int)std::floor((_points.size() - 1) / 3.0); //TODO valivate!
+    _nrSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
 
-    for (double time = 0.0; time <= 1.0; time += 1.0 / nrIntervals) {
-        _intervalTimes.push_back(time);
+    // default values for the curve parameter - equally spaced
+    for (double t = 0.0; t <= 1.0; t += 1.0 / _nrSegments) {
+        _parameterIntervals.push_back(t);
     }
-    // TODO: test that time == 1 is included
-       
-    reparameterizeByArcLength();
+
+    _length = arcLength(1.0);
+
+    initParameterIntervals();
 }
 
 // Interpolate a list of control points and knot times
-glm::dvec3 Bezier3Curve::valueAt(double t) {
+glm::dvec3 Bezier3Curve::valueAt(double s) {
     size_t nrPoints = _points.size();
-    size_t nrTimes = _intervalTimes.size();
-    unsigned int nrSegments = (unsigned int)std::floor((nrPoints - 1) / 3.0);
+    size_t nrTimes = _parameterIntervals.size();
 
     ghoul_assert(nrPoints > 4, "Minimum of four control points needed for interpolation!");
     ghoul_assert((nrPoints - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
-    ghoul_assert(nrSegments == (nrTimes - 1), "Number of interval times must match number of intervals");
+    ghoul_assert(_nrSegments == (nrTimes - 1), "Number of interval times must match number of intervals");
 
-    if (abs(t) < 0.000001)
+    if (abs(s) < 0.000001)
         return _points.front();
 
-    // compute current segment, by first finding iterator to the first time that is larger than t 
+    // compute current segment, by first finding iterator to the first value that is larger than s 
     std::vector<double>::iterator segmentEndIt = 
-        std::lower_bound(_intervalTimes.begin(), _intervalTimes.end(), t);
-    unsigned int segmentIdx = (segmentEndIt - 1) - _intervalTimes.begin();
+        std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), s);
+    unsigned int segmentIdx = (segmentEndIt - 1) - _parameterIntervals.begin();
 
-    double segmentStart = _intervalTimes[segmentIdx];
-    double segmentDuration = (_intervalTimes[segmentIdx + 1] - _intervalTimes[segmentIdx]);
-    double tSegment = (t - segmentStart) / segmentDuration;
+    double segmentStart = _parameterIntervals[segmentIdx];
+    double segmentDuration = (_parameterIntervals[segmentIdx + 1] - _parameterIntervals[segmentIdx]);
+    double sScaled = (s - segmentStart) / segmentDuration;
 
     unsigned int idx = segmentIdx * 3;
 
-    return interpolation::cubicBezier(tSegment, _points[idx], _points[idx + 1],
+    // Interpolate using De Casteljau's algorithm
+    return interpolation::cubicBezier(sScaled, _points[idx], _points[idx + 1],
         _points[idx + 2], _points[idx + 3]);
 }
 
-void Bezier3Curve::reparameterizeByArcLength() {
-    // For bezier every third is a knot shared beetween segments
-    int nrIntervals = (int)std::floor((float)(_points.size() - 1) / 3.0); //TODO valivate!
-
-    if (nrIntervals == 1) {
-        return;
+// compute curve parameter intervals based on relative arc length
+void Bezier3Curve::initParameterIntervals() {
+    std::vector<double> newIntervals;
+    for (double t = 0.0; t <= 1.0; t += 1.0 / _nrSegments) {
+        newIntervals.push_back(arcLength(t) / _length);
     }
-
-    double totalLength = arcLength(1.0); //THIS IS WHERE IT GOES INTO INTERPOLATOR WITHOUT ANY VALUES IN TIMES VECTOR IF >! SEGMENTS OTHERWISE IN PATHSEGMENT::INITCURVE
-    std::vector<double> newTimes;
-
-    // Save time as relative curve length from start to each knot
-    for ( double time : _intervalTimes) {
-        newTimes.push_back(arcLength(time) / totalLength);
-    }
-
-    _intervalTimes.swap(newTimes);
+    _parameterIntervals.swap(newIntervals);
 }
 
 LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
@@ -194,8 +189,8 @@ LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
     _points.push_back(end.position);
 }
 
-glm::dvec3 LinearCurve::valueAt(double t) {
-    return interpolation::linear(t, _points[0], _points[1]);
+glm::dvec3 LinearCurve::valueAt(double s) {
+    return interpolation::linear(s, _points[0], _points[1]);
 }
 
 // TODO: Iprove handling of pauses
@@ -203,7 +198,7 @@ PauseCurve::PauseCurve(CameraState& state) {
     _points.push_back(state.position);
 }
 
-glm::dvec3 PauseCurve::valueAt(double t) {
+glm::dvec3 PauseCurve::valueAt(double s) {
     return _points[0];
 }
 

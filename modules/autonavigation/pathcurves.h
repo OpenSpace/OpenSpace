@@ -35,31 +35,39 @@ namespace openspace::autonavigation {
 class PathCurve {
 public:
     virtual ~PathCurve() = 0;
-    virtual glm::dvec3 valueAt(double t) = 0;
-    std::vector<glm::dvec3> getPoints(); // for debugging
 
-    double arcLength(double tLimit = 1.0);
+    const double length() const;
+    double arcLength(double limit = 1.0);
+
+    // comppute the value at the relative length s [0,1]
+    virtual glm::dvec3 valueAt(double s) = 0;
+
+    std::vector<glm::dvec3> getPoints(); // for debugging
 
 protected:
     // the points used for creating the curve (e.g. control points of a Bezier curve)
     std::vector<glm::dvec3> _points; 
+
+    // the total length of the curve (approximated)
+    double _length;
 };
 
 class Bezier3Curve : public PathCurve {
 public:
     Bezier3Curve(CameraState& start, CameraState& end);
-    glm::dvec3 valueAt(double t);
+    glm::dvec3 valueAt(double s);
 
 private:
-    void reparameterizeByArcLength();
+    void initParameterIntervals();
 
-    std::vector<double> _intervalTimes;
+    std::vector<double> _parameterIntervals;
+    unsigned int _nrSegments;
 };
 
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(CameraState& start, CameraState& end);
-    glm::dvec3 valueAt(double t);
+    glm::dvec3 valueAt(double s);
 };
 
 // OBS! This is a temporary class specialised for handling pauses. 
@@ -67,7 +75,7 @@ public:
 class PauseCurve : public PathCurve {
 public:
     PauseCurve(CameraState& state);
-    glm::dvec3 valueAt(double t);
+    glm::dvec3 valueAt(double s);
 };
 
 } // namespace openspace::autonavigation
