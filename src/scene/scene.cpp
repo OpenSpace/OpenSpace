@@ -34,6 +34,7 @@
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>

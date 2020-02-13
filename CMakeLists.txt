@@ -110,6 +110,30 @@ endif()
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 
+if (MSVC)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX "Enable AVX instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX2 "Enable AVX2 instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX512 "Enable AVX2 instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX2)
+    message(FATAL_ERROR "Cannot enable AVX and AVX2 instructions simultaneously")
+  endif ()
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
+    message(FATAL_ERROR "Cannot enable AVX and AVX512 instructions simultaneously")
+  endif()
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2 AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
+    message(FATAL_ERROR "Cannot enable AVX2 and AVX512 instructions simultaneously")
+  endif()
+
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX ${OPENSPACE_OPTIMIZATION_ENABLE_AVX} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX2 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX2} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX512 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX512} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
+endif ()
+
 include(src/CMakeLists.txt)
 
 ##########################################################################################
@@ -132,6 +156,7 @@ endif()
 # Ghoul
 add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
 target_link_libraries(openspace-core Ghoul)
+set_openspace_compile_settings(Ghoul)
 set_folder_location(Lua "External")
 set_folder_location(lz4 "External")
 set_folder_location(GhoulTest "Unit Tests")
@@ -204,7 +229,6 @@ if (MSVC)
     target_include_directories(openspace-core PUBLIC "${OPENSPACE_NVTOOLS_PATH}/include")
     end_dependency()
   endif ()
-
 endif ()
 
 begin_header("Configuring Modules")

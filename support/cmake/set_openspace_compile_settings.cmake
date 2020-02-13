@@ -30,7 +30,6 @@ function (set_openspace_compile_settings project)
         target_compile_options(
             ${project}
             PRIVATE
-            "/ZI"       # Edit and continue support
             "/MP"       # Multi-threading support
             "/W4"       # Highest warning level
             "/w44062"   # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
@@ -81,8 +80,28 @@ function (set_openspace_compile_settings project)
 
         # Boost as of 1.64 still uses unary_function unless we define this
         target_compile_definitions(${project} PRIVATE "_HAS_AUTO_PTR_ETC")
-
         target_compile_definitions(${project} PRIVATE "NOMINMAX")
+
+        if (OPENSPACE_OPTIMIZATION_ENABLE_AVX)
+            target_compile_options(${project} PRIVATE "/arch:AVX")
+        endif ()
+        if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2)
+            target_compile_options(${project} PRIVATE "/arch:AVX2")
+        endif ()
+        if (OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
+            target_compile_options(${project} PRIVATE "/arch:AVX512")
+        endif ()
+
+        if (OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS)
+            target_compile_options(${project} PRIVATE
+                "/Oi" # usage of intrinsic functions
+                "/GL" # Whole program optimization
+            )
+        else ()
+            target_compile_options(${project} PRIVATE
+                "/ZI"       # Edit and continue support
+            )
+        endif ()
     elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "-Werror")
