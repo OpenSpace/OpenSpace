@@ -49,8 +49,8 @@ local Moon = {
                     Name = "Clem Uvvis [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms",
                     Settings = {
-                        Gamma = 0.81,
-                        Multiplier = 1.1
+                        Gamma = 1.14,
+                        Multiplier = 1.4
                     }
                 },
                 {
@@ -58,8 +58,8 @@ local Moon = {
                     Name = "Clem Uvvis [Sweden]",
                     FilePath = mapServiceConfigs .. "/LiU/Clem_Uvvis.wms",
                     Settings = {
-                        Gamma = 0.81,
-                        Multiplier = 1.1
+                        Gamma = 1.14,
+                        Multiplier = 1.4
                     }
                 },
                 {
@@ -83,7 +83,7 @@ local Moon = {
                 {
                     Identifier = "Kaguya_Utah",
                     Name = "Kaguya [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.wms",
+                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.vrt",
                     Settings = {
                         Gamma = 1.0,
                         Multiplier = 1.23
@@ -92,7 +92,7 @@ local Moon = {
                 {
                     Identifier = "Kaguya_Sweden",
                     Name = "Kaguya [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Kaguya.wms",
+                    FilePath = mapServiceConfigs .. "/LiU/Kaguya.vrt",
                     Settings = {
                         Gamma = 1.0,
                         Multiplier = 1.23
