@@ -42,17 +42,29 @@ const double PathCurve::length() const {
     return _length;
 }
 
-// Approximate the curve length by dividing the curve into smaller linear 
-// segments and accumulate their length
+// Approximate the curve length using Simpson's rule
 double PathCurve::arcLength(double limit) {
-    // TODO: possibly use Simpson's method instead
-    double dt = 0.01; 
-    double sum = 0.0;
-    for (double t = 0.0; t <= limit - dt; t += dt) {
-        double ds = glm::length(valueAt(t + dt) - valueAt(t));
-        sum += ds;
+    const int n = 30; // resolution, must be even for Simpson's rule
+    const double h = limit / (double)n;
+
+    // Points to be multiplied by 1
+    double endPoints = glm::length(valueAt(0.0 + h) - valueAt(0.0)) + glm::length(valueAt(1.0) - valueAt(1.0 - h));
+
+    // Points to be multiplied by 4
+    double times4 = 0.0;
+    for (int i = 1; i < n; i += 2) {
+        float t = h * i;
+        times4 += glm::length(valueAt(t + h) - valueAt(t));
     }
-    return sum;
+
+    // Points to be multiplied by 2
+    double times2 = 0.0;
+    for (int i = 2; i < n; i += 2) {
+        float t = h * i;
+        times2 += glm::length(valueAt(t + h) - valueAt(t));
+    }
+
+    return (h / 3.0) * (endPoints + 4.0 * times4 + 2.0 *times2);
 }
 
 // TODO: remove when not needed
@@ -158,6 +170,9 @@ glm::dvec3 Bezier3Curve::valueAt(double s) {
 
     if (abs(s) < 0.000001)
         return _points.front();
+
+    if (abs(1.0 - s) < 0.000001)
+        return _points.back();
 
     // compute current segment, by first finding iterator to the first value that is larger than s 
     std::vector<double>::iterator segmentEndIt = 
