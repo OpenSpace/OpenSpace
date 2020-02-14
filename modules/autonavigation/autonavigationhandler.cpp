@@ -144,11 +144,12 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     double relativeDisplacement = _distanceAlongCurrentSegment / cps.length();
     relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
 
-    // TODO: don't set every frame
-    // Set anchor node in orbitalNavigator, to render visible nodes and 
-    // add possibility to navigate when we reach the end.
-    CameraState cs = (relativeDisplacement < 0.5) ? cps.start() : cps.end();
-    global::navigationHandler.orbitalNavigator().setAnchorNode(cs.referenceNode);
+    // When halfway along a curve, set anchor node in orbitalNavigator, to render 
+    // visible nodes and add possibility to navigate when we reach the end.
+    if (abs(relativeDisplacement - 0.5) < 0.001) {
+        std::string newAnchor = cps.end().referenceNode;
+        global::navigationHandler.orbitalNavigator().setAnchorNode(newAnchor);
+    }
 
     glm::dvec3 cameraPosition = cps.getPositionAt(relativeDisplacement);
     glm::dquat cameraRotation = cps.getRotationAt(relativeDisplacement);
