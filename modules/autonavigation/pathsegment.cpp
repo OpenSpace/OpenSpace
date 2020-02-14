@@ -50,6 +50,8 @@ PathSegment::PathSegment(
     // Also, when compensatng for simulation time later we need to make a guess for 
     // the duration, based on the current position of the target. 
     _duration = 5;
+
+    _speedFunction = SpeedFunction(_duration);
 }
 
 void PathSegment::setStart(CameraState cs) {
@@ -60,6 +62,7 @@ void PathSegment::setStart(CameraState cs) {
 
 void PathSegment::setDuration(double d) {
     _duration = d;
+    _speedFunction = SpeedFunction(_duration);
 }
 
 const CameraState PathSegment::start() const { return _start; }
@@ -79,28 +82,16 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
     return _curve->getPoints();
 }
 
-
-// Speed function for the segment, where time is a value in the range [0, duration]
-// OBS! If integrated over the curve it must match the total length or the curve
-const double PathSegment::speedAtTime(double time) const {
-    
-    // TODO: validate time
-
-    double speed = speedFunction(time / _duration);
-
-    // apply duration constraint (eq. 14 in Eberly)
-    double speedSum = 0.0;
-    const int steps = 100;
-    double dt = duration() / steps;
-    for (double t = 0.0; t <= 1.0; t += 1.0 / steps) {
-        speedSum += dt * speedFunction(t);
-    }
-
-    // TODO: save speed sum value somewhere
-
-    speed = (length() * speedFunction(time / _duration)) / speedSum;
-
-    return speed;
+/*
+ * Get speed at time value in the range [0, duration]
+ * OBS! If integrated over the curve it must match the total length or the curve.
+ * Thus, we scale according to the constraint in eq. 14 in Eberly 2007
+ * (https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf)
+ */
+double PathSegment::speedAtTime(double time) {
+    ghoul_assert(time >= 0 && time <= _duration, "Time out of range [0, duration]");
+    double t = time / _duration;
+    return (length() * _speedFunction.value(t)) / _speedFunction.integratedSum;
 }
 
 glm::dvec3 PathSegment::getPositionAt(double t) const {
@@ -188,24 +179,36 @@ void PathSegment::initCurve() {
     }
 }
 
-// The speed function, describing the shape of the speed curve with values in range [0,1]
-// OBS! The value must later be normalised so that the speed matches the duration of the segment.
-double PathSegment::speedFunction(double t) const {
-    const double t1 = 0.25;
-    const double t2 = 0.75; // > t1
-    // TODO: more advanced computation of limits
+
+PathSegment::SpeedFunction::SpeedFunction(double duration) {
+    // apply duration constraint (eq. 14 in Eberly)
+    double speedSum = 0.0;
+    const int steps = 100;
+    double dt = duration / steps;
+    for (double t = 0.0; t <= 1.0; t += 1.0 / steps) {
+        speedSum += dt * value(t);
+    }
+
+    integratedSum = speedSum;
+}
+
+double PathSegment::SpeedFunction::value(double t) {
+    ghoul_assert(t >= 0 && t <= 1, "Variable t out of range [0,1]");
+
+    const double t1 = 0.2;
+    const double t2 = 0.8; // > t1
+    // TODO: more advanced computation of limits, possibly based on distances
 
     double speed = 1.0;
-    double tScaled;
 
     // accelerate
     if (t < t1) {
-        tScaled = t / t1;
+        double tScaled = t / t1;
         speed = ghoul::cubicEaseInOut(tScaled);
     }
     // deaccelerate
     else if (t > t2) {
-        tScaled = (t - t2) / (1.0 - t2);
+        double tScaled = (t - t2) / (1.0 - t2);
         speed = 1.0 - ghoul::cubicEaseInOut(tScaled);
     }
 

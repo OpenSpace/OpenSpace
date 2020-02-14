@@ -59,7 +59,7 @@ public:
 
     const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
 
-    const double speedAtTime(double time) const;
+    double speedAtTime(double time);
 
     glm::dvec3 getPositionAt(double t) const;
     glm::dquat getRotationAt(double t) const;
@@ -68,13 +68,24 @@ private:
     const glm::dquat piecewiseSlerpRotation(double t) const;
     void initCurve();
 
-    double speedFunction(double t) const;
+    // The speed function describing the shape of the speed curve. Values in [0,1].
+    struct SpeedFunction {
+        SpeedFunction() = default;
+        SpeedFunction(double duration);
+        double value(double t);
+
+        // store the sum of the function over the duration of the segment, 
+        // so we don't need to recompue it every time we access the speed 
+        double integratedSum;
+    };
 
     CameraState _start;
     CameraState _end;
     double _startTime; 
     double _duration;
     CurveType _curveType; 
+
+    SpeedFunction _speedFunction;
 
     std::shared_ptr<PathCurve> _curve; // OBS! Does it make more sense to use unique_ptr? However, then PathSegments cannot be copied.
 };
