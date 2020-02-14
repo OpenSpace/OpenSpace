@@ -79,12 +79,28 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
     return _curve->getPoints();
 }
 
-// Speed function for a segment, per curve parameter t in range [0,1],
-// which is the relative arc length. OBS! If integrated over the full 
-// length of the curve it must match the total duration
-const double PathSegment::speedAt(double t) const {
-    // TODO: implement dampening near start and end
-    return length() / _duration;
+
+// Speed function for the segment, where time is a value in the range [0, duration]
+// OBS! If integrated over the curve it must match the total length or the curve
+const double PathSegment::speedAtTime(double time) const {
+    
+    // TODO: validate time
+
+    double speed = speedFunction(time / _duration);
+
+    // apply duration constraint (eq. 14 in Eberly)
+    double speedSum = 0.0;
+    const int steps = 100;
+    double dt = duration() / steps;
+    for (double t = 0.0; t <= 1.0; t += 1.0 / steps) {
+        speedSum += dt * speedFunction(t);
+    }
+
+    // TODO: save speed sum value somewhere
+
+    speed = (length() * speedFunction(time / _duration)) / speedSum;
+
+    return speed;
 }
 
 glm::dvec3 PathSegment::getPositionAt(double t) const {
@@ -170,6 +186,30 @@ void PathSegment::initCurve() {
         LERROR("Could not create curve. Type does not exist!");
         return;
     }
+}
+
+// The speed function, describing the shape of the speed curve with values in range [0,1]
+// OBS! The value must later be normalised so that the speed matches the duration of the segment.
+double PathSegment::speedFunction(double t) const {
+    const double t1 = 0.25;
+    const double t2 = 0.75; // > t1
+    // TODO: more advanced computation of limits
+
+    double speed = 1.0;
+    double tScaled;
+
+    // accelerate
+    if (t < t1) {
+        tScaled = t / t1;
+        speed = ghoul::cubicEaseInOut(tScaled);
+    }
+    // deaccelerate
+    else if (t > t2) {
+        tScaled = (t - t2) / (1.0 - t2);
+        speed = 1.0 - ghoul::cubicEaseInOut(tScaled);
+    }
+
+    return speed;
 }
 
 } // namespace openspace::autonavigation

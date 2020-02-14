@@ -138,20 +138,20 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     }
 
     double prevDistance = _distanceAlongCurrentSegment;
-    double displacement = deltaTime * cps.speedAt(prevDistance / cps.length());
+    double displacement = deltaTime * cps.speedAtTime(_currentTime - cps.startTime());
     _distanceAlongCurrentSegment += displacement;
 
-    double t = _distanceAlongCurrentSegment / cps.length();
-    t = std::max(0.0, std::min(t, 1.0));
+    double relativeDisplacement = _distanceAlongCurrentSegment / cps.length();
+    relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
 
     // TODO: don't set every frame
     // Set anchor node in orbitalNavigator, to render visible nodes and 
     // add possibility to navigate when we reach the end.
-    CameraState cs = (t < 0.5) ? cps.start() : cps.end();
+    CameraState cs = (relativeDisplacement < 0.5) ? cps.start() : cps.end();
     global::navigationHandler.orbitalNavigator().setAnchorNode(cs.referenceNode);
 
-    glm::dvec3 cameraPosition = cps.getPositionAt(t);
-    glm::dquat cameraRotation = cps.getRotationAt(t);
+    glm::dvec3 cameraPosition = cps.getPositionAt(relativeDisplacement);
+    glm::dquat cameraRotation = cps.getRotationAt(relativeDisplacement);
 
     camera()->setPositionVec3(cameraPosition); 
     camera()->setRotation(cameraRotation);

@@ -59,7 +59,7 @@ public:
 
     const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
 
-    const double speedAt(double t) const;
+    const double speedAtTime(double time) const;
 
     glm::dvec3 getPositionAt(double t) const;
     glm::dquat getRotationAt(double t) const;
@@ -67,6 +67,8 @@ public:
 private: 
     const glm::dquat piecewiseSlerpRotation(double t) const;
     void initCurve();
+
+    double speedFunction(double t) const;
 
     CameraState _start;
     CameraState _end;
