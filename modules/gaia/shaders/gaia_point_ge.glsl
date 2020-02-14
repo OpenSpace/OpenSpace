@@ -61,14 +61,14 @@ void main() {
     // Discard geometry if star has no position (but wasn't a nullArray).
     // Or if observed distance is above threshold set by cutOffThreshold.
     // By discarding in gs instead of fs we save computations for when nothing is visible.
-    if( length(position) < EPS || distThreshold <= 0){
+    if (length(position) < EPS || distThreshold <= 0) {
         return;
     }
 
     //gl_PointSize = 1.0;
     gl_Position = position;
     gl_Position.z = 0.0;
-    ge_gPosition  = viewPosition;
+    ge_gPosition = viewPosition;
 
     EmitVertex();
 

@@ -193,7 +193,8 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
             *firstFutureKeyframe,
             applicationTime
         );
-    } else if (hasPastKeyframes) {
+    }
+    else if (hasPastKeyframes) {
         // Extrapolate based on last past keyframe
         const double deltaApplicationTime = applicationTime - lastPastKeyframe->timestamp;
         Time predictedTime(
@@ -271,9 +272,11 @@ void TimeManager::progressTime(double dt) {
 
         _currentTime.data().setTime(interpolated.time.j2000Seconds());
         _deltaTime = interpolated.delta;
-    } else if (!hasConsumedLastPastKeyframe) {
+    }
+    else if (!hasConsumedLastPastKeyframe) {
         applyKeyframeData(lastPastKeyframe->data);
-    } else if (!isPaused()) {
+    }
+    else if (!isPaused()) {
         // If there are no keyframes to consider
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;

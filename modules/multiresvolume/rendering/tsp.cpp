@@ -436,7 +436,8 @@ bool TSP::calculateTemporalError() {
         // 0.0 higher up in the tree
         if (coveredBricks.size() == 1) {
             errors[brick] = -0.1f;
-        } else {
+        }
+        else {
             // Calculate standard deviation per voxel, average over brick
             float avgStdDev = 0.f;
             for (unsigned int voxel = 0; voxel<numBrickVals; ++voxel) {

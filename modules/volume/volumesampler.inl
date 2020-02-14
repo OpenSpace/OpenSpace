@@ -59,17 +59,20 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(
 
                 if (x == minCoords.x) {
                     filterCoefficient *= (1.f - t.x);
-                } else if (x == maxCoords.x) {
+                }
+                else if (x == maxCoords.x) {
                     filterCoefficient *= t.x;
                 }
                 if (y == minCoords.y) {
                     filterCoefficient *= (1.f - t.y);
-                } else if (y == maxCoords.y) {
+                }
+                else if (y == maxCoords.y) {
                     filterCoefficient *= t.y;
                 }
                 if (z == minCoords.z) {
                     filterCoefficient *= (1.f - t.z);
-                } else if (z == maxCoords.z) {
+                }
+                else if (z == maxCoords.z) {
                     filterCoefficient *= t.z;
                 }
 

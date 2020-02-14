@@ -50,7 +50,7 @@ message(STATUS "CMake version: ${CMAKE_VERSION}")
 # Bail out if the user tries to generate a 32 bit project.
 if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
   message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
-endif()
+endif ()
 
 ##########################################################################################
 # Cleanup project                                                                        #
@@ -63,7 +63,7 @@ if (NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
     "git submodule update --init --recursive \n"
     "to download the missing dependencies."
   )
-endif()
+endif ()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
@@ -106,7 +106,7 @@ if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
   set(OPENSPACE_GIT_STATUS "uncommitted changes")
 else()
   set(OPENSPACE_GIT_STATUS "")
-endif()
+endif ()
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 
@@ -122,11 +122,11 @@ if (MSVC)
 
   if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
     message(FATAL_ERROR "Cannot enable AVX and AVX512 instructions simultaneously")
-  endif()
+  endif ()
 
   if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2 AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
     message(FATAL_ERROR "Cannot enable AVX2 and AVX512 instructions simultaneously")
-  endif()
+  endif ()
 
   set(GHOUL_OPTIMIZATION_ENABLE_AVX ${OPENSPACE_OPTIMIZATION_ENABLE_AVX} CACHE BOOL "" FORCE)
   set(GHOUL_OPTIMIZATION_ENABLE_AVX2 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX2} CACHE BOOL "" FORCE)
@@ -151,7 +151,7 @@ if (APPLE)
   target_link_libraries(openspace-core ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
     ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
   end_dependency()
-endif()
+endif ()
 
 # Ghoul
 add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
@@ -183,7 +183,7 @@ else ()
     target_link_libraries(openspace-core ${CURL_LIBRARIES})
     target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
   endif ()
-endif()
+endif ()
 end_dependency()
 
 # Qt

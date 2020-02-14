@@ -78,15 +78,20 @@ void main() {
     // Must be the same as the enum in RenderableBillboardsCloud.h
     if (pos.w == 1.f) {
         unit = 1E3;
-    } else if (pos.w == 2.f) {
+    }
+    else if (pos.w == 2.f) {
         unit = PARSEC;
-    } else if (pos.w == 3.f) {
+    }
+    else if (pos.w == 3.f) {
         unit = 1E3 * PARSEC;
-    } else if (pos.w == 4.f) {
+    }
+    else if (pos.w == 4.f) {
         unit = 1E6 * PARSEC;
-    } else if (pos.w == 5.f) {
+    }
+    else if (pos.w == 5.f) {
         unit = 1E9 * PARSEC;
-    } else if (pos.w == 6.f) {
+    }
+    else if (pos.w == 6.f) {
         // Convertion factor from Parsecs to GigalightYears
         unit = 306391534.73091 * PARSEC;
     }
@@ -105,7 +110,8 @@ void main() {
     if (renderOption == 0) {
         scaledRight = scaleMultiply * right * 0.5f;
         scaledUp    = scaleMultiply * up * 0.5f;
-    } else if (renderOption == 1) {
+    }
+    else if (renderOption == 1) {
         vec3 normal   = vec3(normalize(cameraPosition - dpos.xyz));
         vec3 newRight = normalize(cross(cameraLookUp, normal));
         vec3 newUp    = cross(normal, newRight);
@@ -148,7 +154,8 @@ void main() {
             scaledRight *= correctionScale;
             scaledUp    *= correctionScale;
         
-        } else {
+        }
+        else {
             // linear alpha decay
             if (sizes.x < 2.0f * minBillboardSize) {
                 float maxVar = 2.0f * minBillboardSize;

@@ -155,7 +155,8 @@ void IswaKameleonGroup::updateFieldlineSeeds() {
             );
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
-        } else if (it != options.end() && !std::get<2>(seedPath.second)) {
+        }
+        else if (it != options.end() && !std::get<2>(seedPath.second)) {
             LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
 
             IswaManager::ref().createFieldline(

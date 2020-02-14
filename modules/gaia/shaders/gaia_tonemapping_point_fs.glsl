@@ -82,7 +82,8 @@ Fragment getFragment() {
     //vec2 screenOrigo = vec2(-left, -bottom) / vec2(right - left, top - bottom);
     //if (abs(screenOrigo.x - uv.x) > 0.0005 && abs(screenOrigo.y - uv.y) > 0.0005) {
     //    origoFrag.color = vec4(0.0);
-    //} else {
+    //}
+    //else {
     //    origoFrag.color = vec4(1.0);
     //}
     //return origoFrag;

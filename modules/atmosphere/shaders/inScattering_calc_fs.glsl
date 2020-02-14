@@ -68,7 +68,8 @@ void integrand(const float r, const float mu, const float muSun, const float nu,
     if (ozoneLayerEnabled) {
       S_R = (exp(-(ri - Rg) / HO) + exp( -(ri - Rg) / HR )) * transmittanceY;
       S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
-    } else {
+    }
+    else {
       S_R = exp( -(ri - Rg) / HR ) * transmittanceY;
       S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
     }

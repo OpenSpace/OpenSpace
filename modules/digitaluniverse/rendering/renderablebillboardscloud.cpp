@@ -465,7 +465,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         if (o == "Camera View Direction") {
             _renderOption = RenderOptionViewDirection;
-        } else if (o == "Camera Position Normal") {
+        }
+        else if (o == "Camera Position Normal") {
             _renderOption = RenderOptionPositionNormal;
         }
     }

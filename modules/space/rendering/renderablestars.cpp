@@ -631,7 +631,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
         if (sizeCompositionOption == "App Brightness") {
             _psfMultiplyOption = 0;
-        } else if (sizeCompositionOption == "Lum and Size") {
+        }
+        else if (sizeCompositionOption == "Lum and Size") {
             _psfMultiplyOption = 1;
         }
         else if (sizeCompositionOption == "Lum, Size and App Brightness") {

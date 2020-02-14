@@ -817,7 +817,8 @@ void LuaConsole::render() {
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
-    } else if (global::parallelPeer.isHost()) {
+    }
+    else if (global::parallelPeer.isHost()) {
         const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText = "Local script execution";

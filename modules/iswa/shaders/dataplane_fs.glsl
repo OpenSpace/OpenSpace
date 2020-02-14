@@ -62,7 +62,8 @@ Fragment getFragment() {
             else {
                 diffuse = texture(transferFunctions[0], vec2(v, 0.0));
             }
-        } else {
+        }
+        else {
             float v = 0.0;
             for (int i = 0; i < numTextures; i++) {
                 v = texture(textures[i], vs_st).r;

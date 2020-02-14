@@ -105,7 +105,8 @@ void VersionChecker::cancel() {
                     currentVersion.minor,
                     currentVersion.patch
                 ));
-            } else {
+            }
+            else {
                 LINFO(fmt::format(
                     "OpenSpace version {}.{}.{} is up to date.",
                     currentVersion.major,

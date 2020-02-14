@@ -252,7 +252,8 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             if (!tagName.empty()) {
                 result->addTag(std::move(tagName));
             }
-        } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+        }
+        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
             ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
             std::vector<std::string> keys = tagNames.keys();
             std::string tagName;

@@ -134,7 +134,8 @@ void IswaDataGroup::registerProperties() {
             _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
             //_backgroundValues.setVisible(false);
         // else if autofilter is turned off, register backgroundValues
-        } else {
+        }
+        else {
             _backgroundValues.setVisibility(properties::Property::Visibility::All);
             //_backgroundValues.setVisible(true);
         }
@@ -194,9 +195,11 @@ void IswaDataGroup::registerOptions(
 void IswaDataGroup::createDataProcessor() {
     if (_type == typeid(DataPlane).name()) {
         _dataProcessor = std::make_shared<DataProcessorText>();
-    }else if (_type == typeid(DataSphere).name()) {
+    }
+    else if (_type == typeid(DataSphere).name()) {
         _dataProcessor = std::make_shared<DataProcessorJson>();
-    }else if (_type == typeid(KameleonPlane).name()) {
+    }
+    else if (_type == typeid(KameleonPlane).name()) {
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
     }
 }

@@ -547,7 +547,8 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
         global::timeManager.addTimelineChangeCallback([this]() {
             _timeTimelineChanged = true;
         });
-    } else {
+    }
+    else {
         if (_timeJumpCallback != -1) {
             global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
         }

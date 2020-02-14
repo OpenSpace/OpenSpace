@@ -61,7 +61,7 @@ if (OPENSPACE_OPENVR_SUPPORT)
     )
   endif ()
   end_header("Dependency: OpenVR")
-endif()
+endif ()
 
 #####
 # Spout
@@ -80,7 +80,7 @@ if (APPLE)
   set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14" CACHE STRING "Minimum OS X deployment version" FORCE)
   set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep" CACHE STRING "Other Code Signing Flags" FORCE)
-endif()
+endif ()
 
 create_new_application(OpenSpace
   ${SGCT_OPENVR_FILES}

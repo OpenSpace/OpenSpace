@@ -45,7 +45,8 @@ namespace {
             return (0 == filepath.compare(
                 filepath.length() - ending.length(),
                 ending.length(), ending));
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -95,7 +96,8 @@ void TransferFunction::update() {
     if (_needsUpdate) {
         if (hasExtension(_filepath, "txt")) {
             setTextureFromTxt();
-        } else {
+        }
+        else {
             setTextureFromImage();
         }
         _texture->uploadTexture();
@@ -133,13 +135,16 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
 
         if (key == "width") {
             iss >> width;
-        } else if (key == "lower") {
+        }
+        else if (key == "lower") {
             iss >> lower;
             lower = glm::clamp(lower, 0.f, 1.f);
-        } else if (key == "upper") {
+        }
+        else if (key == "upper") {
             iss >> upper;
             upper = glm::clamp(upper, lower, 1.f);
-        } else if (key == "mappingkey") {
+        }
+        else if (key == "mappingkey") {
             float intensity;
             glm::vec4 rgba = glm::vec4(0.f);
             iss >> intensity;

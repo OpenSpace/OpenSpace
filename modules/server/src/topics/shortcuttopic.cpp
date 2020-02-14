@@ -102,7 +102,8 @@ void ShortcutTopic::handleJson(const nlohmann::json& input) {
     if (event == StartSubscription) {
         // TODO: Subscribe to shortcuts and keybindings
         // shortcutManager.subscribe(); ...
-    } else if (event == StopSubscription) {
+    }
+    else if (event == StopSubscription) {
         // TODO: Unsubscribe to shortcuts and keybindings
         // shortcutManager.unsubscribe(); ...
         return;

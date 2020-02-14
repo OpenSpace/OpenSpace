@@ -469,7 +469,8 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
 
     if (parent) {
         parent->attachChild(std::move(node));
-    } else {
+    }
+    else {
         attachNode(std::move(node));
     }
 

@@ -113,7 +113,8 @@ std::string generateJsonDocumentation(const Documentation& d) {
 
             if (it == documentations.end()) {
                 result << R"("reference": { "found": false })";
-            } else {
+            }
+            else {
                 result << R"("reference": {)"
                     << R"("found": true,)"
                     << R"("name": ")" << it->name << "\","

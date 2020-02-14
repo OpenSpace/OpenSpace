@@ -51,14 +51,16 @@ bool AuthorizationTopic::isDone() const {
 void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     if (isDone()) {
         _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
-    } else {
+    }
+    else {
         try {
             auto providedKey = json.at("key").get<std::string>();
             if (authorize(providedKey)) {
                 _connection->setAuthorized(true);
                 _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
                 LINFO("Client successfully authorized.");
-            } else {
+            }
+            else {
                 _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));
             }
         } catch (const std::out_of_range&) {

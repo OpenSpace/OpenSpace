@@ -71,7 +71,8 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     const glm::ivec2 rectSize = upperUpdatingRectBound - lowerUpdatingRectBound;
     if (rectSize.x > 0 && rectSize.y > 0) {
         _textureIsDirty = true;
-    } else {
+    }
+    else {
         return;
     }
 
@@ -117,7 +118,8 @@ void WebRenderHandler::updateTexture() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glBindTexture(GL_TEXTURE_2D, 0);
-    } else if (_textureIsDirty) {
+    }
+    else if (_textureIsDirty) {
         glBindTexture(GL_TEXTURE_2D, _texture);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, _browserBufferSize.x);
 

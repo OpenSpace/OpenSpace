@@ -329,7 +329,8 @@ void RenderableKameleonVolume::load() {
     );
     if (FileSys.fileExists(cachePath)) {
         loadRaw(cachePath);
-    } else {
+    }
+    else {
         loadFromPath(_sourcePath);
         storeRaw(cachePath);
     }
@@ -351,7 +352,8 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
     );
     if (extension == "cdf") {
         loadCdf(path);
-    } else {
+    }
+    else {
         loadRaw(path);
     }
 }

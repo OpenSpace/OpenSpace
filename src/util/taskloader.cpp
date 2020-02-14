@@ -52,7 +52,8 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
             const std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
-        } else if (tasksDictionary.getValue(key, subTask)) {
+        }
+        else if (tasksDictionary.getValue(key, subTask)) {
             const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {

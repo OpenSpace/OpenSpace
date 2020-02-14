@@ -46,7 +46,8 @@ glm::dmat4x3 fromLuaConversion(lua_State* state, bool& success) {
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
                 return glm::dmat4x3(0.0);
-            } else {
+            }
+            else {
                 result[i][j] = lua_tonumber(state, -1);
                 lua_pop(state, 1);
                 ++number;

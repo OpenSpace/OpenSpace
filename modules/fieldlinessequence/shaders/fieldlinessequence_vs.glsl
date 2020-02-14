@@ -107,7 +107,8 @@ void main() {
 
         if (isParticle) {
             vs_color = flowColor;
-        } else {
+        }
+        else {
             vs_color = lineColor;
         }
 
@@ -115,7 +116,8 @@ void main() {
             vec4 quantityColor = getTransferFunctionColor();
             vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
         }
-    } else {
+    }
+    else {
         vs_color = vec4(0);
     }
 

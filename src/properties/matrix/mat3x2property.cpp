@@ -43,10 +43,11 @@ glm::mat3x2 fromLuaConversion(lua_State* state, bool& success) {
                 success = false;
                 return glm::mat3x2(0.f);
             }
-             if (lua_isnumber(state, -1) != 1) {
+            if (lua_isnumber(state, -1) != 1) {
                 success = false;
                 return glm::mat3x2(0.f);
-            } else {
+            }
+            else {
                 result[i][j]
                         = static_cast<glm::mat3x2::value_type>(lua_tonumber(state, -1));
                 lua_pop(state, 1);

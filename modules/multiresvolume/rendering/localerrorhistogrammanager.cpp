@@ -129,12 +129,14 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
 
         if (isOctreeLeaf) {
             childValues = readValues(childIndex);
-        } else {
+        }
+        else {
             const unsigned int childInnerNodeIndex = brickToInnerNodeIndex(childIndex);
             auto it = _voxelCache.find(childInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 childValues = it->second;
-            } else {
+            }
+            else {
                 LERROR(fmt::format(
                     "Child {} visited without cache, {}, {}",
                     childIndex,
@@ -149,11 +151,13 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
         if (octreeChildIndex == 0) {
             parentValues = readValues(parentIndex);
             _voxelCache[parentInnerNodeIndex] = parentValues;
-        } else {
+        }
+        else {
             auto it = _voxelCache.find(parentInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 parentValues = it->second;
-            } else {
+            }
+            else {
                 LERROR(fmt::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
@@ -231,12 +235,14 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
 
         if (isBstLeaf) {
             childValues = readValues(childIndex);
-        } else {
+        }
+        else {
             unsigned int childInnerNodeIndex = brickToInnerNodeIndex(childIndex);
             auto it = _voxelCache.find(childInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 childValues = it->second;
-            } else {
+            }
+            else {
                 LERROR(fmt::format("Child {} visited without cache", childIndex));
                 return false;
             }
@@ -246,11 +252,13 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
         if (bstChildIndex == 1) {
             parentValues = readValues(parentIndex);
             _voxelCache[parentInnerNodeIndex] = parentValues;
-        } else {
+        }
+        else {
             auto it = _voxelCache.find(parentInnerNodeIndex);
             if (it != _voxelCache.end()) {
                 parentValues = it->second;
-            } else {
+            }
+            else {
                 LERROR(fmt::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
@@ -433,7 +441,8 @@ const Histogram* LocalErrorHistogramManager::spatialHistogram(
     const unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
         return &(_spatialHistograms[innerNodeIndex]);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -444,7 +453,8 @@ const Histogram* LocalErrorHistogramManager::temporalHistogram(
     const unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
         return &(_temporalHistograms[innerNodeIndex]);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }

@@ -713,7 +713,8 @@ bool RenderableDUMeshes::readSpeckFile() {
             //file.seekg(position);
             //break;
             continue;
-        } else {
+        }
+        else {
 
         //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:

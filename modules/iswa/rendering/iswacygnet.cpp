@@ -110,7 +110,8 @@ void IswaCygnet::initializeGL() {
 
     if (!_data.groupName.empty()) {
         initializeGroup();
-    } else {
+    }
+    else {
         _delete.onChange([this]() {
             deinitialize();
             global::scriptEngine.queueScript(

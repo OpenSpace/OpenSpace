@@ -128,7 +128,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
-    } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+    }
+    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         const std::vector<std::string>& keys = tagNames.keys();
         for (const std::string& key : keys) {

@@ -723,7 +723,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         unsigned int nAvailableThreads = std::thread::hardware_concurrency();
         unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads - 1;
         sceneInitializer = std::make_unique<MultiThreadedSceneInitializer>(nThreads);
-    } else {
+    }
+    else {
         sceneInitializer = std::make_unique<SingleThreadedSceneInitializer>();
     }
 
@@ -740,7 +741,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     const SceneGraphNode* parent = camera->parent();
     if (parent) {
         global::navigationHandler.orbitalNavigator().setFocusNode(parent->identifier());
-    } else {
+    }
+    else {
         global::navigationHandler.orbitalNavigator().setFocusNode(
             _scene->root()->identifier()
         );
@@ -817,7 +819,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                     progressInfo
                 );
                 ++it;
-            } else {
+            }
+            else {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = 1.f;
 

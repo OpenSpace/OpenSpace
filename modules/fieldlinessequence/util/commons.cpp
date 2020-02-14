@@ -29,9 +29,11 @@ namespace openspace::fls {
 Model stringToModel(const std::string& s) {
     if (s == "batsrus") {
         return Model::Batsrus;
-    } else if (s == "enlil") {
+    }
+    else if (s == "enlil") {
         return Model::Enlil;
-    } else if (s == "pfss") {
+    }
+    else if (s == "pfss") {
         return Model::Pfss;
     }
     return Model::Invalid;

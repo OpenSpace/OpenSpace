@@ -69,7 +69,8 @@ bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
         _itemMap.emplace(key, _itemList.begin());
 
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
