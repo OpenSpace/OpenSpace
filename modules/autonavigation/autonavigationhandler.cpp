@@ -89,17 +89,6 @@ const bool AutoNavigationHandler::hasFinished() const {
     return _currentTime > pathDuration();
 }
 
-const int AutoNavigationHandler::currentPathSegmentIndex() const {
-    for (int i = 0; i < _pathSegments.size(); ++i) {
-        const PathSegment& ps = _pathSegments[i];
-        double endTime = ps.startTime() + ps.duration();
-        if (endTime > _currentTime) {
-            return i;
-        }
-    }
-    return -1;
-}
-
 CameraState AutoNavigationHandler::currentCameraState() {
     CameraState cs;
     cs.position = camera()->positionVec3();

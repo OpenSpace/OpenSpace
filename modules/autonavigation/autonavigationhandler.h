@@ -53,7 +53,6 @@ public:
     Camera* camera() const;
     const double pathDuration() const;
     const bool hasFinished() const;
-    const int currentPathSegmentIndex() const;
     CameraState currentCameraState();         
 
     void updateCamera(double deltaTime);
