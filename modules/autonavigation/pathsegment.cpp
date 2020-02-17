@@ -178,7 +178,6 @@ void PathSegment::initCurve() {
     }
 }
 
-
 PathSegment::SpeedFunction::SpeedFunction(double duration) {
     // apply duration constraint (eq. 14 in Eberly)
     double speedSum = 0.0;
