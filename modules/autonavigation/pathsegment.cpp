@@ -75,7 +75,7 @@ const double PathSegment::startTime() const { return _startTime; }
 
 const double PathSegment::endTime() const { return _startTime + _duration; }
 
-const double PathSegment::length() const { return _curve->length(); }
+const double PathSegment::pathLength() const { return _curve->length(); }
 
 // TODO: remove function for debugging
 const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
@@ -91,7 +91,7 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
 double PathSegment::speedAtTime(double time) {
     ghoul_assert(time >= 0 && time <= _duration, "Time out of range [0, duration]");
     double t = time / _duration;
-    return (length() * _speedFunction.value(t)) / _speedFunction.integratedSum;
+    return (pathLength() * _speedFunction.value(t)) / _speedFunction.integratedSum;
 }
 
 glm::dvec3 PathSegment::getPositionAt(double u) const {

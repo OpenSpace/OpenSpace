@@ -55,7 +55,7 @@ public:
     const double duration() const;
     const double startTime() const;
     const double endTime() const;
-    const double length() const;
+    const double pathLength() const;
 
     const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
 

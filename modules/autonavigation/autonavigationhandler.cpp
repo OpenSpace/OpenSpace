@@ -141,7 +141,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     double displacement = deltaTime * cps.speedAtTime(_currentTime - cps.startTime());
     _distanceAlongCurrentSegment += displacement;
 
-    double relativeDisplacement = _distanceAlongCurrentSegment / cps.length();
+    double relativeDisplacement = _distanceAlongCurrentSegment / cps.pathLength();
     relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
 
     // When halfway along a curve, set anchor node in orbitalNavigator, to render 
