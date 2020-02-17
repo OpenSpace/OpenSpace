@@ -42,8 +42,6 @@ namespace openspace::autonavigation::helpers {
 } // helpers
 
 namespace openspace::autonavigation::interpolation {
-   
-    // TODO: make all these into template functions
 
     glm::dvec3 cubicBezier(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2,
                                      const glm::dvec3 &cp3, const glm::dvec3 &cp4 )
@@ -59,26 +57,5 @@ namespace openspace::autonavigation::interpolation {
         return cp1 * (1.0 - t) + cp2 * t;
     }
 
-    // TODO: remove
-    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3> &points) {
-        size_t n = points.size();
-        ghoul_assert(n > 2, "Minimum of two control points needed for interpolation!");
-
-        size_t nrSegments = n - 1;
-
-        // for points equally spaced in time
-        double tSegment = std::fmod( t*nrSegments, 1.0 ); 
-        tSegment = std::max(0.0, std::min(tSegment, 1.0));
-
-        size_t idx = std::floor(t*nrSegments);
-
-        // prevent stepping past the last segment if t = 1.0
-        if (idx > n - 1) {
-            return points.back();
-        }
-
-        return linear(tSegment, points[idx], points[idx + 1]); 
-    }
-
-} // interpolator
+} // interpolation
 

@@ -39,22 +39,18 @@ namespace openspace::autonavigation::helpers {
 
     glm::dquat getLookAtQuaternion(glm::dvec3 eye, glm::dvec3 center, glm::dvec3 up);
 
-} // helpers
-
-// TODO: include interpolator.h to helperfunctions
-// error when interpolator.h is included and used both here and in pathsegment
-
-// TODO: also make these template functions instead
+} // namespace
 
 namespace openspace::autonavigation::interpolation {
+
+    // TODO: make all these into template functions. 
+    // Alternatively, add cubicBezier interpolation in ghoul and only use
+    // ghoul's interpolator methods
 
     glm::dvec3 cubicBezier(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2, 
                                      const glm::dvec3 &cp3, const glm::dvec3 &cp4);
 
     glm::dvec3 linear(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2);
-
-    // TODO: remove
-    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3> &controlPoints);
 
 } // namespace
 #endif
