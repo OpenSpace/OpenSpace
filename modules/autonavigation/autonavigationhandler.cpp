@@ -194,6 +194,7 @@ void AutoNavigationHandler::clearPath() {
     _pathSegments.clear();
     _currentTime = 0.0;
     _currentSegmentIndex = 0;
+    _distanceAlongCurrentSegment = 0.0;
 }
 
 void AutoNavigationHandler::startPath() {
