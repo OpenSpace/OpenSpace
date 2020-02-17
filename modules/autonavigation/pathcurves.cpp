@@ -161,6 +161,8 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
 
 // Interpolate a list of control points and knot times
 glm::dvec3 Bezier3Curve::valueAt(double u) {
+    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
+
     size_t nrPoints = _points.size();
     size_t nrTimes = _parameterIntervals.size();
 
@@ -202,18 +204,22 @@ void Bezier3Curve::initParameterIntervals() {
 LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
     _points.push_back(start.position);
     _points.push_back(end.position);
+    _length = glm::distance(end.position, start.position);
 }
 
 glm::dvec3 LinearCurve::valueAt(double u) {
+    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
     return interpolation::linear(u, _points[0], _points[1]);
 }
 
 // TODO: Iprove handling of pauses
 PauseCurve::PauseCurve(CameraState& state) {
     _points.push_back(state.position);
+    _length = 1.0; // OBS! Length of a pause curve makes no sense, but it also doesn't matter
 }
 
 glm::dvec3 PauseCurve::valueAt(double u) {
+    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
     return _points[0];
 }
 
