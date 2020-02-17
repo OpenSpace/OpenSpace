@@ -160,7 +160,7 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
 }
 
 // Interpolate a list of control points and knot times
-glm::dvec3 Bezier3Curve::valueAt(double s) {
+glm::dvec3 Bezier3Curve::valueAt(double u) {
     size_t nrPoints = _points.size();
     size_t nrTimes = _parameterIntervals.size();
 
@@ -168,20 +168,20 @@ glm::dvec3 Bezier3Curve::valueAt(double s) {
     ghoul_assert((nrPoints - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
     ghoul_assert(_nrSegments == (nrTimes - 1), "Number of interval times must match number of intervals");
 
-    if (abs(s) < 0.000001)
+    if (abs(u) < 0.000001)
         return _points.front();
 
-    if (abs(1.0 - s) < 0.000001)
+    if (abs(1.0 - u) < 0.000001)
         return _points.back();
 
     // compute current segment, by first finding iterator to the first value that is larger than s 
     std::vector<double>::iterator segmentEndIt = 
-        std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), s);
+        std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
     unsigned int segmentIdx = (segmentEndIt - 1) - _parameterIntervals.begin();
 
     double segmentStart = _parameterIntervals[segmentIdx];
     double segmentDuration = (_parameterIntervals[segmentIdx + 1] - _parameterIntervals[segmentIdx]);
-    double sScaled = (s - segmentStart) / segmentDuration;
+    double sScaled = (u - segmentStart) / segmentDuration;
 
     unsigned int idx = segmentIdx * 3;
 
@@ -204,8 +204,8 @@ LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
     _points.push_back(end.position);
 }
 
-glm::dvec3 LinearCurve::valueAt(double s) {
-    return interpolation::linear(s, _points[0], _points[1]);
+glm::dvec3 LinearCurve::valueAt(double u) {
+    return interpolation::linear(u, _points[0], _points[1]);
 }
 
 // TODO: Iprove handling of pauses
@@ -213,7 +213,7 @@ PauseCurve::PauseCurve(CameraState& state) {
     _points.push_back(state.position);
 }
 
-glm::dvec3 PauseCurve::valueAt(double s) {
+glm::dvec3 PauseCurve::valueAt(double u) {
     return _points[0];
 }
 

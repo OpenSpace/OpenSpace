@@ -94,34 +94,33 @@ double PathSegment::speedAtTime(double time) {
     return (length() * _speedFunction.value(t)) / _speedFunction.integratedSum;
 }
 
-glm::dvec3 PathSegment::getPositionAt(double t) const {
-    return _curve->valueAt(t);    
+glm::dvec3 PathSegment::getPositionAt(double u) const {
+    return _curve->valueAt(u);    
 }
 
-glm::dquat PathSegment::getRotationAt(double t) const {
+glm::dquat PathSegment::getRotationAt(double u) const {
     // TODO: improve how rotation is computed
 
     switch (_curveType) {
     case CurveType::Bezier3: 
     {
-        return piecewiseSlerpRotation(t);
+        return piecewiseSlerpRotation(u);
         break;
     }
     default:
     {
-        double tSlerp = helpers::shiftAndScale(t, 0.1, 0.9);
-        tSlerp = ghoul::cubicEaseInOut(tSlerp);
-        return glm::slerp(_start.rotation, _end.rotation, tSlerp);
+        double uSlerp = helpers::shiftAndScale(u, 0.1, 0.9);
+        uSlerp = ghoul::cubicEaseInOut(uSlerp);
+        return glm::slerp(_start.rotation, _end.rotation, uSlerp);
     }
     }
 }
 
 // Interpolate between a number of keyframes for orientation using SLERP
-const glm::dquat PathSegment::piecewiseSlerpRotation(double t) const {
+const glm::dquat PathSegment::piecewiseSlerpRotation(double u) const {
     // breakpoints for subintervals
-    const double t1 = 0.3;
-    const double t2 = 0.8; // TODO: these should probably be based on distance
-    std::vector<double> times{ 0.0, t1, t2, 1.0 };
+    const double u1 = 0.3;
+    const double u2 = 0.8; // TODO: these should probably be based on distance
 
     glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
     glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
@@ -130,27 +129,27 @@ const glm::dquat PathSegment::piecewiseSlerpRotation(double t) const {
     glm::dvec3 endUpVec = _end.rotation * glm::dvec3(0.0, 1.0, 0.0);
 
     glm::dquat lookAtStartQ =
-        helpers::getLookAtQuaternion(getPositionAt(t1), startNodePos, startUpVec);
+        helpers::getLookAtQuaternion(getPositionAt(u1), startNodePos, startUpVec);
 
     glm::dquat lookAtEndQ =
-        helpers::getLookAtQuaternion(getPositionAt(t2), endNodePos, endUpVec);
+        helpers::getLookAtQuaternion(getPositionAt(u2), endNodePos, endUpVec);
 
-    std::vector<glm::dquat> keyframes{ 
-        _start.rotation, 
-        lookAtStartQ, 
-        lookAtEndQ, 
-        _end.rotation 
+    std::vector<std::pair<glm::dquat, double>> keyframes{
+        {_start.rotation, 0.0},
+        {lookAtStartQ, u1},
+        {lookAtEndQ, u2},
+        {_end.rotation, 1.0},
     };
-
-    ghoul_assert(keyframes.size() == times.size(), "Must have one time value per keyframe.");
 
     // Find the current segment and compute interpolation
     glm::dquat result;
     for (int i = 0; i < keyframes.size() - 1; ++i) {
-        if (t <= times[i + 1]) {
-            double tScaled = (t - times[i]) / (times[i + 1] - times[i]);
-            tScaled = ghoul::quadraticEaseInOut(tScaled);
-            result = glm::slerp(keyframes[i], keyframes[i + 1], tScaled);
+        double ui = keyframes[i].second;
+        double uNext = keyframes[i + 1].second;
+        if (u <= uNext) {
+            double uScaled = (u - ui) / (uNext - ui);
+            uScaled = ghoul::quadraticEaseInOut(uScaled);
+            result = glm::slerp(keyframes[i].first, keyframes[i + 1].first, uScaled);
             break;
         }
     }

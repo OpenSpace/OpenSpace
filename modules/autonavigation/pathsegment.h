@@ -61,11 +61,11 @@ public:
 
     double speedAtTime(double time);
 
-    glm::dvec3 getPositionAt(double t) const;
-    glm::dquat getRotationAt(double t) const;
+    glm::dvec3 getPositionAt(double u) const;
+    glm::dquat getRotationAt(double u) const;
 
 private: 
-    const glm::dquat piecewiseSlerpRotation(double t) const;
+    const glm::dquat piecewiseSlerpRotation(double u) const;
     void initCurve();
 
     // The speed function describing the shape of the speed curve. Values in [0,1].

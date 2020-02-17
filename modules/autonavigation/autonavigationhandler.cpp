@@ -248,11 +248,11 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
         return positions;
     }
 
-    const double dt = 1.0 / nPerSegment;
+    const double du = 1.0 / nPerSegment;
 
     for (PathSegment &p : _pathSegments) {
-        for (double t = 0.0; t < 1.0; t += dt) {
-            auto position = p.getPositionAt(t);
+        for (double u = 0.0; u < 1.0; u += du) {
+            auto position = p.getPositionAt(u);
             positions.push_back(position);
         }
     }
