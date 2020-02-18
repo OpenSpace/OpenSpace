@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,6 +71,8 @@ class Translation;
  */
 class RenderableTrail : public Renderable {
 public:
+
+const double DISTANCE_CULLING_RADII = 800.0;
 
 struct Appearance : properties::PropertyOwner {
         Appearance();
@@ -182,7 +184,8 @@ private:
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
+        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase,
+        resolution, lineWidth) _uniformCache;
 };
 
 } // namespace openspace

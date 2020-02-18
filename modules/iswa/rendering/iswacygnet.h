@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,17 +55,17 @@ public:
 
 protected:
     struct Metadata {
-        int id;
-        int updateTime;
+        int id = -1;
+        int updateTime = -1;
         std::string groupName;
         std::string path;
         std::string parent;
         std::string frame;
-        glm::vec3 gridMin;
-        glm::vec3 gridMax;
-        glm::vec3 offset;
-        glm::vec3 scale;
-        glm::vec4 spatialScale;
+        glm::vec3 gridMin = glm::vec3(0.f);
+        glm::vec3 gridMax = glm::vec3(0.f);
+        glm::vec3 offset = glm::vec3(0.f);
+        glm::vec3 scale = glm::vec3(0.f);
+        glm::vec4 spatialScale = glm::vec4(0.f);
         std::string scaleVariable;
         std::string coordinateType;
     };
@@ -134,10 +134,10 @@ protected:
     glm::mat4 _rotation = glm::mat4(1.f);
 
 private:
-    glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 
-    double _openSpaceTime;
-    double _lastUpdateOpenSpaceTime;
+    double _openSpaceTime = 0.0;
+    double _lastUpdateOpenSpaceTime = 0.0;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;

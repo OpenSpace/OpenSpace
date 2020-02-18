@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,11 +93,11 @@ private:
     cef_key_event_type_t keyEventType(KeyAction action);
 
     BrowserInstance* _browserInstance = nullptr;
-    glm::vec2 _mousePosition = { 0.f, 0.f };
+    glm::vec2 _mousePosition = glm::vec2(0.f);
 
     struct MouseButtonState {
         bool down = false;
-        glm::vec2 lastClickPosition = { 0.f, 0.f };
+        glm::vec2 lastClickPosition = glm::vec2(0.f);
         std::chrono::high_resolution_clock::time_point lastClickTime;
     };
 

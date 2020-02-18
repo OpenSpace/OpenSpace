@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -112,7 +112,8 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
 
     if (requested.empty() && required.empty() && resourceSyncs.empty()) {
         ImGui::Text("%s", assetText.c_str());
-    } else if (ImGui::TreeNode(assetPath.c_str(), "%s", assetText.c_str())) {
+    }
+    else if (ImGui::TreeNode(assetPath.c_str(), "%s", assetText.c_str())) {
         for (const std::shared_ptr<Asset>& child : required) {
             renderTree(*child, assetDirectory);
         }

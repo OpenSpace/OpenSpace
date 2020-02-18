@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/src/layer.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "LayerGroup";
@@ -81,18 +82,24 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
 }
 
 void LayerGroup::initialize() {
+    ZoneScoped
+
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->initialize();
     }
 }
 
 void LayerGroup::deinitialize() {
+    ZoneScoped
+
     for (const std::unique_ptr<Layer>& l : _layers) {
         l->deinitialize();
     }
 }
 
 int LayerGroup::update() {
+    ZoneScoped
+
     int res = 0;
     _activeLayers.clear();
 

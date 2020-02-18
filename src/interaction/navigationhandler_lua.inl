@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -101,7 +101,7 @@ int getNavigationState(lua_State* L) {
 
     if (state.up.has_value()) {
         ghoul::lua::push(L, "Up");
-        pushVector(L, state.up.value());
+        pushVector(L, *state.up);
         lua_rawset(L, -3);
     }
     if (state.yaw != 0) {

@@ -58,24 +58,17 @@ local Keybindings = {
     {
         Key = "h",
         Name="Toggle Trails",
-        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Toggles the visibility of all trails",
+        Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..
+        "local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Toggles the visibility of planet and moon trails",
         GuiPath = "/Rendering",
         Local = false
     },
     {
         Key = "l",
-        Name = "Turn on labels",
-        Command = "openspace.setPropertyValue('{solarsystem_labels}.Renderable.Enabled', true)",
+        Name = "Toggle planet labels",
+        Command = "local list = openspace.getProperty('{solarsystem_labels}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
         Documentation = "Turns on visibility for all solar system labels",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "Shift+l",
-        Name = "Turn off labels",
-        Command = "openspace.setPropertyValue('{solarsystem_labels}.Renderable.Enabled', false)",
-        Documentation = "Turns off visibility for all solar system labels",
         GuiPath = "/Rendering",
         Local = false
     }

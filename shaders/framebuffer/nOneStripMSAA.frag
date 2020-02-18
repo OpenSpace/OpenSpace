@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ in vec2 vTexCoord;
 uniform int currentSample;
 uniform sampler2DMS pixelSizeTexture;
 
-void main() {     
+void main() {
      finalColor = vec4(texelFetch(pixelSizeTexture, ivec2(vTexCoord), currentSample).rgb, 1.0);
      //finalColor = vec4(0.5*vPosition.xy + 0.5, 1.0, 1.0);
      //finalColor = vec4(vPosition.xy, 0.0, 1.0);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,8 @@ namespace openspace {
 // This should be moved into the touch module ---abock
 struct Touch {
     bool active;
-    glm::vec2 pos;
-    uint32_t action;
+    glm::vec2 pos = glm::vec2(0.f);
+    uint32_t action = 0;
 };
 
 class ImGUIModule : public OpenSpaceModule {

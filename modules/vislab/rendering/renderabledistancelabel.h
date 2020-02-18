@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #ifndef __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
 #define __OPENSPACE_MODULE_VISLAB___RENDERABLEDISTANCELABEL___H__
 
@@ -38,6 +37,7 @@ public:
 
      void update(const UpdateData& data) override;
      static documentation::Documentation Documentation();
+private:
 
      properties::StringProperty _nodelineId;
      bool _errorThrown = false;

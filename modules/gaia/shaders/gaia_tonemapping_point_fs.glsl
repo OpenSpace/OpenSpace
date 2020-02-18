@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,7 +82,8 @@ Fragment getFragment() {
     //vec2 screenOrigo = vec2(-left, -bottom) / vec2(right - left, top - bottom);
     //if (abs(screenOrigo.x - uv.x) > 0.0005 && abs(screenOrigo.y - uv.y) > 0.0005) {
     //    origoFrag.color = vec4(0.0);
-    //} else {
+    //}
+    //else {
     //    origoFrag.color = vec4(1.0);
     //}
     //return origoFrag;

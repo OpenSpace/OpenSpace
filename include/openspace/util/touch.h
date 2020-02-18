@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___TOUCH___H__
 #define __OPENSPACE_CORE___TOUCH___H__
 
-#include <glm/detail/type_vec2.hpp>
+#include <glm/vec2.hpp>
 
 #include <cstdint>
 #include <deque>

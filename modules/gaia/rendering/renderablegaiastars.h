@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -191,7 +191,7 @@ private:
     size_t _nRenderValuesPerStar = 0;
     int _nStarsToRender = 0;
     bool _firstDrawCalls = true;
-    glm::dquat _previousCameraRotation;
+    glm::dquat _previousCameraRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     bool _useVBO = false;
     long long _cpuRamBudgetInBytes = 0;
     long long _totalDatasetSizeInBytes = 0;

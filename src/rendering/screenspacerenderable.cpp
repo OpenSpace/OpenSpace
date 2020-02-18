@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -132,7 +133,7 @@ namespace {
         float phi = spherical.z;
 
         // Sanitize coordinates.
-        float theta = wrap(spherical.y, 0.0, glm::two_pi<float>());
+        float theta = wrap(spherical.y, 0.f, glm::two_pi<float>());
         if (theta > glm::pi<float>()) {
             theta = glm::two_pi<float>() - theta;
             phi += glm::pi<float>();
@@ -441,7 +442,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
-    } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+    }
+    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         const std::vector<std::string>& keys = tagNames.keys();
         for (const std::string& key : keys) {
@@ -488,6 +490,8 @@ bool ScreenSpaceRenderable::deinitializeGL() {
 }
 
 void ScreenSpaceRenderable::render() {
+    ZoneScoped
+
     draw(
         globalRotationMatrix() *
         translationMatrix() *
@@ -515,7 +519,7 @@ float ScreenSpaceRenderable::depth() {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = global::windowDelegate.currentWindowResolution();
+    auto res = global::windowDelegate.currentDrawBufferResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
@@ -537,7 +541,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
 
     //to scale the plane
     float textureRatio =

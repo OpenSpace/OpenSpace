@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local shared = asset.require('util/tle_helper')
 
 local group = {
     Title = "CubeSat",

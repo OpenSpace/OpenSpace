@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -424,7 +424,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_FRONT);
-    } else if (orientation == Orientation::Both) {
+    }
+    else if (orientation == Orientation::Both) {
         glDisable(GL_CULL_FACE);
     }
 
@@ -455,7 +456,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_BACK);
-    } else if (orientation == Orientation::Both) {
+    }
+    else if (orientation == Orientation::Both) {
         glEnable(GL_CULL_FACE);
     }
 }

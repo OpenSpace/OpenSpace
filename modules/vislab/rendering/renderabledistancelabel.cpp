@@ -24,13 +24,13 @@
 
 #include <modules/vislab/rendering/renderabledistancelabel.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <modules/base/rendering/renderablenodeline.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <ghoul/logging/logmanager.h>
 #include <string>
 
 namespace {
@@ -39,8 +39,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
         "NodeLine",
         "Node Line",
-        "Property to track a nodeline. When tracking the label text will be updating the distance "
-        "from the nodeline start and end. "
+        "Property to track a nodeline. When tracking the label text will be updating the "
+        "distance from the nodeline start and end."
     };
 }
 
@@ -78,38 +78,45 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
     }
 }
 
-void RenderableDistanceLabel::update(const UpdateData& data) {
+void RenderableDistanceLabel::update(const UpdateData&) {
+    if (_errorThrown) {
+        return;
+    }
 
-    SceneGraphNode* nodelineNode = global::renderEngine.scene()->sceneGraphNode(_nodelineId);
+    RenderEngine& RE = global::renderEngine;
 
-    if (nodelineNode && !_errorThrown) {
-
+    SceneGraphNode* nodelineNode = RE.scene()->sceneGraphNode(_nodelineId);
+    if (nodelineNode) {
         // Calculate distance
-        RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(nodelineNode->renderable());
+        RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(
+            nodelineNode->renderable()
+        );
         if (!nodeline) {
             LERROR("Expected renderable to be of type 'RenderableNodeLine'");
             _errorThrown = true;
             return;
         }
 
-        double myDistance = nodeline->getDistance();
+        double myDistance = nodeline->distance();
 
         // Format string
-        float scale = getUnit(Kilometer);
+        float scale = unit(Kilometer);
         std::string distanceText = std::to_string(std::round(myDistance / scale));
-        int pos = distanceText.find(".");
+        int pos = static_cast<int>(distanceText.find("."));
         std::string subStr = distanceText.substr(pos);
         distanceText.erase(pos, subStr.size());
         std::string finalText = distanceText + " Km";
         setLabelText(finalText);
 
         // Update placement of label with transformation matrix
-        glm::dvec3 start = global::renderEngine.scene()->sceneGraphNode(nodeline->getStart())->worldPosition();
-        glm::dvec3 end = global::renderEngine.scene()->sceneGraphNode(nodeline->getEnd())->worldPosition();
+        SceneGraphNode* startNode = RE.scene()->sceneGraphNode(nodeline->start());
+        glm::dvec3 start = startNode->worldPosition();
+        SceneGraphNode* endNode = RE.scene()->sceneGraphNode(nodeline->end());
+        glm::dvec3 end = endNode->worldPosition();
         glm::dvec3 goalPos = start + (end - start) / 2.0;
         _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
     }
-    else if (!_errorThrown) {
+    else {
         LERROR(fmt::format("There is no scenegraph node with id {}", _nodelineId));
         _errorThrown = true;
     }

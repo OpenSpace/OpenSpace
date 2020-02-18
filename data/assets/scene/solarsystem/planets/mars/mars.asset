@@ -29,6 +29,10 @@ local color_layers = {
             Name = "Mars Texture",
             FilePath = textures .. "/mars.jpg",
             Enabled = true
+        },
+        Settings = {
+            Gamma = 1.6,
+            Multiplier = 1.07
         }
     },
     {
@@ -40,6 +44,10 @@ local color_layers = {
             Name = "Mars Texture",
             FilePath = textures .. "/mars.jpg",
             Enabled = true
+        },
+        Settings = {
+            Gamma = 1.6,
+            Multiplier = 1.07
         }
     },
     {
@@ -107,6 +115,16 @@ local color_layers = {
         Name = "CTX Mosaic [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
         BlendMode = "Color"
+    },
+    {
+        Identifier = "CTX_belended_01",
+        Name = "CTX Belended beta01",
+        FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
+        BlendMode = "Color",
+        Settings = {
+            Gamma = 2.14,
+            Multiplier = 1.54
+        }
     }
 }
 
