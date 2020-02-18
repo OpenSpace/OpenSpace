@@ -684,7 +684,6 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
     //}
 }
 
-
 void RenderableLabels::setLabelText(const std::string & newText) {
     _labelText = newText;
 }
