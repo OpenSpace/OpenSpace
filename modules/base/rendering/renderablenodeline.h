@@ -68,8 +68,6 @@ private:
     void unbindGL();
     void bindGL();
 
-    glm::dvec3 coordinatePosFromAnchorNode(glm::dvec3 worldPos);
-
     ghoul::opengl::ProgramObject* _program;
     /// The vertex attribute location for position
     /// must correlate to layout location in vertex shader

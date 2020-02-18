@@ -175,7 +175,6 @@ namespace {
         "Fade-In/-Out ending speed.",
         "Fade-In/-Out ending speed."
     };
-
 } // namespace
 
 namespace openspace {
@@ -683,6 +682,7 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
         glDepthMask(true);
     //}
 }
+
 
 void RenderableLabels::setLabelText(const std::string & newText) {
     _labelText = newText;
