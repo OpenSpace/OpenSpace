@@ -36,6 +36,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
@@ -143,8 +144,8 @@ private:
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _flightDestinationDistance;
+    properties::DoubleProperty _flightDestinationFactor;
     properties::BoolProperty _applyLinearFlight;
-    
 
     properties::FloatProperty _velocitySensitivity;
     properties::FloatProperty _mouseSensitivity;
