@@ -346,16 +346,4 @@ void RenderableNodeLine::validateNodes() {
     }
 }
 
-/*  Returns a position that is relative to the current
-    anchor node. This is a method to handle precision
-    problems that occur when approaching a line end point */
-glm::dvec3 RenderableNodeLine::getCoordinatePosFromAnchorNode(glm::dvec3 worldPos) {
-
-    glm::dvec3 anchorNodePos(0);
-
-    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
-        anchorNodePos = global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition();
-    }
-}
-
 } // namespace openspace

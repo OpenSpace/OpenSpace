@@ -37,4 +37,8 @@ public:
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
+};
+
+} // namespace openspace
+
 #endif // __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
