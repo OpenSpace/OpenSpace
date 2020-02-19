@@ -121,7 +121,8 @@ void CefWebGuiModule::startOrStopGui() {
         _instance->setZoom(_guiScale);
 
         webBrowserModule->addBrowser(_instance.get());
-    } else if (_instance) {
+    }
+    else if (_instance) {
         _instance->close(true);
         webBrowserModule->removeBrowser(_instance.get());
         webBrowserModule->detachEventHandler();
@@ -176,7 +177,8 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (_visible && _instance) {
             webBrowserModule->attachEventHandler(_instance.get());
-        } else {
+        }
+        else {
             webBrowserModule->detachEventHandler();
         }
     });

@@ -179,7 +179,8 @@ void main() {
     if ( length(in_position) > EPS ){
         vs_gPosition = vec4(model * objectPosition);    
         gl_Position = vec4(projection * viewPosition);
-    } else {
+    }
+    else {
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
     }

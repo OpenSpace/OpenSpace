@@ -128,7 +128,7 @@ float TouchInputHolder::speedX() const {
 }
 
 float TouchInputHolder::speedY() const {
-    if(_inputs.size() <= 1) {
+    if (_inputs.size() <= 1) {
         return 0.f;
     }
     const TouchInput& currentInput = _inputs[0];

@@ -72,7 +72,8 @@ float DataProcessor::processDataPoint(float value, int option) {
         return histogram.equalize(
             normalizeWithStandardScore(value, mean, sd, _histNormValues)
         ) / 512.f;
-    } else {
+    }
+    else {
         return normalizeWithStandardScore(value, mean, sd, _normValues);
     }
 }
@@ -153,7 +154,8 @@ void DataProcessor::calculateFilterValues(const std::vector<int>& selectedOption
                     standardDeviation,
                     _normValues)
                 );
-            } else {
+            }
+            else {
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
                 filterWidth = 1.f / 512.f;

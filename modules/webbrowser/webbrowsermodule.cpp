@@ -129,7 +129,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     if (dictionary.hasKeyAndValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
-    } else {
+    }
+    else {
         _webHelperLocation = findHelperExecutable();
     }
 
@@ -188,7 +189,8 @@ void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
     const auto p = std::find(_browsers.begin(), _browsers.end(), browser);
     if (p != _browsers.end()) {
         _browsers.erase(p);
-    } else {
+    }
+    else {
         LWARNING("Could not find browser in list of browsers.");
     }
 

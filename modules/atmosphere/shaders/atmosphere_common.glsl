@@ -125,7 +125,8 @@ vec3 analyticTransmittance(const float r, const float mu, const float d) {
     return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
              betaOzoneExtinction * (0.0000006) * opticalDepth(HO, r, mu, d) -
              betaMieExtinction * opticalDepth(HM, r, mu, d));
-  } else {
+  }
+  else {
     return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
                betaMieExtinction * opticalDepth(HM, r, mu, d));
   }
@@ -315,7 +316,8 @@ vec3 transmittance(const float r, const float mu, const float d) {
   if (mu > 0.0f) {
     return min(transmittanceLUT(r, mu) / 
                transmittanceLUT(ri, mui), 1.0f);
-  } else {
+  }
+  else {
     return min(transmittanceLUT(ri, -mui) / 
                transmittanceLUT(r, -mu), 1.0f);
   }

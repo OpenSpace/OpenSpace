@@ -134,7 +134,8 @@ glm::dmat3 TransformationManager::frameTransformationMatrix(
     if (fromKameleon && toKameleon) {
         return kameleonTransformationMatrix(from, to, ephemerisTime);
 
-    } else if (fromKameleon && !toKameleon) {
+    }
+    else if (fromKameleon && !toKameleon) {
         glm::dmat3 kameleonTransformation = kameleonTransformationMatrix(
             from,
             "J2000",
@@ -146,7 +147,8 @@ glm::dmat3 TransformationManager::frameTransformationMatrix(
             ephemerisTime
         );
         return spiceTransformation*kameleonTransformation;
-    } else if (!fromKameleon && toKameleon) {
+    }
+    else if (!fromKameleon && toKameleon) {
         glm::dmat3 spiceTransformation = SpiceManager::ref().frameTransformationMatrix(
             from,
             "J2000",

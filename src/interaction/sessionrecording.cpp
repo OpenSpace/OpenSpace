@@ -523,7 +523,8 @@ void SessionRecording::saveTimeKeyframe() {
         writeToFileBuffer(kf._requiresTimeJump);
 
         saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
-    } else {
+    }
+    else {
         std::stringstream keyframeLine = std::stringstream();
         //Add simulation timestamp, timestamp relative, simulation time to recording start
         keyframeLine << "time ";
@@ -880,7 +881,8 @@ void SessionRecording::playbackTimeChange() {
             ));
             return;
         }
-    } else {
+    }
+    else {
         std::istringstream iss(_playbackLineParsing);
         std::string entryType;
         //double timeRef;
@@ -943,7 +945,8 @@ void SessionRecording::playbackScript() {
             ));
             return;
         }
-    } else {
+    }
+    else {
         std::istringstream iss(_playbackLineParsing);
         std::string entryType;
         std::string tmpReadbackScript;
@@ -958,7 +961,8 @@ void SessionRecording::playbackScript() {
                 "Error parsing script line {} of playback file", _playbackLineNum
             ));
             return;
-        } else if (!iss.eof()) {
+        }
+        else if (!iss.eof()) {
             LERROR(fmt::format(
                 "Did not find an EOL at line {} of playback file", _playbackLineNum
             ));
@@ -1108,7 +1112,8 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
                     _idxTimeline_cameraPtrNext = seekAheadIndex;
                 }
                 break;
-            } else {
+            }
+            else {
                 // Force interpolation between consecutive keyframes
                 _idxTimeline_cameraPtrPrev = seekAheadIndex;
             }

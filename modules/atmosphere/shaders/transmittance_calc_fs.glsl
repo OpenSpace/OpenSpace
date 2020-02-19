@@ -82,7 +82,8 @@ void main(void) {
     opDepth = betaOzoneExtinction * (0.0000006) * opticalDepth(r, muSun, HO) + 
     betaMieExtinction * opticalDepth(r, muSun, HM) +
     betaRayleigh * opticalDepth(r, muSun, HR);
-  } else {
+  }
+  else {
     opDepth = betaMieExtinction * opticalDepth(r, muSun, HM) + 
     betaRayleigh * opticalDepth(r, muSun, HR);
   }

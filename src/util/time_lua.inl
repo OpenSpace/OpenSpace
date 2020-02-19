@@ -56,7 +56,8 @@ int time_setDeltaTime(lua_State* L) {
         }
         const double newDeltaTime = lua_tonumber(L, 1);
         global::timeManager.setDeltaTime(newDeltaTime);
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         const char* msg = lua_pushfstring(L,
             "Bad number of arguments. Expected 1 or 2.");
@@ -159,7 +160,8 @@ int time_togglePause(lua_State* L) {
 
     if (nArguments == 0) {
         global::timeManager.setPause(!global::timeManager.isPaused());
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -210,7 +212,8 @@ int time_interpolateTogglePause(lua_State* L) {
             global::timeManager.defaultPauseInterpolationDuration() :
             global::timeManager.defaultUnpauseInterpolationDuration()
         );
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -236,7 +239,8 @@ int time_setPause(lua_State* L) {
     if (nArguments == 1) {
         const bool pause = lua_toboolean(L, 1) == 1;
         global::timeManager.setPause(pause);
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -284,7 +288,8 @@ int time_interpolatePause(lua_State* L) {
             global::timeManager.defaultPauseInterpolationDuration() :
             global::timeManager.defaultUnpauseInterpolationDuration()
         );
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -342,7 +347,8 @@ int time_setTime(lua_State* L) {
             return 0;
         }
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    } else {
+    }
+    else {
         return luaL_error(
             L,
             "bad number of arguments, expected 1 or 2, got %i",

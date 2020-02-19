@@ -146,7 +146,8 @@ void GuiParallelComponent::renderHost() {
     const size_t nClients = nConnections - 1;
     if (nClients == 1) {
         connectionInfo = "Hosting session with 1 client";
-    } else {
+    }
+    else {
         connectionInfo = "Hosting session with " + std::to_string(nClients) + " clients";
     }
 

@@ -29,7 +29,6 @@
 #include <ghoul/misc/easing.h>
 #include <regex>
 
-#pragma optimize ("", off)
 namespace openspace {
 
 namespace {

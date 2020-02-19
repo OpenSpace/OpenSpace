@@ -48,7 +48,8 @@ glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) {
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
                 return glm::mat4x4(1.f);
-            } else {
+            }
+            else {
                 result[i][j]
                         = static_cast<glm::mat4x4::value_type>(lua_tonumber(state, -1));
                 lua_pop(state, 1);

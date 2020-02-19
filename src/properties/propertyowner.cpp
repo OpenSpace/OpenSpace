@@ -190,7 +190,8 @@ void PropertyOwner::addProperty(Property* prop) {
             identifier()
         ));
         return;
-    } else {
+    }
+    else {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
         const bool hasOwner = hasPropertySubOwner(prop->identifier());
         if (hasOwner) {
@@ -235,7 +236,8 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
             identifier()
         ));
         return;
-    } else {
+    }
+    else {
         // We still need to check if the PropertyOwners name is used in a Property
         const bool hasProp = hasProperty(owner->identifier());
         if (hasProp) {
@@ -269,7 +271,8 @@ void PropertyOwner::removeProperty(Property* prop) {
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
         (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);
-    } else {
+    }
+    else {
         LERROR(fmt::format(
             "Property with identifier '{}' not found for removal", prop->identifier()
         ));
@@ -295,7 +298,8 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     // If we found the propertyowner, we can delete it
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
         _subOwners.erase(it);
-    } else {
+    }
+    else {
         LERROR(fmt::format(
             "PropertyOwner with name '{}' not found for removal", owner->identifier()
         ));

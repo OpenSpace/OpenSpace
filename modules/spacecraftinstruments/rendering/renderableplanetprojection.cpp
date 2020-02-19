@@ -487,7 +487,8 @@ void RenderablePlanetProjection::imageProjectGPU(
         if (glm::vec3* radius = std::any_cast<glm::vec3>(&r)){
             _fboProgramObject->setUniform(_fboUniformCache.radius, radius);
         }
-    } else {
+    }
+    else {
         LERROR("Geometry object needs to provide radius");
     }
     if (_geometry->hasProperty("Segments")) {
@@ -495,7 +496,8 @@ void RenderablePlanetProjection::imageProjectGPU(
         if (int* segments = std::any_cast<int>(&s)) {
             _fboProgramObject->setUniform(_fboUniformCache.segments, segments[0]);
         }
-    }else{
+    }
+    else{
         LERROR("Geometry object needs to provide segment count");
     }
 

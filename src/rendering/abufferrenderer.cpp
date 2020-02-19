@@ -975,7 +975,8 @@ void ABufferRenderer::updateRaycastData() {
 
         if (helperPath.empty()) {
             data.namespaceName = "NAMESPACE_" + std::to_string(nextNamespaceIndex++);
-        } else {
+        }
+        else {
             auto iter = namespaceIndices.find(helperPath);
             if (iter == namespaceIndices.end()) {
                 int namespaceIndex = nextNamespaceIndex++;

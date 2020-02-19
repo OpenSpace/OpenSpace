@@ -382,7 +382,8 @@ void ParallelServer::setToClient(Peer& peer) {
             it.second->status = ParallelConnection::Status::ClientWithoutHost;
             sendConnectionStatus(*it.second);
         }
-    } else {
+    }
+    else {
         peer.status = (_hostPeerId > 0) ?
             ParallelConnection::Status::ClientWithHost :
             ParallelConnection::Status::ClientWithoutHost;

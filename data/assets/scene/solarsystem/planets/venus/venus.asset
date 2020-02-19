@@ -26,12 +26,13 @@ local color_layers = {
     {
         Identifier = "Magellan_Mosaic_Utah",
         Name = "Magellan Mosaic [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.wms",
+        FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.vrt",
         BlendMode = "Color",
         Settings = {
             Gamma = 2.0
-        }
-    }
+        },
+        Enabled = true
+    },
 }
 
 local height_layers = {
@@ -43,7 +44,8 @@ local height_layers = {
         Settings = {
             Gamma = 1.72,
             Multiplier = 1.1
-        }
+        },
+        Enabled = true
     }
 }
 

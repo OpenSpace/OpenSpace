@@ -26,14 +26,17 @@
 #include "floatoperations.glsl"
 
 // keep in sync with renderablestars.h:ColorOption enum
-const int COLOROPTION_COLOR     = 0;
-const int COLOROPTION_VELOCITY  = 1; 
-const int COLOROPTION_SPEED     = 2;
+const int COLOROPTION_COLOR = 0;
+const int COLOROPTION_VELOCITY = 1; 
+const int COLOROPTION_SPEED = 2;
 const int COLOROPTION_OTHERDATA = 3;
+const int COLOROPTION_FIXEDCOLOR = 4;
 
 uniform sampler1D colorTexture;
 uniform sampler2D psfTexture;
 uniform float alphaValue;
+
+uniform vec4 fixedColor;
 
 uniform int colorOption;
 
@@ -89,21 +92,28 @@ Fragment getFragment() {
                 color = otherDataValue();
             }
             break;
+        case COLOROPTION_FIXEDCOLOR:
+            color = fixedColor;
+            break;
     }
 
-    vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
+    vec4 textureColor = texture(psfTexture, 0.5 * psfCoords + 0.5);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
     fullColor.a *= alphaValue;
+
+    if (colorOption == COLOROPTION_FIXEDCOLOR) {
+        fullColor.a *= fixedColor.a;
+    }
     
     if (fullColor.a == 0) {
         discard;
     }
 
     Fragment frag;
-    frag.color     = fullColor;
-    frag.depth     = gs_screenSpaceDepth;
+    frag.color = fullColor;
+    frag.depth = gs_screenSpaceDepth;
     frag.gPosition = vs_position;
-    frag.gNormal   = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
     frag.disableLDR2HDR = true;
     
     return frag;

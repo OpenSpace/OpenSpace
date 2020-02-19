@@ -94,10 +94,12 @@ bool TextureCygnet::updateTextureResource() {
         if (imageFile.corrupted) {
             delete[] imageFile.buffer;
             return false;
-        } else {
+        }
+        else {
             _imageFile = imageFile;
         }
-    } else {
+    }
+    else {
         return false;
     }
 

@@ -49,7 +49,8 @@ void DataPlane::initializeGL() {
     if (_group) {
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
-    } else {
+    }
+    else {
         _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden
@@ -60,7 +61,8 @@ void DataPlane::initializeGL() {
                 _backgroundValues = _dataProcessor->filterValues();
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
             // else if autofilter is turned off, register backgroundValues
-            } else {
+            }
+            else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
             }
         });
@@ -148,7 +150,7 @@ std::vector<float*> DataPlane::textureData(){
         return std::vector<float*>();
     }
 
-    if(!_dataOptions.options().size()) { // load options for value selection
+    if (!_dataOptions.options().size()) { // load options for value selection
         fillOptions(_dataBuffer);
         _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
 

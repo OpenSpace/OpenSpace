@@ -62,7 +62,8 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     if (configuration.hasKey(KeySynchronizationRoot)) {
         _synchronizationRoot = configuration.value<std::string>(KeySynchronizationRoot);
-    } else {
+    }
+    else {
         LWARNINGC(
             "SyncModule",
             "No synchronization root specified. Disabling resource synchronization"

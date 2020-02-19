@@ -6,7 +6,7 @@ local localFolder = asset.syncedResource({
     Name = "Mercury Magnetosphere",
     Type = "HttpSynchronization",
     Identifier = "mercury_magnetosphere",
-    Version = 2
+    Version = 3
 })
 
 

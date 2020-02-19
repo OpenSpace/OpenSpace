@@ -64,7 +64,8 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
         for (size_t v = 0; v < numVoxels; ++v) {
             histogram.add(voxelValues[v], 1.0);
         }
-    } else {
+    }
+    else {
         // Has children
         std::vector<unsigned int> children;
 
@@ -89,7 +90,8 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
                     // If node has both BST and Octree children, only add BST ones
                     histogram.add(_histograms[childIndex]);
                 }
-            } else {
+            }
+            else {
                 return false;
             }
         }

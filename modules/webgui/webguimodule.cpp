@@ -174,7 +174,8 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     auto startOrStop = [this]() {
         if (_enabled && !_entryPoint.value().empty()) {
             startProcess();
-        } else {
+        }
+        else {
             stopProcess();
         }
     };

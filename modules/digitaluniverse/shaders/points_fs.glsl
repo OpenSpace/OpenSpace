@@ -41,7 +41,8 @@ Fragment getFragment() {
 
     if (hasColorMap) {
         frag.color = vec4(colorMap.xyz, alphaValue);        
-    } else {
+    }
+    else {
         frag.color = vec4(color, alphaValue);
     }
     

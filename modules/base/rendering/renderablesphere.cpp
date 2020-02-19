@@ -424,7 +424,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_FRONT);
-    } else if (orientation == Orientation::Both) {
+    }
+    else if (orientation == Orientation::Both) {
         glDisable(GL_CULL_FACE);
     }
 
@@ -455,7 +456,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_BACK);
-    } else if (orientation == Orientation::Both) {
+    }
+    else if (orientation == Orientation::Both) {
         glEnable(GL_CULL_FACE);
     }
 }

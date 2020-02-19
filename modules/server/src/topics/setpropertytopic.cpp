@@ -70,11 +70,14 @@ namespace {
     std::string luaLiteralFromJson(nlohmann::json value) {
         if (value.is_string()) {
             return "'" + escapedLuaString(value.get<std::string>()) + "'";
-        } else if (value.is_boolean()) {
+        }
+        else if (value.is_boolean()) {
             return value.get<bool>() ? "true" : "false";
-        } else if (value.is_number()) {
+        }
+        else if (value.is_number()) {
             return std::to_string(value.get<double>());
-        } else if (value.is_array()) {
+        }
+        else if (value.is_array()) {
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += luaLiteralFromJson(it.value()) += ",";
@@ -82,7 +85,8 @@ namespace {
             literal.pop_back(); // remove last comma
             literal += "}";
             return literal;
-        } else if (value.is_object()) {
+        }
+        else if (value.is_object()) {
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
@@ -90,7 +94,8 @@ namespace {
             literal.pop_back(); // remove last comma
             literal += "}";
             return literal;
-        }{
+        }
+        else {
             return "nil";
         }
     }

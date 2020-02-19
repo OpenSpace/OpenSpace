@@ -182,7 +182,8 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
             ghoul::Dictionary returnValue =
                 ghoul::lua::loadArrayDictionaryFromString(script, _state);
             callback(returnValue);
-        } else {
+        }
+        else {
             ghoul::lua::runScript(_state, script);
         }
     }
@@ -651,7 +652,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
 
                 return false;
             }
-        } else {
+        }
+        else {
             _logScripts = false;
             return false;
         }
@@ -738,7 +740,8 @@ void ScriptEngine::postSync(bool isMaster) {
                 continue;
             }
         }
-    } else {
+    }
+    else {
         std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
         while (!_slaveScriptQueue.empty()) {
             try {

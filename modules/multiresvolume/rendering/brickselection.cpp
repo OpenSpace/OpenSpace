@@ -70,7 +70,8 @@ BrickSelection BrickSelection::splitTemporally(bool t, unsigned int childBrickIn
     if (t) {
         child.lowT = centerT();
         child.highT = highT;
-    } else {
+    }
+    else {
         child.lowT = lowT;
         child.highT = centerT();
     }

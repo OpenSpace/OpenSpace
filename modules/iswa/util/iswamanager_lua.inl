@@ -88,7 +88,8 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
     if (global::renderEngine.screenSpaceRenderable(name)) {
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return 0;
-    } else {
+    }
+    else {
         d.setValue("Name", name);
         d.setValue("Type", "ScreenSpaceCygnet");
         d.setValue("UpdateInterval", static_cast<float>(updateInterval));
@@ -108,14 +109,17 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
 //     std::string type = "x";
 //     std::string group = "";
 
-//     if(nArguments > 0)
+//     if (nArguments > 0) {
 //         kwPath = luaL_checkstring(L, 1);
+//     }
 
-//     if(nArguments > 1)
+//     if (nArguments > 1) {
 //         type = luaL_checkstring(L, 2);
+//     }
 
-//     if(nArguments > 2)
+//     if (nArguments > 2) {
 //         group = luaL_checkstring(L, 3);
+//     }
 
 //     IswaManager::ref().createKameleonPlane(kwPath, type, group);
 //     return 0;

@@ -67,7 +67,8 @@ Fragment getFragment() {
     
     if (distanceCenter > dLW) {
         frag.color.a = 0.0;
-    } else {
+    }
+    else {
         frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
     }
 

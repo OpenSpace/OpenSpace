@@ -1157,12 +1157,14 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
             if (_loadingStatesDynamically) {
                 _mustLoadNewStateFromDisk = true;
-            } else {
+            }
+            else {
                 _needsUpdate = true;
                 _activeStateIndex = _activeTriggerTimeIndex;
             }
         } // else {we're still in same state as previous frame (no changes needed)}
-    } else {
+    }
+    else {
         // Not in interval => set everything to false
         _activeTriggerTimeIndex   = -1;
         _mustLoadNewStateFromDisk = false;
@@ -1221,7 +1223,8 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTi
         else {
             _activeTriggerTimeIndex = 0;
         }
-    } else {
+    }
+    else {
         _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
     }
 }

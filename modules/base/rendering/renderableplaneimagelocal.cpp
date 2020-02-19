@@ -102,7 +102,8 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         );
         if (renderType == "Background") {
             setRenderBin(Renderable::RenderBin::Background);
-        } else if (renderType == "Opaque") {
+        }
+        else if (renderType == "Opaque") {
             setRenderBin(Renderable::RenderBin::Opaque);
         }
         else if (renderType == "Transparent") {

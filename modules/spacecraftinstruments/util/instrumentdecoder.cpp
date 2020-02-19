@@ -53,7 +53,8 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
 
     if (dictionary.hasKeyAndValue<std::string>(KeyStopCommand) && _type == "SCANNER"){
         dictionary.getValue(KeyStopCommand, _stopCommand);
-    } else {
+    }
+    else {
         LWARNING("Scanner must provide stop command, please check mod file.");
     }
 

@@ -125,7 +125,8 @@ void Connection::handleMessage(const std::string& message) {
                 message
             ));
             return;
-        } else {
+        }
+        else {
             std::string sanitizedString = message;
             std::transform(
                 message.begin(),
@@ -183,7 +184,8 @@ void Connection::handleJson(const nlohmann::json& json) {
         if (!topic->isDone()) {
             _topics.emplace(topicId, std::move(topic));
         }
-    } else {
+    }
+    else {
         if (!isAuthorized()) {
             LERROR("Connection isn't authorized.");
             return;

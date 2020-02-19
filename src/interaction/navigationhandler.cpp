@@ -53,6 +53,12 @@ namespace {
     constexpr const char* KeyReferenceFrame = "ReferenceFrame";
     const double Epsilon = 1E-7;
 
+    constexpr const openspace::properties::Property::PropertyInfo KeyDisableInputInfo = {
+        "DisableInputs",
+        "Disable all mouse inputs",
+        "Disables all mouse inputs and prevents them from affecting the camera"
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
@@ -142,11 +148,13 @@ NavigationHandler::NavigationState::NavigationState(std::string anchor, std::str
 
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
+    , _disableInputs(KeyDisableInputInfo, false)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
-    // Add the properties
-    addProperty(_useKeyFrameInteraction);
     addPropertySubOwner(_orbitalNavigator);
+
+    addProperty(_disableInputs);
+    addProperty(_useKeyFrameInteraction);
 }
 
 NavigationHandler::~NavigationHandler() {} // NOLINT
@@ -326,20 +334,28 @@ const InputState& NavigationHandler::inputState() const {
 }
 
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-    _inputState.mouseButtonCallback(button, action);
+    if (!_disableInputs) {
+        _inputState.mouseButtonCallback(button, action);
+    }
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
-    _inputState.mousePositionCallback(x, y);
+    if (!_disableInputs) {
+        _inputState.mousePositionCallback(x, y);
+    }
 }
 
 void NavigationHandler::mouseScrollWheelCallback(double pos) {
-    _inputState.mouseScrollWheelCallback(pos);
+    if (!_disableInputs) {
+        _inputState.mouseScrollWheelCallback(pos);
+    }
 }
 
 void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
-    _inputState.keyboardCallback(key, modifier, action);
+    if (!_disableInputs) {
+        _inputState.keyboardCallback(key, modifier, action);
+    }
 }
 
 NavigationHandler::NavigationState NavigationHandler::navigationState() const {

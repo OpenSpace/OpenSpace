@@ -78,7 +78,8 @@ void main(void) {
         vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nu).rgb;
         // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
         irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * w.z * dw;
-      } else {
+      }
+      else {
         // On line 10 of the algorithm, the texture table deltaE is updated, so when we are not in the first
         // iteraction, we are getting the updated result of deltaE (not the single irradiance light but the
         // accumulated (higher order) irradiance light.

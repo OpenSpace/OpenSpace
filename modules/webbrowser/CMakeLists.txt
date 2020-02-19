@@ -152,7 +152,7 @@ set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 # CEF platform-specific config
 #
 
-if(OS_MACOSX)
+if (OS_MACOSX)
   # Helper executable target.
   add_executable(${CEF_HELPER_TARGET} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
   SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
@@ -163,12 +163,15 @@ if(OS_MACOSX)
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
   )
 
-  if(USE_SANDBOX)
+  target_compile_options(${CEF_HELPER_TARGET} PRIVATE -Wno-deprecated-declarations)
+  target_compile_options(libcef_dll_wrapper PRIVATE -Wno-deprecated-declarations)
+
+  if (USE_SANDBOX)
     # Logical target used to link the cef_sandbox library.
     ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
     target_link_libraries(${CEF_HELPER_TARGET} cef_sandbox_lib)
-  endif()
-endif()
+  endif ()
+endif ()
 
 if (OS_WINDOWS)
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")

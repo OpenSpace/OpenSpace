@@ -142,10 +142,12 @@ void HttpRequest::perform(RequestOptions opt) {
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode); // NOLINT
         if (responseCode == StatusCodeOk) {
             setReadyState(ReadyState::Success);
-        } else {
+        }
+        else {
             setReadyState(ReadyState::Fail);
         }
-    } else {
+    }
+    else {
         setReadyState(ReadyState::Fail);
     }
     curl_easy_cleanup(curl);
@@ -218,7 +220,8 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
             LTRACE(fmt::format("Finished sync download '{}'", _httpRequest.url()));
             deinitDownload();
             markAsSuccessful();
-        } else if (rs == HttpRequest::ReadyState::Fail) {
+        }
+        else if (rs == HttpRequest::ReadyState::Fail) {
             LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
             deinitDownload();
             markAsFailed();

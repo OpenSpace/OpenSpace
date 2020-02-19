@@ -109,13 +109,15 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
             dictionary.value<glm::dvec3>(RotationInfo.identifier)
         );
         _matrixIsDirty = true;
-    } else if (dictionary.hasKeyAndValue<glm::dvec4>(RotationInfo.identifier)) {
+    }
+    else if (dictionary.hasKeyAndValue<glm::dvec4>(RotationInfo.identifier)) {
         glm::dvec4 data = dictionary.value<glm::dvec4>(RotationInfo.identifier);
         _eulerRotation = rotationMatrixToEulerAngles(
             glm::mat3_cast(glm::dquat(data.w, data.x, data.y, data.z))
         );
         _matrixIsDirty = true;
-    } else if (dictionary.hasKeyAndValue<glm::dmat3>(RotationInfo.identifier)) {
+    }
+    else if (dictionary.hasKeyAndValue<glm::dmat3>(RotationInfo.identifier)) {
         _eulerRotation = rotationMatrixToEulerAngles(
             dictionary.value<glm::dmat3>(RotationInfo.identifier)
         );

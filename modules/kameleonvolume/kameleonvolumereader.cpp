@@ -222,7 +222,8 @@ std::string KameleonVolumeReader::simulationStart() const {
     std::string startTime;
     if (_kameleon.model->doesAttributeExist("start_time")) {
         startTime = globalAttribute<std::string>(*_kameleon.model, "start_time");
-    } else if (_kameleon.model->doesAttributeExist("tim_rundate_cal")) {
+    }
+    else if (_kameleon.model->doesAttributeExist("tim_rundate_cal")) {
         startTime = globalAttribute<std::string>(*_kameleon.model, "tim_rundate_cal");
         size_t numChars = startTime.length();
         if (numChars < 19) {
@@ -247,9 +248,11 @@ std::string KameleonVolumeReader::simulationStart() const {
                     break;
             }
         }
-    } else if (_kameleon.model->doesAttributeExist("tim_obsdate_cal")) {
+    }
+    else if (_kameleon.model->doesAttributeExist("tim_obsdate_cal")) {
         startTime = globalAttribute<std::string>(*_kameleon.model, "tim_obsdate_cal");
-    } else if (_kameleon.model->doesAttributeExist("tim_crstart_cal")) {
+    }
+    else if (_kameleon.model->doesAttributeExist("tim_crstart_cal")) {
         startTime = globalAttribute<std::string>(*_kameleon.model, "tim_crstart_cal");
     }
 
@@ -263,7 +266,8 @@ std::string KameleonVolumeReader::simulationStart() const {
 float KameleonVolumeReader::elapsedTime() const {
     if (_kameleon.model->doesAttributeExist("elapsed_time_in_seconds")) {
         return globalAttribute<float>(*_kameleon.model, "elapsed_time_in_seconds");
-    } else if (_kameleon.model->doesAttributeExist("time_physical_time")) {
+    }
+    else if (_kameleon.model->doesAttributeExist("time_physical_time")) {
         return globalAttribute<float>(*_kameleon.model, "time_physical_time");
     }
     return 0.f;

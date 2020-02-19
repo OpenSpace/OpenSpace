@@ -155,7 +155,8 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     const std::string type = config.value<std::string>(TypeInfo.identifier);
     if (type == TcpSocketType) {
         _type = static_cast<int>(InterfaceType::TcpSocket);
-    } else if (type == WebSocketType) {
+    }
+    else if (type == WebSocketType) {
         _type = static_cast<int>(InterfaceType::WebSocket);
     }
 

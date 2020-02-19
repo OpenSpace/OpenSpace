@@ -330,7 +330,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
             }
             lastHadMissingData = tileMetaData.hasMissingData[HeightChannel];
         }
-        else if(chunkTile.tile.status == Tile::Status::Unavailable) {
+        else if (chunkTile.tile.status == Tile::Status::Unavailable) {
             boundingHeights.tileOK = false;
         }
 

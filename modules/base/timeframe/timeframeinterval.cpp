@@ -133,7 +133,8 @@ TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
             dictionary.value<std::string>(StartInfo.identifier)
         );
         _hasStart = true;
-    } else if (dictionary.hasValue<double>(StartInfo.identifier)) {
+    }
+    else if (dictionary.hasValue<double>(StartInfo.identifier)) {
         _start = dictionary.value<double>(StartInfo.identifier);
         _hasStart = true;
     }

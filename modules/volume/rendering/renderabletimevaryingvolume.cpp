@@ -452,7 +452,8 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
                 modelTransform = modelTransform * scaleMatrix;
                 _raycaster->setModelTransform(glm::mat4(modelTransform));
-            } else {
+            }
+            else {
                 // The diameter is two times the maximum radius.
                 // No translation: the sphere is always centered in (0, 0, 0)
                 _raycaster->setModelTransform(
@@ -463,7 +464,8 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
-        } else {
+        }
+        else {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
