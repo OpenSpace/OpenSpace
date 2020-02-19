@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___CAMERA___H__
 #define __OPENSPACE_CORE___CAMERA___H__
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <mutex>
@@ -36,7 +35,6 @@ class SceneGraphNode;
 
 /**
  * This class still needs some more love. Suggested improvements:
- * - Remove psc from the camera class interface.
  * - Accessors should return constant references to double precision class members.
  * - Remove the scaling variable (What is it used for?)
  * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded
@@ -60,9 +58,8 @@ public:
      */
     template<typename T>
     struct Cached {
-        Cached() { isDirty = true; }
-        T datum;
-        bool isDirty;
+        T datum = T(0);
+        bool isDirty = true;
     };
 
     Camera() = default;
@@ -101,7 +98,6 @@ public:
     // Right now this function returns the actual combined matrix which makes some
     // of the old calls to the function wrong..
     const glm::dmat4& combinedViewMatrix() const;
-    const glm::dmat4& combinedViewMatrixNoScale() const;
 
     void invalidateCache();
 
@@ -128,9 +124,9 @@ public:
         SgctInternal() = default;
         SgctInternal(const SgctInternal& o);
 
-        glm::mat4 _sceneMatrix;
-        glm::mat4 _viewMatrix;
-        glm::mat4 _projectionMatrix;
+        glm::mat4 _sceneMatrix = glm::mat4(1.f);
+        glm::mat4 _viewMatrix = glm::mat4(1.f);
+        glm::mat4 _projectionMatrix = glm::mat4(1.f);
 
         mutable Cached<glm::mat4> _cachedViewProjectionMatrix;
         mutable std::mutex _mutex;
@@ -158,7 +154,7 @@ private:
     SceneGraphNode* _parent = nullptr;
 
     // _focusPosition to be removed
-    glm::dvec3 _focusPosition;
+    glm::dvec3 _focusPosition = glm::dvec3(0.0);
     float _maxFov = 0.f;
 
     // Cached data

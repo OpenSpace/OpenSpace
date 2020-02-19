@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace::globebrowsing {
 
@@ -308,14 +309,9 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     });
 
     _remove.onChange([&]() {
-        try {
-            if (_tileProvider) {
-                tileprovider::reset(*_tileProvider);
-            }
-        }
-        catch (...) {
+        if (_tileProvider) {
+            tileprovider::reset(*_tileProvider);
             _parent.deleteLayer(identifier());
-            throw;
         }
     });
 
@@ -454,6 +450,8 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
 }
 
 int Layer::update() {
+    ZoneScoped
+
     if (_tileProvider) {
         return tileprovider::update(*_tileProvider);
     }

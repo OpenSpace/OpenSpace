@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -41,7 +41,9 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablenodeline.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.h
@@ -89,7 +91,9 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablenodeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.cpp
@@ -126,6 +130,8 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/grid_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/line_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/line_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_fs.glsl

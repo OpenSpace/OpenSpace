@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ public:
     typename VolumeType::VoxelType sample(const glm::vec3& position) const;
 
 private:
-    glm::ivec3 _filterSize;
+    glm::ivec3 _filterSize = glm::ivec3(0);
     const VolumeType* _volume;
 };
 

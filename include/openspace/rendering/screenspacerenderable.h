@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,6 +75,8 @@ public:
 
 protected:
     void createShaders();
+    std::string makeUniqueIdentifier(std::string name);
+
     glm::mat4 scaleMatrix();
     glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
@@ -105,7 +107,7 @@ protected:
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
-    glm::ivec2 _objectSize;
+    glm::ivec2 _objectSize = glm::ivec2(0);
     UniformCache(alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };

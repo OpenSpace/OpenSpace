@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -99,13 +99,13 @@ public:
 
 private:
     struct CameraRotationDecomposition {
-        glm::dquat localRotation;
-        glm::dquat globalRotation;
+        glm::dquat localRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
+        glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
     struct CameraPose {
-        glm::dvec3 position;
-        glm::dquat rotation;
+        glm::dvec3 position = glm::dvec3(0.0);
+        glm::dquat rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;

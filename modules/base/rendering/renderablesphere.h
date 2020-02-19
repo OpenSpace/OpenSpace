@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class PowerScaledSphere;
+class Sphere;
 struct RenderData;
 struct UpdateData;
 
@@ -83,7 +83,7 @@ private:
     ghoul::opengl::ProgramObject* _shader = nullptr;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    std::unique_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<Sphere> _sphere;
 
     UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
         _mirrorTexture) _uniformCache;

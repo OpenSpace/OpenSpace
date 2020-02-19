@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,6 +54,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
@@ -122,16 +123,6 @@ namespace {
         "Shows information about the current camera state, such as friction",
         "This value determines whether the information about the current camrea state is "
         "shown on the screen"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
-        "TakeScreenshot",
-        "Take Screenshot",
-        "If this property is triggered, a screenshot is taken and stored in the current "
-        "working directory (which is the same directory where the OpenSpace.exe) is "
-        "located in most cases. The images are prefixed with 'SGCT' and postfixed with "
-        "the number of frames. This function will silently overwrite images that are "
-        "already present in the folder."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
@@ -264,7 +255,6 @@ RenderEngine::RenderEngine()
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
-    , _takeScreenshot(TakeScreenshotInfo)
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -346,7 +336,7 @@ RenderEngine::RenderEngine()
 
     _hue.onChange([this]() {
         if (_renderer) {
-            const float h = _hue / 360.0;
+            const float h = _hue / 360.f;
             _renderer->setHue(h);
         }
     });
@@ -378,9 +368,6 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_horizFieldOfView);
-
-    _takeScreenshot.onChange([this](){ _shouldTakeScreenshot = true; });
-    addProperty(_takeScreenshot);
 
     addProperty(_showFrameInformation);
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -422,6 +409,8 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 void RenderEngine::initialize() {
+    ZoneScoped
+
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
     _globalRotation = static_cast<glm::vec3>(global::configuration.globalRotation);
@@ -460,6 +449,8 @@ void RenderEngine::initialize() {
 }
 
 void RenderEngine::initializeGL() {
+    ZoneScoped
+
     LTRACE("RenderEngine::initializeGL(begin)");
 
     std::string renderingMethod = global::configuration.renderingMethod;
@@ -509,10 +500,14 @@ void RenderEngine::initializeGL() {
 }
 
 void RenderEngine::deinitializeGL() {
+    ZoneScoped
+
     _renderer = nullptr;
 }
 
 void RenderEngine::updateScene() {
+    ZoneScoped
+
     if (!_scene) {
         return;
     }
@@ -533,6 +528,8 @@ void RenderEngine::updateScene() {
 }
 
 void RenderEngine::updateShaderPrograms() {
+    ZoneScoped
+
     for (ghoul::opengl::ProgramObject* program : _programs) {
         try {
             if (program->isDirty()) {
@@ -546,6 +543,8 @@ void RenderEngine::updateShaderPrograms() {
 }
 
 void RenderEngine::updateRenderer() {
+    ZoneScoped
+
     const bool windowResized = global::windowDelegate.windowHasResized();
 
     if (windowResized) {
@@ -563,18 +562,15 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
+    ZoneScoped
+
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         ssr->update();
     }
 }
 
 glm::ivec2 RenderEngine::renderingResolution() const {
-    if (global::windowDelegate.isRegularRendering()) {
-        return global::windowDelegate.currentWindowResolution();
-    }
-    else {
-        return global::windowDelegate.currentDrawBufferResolution();
-    }
+    return global::windowDelegate.currentDrawBufferResolution();
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
@@ -583,7 +579,7 @@ glm::ivec2 RenderEngine::fontResolution() const {
         return global::windowDelegate.currentViewportSize();
     }
     else {
-        return global::windowDelegate.currentWindowSize();
+        return global::windowDelegate.currentSubwindowSize();
     }
 }
 
@@ -627,6 +623,8 @@ uint64_t RenderEngine::frameNumber() const {
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
+    ZoneScoped
+
     LTRACE("RenderEngine::render(begin)");
 
     const WindowDelegate& delegate = global::windowDelegate;
@@ -654,6 +652,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (_showFrameInformation) {
+        ZoneScopedN("Show Frame Information")
+
         glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
             fontResolution().y / 3
@@ -666,6 +666,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                 case WindowDelegate::Frustum::Mono: return "";
                 case WindowDelegate::Frustum::LeftEye: return "(left)";
                 case WindowDelegate::Frustum::RightEye: return "(right)";
+                default: throw std::logic_error("Unhandled case label");
             }
         }(frustum);
 
@@ -680,6 +681,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+        ZoneScopedN("Render Screenspace Renderable")
+
         std::vector<ScreenSpaceRenderable*> ssrs;
         ssrs.reserve(global::screenSpaceRenderables.size());
         for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
@@ -758,6 +761,8 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 }
 
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
+    ZoneScoped
+
     const bool isMaster = global::windowDelegate.isMaster();
     if (isMaster || _showOverlayOnSlaves) {
         renderScreenLog();
@@ -780,10 +785,15 @@ void RenderEngine::renderEndscreen() {
     glEnable(GL_BLEND);
 
     rendering::helper::renderBox(
-        glm::vec2(0.f, 0.f),
-        glm::vec2(1.f, 1.f),
+        glm::vec2(0.f),
+        glm::vec2(1.f),
         glm::vec4(0.f, 0.f, 0.f, 0.5f)
     );
+
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::ivec2 res =
+        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
+    glViewport(0, 0, res.x, res.y);
 
     using FR = ghoul::fontrendering::FontRenderer;
     using BBox = FR::BoundingBoxInformation;
@@ -799,6 +809,8 @@ void RenderEngine::renderEndscreen() {
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
+    ZoneScoped
+
     timer = std::max(timer, 0.f);
 
     using BBox = ghoul::fontrendering::FontRenderer::BoundingBoxInformation;
@@ -830,6 +842,8 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::renderDashboard() {
+    ZoneScoped
+
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
@@ -862,22 +876,9 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
+    ZoneScoped
+
     ++_frameNumber;
-
-    if (_shouldTakeScreenshot) {
-        // We only create the directory here, as we don't want to spam the users
-        // screenshot folder everytime we start OpenSpace even when we are not taking any
-        // screenshots. So the first time we actually take one, we create the folder:
-        if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
-            FileSys.createDirectory(
-                absPath("${SCREENSHOTS}"),
-                ghoul::filesystem::FileSystem::Recursive::Yes
-            );
-        }
-
-        global::windowDelegate.takeScreenshot(_applyWarping);
-        _shouldTakeScreenshot = false;
-    }
 
     if (global::performanceManager.isEnabled()) {
         global::performanceManager.storeScenePerformanceMeasurements(
@@ -1061,10 +1062,28 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 /**
-  * Mark that one screenshot should be taken
-*/
-void RenderEngine::takeScreenShot() {
-    _shouldTakeScreenshot = true;
+ * Take a screenshot and store it in the ${SCREENSHOTS} directory
+ */
+void RenderEngine::takeScreenshot() {
+    // We only create the directory here, as we don't want to spam the users
+    // screenshot folder everytime we start OpenSpace even when we are not taking any
+    // screenshots. So the first time we actually take one, we create the folder:
+
+    if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
+        FileSys.createDirectory(
+            absPath("${SCREENSHOTS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes
+        );
+    }
+
+    _latestScreenshotNumber = global::windowDelegate.takeScreenshot(_applyWarping);
+}
+
+/**
+ * Get the latest screenshot filename
+ */
+unsigned int RenderEngine::latestScreenshotNumber() const {
+    return _latestScreenshotNumber;
 }
 
 /**
@@ -1123,6 +1142,14 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "Given a ScreenSpaceRenderable name this script will remove it from the "
                 "renderengine"
             },
+            {
+                "takeScreenshot",
+                &luascriptfunctions::takeScreenshot,
+                {},
+                "",
+                "Take a screenshot and return the screenshot number. The screenshot will "
+                "be stored in the ${SCREENSHOTS} folder. "
+            }
         },
     };
 }
@@ -1224,6 +1251,8 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(
 }
 
 void RenderEngine::renderCameraInformation() {
+    ZoneScoped
+
     if (!_showCameraInfo) {
         return;
     }
@@ -1298,6 +1327,8 @@ void RenderEngine::renderCameraInformation() {
 }
 
 void RenderEngine::renderVersionInformation() {
+    ZoneScoped
+
     if (!_showVersionInfo) {
         return;
     }
@@ -1361,6 +1392,8 @@ void RenderEngine::renderVersionInformation() {
 }
 
 void RenderEngine::renderScreenLog() {
+    ZoneScoped
+
     if (!_showLog) {
         return;
     }
@@ -1417,7 +1450,7 @@ void RenderEngine::renderScreenLog() {
             white
         );
 
-        glm::vec4 color(glm::uninitialize);
+        glm::vec4 color = glm::vec4(0.f);
         switch (e->level) {
             case ghoul::logging::LogLevel::Debug:
                 color = glm::vec4(0.f, 1.f, 0.f, alpha);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,7 +81,8 @@ double getTime(ccmc::Kameleon* kameleon) {
         if (kameleon->doesAttributeExist("start_time")){
             seqStartStr =
                     kameleon->getGlobalAttribute("start_time").getAttributeString();
-        } else if (kameleon->doesAttributeExist("tim_rundate_cal")) {
+        }
+        else if (kameleon->doesAttributeExist("tim_rundate_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_rundate_cal").getAttributeString();
             const size_t N_CHARS = seqStartStr.length();
@@ -111,13 +112,16 @@ double getTime(ccmc::Kameleon* kameleon) {
                         break;
                 }
             }
-        } else if (kameleon->doesAttributeExist("tim_obsdate_cal")) {
+        }
+        else if (kameleon->doesAttributeExist("tim_obsdate_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
-        } else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
+        }
+        else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
-        } else {
+        }
+        else {
             LWARNING(
                 "No starting time attribute could be found in the .cdf file. Starting "
                 "time is set to 01.JAN.2000 12:00."
@@ -133,7 +137,8 @@ double getTime(ccmc::Kameleon* kameleon) {
             seqStartDbl = Time::convertTime(
                 seqStartStr.substr(0, seqStartStr.length() - 2)
             );
-        } else {
+        }
+        else {
             LWARNING("No starting time attribute could be found in the .cdf file."
                 "Starting time is set to 01.JAN.2000 12:00.");
             seqStartDbl = 0.0;
@@ -144,10 +149,12 @@ double getTime(ccmc::Kameleon* kameleon) {
         if (kameleon->doesAttributeExist("elapsed_time_in_seconds")) {
             ccmc::Attribute att = kameleon->getGlobalAttribute("elapsed_time_in_seconds");
             stateStartOffset = static_cast<double>(att.getAttributeFloat());
-        } else if (kameleon->doesAttributeExist("time_physical_time")) {
+        }
+        else if (kameleon->doesAttributeExist("time_physical_time")) {
             ccmc::Attribute att = kameleon->getGlobalAttribute("time_physical_time");
             stateStartOffset = static_cast<double>(att.getAttributeFloat());
-        } else {
+        }
+        else {
             stateStartOffset = 0.0;
             LWARNING("No time offset attribute could be found in the .cdf file."
                      "The current state starts the same time as the sequence!");

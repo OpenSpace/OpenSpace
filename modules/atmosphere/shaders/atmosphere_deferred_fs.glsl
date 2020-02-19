@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -128,14 +128,16 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], co
             if (ground) {
               if (hardShadows) {
                   return vec4(0.2, 0.2, 0.2, 1.0);
-              } else {
+              }
+              else {
                   return butterworthFunc(length_d, r_u_pi, 4.0);
               }
             }
             else {
               if (hardShadows) {
                   return vec4(0.5, 0.5, 0.5, 1.0);
-              } else {
+              }
+              else {
                   return vec4(vec3(length_d/r_p_pi), 1.0);
               }
             }
@@ -143,7 +145,8 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], co
         else if ( length_d < r_p_pi ) {// penumbra
             if (hardShadows) {
                 return vec4(0.5, 0.5, 0.5, 1.0); 
-            } else {
+            }
+            else {
                 return vec4(vec3(length_d/r_p_pi), 1.0);
             }
         }
@@ -212,7 +215,8 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
         inside    = false;
         offset    = s - q;
         maxLength = s + q;
-    } else {
+    }
+    else {
         inside    = true;
         offset    = 0.0;
         maxLength = s + q;
@@ -332,7 +336,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // We set the irradianceFactor to 1.0 so the reflected irradiance will be considered
         // when calculating the reflected light on the ground.
         irradianceFactor = 1.0;
-    } else {
+    }
+    else {
         attenuation = analyticTransmittance(r, mu, t);
         //attenuation = transmittance(r, mu, t); 
         groundHit = false;
@@ -412,13 +417,13 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     
     if (groundHit) {
         return finalScatteringRadiance;
-    } else {
+    }
+    else {
         //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
-        return attenuation * spaceColor.rgb + finalScatteringRadiance;
+        return spaceColor.rgb + finalScatteringRadiance;
         // return attenuation * spaceColor.rgb +
         // (vec3(1.0) - attenuation) * finalScatteringRadiance;
-    }
-    
+    }    
 }
 
 /* 
@@ -477,7 +482,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     vec3 RLStar = (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
     if (dotNS < 0.05f) {
         groundRadiance = groundReflectance.rgb * mix(30.0f, 1.0f, smoothstep(-1.0f, 0.05f, dotNS)) * RLStar;
-    } else {
+    }
+    else {
         groundRadiance = groundReflectance.rgb * RLStar;
     }
 
@@ -619,7 +625,8 @@ void main() {
             if (pixelDepth < offset) {
                 // ATM Occluded - Something in fron of ATM.
                 atmosphereFinalColor += color;
-            } else {
+            }
+            else {
                 // Following paper nomenclature      
                 double t = offset;                  
                 vec3 attenuation;     
@@ -659,7 +666,8 @@ void main() {
                     groundColorV = groundColor(x, tF, v, s, r, mu, attenuation,
                                                 color, normal.xyz, irradianceFactor, 
                                                 normal.a, sunIntensityGround);
-                } else {
+                }
+                else {
                     // In order to get better performance, we are not tracing
                     // multiple rays per pixel when the ray doesn't intersect
                     // the ground.

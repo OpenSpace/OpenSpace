@@ -1,8 +1,8 @@
-/****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,16 @@
 
 namespace openspace {
 
+const std::vector<int> LeapYears = {
+    1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
+    2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
+    2044, 2048, 2052, 2056
+};
+int countDays(int year);
+int countLeapSeconds(int year, int dayOfYear);
+double calculateSemiMajorAxis(double meanMotion);
+double epochFromSubstring(const std::string& epochString);
+
 class RenderableSatellites : public Renderable {
 public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);
@@ -64,9 +74,9 @@ public:
 
 private:
     struct Vertex {
-        glm::vec3 position;
-        glm::vec3 color;
-        glm::vec2 texcoord;
+        glm::vec3 position = glm::vec3(0.f);
+        glm::vec3 color = glm::vec3(0.f);
+        glm::vec2 texcoord = glm::vec2(0.f);
     };
 
     struct KeplerParameters {
@@ -83,8 +93,12 @@ private:
 
     /// The layout of the VBOs
     struct TrailVBOLayout {
-        float x, y, z, time;
-        double epoch, period; 
+        float x = 0.f;
+        float y = 0.f;
+        float z = 0.f;
+        float time = 0.f;
+        double epoch = 0.0;
+        double period = 0.0;
     };
 
     KeplerTranslation _keplerTranslator;
@@ -93,10 +107,6 @@ private:
     /// The backend storage for the vertex buffer object containing all points for this
     /// trail.
     std::vector<TrailVBOLayout> _vertexBufferData;
-
-    /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
-    std::vector<unsigned int> _indexBufferData;
 
     GLuint _vertexArray;
     GLuint _vertexBuffer;
@@ -113,11 +123,9 @@ private:
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
 
-    properties::DoubleProperty _lineFade;
-
     RenderableTrail::Appearance _appearance;
 
-    glm::vec3 _position;
+    glm::vec3 _position = glm::vec3(0.f);
 
     UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
         numberOfSegments) _uniformCache;

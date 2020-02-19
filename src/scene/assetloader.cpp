@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,13 +89,13 @@ namespace {
 
 namespace openspace {
 
-AssetLoader::AssetLoader(ghoul::lua::LuaState& luaState,
+AssetLoader::AssetLoader(ghoul::lua::LuaState* luaState,
                          SynchronizationWatcher* syncWatcher,
                          std::string assetRootDirectory)
     : _rootAsset(std::make_shared<Asset>(this, syncWatcher))
     , _synchronizationWatcher(syncWatcher)
     , _assetRootDirectory(std::move(assetRootDirectory))
-    , _luaState(&luaState)
+    , _luaState(luaState)
 {
     setCurrentAsset(_rootAsset);
 
@@ -323,7 +323,8 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     std::string prefix;
     if (pathType == PathType::RelativeToAsset) {
         prefix = baseDirectory + ghoul::filesystem::FileSystem::PathSeparator;
-    } else if (pathType == PathType::RelativeToAssetRoot) {
+    }
+    else if (pathType == PathType::RelativeToAssetRoot) {
         prefix = _assetRootDirectory + ghoul::filesystem::FileSystem::PathSeparator;
     }
 
@@ -464,7 +465,8 @@ void AssetLoader::unrequest(const std::string& identifier) {
 ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
     if (_currentAsset->hasAssetFile()) {
         return _currentAsset->assetDirectory();
-    } else {
+    }
+    else {
         return _assetRootDirectory;
     }
 }

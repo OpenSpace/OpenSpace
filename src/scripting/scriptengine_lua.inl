@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -412,18 +412,18 @@ int saveLastChangeToProfile(lua_State* L) {
     std::string strNew = fmt::format("{}\n{}",actualLastLine, strReplace);
     std::ifstream filein(assetPath);
     std::ofstream fileout(tempAssetPath);
-    if(!filein) {
+    if (!filein) {
         ghoul::lua::push(L, fmt::format("Could not open profile '{}'", assetPath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
-    if(!fileout) {
+    if (!fileout) {
         ghoul::lua::push(L, fmt::format("Could not open tmp profile '{}'", tempAssetPath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
 
     bool found = false;
     while(std::getline (filein, line)) {
-        if(line == strReplace){
+        if (line == strReplace) {
             line = strNew;
             found = true;
         }
@@ -444,7 +444,8 @@ int saveLastChangeToProfile(lua_State* L) {
         }
         FileSys.deleteFile(tempAssetPath);
         return 0;
-    } else {
+    }
+    else {
         ghoul::lua::push(L, "can not save to built in profiles");
         printInternal(ghoul::logging::LogLevel::Error, L);
         return -1;

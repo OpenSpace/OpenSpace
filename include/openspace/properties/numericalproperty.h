@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,7 @@ public:
     using TemplateProperty<T>::operator=;
 
 
-    void setInterpolationTarget(ghoul::any value) override;
+    void setInterpolationTarget(std::any value) override;
     void setLuaInterpolationTarget(lua_State* state) override;
     void setStringInterpolationTarget(std::string value) override;
 
@@ -90,13 +90,13 @@ protected:
      */
     std::string luaToJson(std::string luaValue) const;
 
-    T _minimumValue;
-    T _maximumValue;
-    T _stepping;
-    float _exponent;
+    T _minimumValue = T(0);
+    T _maximumValue = T(0);
+    T _stepping = T(0);
+    float _exponent = 0.f;
 
-    T _interpolationStart;
-    T _interpolationEnd;
+    T _interpolationStart = T(0);
+    T _interpolationEnd = T(0);
 };
 
 } // namespace openspace::properties

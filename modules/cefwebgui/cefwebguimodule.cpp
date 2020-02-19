@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -86,6 +87,8 @@ CefWebGuiModule::CefWebGuiModule()
 }
 
 void CefWebGuiModule::startOrStopGui() {
+    ZoneScoped
+
     WebBrowserModule* webBrowserModule = global::moduleEngine.module<WebBrowserModule>();
 
     const bool isGuiWindow =
@@ -103,7 +106,13 @@ void CefWebGuiModule::startOrStopGui() {
                 new GUIKeyboardHandler
             );
             _instance->initialize();
-            _instance->loadUrl(_url);
+            _instance->reshape(static_cast<glm::ivec2>(
+                static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
+                global::windowDelegate.dpiScaling()
+                ));
+            if (!_url.value().empty()) {
+                _instance->loadUrl(_url);
+            }
         }
         if (_visible) {
             webBrowserModule->attachEventHandler(_instance.get());
@@ -112,7 +121,8 @@ void CefWebGuiModule::startOrStopGui() {
         _instance->setZoom(_guiScale);
 
         webBrowserModule->addBrowser(_instance.get());
-    } else if (_instance) {
+    }
+    else if (_instance) {
         _instance->close(true);
         webBrowserModule->removeBrowser(_instance.get());
         webBrowserModule->detachEventHandler();
@@ -121,6 +131,8 @@ void CefWebGuiModule::startOrStopGui() {
 }
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
+    ZoneScoped
+
     WebBrowserModule* webBrowserModule =
         global::moduleEngine.module<WebBrowserModule>();
 
@@ -131,31 +143,42 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     }
 
     _enabled.onChange([this]() {
+        ZoneScopedN("CefWebGuiModule::enabled")
+
         startOrStopGui();
     });
 
     _url.onChange([this]() {
+        ZoneScopedN("CefWebGuiModule::url")
+
         if (_instance) {
             _instance->loadUrl(_url);
         }
     });
 
     _reload.onChange([this]() {
+        ZoneScopedN("CefWebGuiModule::reload")
+
         if (_instance) {
             _instance->reloadBrowser();
         }
     });
 
     _guiScale.onChange([this]() {
+        ZoneScopedN("CefWebGuiModule::guiScale")
+
         if (_instance) {
             _instance->setZoom(_guiScale);
         }
     });
 
     _visible.onChange([this, webBrowserModule]() {
+        ZoneScopedN("CefWebGuiModule::visible")
+
         if (_visible && _instance) {
             webBrowserModule->attachEventHandler(_instance.get());
-        } else {
+        }
+        else {
             webBrowserModule->detachEventHandler();
         }
     });
@@ -170,6 +193,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
     _endpointCallback = webGuiModule->addEndpointChangeCallback(
         [this](const std::string& endpoint, bool exists) {
+            ZoneScopedN("CefWebGuiModule::endpointCallback")
             if (exists && endpoint == "frontend" && _instance) {
                 _instance->reloadBrowser();
             }
@@ -191,6 +215,8 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::draw2D.emplace_back([this](){
+        ZoneScopedN("CefWebGuiModule")
+
         const bool isGuiWindow =
             global::windowDelegate.hasGuiWindow() ?
             global::windowDelegate.isGuiWindow() :
@@ -198,11 +224,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         const bool isMaster = global::windowDelegate.isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
-            if (global::windowDelegate.windowHasResized()) {
+            if (global::windowDelegate.windowHasResized() || _instance->_shouldReshape) {
                 _instance->reshape(static_cast<glm::ivec2>(
-                    static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+                    static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
                     global::windowDelegate.dpiScaling()
                 ));
+                _instance->_shouldReshape = false;
             }
             if (_visible) {
                 _instance->draw();
@@ -211,6 +238,8 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::deinitializeGL.emplace_back([this]() {
+        ZoneScopedN("CefWebGuiModule")
+
         if (_endpointCallback != -1) {
             WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
             webGuiModule->removeEndpointChangeCallback(_endpointCallback);

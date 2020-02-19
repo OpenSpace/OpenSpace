@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
 #include <memory>
@@ -80,7 +81,9 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
-    void externalControlCallback(const char* receivedChars, int size, int clientId);
+    void touchDetectionCallback(TouchInput input);
+    void touchUpdateCallback(TouchInput input);
+    void touchExitCallback(TouchInput input);
     std::vector<char> encode();
     void decode(std::vector<char> data);
 
@@ -106,6 +109,7 @@ private:
 
     void runGlobalCustomizationScripts();
     void configureLogging();
+    std::string generateFilePath(std::string openspaceRelativePath);
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;

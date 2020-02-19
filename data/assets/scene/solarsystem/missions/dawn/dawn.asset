@@ -666,11 +666,17 @@ local Dawn = {
 local DawnSolarArray1 = {
     Identifier = "DawnSolar1",
     Parent = Dawn.Identifier,
-    Transformation = {
+    Transform = {
+        -- JCC: Spice rotations are commented because spice ck files
+        -- are not present.
+        -- Rotation = {
+        --     Type = "SpiceRotation",
+        --     SourceFrame = "DAWN_SA-Y",
+        --     DestinationFrame = "DAWN_SPACECRAFT"
+        -- }
         Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "DAWN_SA-Y",
-            DestinationFrame = "DAWN_SPACECRAFT"
+            Type = "StaticRotation",
+            Rotation = {0.0, 4.71225, 0.0}
         }
     },
     Renderable = {
@@ -693,11 +699,15 @@ local DawnSolarArray1 = {
 local DawnSolarArray2 = {
     Identifier = "DawnSolar2",
     Parent = Dawn.Identifier,
-    Transformation = {
+    Transform = {
+        -- Rotation = {
+        --     Type = "SpiceRotation",
+        --     SourceFrame = "DAWN_SA+Y",
+        --     DestinationFrame = "DAWN_SPACECRAFT"
+        -- }
         Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "DAWN_SA+Y",
-            DestinationFrame = "DAWN_SPACECRAFT"
+            Type = "StaticRotation",
+            Rotation = {3.1415, 1.57075, 0.0}
         }
     },
     Renderable = {

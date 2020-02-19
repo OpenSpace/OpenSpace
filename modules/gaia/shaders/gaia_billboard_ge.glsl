@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -100,15 +100,15 @@ void main() {
     // Discard geometry if star has no position (but wasn't a nullArray).
     // Or if observed distance is above threshold set by cutOffThreshold.
     // By discarding in gs instead of fs we save computations for when nothing is visible.
-    if( length(position) < EPS || distThreshold <= 0){
+    if (length(position) < EPS || distThreshold <= 0) {
         return;
     }
     
     vec4 centerWorldPos = vs_gPosition[0];
     
-    dvec3 cameraNormal   = normalize(cameraPos - dvec3(centerWorldPos.xyz));
+    dvec3 cameraNormal = normalize(cameraPos - dvec3(centerWorldPos.xyz));
     dvec3 newRight = normalize(cross(cameraLookUp, cameraNormal));
-    dvec3 newUp    = cross(cameraNormal, newRight);
+    dvec3 newUp = cross(cameraNormal, newRight);
     vec4 wCameraRight = vec4(newRight, 0.0);
     vec4 wCameraUp = vec4(newUp, 0.0);
 
