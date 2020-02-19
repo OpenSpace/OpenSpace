@@ -371,13 +371,13 @@ private:
     void verifyResolutionRestrictions(const int value, const char unit);
     double diff(DateTime& from, DateTime& to);
     void doFirstApproximation(DateTime& q, DateTime& unQ, double value, char unit);
-    RangedTime _timerange;
     double computeSecondsFromResolution(const int valueIn, const char unit);
     double _resolution = 0.0;
     double _resolutionValue = 0.0;
     char _resolutionUnit = 'd';
     DateTime _dt;
     DateTime _start;
+    RangedTime _timerange;
 };
 
 } // namespace openspace::globebrowsing

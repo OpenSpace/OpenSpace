@@ -65,7 +65,6 @@ namespace {
                               std::string expectedType, bool expectFailure)
     {
         std::string res;
-        const std::string search = "Invalid resolution ";
         try {
             tq.setResolution(resolution);
         }
@@ -74,11 +73,10 @@ namespace {
         }
 
         if (expectFailure) {
-            REQUIRE(res.find(search) != std::string::npos);
             REQUIRE(res.find(expectedType) != std::string::npos);
         }
         else {
-            REQUIRE(res.find(search) == std::string::npos);
+            REQUIRE(res.find(expectedType) == std::string::npos);
         }
     }
 
@@ -274,6 +272,37 @@ TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
     SpiceManager::deinitialize();
 }
 
+TEST_CASE("TimeQuantizer: Test pre-2000 dates", "[timequantizer]") {
+    SpiceManager::initialize();
+
+    loadLSKKernel();
+    globebrowsing::TimeQuantizer t1;
+    Time testT;
+
+    t1.setStartEndRange("1000-01-01T00:00:00", "2001-01-01T00:00:00");
+    t1.setResolution("1d");
+
+    singleTimeTest(testT, t1, true, "1980-02-28T16:10:00", "1980-02-28T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1930-04-30T22:00:00", "1930-04-30T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1910-05-31T00:00:00", "1910-05-31T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1969-09-30T12:00:00", "1969-09-30T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1900-11-30T20:11:07", "1900-11-30T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1800-04-30T22:00:20", "1800-04-30T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1799-07-31T02:13:17", "1799-07-31T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1860-01-30T22:00:00", "1860-01-30T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1944-04-12T05:55:55", "1944-04-12T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1000-01-01T00:00:00", "1000-01-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1999-04-30T22:00:00", "1999-04-30T00:00:00.000");
+    singleTimeTest(testT, t1, true, "1999-12-31T23:59:59", "1999-12-31T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2000-01-01T11:59:59", "2000-01-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2000-01-01T12:00:00", "2000-01-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2000-01-01T12:00:01", "2000-01-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2000-01-01T00:00:00", "2000-01-01T00:00:00.000");
+    singleTimeTest(testT, t1, true, "2000-01-02T00:00:00", "2000-01-02T00:00:00.000");
+
+    SpiceManager::deinitialize();
+}
+
 TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
     SpiceManager::initialize();
 
@@ -322,6 +351,7 @@ TEST_CASE("TimeQuantizer: Test start time using constructor", "[timequantizer]")
     singleStartTimeTest("2017-01-28T12:00:00", "Invalid start time value", true);
     singleStartTimeTest("2017-01-28T00:01:00", "Invalid start time value", true);
     singleStartTimeTest("2017-01-28T00:00:01", "Invalid start time value", true);
+    singleStartTimeTest("1980-01-20T00:00:00", "Invalid start", false);
 
     SpiceManager::deinitialize();
 }
