@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -117,7 +117,8 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
                     _histograms[innerNodeIndex] = Histogram(_minBin, _maxBin, _numBins);
                     ancestorVoxels = readValues(ancestorBrickIndex);
                     _voxelCache[innerNodeIndex] = ancestorVoxels;
-                } else {
+                }
+                else {
                     ancestorVoxels = it->second;
                 }
 
@@ -289,7 +290,8 @@ const Histogram* ErrorHistogramManager::histogram(unsigned int brickIndex) const
     const unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
         return &(_histograms[innerNodeIndex]);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }

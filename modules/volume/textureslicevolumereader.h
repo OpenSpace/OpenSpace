@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,7 @@ private:
     ghoul::opengl::Texture& getSlice(int sliceIndex) const;
     std::vector<std::string> _paths;
     mutable LinearLruCache<std::shared_ptr<ghoul::opengl::Texture>> _cache;
-    glm::ivec2 _sliceDimensions;
+    glm::ivec2 _sliceDimensions = glm::ivec2(0);
     bool _isInitialized = false;
 };
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -404,10 +404,10 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     if (!isGuiMode(pos, numFingers)) {
         bool isTransitionBetweenModes = (_wasPrevModeDirectTouch != _directTouchMode);
         if (isTransitionBetweenModes) {
-            _vel.orbit = glm::dvec2(0.0, 0.0);
+            _vel.orbit = glm::dvec2(0.0);
             _vel.zoom = 0.0;
             _vel.roll = 0.0;
-            _vel.pan = glm::dvec2(0.0, 0.0);
+            _vel.pan = glm::dvec2(0.0);
             resetAfterInput();
         }
 
@@ -468,10 +468,10 @@ bool TouchInteraction::isGuiMode(glm::dvec2 screenPosition, size_t numFingers) {
 
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
     // Reset old velocities upon new interaction
-    _vel.orbit = glm::dvec2(0.0, 0.0);
+    _vel.orbit = glm::dvec2(0.0);
     _vel.zoom = 0.0;
     _vel.roll = 0.0;
-    _vel.pan = glm::dvec2(0.0, 0.0);
+    _vel.pan = glm::dvec2(0.0);
 #ifdef TOUCH_DEBUG_PROPERTIES
     LINFO("DirectControl");
 #endif
@@ -498,17 +498,17 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
 
         // Reset velocities after setting new camera state
         _lastVel = _vel;
-        _vel.orbit = glm::dvec2(0.0, 0.0);
+        _vel.orbit = glm::dvec2(0.0);
         _vel.zoom = 0.0;
         _vel.roll = 0.0;
-        _vel.pan = glm::dvec2(0.0, 0.0);
+        _vel.pan = glm::dvec2(0.0);
     }
     else {
         // prevents touch to infinitely be active (due to windows bridge case where event
         // doesnt get consumed sometimes when LMA fails to converge)
         Touch touch;
         touch.active = true;
-        touch.pos = glm::dvec2(0.0, 0.0);
+        touch.pos = glm::dvec2(0.0);
         touch.action = 1;
         global::moduleEngine.module<ImGUIModule>()->touchInput = touch;
         resetAfterInput();
@@ -1224,10 +1224,10 @@ void TouchInteraction::resetAfterInput() {
     _guiON = module.gui.isEnabled();
 
     // Reset variables
-    _lastVel.orbit = glm::dvec2(0.0, 0.0);
+    _lastVel.orbit = glm::dvec2(0.0);
     _lastVel.zoom = 0.0;
     _lastVel.roll = 0.0;
-    _lastVel.pan = glm::dvec2(0.0, 0.0);
+    _lastVel.pan = glm::dvec2(0.0);
     _selected.clear();
     _pickingSelected = nullptr;
 }

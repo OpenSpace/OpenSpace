@@ -1,0 +1,8 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'pha', 'sssb_data_pha')
+local object = sharedSssb.createSssbGroupObject("sssb_data_pha.csv", filepath, { 0.75, 0.2, 0.2 })
+object.Renderable.Enabled = false
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

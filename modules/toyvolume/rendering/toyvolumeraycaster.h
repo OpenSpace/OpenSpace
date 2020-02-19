@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,10 +72,10 @@ private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
     BoxGeometry _boundingBox;
-    glm::vec4 _color;
-    glm::mat4 _modelTransform;
-    float _stepSize;
-    double _time;
+    glm::vec4 _color = glm::vec4(0.f);
+    glm::mat4 _modelTransform = glm::mat4(1.f);
+    float _stepSize = 0.f;
+    double _time = 0.0;
 }; // ToyVolumeRaycaster
 
 } // openspace

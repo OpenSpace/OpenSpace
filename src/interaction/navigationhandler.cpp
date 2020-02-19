@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/profiling.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <fstream>
 
@@ -51,6 +52,12 @@ namespace {
     constexpr const char* KeyPitch = "Pitch";
     constexpr const char* KeyReferenceFrame = "ReferenceFrame";
     const double Epsilon = 1E-7;
+
+    constexpr const openspace::properties::Property::PropertyInfo KeyDisableInputInfo = {
+        "DisableInputs",
+        "Disable all mouse inputs",
+        "Disables all mouse inputs and prevents them from affecting the camera"
+    };
 
     constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
@@ -77,7 +84,7 @@ ghoul::Dictionary NavigationHandler::NavigationState::dictionary() const {
         cameraDict.setValue(KeyAim, aim);
     }
     if (up.has_value()) {
-        cameraDict.setValue(KeyUp, up.value());
+        cameraDict.setValue(KeyUp, *up);
 
         if (std::abs(yaw) > Epsilon) {
             cameraDict.setValue(KeyYaw, yaw);
@@ -141,16 +148,20 @@ NavigationHandler::NavigationState::NavigationState(std::string anchor, std::str
 
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
+    , _disableInputs(KeyDisableInputInfo, false)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
-    // Add the properties
-    addProperty(_useKeyFrameInteraction);
     addPropertySubOwner(_orbitalNavigator);
+
+    addProperty(_disableInputs);
+    addProperty(_useKeyFrameInteraction);
 }
 
 NavigationHandler::~NavigationHandler() {} // NOLINT
 
 void NavigationHandler::initialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
@@ -162,6 +173,8 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
+    ZoneScoped
+
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
@@ -213,7 +226,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
     if (_pendingNavigationState.has_value()) {
-        applyNavigationState(_pendingNavigationState.value());
+        applyNavigationState(*_pendingNavigationState);
         _orbitalNavigator.resetVelocities();
         _pendingNavigationState.reset();
     }
@@ -269,7 +282,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
 
     glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(referenceFrameTransform * ns.up.value()) :
+        glm::normalize(referenceFrameTransform * *ns.up) :
         glm::dvec3(0.0, 1.0, 0.0);
 
     // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
@@ -282,8 +295,8 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         up
     )));
 
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.0, 0.0, 0.0));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.0, -1.0, 0.0));
 
     _camera->setPositionVec3(cameraPositionWorld);
     _camera->setRotation(neutralCameraRotation * yawRotation * pitchRotation);
@@ -321,20 +334,28 @@ const InputState& NavigationHandler::inputState() const {
 }
 
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-    _inputState.mouseButtonCallback(button, action);
+    if (!_disableInputs) {
+        _inputState.mouseButtonCallback(button, action);
+    }
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
-    _inputState.mousePositionCallback(x, y);
+    if (!_disableInputs) {
+        _inputState.mousePositionCallback(x, y);
+    }
 }
 
 void NavigationHandler::mouseScrollWheelCallback(double pos) {
-    _inputState.mouseScrollWheelCallback(pos);
+    if (!_disableInputs) {
+        _inputState.mouseScrollWheelCallback(pos);
+    }
 }
 
 void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
-    _inputState.keyboardCallback(key, modifier, action);
+    if (!_disableInputs) {
+        _inputState.keyboardCallback(key, modifier, action);
+    }
 }
 
 NavigationHandler::NavigationState NavigationHandler::navigationState() const {
@@ -360,7 +381,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     }
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
+        glm::dvec3(0.0),
         aim->worldPosition() - _camera->positionVec3(),
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
@@ -372,7 +393,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     const double yaw = -eulerAngles.y;
 
     // Need to compensate by redisual roll left in local rotation:
-    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0, 0, 1));
+    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0.0, 0.0, 1.0));
     const glm::dvec3 neutralUp =
         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();
 
@@ -406,7 +427,8 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
             return;
         }
         state = navigationState(*referenceFrame).dictionary();
-    } else {
+    }
+    else {
         state = navigationState().dictionary();
     }
 
@@ -414,9 +436,8 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
         std::string absolutePath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        ghoul::DictionaryLuaFormatter formatter;
         std::ofstream ofs(absolutePath.c_str());
-        ofs << "return " << formatter.format(state.dictionary());
+        ofs << "return " << ghoul::formatLua(state.dictionary());
         ofs.close();
     }
 }

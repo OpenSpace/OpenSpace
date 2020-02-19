@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -186,13 +186,13 @@ std::ostream& operator<<(std::ostream& os, const TemplateProperty<T>& obj) {
 }
 
 template <typename T>
-ghoul::any TemplateProperty<T>::get() const {
-    return ghoul::any(_value);
+std::any TemplateProperty<T>::get() const {
+    return std::any(_value);
 }
 
 template <typename T>
-void TemplateProperty<T>::set(ghoul::any value) {
-    T v = ghoul::any_cast<T>(std::move(value));
+void TemplateProperty<T>::set(std::any value) {
+    T v = std::any_cast<T>(std::move(value));
     if (v != _value) {
         _value = std::move(v);
         notifyChangeListeners();
@@ -221,7 +221,7 @@ bool TemplateProperty<T>::setLuaValue(lua_State* state) {
         success
     );
     if (success) {
-        set(ghoul::any(thisValue));
+        set(std::any(thisValue));
     }
     return success;
 }
@@ -248,7 +248,7 @@ bool TemplateProperty<T>::setStringValue(std::string value) {
         success
     );
     if (success) {
-        set(ghoul::any(thisValue));
+        set(std::any(thisValue));
     }
     return success;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,7 +82,8 @@ void main(void) {
     opDepth = betaOzoneExtinction * (0.0000006) * opticalDepth(r, muSun, HO) + 
     betaMieExtinction * opticalDepth(r, muSun, HM) +
     betaRayleigh * opticalDepth(r, muSun, HR);
-  } else {
+  }
+  else {
     opDepth = betaMieExtinction * opticalDepth(r, muSun, HM) + 
     betaRayleigh * opticalDepth(r, muSun, HR);
   }

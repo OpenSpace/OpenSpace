@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -319,7 +319,8 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
         //    13   65-68   Element set  number.Incremented when a new TLE is generated
         //    14   69-69   Checksum (modulo 10)
         keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
-    } else {
+    }
+    else {
         throw ghoul::RuntimeError(fmt::format(
             "File {} @ line {} does not have '1' header", filename, lineNum + 1
         ));
@@ -371,7 +372,8 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
         // Get mean motion
         stream.str(line.substr(52, 11));
         stream >> keplerElements.meanMotion;
-    } else {
+    }
+    else {
         throw ghoul::RuntimeError(fmt::format(
             "File {} @ line {} does not have '2' header", filename, lineNum + 2
         ));

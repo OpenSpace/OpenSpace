@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -102,7 +102,8 @@ void ShortcutTopic::handleJson(const nlohmann::json& input) {
     if (event == StartSubscription) {
         // TODO: Subscribe to shortcuts and keybindings
         // shortcutManager.subscribe(); ...
-    } else if (event == StopSubscription) {
+    }
+    else if (event == StopSubscription) {
         // TODO: Unsubscribe to shortcuts and keybindings
         // shortcutManager.unsubscribe(); ...
         return;

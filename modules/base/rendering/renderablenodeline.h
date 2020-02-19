@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,10 +34,9 @@
 #include <ghoul/glm.h>
 
 namespace ghoul::opengl { class ProgramObject; }
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class Translation;
 
@@ -52,10 +51,10 @@ public:
     static documentation::Documentation Documentation();
 
     // Get the distance between the start and end node
-    double getDistance();
+    double distance() const;
 
-    const std::string getStart();
-    const std::string getEnd();
+    std::string start() const;
+    std::string end() const;
 
 private:
     void initializeGL() override;
@@ -69,8 +68,6 @@ private:
     void unbindGL();
     void bindGL();
 
-    glm::dvec3 getCoordinatePosFromAnchorNode(glm::dvec3 worldPos);
-
     ghoul::opengl::ProgramObject* _program;
     /// The vertex attribute location for position
     /// must correlate to layout location in vertex shader
@@ -79,8 +76,8 @@ private:
     GLuint _vBufferId = 0;
     std::vector<float> _vertexArray;
 
-    glm::dvec3 _startPos;
-    glm::dvec3 _endPos;
+    glm::dvec3 _startPos = glm::dvec3(0.0);
+    glm::dvec3 _endPos = glm::dvec3(0.0);
 
     properties::StringProperty _start;
     properties::StringProperty _end;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,8 @@ Fragment getFragment() {
             else {
                 diffuse = texture(transferFunctions[0], vec2(v, 0.0));
             }
-        } else {
+        }
+        else {
             float v = 0.0;
             for (int i = 0; i < numTextures; i++) {
                 v = texture(textures[i], vs_st).r;

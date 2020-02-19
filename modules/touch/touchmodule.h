@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,7 +66,7 @@ private:
 
     properties::BoolProperty _touchActive;
     // contains an id and the Point that was processed last frame
-    glm::ivec2 _webPositionCallback = glm::ivec2(0,0);
+    glm::ivec2 _webPositionCallback = glm::ivec2(0);
 #ifdef WIN32
     std::unique_ptr<Win32TouchHook> _win32TouchHook;
 #endif //WIN32

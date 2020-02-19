@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -155,7 +155,8 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     const std::string type = config.value<std::string>(TypeInfo.identifier);
     if (type == TcpSocketType) {
         _type = static_cast<int>(InterfaceType::TcpSocket);
-    } else if (type == WebSocketType) {
+    }
+    else if (type == WebSocketType) {
         _type = static_cast<int>(InterfaceType::WebSocket);
     }
 

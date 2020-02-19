@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -239,9 +239,9 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
-        glm::ivec4 rotation;
-        glm::ivec4 zoom;
-        glm::ivec4 roll;
+        glm::ivec4 rotation = glm::ivec4(0);
+        glm::ivec4 zoom = glm::ivec4(0);
+        glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
 };
 

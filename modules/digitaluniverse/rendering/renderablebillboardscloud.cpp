@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -465,7 +465,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         if (o == "Camera View Direction") {
             _renderOption = RenderOptionViewDirection;
-        } else if (o == "Camera Position Normal") {
+        }
+        else if (o == "Camera Position Normal") {
             _renderOption = RenderOptionPositionNormal;
         }
     }
@@ -1474,8 +1475,8 @@ bool RenderableBillboardsCloud::readLabelFile() {
 
         std::stringstream str(line);
 
-        glm::vec3 position;
-        for (auto j = 0; j < 3; ++j) {
+        glm::vec3 position = glm::vec3(0.f);
+        for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }
 
@@ -1693,7 +1694,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             addPosition(position);
         }
     }
-    _fadeInDistance.setMaxValue(glm::vec2(10.0f * biggestCoord));
+    _fadeInDistance.setMaxValue(glm::vec2(10.f * biggestCoord));
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {
@@ -1731,7 +1732,7 @@ void RenderableBillboardsCloud::renderToTexture(GLuint textureToRenderTo,
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
 
-    glViewport(0, 0, textureWidth, textureHeight);
+    glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
 
     loadPolygonGeometryForRendering();
     renderPolygonGeometry(_polygonVao);
