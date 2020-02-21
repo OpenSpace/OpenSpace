@@ -208,11 +208,23 @@ void EventHandler::initialize() {
             }
 
             if (_validTouchStates.empty()) {
+#ifdef WIN32
                 CefTouchEvent event = touchEvent(
                     input,
                     cef_touch_event_type_t::CEF_TET_PRESSED
                 );
                 _browserInstance->sendTouchEvent(event);
+#else
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = true;
+                _browserInstance->sendMouseClickEvent(
+                    mouseEvent(),
+                    MBT_LEFT,
+                    false,
+                    BrowserInstance::SingleClick
+                );
+#endif
                 _validTouchStates.emplace_back(input);
             }
             else {
@@ -241,11 +253,20 @@ void EventHandler::initialize() {
             );
 
             if (it == _validTouchStates.cbegin()) {
+#ifdef WIN32
+
                 CefTouchEvent event = touchEvent(
                     input,
                     cef_touch_event_type_t::CEF_TET_MOVED
                 );
                 _browserInstance->sendTouchEvent(event);
+#else
+                glm::vec2 windowPos = input.currentWindowCoordinates();
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = true;
+                _browserInstance->sendMouseMoveEvent(mouseEvent());
+#endif
                 return true;
             }
             else if (it != _validTouchStates.cend()){
@@ -276,12 +297,28 @@ void EventHandler::initialize() {
             if (found == _validTouchStates.cend()) {
                 return;
             }
+#ifdef WIN32
             CefTouchEvent event = touchEvent(
                 input,
                 cef_touch_event_type_t::CEF_TET_RELEASED
             );
             _browserInstance->sendTouchEvent(event);
+#endif
             _validTouchStates.erase(found);
+#ifndef WIN32
+            if (_validTouchStates.empty()) {
+                glm::vec2 windowPos = input.currentWindowCoordinates();
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = false;
+                _browserInstance->sendMouseClickEvent(
+                    mouseEvent(),
+                    MBT_LEFT,
+                    true,
+                    BrowserInstance::SingleClick
+                );
+            }
+#endif
         }
     );
 }
@@ -426,6 +463,7 @@ CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
     return event;
 }
 
+#ifdef WIN32
 CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     const cef_touch_event_type_t eventType) const
 {
@@ -440,6 +478,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.pointer_type = cef_pointer_type_t::CEF_POINTER_TYPE_TOUCH;
     return event;
 }
+#endif
 
 void EventHandler::setBrowserInstance(BrowserInstance* browserInstance) {
     LDEBUG("Setting browser instance.");
