@@ -84,7 +84,9 @@ public:
     void draw();
     void close(bool force = false);
 
+#ifdef WIN32
     void sendTouchEvent(const CefTouchEvent& event) const;
+#endif
 
     bool sendKeyEvent(const CefKeyEvent& event);
     bool sendMouseClickEvent(const CefMouseEvent& event,
