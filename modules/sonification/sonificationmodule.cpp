@@ -27,6 +27,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/glm.h>
+#include <openspace/util/camera.h>
+#include <glm/gtx/vector_angle.hpp>
 
 
  //Debug purposes
@@ -35,6 +37,8 @@
 #include <time.h>
 #include <thread>
 #include <chrono>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 //Output to SuperCollider (SC)
 #define SC_IP_ADDRESS "127.0.0.1"
@@ -76,7 +80,7 @@ void SonificationModule::sendMesssage(const std::string label, const float messa
 }
 
 //Send message to supercollider, address the message with label
-    //NOTE: label must be in the format: "/label"
+//NOTE: label must be in the format: "/label"
 void SonificationModule::sendMesssage(const std::string label, const std::string message) {
     //NOTE: Socket cannot be saved in class, it does not work then, dont know why. 
     //Only works if the socket is recreated every time
@@ -87,7 +91,7 @@ void SonificationModule::sendMesssage(const std::string label, const std::string
 }
 
 //Send message to supercollider, address the message with label
-    //NOTE: label must be in the format: "/label"
+//NOTE: label must be in the format: "/label"
 void SonificationModule::sendMesssage(const std::string label, const glm::dvec3 message) {
     //NOTE: Socket cannot be saved in class, it does not work then, dont know why. 
     //Only works if the socket is recreated every time
@@ -98,17 +102,23 @@ void SonificationModule::sendMesssage(const std::string label, const glm::dvec3 
 }
 
 void SonificationModule::threadFunk(std::atomic<bool>& isRunning) {
-    
-    //std::this_thread::sleep_for(std::chrono::seconds(10));
-    
     while (isRunning) {
-        /*float random = 10.0f + static_cast <float> (rand()) /
-            (static_cast <float> (RAND_MAX / (100.0f - 10.0f)));
-        std::cout << "Thread generated: " << random << std::endl;
-        sendMesssage("/venus", random);*/
-
         //Is scene initialized?
         if (global::renderEngine.scene() && !global::renderEngine.scene()->isInitializing()) {
+            //Camera
+            glm::dvec3 cameraDir;
+            glm::dvec3 cameraPos;
+            if (global::renderEngine.scene()->camera()) {
+                cameraPos = global::renderEngine.scene()->camera()->positionVec3();
+                cameraDir = global::renderEngine.scene()->camera()->viewDirectionWorldSpace();
+                if (cameraPos != glm::dvec3(0.0, 0.0, 0.0)) {
+                    //std::cout << "Thread: Position of Camera: ( " << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z << ")" << std::endl;
+                    //std::cout << "Thread: Direction of Camera: ( " << cameraDir.x << ", " << cameraDir.y << ", " << cameraDir.z << ")" << std::endl;
+                    sendMesssage("/camera", cameraPos);
+                    sendMesssage("/camera", cameraDir);
+                }
+            }
+
             //Mercury
             if (global::renderEngine.scene()->sceneGraphNode("Mercury")) {
                 glm::dvec3 mercuryPos = global::renderEngine.scene()->sceneGraphNode("Mercury")->worldPosition();
@@ -131,7 +141,12 @@ void SonificationModule::threadFunk(std::atomic<bool>& isRunning) {
             if (global::renderEngine.scene()->sceneGraphNode("Earth")) {
                 glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
                 if (earthPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Earth: ( " << earthPos.x << ", " << earthPos.y << ", " << earthPos.z << ")" << std::endl;
+                    //std::cout << "Thread: Position of Earth: ( " << earthPos.x << ", " << earthPos.y << ", " << earthPos.z << ")" << std::endl;
+
+                    double angle = glm::angle(glm::normalize(cameraDir), glm::normalize(earthPos - cameraPos));
+                    angle = angle * 180.0 / M_PI;
+
+                    std::cout << "Thread: Angle between camera and Earth: " << angle << std::endl;
                     sendMesssage("/earth", earthPos);
                 }
             }
@@ -189,18 +204,10 @@ void SonificationModule::threadFunk(std::atomic<bool>& isRunning) {
 void SonificationModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/) {
     //Test to send some data to SC
     //std::cout << "Sonification Initialize: Sending message to SuperCollider!" << std::endl;
-    srand(static_cast <unsigned> (time(0)));
-    sendMesssage("/venus", 1.0f);
+    //sendMesssage("/venus", 1.0f);
 
     //start a thread
     _thread = std::thread([this]() { threadFunk(std::ref(_isRunning)); });
-
-    //Wait a while and then close the thread
-    /*std::this_thread::sleep_for(std::chrono::seconds(20));
-    std::cout << "Joining thread!" << std::endl;
-    if (th.joinable())
-        th.join();*/
-
 }
 
 
