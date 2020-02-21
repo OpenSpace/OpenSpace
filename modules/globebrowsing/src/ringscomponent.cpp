@@ -258,18 +258,23 @@ bool RingsComponent::isReady() const {
 void RingsComponent::initializeGL() {
     compileShadowShader();
 
-    _geometryOnlyShader = global::renderEngine.buildRenderProgram(
-        "RingsGeomOnlyProgram",
-        absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_fs.glsl")
-    );
+    try {
+        //global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
+        _geometryOnlyShader = global::renderEngine.buildRenderProgram(
+            "RingsGeomOnlyProgram",
+            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_vs.glsl"),
+            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_fs.glsl")
+        );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
-    ghoul::opengl::updateUniformLocations(
-        *_geometryOnlyShader, 
-        _geomUniformCache, 
-        GeomUniformNames
-    );
+        ghoul::opengl::updateUniformLocations(
+            *_geometryOnlyShader,
+            _geomUniformCache,
+            GeomUniformNames
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR(e.message);
+    }
 
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -374,7 +379,7 @@ void RingsComponent::draw(const RenderData& data,
 }
 
 void RingsComponent::update(const UpdateData& data) {
-    if (_shader->isDirty()) {
+    if (_shader && _shader->isDirty()) {
         compileShadowShader();
     }
 
@@ -483,11 +488,12 @@ void RingsComponent::compileShadowShader() {
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
             dict
         );
+
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.message);
     }
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 bool RingsComponent::isEnabled() const {
