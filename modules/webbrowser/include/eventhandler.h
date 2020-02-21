@@ -84,8 +84,19 @@ private:
      */
     CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
 
+#ifdef WIN32
+    /**
+     * Build a CEF touch event based on our internal structure
+     * 
+     * Note: as of 02/21/2020 we are using an older version of CEF on OSX
+     * than WIN32.
+     * This version does not handle the CefTouchEvent type and does
+     * not have any internal touch handling.
+     */
     CefTouchEvent touchEvent(const TouchInput& input,
         const cef_touch_event_type_t eventType) const;
+#endif
+
     /**
      * Find the CEF key event to use for a given action.
      *
