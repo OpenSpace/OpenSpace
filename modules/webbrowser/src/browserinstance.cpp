@@ -149,9 +149,11 @@ bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
     return hasContent(event.x, event.y);
 }
 
+#ifdef WIN32
 void BrowserInstance::sendTouchEvent(const CefTouchEvent& event) const{
     _browser->GetHost()->SendTouchEvent(event);
 }
+#endif
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent& event) {
     constexpr const bool DidNotLeaveWindow = false;
