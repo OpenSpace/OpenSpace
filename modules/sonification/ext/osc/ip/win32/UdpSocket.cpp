@@ -196,7 +196,10 @@ public:
 	{
 		assert( isConnected_ );
 
-        send( socket_, data, (int)size, 0 );
+        int iResult = send( socket_, data, (int)size, 0 );
+        if (iResult == SOCKET_ERROR) {
+            printf("send failed with error: %d\n", WSAGetLastError());
+        }
 	}
 
     void SendTo( const IpEndpointName& remoteEndpoint, const char *data, std::size_t size )

@@ -27,7 +27,11 @@
 
 #include "modules/sonification/ext/osc/ip/UdpSocket.h"
 #include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
+#include "modules/sonification/include/sonificationhelper.h"
 #include <string>
+#include <thread>
+#include <atomic>
+#include <ghoul/glm.h>
 
 #include <openspace/util/openspacemodule.h>
 
@@ -38,10 +42,29 @@ public:
     SonificationModule();
     ~SonificationModule();
 
+    //Send message to supercollider, address the message with label
+    //NOTE: label must be in the format: "/label"
+    void sendMesssage(const std::string label, const float message);
+
+    //Send message to supercollider, address the message with label
+    //NOTE: label must be in the format: "/label"
+    void sendMesssage(const std::string label, const std::string message);
+
+    //Send message to supercollider, address the message with label
+    //NOTE: label must be in the format: "/label"
+    void sendMesssage(const std::string label, const glm::dvec3 message);
+
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
 
 private:
+    char* _buffer;
+    osc::OutboundPacketStream _stream;
+    SonificationHelper _helper;
+    std::thread _thread;
+    std::atomic<bool> _isRunning;
+
+    void threadFunk(std::atomic<bool>& isRunning);
 };
 
 } // namespace openspace
