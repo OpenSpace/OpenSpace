@@ -25,10 +25,10 @@
 #include <modules/sonification/sonificationmodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <ghoul/glm.h>
 #include <openspace/util/camera.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <glm/gtx/projection.hpp>
 
 
  //Debug purposes
@@ -68,133 +68,92 @@ SonificationModule::~SonificationModule() {
         _thread.join();
 }
 
-//Send message to supercollider, address the message with label
-//NOTE: label must be in the format: "/label"
-void SonificationModule::sendMesssage(const std::string label, const float message) {
-    //NOTE: Socket cannot be saved in class, it does not work then, dont know why. 
-    //Only works if the socket is recreated every time
-    UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
-    _stream.Clear();
-    _stream << osc::BeginMessage(label.c_str()) << message << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+//Extract the data from the given identifier
+//NOTE: The identifier must start with capital letter, otherwise no match will be found
+void SonificationModule::extractData(const std::string identifier,
+    const Scene * const scene, const glm::dvec3 cameraPosition,
+    const glm::dvec3 cameraDirection, const glm::dvec3 cameraUpVector) 
+{
+    SceneGraphNode* node = scene->sceneGraphNode(identifier);
+    if (node) {
+        glm::dvec3 nodePosition = node->worldPosition();
+        if (nodePosition != glm::dvec3(0.0, 0.0, 0.0)) {
+            //std::cout << "Position of " << identifier << ": ( " << nodePosition.x << ", " << nodePosition.y << ", " << nodePosition.z << ")" << std::endl;
+            
+            //Calculate distance to the planet from the camera
+            glm::dvec3 cameraToNode = nodePosition - cameraPosition;
+            double distance = glm::length(cameraToNode);
+            std::cout << "Distance from camera to " << identifier << ": " << distance << std::endl;
+
+            //Calculate angle from camera to the planet in the camera plane
+            //Project v down to the camera plane, Pplane(v)
+            //Pn(v) is v projected on the normal n of the plane -> Pplane(v) = v - Pn(v)
+            glm::dvec3 projectedNodePos = nodePosition - glm::proj(cameraToNode, cameraUpVector);
+            double angle = glm::angle(glm::normalize(cameraDirection), glm::normalize(cameraToNode));
+            
+            //Convert to degrees, DEBUG
+            double degreeAngle = angle * 180.0 / M_PI;
+            std::cout << "Angle between camera and " << identifier << ": " << degreeAngle << std::endl;
+            
+            //Send the data to SuperCollider
+            std::string label = "/" + identifier;
+
+            //NOTE: Socket cannot be saved in class, it does not work then, dont know why. 
+            //Only works if the socket is recreated every time
+            UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+            _stream.Clear();
+            _stream << osc::BeginMessage(label.c_str()) << distance << angle << osc::EndMessage;
+            socket.Send(_stream.Data(), _stream.Size());
+        }
+    }
 }
 
-//Send message to supercollider, address the message with label
-//NOTE: label must be in the format: "/label"
-void SonificationModule::sendMesssage(const std::string label, const std::string message) {
-    //NOTE: Socket cannot be saved in class, it does not work then, dont know why. 
-    //Only works if the socket is recreated every time
-    UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
-    _stream.Clear();
-    _stream << osc::BeginMessage(label.c_str()) << message.c_str() << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
-}
+void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
+    
+    Scene* scene;
+    Camera* camera;
+    glm::dvec3 cameraDir, cameraPos, cameraUpVector;
 
-//Send message to supercollider, address the message with label
-//NOTE: label must be in the format: "/label"
-void SonificationModule::sendMesssage(const std::string label, const glm::dvec3 message) {
-    //NOTE: Socket cannot be saved in class, it does not work then, dont know why. 
-    //Only works if the socket is recreated every time
-    UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
-    _stream.Clear();
-    _stream << osc::BeginMessage(label.c_str()) << message.x << message.y << message.z << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
-}
-
-void SonificationModule::threadFunk(std::atomic<bool>& isRunning) {
     while (isRunning) {
-        //Is scene initialized?
-        if (global::renderEngine.scene() && !global::renderEngine.scene()->isInitializing()) {
-            //Camera
-            glm::dvec3 cameraDir;
-            glm::dvec3 cameraPos;
-            if (global::renderEngine.scene()->camera()) {
-                cameraPos = global::renderEngine.scene()->camera()->positionVec3();
-                cameraDir = global::renderEngine.scene()->camera()->viewDirectionWorldSpace();
-                if (cameraPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    //std::cout << "Thread: Position of Camera: ( " << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z << ")" << std::endl;
-                    //std::cout << "Thread: Direction of Camera: ( " << cameraDir.x << ", " << cameraDir.y << ", " << cameraDir.z << ")" << std::endl;
-                    sendMesssage("/camera", cameraPos);
-                    sendMesssage("/camera", cameraDir);
+
+        scene = global::renderEngine.scene();
+        if (scene && !scene->isInitializing()) {
+           
+            camera = scene->camera();
+            
+            if (camera) {
+                cameraPos = camera->positionVec3();
+                cameraDir = camera->viewDirectionWorldSpace();
+                cameraUpVector = camera->lookUpVectorWorldSpace();
+
+                if (cameraPos != glm::dvec3(1.0, 1.0, 1.0)) {
+                    
+                    //Complete scene initialized, start extracting data
+                    //Mercury
+                    extractData("Mercury", scene, cameraPos, cameraDir, cameraUpVector);
+
+                    //Venus
+                    extractData("Venus", scene, cameraPos, cameraDir, cameraUpVector);
+
+                    //Earth
+                    extractData("Earth", scene, cameraPos, cameraDir, cameraUpVector);
+
+                    //Mars
+                    extractData("Mars", scene, cameraPos, cameraDir, cameraUpVector);
+
+                    //Jupiter
+                    extractData("Jupiter", scene, cameraPos, cameraDir, cameraUpVector);
+
+                    //Saturn
+                    extractData("Saturn", scene, cameraPos, cameraDir, cameraUpVector);
+
+                    //Uranus
+                    extractData("Uranus", scene, cameraPos, cameraDir, cameraUpVector);
+
+                    //Neptune
+                    extractData("Neptune", scene, cameraPos, cameraDir, cameraUpVector);
                 }
             }
-
-            //Mercury
-            if (global::renderEngine.scene()->sceneGraphNode("Mercury")) {
-                glm::dvec3 mercuryPos = global::renderEngine.scene()->sceneGraphNode("Mercury")->worldPosition();
-                if (mercuryPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Mercury: ( " << mercuryPos.x << ", " << mercuryPos.y << ", " << mercuryPos.z << ")" << std::endl;
-                    sendMesssage("/mercury", mercuryPos);
-                } 
-            }
-
-            //Venus
-            if (global::renderEngine.scene()->sceneGraphNode("Venus")) {
-                glm::dvec3 venusPos = global::renderEngine.scene()->sceneGraphNode("Venus")->worldPosition();
-                if (venusPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Venus: ( " << venusPos.x << ", " << venusPos.y << ", " << venusPos.z << ")" << std::endl;
-                    sendMesssage("/venus", venusPos);
-                }
-            }
-
-            //Earth
-            if (global::renderEngine.scene()->sceneGraphNode("Earth")) {
-                glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
-                if (earthPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    //std::cout << "Thread: Position of Earth: ( " << earthPos.x << ", " << earthPos.y << ", " << earthPos.z << ")" << std::endl;
-
-                    double angle = glm::angle(glm::normalize(cameraDir), glm::normalize(earthPos - cameraPos));
-                    angle = angle * 180.0 / M_PI;
-
-                    std::cout << "Thread: Angle between camera and Earth: " << angle << std::endl;
-                    sendMesssage("/earth", earthPos);
-                }
-            }
-
-            //Mars
-            if (global::renderEngine.scene()->sceneGraphNode("Mars")) {
-                glm::dvec3 marsPos = global::renderEngine.scene()->sceneGraphNode("Mars")->worldPosition();
-                if (marsPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Mars: ( " << marsPos.x << ", " << marsPos.y << ", " << marsPos.z << ")" << std::endl;
-                    sendMesssage("/mars", marsPos);
-                }
-            }
-
-            //Jupiter
-            if (global::renderEngine.scene()->sceneGraphNode("Jupiter")) {
-                glm::dvec3 jupiterPos = global::renderEngine.scene()->sceneGraphNode("Jupiter")->worldPosition();
-                if (jupiterPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Jupiter: ( " << jupiterPos.x << ", " << jupiterPos.y << ", " << jupiterPos.z << ")" << std::endl;
-                    sendMesssage("/jupiter", jupiterPos);
-                }
-            }
-
-            //Saturn
-            if (global::renderEngine.scene()->sceneGraphNode("Saturn")) {
-                glm::dvec3 saturnPos = global::renderEngine.scene()->sceneGraphNode("Saturn")->worldPosition();
-                if (saturnPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Saturn: ( " << saturnPos.x << ", " << saturnPos.y << ", " << saturnPos.z << ")" << std::endl;
-                    sendMesssage("/saturn", saturnPos);
-                }  
-            }
-
-            //Uranus
-            if (global::renderEngine.scene()->sceneGraphNode("Uranus")) {
-                glm::dvec3 uranusPos = global::renderEngine.scene()->sceneGraphNode("Uranus")->worldPosition();
-                if (uranusPos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Uranus: ( " << uranusPos.x << ", " << uranusPos.y << ", " << uranusPos.z << ")" << std::endl;
-                    sendMesssage("/uranus", uranusPos);
-                }
-            }
-
-            //Neptune
-            if (global::renderEngine.scene()->sceneGraphNode("Neptune")) {
-                glm::dvec3 neptunePos = global::renderEngine.scene()->sceneGraphNode("Neptune")->worldPosition();
-                if (neptunePos != glm::dvec3(0.0, 0.0, 0.0)) {
-                    std::cout << "Thread: Position of Neptune: ( " << neptunePos.x << ", " << neptunePos.y << ", " << neptunePos.z << ")" << std::endl;
-                    sendMesssage("/neptune", neptunePos);
-                }
-            } 
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -207,7 +166,7 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& /*dictionar
     //sendMesssage("/venus", 1.0f);
 
     //start a thread
-    _thread = std::thread([this]() { threadFunk(std::ref(_isRunning)); });
+    _thread = std::thread([this]() { threadMain(std::ref(_isRunning)); });
 }
 
 

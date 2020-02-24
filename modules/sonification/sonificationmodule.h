@@ -32,6 +32,7 @@
 #include <thread>
 #include <atomic>
 #include <ghoul/glm.h>
+#include <openspace/scene/scene.h>
 
 #include <openspace/util/openspacemodule.h>
 
@@ -42,17 +43,11 @@ public:
     SonificationModule();
     ~SonificationModule();
 
-    //Send message to supercollider, address the message with label
-    //NOTE: label must be in the format: "/label"
-    void sendMesssage(const std::string label, const float message);
-
-    //Send message to supercollider, address the message with label
-    //NOTE: label must be in the format: "/label"
-    void sendMesssage(const std::string label, const std::string message);
-
-    //Send message to supercollider, address the message with label
-    //NOTE: label must be in the format: "/label"
-    void sendMesssage(const std::string label, const glm::dvec3 message);
+    //Extract the data from the given identifier
+    //NOTE: The identifier must start with capital letter, otherwise no match will be found
+    void extractData(const std::string identifier, const Scene * const scene,
+        const glm::dvec3 cameraPosition, const glm::dvec3 cameraDirection,
+        const glm::dvec3 cameraUpVector);
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
@@ -60,11 +55,12 @@ protected:
 private:
     char* _buffer;
     osc::OutboundPacketStream _stream;
-    SonificationHelper _helper;
+    SonificationHelper _helper; //Needed?
     std::thread _thread;
     std::atomic<bool> _isRunning;
 
-    void threadFunk(std::atomic<bool>& isRunning);
+    //Main function for _thread
+    void threadMain(std::atomic<bool>& isRunning);
 };
 
 } // namespace openspace
