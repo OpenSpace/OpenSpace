@@ -16,7 +16,7 @@ asset.require('scene/solarsystem/sun/glare')
 asset.require('scene/solarsystem/planets')
 asset.request('scene/milkyway/milkyway/volume')
 
--- TODO: add non planet object
+-- Add non planet object
 local modelFolder = asset.syncedResource({
     Name = "Apollo Models",
     Type = "HttpSynchronization",
@@ -75,6 +75,14 @@ local Keybindings = {
         Command = "openspace.autonavigation.stopPath()",
         Documentation = "Stop a camera path.",
         GuiPath = "/Interaction",
+        Local = false
+    },
+    {
+        Key = "h",
+        Name="Toggle Planet Trails",
+        Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Toggles the visibility of planet trails",
+        GuiPath = "/Rendering",
         Local = false
     },
 }

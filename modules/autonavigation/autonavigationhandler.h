@@ -47,12 +47,10 @@ public:
     AutoNavigationHandler();
     ~AutoNavigationHandler();
 
-    // Mutators
-
     // Accessors
     Camera* camera() const;
-    const double pathDuration() const;
-    const bool hasFinished() const;
+    double pathDuration() const;
+    bool hasFinished() const;
     CameraState currentCameraState();         
 
     void updateCamera(double deltaTime);

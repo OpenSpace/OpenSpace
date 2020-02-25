@@ -87,7 +87,7 @@ private:
 
     SpeedFunction _speedFunction;
 
-    std::shared_ptr<PathCurve> _curve; // OBS! Does it make more sense to use unique_ptr? However, then PathSegments cannot be copied.
+    std::shared_ptr<PathCurve> _curve; 
 };
 
 } // namespace openspace::autonavigation

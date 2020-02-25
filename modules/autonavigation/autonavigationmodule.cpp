@@ -78,21 +78,21 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             &autonavigation::luascriptfunctions::generatePath,
             {},
             "table",
-            "Generate the path as described by the lua table input argument. TODO: Describe how a path instruction is defined?. " //TODO also make this one start path from file
+            "Generate the path as described by the lua table input argument. TODO: Describe how a path instruction is defined?. " 
         },
         {
             "generatePathFromFile",
             &autonavigation::luascriptfunctions::generatePathFromFile,
             {},
             "string",
-            "Read an input file with lua instructions and use those to generate a camera path. TODO: Describe how a path instruction is defined?. " //TODO also make this one start path from file
+            "Read an input file with lua instructions and use those to generate a camera path. TODO: Describe how a path instruction is defined?. " 
         },
         {
             "getPathPositions",
             &autonavigation::luascriptfunctions::getPathPositions,
             {},
             "number",
-            "TODO: " 
+            "FOR DEBUG. Sample positions along the path. The input argument is the number of samples per path segment. " 
         },
         {
             "getControlPoints",

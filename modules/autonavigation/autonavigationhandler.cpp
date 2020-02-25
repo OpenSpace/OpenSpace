@@ -77,7 +77,7 @@ Camera* AutoNavigationHandler::camera() const {
     return global::navigationHandler.camera();
 }
 
-const double AutoNavigationHandler::pathDuration() const {
+double AutoNavigationHandler::pathDuration() const {
     double sum = 0.0;
     for (const PathSegment& ps : _pathSegments) {
         sum += ps.duration();
@@ -85,7 +85,7 @@ const double AutoNavigationHandler::pathDuration() const {
     return sum;
 }
 
-const bool AutoNavigationHandler::hasFinished() const {
+bool AutoNavigationHandler::hasFinished() const {
     return _currentTime > pathDuration();
 }
 
@@ -333,7 +333,7 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& instr
 
         // TODO: compute defualt height in a better way
         double defaultHeight = 2 * targetNode->boundingSphere();
-        double height = hasHeight? props->height.value() : defaultHeight;
+        double height = hasHeight ? props->height.value() : defaultHeight;
 
         targetPos = computeTargetPositionAtNode(
             targetNode, 
