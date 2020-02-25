@@ -31,20 +31,20 @@ local sunRadius = 695508000
 local earthRadius = 6371
 
 -- Selected field lines + some additional field lines
--- asset.require('./wsa/scs_oi')
+asset.require('./wsa/scs_oi')
 asset.require('./wsa/pfss_oi')
--- asset.require('./wsa/pfss_io')
+asset.require('./wsa/pfss_io')
 -- Sub-Earth track
--- asset.require('./wsa/sub_earth')
+asset.require('./wsa/sub_earth')
 -- Sun with magnetic field texture
--- local sunAsset = asset.require('./wsa/sun')
+-- local sunAsset = asset.require('./wsa/sun')  -- does not excists 
 
 -- Parker Solar Probe asset package
--- asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')
--- asset.require('./wsa/psp_pfss_io')
--- asset.require('./wsa/psp_pfss_oi')
--- asset.require('./wsa/psp_scs_oi')
--- asset.require('./wsa/psp_sub_satellite')
+-- asset.require('scene/solarsystem/missions/parkersolarprobe/parker_solar_probe_trail')    --broken
+-- asset.require('./wsa/psp_pfss_io')       --broken
+-- asset.require('./wsa/psp_pfss_oi')       --broken
+-- asset.require('./wsa/psp_scs_oi')        --broken
+-- asset.require('./wsa/psp_sub_satellite') --broken
 
 
 

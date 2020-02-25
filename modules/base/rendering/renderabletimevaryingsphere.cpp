@@ -36,7 +36,7 @@
 
 
 // Why will it not compile without this library?
-#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/sphere.h>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingSphere";
