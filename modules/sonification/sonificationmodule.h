@@ -45,9 +45,9 @@ public:
 
     //Extract the data from the given identifier
     //NOTE: The identifier must start with capital letter, otherwise no match will be found
-    void extractData(const std::string identifier, const Scene * const scene,
-        const glm::dvec3 cameraPosition, const glm::dvec3 cameraDirection,
-        const glm::dvec3 cameraUpVector);
+    void extractData(const std::string& identifier, const Scene * const scene,
+        const glm::dvec3& cameraPosition, const glm::dvec3& cameraDirection,
+        const glm::dvec3& cameraUpVector);
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;

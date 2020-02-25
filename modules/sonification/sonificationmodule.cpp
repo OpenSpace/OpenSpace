@@ -29,6 +29,8 @@
 #include <openspace/util/camera.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/projection.hpp>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 
 
  //Debug purposes
@@ -70,9 +72,9 @@ SonificationModule::~SonificationModule() {
 
 //Extract the data from the given identifier
 //NOTE: The identifier must start with capital letter, otherwise no match will be found
-void SonificationModule::extractData(const std::string identifier,
-    const Scene * const scene, const glm::dvec3 cameraPosition,
-    const glm::dvec3 cameraDirection, const glm::dvec3 cameraUpVector) 
+void SonificationModule::extractData(const std::string& identifier,
+    const Scene * const scene, const glm::dvec3& cameraPosition,
+    const glm::dvec3& cameraDirection, const glm::dvec3& cameraUpVector)
 {
     SceneGraphNode* node = scene->sceneGraphNode(identifier);
     if (node) {
@@ -80,10 +82,10 @@ void SonificationModule::extractData(const std::string identifier,
         if (nodePosition != glm::dvec3(0.0, 0.0, 0.0)) {
             //std::cout << "Position of " << identifier << ": ( " << nodePosition.x << ", " << nodePosition.y << ", " << nodePosition.z << ")" << std::endl;
             
-            //Calculate distance to the planet from the camera
+            //Calculate distance to the planet from the camera, convert to km
             glm::dvec3 cameraToNode = nodePosition - cameraPosition;
-            double distance = glm::length(cameraToNode);
-            std::cout << "Distance from camera to " << identifier << ": " << distance << std::endl;
+            double distance = glm::length(cameraToNode)/ 1000.0;
+            //std::cout << "Distance from camera to " << identifier << ": " << distance << std::endl;
 
             //Calculate angle from camera to the planet in the camera plane
             //Project v down to the camera plane, Pplane(v)
@@ -93,13 +95,13 @@ void SonificationModule::extractData(const std::string identifier,
             
             //Convert to degrees, DEBUG
             double degreeAngle = angle * 180.0 / M_PI;
-            std::cout << "Angle between camera and " << identifier << ": " << degreeAngle << std::endl;
+            //std::cout << "Angle between camera and " << identifier << ": " << degreeAngle << std::endl;
             
             //Send the data to SuperCollider
             std::string label = "/" + identifier;
 
             //NOTE: Socket cannot be saved in class, it does not work then, dont know why. 
-            //Only works if the socket is recreated every time
+            //Only works if the socket is recreated every time, wasteful
             UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
             _stream.Clear();
             _stream << osc::BeginMessage(label.c_str()) << distance << angle << osc::EndMessage;
@@ -113,6 +115,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
     Scene* scene;
     Camera* camera;
     glm::dvec3 cameraDir, cameraPos, cameraUpVector;
+    const SceneGraphNode* focusNode;
 
     while (isRunning) {
 
@@ -126,32 +129,53 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                 cameraDir = camera->viewDirectionWorldSpace();
                 cameraUpVector = camera->lookUpVectorWorldSpace();
 
+                //Complete scene initialized, start extracting data
                 if (cameraPos != glm::dvec3(1.0, 1.0, 1.0)) {
                     
-                    //Complete scene initialized, start extracting data
-                    //Mercury
-                    extractData("Mercury", scene, cameraPos, cameraDir, cameraUpVector);
+                    //Which node is in focus?
+                    focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
+                    if (!focusNode) continue;
+                    std::cout << "Node in focus: " << focusNode->identifier() << std::endl;
 
-                    //Venus
-                    extractData("Venus", scene, cameraPos, cameraDir, cameraUpVector);
+                    //Let the sonification know which node is in focus,
+                    //is used to switch different sonifications
+                    UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+                    _stream.Clear();
+                    std::string focusLabel = "/focus";
+                    _stream << osc::BeginMessage(focusLabel.c_str()) << focusNode->identifier().c_str() << osc::EndMessage;
+                    socket.Send(_stream.Data(), _stream.Size());
 
-                    //Earth
-                    extractData("Earth", scene, cameraPos, cameraDir, cameraUpVector);
+                    //If the sun is in focus then turn on the solrar system sonification
+                    if (focusNode->identifier() == "Sun") {
+                        //Mercury
+                        extractData("Mercury", scene, cameraPos, cameraDir, cameraUpVector);
 
-                    //Mars
-                    extractData("Mars", scene, cameraPos, cameraDir, cameraUpVector);
+                        //Venus
+                        extractData("Venus", scene, cameraPos, cameraDir, cameraUpVector);
 
-                    //Jupiter
-                    extractData("Jupiter", scene, cameraPos, cameraDir, cameraUpVector);
+                        //Earth
+                        extractData("Earth", scene, cameraPos, cameraDir, cameraUpVector);
 
-                    //Saturn
-                    extractData("Saturn", scene, cameraPos, cameraDir, cameraUpVector);
+                        //Mars
+                        extractData("Mars", scene, cameraPos, cameraDir, cameraUpVector);
 
-                    //Uranus
-                    extractData("Uranus", scene, cameraPos, cameraDir, cameraUpVector);
+                        //Jupiter
+                        extractData("Jupiter", scene, cameraPos, cameraDir, cameraUpVector);
 
-                    //Neptune
-                    extractData("Neptune", scene, cameraPos, cameraDir, cameraUpVector);
+                        //Saturn
+                        extractData("Saturn", scene, cameraPos, cameraDir, cameraUpVector);
+
+                        //Uranus
+                        extractData("Uranus", scene, cameraPos, cameraDir, cameraUpVector);
+
+                        //Neptune
+                        extractData("Neptune", scene, cameraPos, cameraDir, cameraUpVector);
+                    }
+
+                    //Otherwise just extract data from the node in focus, planetary sonification
+                    else {
+                        extractData(focusNode->identifier(), scene, cameraPos, cameraDir, cameraUpVector);
+                    }
                 }
             }
         }
