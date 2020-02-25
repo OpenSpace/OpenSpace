@@ -31,7 +31,8 @@
 #include <glm/gtx/projection.hpp>
 
 namespace {
-constexpr const char* _loggerCat = "PathCurve";
+    constexpr const char* _loggerCat = "PathCurve";
+    const double Epsilon = 1E-7;
 } // namespace
 
 namespace openspace::autonavigation {
@@ -170,10 +171,10 @@ glm::dvec3 Bezier3Curve::valueAt(double u) {
     ghoul_assert((nrPoints - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
     ghoul_assert(_nrSegments == (nrTimes - 1), "Number of interval times must match number of intervals");
 
-    if (abs(u) < 0.000001)
+    if (abs(u) < Epsilon)
         return _points.front();
 
-    if (abs(1.0 - u) < 0.000001)
+    if (abs(1.0 - u) < Epsilon)
         return _points.back();
 
     // compute current segment, by first finding iterator to the first value that is larger than s 
