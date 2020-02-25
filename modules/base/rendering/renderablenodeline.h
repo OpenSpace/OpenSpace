@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,8 +76,8 @@ private:
     GLuint _vBufferId = 0;
     std::vector<float> _vertexArray;
 
-    glm::dvec3 _startPos;
-    glm::dvec3 _endPos;
+    glm::dvec3 _startPos = glm::dvec3(0.0);
+    glm::dvec3 _endPos = glm::dvec3(0.0);
 
     properties::StringProperty _start;
     properties::StringProperty _end;

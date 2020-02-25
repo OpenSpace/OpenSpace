@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,9 +44,9 @@ public:
     // Stores the selected node, the cursor ID as well as the surface coordinates the
     // cursor touched
     struct SelectedBody {
-        size_t id;
-        SceneGraphNode* node;
-        glm::dvec3 coordinates;
+        size_t id = 0;
+        SceneGraphNode* node = nullptr;
+        glm::dvec3 coordinates = glm::dvec3(0.0);
     };
 
     DirectInputSolver();

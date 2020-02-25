@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,9 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
-#include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <vector>
 
@@ -236,6 +237,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Initialize
     global::callback::initializeGL.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
         _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(
             _tileCacheSizeMB
         );
@@ -252,16 +255,24 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     global::callback::deinitializeGL.emplace_back([]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
         tileprovider::deinitializeDefaultTile();
     });
 
 
     // Render
-    global::callback::render.emplace_back([&]() { _tileCache->update(); });
+    global::callback::render.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
+        _tileCache->update();
+    });
 
     // Postdraw
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
     global::callback::postDraw.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
         // >= as we might have multiple frames per postDraw call (stereo rendering,
         // fisheye, etc)
         const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
@@ -297,7 +308,11 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     // Deinitialize
-    global::callback::deinitialize.emplace_back([&]() { GdalWrapper::destroy(); });
+    global::callback::deinitialize.emplace_back([&]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
+        GdalWrapper::destroy();
+    });
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");

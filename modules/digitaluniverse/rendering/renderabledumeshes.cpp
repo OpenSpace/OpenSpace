@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -236,12 +236,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-    , _textColor(
-        TextColorInfo,
-        glm::vec4(1.0f, 1.0, 1.0f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _textColor(TextColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
@@ -718,7 +713,8 @@ bool RenderableDUMeshes::readSpeckFile() {
             //file.seekg(position);
             //break;
             continue;
-        } else {
+        }
+        else {
 
         //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
@@ -866,7 +862,7 @@ bool RenderableDUMeshes::readLabelFile() {
 
         std::stringstream str(line);
 
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }

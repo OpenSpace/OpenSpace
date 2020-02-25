@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <optional>
@@ -63,15 +64,13 @@ public:
 
     static documentation::Documentation Documentation();
 
-//private:
-//    void loadShapeTexture();
-
 private:
     enum ColorOption {
-        Color     = 0,
-        Velocity  = 1,
-        Speed     = 2,
-        OtherData = 3
+        Color = 0,
+        Velocity = 1,
+        Speed = 2,
+        OtherData = 3,
+        FixedColor = 4
     };
 
     static const int _psfTextureSize = 64;
@@ -99,6 +98,7 @@ private:
     properties::StringProperty _otherDataColorMapPath;
     properties::Vec2Property _otherDataRange;
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+    properties::Vec4Property _fixedColor;
     properties::BoolProperty _filterOutOfRange;
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
@@ -132,7 +132,7 @@ private:
         colorOption, magnitudeExponent, eyePosition, psfParamConf,
         lumCent, radiusCent, brightnessCent, colorTexture,
         alphaValue, psfTexture, otherDataTexture, otherDataRange,
-        filterOutOfRange
+        filterOutOfRange, fixedColor
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;

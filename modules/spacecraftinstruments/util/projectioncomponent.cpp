@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,12 +51,14 @@ namespace {
     constexpr const char* keyInstrumentAspect = "Instrument.Aspect";
 
     constexpr const char* keyTranslation = "DataInputTranslation";
+    constexpr const char* keyTimesTranslation = "TimesDataInputTranslation";
 
     constexpr const char* keyProjObserver = "Observer";
     constexpr const char* keyProjTarget = "Target";
     constexpr const char* keyProjAberration = "Aberration";
 
     constexpr const char* keySequenceDir = "Sequence";
+    constexpr const char* keyTimesSequenceDir = "TimesSequence";
     constexpr const char* keySequenceType = "SequenceType";
 
     constexpr const char* keyNeedsTextureMapDilation = "TextureMap";
@@ -67,6 +69,7 @@ namespace {
     constexpr const char* sequenceTypePlaybook = "playbook";
     constexpr const char* sequenceTypeHybrid = "hybrid";
     constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
+    constexpr const char* sequenceTypeImageAndInstrumentTimes = "image-and-instrument-times";
 
     constexpr const char* placeholderFile = "${DATA}/placeholder.png";
 
@@ -149,7 +152,7 @@ documentation::Documentation ProjectionComponent::Documentation() {
                 keySequenceType,
                 new StringInListVerifier(
                     { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid,
-                      sequenceTypeInstrumentTimes }
+                      sequenceTypeInstrumentTimes, sequenceTypeImageAndInstrumentTimes }
                 ),
                 Optional::Yes,
                 "This value determines which type of sequencer is used for generating "
@@ -367,6 +370,27 @@ void ProjectionComponent::initialize(const std::string& identifier,
                     std::move(sequenceSource),
                     translationDictionary
                 )
+            );
+        }
+        else if (sequenceType == sequenceTypeImageAndInstrumentTimes) {
+            parsers.push_back(
+                std::make_unique<LabelParser>(
+                    identifier,
+                    std::move(sequenceSource),
+                    translationDictionary
+                    )
+            );
+
+            std::string timesSequenceSource = absPath(dictionary.value<std::string>(keyTimesSequenceDir));
+            ghoul::Dictionary timesTranslationDictionary;
+            dictionary.getValue(keyTimesTranslation, timesTranslationDictionary);
+
+            parsers.push_back(
+                std::make_unique<InstrumentTimesParser>(
+                    identifier,
+                    std::move(timesSequenceSource),
+                    timesTranslationDictionary
+                    )
             );
         }
     }

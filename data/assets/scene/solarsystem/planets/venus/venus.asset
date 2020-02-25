@@ -17,13 +17,22 @@ local color_layers = {
     {
         Identifier = "Texture",
         FilePath = textures .. "/venus.jpg",
-        Enabled = true
+        Enabled = true,
+        Settings = {
+            Opacity = 0.48,
+            Gamma = 0.48
+        }
     },
     {
         Identifier = "Magellan_Mosaic_Utah",
         Name = "Magellan Mosaic [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.wms"
-    }
+        FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.vrt",
+        BlendMode = "Color",
+        Settings = {
+            Gamma = 2.0
+        },
+        Enabled = true
+    },
 }
 
 local height_layers = {
@@ -31,7 +40,12 @@ local height_layers = {
         Identifier = "Magellan",
         Name = "Magellan Elevation [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/MagellanDEM.wms",
-        TilePixelSize = 64
+        TilePixelSize = 64,
+        Settings = {
+            Gamma = 1.72,
+            Multiplier = 1.1
+        },
+        Enabled = true
     }
 }
 

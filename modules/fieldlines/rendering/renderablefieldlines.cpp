@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -371,8 +371,8 @@ void RenderableFieldlines::loadSeedPointsFromTable() {
     LINFO("Loading provided list of seed points");
     ghoul::Dictionary seedpointsDictionary;
     _seedPointsInfo.getValue(KeySeedPointsTable, seedpointsDictionary);
-    glm::vec3 seedPos;
     for (const std::string& index : seedpointsDictionary.keys()) {
+        glm::vec3 seedPos = glm::vec3(0.f);
         _fieldlineInfo.getValue(std::string(KeySeedPointsTable) + "." + index, seedPos);
         _seedPoints.push_back(seedPos);
     }

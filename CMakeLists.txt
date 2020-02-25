@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2019                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,7 +28,7 @@ project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
 set(OPENSPACE_VERSION_MINOR 15)
-set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_PATCH 1)
 set(OPENSPACE_VERSION_STRING "Beta-5")
 
 
@@ -43,7 +43,6 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
 
 begin_header("Configuring OpenSpace project")
 message(STATUS "CMake version: ${CMAKE_VERSION}")
@@ -51,7 +50,7 @@ message(STATUS "CMake version: ${CMAKE_VERSION}")
 # Bail out if the user tries to generate a 32 bit project.
 if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
   message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
-endif()
+endif ()
 
 ##########################################################################################
 # Cleanup project                                                                        #
@@ -64,7 +63,7 @@ if (NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
     "git submodule update --init --recursive \n"
     "to download the missing dependencies."
   )
-endif()
+endif ()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
@@ -107,9 +106,33 @@ if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
   set(OPENSPACE_GIT_STATUS "uncommitted changes")
 else()
   set(OPENSPACE_GIT_STATUS "")
-endif()
+endif ()
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
+
+if (MSVC)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX "Enable AVX instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX2 "Enable AVX2 instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX512 "Enable AVX2 instruction set for compilation" OFF)
+  option(OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX2)
+    message(FATAL_ERROR "Cannot enable AVX and AVX2 instructions simultaneously")
+  endif ()
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
+    message(FATAL_ERROR "Cannot enable AVX and AVX512 instructions simultaneously")
+  endif ()
+
+  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2 AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
+    message(FATAL_ERROR "Cannot enable AVX2 and AVX512 instructions simultaneously")
+  endif ()
+
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX ${OPENSPACE_OPTIMIZATION_ENABLE_AVX} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX2 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX2} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_AVX512 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX512} CACHE BOOL "" FORCE)
+  set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
+endif ()
 
 include(src/CMakeLists.txt)
 
@@ -128,11 +151,12 @@ if (APPLE)
   target_link_libraries(openspace-core ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
     ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
   end_dependency()
-endif()
+endif ()
 
 # Ghoul
 add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
 target_link_libraries(openspace-core Ghoul)
+set_openspace_compile_settings(Ghoul)
 set_folder_location(Lua "External")
 set_folder_location(lz4 "External")
 set_folder_location(GhoulTest "Unit Tests")
@@ -159,7 +183,7 @@ else ()
     target_link_libraries(openspace-core ${CURL_LIBRARIES})
     target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
   endif ()
-endif()
+endif ()
 end_dependency()
 
 # Qt
@@ -205,39 +229,7 @@ if (MSVC)
     target_include_directories(openspace-core PUBLIC "${OPENSPACE_NVTOOLS_PATH}/include")
     end_dependency()
   endif ()
-
 endif ()
-
-##########################################################################################
-# Tests                                                                                  #
-##########################################################################################
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-if (OPENSPACE_HAVE_TESTS)
-  include_gtest("${GHOUL_BASE_DIR}/ext/googletest")
-
-  file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-  add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
-
-  target_include_directories(OpenSpaceTest PUBLIC
-    "${OPENSPACE_BASE_DIR}/include"
-    "${OPENSPACE_BASE_DIR}/tests"
-    "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
-  )
-  target_compile_definitions(OpenSpaceTest PUBLIC
-    "GHL_THROW_ON_ASSERT" "GTEST_HAS_TR1_TUPLE=0"
-  )
-  target_link_libraries(OpenSpaceTest gtest openspace-core)
-
-  set_folder_location(OpenSpaceTest "Unit Tests")
-
-  if (MSVC)
-    set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
-      "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-    )
-  endif ()
-  set_openspace_compile_settings(OpenSpaceTest)
-endif (OPENSPACE_HAVE_TESTS)
-
 
 begin_header("Configuring Modules")
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
@@ -249,6 +241,13 @@ begin_header("Configuring Applications")
 handle_applications()
 end_header("End: Configuring Applications")
 message(STATUS "")
+
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+if (OPENSPACE_HAVE_TESTS)
+  begin_header("Generating OpenSpace unit test")
+  add_subdirectory("${OPENSPACE_BASE_DIR}/tests")
+  end_header()
+endif (OPENSPACE_HAVE_TESTS)
 
 
 # Web Browser and Web gui
@@ -268,11 +267,6 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-
-  if (TARGET OpenSpaceTest)
-    set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
-    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-  endif ()
 elseif (OPENSPACE_MODULE_WEBBROWSER)
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()

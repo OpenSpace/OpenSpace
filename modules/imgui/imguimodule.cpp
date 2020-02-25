@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace {
 
@@ -130,21 +131,29 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     });
 
     global::callback::deinitialize.emplace_back([&]() {
+        ZoneScopedN("ImGUI")
+
         LDEBUGC("ImGui", "Deinitialize GUI");
         gui.deinitialize();
     });
 
     global::callback::initializeGL.emplace_back([&]() {
+        ZoneScopedN("ImGUI")
+
         LDEBUGC("ImGui", "Initializing GUI OpenGL");
         gui.initializeGL();
     });
 
     global::callback::deinitializeGL.emplace_back([&]() {
+        ZoneScopedN("ImGUI")
+
         LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
         gui.deinitializeGL();
     });
 
     global::callback::draw2D.emplace_back([&]() {
+        ZoneScopedN("ImGUI")
+
         // TODO emiax: Make sure this is only called for one of the eyes, in the case
         // of side-by-side / top-bottom stereo.
 
@@ -182,6 +191,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::keyboard.emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+            ZoneScopedN("ImGUI")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -196,6 +207,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::character.emplace_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
+            ZoneScopedN("ImGUI")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -210,6 +223,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::mouseButton.emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
+            ZoneScopedN("ImGUI")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -224,6 +239,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::mouseScrollWheel.emplace_back(
         [&](double, double posY) -> bool {
+            ZoneScopedN("ImGUI")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())

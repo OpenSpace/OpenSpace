@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,6 +77,7 @@ public:
 private:
     void loadTexture();
     void createPlane();
+    void compileShadowShader();
 
     properties::StringProperty _texturePath;
     properties::FloatProperty _size;
@@ -90,8 +91,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, nShadowSamples,
-        zFightingPercentage
+        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture)  
         _geomUniformCache;
@@ -104,7 +104,7 @@ private:
     GLuint _vertexPositionBuffer = 0;
     bool _planeIsDirty = false;
 
-    glm::vec3 _sunPosition;
+    glm::vec3 _sunPosition = glm::vec3(0.f);
 };
 
 } // namespace openspace

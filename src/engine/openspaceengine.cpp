@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <openspace/openspace.h>
-
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
@@ -75,6 +74,7 @@
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
@@ -183,6 +183,8 @@ void OpenSpaceEngine::registerPathTokens() {
 }
 
 void OpenSpaceEngine::initialize() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
@@ -345,7 +347,7 @@ void OpenSpaceEngine::initialize() {
 
     global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
         std::make_unique<AssetLoader>(
-            *global::scriptEngine.luaState(),
+            global::scriptEngine.luaState(),
             rawWatcher,
             FileSys.absPath("${ASSETS}")
         ),
@@ -377,6 +379,8 @@ void OpenSpaceEngine::initialize() {
     global::renderEngine.initialize();
 
     for (const std::function<void()>& func : global::callback::initialize) {
+        ZoneScopedN("[Module] initialize")
+
         func();
     }
 
@@ -407,6 +411,8 @@ std::string OpenSpaceEngine::generateFilePath(std::string openspaceRelativePath)
 }
 
 void OpenSpaceEngine::initializeGL() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
     glbinding::Binding::initialize(global::windowDelegate.openGLProcedureAddress);
@@ -668,6 +674,8 @@ void OpenSpaceEngine::initializeGL() {
     global::moduleEngine.initializeGL();
 
     for (const std::function<void()>& func : global::callback::initializeGL) {
+        ZoneScopedN("[Module] initializeGL")
+
         func();
     }
 
@@ -682,6 +690,8 @@ void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
 }
 
 void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::loadSingleAsset(begin)");
 
     global::windowDelegate.setBarrier(false);
@@ -695,6 +705,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         return;
     }
     if (_scene) {
+        ZoneScopedN("Reset scene")
+
         global::syncEngine.removeSyncables(global::timeManager.getSyncables());
         if (_scene && _scene->camera()) {
             global::syncEngine.removeSyncables(_scene->camera()->getSyncables());
@@ -711,7 +723,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         unsigned int nAvailableThreads = std::thread::hardware_concurrency();
         unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads - 1;
         sceneInitializer = std::make_unique<MultiThreadedSceneInitializer>(nThreads);
-    } else {
+    }
+    else {
         sceneInitializer = std::make_unique<SingleThreadedSceneInitializer>();
     }
 
@@ -728,7 +741,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     const SceneGraphNode* parent = camera->parent();
     if (parent) {
         global::navigationHandler.orbitalNavigator().setFocusNode(parent->identifier());
-    } else {
+    }
+    else {
         global::navigationHandler.orbitalNavigator().setFocusNode(
             _scene->root()->identifier()
         );
@@ -754,6 +768,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             a->ownSynchronizations();
 
         for (const std::shared_ptr<ResourceSynchronization>& s : syncs) {
+            ZoneScopedN("Update resource synchronization")
+
             if (s->state() == ResourceSynchronization::State::Syncing) {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = s->progress();
@@ -803,7 +819,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                     progressInfo
                 );
                 ++it;
-            } else {
+            }
+            else {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = 1.f;
 
@@ -854,6 +871,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 }
 
 void OpenSpaceEngine::deinitialize() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
     for (const std::function<void()>& func : global::callback::deinitialize) {
@@ -874,6 +893,8 @@ void OpenSpaceEngine::deinitialize() {
     global::sessionRecording.deinitialize();
     global::versionChecker.cancel();
 
+    _assetManager = nullptr;
+
     global::deinitialize();
 
     FactoryManager::deinitialize();
@@ -891,6 +912,8 @@ void OpenSpaceEngine::deinitialize() {
 }
 
 void OpenSpaceEngine::deinitializeGL() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::deinitializeGL(begin)");
 
     // We want to render an image informing the user that we are shutting down
@@ -904,6 +927,8 @@ void OpenSpaceEngine::deinitializeGL() {
     for (const std::function<void()>& func : global::callback::deinitializeGL) {
         func();
     }
+
+    _loadingScreen = nullptr;
 
     global::deinitializeGL();
 
@@ -938,6 +963,8 @@ void OpenSpaceEngine::writeStaticDocumentation() {
 }
 
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
+    ZoneScoped
+
     LINFO("Running Global initialization scripts");
     ghoul::lua::LuaState state;
     global::scriptEngine.initializeLuaState(state);
@@ -993,6 +1020,8 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::writeSceneDocumentation() {
+    ZoneScoped
+
     // Write documentation to json files if config file supplies path for doc files
 
     std::string path = global::configuration.documentation.path;
@@ -1037,6 +1066,8 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 }
 
 void OpenSpaceEngine::preSynchronization() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
     //std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -1065,7 +1096,6 @@ void OpenSpaceEngine::preSynchronization() {
 
     global::syncEngine.preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
-
         double dt = global::windowDelegate.deltaTime();
 
         if (global::sessionRecording.isSavingFramesDuringPlayback()) {
@@ -1100,12 +1130,16 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     for (const std::function<void()>& func : global::callback::preSync) {
+        ZoneScopedN("[Module] preSync")
+
         func();
     }
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
@@ -1151,6 +1185,8 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     for (const std::function<void()>& func : global::callback::postSyncPreDraw) {
+        ZoneScopedN("[Module] postSyncPreDraw")
+
         func();
     }
 
@@ -1179,6 +1215,8 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::render(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
@@ -1200,6 +1238,8 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     global::renderEngine.render(sceneMatrix, viewMatrix, projectionMatrix);
 
     for (const std::function<void()>& func : global::callback::render) {
+        ZoneScopedN("[Module] render")
+
         func();
     }
 
@@ -1207,6 +1247,8 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 }
 
 void OpenSpaceEngine::drawOverlays() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
@@ -1227,6 +1269,8 @@ void OpenSpaceEngine::drawOverlays() {
     }
 
     for (const std::function<void()>& func : global::callback::draw2D) {
+        ZoneScopedN("[Module] draw2D")
+
         func();
     }
 
@@ -1234,6 +1278,8 @@ void OpenSpaceEngine::drawOverlays() {
 }
 
 void OpenSpaceEngine::postDraw() {
+    ZoneScoped
+
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
@@ -1246,6 +1292,8 @@ void OpenSpaceEngine::postDraw() {
     global::renderEngine.postDraw();
 
     for (const std::function<void()>& func : global::callback::postDraw) {
+        ZoneScopedN("[Module] postDraw")
+
         func();
     }
 
@@ -1258,6 +1306,8 @@ void OpenSpaceEngine::postDraw() {
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
+    ZoneScoped
+
     if (_loadingScreen) {
         // If the loading screen object exists, we are currently loading and want key
         // presses to behave differently
@@ -1289,6 +1339,8 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
+    ZoneScoped
+
     using F = std::function<bool (unsigned int, KeyModifier)>;
     for (const F& func : global::callback::character) {
         bool isConsumed = func(codepoint, modifier);
@@ -1305,6 +1357,8 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
                                           MouseAction action,
                                           KeyModifier mods)
 {
+    ZoneScoped
+
     using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
     for (const F& func : global::callback::mouseButton) {
         bool isConsumed = func(button, action, mods);
@@ -1338,6 +1392,8 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
+    ZoneScoped
+
     using F = std::function<void (double, double)>;
     for (const F& func : global::callback::mousePosition) {
         func(x, y);
@@ -1348,6 +1404,8 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
+    ZoneScoped
+
     using F = std::function<bool (double, double)>;
     for (const F& func : global::callback::mouseScrollWheel) {
         bool isConsumed = func(posX, posY);
@@ -1361,6 +1419,8 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
 }
 
 void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
+    ZoneScoped
+
     using F = std::function<bool (TouchInput)>;
     for (const F& func : global::callback::touchDetected) {
         bool isConsumed = func(input);
@@ -1371,6 +1431,8 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
+    ZoneScoped
+
     using F = std::function<bool(TouchInput)>;
     for (const F& func : global::callback::touchUpdated) {
         bool isConsumed = func(input);
@@ -1381,6 +1443,8 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
 }
 
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
+    ZoneScoped
+
     using F = std::function<void(TouchInput)>;
     for (const F& func : global::callback::touchExit) {
         func(input);
@@ -1389,11 +1453,15 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 
 
 std::vector<char> OpenSpaceEngine::encode() {
+    ZoneScoped
+
     std::vector<char> buffer = global::syncEngine.encodeSyncables();
     return buffer;
 }
 
 void OpenSpaceEngine::decode(std::vector<char> data) {
+    ZoneScoped
+
     global::syncEngine.decodeSyncables(std::move(data));
 }
 

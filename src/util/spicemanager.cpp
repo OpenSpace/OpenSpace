@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -525,7 +525,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
-        glm::dvec3 position;
+        glm::dvec3 position = glm::dvec3(0.0);
         spkpos_c(
             target.c_str(),
             ephemerisTime,
@@ -1027,7 +1027,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
 
     const std::set<double>& coveredTimes = _spkCoverageTimes.find(targetId)->second;
 
-    glm::dvec3 pos;
+    glm::dvec3 pos = glm::dvec3(0.0);
     if (coveredTimes.lower_bound(ephemerisTime) == coveredTimes.begin()) {
         // coverage later, fetch first position
         spkpos_c(
@@ -1062,7 +1062,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     }
     else {
         // coverage both earlier and later, interpolate these positions
-        glm::dvec3 posEarlier;
+        glm::dvec3 posEarlier = glm::dvec3(0.0);
         double ltEarlier;
         double timeEarlier = *std::prev((coveredTimes.lower_bound(ephemerisTime)));
         spkpos_c(
@@ -1075,7 +1075,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             &ltEarlier
         );
 
-        glm::dvec3 posLater;
+        glm::dvec3 posLater = glm::dvec3(0.0);
         double ltLater;
         double timeLater = *(coveredTimes.upper_bound(ephemerisTime));
         spkpos_c(
@@ -1106,7 +1106,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
                                                      const std::string& toFrame,
                                                      double time) const
 {
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
     const int idFrame = frameId(fromFrame);
 
     if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()) {
@@ -1118,7 +1118,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             ));
         }
         else {
-            return glm::dmat3();
+            return glm::dmat3(1.0);
         }
     }
 
@@ -1155,7 +1155,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
         double earlier = *std::prev((coveredTimes.lower_bound(time)));
         double later = *(coveredTimes.upper_bound(time));
 
-        glm::dmat3 earlierTransform;
+        glm::dmat3 earlierTransform = glm::dmat3(1.0);
         pxform_c(
             fromFrame.c_str(),
             toFrame.c_str(),
@@ -1167,7 +1167,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             fromFrame, toFrame, time
         ));
 
-        glm::dmat3 laterTransform;
+        glm::dmat3 laterTransform = glm::dmat3(1.0);
         pxform_c(
             fromFrame.c_str(),
             toFrame.c_str(),

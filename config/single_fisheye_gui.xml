@@ -34,8 +34,7 @@
 
     <Window fullScreen="false" name="GUI" tags="GUI">
         <Stereo type="none" />
-        <Size x="1280" y="720" />
-        <Res x="2048" y="2048" />
+        <Size x="1024" y="1024" />
         <Pos x="50" y="50" />
         <Viewport>
             <Pos x="0.0" y="0.0" />

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 #include <openspace/scene/timeframe.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
 
@@ -251,7 +252,8 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             if (!tagName.empty()) {
                 result->addTag(std::move(tagName));
             }
-        } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+        }
+        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
             ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
             std::vector<std::string> keys = tagNames.keys();
             std::string tagName;
@@ -311,6 +313,9 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {} // NOLINT
 
 void SceneGraphNode::initialize() {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Initializing: {}", identifier()));
 
     if (_renderable) {
@@ -332,6 +337,9 @@ void SceneGraphNode::initialize() {
 }
 
 void SceneGraphNode::initializeGL() {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Initializing GL: {}", identifier()));
 
     if (_renderable) {
@@ -343,6 +351,9 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
     setScene(nullptr);
@@ -357,6 +368,9 @@ void SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::deinitializeGL() {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
 
     if (_renderable) {
@@ -381,6 +395,9 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     State s = _state;
     if (s != State::Initialized && _state != State::GLInitialized) {
         return;
@@ -482,6 +499,9 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
+    ZoneScoped
+    ZoneName(identifier().c_str(), identifier().size())
+
     if (_state != State::GLInitialized) {
         return;
     }
@@ -522,6 +542,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _performanceRecord.renderTime = (end - start).count();
     }
     else {
+        TracyGpuZone("Render")
+
         _renderable->render(newData, tasks);
         if (_computeScreenSpaceValues) {
             computeScreenSpaceData(newData);
@@ -746,11 +768,7 @@ SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }
     else {
-        return {
-            glm::dvec3(0.0, 0.0, 0.0),
-            glm::normalize(targetModelSpace),
-            0.0
-        };
+        return { glm::dvec3(0.0), glm::normalize(targetModelSpace), 0.0 };
     }
 }
 
@@ -860,6 +878,8 @@ Scene* SceneGraphNode::scene() {
 }
 
 void SceneGraphNode::setScene(Scene* scene) {
+    ZoneScoped
+
     // Unregister from previous scene, bottom up
     traversePostOrder([](SceneGraphNode* node) {
         if (node->_scene) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,8 @@ void DataSphere::initializeGL() {
     if (_group) {
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
-    } else {
+    }
+    else {
         _dataProcessor = std::make_shared<DataProcessorJson>();
         //If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this]() {
@@ -71,7 +72,8 @@ void DataSphere::initializeGL() {
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
-            } else {
+            }
+            else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
                 //_backgroundValues.setVisible(true);
             }

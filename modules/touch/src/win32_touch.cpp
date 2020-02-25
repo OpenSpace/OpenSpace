@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -237,13 +237,12 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
         //         GetModuleHandleW(NULL),
         //         0 //<- Global thread id (low-level mouse is global only)
         //     );
-        //     if(!gMouseHook){
+        //     if (!gMouseHook) {
         //         LINFO("Could not setup mousehook!");
         //     }
 
         //     MSG msg;
-        //     while (GetMessage(&msg, NULL, 0, 0))
-        //     {
+        //     while (GetMessage(&msg, NULL, 0, 0)) {
         //         DispatchMessage(&msg);
         //     }
         // });

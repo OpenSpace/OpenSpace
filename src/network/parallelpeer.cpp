@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/misc/profiling.h>
 
 #include "parallelpeer_lua.inl"
 
@@ -503,6 +504,8 @@ void ParallelPeer::resetTimeOffset() {
 }
 
 void ParallelPeer::preSynchronization() {
+    ZoneScoped
+
     std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
         ParallelConnection::Message& message = _receiveBuffer.front();
@@ -544,7 +547,8 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
         global::timeManager.addTimelineChangeCallback([this]() {
             _timeTimelineChanged = true;
         });
-    } else {
+    }
+    else {
         if (_timeJumpCallback != -1) {
             global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
         }

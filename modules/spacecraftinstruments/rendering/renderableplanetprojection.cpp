@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -483,19 +483,21 @@ void RenderablePlanetProjection::imageProjectGPU(
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
     if (_geometry->hasProperty("Radius")) {
-        ghoul::any r = _geometry->property("Radius")->get();
-        if (glm::vec3* radius = ghoul::any_cast<glm::vec3>(&r)){
+        std::any r = _geometry->property("Radius")->get();
+        if (glm::vec3* radius = std::any_cast<glm::vec3>(&r)){
             _fboProgramObject->setUniform(_fboUniformCache.radius, radius);
         }
-    } else {
+    }
+    else {
         LERROR("Geometry object needs to provide radius");
     }
     if (_geometry->hasProperty("Segments")) {
-        ghoul::any s = _geometry->property("Segments")->get();
-        if (int* segments = ghoul::any_cast<int>(&s)) {
+        std::any s = _geometry->property("Segments")->get();
+        if (int* segments = std::any_cast<int>(&s)) {
             _fboProgramObject->setUniform(_fboUniformCache.segments, segments[0]);
         }
-    }else{
+    }
+    else{
         LERROR("Geometry object needs to provide segment count");
     }
 
@@ -514,7 +516,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
 
     _transform = glm::mat4(_stateMatrix);
 
-    glm::dvec3 bs;
+    glm::dvec3 bs = glm::dvec3(0.0);
     try {
         SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
             _projectionComponent.instrumentId()
@@ -536,8 +538,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         lightTime
     ) * 1000.0;
 
-    float distance = glm::length(p);
-    float radius = boundingSphere();
+    const double distance = glm::length(p);
+    const double radius = boundingSphere();
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         p,
         bs,
@@ -545,8 +547,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        distance - radius,
-        distance + radius,
+        static_cast<float>(distance - radius),
+        static_cast<float>(distance + radius),
         _boresight
     );
 }

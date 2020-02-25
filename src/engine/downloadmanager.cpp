@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -271,17 +271,20 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 getline(ss, extension ,'/');
                 getline(ss, extension);
                 file.format = extension;
-            } else {
+            }
+            else {
                 LWARNING("Could not get extension from file downloaded from: " + url);
             }
             successCb(file);
             curl_easy_cleanup(curl);
             return file;
-        } else {
+        }
+        else {
             std::string err = curl_easy_strerror(res);
             if (errorCb) {
                 errorCb(err);
-            } else {
+            }
+            else {
                 LWARNING(fmt::format("Error downloading '{}': {}", url, err));
             }
             curl_easy_cleanup(curl);

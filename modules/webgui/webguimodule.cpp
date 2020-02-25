@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebGuiModule";
@@ -173,7 +174,8 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     auto startOrStop = [this]() {
         if (_enabled && !_entryPoint.value().empty()) {
             startProcess();
-        } else {
+        }
+        else {
             stopProcess();
         }
     };
@@ -225,6 +227,8 @@ void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exi
 }
 
 void WebGuiModule::startProcess() {
+    ZoneScoped
+
     _endpoints.clear();
 
     ServerModule* serverModule = global::moduleEngine.module<ServerModule>();

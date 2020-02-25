@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -108,13 +108,10 @@ private:
     int _shadowDepthTextureWidth = 4096;
     bool _dynamicDepthTextureRes = true;
         
-    // All of these initializations should probably be 0 since they are GLuints?
-    GLuint _shadowDepthTexture = -1;
-    GLuint _positionInLightSpaceTexture = -1;
-    GLuint _shadowFBO = -1;
-    GLuint _firstPassSubroutine = -1;
-    GLuint _secondPassSubroutine = 1;
-    GLint _defaultFBO = -1;
+    GLuint _shadowDepthTexture = 0;
+    GLuint _positionInLightSpaceTexture = 0;
+    GLuint _shadowFBO = 0;
+    GLint _defaultFBO = 0;
     GLint _mViewport[4];
 
     GLboolean _faceCulling;
@@ -130,13 +127,13 @@ private:
     GLfloat _colorClearValue[4];
     GLfloat _depthClearValue;
 
-    glm::vec3 _sunPosition;
+    glm::vec3 _sunPosition = glm::vec3(0.f);
 
     glm::dmat4 _shadowMatrix = glm::dmat4(1.0);
 
     glm::dvec3 _cameraPos = glm::dvec3(0.0);
-    glm::dvec3 _cameraFocus;
-    glm::dquat _cameraRotation;
+    glm::dvec3 _cameraFocus = glm::dvec3(0.0);
+    glm::dquat _cameraRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
 
     std::stringstream _serializedCamera;
 
