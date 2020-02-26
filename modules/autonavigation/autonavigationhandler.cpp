@@ -105,14 +105,14 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     _currentTime += deltaTime;
 
-    PathSegment& cps = _pathSegments[_currentSegmentIndex];
+    PathSegment cps = _pathSegments[_currentSegmentIndex];
 
     // Have we walked past the current segment?
     if (_currentTime > cps.endTime()) {
         _currentSegmentIndex++;
         _distanceAlongCurrentSegment = 0.0;
 
-        // WStepped past the last segment
+        // Stepped past the last segment
         if (_currentSegmentIndex > _pathSegments.size() - 1) {
             LINFO("Reached end of path.");
             _isPlaying = false;
