@@ -5,7 +5,13 @@ local renderableHelper = asset.require('util/renderable_helper')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+
+-- assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/sun/glare')
+asset.require('scene/solarsystem/sun/marker')
+asset.require('scene/solarsystem/sun/sun_textures')
+asset.require('scene/solarsystem/sun/transforms')
+
 -- asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
@@ -24,7 +30,7 @@ local webGui = asset.require('util/webgui')
 -- asset.request('customization/globebrowsing')
 
 -- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local sunAsset = asset.require('scene/solarsystem/sun/sun_wsa')
 
 local sunRadius = 695508000
 

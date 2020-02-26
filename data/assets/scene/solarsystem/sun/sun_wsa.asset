@@ -2,24 +2,24 @@ local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
+local wsaOutDirectory = asset.localResource("wsa_out_fits")
+
 
 local Sun = {
     Identifier = "Sun",
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
-        Type = "RenderableGlobe",
-        Enabled = false,
-        Radii = { 6.957E8, 6.957E8, 6.957E8 },
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/sun.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Type = "RenderableTimeVaryingSphere",
+        -- Use WebContent
+        WebContent = true,
+        -- Url to web content
+        WebContentUrl = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1180",
+        Enabled = true,
+        Size = 6.957E8,
+        Segments = 64,
+        SourceFolder = wsaOutDirectory, -- Running locally
+        MapType = "gong",
+        DefaultTexture = textures .. "/sun.jpg",
         PerformShading = false
     },
     GUI = {

@@ -7,7 +7,6 @@ local ParkerSolarProbeTrail = {
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
-        Enabled = true,
         Translation = {
             Type = "HorizonsTranslation",
             HorizonsTextFile = "C:/Users/skollber/Downloads/parker_20180812-20191231.dat"
