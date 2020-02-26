@@ -34,7 +34,6 @@ namespace {
     constexpr const char* KeyInstructions = "Instructions";
     constexpr const char* KeyStopAtTargets = "StopAtTargets";
     constexpr const char* KeyStartState = "StartState";
-    constexpr const char* KeyCurveType = "CurveType";
 
 } // namespace
 
@@ -65,11 +64,6 @@ PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
     // Read stop at targets flag
     if (dictionary.hasValue<bool>(KeyStopAtTargets)) {
         _stopAtTargets = dictionary.value<bool>(KeyStopAtTargets);
-    }
-
-    // Read desired curve type
-    if (dictionary.hasValue<std::string>(KeyCurveType)) {
-        _curveType = dictionary.value<std::string>(KeyCurveType);
     }
 
     // Read start state
@@ -105,10 +99,6 @@ const bool PathSpecification::stopAtTargets() const {
     return _stopAtTargets;
 }
 
-const std::string& PathSpecification::curveType() const {
-    return _curveType;
-}
-
 const interaction::NavigationHandler::NavigationState& PathSpecification::startState() const {
     return _startState.value();
 }
@@ -141,12 +131,6 @@ documentation::Documentation PathSpecification::Documentation() {
                 new TableVerifier,
                 Optional::Yes,
                 "A navigation state that determines the start state for the camera path."
-            },
-            {
-                KeyCurveType,
-                new StringVerifier,
-                Optional::Yes,
-                "A string describing one of the available curve types (TODO: refer to later documentation)."
             },
         }
     };

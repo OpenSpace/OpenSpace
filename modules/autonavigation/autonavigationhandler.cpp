@@ -48,35 +48,28 @@ namespace {
         "positions and path generation, to avoid issues when there is no bounding sphere."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
+        "DefaultCurveOption",
+        "Default Curve Option",
+        "The defualt curve type chosen when generating a path, if none is specified."
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
 
-// Temporary function to convert a string to one of the bools above. 
-// TODO: move to a better place / rewrite
-CurveType stringToCurveType(std::string str) {
-    if (str.empty()) 
-        return CurveType::None;
-
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-
-    if (str == "bezier3") {
-        return CurveType::Bezier3;
-    }
-    else if (str == "linear") {
-        return CurveType::Linear;
-    }
-    else {
-        LERROR(fmt::format("'{}' is not a valid curve type! Choosing default.", str));
-        return CurveType::None;
-    }
-}
-
 AutoNavigationHandler::AutoNavigationHandler()
     : properties::PropertyOwner({ "AutoNavigationHandler" })
     , _minAllowedBoundingSphere(MinimalBoundingSphereInfo, 10.0, 1.0, 3e10)
+    , _defaultCurveOption(DefaultCurveOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     addProperty(_minAllowedBoundingSphere);
+
+    _defaultCurveOption.addOptions({
+        { CurveType::Bezier3, "Bezier3" },
+        { CurveType::Linear, "Linear"} 
+    });
+    addProperty(_defaultCurveOption);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -159,8 +152,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
     clearPath();
-
-    _pathCurveType = stringToCurveType(spec.curveType());
 
     bool success = true;
     for (int i = 0; i < spec.instructions()->size(); i++) {
@@ -412,11 +403,10 @@ void AutoNavigationHandler::addSegment(CameraState& start,
         startTime = last.startTime() + last.duration();
     }
 
-    bool hasType = (_pathCurveType != CurveType::None);
+    // TODO: Improve how curve types are handled
+    const int curveType = _defaultCurveOption;
 
-    PathSegment newSegment = hasType 
-        ? PathSegment{ start, end, startTime, _pathCurveType } 
-        : PathSegment{ start, end, startTime };
+    PathSegment newSegment{ start, end, startTime, CurveType(curveType) };
 
     // TODO: handle duration better
     if (duration.has_value()) {

@@ -31,18 +31,18 @@
 
 namespace openspace::autonavigation {
 
-enum class CurveType {
+// TODO: place this enum somewhere else
+enum CurveType {
     Bezier3,
     Linear,
-    Pause, // OBS! Temporary special case for handling pauses
-    None
+    Pause // OBS! Temporary special case for handling pauses
 };
 
 class PathCurve;
 
 class PathSegment {
 public:
-    PathSegment(CameraState start, CameraState end, double startTime, CurveType type = CurveType::Bezier3);
+    PathSegment(CameraState start, CameraState end, double startTime, CurveType type);
     ~PathSegment() = default;
 
     // Mutators

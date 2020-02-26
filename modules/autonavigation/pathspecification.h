@@ -45,7 +45,6 @@ public:
     // Accessors
     const std::vector<Instruction>* instructions() const;
     const bool stopAtTargets() const; 
-    const std::string& curveType() const;
     const interaction::NavigationHandler::NavigationState& startState() const;
 
     const bool hasStartState() const;
@@ -53,7 +52,6 @@ public:
 private:
     std::vector<Instruction> _instructions;
     bool _stopAtTargets = false; // default is to play the entire path without stops
-    std::string _curveType = std::string();
     std::optional<interaction::NavigationHandler::NavigationState> _startState;
 
     // TODO: maxSpeed or speedFactor or something?
