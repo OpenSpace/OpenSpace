@@ -27,12 +27,13 @@
 
 #include "modules/sonification/ext/osc/ip/UdpSocket.h"
 #include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
-#include "modules/sonification/include/sonificationhelper.h"
 #include <string>
 #include <thread>
 #include <atomic>
 #include <ghoul/glm.h>
 #include <openspace/scene/scene.h>
+
+#define NUM_PLANETS 8
 
 #include <openspace/util/openspacemodule.h>
 
@@ -45,7 +46,7 @@ public:
 
     //Extract the data from the given identifier
     //NOTE: The identifier must start with capital letter, otherwise no match will be found
-    void extractData(const std::string& identifier, const Scene * const scene,
+    void extractData(const std::string& identifier, int i, const Scene * const scene,
         const glm::dvec3& cameraPosition, const glm::dvec3& cameraDirection,
         const glm::dvec3& cameraUpVector);
 
@@ -53,14 +54,43 @@ protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
 
 private:
-    char* _buffer;
-    osc::OutboundPacketStream _stream;
-    SonificationHelper _helper; //Needed?
-    std::thread _thread;
-    std::atomic<bool> _isRunning;
-
     //Main function for _thread
     void threadMain(std::atomic<bool>& isRunning);
+
+    //Struct to hold data for all the planets
+    struct Planet {
+        Planet() {
+            _identifier = "";
+            _distance = 0.0;
+            _angle = 0.0;
+        }
+
+        Planet(std::string identifier) {
+            _identifier = identifier;
+            _distance = 0.0;
+            _angle = 0.0;
+        }
+
+        void setDistance(double distance) {
+            _distance = distance;
+        }
+
+        void setAngle(double angle) {
+            _angle = angle;
+        }
+
+        std::string _identifier;
+        double _distance;
+        double _angle;
+    };
+
+    char* _buffer;
+    osc::OutboundPacketStream _stream;
+    std::thread _thread;
+    std::atomic<bool> _isRunning;
+    double _anglePrecision;
+    double _distancePrecision;
+    Planet _planets[NUM_PLANETS];
 };
 
 } // namespace openspace
