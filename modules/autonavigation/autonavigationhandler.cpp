@@ -316,6 +316,7 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& instr
     // Compute end state 
     std::string& identifier = props->targetNode;
     const SceneGraphNode* targetNode = sceneGraphNode(identifier);
+
     if (!targetNode) {
         LERROR(fmt::format("Could not find node '{}' to target", identifier));
         return false;
@@ -329,16 +330,10 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& instr
             targetNode->worldRotationMatrix() * props->position.value();
     }
     else {
-        bool hasHeight = props->height.has_value();
-
-        // TODO: compute defualt height in a better way
-        double defaultHeight = 2 * targetNode->boundingSphere();
-        double height = hasHeight ? props->height.value() : defaultHeight;
-
         targetPos = computeTargetPositionAtNode(
             targetNode, 
             startState.position,
-            height
+            props->height
         );
     }
 
@@ -439,15 +434,50 @@ void AutoNavigationHandler::addPause(CameraState& state, std::optional<double> d
     _pathSegments.push_back(newSegment);
 }
 
-glm::dvec3 AutoNavigationHandler::computeTargetPositionAtNode(
-    const SceneGraphNode* node, glm::dvec3 prevPos, double height)
-{
-    // TODO: compute actual distance above surface and validate negative values
+double AutoNavigationHandler::findValidBoundingSphere(const SceneGraphNode* node) {
+    const double minAllowedValue = 10.0; // TODO: investigate suitable values (Also, make a property?)
+    double bs = static_cast<double>(node->boundingSphere());
 
+    if (bs < minAllowedValue) {
+
+        // If the bs of the target is too small, try to find a good value in a child node.
+        // Only check the closest children, to avoid deep traversal in the scene graph. Also,
+        // the possibility to find a bounding sphere represents the visual size of the 
+        // target well is higher for these nodes.
+        for (SceneGraphNode* child : node->children()) {
+            bs = static_cast<double>(child->boundingSphere());
+            if (bs > minAllowedValue) {
+                LWARNING(fmt::format(
+                    "The scene graph node '{}' has no, or a very small, bounding sphere. Using bounding sphere of child node '{}' in computations.",
+                    node->identifier(), 
+                    child->identifier()
+                ));
+
+                return bs;
+            }
+        }
+
+        LWARNING(fmt::format("The scene graph node '{}' has no, or a very small,"
+            "bounding sphere. This might lead to unexpected results.", node->identifier()));
+
+        bs = minAllowedValue;
+    }
+
+    return bs;
+}
+
+glm::dvec3 AutoNavigationHandler::computeTargetPositionAtNode(
+    const SceneGraphNode* node, glm::dvec3 prevPos, std::optional<double> heightOptional)
+{
     glm::dvec3 targetPos = node->worldPosition();
     glm::dvec3 targetToPrevVector = prevPos - targetPos;
+    // TODO: compute position in a more clever way
 
-    double radius = static_cast<double>(node->boundingSphere());
+    const double radius = findValidBoundingSphere(node);
+    const double defaultHeight = 2 * radius;
+
+    bool hasHeight = heightOptional.has_value();
+    double height = hasHeight ? heightOptional.value() : defaultHeight;
 
     // move target position out from surface, along vector to camera
     targetPos += glm::normalize(targetToPrevVector) * (radius + height);

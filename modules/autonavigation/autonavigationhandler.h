@@ -76,8 +76,9 @@ private:
 
     void addPause(CameraState& state, std::optional<double> duration);
 
+    double findValidBoundingSphere(const SceneGraphNode* node);
     glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
-        glm::dvec3 prevPos, double height);
+        glm::dvec3 prevPos, std::optional<double> height);
 
     CameraState cameraStateFromNavigationState(
         const interaction::NavigationHandler::NavigationState& ns);
