@@ -40,6 +40,14 @@
 
 namespace {
     constexpr const char* _loggerCat = "AutoNavigationHandler";
+
+    constexpr const openspace::properties::Property::PropertyInfo MinimalBoundingSphereInfo = {
+        "MinimalBoundingSphere",
+        "Minimal BoundingSphere",
+        "The minimal allowed value for a bounding sphere. Used for computation of target "
+        "positions and path generation, to avoid issues when there is no bounding sphere."
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -66,9 +74,9 @@ CurveType stringToCurveType(std::string str) {
 
 AutoNavigationHandler::AutoNavigationHandler()
     : properties::PropertyOwner({ "AutoNavigationHandler" })
+    , _minAllowedBoundingSphere(MinimalBoundingSphereInfo, 10.0, 1.0, 3e10)
 {
-    // Add the properties
-    // TODO
+    addProperty(_minAllowedBoundingSphere);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -435,10 +443,9 @@ void AutoNavigationHandler::addPause(CameraState& state, std::optional<double> d
 }
 
 double AutoNavigationHandler::findValidBoundingSphere(const SceneGraphNode* node) {
-    const double minAllowedValue = 10.0; // TODO: investigate suitable values (Also, make a property?)
     double bs = static_cast<double>(node->boundingSphere());
 
-    if (bs < minAllowedValue) {
+    if (bs < _minAllowedBoundingSphere) {
 
         // If the bs of the target is too small, try to find a good value in a child node.
         // Only check the closest children, to avoid deep traversal in the scene graph. Also,
@@ -446,7 +453,7 @@ double AutoNavigationHandler::findValidBoundingSphere(const SceneGraphNode* node
         // target well is higher for these nodes.
         for (SceneGraphNode* child : node->children()) {
             bs = static_cast<double>(child->boundingSphere());
-            if (bs > minAllowedValue) {
+            if (bs > _minAllowedBoundingSphere) {
                 LWARNING(fmt::format(
                     "The scene graph node '{}' has no, or a very small, bounding sphere. Using bounding sphere of child node '{}' in computations.",
                     node->identifier(), 
@@ -460,7 +467,7 @@ double AutoNavigationHandler::findValidBoundingSphere(const SceneGraphNode* node
         LWARNING(fmt::format("The scene graph node '{}' has no, or a very small,"
             "bounding sphere. This might lead to unexpected results.", node->identifier()));
 
-        bs = minAllowedValue;
+        bs = _minAllowedBoundingSphere;
     }
 
     return bs;

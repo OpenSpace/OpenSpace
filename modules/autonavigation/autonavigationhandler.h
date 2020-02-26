@@ -94,6 +94,8 @@ private:
     unsigned int _currentSegmentIndex = 0;
 
     bool _stopAtTargets;
+
+    properties::DoubleProperty _minAllowedBoundingSphere;
 };
 
 } // namespace openspace::autonavigation

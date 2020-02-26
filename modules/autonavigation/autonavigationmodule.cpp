@@ -36,7 +36,9 @@ namespace {
 
 namespace openspace {
 
-AutoNavigationModule::AutoNavigationModule() : OpenSpaceModule(Name) {}
+AutoNavigationModule::AutoNavigationModule() : OpenSpaceModule(Name) {
+    addPropertySubOwner(_autoNavigationHandler);
+}
 
 autonavigation::AutoNavigationHandler& AutoNavigationModule::AutoNavigationHandler() {
     return _autoNavigationHandler;
