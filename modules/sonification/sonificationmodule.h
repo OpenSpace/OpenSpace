@@ -91,6 +91,7 @@ private:
     double _anglePrecision;
     double _distancePrecision;
     Planet _planets[NUM_PLANETS];
+    bool _isPlanetaryView;
 };
 
 } // namespace openspace
