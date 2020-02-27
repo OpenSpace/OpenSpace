@@ -2,6 +2,9 @@ asset.require('./base')
 
 local sceneHelper = asset.require('util/scene_helper')
 
+asset.require('scene/solarsystem/planets/earth/earth')
+asset.require('scene/solarsystem/planets/earth/satellites/satellites.asset')
+
 -- Keybindings that are specific for this scene
 local Keybindings = {
      {
@@ -30,6 +33,8 @@ asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
 
     openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
+
+    openspace.setPropertyValue("{earth_satellites}.Renderable.Enabled", false)
 end)
 
 asset.onDeinitialize(function ()
