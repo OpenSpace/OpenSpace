@@ -362,6 +362,15 @@ public:
     static void saveScriptKeyframeAscii(timestamps times,
         datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
+    /**
+     * Reads header information from a session recording file
+     *
+     * \param stream reference to ifstream that contains the session recording file data
+     * \param readLen_chars number of characters to be read, which may be the expected
+     *        length of the header line, or an arbitrary number of characters within it
+     */
+    static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
+
 private:
     enum class RecordedType {
         Camera = 0,

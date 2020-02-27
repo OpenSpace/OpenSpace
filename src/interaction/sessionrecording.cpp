@@ -47,18 +47,6 @@ namespace {
 
     constexpr const bool UsingTimeKeyframes = false;
 
-    template <typename T>
-    T readFromPlayback(std::ifstream& stream) {
-        T res;
-        stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-        return res;
-    }
-
-    std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars) {
-        std::vector<char> readTemp(readLen_chars);
-        stream.read(&readTemp[0], readLen_chars);
-        return std::string(readTemp.begin(), readTemp.end());
-    }
 
 } // namespace
 
@@ -938,6 +926,14 @@ void SessionRecording::readTimeKeyframeAscii(timestamps& times,
         ));
         return;
     }
+}
+
+static std::string SessionRecording::readHeaderElement(std::ifstream& stream,
+                                                       size_t readLen_chars)
+{
+    std::vector<char> readTemp(readLen_chars);
+    stream.read(&readTemp[0], readLen_chars);
+    return std::string(readTemp.begin(), readTemp.end());
 }
 
 void SessionRecording::playbackScript() {

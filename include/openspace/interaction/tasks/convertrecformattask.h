@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
 
 #include <openspace/util/task.h>
+#include <openspace/interaction/sessionrecording.h>
 
 #include <ghoul/glm.h>
 
@@ -38,7 +39,7 @@ namespace {
     constexpr const char* KeyOutFilePath = "OutputFilePath";
 }
 
-namespace openspace {
+namespace openspace::interaction {
 
 class ConvertRecFormatTask : public Task {
 public:
@@ -51,19 +52,23 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
+    void convert();
+    SessionRecording::RecordedDataMode ConvertRecFormatTask::formatType();
 
 private:
     void convertToAscii();
     void convertToBinary();
-
+    std::string addFileSuffix(const std::string& filePath, const std::string& suffix);
     std::string _inFilePath;
     std::string  _outFilePath;
     std::ifstream _iFile;
-    std::ifstream _oFile;
+    std::ofstream _oFile;
 
     std::string _valueFunctionLua;
+
+    SessionRecording sr;
 };
 
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif //__OPENSPACE_CORE___CONVERTRECFORMATTASK___H__

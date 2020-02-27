@@ -36,7 +36,7 @@ namespace {
     constexpr const char* _loggerCat = "ConvertRecFormatTask";
 } // namespace
 
-namespace openspace {
+namespace openspace::interaction {
 
 ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
@@ -68,12 +68,12 @@ void ConvertRecFormatTask::perform(const Task::ProgressCallback& progressCallbac
 }
 
 void ConvertRecFormatTask::convert() {
-    interaction::RecordedDataMode type = formatType();
+    SessionRecording::RecordedDataMode type = formatType();
 
-    if (type == interaction::RecordedDataMode::Ascii) {
+    if (type == SessionRecording::RecordedDataMode::Ascii) {
         convertToBinary();
     }
-    else if (type == interaction::RecordedDataMode::Binary) {
+    else if (type == SessionRecording::RecordedDataMode::Binary) {
         convertToAscii();
     }
     else {
@@ -82,33 +82,83 @@ void ConvertRecFormatTask::convert() {
     }
 }
 
-RecordedDataMode ConvertRecFormatTask::formatType() {
+SessionRecording::RecordedDataMode ConvertRecFormatTask::formatType() {
     const std::string expectedHeader = "OpenSpace_record/playback";
     std::string line;
     //Get first line, which is ASCII regardless of format
     std::getline(_iFile, line);
 
-    if (line.substr(0, interaction::FileHeaderTitle.length())
-        != interaction::FileHeaderTitle)
+    if (line.substr(0, SessionRecording::FileHeaderTitle.length())
+        != SessionRecording::FileHeaderTitle)
     {
         LERROR(fmt::format("Session recording file {} does not have expected header.", _inFilePath));
-        return RecordedDataMode::Binary + 1;
+        return SessionRecording::RecordedDataMode::Binary + 1;
     }
     else {
-        if (line.back() == DataFormatAsciiTag) {
-            return RecordedDataMode::Ascii;
+        if (line.back() == SessionRecording::DataFormatAsciiTag) {
+            return SessionRecording::RecordedDataMode::Ascii;
         }
-        else if (line.back() == DataFormatBinaryTag) {
-            return RecordedDataMode::Binary;
+        else if (line.back() == SessionRecording::DataFormatBinaryTag) {
+            return SessionRecording::RecordedDataMode::Binary;
         }
         else {
-            return RecordedDataMode::Binary + 1;
+            return SessionRecording::RecordedDataMode::Binary + 1;
         }
     }
 }
 
 void ConvertRecFormatTask::convertToAscii() {
+    SessionRecording::timestamps times;
+    datamessagestructures::CameraKeyframe ckf;
+    datamessagestructures::TimeKeyframe   tkf;
+    datamessagestructures::ScriptMessage  skf;
+    int lineNum = 1;
+    unsigned char frameType;
     _outFilePath = addFileSuffix(_inFilePath, "_ascii");
+
+    bool fileReadOk = true;
+    while (fileReadOk) {
+        frameType = readFromPlayback<unsigned char>(_iFile);
+        // Check if have reached EOF
+        if (!_iFile) {
+            LINFO(fmt::format(
+                "Finished converting {} entries from playback file {}",
+                lineNum - 1, _inFilePath
+            ));
+            fileReadOk = false;
+            break;
+        }
+
+        if (frameType == 'c') {
+            SessionRecording::readCameraKeyframeBinary(times, ckf, _iFile, lineNum);
+            std::stringstream keyframeLine = std::stringstream();
+            SessionRecording::saveHeaderAscii(times, "camera", keyframeLine);
+            ckf.write(keyframeLine);
+            SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
+        }
+        else if (frameType == 't') {
+            SessionRecording::readTimeKeyframeBinary(times, tkf, _iFile, lineNum);
+            std::stringstream keyframeLine = std::stringstream();
+            SessionRecording::saveHeaderAscii(times, "time", keyframeLine);
+            ckf.write(keyframeLine);
+            SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
+        }
+        else if (frameType == 's') {
+            SessionRecording::readScriptKeyframeBinary(times, skf, _iFile, lineNum);
+            std::stringstream keyframeLine = std::stringstream();
+            SessionRecording::saveHeaderAscii(times, "script", keyframeLine);
+            ckf.write(keyframeLine);
+            SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
+        }
+        else {
+            LERROR(fmt::format(
+                "Unknown frame type @ index {} of playback file {}",
+                lineNum - 1, _inFilePath
+            ));
+            break;
+        }
+        lineNum++;
+    }
 }
 
 void ConvertRecFormatTask::convertToBinary() {
@@ -118,7 +168,7 @@ void ConvertRecFormatTask::convertToBinary() {
 std::string ConvertRecFormatTask::addFileSuffix(const std::string& filePath,
                                                 const std::string& suffix)
 {
-    size_t lastdot = filename.find_last_of(".");
+    size_t lastdot = filePath.find_last_of(".");
     std::string extension = filePath.substr(0, lastdot);
     if (lastdot == std::string::npos) {
         return filePath + suffix;
@@ -154,4 +204,6 @@ documentation::Documentation ConvertRecFormatTask::documentation() {
             },
         },
     };
+}
+
 }
