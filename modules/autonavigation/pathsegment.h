@@ -53,8 +53,8 @@ public:
 
     double speedAtTime(double time);
 
-    glm::dvec3 getPositionAt(double u) const;
-    glm::dquat getRotationAt(double u) const;
+    // Interpolate along the curve to get the current camera state
+    CameraState interpolate(double u) const;
 
 private: 
     void initCurve();

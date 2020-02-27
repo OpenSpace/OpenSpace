@@ -84,13 +84,11 @@ private:
     CameraState cameraStateFromNavigationState(
         const interaction::NavigationHandler::NavigationState& ns);
 
-    // This list essentially represents the camera path
+    // this list essentially represents the camera path
     std::vector<PathSegment> _pathSegments;
-    CurveType _pathCurveType; // TEST: create a path with just one type of curve
 
     bool _isPlaying = false;
-
-    double _currentTime;
+    double _currentTime = 0.0;
     double _distanceAlongCurrentSegment = 0.0; 
     unsigned int _currentSegmentIndex = 0;
 

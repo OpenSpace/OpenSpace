@@ -106,10 +106,10 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     _currentTime += deltaTime;
 
-    PathSegment cps = _pathSegments[_currentSegmentIndex];
+    PathSegment currentSegment = _pathSegments[_currentSegmentIndex];
 
     // Have we walked past the current segment?
-    if (_currentTime > cps.endTime()) {
+    if (_currentTime > currentSegment.endTime()) {
         _currentSegmentIndex++;
         _distanceAlongCurrentSegment = 0.0;
 
@@ -120,7 +120,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
             return;
         }
 
-        cps = _pathSegments[_currentSegmentIndex];
+        currentSegment = _pathSegments[_currentSegmentIndex];
 
         if (_stopAtTargets) {
             pausePath();
@@ -128,27 +128,25 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
         }
     }
 
+    // compute interpolated camera state
     double prevDistance = _distanceAlongCurrentSegment;
-    double displacement = deltaTime * cps.speedAtTime(_currentTime - cps.startTime());
+    double displacement = deltaTime * currentSegment.speedAtTime(_currentTime - currentSegment.startTime());
     _distanceAlongCurrentSegment += displacement;
 
-    double relativeDisplacement = _distanceAlongCurrentSegment / cps.pathLength();
+    double relativeDisplacement = _distanceAlongCurrentSegment / currentSegment.pathLength();
     relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
 
-    // When halfway along a curve, set anchor node in orbitalNavigator, to render 
-    // visible nodes and add possibility to navigate when we reach the end.
-    std::string targetAnchor = cps.end().referenceNode;
+    CameraState newState = currentSegment.interpolate(relativeDisplacement);
+
+    // Set anchor node in orbitalNavigator, to render visible nodes and add activate
+    // navigation when we reach the end.
     std::string currentAnchor = global::navigationHandler.anchorNode()->identifier();
+    if (currentAnchor != newState.referenceNode) {
+        global::navigationHandler.orbitalNavigator().setAnchorNode(newState.referenceNode);
+    }
 
-    if ((relativeDisplacement > 0.5) && (currentAnchor != targetAnchor)) {
-        global::navigationHandler.orbitalNavigator().setAnchorNode(targetAnchor);
-    } 
-
-    glm::dvec3 cameraPosition = cps.getPositionAt(relativeDisplacement);
-    glm::dquat cameraRotation = cps.getRotationAt(relativeDisplacement);
-
-    camera()->setPositionVec3(cameraPosition); 
-    camera()->setRotation(cameraRotation);
+    camera()->setPositionVec3(newState.position);
+    camera()->setRotation(newState.rotation);
 }
 
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
@@ -244,7 +242,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
 
     for (PathSegment &p : _pathSegments) {
         for (double u = 0.0; u < 1.0; u += du) {
-            auto position = p.getPositionAt(u);
+            auto position = p.interpolate(u).position;
             positions.push_back(position);
         }
     }

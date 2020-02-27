@@ -94,12 +94,12 @@ double PathSegment::speedAtTime(double time) {
     return (pathLength() * _speedFunction.value(t)) / _speedFunction.integratedSum;
 }
 
-glm::dvec3 PathSegment::getPositionAt(double u) const {
-    return _curve->positionAt(u);    
-}
-
-glm::dquat PathSegment::getRotationAt(double u) const {
-    return _curve->rotationAt(u);
+CameraState PathSegment::interpolate(double u) const {
+    CameraState cs;
+    cs.position = _curve->positionAt(u);
+    cs.rotation = _curve->rotationAt(u);
+    cs.referenceNode = (u > 0.5) ? _end.referenceNode : _start.referenceNode;
+    return cs;
 }
 
 // Initialise the curve, based on the start, end state and curve type
