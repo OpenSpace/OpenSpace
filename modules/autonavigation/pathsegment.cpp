@@ -95,7 +95,7 @@ double PathSegment::speedAtTime(double time) {
 }
 
 glm::dvec3 PathSegment::getPositionAt(double u) const {
-    return _curve->valueAt(u);    
+    return _curve->positionAt(u);    
 }
 
 glm::dquat PathSegment::getRotationAt(double u) const {

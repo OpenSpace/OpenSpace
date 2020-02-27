@@ -49,20 +49,20 @@ double PathCurve::arcLength(double limit) {
     const double h = limit / (double)n;
 
     // Points to be multiplied by 1
-    double endPoints = glm::length(valueAt(0.0 + h) - valueAt(0.0)) + glm::length(valueAt(1.0) - valueAt(1.0 - h));
+    double endPoints = glm::length(positionAt(0.0 + h) - positionAt(0.0)) + glm::length(positionAt(1.0) - positionAt(1.0 - h));
 
     // Points to be multiplied by 4
     double times4 = 0.0;
     for (int i = 1; i < n; i += 2) {
         float t = h * i;
-        times4 += glm::length(valueAt(t + h) - valueAt(t));
+        times4 += glm::length(positionAt(t + h) - positionAt(t));
     }
 
     // Points to be multiplied by 2
     double times2 = 0.0;
     for (int i = 2; i < n; i += 2) {
         float t = h * i;
-        times2 += glm::length(valueAt(t + h) - valueAt(t));
+        times2 += glm::length(positionAt(t + h) - positionAt(t));
     }
 
     return (h / 3.0) * (endPoints + 4.0 * times4 + 2.0 *times2);
@@ -161,7 +161,7 @@ Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
 }
 
 // Interpolate a list of control points and knot times
-glm::dvec3 Bezier3Curve::valueAt(double u) {
+glm::dvec3 Bezier3Curve::positionAt(double u) {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
 
     size_t nrPoints = _points.size();
@@ -208,7 +208,7 @@ LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
     _length = glm::distance(end.position, start.position);
 }
 
-glm::dvec3 LinearCurve::valueAt(double u) {
+glm::dvec3 LinearCurve::positionAt(double u) {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
     return interpolation::linear(u, _points[0], _points[1]);
 }
@@ -219,7 +219,7 @@ PauseCurve::PauseCurve(CameraState& state) {
     _length = 1.0; // OBS! Length of a pause curve makes no sense, but it also doesn't matter
 }
 
-glm::dvec3 PauseCurve::valueAt(double u) {
+glm::dvec3 PauseCurve::positionAt(double u) {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
     return _points[0];
 }
