@@ -31,7 +31,12 @@
 
 namespace openspace::autonavigation {
 
-// OBS! Path curves has curve parameter in range [0,1]
+enum CurveType {
+    Bezier3,
+    Linear,
+    Pause // OBS! Temporary special case for handling pauses
+};
+
 class PathCurve {
 public:
     virtual ~PathCurve() = 0;
@@ -50,11 +55,12 @@ protected:
 
     // the total length of the curve (approximated)
     double _length;
+
 };
 
 class Bezier3Curve : public PathCurve {
 public:
-    Bezier3Curve(CameraState& start, CameraState& end);
+    Bezier3Curve(const CameraState& start, const CameraState& end);
     glm::dvec3 positionAt(double u);
 
 private:
@@ -66,7 +72,7 @@ private:
 
 class LinearCurve : public PathCurve {
 public:
-    LinearCurve(CameraState& start, CameraState& end);
+    LinearCurve(const CameraState& start, const CameraState& end);
     glm::dvec3 positionAt(double u);
 
 };

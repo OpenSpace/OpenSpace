@@ -74,7 +74,7 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
     return _points;
 }
 
-Bezier3Curve::Bezier3Curve(CameraState& start, CameraState& end) {
+Bezier3Curve::Bezier3Curve(const CameraState& start, const CameraState& end) {
     glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
     glm::dvec3 endNodePos = sceneGraphNode(end.referenceNode)->worldPosition();
     double startNodeRadius = sceneGraphNode(start.referenceNode)->boundingSphere();
@@ -202,7 +202,7 @@ void Bezier3Curve::initParameterIntervals() {
     _parameterIntervals.swap(newIntervals);
 }
 
-LinearCurve::LinearCurve(CameraState& start, CameraState& end) {
+LinearCurve::LinearCurve(const CameraState& start, const CameraState& end) {
     _points.push_back(start.position);
     _points.push_back(end.position);
     _length = glm::distance(end.position, start.position);

@@ -26,19 +26,11 @@
 #define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
 #include <modules/autonavigation/camerastate.h>
+#include <modules/autonavigation/pathcurves.h>
 #include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace::autonavigation {
-
-// TODO: place this enum somewhere else
-enum CurveType {
-    Bezier3,
-    Linear,
-    Pause // OBS! Temporary special case for handling pauses
-};
-
-class PathCurve;
 
 class PathSegment {
 public:
