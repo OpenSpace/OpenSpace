@@ -22,65 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
-#define __OPENSPACE_MODULE___PATHSEGMENT___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 
 #include <modules/autonavigation/camerastate.h>
-#include <modules/autonavigation/pathcurves.h>
-#include <ghoul/glm.h>
-#include <vector>
 
 namespace openspace::autonavigation {
 
-class PathSegment {
+enum RotationMethod {
+    Slerp,
+    PiecewiseSlerp,
+    Fixed
+};
+
+class PathCurve;
+
+class RotationInterpolator {
 public:
-    PathSegment(CameraState start, CameraState end, double startTime, CurveType type);
-    ~PathSegment() = default;
+    RotationInterpolator() = default;
+    RotationInterpolator(const CameraState& start, const CameraState& end, 
+        PathCurve* curve, RotationMethod method);
 
-    // Mutators
-    void setStart(CameraState cs);
-    void setDuration(double d);
+    glm::dquat rotationAt(double u);
 
-    // Accessors
-    const CameraState start() const;
-    const CameraState end() const;
-    const double duration() const;
-    const double startTime() const;
-    const double endTime() const;
-    const double pathLength() const;
-
-    const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
-
-    double speedAtTime(double time);
-
-    glm::dvec3 getPositionAt(double u) const;
-    glm::dquat getRotationAt(double u) const;
-
-private: 
-    void initCurve();
-
-    // The speed function describing the shape of the speed curve. Values in [0,1].
-    struct SpeedFunction {
-        SpeedFunction() = default;
-        SpeedFunction(double duration);
-        double value(double t);
-
-        // store the sum of the function over the duration of the segment, 
-        // so we don't need to recompue it every time we access the speed 
-        double integratedSum;
-    };
-
+private:
     CameraState _start;
     CameraState _end;
-    double _startTime; 
-    double _duration;
-    CurveType _curveType; 
+    PathCurve* _curve = nullptr;
+    RotationMethod _method;
 
-    SpeedFunction _speedFunction;
-
-    std::shared_ptr<PathCurve> _curve; 
+    glm::dquat easedSlerp(double u);
+    glm::dquat piecewiseSlerp(double u);
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___PATHSEGMENT___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__

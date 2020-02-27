@@ -68,6 +68,10 @@ double PathCurve::arcLength(double limit) {
     return (h / 3.0) * (endPoints + 4.0 * times4 + 2.0 *times2);
 }
 
+glm::dquat PathCurve::rotationAt(double u) {
+    return _rotationInterpolator.rotationAt(u);
+}
+
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> PathCurve::getPoints() {
@@ -75,6 +79,9 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
 }
 
 Bezier3Curve::Bezier3Curve(const CameraState& start, const CameraState& end) {
+    // default rotation interpolation
+    _rotationInterpolator = RotationInterpolator{ start, end, this, PiecewiseSlerp };
+
     glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
     glm::dvec3 endNodePos = sceneGraphNode(end.referenceNode)->worldPosition();
     double startNodeRadius = sceneGraphNode(start.referenceNode)->boundingSphere();
@@ -206,6 +213,7 @@ LinearCurve::LinearCurve(const CameraState& start, const CameraState& end) {
     _points.push_back(start.position);
     _points.push_back(end.position);
     _length = glm::distance(end.position, start.position);
+    _rotationInterpolator = RotationInterpolator{ start, end, this, Slerp };
 }
 
 glm::dvec3 LinearCurve::positionAt(double u) {
@@ -214,9 +222,10 @@ glm::dvec3 LinearCurve::positionAt(double u) {
 }
 
 // TODO: Iprove handling of pauses
-PauseCurve::PauseCurve(CameraState& state) {
+PauseCurve::PauseCurve(const CameraState& state) {
     _points.push_back(state.position);
     _length = 1.0; // OBS! Length of a pause curve makes no sense, but it also doesn't matter
+    _rotationInterpolator = RotationInterpolator{ state, state, this, Fixed };
 }
 
 glm::dvec3 PauseCurve::positionAt(double u) {

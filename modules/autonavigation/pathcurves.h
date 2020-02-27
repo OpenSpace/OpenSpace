@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
 
 #include <modules/autonavigation/camerastate.h>
+#include <modules/autonavigation/rotationinterpolator.h>
 #include <ghoul/glm.h>
 #include <vector>
 
@@ -44,18 +45,17 @@ public:
     const double length() const;
     double arcLength(double limit = 1.0);
 
-    // comppute the value at the relative length s [0,1]
+    // u is interpolation parameter in [0,1] (relative length)
     virtual glm::dvec3 positionAt(double u) = 0;
+    glm::dquat rotationAt(double u);
 
     std::vector<glm::dvec3> getPoints(); // for debugging
 
 protected:
-    // the points used for creating the curve (e.g. control points of a Bezier curve)
     std::vector<glm::dvec3> _points; 
+    double _length; // the total length of the curve (approximated)
 
-    // the total length of the curve (approximated)
-    double _length;
-
+    RotationInterpolator _rotationInterpolator;
 };
 
 class Bezier3Curve : public PathCurve {
@@ -74,14 +74,13 @@ class LinearCurve : public PathCurve {
 public:
     LinearCurve(const CameraState& start, const CameraState& end);
     glm::dvec3 positionAt(double u);
-
 };
 
 // OBS! This is a temporary class specialised for handling pauses. 
 // TODO: handle better in the future. 
 class PauseCurve : public PathCurve {
 public:
-    PauseCurve(CameraState& state);
+    PauseCurve(const CameraState& state);
     glm::dvec3 positionAt(double u);
 };
 

@@ -99,62 +99,7 @@ glm::dvec3 PathSegment::getPositionAt(double u) const {
 }
 
 glm::dquat PathSegment::getRotationAt(double u) const {
-    // TODO: improve how rotation is computed
-
-    switch (_curveType) {
-    case CurveType::Bezier3: 
-    {
-        return piecewiseSlerpRotation(u);
-        break;
-    }
-    default:
-    {
-        double uSlerp = helpers::shiftAndScale(u, 0.1, 0.9);
-        uSlerp = ghoul::cubicEaseInOut(uSlerp);
-        return glm::slerp(_start.rotation, _end.rotation, uSlerp);
-    }
-    }
-}
-
-// Interpolate between a number of keyframes for orientation using SLERP
-const glm::dquat PathSegment::piecewiseSlerpRotation(double u) const {
-    // breakpoints for subintervals
-    const double u1 = 0.3;
-    const double u2 = 0.8; // TODO: these should probably be based on distance
-
-    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
-
-    glm::dvec3 startUpVec = _start.rotation * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 endUpVec = _end.rotation * glm::dvec3(0.0, 1.0, 0.0);
-
-    glm::dquat lookAtStartQ =
-        helpers::getLookAtQuaternion(getPositionAt(u1), startNodePos, startUpVec);
-
-    glm::dquat lookAtEndQ =
-        helpers::getLookAtQuaternion(getPositionAt(u2), endNodePos, endUpVec);
-
-    std::vector<std::pair<glm::dquat, double>> keyframes{
-        {_start.rotation, 0.0},
-        {lookAtStartQ, u1},
-        {lookAtEndQ, u2},
-        {_end.rotation, 1.0},
-    };
-
-    // Find the current segment and compute interpolation
-    glm::dquat result;
-    for (int i = 0; i < keyframes.size() - 1; ++i) {
-        double ui = keyframes[i].second;
-        double uNext = keyframes[i + 1].second;
-        if (u <= uNext) {
-            double uScaled = (u - ui) / (uNext - ui);
-            uScaled = ghoul::quadraticEaseInOut(uScaled);
-            result = glm::slerp(keyframes[i].first, keyframes[i + 1].first, uScaled);
-            break;
-        }
-    }
-
-    return result;
+    return _curve->rotationAt(u);
 }
 
 // Initialise the curve, based on the start, end state and curve type
