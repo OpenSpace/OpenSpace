@@ -115,6 +115,7 @@ void ConvertRecFormatTask::convertToAscii() {
     int lineNum = 1;
     unsigned char frameType;
     _outFilePath = addFileSuffix(_inFilePath, "_ascii");
+    std::stringstream keyframeLine = std::stringstream();
 
     bool fileReadOk = true;
     while (fileReadOk) {
@@ -129,26 +130,21 @@ void ConvertRecFormatTask::convertToAscii() {
             break;
         }
 
+        keyframeLine.str(std::string());
         if (frameType == 'c') {
             SessionRecording::readCameraKeyframeBinary(times, ckf, _iFile, lineNum);
-            std::stringstream keyframeLine = std::stringstream();
             SessionRecording::saveHeaderAscii(times, "camera", keyframeLine);
             ckf.write(keyframeLine);
-            SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
         }
         else if (frameType == 't') {
             SessionRecording::readTimeKeyframeBinary(times, tkf, _iFile, lineNum);
-            std::stringstream keyframeLine = std::stringstream();
             SessionRecording::saveHeaderAscii(times, "time", keyframeLine);
-            ckf.write(keyframeLine);
-            SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
+            tkf.write(keyframeLine);
         }
         else if (frameType == 's') {
             SessionRecording::readScriptKeyframeBinary(times, skf, _iFile, lineNum);
-            std::stringstream keyframeLine = std::stringstream();
             SessionRecording::saveHeaderAscii(times, "script", keyframeLine);
-            ckf.write(keyframeLine);
-            SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
+            skf.write(keyframeLine);
         }
         else {
             LERROR(fmt::format(
@@ -157,6 +153,7 @@ void ConvertRecFormatTask::convertToAscii() {
             ));
             break;
         }
+        SessionRecording::saveKeyframeToFile(keyframeLine.str(), _oFile);
         lineNum++;
     }
 }
