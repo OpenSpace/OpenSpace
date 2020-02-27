@@ -89,8 +89,8 @@ void SonificationModule::extractData(const std::string& identifier, int i,
             //Calculate angle from camera to the planet in the camera plane
             //Project v down to the camera plane, Pplane(v)
             //Pn(v) is v projected on the normal n of the plane -> Pplane(v) = v - Pn(v)
-            glm::dvec3 projectedNodePos = nodePosition - glm::proj(cameraToNode, cameraUpVector);
-            double angle = glm::angle(glm::normalize(cameraDirection), glm::normalize(cameraToNode));
+            glm::dvec3 cameraToProjectedNode = (nodePosition - glm::proj(cameraToNode, cameraUpVector)) - cameraPosition;
+            double angle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(cameraToProjectedNode), glm::normalize(cameraUpVector));
 
             //Check if this data is new, otherwise dont send the data
             if (abs(_planets[i]._distance - distance) > _distancePrecision || abs(_planets[i]._angle - angle) > _anglePrecision) {
@@ -157,11 +157,11 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                         //Only send data if something new has happened
                         //If the node is in focus, increase sensitivity in what new data is
                         if (focusNode->identifier().compare(_planets[i]._identifier) == 0) {
-                            _anglePrecision = 0.1;
+                            _anglePrecision = 0.01;
                             _distancePrecision = 10.0;
                         }
                         else {
-                            _anglePrecision = 0.2;
+                            _anglePrecision = 0.05;
                             _distancePrecision = 200.0;
                         }
 
