@@ -60,6 +60,12 @@ namespace {
         "Segments",
         "The number of segments to use for each orbit ellipse"
     };
+    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
+        "UpperLimit",
+        "Upper Limit",
+        "Upper limit on the number of objects for this renderable, regardless of "
+        "how many objects are contained in the data file"
+    };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -193,6 +199,12 @@ documentation::Documentation RenderableSmallBody::Documentation() {
                 SegmentsInfo.description
             },
             {
+                UpperLimitInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                UpperLimitInfo.description
+            },
+            {
                 PathInfo.identifier,
                 new StringVerifier,
                 Optional::No,
@@ -223,8 +235,8 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
-    , _nSegments(SegmentsInfo)
-
+    , _nSegments(SegmentsInfo, 100, 10, 4000)
+    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
 {
     documentation::testSpecificationAndThrow(
          Documentation(),
@@ -233,7 +245,9 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
         );
 
     _path = dictionary.value<std::string>(PathInfo.identifier);
-    _nSegments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+    _nSegments = static_cast<unsigned int>(
+        dictionary.value<double>(SegmentsInfo.identifier)
+    );
 
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
@@ -245,6 +259,15 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     }
     else {
         _appearance.lineFade = 20;
+    }
+
+    if (dictionary.hasKeyAndValue<double>(UpperLimitInfo.identifier)) {
+        _upperLimit = static_cast<unsigned int>(
+            dictionary.value<double>(UpperLimitInfo.identifier)
+        );
+    }
+    else {
+        _upperLimit = 0;
     }
 
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
@@ -262,11 +285,13 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
 
     _path.onChange(reinitializeTrailBuffers);
     _nSegments.onChange(reinitializeTrailBuffers);
+    _upperLimit.onChange(reinitializeTrailBuffers);
 
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
     addProperty(_opacity);
+    addProperty(_upperLimit);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }
@@ -288,16 +313,27 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
     std::string line;
-    std::string name;
-    std::string field;
     std::streamoff csvLine = -1;
     int fieldCount = 0;
+    float lineSkipFraction = 1.0;
+    float lineSkipTotal = 0.0;
+    float currLineFraction;
+    int currLineCount;
+    int lastLineCount = -1;
     const std::string expectedHeaderLine =
         "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
     try {
         std::getline(file, line); // get rid of first line (header)
         numberOfLines -= 1;
+        if (_upperLimit == 0 || _upperLimit > numberOfLines) {
+            //If limit wasn't specified in dictionary, set to lines in file (-header)
+            _upperLimit = numberOfLines;
+        }
+        else {
+            lineSkipFraction = static_cast<float>(_upperLimit) /
+                static_cast<float>(numberOfLines);
+        }
         if (line.compare(expectedHeaderLine) != 0) {
             LERROR(fmt::format(
                 "File {} does not have the appropriate JPL SBDB header at line 1.",
@@ -307,81 +343,13 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             return;
         }
 
-        for (csvLine = 0; csvLine < numberOfLines; csvLine++) {
-            fieldCount = 0;
-            KeplerParameters keplerElements;
-            // Object designator string
-            std::getline(file, name, ',');
-            fieldCount++;
-
-            // Epoch
-            if (!std::getline(file, field, ',')) {
-                throw std::invalid_argument("Unable to read epoch from line"
-                    + std::to_string(csvLine + 1));
+        for (csvLine = 1; csvLine <= numberOfLines; csvLine++) {
+            currLineFraction = static_cast<float>(csvLine - 1) * lineSkipFraction;
+            currLineCount = static_cast<int>(currLineFraction);
+            if (currLineCount > lastLineCount) {
+                readOrbitalParamsFromThisLine(fieldCount, csvLine, file);
             }
-            keplerElements.epoch = epochFromYMDdSubstring(field);
-            fieldCount++;
-
-            // Eccentricity (unit-less)
-            if (!std::getline(file, field, ',')) {
-                throw std::invalid_argument("Unable to read eccentricity from line"
-                    + std::to_string(csvLine + 1));
-            }
-            keplerElements.eccentricity = std::stod(field);
-            fieldCount++;
-
-            // Semi-major axis (astronomical units - au)
-            if (!std::getline(file, field, ',')) {
-                throw std::invalid_argument("Unable to read semi-major axis from line"
-                    + std::to_string(csvLine + 1));
-            }
-            keplerElements.semiMajorAxis = std::stod(field);
-            keplerElements.semiMajorAxis *= convertAuToKm;
-            fieldCount++;
-
-            // Inclination (degrees)
-            if (!std::getline(file, field, ',')) {
-                throw std::invalid_argument("Unable to read inclination from line"
-                    + std::to_string(csvLine + 1));
-            }
-            keplerElements.inclination = importAngleValue(field);
-            fieldCount++;
-
-            // Longitude of ascending node (degrees)
-            if (!std::getline(file, field, ',')) {
-                throw std::invalid_argument("Unable to read ascending node from line"
-                    + std::to_string(csvLine + 1));
-            }
-            keplerElements.ascendingNode = importAngleValue(field);
-            fieldCount++;
-
-            // Argument of Periapsis (degrees)
-            if (!std::getline(file, field, ',')) {
-                throw std::invalid_argument("Unable to read arg of periapsis from line"
-                    + std::to_string(csvLine + 1));
-            }
-            keplerElements.argumentOfPeriapsis = importAngleValue(field);
-            fieldCount++;
-
-            // Mean Anomaly (degrees)
-            if (!std::getline(file, field, ',')) {
-                throw std::invalid_argument("Unable to read mean anomaly from line"
-                    + std::to_string(csvLine + 1));
-            }
-            keplerElements.meanAnomaly = importAngleValue(field);
-            fieldCount++;
-
-            // Period (days)
-            if (!std::getline(file, field)) {
-                throw std::invalid_argument("Unable to read period from line"
-                    + std::to_string(csvLine + 1));
-            }
-            keplerElements.period = std::stod(field);
-            keplerElements.period *= convertDaysToSecs;
-            fieldCount++;
-
-            _sbData.push_back(keplerElements);
-            _sbNames.push_back(name);
+            lastLineCount = currLineCount;
         }
     }
     catch (std::invalid_argument&) {
@@ -389,7 +357,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             "(invalid_argument exception) at line {}/{} of {}";
         LERROR(fmt::format(
             errMsg,
-            fieldCount, csvLine + 1, numberOfLines, filename
+            fieldCount, csvLine, numberOfLines, filename
         ));
     }
     catch (std::out_of_range&) {
@@ -397,7 +365,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             "(out_of_range exception) at line {}/{} of {}";
         LERROR(fmt::format(
             errMsg,
-            fieldCount, csvLine + 1, numberOfLines, filename
+            fieldCount, csvLine, numberOfLines, filename
         ));
     }
     catch (std::ios_base::failure&) {
@@ -405,11 +373,94 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             "to read field {} at line {}/{} of {}";
         LERROR(fmt::format(
             errMsg,
-            fieldCount, csvLine + 1, numberOfLines, filename
+            fieldCount, csvLine, numberOfLines, filename
         ));
     }
 
     file.close();
+}
+
+void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
+                                                        std::streamoff& csvLine,
+                                                        std::ifstream& file)
+{
+    std::string name;
+    std::string field;
+    fieldCount = 0;
+    KeplerParameters keplerElements;
+
+    // Object designator string
+    std::getline(file, name, ',');
+    fieldCount++;
+
+    // Epoch
+    if (!std::getline(file, field, ',')) {
+        throw std::invalid_argument("Unable to read epoch from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.epoch = epochFromYMDdSubstring(field);
+    fieldCount++;
+
+    // Eccentricity (unit-less)
+    if (!std::getline(file, field, ',')) {
+        throw std::invalid_argument("Unable to read eccentricity from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.eccentricity = std::stod(field);
+    fieldCount++;
+
+    // Semi-major axis (astronomical units - au)
+    if (!std::getline(file, field, ',')) {
+        throw std::invalid_argument("Unable to read semi-major axis from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.semiMajorAxis = std::stod(field);
+    keplerElements.semiMajorAxis *= convertAuToKm;
+    fieldCount++;
+
+    // Inclination (degrees)
+    if (!std::getline(file, field, ',')) {
+        throw std::invalid_argument("Unable to read inclination from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.inclination = importAngleValue(field);
+    fieldCount++;
+
+    // Longitude of ascending node (degrees)
+    if (!std::getline(file, field, ',')) {
+        throw std::invalid_argument("Unable to read ascending node from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.ascendingNode = importAngleValue(field);
+    fieldCount++;
+
+    // Argument of Periapsis (degrees)
+    if (!std::getline(file, field, ',')) {
+        throw std::invalid_argument("Unable to read arg of periapsis from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.argumentOfPeriapsis = importAngleValue(field);
+    fieldCount++;
+
+    // Mean Anomaly (degrees)
+    if (!std::getline(file, field, ',')) {
+        throw std::invalid_argument("Unable to read mean anomaly from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.meanAnomaly = importAngleValue(field);
+    fieldCount++;
+
+    // Period (days)
+    if (!std::getline(file, field)) {
+        throw std::invalid_argument("Unable to read period from line"
+            + std::to_string(csvLine));
+    }
+    keplerElements.period = std::stod(field);
+    keplerElements.period *= convertDaysToSecs;
+    fieldCount++;
+
+    _sbData.push_back(keplerElements);
+    _sbNames.push_back(name);
 }
 
 static double importAngleValue(const std::string& angle) {

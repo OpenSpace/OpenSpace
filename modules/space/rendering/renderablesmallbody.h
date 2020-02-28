@@ -88,6 +88,9 @@ private:
         double epoch, period; 
     };
 
+    void readOrbitalParamsFromThisLine(int& fieldCount, std::streamoff& csvLine,
+        std::ifstream& file);
+
     KeplerTranslation _keplerTranslator;
     std::vector<KeplerParameters> _sbData;
     std::vector<std::string> _sbNames;
@@ -114,6 +117,7 @@ private:
 
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
+    properties::UIntProperty _upperLimit;
 
     RenderableTrail::Appearance _appearance;
 
