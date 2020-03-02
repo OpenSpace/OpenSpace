@@ -252,9 +252,9 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     }
-    if (dictionary.hasKeyAndValue<double>("FadeInfo")) {
+    if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
         _appearance.lineFade = static_cast<float>(
-            dictionary.value<double>("FadeInfo")
+            dictionary.value<double>(FadeInfo.identifier)
         );
     }
     else {
@@ -311,6 +311,8 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
     std::streamoff numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
                                    std::istreambuf_iterator<char>(), '\n' );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
+    _sbData.clear();
+    _sbNames.clear();
 
     std::string line;
     std::streamoff csvLine = -1;
