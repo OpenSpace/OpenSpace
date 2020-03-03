@@ -89,6 +89,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     addPropertySubOwner(_atNodeNavigator);
 
     _defaultCurveOption.addOptions({
+        { CurveType::AvoidCollision, "AvoidCollision" },
         { CurveType::Bezier3, "Bezier3" },
         { CurveType::Linear, "Linear" }
     });

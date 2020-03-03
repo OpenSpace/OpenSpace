@@ -22,59 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
-#define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
 
-#include <modules/autonavigation/rotationinterpolator.h>
-#include <modules/autonavigation/waypoint.h>
-#include <ghoul/glm.h>
-#include <vector>
+#include <modules/autonavigation/pathcurves.h>
 
 namespace openspace::autonavigation {
 
-enum CurveType {
-    AvoidCollision,
-    Bezier3,
-    Linear,
-};
-
-class PathCurve {
+class AvoidCollisionCurve : public PathCurve {
 public:
-    virtual ~PathCurve() = 0;
-
-    const double length() const;
-    double arcLength(double limit = 1.0);
-
-    // u is interpolation parameter in [0,1] (relative length)
-    virtual glm::dvec3 positionAt(double u) = 0;
-
-    std::vector<glm::dvec3> getPoints(); // for debugging
-
-protected:
-    std::vector<glm::dvec3> _points; 
-    double _length; // the total length of the curve (approximated)
-};
-
-// TODO: Put path curve classes in separate files
-
-class Bezier3Curve : public PathCurve {
-public:
-    Bezier3Curve(const Waypoint& start, const Waypoint& end);
+    AvoidCollisionCurve(const CameraState& start, const CameraState& end);
     glm::dvec3 positionAt(double u);
 
 private:
-    void initParameterIntervals(); // TODO: Move this logic out to base class
-
     std::vector<double> _parameterIntervals;
-    unsigned int _nrSegments;
-};
 
-class LinearCurve : public PathCurve {
-public:
-    LinearCurve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 positionAt(double u);
+    std::vector<SceneGraphNode*> findRelevantNodes();
+    void removeCollisions(std::vector<SceneGraphNode*>& relevantNodes, int step = 0);
+    void initParameterIntervals();
+    glm::dvec3 interpolatePoints(double u);
+    glm::dvec3 roundedSpline(double u, const glm::dvec3 &a, const glm::dvec3 &b,
+                                       const glm::dvec3 &c, const glm::dvec3 &d);
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__

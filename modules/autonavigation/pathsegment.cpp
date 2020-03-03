@@ -24,6 +24,7 @@
 
 #include <modules/autonavigation/pathsegment.h>
 
+#include <modules/autonavigation/avoidcollisioncurve.h>
 #include <modules/autonavigation/pathcurves.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -123,6 +124,10 @@ void PathSegment::initCurve() {
 
     switch (_curveType) 
     {
+    case CurveType::AvoidCollision:
+        _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
+        break;
+
     case CurveType::Bezier3:
         _curve = std::make_unique<Bezier3Curve>(_start, _end);
         _rotationInterpolator = std::make_unique<LookAtInterpolator>(

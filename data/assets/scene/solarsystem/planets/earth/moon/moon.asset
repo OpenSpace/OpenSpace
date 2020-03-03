@@ -165,6 +165,7 @@ local Moon = {
             LabelsColor = {1.0, 1.0, 0.0, 1.0}
         }
     },
+    Tag = { "moon_solarSystem", "moon_giants" },
     GUI = {
         Path = "/Solar System/Planets/Earth/Moon"
     }

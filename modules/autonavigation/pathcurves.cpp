@@ -25,10 +25,16 @@
 #include <modules/autonavigation/pathcurves.h>
 
 #include <modules/autonavigation/helperfunctions.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/query/query.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
+#include <glm/gtx/intersect.hpp>
+#include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/projection.hpp>
+#include <algorithm>
+#include <vector>
 
 namespace {
     constexpr const char* _loggerCat = "PathCurve";
@@ -165,35 +171,7 @@ Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
 
 // Interpolate a list of control points and knot times
 glm::dvec3 Bezier3Curve::positionAt(double u) {
-    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
-
-    size_t nrPoints = _points.size();
-    size_t nrTimes = _parameterIntervals.size();
-
-    ghoul_assert(nrPoints > 4, "Minimum of four control points needed for interpolation!");
-    ghoul_assert((nrPoints - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
-    ghoul_assert(_nrSegments == (nrTimes - 1), "Number of interval times must match number of intervals");
-
-    if (abs(u) < Epsilon)
-        return _points.front();
-
-    if (abs(1.0 - u) < Epsilon)
-        return _points.back();
-
-    // compute current segment, by first finding iterator to the first value that is larger than s 
-    std::vector<double>::iterator segmentEndIt = 
-        std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
-    unsigned int segmentIdx = (segmentEndIt - 1) - _parameterIntervals.begin();
-
-    double segmentStart = _parameterIntervals[segmentIdx];
-    double segmentDuration = (_parameterIntervals[segmentIdx + 1] - _parameterIntervals[segmentIdx]);
-    double sScaled = (u - segmentStart) / segmentDuration;
-
-    unsigned int idx = segmentIdx * 3;
-
-    // Interpolate using De Casteljau's algorithm
-    return interpolation::cubicBezier(sScaled, _points[idx], _points[idx + 1],
-        _points[idx + 2], _points[idx + 3]);
+    return interpolation::piecewiseCubicBezier(u, _points, _parameterIntervals);
 }
 
 // compute curve parameter intervals based on relative arc length
