@@ -34,6 +34,7 @@
 #include <openspace/scene/scene.h>
 
 #define NUM_PLANETS 8
+#define NUM_SEC_PER_DAY 86400.0
 
 #include <openspace/util/openspacemodule.h>
 
@@ -45,7 +46,8 @@ public:
     ~SonificationModule();
 
     //Extract the data from the given identifier
-    //NOTE: The identifier must start with capital letter, otherwise no match will be found
+    //NOTE: The identifier must start with capital letter,
+    //otherwise no match will be found
     void extractData(const std::string& identifier, int i, const Scene * const scene,
         const glm::dvec3& cameraPosition, const glm::dvec3& cameraDirection,
         const glm::dvec3& cameraUpVector);
@@ -90,6 +92,8 @@ private:
     std::atomic<bool> _isRunning;
     double _anglePrecision;
     double _distancePrecision;
+    double _previousTimeSpeed;
+    double _timePrecision;
     Planet _planets[NUM_PLANETS];
     bool _isPlanetaryView;
 };

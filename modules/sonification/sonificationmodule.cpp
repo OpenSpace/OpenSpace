@@ -30,6 +30,7 @@
 #include <glm/gtx/projection.hpp>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/util/timemanager.h>
 
  //Debug purposes
 #include <iostream>
@@ -50,6 +51,8 @@ SonificationModule::SonificationModule()
     _stream = osc::OutboundPacketStream(_buffer, BUFFER_SIZE);
     _isRunning = true;
     _isPlanetaryView = true;
+    _previousTimeSpeed = 0.0;
+    _timePrecision = 0.001;
 
     if (_thread.joinable())
         _thread.join();
@@ -88,6 +91,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
             //Calculate distance to the planet from the camera, convert to km
             glm::dvec3 cameraToNode = nodePosition - cameraPosition;
             double distance = glm::length(cameraToNode)/1000.0;
+            double timeSpeed = global::timeManager.deltaTime() / NUM_SEC_PER_DAY;
             double angle;
 
             //Calculate angle differently if planetary view or solar view
@@ -113,11 +117,13 @@ void SonificationModule::extractData(const std::string& identifier, int i,
             
             //Check if this data is new, otherwise dont send the data
             if (abs(_planets[i]._distance - distance) > _distancePrecision || 
-                abs(_planets[i]._angle - angle) > _anglePrecision) 
+                abs(_planets[i]._angle - angle) > _anglePrecision ||
+                abs(_previousTimeSpeed - timeSpeed) > _timePrecision)
             {
                 //Update the saved data for the planet
                 _planets[i].setDistance(distance);
                 _planets[i].setAngle(angle);
+                _previousTimeSpeed = timeSpeed;
 
                 //Send the data to SuperCollider
                 //NOTE: Socket cannot be saved in class, it does not work then,
@@ -127,7 +133,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                     IpEndpointName(SC_IP_ADDRESS, SC_PORT));
                 _stream.Clear();
                 _stream << osc::BeginMessage(label.c_str()) << distance <<
-                    angle << osc::EndMessage;
+                    angle << timeSpeed << osc::EndMessage;
                 socket.Send(_stream.Data(), _stream.Size());
             }
         }
