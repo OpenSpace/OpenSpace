@@ -359,7 +359,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             "(invalid_argument exception) at line {}/{} of {}";
         LERROR(fmt::format(
             errMsg,
-            fieldCount, csvLine, numberOfLines, filename
+            fieldCount, csvLine + 1, numberOfLines, filename
         ));
     }
     catch (std::out_of_range&) {
@@ -367,7 +367,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             "(out_of_range exception) at line {}/{} of {}";
         LERROR(fmt::format(
             errMsg,
-            fieldCount, csvLine, numberOfLines, filename
+            fieldCount, csvLine + 1, numberOfLines, filename
         ));
     }
     catch (std::ios_base::failure&) {
@@ -375,7 +375,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
             "to read field {} at line {}/{} of {}";
         LERROR(fmt::format(
             errMsg,
-            fieldCount, csvLine, numberOfLines, filename
+            fieldCount, csvLine + 1, numberOfLines, filename
         ));
     }
 
@@ -398,7 +398,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Epoch
     if (!std::getline(file, field, ',')) {
         throw std::invalid_argument("Unable to read epoch from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.epoch = epochFromYMDdSubstring(field);
     fieldCount++;
@@ -406,7 +406,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Eccentricity (unit-less)
     if (!std::getline(file, field, ',')) {
         throw std::invalid_argument("Unable to read eccentricity from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.eccentricity = std::stod(field);
     fieldCount++;
@@ -414,7 +414,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Semi-major axis (astronomical units - au)
     if (!std::getline(file, field, ',')) {
         throw std::invalid_argument("Unable to read semi-major axis from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.semiMajorAxis = std::stod(field);
     keplerElements.semiMajorAxis *= convertAuToKm;
@@ -423,7 +423,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Inclination (degrees)
     if (!std::getline(file, field, ',')) {
         throw std::invalid_argument("Unable to read inclination from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.inclination = importAngleValue(field);
     fieldCount++;
@@ -431,7 +431,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Longitude of ascending node (degrees)
     if (!std::getline(file, field, ',')) {
         throw std::invalid_argument("Unable to read ascending node from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.ascendingNode = importAngleValue(field);
     fieldCount++;
@@ -439,7 +439,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Argument of Periapsis (degrees)
     if (!std::getline(file, field, ',')) {
         throw std::invalid_argument("Unable to read arg of periapsis from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.argumentOfPeriapsis = importAngleValue(field);
     fieldCount++;
@@ -447,7 +447,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Mean Anomaly (degrees)
     if (!std::getline(file, field, ',')) {
         throw std::invalid_argument("Unable to read mean anomaly from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.meanAnomaly = importAngleValue(field);
     fieldCount++;
@@ -455,7 +455,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     // Period (days)
     if (!std::getline(file, field)) {
         throw std::invalid_argument("Unable to read period from line"
-            + std::to_string(csvLine));
+            + std::to_string(csvLine + 1));
     }
     keplerElements.period = std::stod(field);
     keplerElements.period *= convertDaysToSecs;
