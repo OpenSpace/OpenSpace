@@ -123,7 +123,7 @@ void ConvertRecFormatTask::convertToAscii() {
         // Check if have reached EOF
         if (!_iFile) {
             LINFO(fmt::format(
-                "Finished converting {} entries from playback file {}",
+                "Finished converting {} entries from file {}",
                 lineNum - 1, _inFilePath
             ));
             fileReadOk = false;
@@ -159,7 +159,58 @@ void ConvertRecFormatTask::convertToAscii() {
 }
 
 void ConvertRecFormatTask::convertToBinary() {
-    _outFilePath = addFileSuffix(_inFilePath, "_binary");
+    SessionRecording::timestamps times;
+    datamessagestructures::CameraKeyframe ckf;
+    datamessagestructures::TimeKeyframe   tkf;
+    datamessagestructures::ScriptMessage  skf;
+    int lineNum = 1;
+    std::string lineContents;
+    unsigned char keyframeBuffer[SessionRecording::_saveBufferMaxSize_bytes];
+    std::ofstream saveFile;
+    saveFile.open(_outFilePath, std::ios::binary);
+    size_t idx = 0;
+
+    while (std::getline(_iFile, lineContents)) {
+        lineNum++;
+
+        std::istringstream iss(lineContents);
+        std::string entryType;
+        if (!(iss >> entryType)) {
+            LERROR(fmt::format(
+                "Error reading entry type @ line {} of file {}",
+                lineNum, _inFilePath
+            ));
+            break;
+        }
+
+        if (entryType == "camera") {
+            SessionRecording::readCameraKeyframeAscii(times, ckf, _inFilePath, lineNum);
+            SessionRecording::saveCameraKeyframeBinary(times, ckf, keyframeBuffer,
+                saveFile);
+        }
+        else if (entryType == "time") {
+            SessionRecording::readTimeKeyframeAscii(times, tkf, _inFilePath, lineNum);
+            SessionRecording::saveTimeKeyframeBinary(times, tkf, keyframeBuffer,
+                saveFile);
+        }
+        else if (entryType == "script") {
+            SessionRecording::readScriptKeyframeAscii(times, skf, _inFilePath, lineNum);
+            SessionRecording::saveScriptKeyframeBinary(times, skf, keyframeBuffer,
+                saveFile);
+        }
+        else {
+            LERROR(fmt::format(
+                "Unknown frame type {} @ line {} of file {}",
+                entryType, lineContents, _inFilePath
+            ));
+            break;
+        }
+    }
+    saveFile.close();
+    LINFO(fmt::format(
+        "Finished converting {} entries from file {}",
+        lineNum, _inFilePath
+    ));
 }
 
 std::string ConvertRecFormatTask::addFileSuffix(const std::string& filePath,

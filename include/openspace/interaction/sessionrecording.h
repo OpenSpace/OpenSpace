@@ -59,6 +59,12 @@ public:
     const char DataFormatAsciiTag = 'A';
     const char DataFormatBinaryTag = 'B';
 
+    static const size_t keyframeHeaderSize_bytes = 33;
+    static const size_t saveBufferCameraSize_min = 82;
+    static const size_t saveBufferStringSize_max = 500;
+    static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
+        + saveBufferCameraSize_min + saveBufferStringSize_max;
+
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
 
@@ -458,12 +464,6 @@ private:
     double _saveRenderingDeltaTime = 1.0 / 30.0;
     double _saveRenderingCurrentRecordedTime;
 
-    static const size_t keyframeHeaderSize_bytes = 33;
-    static const size_t saveBufferCameraSize_min = 82;
-    static const size_t saveBufferStringSize_max = 500;
-    static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
-        + saveBufferCameraSize_min
-        + saveBufferStringSize_max;
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 
     bool _cleanupNeeded = false;
