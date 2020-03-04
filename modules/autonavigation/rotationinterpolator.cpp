@@ -54,6 +54,9 @@ glm::dquat RotationInterpolator::rotationAt(double u) {
     case Fixed:
         return _start.rotation;
         break;
+    case LookAt:
+        return lookAtInterpolator(u);
+        break;
     default:
         LERROR("Non-implemented orientation interpolation method!");
         return _start.rotation;
@@ -65,6 +68,24 @@ glm::dquat RotationInterpolator::easedSlerp(double u) {
     double uScaled = helpers::shiftAndScale(u, 0.1, 0.9);
     uScaled = ghoul::cubicEaseInOut(uScaled);
     return glm::slerp(_start.rotation, _end.rotation, uScaled);
+}
+
+// Look at start node until tStart, then turn to look at end node from tEnd
+// Will overwrite rotation of navigation states! 
+glm::dquat RotationInterpolator::lookAtInterpolator(double u) {
+    double tStart = 0.15;
+    double tEnd = 0.7;
+    double uNew = helpers::shiftAndScale(u, tStart, tEnd);
+    uNew = ghoul::cubicEaseInOut(uNew);
+
+    
+    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
+    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
+    glm::dvec3 lookAtPos = interpolation::linear(uNew, startNodePos, endNodePos);
+
+    glm::dvec3 startUpVec = _start.rotation * glm::dvec3(0.0, 1.0, 0.0);
+
+    return helpers::getLookAtQuaternion(_curve->positionAt(u), lookAtPos, startUpVec);
 }
 
 // Interpolate between a number of keyframes for orientation using SLERP

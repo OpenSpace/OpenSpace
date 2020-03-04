@@ -32,7 +32,8 @@ namespace openspace::autonavigation {
 enum RotationMethod {
     Slerp,
     PiecewiseSlerp,
-    Fixed
+    Fixed,
+    LookAt
 };
 
 class PathCurve;
@@ -52,6 +53,7 @@ private:
     RotationMethod _method;
 
     glm::dquat easedSlerp(double u);
+    glm::dquat lookAtInterpolator(double u); // for debug
     glm::dquat piecewiseSlerp(double u);
 };
 
