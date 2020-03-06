@@ -77,8 +77,7 @@ namespace openspace::autonavigation::helpers {
             // only care about the first intersection point if we have two
             double t = (-b - std::sqrt(intersectionTest)) / (2.0 *a);
 
-            // outside the line segment?
-            if (t < 0.0 || t > 1.0) return false;
+            if (t <= Epsilon || t >= abs(1.0 - Epsilon)) return false;
 
             // TEST
             LINFO("Collision!! at t = " + std::to_string(t));
