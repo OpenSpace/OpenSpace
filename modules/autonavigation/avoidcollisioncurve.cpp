@@ -39,6 +39,14 @@
 namespace {
     constexpr const char* _loggerCat = "AvoidCollisionCurve";
     const double Epsilon = 1E-7;
+
+    // TODO: move this list somewhere else
+    const std::vector<std::string> RelevantTags{
+        "planet_solarSystem",
+        "moon_solarSystem"
+        // TODO
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -72,31 +80,23 @@ glm::dvec3 AvoidCollisionCurve::positionAt(double u) {
     return interpolatePoints(u);
 }
 
-// TODO: refactor
-bool isRelevant(const SceneGraphNode* node) {
-    // TODO: move this list somewhere else
-    const std::vector<std::string> relevantTags{
-        "planet_solarSystem",
-        "moon_solarSystem"
-        // TODO
-    };
-
-    // does the node match any of the relevant tags?
-    const std::vector<std::string> tags = node->tags();
-    auto result = std::find_first_of(relevantTags.begin(), relevantTags.end(), tags.begin(), tags.end());
-
-    // does not match any tags => not interesting
-    if (result == relevantTags.end()) {
-        return false;
-    }
-
-    return node->renderable() && (node->boundingSphere() > 0.0);
-}
-
 std::vector<SceneGraphNode*> AvoidCollisionCurve::findRelevantNodes() {
     // TODO: make more efficient
     const std::vector<SceneGraphNode*>& allNodes =
         global::renderEngine.scene()->allSceneGraphNodes();
+
+    auto isRelevant = [](const SceneGraphNode* node) {
+        // does the node match any of the relevant tags?
+        const std::vector<std::string> tags = node->tags();
+        auto result = std::find_first_of(RelevantTags.begin(), RelevantTags.end(), tags.begin(), tags.end());
+
+        // does not match any tags => not interesting
+        if (result == RelevantTags.end()) {
+            return false;
+        }
+
+        return node->renderable() && (node->boundingSphere() > 0.0);
+    };
 
     std::vector<SceneGraphNode*> result{};
     std::copy_if(allNodes.begin(), allNodes.end(), std::back_inserter(result), isRelevant);
