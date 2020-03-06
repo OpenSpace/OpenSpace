@@ -146,15 +146,19 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 for (int m = 0; m < _planets[i]._moons.size(); ++m) {
                     SceneGraphNode* moon = scene->sceneGraphNode(_planets[i]._moons[m].first);
                     if (moon) {
-                        //std::cout << "Found moon " << _planets[i]._moons[m] << " of " << identifier << std::endl;
                         glm::dvec3 planetToMoon = moon->worldPosition() - nodePosition;
                         glm::dvec3 planetToProjectedMoon = planetToMoon - glm::proj(planetToMoon, cameraUpVector);
 
+                        //Easy switch between different angles
+                        //Angle from planet to moon with respect to camera
+
                         //NOTE: This will not work if the camera is looking straight down on the planet,
                         //weired behaviour when switching from upside to downside vice versa
-                        double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection),
-                            glm::normalize(planetToProjectedMoon),
-                            glm::normalize(cameraUpVector));
+                        double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(planetToProjectedMoon), glm::normalize(cameraUpVector));
+
+                        //Angle from camera to the moon projected on camera plane
+                        //glm::dvec3 cameraToProjectedMoon = (moon->worldPosition() - glm::proj(moon->worldPosition() - cameraPosition, cameraUpVector)) - cameraPosition;
+                        //double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(cameraToProjectedMoon), glm::normalize(cameraUpVector));
 
                         if (abs(_planets[i]._moons[m].second - moonAngle) > _anglePrecision) {
                             updateMoons = true;
@@ -170,9 +174,15 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 //Solar view, calculate angle from sun (origin) to node, 
                 //with x axis as forward and y axis as upwards 
                 //NOTE: Does not take into accoutnt the cameras position
-                angle = glm::orientedAngle(glm::normalize(nodePosition),
-                    glm::normalize(glm::dvec3(1.0, 0.0, 0.0)), 
-                    glm::normalize(glm::dvec3(0.0, 1.0, 0.0)));
+                //Angle from Sun
+                //angle = glm::orientedAngle(glm::normalize(nodePosition), glm::normalize(glm::dvec3(1.0, 0.0, 0.0)), glm::normalize(glm::dvec3(0.0, 1.0, 0.0)));
+
+                //angle from sun with respect to the camera
+                angle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(nodePosition - glm::proj(nodePosition, cameraUpVector)), glm::normalize(cameraUpVector));
+
+                //Angle from camera
+                //glm::dvec3 cameraToProjectedNode = (nodePosition - glm::proj(cameraToNode, cameraUpVector)) - cameraPosition;
+                //angle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(cameraToProjectedNode), glm::normalize(cameraUpVector));
             }
             
             //Check if this data is new, otherwise dont send the data
