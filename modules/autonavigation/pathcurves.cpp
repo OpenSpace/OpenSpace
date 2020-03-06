@@ -54,14 +54,14 @@ double PathCurve::arcLength(double limit) {
     // Points to be multiplied by 4
     double times4 = 0.0;
     for (int i = 1; i < n; i += 2) {
-        float t = h * i;
+        double t = h * i;
         times4 += glm::length(positionAt(t + h) - positionAt(t));
     }
 
     // Points to be multiplied by 2
     double times2 = 0.0;
     for (int i = 2; i < n; i += 2) {
-        float t = h * i;
+        double t = h * i;
         times2 += glm::length(positionAt(t + h) - positionAt(t));
     }
 
