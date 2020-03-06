@@ -104,9 +104,29 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     if (!_isPlaying || _pathSegments.empty()) return;
 
-    _currentTime += deltaTime;
+    //TODO: early out if simulation time is not stopped.
 
     PathSegment currentSegment = _pathSegments[_currentSegmentIndex];
+
+    // compute interpolated camera state
+    double prevDistance = _distanceAlongCurrentSegment;
+    double displacement = deltaTime * currentSegment.speedAtTime(_currentTime - currentSegment.startTime());
+    _distanceAlongCurrentSegment += displacement;
+
+    double relativeDisplacement = _distanceAlongCurrentSegment / currentSegment.pathLength();
+    relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
+
+    CameraState newState = currentSegment.interpolate(relativeDisplacement);
+
+    // Set anchor node in orbitalNavigator, to render visible nodes and add activate
+    // navigation when we reach the end.
+    std::string currentAnchor = global::navigationHandler.anchorNode()->identifier();
+    if (currentAnchor != newState.referenceNode) {
+        global::navigationHandler.orbitalNavigator().setAnchorNode(newState.referenceNode);
+    }
+
+    camera()->setPositionVec3(newState.position);
+    camera()->setRotation(newState.rotation);
 
     // Have we walked past the current segment?
     if (_currentTime > currentSegment.endTime()) {
@@ -128,25 +148,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
         }
     }
 
-    // compute interpolated camera state
-    double prevDistance = _distanceAlongCurrentSegment;
-    double displacement = deltaTime * currentSegment.speedAtTime(_currentTime - currentSegment.startTime());
-    _distanceAlongCurrentSegment += displacement;
-
-    double relativeDisplacement = _distanceAlongCurrentSegment / currentSegment.pathLength();
-    relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
-
-    CameraState newState = currentSegment.interpolate(relativeDisplacement);
-
-    // Set anchor node in orbitalNavigator, to render visible nodes and add activate
-    // navigation when we reach the end.
-    std::string currentAnchor = global::navigationHandler.anchorNode()->identifier();
-    if (currentAnchor != newState.referenceNode) {
-        global::navigationHandler.orbitalNavigator().setAnchorNode(newState.referenceNode);
-    }
-
-    camera()->setPositionVec3(newState.position);
-    camera()->setRotation(newState.rotation);
+    _currentTime += deltaTime;
 }
 
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
