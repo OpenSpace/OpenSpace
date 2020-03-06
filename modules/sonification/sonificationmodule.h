@@ -32,6 +32,8 @@
 #include <atomic>
 #include <ghoul/glm.h>
 #include <openspace/scene/scene.h>
+#include <vector>
+#include <utility>
 
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
@@ -84,6 +86,7 @@ private:
         std::string _identifier;
         double _distance;
         double _angle;
+        std::vector<std::pair<std::string, double>> _moons;
     };
 
     char* _buffer;

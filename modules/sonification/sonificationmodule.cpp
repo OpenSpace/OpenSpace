@@ -60,12 +60,45 @@ SonificationModule::SonificationModule()
     //Fill the _planets array
     _planets[0] = Planet("Mercury");
     _planets[1] = Planet("Venus");
+
     _planets[2] = Planet("Earth");
+    _planets[2]._moons.reserve(1);
+    _planets[2]._moons.push_back({ "Moon", 0.0 });
+
     _planets[3] = Planet("Mars");
+    _planets[3]._moons.reserve(2);
+    _planets[3]._moons.push_back({ "Phobos", 0.0 });
+    _planets[3]._moons.push_back({ "Deimos", 0.0 });
+
     _planets[4] = Planet("Jupiter");
+    _planets[4]._moons.reserve(4);
+    _planets[4]._moons.push_back({ "Io", 0.0 });
+    _planets[4]._moons.push_back({ "Europa", 0.0 });
+    _planets[4]._moons.push_back({ "Ganymede", 0.0 });
+    _planets[4]._moons.push_back({ "Callisto", 0.0 });
+
     _planets[5] = Planet("Saturn");
+    _planets[5]._moons.reserve(8);
+    _planets[5]._moons.push_back({ "Dione", 0.0 });
+    _planets[5]._moons.push_back({ "Enceladus", 0.0 });
+    _planets[5]._moons.push_back({ "Hyperion", 0.0 });
+    _planets[5]._moons.push_back({ "Iapetus", 0.0 });
+    _planets[5]._moons.push_back({ "Mimas", 0.0 });
+    _planets[5]._moons.push_back({ "Rhea", 0.0 });
+    _planets[5]._moons.push_back({ "Tethys", 0.0 });
+    _planets[5]._moons.push_back({ "Titan", 0.0 });
+
     _planets[6] = Planet("Uranus");
+    _planets[6]._moons.reserve(5);
+    _planets[6]._moons.push_back({ "Ariel", 0.0 });
+    _planets[6]._moons.push_back({ "Miranda", 0.0 });
+    _planets[6]._moons.push_back({ "Oberon", 0.0 });
+    _planets[6]._moons.push_back({ "Titania", 0.0 });
+    _planets[6]._moons.push_back({ "Umbriel", 0.0 });
+
     _planets[7] = Planet("Neptune");
+    _planets[7]._moons.reserve(1);
+    _planets[7]._moons.push_back({ "Triton", 0.0 });
 }
 
 SonificationModule::~SonificationModule() {
@@ -93,6 +126,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
             double distance = glm::length(cameraToNode)/1000.0;
             double timeSpeed = global::timeManager.deltaTime() / NUM_SEC_PER_DAY;
             double angle;
+            bool updateMoons = false;
 
             //Calculate angle differently if planetary view or solar view
             if (_isPlanetaryView) {
@@ -106,10 +140,36 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 angle = glm::orientedAngle(glm::normalize(cameraDirection),
                     glm::normalize(cameraToProjectedNode), 
                     glm::normalize(cameraUpVector));
+
+                //If this planet is in focus then calculate the angle from
+                //the planet to its moons and send them too
+                for (int m = 0; m < _planets[i]._moons.size(); ++m) {
+                    SceneGraphNode* moon = scene->sceneGraphNode(_planets[i]._moons[m].first);
+                    if (moon) {
+                        //std::cout << "Found moon " << _planets[i]._moons[m] << " of " << identifier << std::endl;
+                        glm::dvec3 planetToMoon = moon->worldPosition() - nodePosition;
+                        glm::dvec3 planetToProjectedMoon = planetToMoon - glm::proj(planetToMoon, cameraUpVector);
+
+                        //NOTE: This will not work if the camera is looking straight down on the planet,
+                        //weired behaviour when switching from upside to downside vice versa
+                        double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection),
+                            glm::normalize(planetToProjectedMoon),
+                            glm::normalize(cameraUpVector));
+
+                        if (abs(_planets[i]._moons[m].second - moonAngle) > _anglePrecision) {
+                            updateMoons = true;
+                            _planets[i]._moons[m].second = moonAngle;
+                        }
+                    }
+                    else {
+                        std::cout << "Could not find moon " << _planets[i]._moons[m].first << " of " << identifier << std::endl;
+                    }
+                }
             }
             else {
                 //Solar view, calculate angle from sun (origin) to node, 
                 //with x axis as forward and y axis as upwards 
+                //NOTE: Does not take into accoutnt the cameras position
                 angle = glm::orientedAngle(glm::normalize(nodePosition),
                     glm::normalize(glm::dvec3(1.0, 0.0, 0.0)), 
                     glm::normalize(glm::dvec3(0.0, 1.0, 0.0)));
@@ -118,7 +178,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
             //Check if this data is new, otherwise dont send the data
             if (abs(_planets[i]._distance - distance) > _distancePrecision || 
                 abs(_planets[i]._angle - angle) > _anglePrecision ||
-                abs(_previousTimeSpeed - timeSpeed) > _timePrecision)
+                abs(_previousTimeSpeed - timeSpeed) > _timePrecision || updateMoons)
             {
                 //Update the saved data for the planet
                 _planets[i].setDistance(distance);
@@ -132,8 +192,14 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 UdpTransmitSocket socket = UdpTransmitSocket(
                     IpEndpointName(SC_IP_ADDRESS, SC_PORT));
                 _stream.Clear();
-                _stream << osc::BeginMessage(label.c_str()) << distance <<
-                    angle << timeSpeed << osc::EndMessage;
+                _stream << osc::BeginMessage(label.c_str()) << distance << angle << timeSpeed;
+
+                //Add the information of the moons if any
+                for (int m = 0; m < _planets[i]._moons.size(); ++m) {
+                    _stream << _planets[i]._moons[m].second;
+                }
+
+                _stream << osc::EndMessage;
                 socket.Send(_stream.Data(), _stream.Size());
             }
         }
@@ -196,9 +262,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                         
                         //Only send data if something new has happened
                         //If the node is in focus, increase sensitivity
-                        if (focusNode->identifier()
-                            .compare(_planets[i]._identifier) == 0)
-                        {
+                        if (focusNode->identifier().compare(_planets[i]._identifier) == 0) {
                             _anglePrecision = 0.01;
                             _distancePrecision = 10.0;
                         }
