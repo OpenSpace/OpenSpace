@@ -107,7 +107,7 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
     if (dictionary.hasKey(DistanceUnitInfo.identifier)) {
         _distanceUnit = static_cast<int>(
             dictionary.value<double>(DistanceUnitInfo.identifier)
-            );
+        );
         addProperty(_distanceUnit);
     }
     if (dictionary.hasKey(CustomUnitDescriptorInfo.identifier)) {
