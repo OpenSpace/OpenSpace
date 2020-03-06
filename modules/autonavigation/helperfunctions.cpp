@@ -109,27 +109,6 @@ namespace openspace::autonavigation::interpolation {
         return cp1 * (1.0 - t) + cp2 * t;
     }
 
-    glm::dvec3 catmullRom(double t, const glm::dvec3 &p0, const glm::dvec3 &p1,
-                                    const glm::dvec3 &p2, const glm::dvec3 &p3)
-    {
-        ghoul_assert(t >= 0 && t <= 1.0, "Interpolation variable out of range [0, 1]");
-
-        if (t <= 0.0) return p1;
-        if (t >= 1.0) return p2;
-
-        const double t2 = t * t; 
-        const double t3 = t2 * t;
-
-        glm::dvec3 result = (
-            p0 * (-0.5 * t3 + t2 - 0.5 * t) +
-            p1 * ( 1.5 * t3 - 2.5 * t2 + 1.0) +
-            p2 * (-1.5 * t3 + 2.0 * t2 + 0.5 * t) +
-            p3 * ( 0.5 * t3 - 0.5 * t2)
-            );
-
-        return result;
-    }
-
     glm::dvec3 hermite(double t, const glm::dvec3 &p1, const glm::dvec3 &p2,
                        const glm::dvec3 &tangent1, const glm::dvec3 &tangent2)
     {

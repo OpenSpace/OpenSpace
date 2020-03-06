@@ -25,13 +25,8 @@
 #include <modules/autonavigation/pathcurves.h>
 
 #include <modules/autonavigation/helperfunctions.h>
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
-#include <glm/gtx/intersect.hpp>
-#include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <vector>

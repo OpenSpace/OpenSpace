@@ -55,9 +55,6 @@ namespace openspace::autonavigation::interpolation {
 
     glm::dvec3 linear(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2);
 
-    glm::dvec3 catmullRom(double t, const glm::dvec3 &a, const glm::dvec3 &b,
-                                    const glm::dvec3 &c, const glm::dvec3 &d);
-
     glm::dvec3 hermite(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2,
                        const glm::dvec3 &tangent1, const glm::dvec3 &tangent2);
 

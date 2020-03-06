@@ -30,8 +30,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
-#include <glm/gtx/intersect.hpp>
-#include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <vector>
@@ -215,18 +213,17 @@ glm::dvec3 AvoidCollisionCurve::roundedSpline(double t, const glm::dvec3 &a,
 
     // find velocities at b and c
     glm::dvec3 cb = c - b;
+    glm::dvec3 bc = -cb;
+
     if (!isNormalizable(cb)) {
         return b;
     }
 
     glm::dvec3 ab = a - b;
 
-    // a and b are the same point. try finding a substitue
+    // a and b are the same point
     if (!isNormalizable(ab)) {
-        ab = b - c;
-        if (!isNormalizable(ab)) {
-            ab = glm::dvec3(0.0, 1.0, 0.0);
-        }
+        ab = bc;
     }
 
     glm::dvec3 bVelocity = glm::normalize(cb) - glm::normalize(ab);
@@ -234,15 +231,12 @@ glm::dvec3 AvoidCollisionCurve::roundedSpline(double t, const glm::dvec3 &a,
         glm::normalize(bVelocity) : glm::dvec3(0.0, 1.0, 0.0);
 
     glm::dvec3 dc = d - c;
-    // d and c are the same point. try finding a substitue
+
+    // d and c are the same point
     if (!isNormalizable(dc)) {
-        dc = c - b;
-        if (!isNormalizable(dc)) {
-            dc = glm::dvec3(0.0, 1.0, 0.0); 
-        }
+        dc = cb;
     }
 
-    glm::dvec3 bc = (-1.0)*cb;
     glm::dvec3 cVelocity = glm::normalize(dc) - glm::normalize(bc);
     cVelocity = isNormalizable(cVelocity) ?
         glm::normalize(cVelocity) : glm::dvec3(0.0, 1.0, 0.0);
@@ -250,7 +244,7 @@ glm::dvec3 AvoidCollisionCurve::roundedSpline(double t, const glm::dvec3 &a,
     double cbDistance = glm::length(cb);
     double tangetLength = cbDistance;
 
-    // Distances in space can be extremely large, so we dont want to let the tangents have the complete length. 
+    // Distances in space can be extremely large, so we dont want the tangents to always have the full length. 
     const double tangentlengthThreshold = 1E10; // TODO: What's a good threshold?? ALSO make global
     if (tangetLength > tangentlengthThreshold)
         tangetLength = tangentlengthThreshold;
