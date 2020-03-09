@@ -52,7 +52,8 @@ public:
     Camera* camera() const;
     double pathDuration() const;
     bool hasFinished() const;
-    CameraState currentCameraState();         
+    CameraState currentCameraState();
+    CameraState lastState();
 
     void updateCamera(double deltaTime);
     void createPath(PathSpecification& spec);
@@ -67,22 +68,16 @@ public:
     std::vector<glm::dvec3> getControlPoints(); //debug
 
 private:
-    bool handleInstruction(const Instruction& instruction, int index);
+    bool handleInstruction(const Instruction& ins, int index);
 
-    bool handleTargetNodeInstruction(const Instruction& instruction);
-    bool handleNavigationStateInstruction(const Instruction& instruction);
-    bool handlePauseInstruction(const Instruction& instruction);
+    bool handleTargetNodeInstruction(const Instruction& ins);
+    bool handleNavigationStateInstruction(const Instruction& ins);
+    bool handlePauseInstruction(const Instruction& ins);
 
-    void addSegment(CameraState& start, CameraState& end, std::optional<double> duration);
-
-    void addPause(CameraState& state, std::optional<double> duration);
+    void addPause(std::optional<double> duration);
+    void addSegment(CameraState& state, std::optional<double> duration);
 
     double findValidBoundingSphere(const SceneGraphNode* node);
-    glm::dvec3 computeTargetPositionAtNode(const SceneGraphNode* node,
-        glm::dvec3 prevPos, std::optional<double> height);
-
-    CameraState cameraStateFromNavigationState(
-        const interaction::NavigationHandler::NavigationState& ns);
 
     // this list essentially represents the camera path
     std::vector<PathSegment> _pathSegments;

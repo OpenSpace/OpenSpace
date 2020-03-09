@@ -41,6 +41,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule_lua.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/camerastate.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/instruction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathspecification.cpp

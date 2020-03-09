@@ -22,26 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___CAMERASTATE___H__
-#define __OPENSPACE_MODULE___CAMERASTATE___H__
+#include <modules/autonavigation/camerastate.h>
 
-#include <openspace/interaction/navigationhandler.h>
-#include <ghoul/glm.h>
-#include <vector>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/query/query.h>
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+    constexpr const char* _loggerCat = "CameraState";
+} // namespace
 
 namespace openspace::autonavigation {
 
-struct CameraState {
-    using NavigationState = interaction::NavigationHandler::NavigationState;
-    CameraState() = default;
-    CameraState(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
-    CameraState(const NavigationState& ns);
+CameraState::CameraState(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
+    : position(pos), rotation(rot), referenceNode(ref)
+{}
 
-    glm::dvec3 position;
-    glm::dquat rotation;
-    std::string referenceNode; // OBS! A bit unclear name, since position and rotation is in world coords
-};
+CameraState::CameraState(const NavigationState& ns) {
+    // OBS! The following code is exactly the same as used in 
+    // NavigationHandler::applyNavigationState. Should probably be made into a function.
+    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
+    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
+
+    if (!anchorNode) {
+        LERROR(fmt::format("Could not find node '{}' to target. Returning empty state.", ns.anchor));
+        return;
+    }
+
+    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
+    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
+
+    position = anchorWorldPosition +
+        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
+
+    glm::dvec3 up = ns.up.has_value() ?
+        glm::normalize(referenceFrameTransform * ns.up.value()) :
+        glm::dvec3(0.0, 1.0, 0.0);
+
+    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
+    glm::dvec3 neutralView =
+        glm::normalize(anchorWorldPosition - position);
+
+    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
+        glm::dvec3(0.0),
+        neutralView,
+        up
+    )));
+
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
+
+    rotation = neutralCameraRotation * yawRotation * pitchRotation;
+
+    referenceNode = ns.referenceFrame;
+}
 
 } // namespace openspace::autonavigation
-
-#endif // __OPENSPACE_MODULE___CAMERASTATE___H__

@@ -100,6 +100,10 @@ CameraState AutoNavigationHandler::currentCameraState() {
     return cs;
 }
 
+CameraState AutoNavigationHandler::lastState() {
+    return _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+}
+
 void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
@@ -167,7 +171,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 
     // Check if we have a specified start state. If so, update the first segment
     if (spec.hasStartState() && _pathSegments.size() > 0) {
-        CameraState startState = cameraStateFromNavigationState(spec.startState());
+        CameraState startState{ spec.startState() };
         _pathSegments[0].setStart(startState);
     }
 
@@ -279,20 +283,20 @@ std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
     return points;
 }
 
-bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, int index) {
+bool AutoNavigationHandler::handleInstruction(const Instruction& ins, int index) {
     bool success = true;
-    switch (instruction.type)
+    switch (ins.type)
     {
     case InstructionType::TargetNode:
-        success = handleTargetNodeInstruction(instruction);
+        success = handleTargetNodeInstruction(ins);
         break;
 
     case InstructionType::NavigationState:
-        success = handleNavigationStateInstruction(instruction);
+        success = handleNavigationStateInstruction(ins);
         break;
 
     case InstructionType::Pause:
-        success = handlePauseInstruction(instruction);
+        success = handlePauseInstruction(ins);
         break;
 
     default:
@@ -309,18 +313,15 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& instruction, in
     return true;
 }
 
-bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& instruction) {
+bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& ins) {
     // Verify instruction type
     TargetNodeInstructionProps* props = 
-        dynamic_cast<TargetNodeInstructionProps*>(instruction.props.get());
+        dynamic_cast<TargetNodeInstructionProps*>(ins.props.get());
 
     if (!props) {
         LERROR("Could not handle target node instruction.");
         return false;
     }
-
-    CameraState startState = 
-        _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
 
     // Compute end state 
     std::string& identifier = props->targetNode;
@@ -339,11 +340,18 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& instr
             targetNode->worldRotationMatrix() * props->position.value();
     }
     else {
-        targetPos = computeTargetPositionAtNode(
-            targetNode, 
-            startState.position,
-            props->height
-        );
+        glm::dvec3 nodePos = targetNode->worldPosition();
+        glm::dvec3 nodeToPrev= lastState().position - nodePos;
+        // TODO: compute position in a more clever way
+
+        const double radius = findValidBoundingSphere(targetNode);
+        const double defaultHeight = 2 * radius;
+
+        bool hasHeight = props->height.has_value();
+        double height = hasHeight ? props->height.value() : defaultHeight;
+
+        // move target position out from surface, along vector to camera
+        targetPos = nodePos + glm::normalize(nodeToPrev) * (radius + height);
     }
 
     glm::dmat4 lookAtMat = glm::lookAt(
@@ -354,57 +362,54 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& instr
 
     glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 
-    CameraState endState = CameraState{ targetPos, targetRot, identifier };
+    CameraState endState{ targetPos, targetRot, identifier };
 
-    addSegment(startState, endState, instruction.props->duration);
+    addSegment(endState, ins.props->duration);
     return true;
 }
 
-bool AutoNavigationHandler::handleNavigationStateInstruction(
-    const Instruction& instruction)
-{
+bool AutoNavigationHandler::handleNavigationStateInstruction(const Instruction& ins) {
     // Verify instruction type
     NavigationStateInstructionProps* props =
-        dynamic_cast<NavigationStateInstructionProps*>(instruction.props.get());
+        dynamic_cast<NavigationStateInstructionProps*>(ins.props.get());
 
     if (!props) {
         LERROR(fmt::format("Could not handle navigation state instruction."));
         return false;
     }
 
-    CameraState startState =
-        _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+    CameraState endState{ props->navState };
 
-    interaction::NavigationHandler::NavigationState ns = props->navState;
-    CameraState endState = cameraStateFromNavigationState(ns);
-
-    addSegment(startState, endState, instruction.props->duration);
+    addSegment(endState, ins.props->duration);
     return true;
 }
 
-bool AutoNavigationHandler::handlePauseInstruction(const Instruction& instruction)
-{
+bool AutoNavigationHandler::handlePauseInstruction(const Instruction& ins) {
     // Verify instruction type
     PauseInstructionProps* props =
-        dynamic_cast<PauseInstructionProps*>(instruction.props.get());
+        dynamic_cast<PauseInstructionProps*>(ins.props.get());
 
     if (!props) {
         LERROR(fmt::format("Could not handle pause instruction."));
         return false;
     }
 
-    CameraState state =_pathSegments.empty() 
-        ?  currentCameraState() 
-        : _pathSegments.back().end();
-
     // TODO: implement more complex behavior later
 
-    addPause(state, instruction.props->duration);
+    addPause(ins.props->duration);
     return true;
 }
 
-void AutoNavigationHandler::addSegment(CameraState& start, 
-    CameraState& end, std::optional<double> duration) 
+void AutoNavigationHandler::addPause(std::optional<double> duration) {
+    CameraState current = currentCameraState();
+    CameraState state =_pathSegments.empty() ? current : _pathSegments.back().end();
+
+    // TODO: implement more complex pause behaviour
+
+    addSegment(state, duration);
+}
+
+void AutoNavigationHandler::addSegment(CameraState& state, std::optional<double> duration) 
 {
     // compute startTime 
     double startTime = 0.0;
@@ -416,24 +421,7 @@ void AutoNavigationHandler::addSegment(CameraState& start,
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    PathSegment newSegment{ start, end, startTime, CurveType(curveType) };
-
-    // TODO: handle duration better
-    if (duration.has_value()) {
-        newSegment.setDuration(duration.value());
-    }
-    _pathSegments.push_back(newSegment);
-}
-
-void AutoNavigationHandler::addPause(CameraState& state, std::optional<double> duration) {
-    // compute startTime 
-    double startTime = 0.0;
-    if (!_pathSegments.empty()) {
-        PathSegment& last = _pathSegments.back();
-        startTime = last.startTime() + last.duration();
-    }
-
-    PathSegment newSegment = PathSegment{ state, state, startTime, CurveType::Pause };
+    PathSegment newSegment{ lastState(), state, startTime, CurveType(curveType) };
 
     // TODO: handle duration better
     if (duration.has_value()) {
@@ -471,66 +459,6 @@ double AutoNavigationHandler::findValidBoundingSphere(const SceneGraphNode* node
     }
 
     return bs;
-}
-
-glm::dvec3 AutoNavigationHandler::computeTargetPositionAtNode(
-    const SceneGraphNode* node, glm::dvec3 prevPos, std::optional<double> heightOptional)
-{
-    glm::dvec3 targetPos = node->worldPosition();
-    glm::dvec3 targetToPrevVector = prevPos - targetPos;
-    // TODO: compute position in a more clever way
-
-    const double radius = findValidBoundingSphere(node);
-    const double defaultHeight = 2 * radius;
-
-    bool hasHeight = heightOptional.has_value();
-    double height = hasHeight ? heightOptional.value() : defaultHeight;
-
-    // move target position out from surface, along vector to camera
-    targetPos += glm::normalize(targetToPrevVector) * (radius + height);
-
-    return targetPos;
-}
-
-CameraState AutoNavigationHandler::cameraStateFromNavigationState(
-    const interaction::NavigationHandler::NavigationState& ns) 
-{
-    // OBS! The following code is exactly the same as used in 
-    // NavigationHandler::applyNavigationState. Should probably be made into a function.
-    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
-    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
-
-    if (!anchorNode) {
-        LERROR(fmt::format("Could not find node '{}' to target. Returning empty state.", ns.anchor));
-        return CameraState{};
-    }
-
-    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
-    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
-
-    const glm::dvec3 targetPositionWorld = anchorWorldPosition +
-        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
-
-    glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(referenceFrameTransform * ns.up.value()) :
-        glm::dvec3(0.0, 1.0, 0.0);
-
-    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
-    glm::dvec3 neutralView =
-        glm::normalize(anchorWorldPosition - targetPositionWorld);
-
-    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0),
-        neutralView,
-        up
-    )));
-
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
-
-    glm::quat targetRotation = neutralCameraRotation * yawRotation * pitchRotation;
-
-    return CameraState{ targetPositionWorld, targetRotation, ns.anchor };
 }
 
 } // namespace openspace::autonavigation
