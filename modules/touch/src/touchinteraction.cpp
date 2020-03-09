@@ -83,13 +83,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "TouchEvents",
         "True if we have a touch event",
-        "" // @TODO Missing documentation
+        "",
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo TouchInteractionTypeInfo = {
         "TouchInteractionType",
         "Type of last known touch interaction",
-        "" // @TODO Missing documentation
+        "Holds the value of the last detected touch interaction or none if no touch is active."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
@@ -1268,6 +1269,9 @@ void TouchInteraction::tap() {
 
 void TouchInteraction::touchActive(bool active) {
     _touchActive = active;
+    if (!active) {
+        _lastInteractionType = NONE;
+    }
 }
 
 // Get & Setters
