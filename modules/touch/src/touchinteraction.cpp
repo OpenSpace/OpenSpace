@@ -83,8 +83,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "TouchEvents",
         "True if we have a touch event",
-        "",
-        openspace::properties::Property::Visibility::Hidden
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TouchInteractionTypeInfo = {
+        "TouchInteractionType",
+        "Type of last known touch interaction",
+        "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
@@ -259,6 +264,7 @@ TouchInteraction::TouchInteraction()
     , _origin(OriginInfo)
     , _unitTest(UnitTestInfo, false)
     , _touchActive(EventsInfo, false)
+    , _lastInteractionType(TouchInteractionTypeInfo, 0, 0, 6)
     , _reset(SetDefaultInfo, false)
     , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
@@ -314,6 +320,7 @@ TouchInteraction::TouchInteraction()
     // projDiffLength/diffLength.
 {
     addProperty(_touchActive);
+    addProperty(_lastInteractionType);
     addProperty(_unitTest);
     addProperty(_reset);
     addProperty(_maxTapTime);
@@ -786,6 +793,8 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                                          const std::vector<TouchInput>& lastProcessed)
 {
     const int action = interpretInteraction(list, lastProcessed);
+    _lastInteractionType = action;
+
     const SceneGraphNode* anchor =
         global::navigationHandler.orbitalNavigator().anchorNode();
     if (!anchor) {

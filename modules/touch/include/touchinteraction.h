@@ -67,7 +67,7 @@ public:
     TouchInteraction();
 
     // for interpretInteraction()
-    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK, ZOOM_OUT };
+    enum Type { NONE = 0, ROT, PINCH, PAN, ROLL, PICK, ZOOM_OUT };
 
     // Stores the velocity in all 6DOF
     struct VelocityStates {
@@ -161,6 +161,7 @@ private:
     properties::StringProperty _origin;
     properties::BoolProperty _unitTest;
     properties::BoolProperty _touchActive;
+    properties::IntProperty _lastInteractionType;
     properties::BoolProperty _reset;
     properties::IntProperty _maxTapTime;
     properties::IntProperty _deceleratesPerSecond;
