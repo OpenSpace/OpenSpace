@@ -54,137 +54,9 @@ namespace {
         "Path",
         "The file path to the SBDB file to read"
     };
-
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Segments",
-        "The number of segments to use for each orbit ellipse"
-    };
-    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
-        "UpperLimit",
-        "Upper Limit",
-        "Upper limit on the number of objects for this renderable, regardless of "
-        "how many objects are contained in the data file"
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
-    };
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
-        "Line fade",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. The higher the number, "
-        "the less fading is applied."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
-    };
-    
-    constexpr const char* KeyFile = "Path";
-    constexpr const char* KeyLineNum = "LineNumber";
 }
 
 namespace openspace {
-
-const std::vector<int> DaysOfMonths = {
-    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-};
-
-enum Months {
-    January = 0,
-    February,
-    March,
-    April,
-    May,
-    June,
-    July,
-    August,
-    September,
-    October,
-    November,
-    December
-};
-
-int daysIntoGivenYear(int month, int dayOfMonth) {
-    //month and dayCount are zero-based. Does NOT account for leap year.
-    month -= 1;
-    int dayCount = dayOfMonth - 1;
-
-    for (int m = Months::January; m < month; ++m) {
-        dayCount += DaysOfMonths[m];
-    }
-    return dayCount;
-}
-
-double epochFromYMDdSubstring(const std::string& epochString) {
-    // The epochString is in the form:
-    // YYYYMMDD.ddddddd
-    // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
-    // and dddd the fraction of that day.
-
-    // The main overview of this function:
-    // 1. Read the year value
-    // 2. Calculate the number of seconds since the beginning of the year
-    // 2.a Get the number of full days since the beginning of the year
-    // 2.b If the year is a leap year, modify the number of days
-    // 3. Convert the number of days to a number of seconds
-    // 4. Get the number of leap seconds since January 1st, 2000 and remove them
-    // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
-    // midnight
-
-    // 1
-    int year = std::atoi(epochString.substr(0, 4).c_str());
-    const int daysSince2000 = countDays(year);
-
-    // 2.
-    // 2.a
-    int monthNum = std::atoi(epochString.substr(4, 2).c_str());
-    int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
-    int wholeDaysInto = daysIntoGivenYear(monthNum, dayOfMonthNum);
-    double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
-    double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
-
-    // 2.b
-    const bool isInLeapYear = std::find(
-        LeapYears.begin(),
-        LeapYears.end(),
-        year
-    ) != LeapYears.end();
-    if (isInLeapYear && daysInYear >= 60) {
-        // We are in a leap year, so we have an effective day more if we are
-        // beyond the end of february (= 31+29 days)
-        --daysInYear;
-    }
-
-    // 3
-    using namespace std::chrono;
-    const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-    //Need to subtract 1 from daysInYear since it is not a zero-based count
-    const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
-
-    // 4
-    // We need to remove additional leap seconds past 2000 and add them prior to
-    // 2000 to sync up the time zones
-    const double nLeapSecondsOffset = -countLeapSeconds(
-        year,
-        static_cast<int>(std::floor(daysInYear))
-    );
-
-    // 5
-    const double nSecondsEpochOffset = static_cast<double>(
-        seconds(hours(12)).count()
-    );
-
-    // Combine all of the values
-    const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
-    return epoch;
-}
 
 documentation::Documentation RenderableSmallBody::Documentation() {
     using namespace documentation;
@@ -233,71 +105,17 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 }
     
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _path(PathInfo)
-    , _nSegments(SegmentsInfo, 100, 10, 4000)
-    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
+    : RenderableOrbitalKepler(dictionary)
 {
     documentation::testSpecificationAndThrow(
          Documentation(),
          dictionary,
          "RenderableSmallBody"
         );
-
-    _path = dictionary.value<std::string>(PathInfo.identifier);
-    _nSegments = static_cast<unsigned int>(
-        dictionary.value<double>(SegmentsInfo.identifier)
-    );
-
-    if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
-        _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
-    }
-    if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
-        _appearance.lineFade = static_cast<float>(
-            dictionary.value<double>(FadeInfo.identifier)
-        );
-    }
-    else {
-        _appearance.lineFade = 20;
-    }
-
-    if (dictionary.hasKeyAndValue<double>(UpperLimitInfo.identifier)) {
-        _upperLimit = static_cast<unsigned int>(
-            dictionary.value<double>(UpperLimitInfo.identifier)
-        );
-    }
-    else {
-        _upperLimit = 0;
-    }
-
-    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
-        _appearance.lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-            );
-    }
-    else {
-        _appearance.lineWidth = 2.0;
-    }
-
-    auto reinitializeTrailBuffers = [this]() {
-        initializeGL();
-    };
-
-    _path.onChange(reinitializeTrailBuffers);
-    _nSegments.onChange(reinitializeTrailBuffers);
-    _upperLimit.onChange(reinitializeTrailBuffers);
-
-    addPropertySubOwner(_appearance);
-    addProperty(_path);
-    addProperty(_nSegments);
-    addProperty(_opacity);
-    addProperty(_upperLimit);
-
-    setRenderBin(Renderable::RenderBin::Overlay);
 }
    
     
-void RenderableSmallBody::readJplSbDb(const std::string& filename) {
+void RenderableSmallBody::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {
         throw ghoul::RuntimeError(fmt::format(
             "JPL SBDB file {} does not exist.", filename
@@ -311,7 +129,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
     std::streamoff numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
                                    std::istreambuf_iterator<char>(), '\n' );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
-    _sbData.clear();
+    _data.clear();
     _sbNames.clear();
 
     std::string line;
@@ -461,7 +279,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
     keplerElements.period *= convertDaysToSecs;
     fieldCount++;
 
-    _sbData.push_back(keplerElements);
+    _data.push_back(keplerElements);
     _sbNames.push_back(name);
 }
 
@@ -473,158 +291,5 @@ static double importAngleValue(const std::string& angle) {
     }
     return output;
 }
-
-void RenderableSmallBody::initializeGL() {
-    glGenVertexArrays(1, &_vertexArray);
-    glGenBuffers(1, &_vertexBuffer);
-
-    _programObject = SpaceModule::ProgramObjectManager.request(
-       ProgramName,
-       []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-           return global::renderEngine.buildRenderProgram(
-               ProgramName,
-               absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
-           );
-       }
-   );
-    
-    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
-    _uniformCache.inGameTime = _programObject->uniformLocation("inGameTime");
-    _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-
-    updateBuffers();
-    setRenderBin(Renderable::RenderBin::Overlay);
-}
-    
-void RenderableSmallBody::deinitializeGL() {
-    glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteVertexArrays(1, &_vertexArray);
-
-    SpaceModule::ProgramObjectManager.release(
-        ProgramName,
-        [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
-        }
-    );
-    _programObject = nullptr;
-}
-
-bool RenderableSmallBody::isReady() const {
-    return _programObject != nullptr;
-}
-
-void RenderableSmallBody::render(const RenderData& data, RendererTasks&) {
-    if (_sbData.empty())
-        return;
-
-    _programObject->activate();
-    _programObject->setUniform(_uniformCache.opacity, _opacity);
-    _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
-
-
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    _programObject->setUniform(
-        _uniformCache.modelView,
-        data.camera.combinedViewMatrix() * modelTransform
-    );
-    // Because we want the property to work similar to the planet trails
-    float fade = static_cast<float>(pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.0));
-
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
-    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, fade);
-
-    glLineWidth(_appearance.lineWidth);
-
-    const size_t nrOrbits = _sbData.size();
-    gl::GLint vertices = 0;
-
-    //glDepthMask(false);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
-
-    glBindVertexArray(_vertexArray);
-    for (size_t i = 0; i < nrOrbits; ++i) {
-        glDrawArrays(GL_LINE_STRIP, vertices, _nSegments + 1);
-        vertices = vertices + _nSegments + 1;
-    }
-    glBindVertexArray(0);
-    
-    _programObject->deactivate();
-
-}
-
-void RenderableSmallBody::updateBuffers() {
-    readJplSbDb(_path);
-
-    const size_t nVerticesPerOrbit = _nSegments + 1;
-    _vertexBufferData.resize(_sbData.size() * nVerticesPerOrbit);
-    size_t orbitindex = 0;
-
-    for (const auto& orbit : _sbData) {
-        _keplerTranslator.setKeplerElements(
-            orbit.eccentricity,
-            orbit.semiMajorAxis,
-            orbit.inclination,
-            orbit.ascendingNode,
-            orbit.argumentOfPeriapsis,
-            orbit.meanAnomaly,
-            orbit.period,
-            orbit.epoch
-        );
-
-        for (size_t i=0 ; i < nVerticesPerOrbit; ++i) {
-            size_t index = orbitindex * nVerticesPerOrbit  + i;
-
-            double timeOffset = orbit.period * 
-                    static_cast<double>(i)/ static_cast<double>(_nSegments); 
-            
-            glm::dvec3 position = _keplerTranslator.position({
-                {},
-                Time(timeOffset + orbit.epoch),
-                Time(0.0),
-                false
-            });
-            
-            double positionX = position.x; 
-            double positionY = position.y; 
-            double positionZ = position.z; 
-
-            _vertexBufferData[index].x = static_cast<float>(positionX);
-            _vertexBufferData[index].y = static_cast<float>(positionY);
-            _vertexBufferData[index].z = static_cast<float>(positionZ);
-            _vertexBufferData[index].time = static_cast<float>(timeOffset);
-            _vertexBufferData[index].epoch = orbit.epoch;
-            _vertexBufferData[index].period = orbit.period;
-        }
-      
-        ++orbitindex;
-    }
-
-    glBindVertexArray(_vertexArray);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexBufferData.size() * sizeof(TrailVBOLayout),
-        _vertexBufferData.data(),
-        GL_STATIC_DRAW    
-    );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4*sizeof(GL_FLOAT)) );
-
-    glBindVertexArray(0);
-}
-    
+  
 }
