@@ -33,6 +33,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
@@ -103,8 +104,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
     if (!_isPlaying || _pathSegments.empty()) return;
-
-    //TODO: early out if simulation time is not stopped.
 
     PathSegment currentSegment = _pathSegments[_currentSegmentIndex];
 
@@ -193,6 +192,16 @@ void AutoNavigationHandler::startPath() {
         LERROR("Cannot start an empty path.");
         return;
     }
+
+    // TODO: remove this line at the end of our project. Used to simplify testing
+    global::timeManager.setPause(true);
+
+    //OBS! Until we can handle simulation time: early out if not paused
+    if (!global::timeManager.isPaused()) {
+        LERROR("Simulation time must be paused to run a camera path.");
+        return;
+    }
+
     LINFO("Starting path...");
     _currentTime = 0.0;
     _isPlaying = true;
