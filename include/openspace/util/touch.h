@@ -80,6 +80,7 @@ public:
 private:
     //A deque of recorded inputs. Adding newer points to the front of the queue
     std::deque<TouchInput> _inputs;
+    TouchInput _firstInput;
 
     size_t _touchDeviceId;
     size_t _fingerId;

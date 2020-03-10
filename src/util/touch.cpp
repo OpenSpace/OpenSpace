@@ -73,6 +73,7 @@ float TouchInput::angleToPos(float otherX, float otherY) const {
 
 TouchInputHolder::TouchInputHolder(TouchInput input)
     : _inputs{ input }
+    , _firstInput(input)
     , _touchDeviceId(input.touchDeviceId)
     , _fingerId(input.fingerId)
 {}
@@ -182,7 +183,7 @@ size_t TouchInputHolder::numInputs() const {
 }
 
 const TouchInput& TouchInputHolder::firstInput() const {
-    return _inputs.back();
+    return _firstInput;
 }
 
 const TouchInput& TouchInputHolder::latestInput() const {
