@@ -41,7 +41,7 @@ namespace {
 namespace openspace::autonavigation {
 
 PathSegment::PathSegment(
-    CameraState start, CameraState end, double startTime, CurveType type)
+    Waypoint start, Waypoint end, double startTime, CurveType type)
     : _start(start), _end(end), _startTime(startTime), _curveType(type)
 {
     initCurve();
@@ -54,7 +54,7 @@ PathSegment::PathSegment(
     _speedFunction = SpeedFunction(_duration);
 }
 
-void PathSegment::setStart(CameraState cs) {
+void PathSegment::setStart(Waypoint cs) {
     _start = std::move(cs);
     initCurve();
     // TODO later: maybe recompute duration as well...
@@ -65,9 +65,9 @@ void PathSegment::setDuration(double d) {
     _speedFunction = SpeedFunction(_duration);
 }
 
-const CameraState PathSegment::start() const { return _start; }
+const Waypoint PathSegment::start() const { return _start; }
 
-const CameraState PathSegment::end() const { return _end; }
+const Waypoint PathSegment::end() const { return _end; }
 
 const double PathSegment::duration() const { return _duration; }
 
@@ -94,12 +94,15 @@ double PathSegment::speedAtTime(double time) {
     return (pathLength() * _speedFunction.value(t)) / _speedFunction.integratedSum;
 }
 
-CameraState PathSegment::interpolate(double u) const {
-    CameraState cs;
+CameraPose PathSegment::interpolate(double u) const {
+    CameraPose cs;
     cs.position = _curve->positionAt(u);
     cs.rotation = _curve->rotationAt(u);
-    cs.referenceNode = (u > 0.5) ? _end.referenceNode : _start.referenceNode;
     return cs;
+}
+
+std::string PathSegment::getCurrentAnchor(double u) const {
+    return (u > 0.5) ? _end.node : _start.node;
 }
 
 // Initialise the curve, based on the start, end state and curve type

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___CAMERASTATE___H__
-#define __OPENSPACE_MODULE___CAMERASTATE___H__
+#ifndef __OPENSPACE_MODULE___WAYPOINT___H__
+#define __OPENSPACE_MODULE___WAYPOINT___H__
 
 #include <openspace/interaction/navigationhandler.h>
 #include <ghoul/glm.h>
@@ -31,17 +31,27 @@
 
 namespace openspace::autonavigation {
 
-struct CameraState {
-    using NavigationState = interaction::NavigationHandler::NavigationState;
-    CameraState() = default;
-    CameraState(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
-    CameraState(const NavigationState& ns);
-
+struct CameraPose {
     glm::dvec3 position;
     glm::dquat rotation;
-    std::string referenceNode; // OBS! A bit unclear name, since position and rotation is in world coords
+};
+
+struct WayPoint {
+    using NavigationState = interaction::NavigationHandler::NavigationState;
+
+    // TODO: create waypoints from a dictionary
+
+    WayPoint() = default;
+    WayPoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
+    WayPoint(const NavigationState& ns);
+
+    glm::dvec3 position() const;
+    glm::dquat rotation() const;
+
+    CameraPose pose;
+    std::string node; 
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___CAMERASTATE___H__
+#endif // __OPENSPACE_MODULE___WAYPOINT___H__

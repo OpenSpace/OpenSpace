@@ -81,27 +81,25 @@ Camera* AutoNavigationHandler::camera() const {
 }
 
 double AutoNavigationHandler::pathDuration() const {
-    double sum = 0.0;
-    for (const PathSegment& ps : _pathSegments) {
-        sum += ps.duration();
-    }
-    return sum;
+    if (_pathSegments.empty()) 
+        return 0.0;
+
+    return _pathSegments.back().endTime();
 }
 
 bool AutoNavigationHandler::hasFinished() const {
     return _currentTime > pathDuration();
 }
 
-CameraState AutoNavigationHandler::currentCameraState() {
-    CameraState cs;
-    cs.position = camera()->positionVec3();
-    cs.rotation = camera()->rotationQuaternion();
-    cs.referenceNode = global::navigationHandler.anchorNode()->identifier();
-    return cs;
+Waypoint AutoNavigationHandler::wayPointFromCamera() {
+    glm::dvec3 pos = camera()->positionVec3();
+    glm::dquat rot = camera()->rotationQuaternion();
+    std::string node = global::navigationHandler.anchorNode()->identifier();
+    return Waypoint{pos, rot, node};
 }
 
-CameraState AutoNavigationHandler::lastState() {
-    return _pathSegments.empty() ? currentCameraState() : _pathSegments.back().end();
+Waypoint AutoNavigationHandler::lastWayPoint() {
+    return _pathSegments.empty() ? wayPointFromCamera() : _pathSegments.back().end();
 }
 
 void AutoNavigationHandler::updateCamera(double deltaTime) {
@@ -119,17 +117,18 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     double relativeDisplacement = _distanceAlongCurrentSegment / currentSegment.pathLength();
     relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
 
-    CameraState newState = currentSegment.interpolate(relativeDisplacement);
+    CameraPose newPose = currentSegment.interpolate(relativeDisplacement);
+    std::string newAnchor = currentSegment.getCurrentAnchor(relativeDisplacement);
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
     std::string currentAnchor = global::navigationHandler.anchorNode()->identifier();
-    if (currentAnchor != newState.referenceNode) {
-        global::navigationHandler.orbitalNavigator().setAnchorNode(newState.referenceNode);
+    if (currentAnchor != newAnchor) {
+        global::navigationHandler.orbitalNavigator().setAnchorNode(newAnchor);
     }
 
-    camera()->setPositionVec3(newState.position);
-    camera()->setRotation(newState.rotation);
+    camera()->setPositionVec3(newPose.position);
+    camera()->setRotation(newPose.rotation);
 
     // Have we walked past the current segment?
     if (_currentTime > currentSegment.endTime()) {
@@ -169,9 +168,9 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
     // OBS! Would it be better to save the spec in the handler class? 
     _stopAtTargets = spec.stopAtTargets();
 
-    // Check if we have a specified start state. If so, update the first segment
+    // Check if we have a specified start navigation state. If so, update first segment
     if (spec.hasStartState() && _pathSegments.size() > 0) {
-        CameraState startState{ spec.startState() };
+        Waypoint startState{ spec.startState() };
         _pathSegments[0].setStart(startState);
     }
 
@@ -233,9 +232,8 @@ void AutoNavigationHandler::continuePath() {
 
     LINFO("Continuing path...");
 
-    // Recompute start camera state for the upcoming path segment, to avoid clipping to
-    // the old camera state.
-    _pathSegments[_currentSegmentIndex].setStart(currentCameraState());
+    // Recompute start camera state for the upcoming path segment,
+    _pathSegments[_currentSegmentIndex].setStart(wayPointFromCamera());
     _isPlaying = true;
 }
 
@@ -340,8 +338,10 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& ins) 
             targetNode->worldRotationMatrix() * props->position.value();
     }
     else {
+        // TODO: Instead of this case, allow the curve to set its final position
+
         glm::dvec3 nodePos = targetNode->worldPosition();
-        glm::dvec3 nodeToPrev= lastState().position - nodePos;
+        glm::dvec3 nodeToPrev= lastWayPoint().position() - nodePos;
         // TODO: compute position in a more clever way
 
         const double radius = findValidBoundingSphere(targetNode);
@@ -362,7 +362,7 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& ins) 
 
     glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 
-    CameraState endState{ targetPos, targetRot, identifier };
+    Waypoint endState{ targetPos, targetRot, identifier };
 
     addSegment(endState, ins.props->duration);
     return true;
@@ -378,7 +378,7 @@ bool AutoNavigationHandler::handleNavigationStateInstruction(const Instruction& 
         return false;
     }
 
-    CameraState endState{ props->navState };
+    Waypoint endState{ props->navState };
 
     addSegment(endState, ins.props->duration);
     return true;
@@ -401,27 +401,27 @@ bool AutoNavigationHandler::handlePauseInstruction(const Instruction& ins) {
 }
 
 void AutoNavigationHandler::addPause(std::optional<double> duration) {
-    CameraState current = currentCameraState();
-    CameraState state =_pathSegments.empty() ? current : _pathSegments.back().end();
+    double startTime = pathDuration();
+    Waypoint waypoint = lastWayPoint();
+    PathSegment newSegment{ waypoint, waypoint, startTime, CurveType::Pause };
 
-    // TODO: implement more complex pause behaviour
+    // TODO: implement more complex behavior later
 
-    addSegment(state, duration);
+    // TODO: handle duration better
+    if (duration.has_value()) {
+        newSegment.setDuration(duration.value());
+    }
+    _pathSegments.push_back(newSegment);
 }
 
-void AutoNavigationHandler::addSegment(CameraState& state, std::optional<double> duration) 
+void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double> duration) 
 {
-    // compute startTime 
-    double startTime = 0.0;
-    if (!_pathSegments.empty()) {
-        PathSegment& last = _pathSegments.back();
-        startTime = last.startTime() + last.duration();
-    }
+    double startTime = pathDuration();
 
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    PathSegment newSegment{ lastState(), state, startTime, CurveType(curveType) };
+    PathSegment newSegment{ lastWayPoint(), waypoint, startTime, CurveType(curveType) };
 
     // TODO: handle duration better
     if (duration.has_value()) {

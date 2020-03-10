@@ -22,77 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
-#define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
+#include <modules/autonavigation/waypoint.h>
 
-#include <modules/autonavigation/pathsegment.h>
-#include <openspace/interaction/interpolator.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/glm.h>
+#include <openspace/query/query.h>
+#include <ghoul/logging/logmanager.h>
 
-namespace openspace {
-    class Camera;
-} // namespace openspace
+namespace {
+    constexpr const char* _loggerCat = "Waypoint";
+} // namespace
 
 namespace openspace::autonavigation {
 
-struct Waypoint;
-struct Instruction;
-class PathSpecification;
+Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
+    : node(ref)
+{
+    pose.position = pos;
+    pose.rotation = rot;
+}
 
-class AutoNavigationHandler : public properties::PropertyOwner {
-public:
-    AutoNavigationHandler();
-    ~AutoNavigationHandler();
+Waypoint::Waypoint(const NavigationState& ns) {
+    // OBS! The following code is exactly the same as used in 
+    // NavigationHandler::applyNavigationState. Should probably be made into a function.
+    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
+    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
 
-    // Accessors
-    Camera* camera() const;
-    double pathDuration() const;
-    bool hasFinished() const;
-    Waypoint wayPointFromCamera();
-    Waypoint lastWayPoint();
+    if (!anchorNode) {
+        LERROR(fmt::format("Could not find node '{}' to target. Returning empty state.", ns.anchor));
+        return;
+    }
 
-    void updateCamera(double deltaTime);
-    void createPath(PathSpecification& spec);
-    void clearPath();
-    void startPath();
-    void pausePath();
-    void continuePath();
-    void stopPath();
+    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
+    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
 
-    // TODO: remove functions for debugging
-    std::vector<glm::dvec3> getCurvePositions(int nPerSegment); //debug
-    std::vector<glm::dvec3> getControlPoints(); //debug
+    pose.position = anchorWorldPosition +
+        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
 
-private:
-    bool handleInstruction(const Instruction& ins, int index);
+    glm::dvec3 up = ns.up.has_value() ?
+        glm::normalize(referenceFrameTransform * ns.up.value()) :
+        glm::dvec3(0.0, 1.0, 0.0);
 
-    bool handleTargetNodeInstruction(const Instruction& ins);
-    bool handleNavigationStateInstruction(const Instruction& ins);
-    bool handlePauseInstruction(const Instruction& ins);
+    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
+    glm::dvec3 neutralView =
+        glm::normalize(anchorWorldPosition - pose.position);
 
-    void addPause(std::optional<double> duration);
-    void addSegment(Waypoint& state, std::optional<double> duration);
+    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
+        glm::dvec3(0.0),
+        neutralView,
+        up
+    )));
 
-    double findValidBoundingSphere(const SceneGraphNode* node);
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
 
-    // this list essentially represents the camera path
-    std::vector<PathSegment> _pathSegments;
+    pose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 
-    bool _isPlaying = false;
-    double _currentTime = 0.0;
-    double _distanceAlongCurrentSegment = 0.0; 
-    unsigned int _currentSegmentIndex = 0;
+    node = ns.referenceFrame;
+}
 
-    bool _stopAtTargets;
+glm::dvec3 Waypoint::position() const { return pose.position; }
 
-    properties::DoubleProperty _minAllowedBoundingSphere;
-    properties::OptionProperty _defaultCurveOption;
-};
+glm::dquat Waypoint::rotation() const { return pose.rotation; }
 
 } // namespace openspace::autonavigation
-
-#endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__

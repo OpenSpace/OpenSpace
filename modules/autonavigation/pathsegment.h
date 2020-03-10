@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
 #define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
-#include <modules/autonavigation/camerastate.h>
+#include <modules/autonavigation/waypoint.h>
 #include <modules/autonavigation/pathcurves.h>
 #include <ghoul/glm.h>
 #include <vector>
@@ -34,16 +34,16 @@ namespace openspace::autonavigation {
 
 class PathSegment {
 public:
-    PathSegment(CameraState start, CameraState end, double startTime, CurveType type);
+    PathSegment(Waypoint start, Waypoint end, double startTime, CurveType type);
     ~PathSegment() = default;
 
     // Mutators
-    void setStart(CameraState cs);
+    void setStart(Waypoint cs);
     void setDuration(double d);
 
     // Accessors
-    const CameraState start() const;
-    const CameraState end() const;
+    const Waypoint start() const;
+    const Waypoint end() const;
     const double duration() const;
     const double startTime() const;
     const double endTime() const;
@@ -53,8 +53,8 @@ public:
 
     double speedAtTime(double time);
 
-    // Interpolate along the curve to get the current camera state
-    CameraState interpolate(double u) const;
+    CameraPose interpolate(double u) const;
+    std::string getCurrentAnchor(double u) const;
 
 private: 
     void initCurve();
@@ -70,8 +70,8 @@ private:
         double integratedSum;
     };
 
-    CameraState _start;
-    CameraState _end;
+    Waypoint _start;
+    Waypoint _end;
     double _startTime; 
     double _duration;
     CurveType _curveType; 

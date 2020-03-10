@@ -22,59 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/camerastate.h>
+#ifndef __OPENSPACE_MODULE___WAYPOINT___H__
+#define __OPENSPACE_MODULE___WAYPOINT___H__
 
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
-#include <ghoul/logging/logmanager.h>
-
-namespace {
-    constexpr const char* _loggerCat = "CameraState";
-} // namespace
+#include <openspace/interaction/navigationhandler.h>
+#include <ghoul/glm.h>
+#include <vector>
 
 namespace openspace::autonavigation {
 
-CameraState::CameraState(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
-    : position(pos), rotation(rot), referenceNode(ref)
-{}
+struct CameraPose {
+    glm::dvec3 position;
+    glm::dquat rotation;
+};
 
-CameraState::CameraState(const NavigationState& ns) {
-    // OBS! The following code is exactly the same as used in 
-    // NavigationHandler::applyNavigationState. Should probably be made into a function.
-    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
-    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
+struct Waypoint {
+    using NavigationState = interaction::NavigationHandler::NavigationState;
 
-    if (!anchorNode) {
-        LERROR(fmt::format("Could not find node '{}' to target. Returning empty state.", ns.anchor));
-        return;
-    }
+    // TODO: create waypoints from a dictionary
 
-    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
-    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
+    Waypoint() = default;
+    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
+    Waypoint(const NavigationState& ns);
 
-    position = anchorWorldPosition +
-        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
+    glm::dvec3 position() const;
+    glm::dquat rotation() const;
 
-    glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(referenceFrameTransform * ns.up.value()) :
-        glm::dvec3(0.0, 1.0, 0.0);
-
-    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
-    glm::dvec3 neutralView =
-        glm::normalize(anchorWorldPosition - position);
-
-    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0),
-        neutralView,
-        up
-    )));
-
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
-
-    rotation = neutralCameraRotation * yawRotation * pitchRotation;
-
-    referenceNode = ns.referenceFrame;
-}
+    CameraPose pose;
+    std::string node; 
+};
 
 } // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE___WAYPOINT___H__

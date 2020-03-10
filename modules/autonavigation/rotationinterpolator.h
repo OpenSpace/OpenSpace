@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 
-#include <modules/autonavigation/camerastate.h>
+#include <modules/autonavigation/waypoint.h>
 
 namespace openspace::autonavigation {
 
@@ -41,14 +41,14 @@ class PathCurve;
 class RotationInterpolator {
 public:
     RotationInterpolator() = default;
-    RotationInterpolator(const CameraState& start, const CameraState& end, 
+    RotationInterpolator(const Waypoint& start, const Waypoint& end, 
         PathCurve* curve, RotationMethod method);
 
     glm::dquat rotationAt(double u);
 
 private:
-    CameraState _start;
-    CameraState _end;
+    Waypoint _start;
+    Waypoint _end;
     PathCurve* _curve = nullptr;
     RotationMethod _method;
 

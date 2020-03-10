@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
 
-#include <modules/autonavigation/camerastate.h>
+#include <modules/autonavigation/waypoint.h>
 #include <modules/autonavigation/rotationinterpolator.h>
 #include <ghoul/glm.h>
 #include <vector>
@@ -60,7 +60,7 @@ protected:
 
 class Bezier3Curve : public PathCurve {
 public:
-    Bezier3Curve(const CameraState& start, const CameraState& end);
+    Bezier3Curve(const Waypoint& start, const Waypoint& end);
     glm::dvec3 positionAt(double u);
 
 private:
@@ -72,7 +72,7 @@ private:
 
 class LinearCurve : public PathCurve {
 public:
-    LinearCurve(const CameraState& start, const CameraState& end);
+    LinearCurve(const Waypoint& start, const Waypoint& end);
     glm::dvec3 positionAt(double u);
 };
 
@@ -80,7 +80,7 @@ public:
 // TODO: handle better in the future. 
 class PauseCurve : public PathCurve {
 public:
-    PauseCurve(const CameraState& state);
+    PauseCurve(const Waypoint& state);
     glm::dvec3 positionAt(double u);
 };
 

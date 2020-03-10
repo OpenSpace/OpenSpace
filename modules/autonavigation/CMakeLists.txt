@@ -27,13 +27,13 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/camerastate.h
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.h
   ${CMAKE_CURRENT_SOURCE_DIR}/instruction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pathspecification.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pathsegment.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurves.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotationinterpolator.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -41,13 +41,13 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule_lua.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/camerastate.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/instruction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathspecification.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathsegment.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurves.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotationinterpolator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

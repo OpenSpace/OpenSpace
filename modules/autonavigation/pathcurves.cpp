@@ -78,17 +78,17 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
     return _points;
 }
 
-Bezier3Curve::Bezier3Curve(const CameraState& start, const CameraState& end) {
+Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
     // default rotation interpolation
     _rotationInterpolator = RotationInterpolator{ start, end, this, PiecewiseSlerp };
 
-    glm::dvec3 startNodePos = sceneGraphNode(start.referenceNode)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(end.referenceNode)->worldPosition();
-    double startNodeRadius = sceneGraphNode(start.referenceNode)->boundingSphere();
-    double endNodeRadius = sceneGraphNode(end.referenceNode)->boundingSphere();
+    glm::dvec3 startNodePos = sceneGraphNode(start.node)->worldPosition();
+    glm::dvec3 endNodePos = sceneGraphNode(end.node)->worldPosition();
+    double startNodeRadius = sceneGraphNode(start.node)->boundingSphere();
+    double endNodeRadius = sceneGraphNode(end.node)->boundingSphere();
 
-    glm::dvec3 startNodeToStartPos = start.position - startNodePos;
-    glm::dvec3 endNodeToEndPos = end.position - endNodePos;
+    glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
+    glm::dvec3 endNodeToEndPos = end.position() - endNodePos;
 
     double startTangentLength = 2.0 * startNodeRadius;
     double endTangentLength = 2.0 * endNodeRadius;
@@ -96,13 +96,13 @@ Bezier3Curve::Bezier3Curve(const CameraState& start, const CameraState& end) {
     glm::dvec3 endTangentDirection = normalize(endNodeToEndPos);
 
     // Start by going outwards
-    _points.push_back(start.position);
-    _points.push_back(start.position + startTangentLength * startTangentDirection);
+    _points.push_back(start.position());
+    _points.push_back(start.position() + startTangentLength * startTangentDirection);
 
-    if (start.referenceNode != end.referenceNode) {
+    if (start.node != end.node) {
 
         glm::dvec3 startNodeToEndNode = endNodePos - startNodePos;
-        glm::dvec3 startToEndDirection = normalize(end.position - start.position);
+        glm::dvec3 startToEndDirection = normalize(end.position() - start.position());
 
         // Assuming we move straigh out to point to a distance proportional to radius, angle is enough to check collision risk
         double cosStartAngle = glm::dot(startTangentDirection, startToEndDirection);
@@ -152,8 +152,8 @@ Bezier3Curve::Bezier3Curve(const CameraState& start, const CameraState& end) {
         }
     }
 
-    _points.push_back(end.position + endTangentLength * endTangentDirection);
-    _points.push_back(end.position);
+    _points.push_back(end.position() + endTangentLength * endTangentDirection);
+    _points.push_back(end.position());
 
     _nrSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
 
@@ -209,10 +209,10 @@ void Bezier3Curve::initParameterIntervals() {
     _parameterIntervals.swap(newIntervals);
 }
 
-LinearCurve::LinearCurve(const CameraState& start, const CameraState& end) {
-    _points.push_back(start.position);
-    _points.push_back(end.position);
-    _length = glm::distance(end.position, start.position);
+LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
+    _points.push_back(start.position());
+    _points.push_back(end.position());
+    _length = glm::distance(end.position(), start.position());
     _rotationInterpolator = RotationInterpolator{ start, end, this, Slerp };
 }
 
@@ -222,10 +222,10 @@ glm::dvec3 LinearCurve::positionAt(double u) {
 }
 
 // TODO: Iprove handling of pauses
-PauseCurve::PauseCurve(const CameraState& state) {
-    _points.push_back(state.position);
+PauseCurve::PauseCurve(const Waypoint& waypoint) {
+    _points.push_back(waypoint.position());
     _length = 1.0; // OBS! Length of a pause curve makes no sense, but it also doesn't matter
-    _rotationInterpolator = RotationInterpolator{ state, state, this, Fixed };
+    _rotationInterpolator = RotationInterpolator{ waypoint, waypoint, this, Fixed };
 }
 
 glm::dvec3 PauseCurve::positionAt(double u) {

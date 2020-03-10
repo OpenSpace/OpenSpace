@@ -36,7 +36,7 @@ namespace {
 namespace openspace::autonavigation {
 
 RotationInterpolator::RotationInterpolator(
-    const CameraState& start, const CameraState& end, PathCurve* curve, RotationMethod method)
+    const Waypoint& start, const Waypoint& end, PathCurve* curve, RotationMethod method)
     : _start(start), _end(end), _method(method)
 {
     _curve = curve;
@@ -52,14 +52,14 @@ glm::dquat RotationInterpolator::rotationAt(double u) {
         return piecewiseSlerp(u);
         break;
     case Fixed:
-        return _start.rotation;
+        return _start.rotation();
         break;
     case LookAt:
         return lookAtInterpolator(u);
         break;
     default:
         LERROR("Non-implemented orientation interpolation method!");
-        return _start.rotation;
+        return _start.rotation();
         break;
     }
 }
@@ -67,7 +67,7 @@ glm::dquat RotationInterpolator::rotationAt(double u) {
 glm::dquat RotationInterpolator::easedSlerp(double u) {
     double uScaled = helpers::shiftAndScale(u, 0.1, 0.9);
     uScaled = ghoul::cubicEaseInOut(uScaled);
-    return glm::slerp(_start.rotation, _end.rotation, uScaled);
+    return glm::slerp(_start.rotation(), _end.rotation(), uScaled);
 }
 
 // Look at start node until tStart, then turn to look at end node from tEnd
@@ -79,11 +79,11 @@ glm::dquat RotationInterpolator::lookAtInterpolator(double u) {
     uNew = ghoul::cubicEaseInOut(uNew);
 
     
-    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
+    glm::dvec3 startNodePos = sceneGraphNode(_start.node)->worldPosition();
+    glm::dvec3 endNodePos = sceneGraphNode(_end.node)->worldPosition();
     glm::dvec3 lookAtPos = interpolation::linear(uNew, startNodePos, endNodePos);
 
-    glm::dvec3 startUpVec = _start.rotation * glm::dvec3(0.0, 1.0, 0.0);
+    glm::dvec3 startUpVec = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
 
     return helpers::getLookAtQuaternion(_curve->positionAt(u), lookAtPos, startUpVec);
 }
@@ -96,11 +96,11 @@ glm::dquat RotationInterpolator::piecewiseSlerp(double u) {
     const double u1 = 0.3;
     const double u2 = 0.8; // TODO: these should probably be based on distance
 
-    glm::dvec3 startNodePos = sceneGraphNode(_start.referenceNode)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(_end.referenceNode)->worldPosition();
+    glm::dvec3 startNodePos = sceneGraphNode(_start.node)->worldPosition();
+    glm::dvec3 endNodePos = sceneGraphNode(_end.node)->worldPosition();
 
-    glm::dvec3 startUpVec = _start.rotation * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 endUpVec = _end.rotation * glm::dvec3(0.0, 1.0, 0.0);
+    glm::dvec3 startUpVec = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+    glm::dvec3 endUpVec = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
 
     glm::dquat lookAtStartQ =
         helpers::getLookAtQuaternion(_curve->positionAt(u1), startNodePos, startUpVec);
@@ -109,10 +109,10 @@ glm::dquat RotationInterpolator::piecewiseSlerp(double u) {
         helpers::getLookAtQuaternion(_curve->positionAt(u2), endNodePos, endUpVec);
 
     std::vector<std::pair<glm::dquat, double>> keyframes{
-        {_start.rotation, 0.0},
+        {_start.rotation(), 0.0},
         {lookAtStartQ, u1},
         {lookAtEndQ, u2},
-        {_end.rotation, 1.0}
+        {_end.rotation(), 1.0}
     };
 
     // Find the current segment and compute interpolation
