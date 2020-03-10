@@ -117,6 +117,11 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PinchZoomFactorInfo = {
+            "PinchZoomFactor", "Scaling distance travelled on pinch",
+            ""  // @TODO Missing documentation
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
         "DirectManipulationRadius",
         "Radius a planet has to have to activate direct-manipulation",
@@ -264,6 +269,7 @@ TouchInteraction::TouchInteraction()
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
     , _touchScreenSize(TouchScreenSizeInfo, 55.0f, 5.5f, 150.0f)
     , _tapZoomFactor(TapZoomFactorInfo, 0.2f, 0.f, 0.5f)
+    , _pinchZoomFactor(PinchZoomFactorInfo, 0.01f, 0.f, 0.2f)
     , _nodeRadiusThreshold(DirectManipulationInfo, 0.2f, 0.0f, 1.0f)
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
@@ -322,6 +328,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_deceleratesPerSecond);
     addProperty(_touchScreenSize);
     addProperty(_tapZoomFactor);
+    addProperty(_pinchZoomFactor);
     addProperty(_nodeRadiusThreshold);
     addProperty(_rollAngleThreshold);
     addProperty(_orbitSpeedThreshold);
@@ -828,12 +835,11 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 #endif
 
     const TouchInputHolder& inputHolder = list.at(0);
+    const glm::ivec2 windowSize = global::windowDelegate.currentWindowSize();
+    const float aspectRatio =
+        static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
     switch (action) {
         case ROT: { // add rotation velocity
-            const auto inputs = inputHolder.peekInputs();
-            if(inputs.size() > 1 ){
-                const float dt = inputs[0].timestamp - inputs[1].timestamp;
-            }
             _vel.orbit += glm::dvec2(inputHolder.speedX() *
                           _sensitivity.orbit.x, inputHolder.speedY() *
                           _sensitivity.orbit.y);
@@ -845,28 +851,30 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
         }
         case PINCH: {
              // add zooming velocity - dependant on distance difference between contact
-             // points this/last frame
+             // points this/first frame
             const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
             const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
             double distToCentroidStart = 
-                glm::length(glm::dvec2(startFinger0.x, startFinger0.y) - 
-                            glm::dvec2(startFinger1.x, startFinger1.y)) / 2.0;
+                glm::length(glm::dvec2(startFinger0.x * aspectRatio, startFinger0.y) - 
+                        glm::dvec2(startFinger1.x * aspectRatio, startFinger1.y)) / 2.0;
 
             const TouchInput& endFinger0 = _pinchInputs[0].latestInput();
             const TouchInput& endFinger1 = _pinchInputs[1].latestInput();
             double distToCentroidEnd = 
-                glm::length(glm::dvec2(endFinger0.x, endFinger0.y) - 
-                            glm::dvec2(endFinger1.x, endFinger1.y)) / 2.0;
+                glm::length(glm::dvec2(endFinger0.x * aspectRatio, endFinger0.y) - 
+                        glm::dvec2(endFinger1.x * aspectRatio, endFinger1.y)) / 2.0;
 
-            double zoomFactor = 0.01*(distToCentroidEnd - distToCentroidStart);
+            double zoomFactor = distToCentroidEnd - distToCentroidStart;
 #ifdef TOUCH_DEBUG_PROPERTIES
             pinchConsecCt++;
             pinchConsecZoomFactor += zoomFactor;
 #endif
 
             _constTimeDecayCoeff.zoom = 1.0;
-            _vel.zoom = zoomFactor * _zoomSensitivityProportionalDist *
-                         std::max(_touchScreenSize.value() * 0.1, 1.0);
+            _vel.zoom = zoomFactor * 
+                _pinchZoomFactor * 
+                _zoomSensitivityProportionalDist * 
+                std::max(_touchScreenSize.value() * 0.1, 1.0);
             break;
         }
         case ROLL: {
@@ -1256,6 +1264,7 @@ void TouchInteraction::resetToDefault() {
     _deceleratesPerSecond.set(240);
     _touchScreenSize.set(55.0f);
     _tapZoomFactor.set(0.2f);
+    _pinchZoomFactor.set(0.01f);
     _nodeRadiusThreshold.set(0.2f);
     _rollAngleThreshold.set(0.025f);
     _orbitSpeedThreshold.set(0.005f);
