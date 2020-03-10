@@ -31,7 +31,7 @@ namespace openspace::autonavigation {
 
 class AvoidCollisionCurve : public PathCurve {
 public:
-    AvoidCollisionCurve(const CameraState& start, const CameraState& end);
+    AvoidCollisionCurve(const Waypoint& start, const Waypoint& end);
     glm::dvec3 positionAt(double u);
 
 private:

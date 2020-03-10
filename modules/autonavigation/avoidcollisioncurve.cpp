@@ -49,12 +49,12 @@ namespace {
 
 namespace openspace::autonavigation {
 
-AvoidCollisionCurve::AvoidCollisionCurve(const CameraState& start, const CameraState& end) {
+AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
     // default rotation interpolation
     _rotationInterpolator = RotationInterpolator{ start, end, this, Slerp };
 
-    _points.push_back(start.position);
-    _points.push_back(end.position);
+    _points.push_back(start.position());
+    _points.push_back(end.position());
 
     std::vector<SceneGraphNode*> relevantNodes = findRelevantNodes();
 
