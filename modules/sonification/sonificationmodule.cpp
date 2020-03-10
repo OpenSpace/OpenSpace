@@ -102,10 +102,7 @@ SonificationModule::SonificationModule()
 }
 
 SonificationModule::~SonificationModule() {
-    delete[] _buffer;
-    _isRunning = false;
-    if (_thread.joinable())
-        _thread.join();
+
 }
 
 //Extract the data from the given identifier
@@ -218,15 +215,16 @@ void SonificationModule::extractData(const std::string& identifier, int i,
 
 void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
     
-    Scene* scene;
-    Camera* camera;
+    Scene* scene = nullptr;
+    Camera* camera = nullptr;
     glm::dvec3 cameraDirection, cameraPosition, cameraUpVector;
-    const SceneGraphNode* focusNode, *previousFocusNode;
+    const SceneGraphNode* focusNode = nullptr;
+    const SceneGraphNode *previousFocusNode = nullptr;
 
     while (isRunning) {
 
         scene = global::renderEngine.scene();
-        if (scene && !scene->isInitializing()) {
+        if (scene && scene->root()->children().size() > 0) {
            
             camera = scene->camera();
             
@@ -239,8 +237,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                 if (cameraPosition != glm::dvec3(1.0, 1.0, 1.0)) {
                     
                     //Which node is in focus?
-                    focusNode = global::navigationHandler.orbitalNavigator()
-                        .anchorNode();
+                    focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
                     if (!focusNode) continue;
                     
                     //Check if focus has changed
@@ -294,6 +291,13 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 {
     //start a thread to extract data to the sonification
     _thread = std::thread([this]() { threadMain(std::ref(_isRunning)); });
+}
+
+void SonificationModule::internalDeinitialize() {
+    delete[] _buffer;
+    _isRunning = false;
+    if (_thread.joinable())
+        _thread.join();
 }
 
 } // namespace openspace

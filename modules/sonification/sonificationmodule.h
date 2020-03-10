@@ -56,6 +56,7 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalDeinitialize() override;
 
 private:
     //Main function for _thread
