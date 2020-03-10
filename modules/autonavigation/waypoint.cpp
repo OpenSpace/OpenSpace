@@ -35,7 +35,7 @@ namespace {
 namespace openspace::autonavigation {
 
 WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier, 
-    const double minBoundingSphere) 
+                                         const double minBoundingSphere) 
 {
     const SceneGraphNode* node = sceneGraphNode(nodeIdentifier); 
     if (!node) {
@@ -48,7 +48,7 @@ WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier,
 }
 
 double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node,
-    const double minBoundingSphere) 
+                                                    const double minBoundingSphere) 
 {
     double bs = static_cast<double>(node->boundingSphere());
 
@@ -81,7 +81,7 @@ double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node,
 }
 
 Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref, 
-                                                         const double minBoundingSphere)
+                   const double minBoundingSphere)
     : nodeDetails(ref, minBoundingSphere)
 {
     pose.position = pos;
