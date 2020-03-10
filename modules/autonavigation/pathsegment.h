@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
 #define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
-#include <modules/autonavigation/waypoint.h>
 #include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/waypoint.h>
 #include <ghoul/glm.h>
 #include <vector>
 
