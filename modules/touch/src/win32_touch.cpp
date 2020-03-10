@@ -46,6 +46,11 @@ namespace {
     HHOOK gMouseHook = nullptr;
     bool gStarted = false;
     std::chrono::microseconds gStartTime = std::chrono::microseconds(0);
+    const long long gFrequency = []() -> long long {
+      LARGE_INTEGER frequency;
+      QueryPerformanceFrequency(&frequency);
+      return frequency.QuadPart;
+    }();
     std::unordered_map<
         UINT32,
         std::unique_ptr<openspace::TouchInputHolder>
@@ -80,9 +85,9 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             }
 
             using namespace std::chrono;
-            const microseconds timestamp = duration_cast<microseconds>(
-                high_resolution_clock::now().time_since_epoch()
-            ) - gStartTime;
+            const microseconds timestamp = duration<UINT64, std::micro>(
+                info.PerformanceCount * std::micro::den / gFrequency) - gStartTime;
+
             RECT rect;
             GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
 
@@ -100,7 +105,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 static_cast<size_t>(info.pointerId),
                 xPos,
                 yPos,
-                static_cast<double>(timestamp.count())/1'000'000.0
+                static_cast<double>(timestamp.count()) / 1'000'000.0
             );
 
             if (info.pointerFlags & POINTER_FLAG_DOWN) {
@@ -213,8 +218,10 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
 
     if (!gStarted) {
         gStarted = true;
-        gStartTime = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
+        LARGE_INTEGER count;
+        QueryPerformanceCounter(&count);
+        gStartTime = std::chrono::duration<UINT64, std::micro>(
+            count.QuadPart * std::micro::den / gFrequency
         );
 #ifdef ENABLE_TUIOMESSAGES
         gTuioServer = new TUIO::TuioServer("localhost", 3333);
