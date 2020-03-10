@@ -118,8 +118,10 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo PinchZoomFactorInfo = {
-            "PinchZoomFactor", "Scaling distance travelled on pinch",
-            ""  // @TODO Missing documentation
+            "PinchZoomFactor",
+            "Scaling distance travelled on pinch",
+            "This value is used to reduce the amount of pinching needed. A linear"
+            "kind of sensitivity that will alter the pinch-zoom speed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
@@ -1106,7 +1108,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
             //Apply the velocity to update camera position
             double zoomVelocity = _vel.zoom;
-            if(!directTouch) {
+            if (!directTouch) {
                 const double distanceFromSurface =
                     length(currentPosDistance) - anchor->boundingSphere();
                 if (distanceFromSurface > 0.1) {
