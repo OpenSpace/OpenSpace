@@ -852,17 +852,18 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
         case PINCH: {
              // add zooming velocity - dependant on distance difference between contact
              // points this/first frame
+            using namespace glm;
             const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
             const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
-            double distToCentroidStart = 
-                glm::length(glm::dvec2(startFinger0.x * aspectRatio, startFinger0.y) - 
-                        glm::dvec2(startFinger1.x * aspectRatio, startFinger1.y)) / 2.0;
+            const dvec2 startVec0 = dvec2(startFinger0.x * aspectRatio, startFinger0.y);
+            const dvec2 startVec1 = dvec2(startFinger1.x * aspectRatio, startFinger1.y);
+            double distToCentroidStart = length(startVec0 - startVec1) / 2.0;
 
             const TouchInput& endFinger0 = _pinchInputs[0].latestInput();
             const TouchInput& endFinger1 = _pinchInputs[1].latestInput();
-            double distToCentroidEnd = 
-                glm::length(glm::dvec2(endFinger0.x * aspectRatio, endFinger0.y) - 
-                        glm::dvec2(endFinger1.x * aspectRatio, endFinger1.y)) / 2.0;
+            const dvec2 endVec0 = dvec2(endFinger0.x * aspectRatio, endFinger0.y);
+            const dvec2 endVec1 = dvec2(endFinger1.x * aspectRatio, endFinger1.y);
+            double distToCentroidEnd = length(endVec0 - endVec1) / 2.0;
 
             double zoomFactor = distToCentroidEnd - distToCentroidStart;
 #ifdef TOUCH_DEBUG_PROPERTIES
