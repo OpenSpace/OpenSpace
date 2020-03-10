@@ -46,7 +46,7 @@ struct TouchInput {
     float y;
     float dx = 0.f;         // movement in x direction since last touch input
     float dy = 0.f;         // movement in y direction since last touch input
-    double timestamp; // timestamp in seconds from global touch initialization
+    double timestamp;       // timestamp in seconds from global touch initialization
 };
 
 class TouchInputHolder {
@@ -56,6 +56,7 @@ public:
     // tryAddInput:
     // Succeeds upon a different input than last.
     // Fails upon a too similar input as last.
+    // Updates time for the last input if same position.
     bool tryAddInput(TouchInput input);
     void clearInputs();
 
@@ -72,6 +73,7 @@ public:
     double gestureTime() const;
 
     size_t numInputs() const;
+    const TouchInput& firstInput() const;
     const TouchInput& latestInput() const;
     const std::deque<TouchInput>& peekInputs() const;
 
