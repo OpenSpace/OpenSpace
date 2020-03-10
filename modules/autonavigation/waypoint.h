@@ -36,20 +36,34 @@ struct CameraPose {
     glm::dquat rotation;
 };
 
+// The waypoint node is the anchor or target node. 
+struct WaypointNodeDetails {
+    WaypointNodeDetails() = default;
+    WaypointNodeDetails(const std::string nodeIdentifier, const double minBoundingSphere);
+
+    static double findValidBoundingSphere(const SceneGraphNode* node,
+        const double minBoundingSphere);
+
+    std::string identifier;
+    double validBoundingSphere; // to be able to handle nodes with faulty bounding spheres
+};
+
 struct Waypoint {
     using NavigationState = interaction::NavigationHandler::NavigationState;
 
     // TODO: create waypoints from a dictionary
 
     Waypoint() = default;
-    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
-    Waypoint(const NavigationState& ns);
+    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref, 
+        const double minBoundingSphere);
+    Waypoint(const NavigationState& ns, const double minBoundingSphere);
 
     glm::dvec3 position() const;
     glm::dquat rotation() const;
+    SceneGraphNode* node() const; 
 
     CameraPose pose;
-    std::string node; 
+    WaypointNodeDetails nodeDetails;
 };
 
 } // namespace openspace::autonavigation

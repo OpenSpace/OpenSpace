@@ -28,8 +28,6 @@
 #include <modules/autonavigation/pathcurves.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/query/query.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/easing.h>
@@ -102,7 +100,7 @@ CameraPose PathSegment::interpolate(double u) const {
 }
 
 std::string PathSegment::getCurrentAnchor(double u) const {
-    return (u > 0.5) ? _end.node : _start.node;
+    return (u > 0.5) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
 }
 
 // Initialise the curve, based on the start, end state and curve type

@@ -91,17 +91,6 @@ bool AutoNavigationHandler::hasFinished() const {
     return _currentTime > pathDuration();
 }
 
-Waypoint AutoNavigationHandler::wayPointFromCamera() {
-    glm::dvec3 pos = camera()->positionVec3();
-    glm::dquat rot = camera()->rotationQuaternion();
-    std::string node = global::navigationHandler.anchorNode()->identifier();
-    return Waypoint{pos, rot, node};
-}
-
-Waypoint AutoNavigationHandler::lastWayPoint() {
-    return _pathSegments.empty() ? wayPointFromCamera() : _pathSegments.back().end();
-}
-
 void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
@@ -170,7 +159,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 
     // Check if we have a specified start navigation state. If so, update first segment
     if (spec.hasStartState() && _pathSegments.size() > 0) {
-        Waypoint startState{ spec.startState() };
+        Waypoint startState{ spec.startState() , _minAllowedBoundingSphere};
         _pathSegments[0].setStart(startState);
     }
 
@@ -281,6 +270,17 @@ std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
     return points;
 }
 
+Waypoint AutoNavigationHandler::wayPointFromCamera() {
+    glm::dvec3 pos = camera()->positionVec3();
+    glm::dquat rot = camera()->rotationQuaternion();
+    std::string node = global::navigationHandler.anchorNode()->identifier();
+    return Waypoint{ pos, rot, node, _minAllowedBoundingSphere };
+}
+
+Waypoint AutoNavigationHandler::lastWayPoint() {
+    return _pathSegments.empty() ? wayPointFromCamera() : _pathSegments.back().end();
+}
+
 bool AutoNavigationHandler::handleInstruction(const Instruction& ins, int index) {
     bool success = true;
     switch (ins.type)
@@ -341,10 +341,10 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& ins) 
         // TODO: Instead of this case, allow the curve to set its final position
 
         glm::dvec3 nodePos = targetNode->worldPosition();
-        glm::dvec3 nodeToPrev= lastWayPoint().position() - nodePos;
+        glm::dvec3 nodeToPrev = lastWayPoint().position() - nodePos;
         // TODO: compute position in a more clever way
 
-        const double radius = findValidBoundingSphere(targetNode);
+        const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode, _minAllowedBoundingSphere);
         const double defaultHeight = 2 * radius;
 
         bool hasHeight = props->height.has_value();
@@ -362,7 +362,7 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& ins) 
 
     glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 
-    Waypoint endState{ targetPos, targetRot, identifier };
+    Waypoint endState{ targetPos, targetRot, identifier, _minAllowedBoundingSphere };
 
     addSegment(endState, ins.props->duration);
     return true;
@@ -378,7 +378,7 @@ bool AutoNavigationHandler::handleNavigationStateInstruction(const Instruction& 
         return false;
     }
 
-    Waypoint endState{ props->navState };
+    Waypoint endState{ props->navState , _minAllowedBoundingSphere };
 
     addSegment(endState, ins.props->duration);
     return true;
@@ -414,8 +414,7 @@ void AutoNavigationHandler::addPause(std::optional<double> duration) {
     _pathSegments.push_back(newSegment);
 }
 
-void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double> duration) 
-{
+void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double> duration) {
     double startTime = pathDuration();
 
     // TODO: Improve how curve types are handled
@@ -428,37 +427,6 @@ void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double>
         newSegment.setDuration(duration.value());
     }
     _pathSegments.push_back(newSegment);
-}
-
-double AutoNavigationHandler::findValidBoundingSphere(const SceneGraphNode* node) {
-    double bs = static_cast<double>(node->boundingSphere());
-
-    if (bs < _minAllowedBoundingSphere) {
-
-        // If the bs of the target is too small, try to find a good value in a child node.
-        // Only check the closest children, to avoid deep traversal in the scene graph. Also,
-        // the possibility to find a bounding sphere represents the visual size of the 
-        // target well is higher for these nodes.
-        for (SceneGraphNode* child : node->children()) {
-            bs = static_cast<double>(child->boundingSphere());
-            if (bs > _minAllowedBoundingSphere) {
-                LWARNING(fmt::format(
-                    "The scene graph node '{}' has no, or a very small, bounding sphere. Using bounding sphere of child node '{}' in computations.",
-                    node->identifier(), 
-                    child->identifier()
-                ));
-
-                return bs;
-            }
-        }
-
-        LWARNING(fmt::format("The scene graph node '{}' has no, or a very small,"
-            "bounding sphere. This might lead to unexpected results.", node->identifier()));
-
-        bs = _minAllowedBoundingSphere;
-    }
-
-    return bs;
 }
 
 } // namespace openspace::autonavigation

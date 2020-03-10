@@ -52,8 +52,6 @@ public:
     Camera* camera() const;
     double pathDuration() const;
     bool hasFinished() const;
-    Waypoint wayPointFromCamera();
-    Waypoint lastWayPoint();
 
     void updateCamera(double deltaTime);
     void createPath(PathSpecification& spec);
@@ -68,6 +66,9 @@ public:
     std::vector<glm::dvec3> getControlPoints(); //debug
 
 private:
+    Waypoint wayPointFromCamera();
+    Waypoint lastWayPoint();
+
     bool handleInstruction(const Instruction& ins, int index);
 
     bool handleTargetNodeInstruction(const Instruction& ins);
@@ -76,8 +77,6 @@ private:
 
     void addPause(std::optional<double> duration);
     void addSegment(Waypoint& state, std::optional<double> duration);
-
-    double findValidBoundingSphere(const SceneGraphNode* node);
 
     // this list essentially represents the camera path
     std::vector<PathSegment> _pathSegments;

@@ -82,10 +82,10 @@ Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
     // default rotation interpolation
     _rotationInterpolator = RotationInterpolator{ start, end, this, PiecewiseSlerp };
 
-    glm::dvec3 startNodePos = sceneGraphNode(start.node)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(end.node)->worldPosition();
-    double startNodeRadius = sceneGraphNode(start.node)->boundingSphere();
-    double endNodeRadius = sceneGraphNode(end.node)->boundingSphere();
+    glm::dvec3 startNodePos = start.node()->worldPosition();
+    glm::dvec3 endNodePos = end.node()->worldPosition();
+    double startNodeRadius = start.nodeDetails.validBoundingSphere;
+    double endNodeRadius = end.nodeDetails.validBoundingSphere;
 
     glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
     glm::dvec3 endNodeToEndPos = end.position() - endNodePos;
@@ -99,7 +99,10 @@ Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
     _points.push_back(start.position());
     _points.push_back(start.position() + startTangentLength * startTangentDirection);
 
-    if (start.node != end.node) {
+    const std::string& startNode = start.nodeDetails.identifier;
+    const std::string& endNode = end.nodeDetails.identifier;
+
+    if (startNode != endNode) {
 
         glm::dvec3 startNodeToEndNode = endNodePos - startNodePos;
         glm::dvec3 startToEndDirection = normalize(end.position() - start.position());

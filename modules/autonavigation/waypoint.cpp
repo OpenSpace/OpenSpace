@@ -34,21 +34,71 @@ namespace {
 
 namespace openspace::autonavigation {
 
-Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
-    : node(ref)
+WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier, 
+    const double minBoundingSphere) 
+{
+    const SceneGraphNode* node = sceneGraphNode(nodeIdentifier); 
+    if (!node) {
+        LERROR(fmt::format("Could not find node '{}'.", nodeIdentifier));
+        return;
+    }
+
+    identifier = nodeIdentifier;
+    validBoundingSphere = findValidBoundingSphere(node, minBoundingSphere);
+
+    // TEST:
+    LINFO(fmt::format("Created waypoint node '{}' with boudning sphere: {}", nodeIdentifier, validBoundingSphere));
+}
+
+double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node,
+    const double minBoundingSphere) 
+{
+    double bs = static_cast<double>(node->boundingSphere());
+
+    if (bs < minBoundingSphere) {
+
+        // If the bs of the target is too small, try to find a good value in a child node.
+        // Only check the closest children, to avoid deep traversal in the scene graph. Also,
+        // the possibility to find a bounding sphere represents the visual size of the 
+        // target well is higher for these nodes.
+        for (SceneGraphNode* child : node->children()) {
+            bs = static_cast<double>(child->boundingSphere());
+            if (bs > minBoundingSphere) {
+                LWARNING(fmt::format(
+                    "The scene graph node '{}' has no, or a very small, bounding sphere. Using bounding sphere of child node '{}' in computations.",
+                    node->identifier(), 
+                    child->identifier()
+                ));
+
+                return bs;
+            }
+        }
+
+        LWARNING(fmt::format("The scene graph node '{}' has no, or a very small,"
+            "bounding sphere. This might lead to unexpected results.", node->identifier()));
+
+        bs = minBoundingSphere;
+    }
+
+    return bs;
+}
+
+Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref, 
+                                                         const double minBoundingSphere)
+    : nodeDetails(ref, minBoundingSphere)
 {
     pose.position = pos;
     pose.rotation = rot;
 }
 
-Waypoint::Waypoint(const NavigationState& ns) {
+Waypoint::Waypoint(const NavigationState& ns, const double minBoundingSphere) {
     // OBS! The following code is exactly the same as used in 
     // NavigationHandler::applyNavigationState. Should probably be made into a function.
     const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
     const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
 
     if (!anchorNode) {
-        LERROR(fmt::format("Could not find node '{}' to target. Returning empty state.", ns.anchor));
+        LERROR(fmt::format("Could not find node '{}' to target.", ns.anchor));
         return;
     }
 
@@ -77,11 +127,15 @@ Waypoint::Waypoint(const NavigationState& ns) {
 
     pose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 
-    node = ns.referenceFrame;
+    nodeDetails = WaypointNodeDetails{ ns.referenceFrame, minBoundingSphere };
 }
 
 glm::dvec3 Waypoint::position() const { return pose.position; }
 
 glm::dquat Waypoint::rotation() const { return pose.rotation; }
+
+SceneGraphNode* Waypoint::node() const { 
+    return sceneGraphNode(nodeDetails.identifier);
+}
 
 } // namespace openspace::autonavigation

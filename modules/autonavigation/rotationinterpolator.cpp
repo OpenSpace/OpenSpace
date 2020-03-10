@@ -78,9 +78,8 @@ glm::dquat RotationInterpolator::lookAtInterpolator(double u) {
     double uNew = helpers::shiftAndScale(u, tStart, tEnd);
     uNew = ghoul::cubicEaseInOut(uNew);
 
-    
-    glm::dvec3 startNodePos = sceneGraphNode(_start.node)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(_end.node)->worldPosition();
+    glm::dvec3 startNodePos = _start.node()->worldPosition();
+    glm::dvec3 endNodePos = _end.node()->worldPosition();
     glm::dvec3 lookAtPos = interpolation::linear(uNew, startNodePos, endNodePos);
 
     glm::dvec3 startUpVec = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
@@ -96,8 +95,8 @@ glm::dquat RotationInterpolator::piecewiseSlerp(double u) {
     const double u1 = 0.3;
     const double u2 = 0.8; // TODO: these should probably be based on distance
 
-    glm::dvec3 startNodePos = sceneGraphNode(_start.node)->worldPosition();
-    glm::dvec3 endNodePos = sceneGraphNode(_end.node)->worldPosition();
+    glm::dvec3 startNodePos = _start.node()->worldPosition();
+    glm::dvec3 endNodePos = _end.node()->worldPosition();
 
     glm::dvec3 startUpVec = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
     glm::dvec3 endUpVec = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
