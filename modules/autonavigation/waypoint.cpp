@@ -45,9 +45,6 @@ WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier,
 
     identifier = nodeIdentifier;
     validBoundingSphere = findValidBoundingSphere(node, minBoundingSphere);
-
-    // TEST:
-    LINFO(fmt::format("Created waypoint node '{}' with boudning sphere: {}", nodeIdentifier, validBoundingSphere));
 }
 
 double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node,
