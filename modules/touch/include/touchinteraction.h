@@ -167,6 +167,7 @@ private:
     properties::IntProperty _deceleratesPerSecond;
     properties::FloatProperty _touchScreenSize;
     properties::FloatProperty _tapZoomFactor;
+    properties::FloatProperty _pinchZoomFactor;
     properties::FloatProperty _nodeRadiusThreshold;
     properties::FloatProperty _rollAngleThreshold;
     properties::FloatProperty _orbitSpeedThreshold;
