@@ -221,7 +221,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     global::callback::touchUpdated.push_back(
         [this](TouchInput i) {
             updateOrAddTouchInput(i);
-        return true;
+            return true;
         }
     );
 
