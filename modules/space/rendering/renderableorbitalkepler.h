@@ -37,16 +37,6 @@
 
 namespace openspace {
 
-const std::vector<int> LeapYears = {
-    1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
-    2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
-    2044, 2048, 2052, 2056
-};
-int countDays(int year);
-int countLeapSeconds(int year, int dayOfYear);
-double calculateSemiMajorAxis(double meanMotion);
-double epochFromSubstring(const std::string& epochString);
-
 class RenderableOrbitalKepler : public Renderable {
 public:
     RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
@@ -72,13 +62,35 @@ public:
         */
     virtual void readDataFile(const std::string& filename) = 0;
 
-private:
-    struct Vertex {
-        glm::vec3 position = glm::vec3(0.f);
-        glm::vec3 color = glm::vec3(0.f);
-        glm::vec2 texcoord = glm::vec2(0.f);
+protected:
+    int countDays(int year);
+    int countLeapSeconds(int year, int dayOfYear);
+    double calculateSemiMajorAxis(double meanMotion);
+    double epochFromSubstring(const std::string& epochString);
+    double epochFromYMDdSubstring(const std::string& epochString);
+    int daysIntoGivenYear(int month, int dayOfMonth);
+    const std::vector<int> LeapYears = {
+        1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
+        2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
+        2044, 2048, 2052, 2056
     };
-
+    const std::vector<int> DaysOfMonths = {
+    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
+    enum Months {
+        January = 0,
+        February,
+        March,
+        April,
+        May,
+        June,
+        July,
+        August,
+        September,
+        October,
+        November,
+        December
+    };
     struct KeplerParameters {
         double inclination = 0.0;
         double semiMajorAxis = 0.0;
@@ -89,6 +101,17 @@ private:
         double meanMotion = 0.0;
         double epoch = 0.0;
         double period = 0.0;
+    };
+    const double convertAuToKm = 1.496e8;
+    const double convertDaysToSecs = 86400.;
+    std::vector<KeplerParameters> _data;
+    properties::UIntProperty _upperLimit;
+
+private:
+    struct Vertex {
+        glm::vec3 position = glm::vec3(0.f);
+        glm::vec3 color = glm::vec3(0.f);
+        glm::vec2 texcoord = glm::vec2(0.f);
     };
 
     /// The layout of the VBOs
@@ -102,7 +125,6 @@ private:
     };
 
     KeplerTranslation _keplerTranslator;
-    std::vector<KeplerParameters> _data;
 
     /// The backend storage for the vertex buffer object containing all points for this
     /// trail.
@@ -119,13 +141,9 @@ private:
     void updateBuffers();
 
     ghoul::opengl::ProgramObject* _programObject;
-
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
-    properties::UIntProperty _upperLimit;
-
     RenderableTrail::Appearance _appearance;
-
     glm::vec3 _position = glm::vec3(0.f);
 
     UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,

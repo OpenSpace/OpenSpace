@@ -43,20 +43,18 @@ static double importAngleValue(const std::string& angle);
 class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
     RenderableSmallBody(const ghoul::Dictionary& dictionary);
-    static documentation::Documentation Documentation();
+    //static documentation::Documentation Documentation();
 
 private:
     void readOrbitalParamsFromThisLine(int& fieldCount, std::streamoff& csvLine,
         std::ifstream& file);
+    void readDataFile(const std::string& filename);
 
     std::vector<std::string> _sbNames;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
-
-    const double convertAuToKm = 1.496e8;
-    const double convertDaysToSecs = 86400.;
 };
 
 } // namespace openspace

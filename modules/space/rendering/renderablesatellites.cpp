@@ -56,51 +56,11 @@ namespace {
 }
 
 namespace openspace {
-
-documentation::Documentation RenderableSatellites::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSatellites",
-        "space_renderable_satellites",
-        {
-            {
-                SegmentsInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            }
-        }
-    };
-}
     
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
-    documentation::testSpecificationAndThrow(
-         Documentation(),
-         dictionary,
-         "RenderableSatellites"
-        );
 }
-   
     
 void RenderableSatellites::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {

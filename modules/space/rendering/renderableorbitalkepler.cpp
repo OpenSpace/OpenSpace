@@ -88,189 +88,264 @@ namespace {
 
 namespace openspace {
 
-    // Count the number of full days since the beginning of 2000 to the beginning of
-    // the parameter 'year'
-    int countDays(int year) {
-        // Find the position of the current year in the vector, the difference
-        // between its position and the position of 2000 (for J2000) gives the
-        // number of leap years
-        constexpr const int Epoch = 2000;
-        constexpr const int DaysRegularYear = 365;
-        constexpr const int DaysLeapYear = 366;
+// Count the number of full days since the beginning of 2000 to the beginning of
+// the parameter 'year'
+int RenderableOrbitalKepler::countDays(int year) {
+    // Find the position of the current year in the vector, the difference
+    // between its position and the position of 2000 (for J2000) gives the
+    // number of leap years
+    constexpr const int Epoch = 2000;
+    constexpr const int DaysRegularYear = 365;
+    constexpr const int DaysLeapYear = 366;
 
-        if (year == Epoch) {
-            return 0;
+    if (year == Epoch) {
+        return 0;
+    }
+
+    // Get the position of the most recent leap year
+    const auto lb = std::lower_bound(LeapYears.begin(), LeapYears.end(), year);
+
+    // Get the position of the epoch
+    const auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
+
+    // The distance between the two iterators gives us the number of leap years
+    const int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
+
+    const int nYears = std::abs(year - Epoch);
+    const int nRegularYears = nYears - nLeapYears;
+
+    // Get the total number of days as the sum of leap years + non leap years
+    const int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
+    return result;
+}
+
+// Returns the number of leap seconds that lie between the {year, dayOfYear}
+// time point and { 2000, 1 }
+int RenderableOrbitalKepler::countLeapSeconds(int year, int dayOfYear) {
+    // Find the position of the current year in the vector; its position in
+    // the vector gives the number of leap seconds
+    struct LeapSecond {
+        int year;
+        int dayOfYear;
+        bool operator<(const LeapSecond& rhs) const {
+            return std::tie(year, dayOfYear) < std::tie(rhs.year, rhs.dayOfYear);
         }
+    };
 
-        // Get the position of the most recent leap year
-        const auto lb = std::lower_bound(LeapYears.begin(), LeapYears.end(), year);
+    const LeapSecond Epoch = { 2000, 1 };
 
-        // Get the position of the epoch
-        const auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
+    // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
+    static const std::vector<LeapSecond> LeapSeconds = {
+        { 1972,   1 },
+        { 1972, 183 },
+        { 1973,   1 },
+        { 1974,   1 },
+        { 1975,   1 },
+        { 1976,   1 },
+        { 1977,   1 },
+        { 1978,   1 },
+        { 1979,   1 },
+        { 1980,   1 },
+        { 1981, 182 },
+        { 1982, 182 },
+        { 1983, 182 },
+        { 1985, 182 },
+        { 1988,   1 },
+        { 1990,   1 },
+        { 1991,   1 },
+        { 1992, 183 },
+        { 1993, 182 },
+        { 1994, 182 },
+        { 1996,   1 },
+        { 1997, 182 },
+        { 1999,   1 },
+        { 2006,   1 },
+        { 2009,   1 },
+        { 2012, 183 },
+        { 2015, 182 },
+        { 2017,   1 }
+    };
 
-        // The distance between the two iterators gives us the number of leap years
-        const int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
+    // Get the position of the last leap second before the desired date
+    LeapSecond date { year, dayOfYear };
+    const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
 
-        const int nYears = std::abs(year - Epoch);
-        const int nRegularYears = nYears - nLeapYears;
+    // Get the position of the Epoch
+    const auto y2000 = std::lower_bound(
+        LeapSeconds.begin(),
+        LeapSeconds.end(),
+        Epoch
+    );
 
-        // Get the total number of days as the sum of leap years + non leap years
-        const int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
-        return result;
+    // The distance between the two iterators gives us the number of leap years
+    const int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
+    return nLeapSeconds;
+}
+
+double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) {
+    constexpr const double GravitationalConstant = 6.6740831e-11;
+    constexpr const double MassEarth = 5.9721986e24;
+    constexpr const double muEarth = GravitationalConstant * MassEarth;
+
+    // Use Kepler's 3rd law to calculate semimajor axis
+    // a^3 / P^2 = mu / (2pi)^2
+    // <=> a = ((mu * P^2) / (2pi^2))^(1/3)
+    // with a = semimajor axis
+    // P = period in seconds
+    // mu = G*M_earth
+    double period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
+
+    const double pisq = glm::pi<double>() * glm::pi<double>();
+    double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
+
+    // We need the semi major axis in km instead of m
+    return semiMajorAxis / 1000.0;
+}
+
+double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochString) {
+    // The epochString is in the form:
+    // YYDDD.DDDDDDDD
+    // With YY being the last two years of the launch epoch, the first DDD the day
+    // of the year and the remaning a fractional part of the day
+
+    // The main overview of this function:
+    // 1. Reconstruct the full year from the YY part
+    // 2. Calculate the number of seconds since the beginning of the year
+    // 2.a Get the number of full days since the beginning of the year
+    // 2.b If the year is a leap year, modify the number of days
+    // 3. Convert the number of days to a number of seconds
+    // 4. Get the number of leap seconds since January 1st, 2000 and remove them
+    // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
+    // midnight
+
+    // According to https://celestrak.com/columns/v04n03/
+    // Apparently, US Space Command sees no need to change the two-line element
+    // set format yet since no artificial earth satellites existed prior to 1957.
+    // By their reasoning, two-digit years from 57-99 correspond to 1957-1999 and
+    // those from 00-56 correspond to 2000-2056. We'll see each other again in 057!
+
+    // 1. Get the full year
+    std::string yearPrefix = [y = epochString.substr(0, 2)](){
+        int year = std::atoi(y.c_str());
+        return year >= 57 ? "19" : "20";
+    }();
+    const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
+    const int daysSince2000 = countDays(year);
+
+    // 2.
+    // 2.a
+    double daysInYear = std::atof(epochString.substr(2).c_str());
+
+    // 2.b
+    const bool isInLeapYear = std::find(
+        LeapYears.begin(),
+        LeapYears.end(),
+        year
+    ) != LeapYears.end();
+    if (isInLeapYear && daysInYear >= 60) {
+        // We are in a leap year, so we have an effective day more if we are
+        // beyond the end of february (= 31+29 days)
+        --daysInYear;
     }
 
-    // Returns the number of leap seconds that lie between the {year, dayOfYear}
-    // time point and { 2000, 1 }
-    int countLeapSeconds(int year, int dayOfYear) {
-        // Find the position of the current year in the vector; its position in
-        // the vector gives the number of leap seconds
-        struct LeapSecond {
-            int year;
-            int dayOfYear;
-            bool operator<(const LeapSecond& rhs) const {
-                return std::tie(year, dayOfYear) < std::tie(rhs.year, rhs.dayOfYear);
-            }
-        };
+    // 3
+    using namespace std::chrono;
+    const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
+    //Need to subtract 1 from daysInYear since it is not a zero-based count
+    const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
-        const LeapSecond Epoch = { 2000, 1 };
+    // 4
+    // We need to remove additional leap seconds past 2000 and add them prior to
+    // 2000 to sync up the time zones
+    const double nLeapSecondsOffset = -countLeapSeconds(
+        year,
+        static_cast<int>(std::floor(daysInYear))
+    );
 
-        // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
-        static const std::vector<LeapSecond> LeapSeconds = {
-            { 1972,   1 },
-            { 1972, 183 },
-            { 1973,   1 },
-            { 1974,   1 },
-            { 1975,   1 },
-            { 1976,   1 },
-            { 1977,   1 },
-            { 1978,   1 },
-            { 1979,   1 },
-            { 1980,   1 },
-            { 1981, 182 },
-            { 1982, 182 },
-            { 1983, 182 },
-            { 1985, 182 },
-            { 1988,   1 },
-            { 1990,   1 },
-            { 1991,   1 },
-            { 1992, 183 },
-            { 1993, 182 },
-            { 1994, 182 },
-            { 1996,   1 },
-            { 1997, 182 },
-            { 1999,   1 },
-            { 2006,   1 },
-            { 2009,   1 },
-            { 2012, 183 },
-            { 2015, 182 },
-            { 2017,   1 }
-        };
+    // 5
+    const double nSecondsEpochOffset = static_cast<double>(
+        seconds(hours(12)).count()
+    );
 
-        // Get the position of the last leap second before the desired date
-        LeapSecond date { year, dayOfYear };
-        const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
+    // Combine all of the values
+    const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
+    return epoch;
+}
 
-        // Get the position of the Epoch
-        const auto y2000 = std::lower_bound(
-            LeapSeconds.begin(),
-            LeapSeconds.end(),
-            Epoch
+double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochString) {
+    // The epochString is in the form:
+    // YYYYMMDD.ddddddd
+    // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
+    // and dddd the fraction of that day.
+
+    // The main overview of this function:
+    // 1. Read the year value
+    // 2. Calculate the number of seconds since the beginning of the year
+    // 2.a Get the number of full days since the beginning of the year
+    // 2.b If the year is a leap year, modify the number of days
+    // 3. Convert the number of days to a number of seconds
+    // 4. Get the number of leap seconds since January 1st, 2000 and remove them
+    // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
+    // midnight
+
+    // 1
+    int year = std::atoi(epochString.substr(0, 4).c_str());
+    const int daysSince2000 = countDays(year);
+
+    // 2.
+    // 2.a
+    int monthNum = std::atoi(epochString.substr(4, 2).c_str());
+    int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
+    int wholeDaysInto = daysIntoGivenYear(monthNum, dayOfMonthNum);
+    double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
+    double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
+
+    // 2.b
+    const bool isInLeapYear = std::find(
+        LeapYears.begin(),
+        LeapYears.end(),
+        year
+    ) != LeapYears.end();
+    if (isInLeapYear && daysInYear >= 60) {
+        // We are in a leap year, so we have an effective day more if we are
+        // beyond the end of february (= 31+29 days)
+        --daysInYear;
+    }
+
+    // 3
+    using namespace std::chrono;
+    const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
+    //Need to subtract 1 from daysInYear since it is not a zero-based count
+    const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
+
+    // 4
+    // We need to remove additional leap seconds past 2000 and add them prior to
+    // 2000 to sync up the time zones
+    const double nLeapSecondsOffset = -countLeapSeconds(
+        year,
+        static_cast<int>(std::floor(daysInYear))
+    );
+
+    // 5
+    const double nSecondsEpochOffset = static_cast<double>(
+        seconds(hours(12)).count()
         );
 
-        // The distance between the two iterators gives us the number of leap years
-        const int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
-        return nLeapSeconds;
+    // Combine all of the values
+    const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
+    return epoch;
+}
+
+int RenderableOrbitalKepler::daysIntoGivenYear(int month, int dayOfMonth) {
+    //month and dayCount are zero-based. Does NOT account for leap year.
+    month -= 1;
+    int dayCount = dayOfMonth - 1;
+
+    for (int m = Months::January; m < month; ++m) {
+        dayCount += DaysOfMonths[m];
     }
-
-    double calculateSemiMajorAxis(double meanMotion) {
-        constexpr const double GravitationalConstant = 6.6740831e-11;
-        constexpr const double MassEarth = 5.9721986e24;
-        constexpr const double muEarth = GravitationalConstant * MassEarth;
-
-        // Use Kepler's 3rd law to calculate semimajor axis
-        // a^3 / P^2 = mu / (2pi)^2
-        // <=> a = ((mu * P^2) / (2pi^2))^(1/3)
-        // with a = semimajor axis
-        // P = period in seconds
-        // mu = G*M_earth
-        double period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
-
-        const double pisq = glm::pi<double>() * glm::pi<double>();
-        double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
-
-        // We need the semi major axis in km instead of m
-        return semiMajorAxis / 1000.0;
-    }
-
-double epochFromSubstring(const std::string& epochString) {
-        // The epochString is in the form:
-        // YYDDD.DDDDDDDD
-        // With YY being the last two years of the launch epoch, the first DDD the day
-        // of the year and the remaning a fractional part of the day
-
-        // The main overview of this function:
-        // 1. Reconstruct the full year from the YY part
-        // 2. Calculate the number of seconds since the beginning of the year
-        // 2.a Get the number of full days since the beginning of the year
-        // 2.b If the year is a leap year, modify the number of days
-        // 3. Convert the number of days to a number of seconds
-        // 4. Get the number of leap seconds since January 1st, 2000 and remove them
-        // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
-        // midnight
-
-        // According to https://celestrak.com/columns/v04n03/
-        // Apparently, US Space Command sees no need to change the two-line element
-        // set format yet since no artificial earth satellites existed prior to 1957.
-        // By their reasoning, two-digit years from 57-99 correspond to 1957-1999 and
-        // those from 00-56 correspond to 2000-2056. We'll see each other again in 2057!
-
-        // 1. Get the full year
-        std::string yearPrefix = [y = epochString.substr(0, 2)](){
-            int year = std::atoi(y.c_str());
-            return year >= 57 ? "19" : "20";
-        }();
-        const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
-        const int daysSince2000 = countDays(year);
-
-        // 2.
-        // 2.a
-        double daysInYear = std::atof(epochString.substr(2).c_str());
-
-        // 2.b
-        const bool isInLeapYear = std::find(
-            LeapYears.begin(),
-            LeapYears.end(),
-            year
-        ) != LeapYears.end();
-        if (isInLeapYear && daysInYear >= 60) {
-            // We are in a leap year, so we have an effective day more if we are
-            // beyond the end of february (= 31+29 days)
-            --daysInYear;
-        }
-
-        // 3
-        using namespace std::chrono;
-        const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        //Need to subtract 1 from daysInYear since it is not a zero-based count
-        const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
-
-        // 4
-        // We need to remove additional leap seconds past 2000 and add them prior to
-        // 2000 to sync up the time zones
-        const double nLeapSecondsOffset = -countLeapSeconds(
-            year,
-            static_cast<int>(std::floor(daysInYear))
-        );
-
-        // 5
-        const double nSecondsEpochOffset = static_cast<double>(
-            seconds(hours(12)).count()
-        );
-
-        // Combine all of the values
-        const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
-        return epoch;
-    }
+    return dayCount;
+}
 
 documentation::Documentation RenderableOrbitalKepler::Documentation() {
     using namespace documentation;
@@ -283,6 +358,12 @@ documentation::Documentation RenderableOrbitalKepler::Documentation() {
                 new DoubleVerifier,
                 Optional::No,
                 SegmentsInfo.description
+            },
+            {
+                UpperLimitInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                UpperLimitInfo.description
             },
             {
                 PathInfo.identifier,
@@ -301,6 +382,12 @@ documentation::Documentation RenderableOrbitalKepler::Documentation() {
                 new DoubleVector3Verifier,
                 Optional::No,
                 LineColorInfo.description
+            },
+            {
+                TrailFadeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TrailFadeInfo.description
             }
         }
     };
@@ -310,6 +397,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
     : Renderable(dictionary)
     , _path(PathInfo)
     , _nSegments(SegmentsInfo, 120, 4, 1024)
+    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
 {
     documentation::testSpecificationAndThrow(
          Documentation(),

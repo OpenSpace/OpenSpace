@@ -38,13 +38,11 @@
 
 namespace openspace {
 
-class RenderableSatellites : private RenderableOrbitalKepler {
+class RenderableSatellites : public RenderableOrbitalKepler {
 public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);
-    static documentation::Documentation Documentation();
-
-private:
-
+    void readDataFile(const std::string& filename);
+    //static documentation::Documentation Documentation();
 };
 
 } // namespace openspace

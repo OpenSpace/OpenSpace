@@ -58,62 +58,11 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation RenderableSmallBody::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSmallBody",
-        "small solar system bodies",
-        {
-            {
-                SegmentsInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                UpperLimitInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                UpperLimitInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                FadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInfo.description
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            }
-        }
-    };
-}
-    
+   
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
-    documentation::testSpecificationAndThrow(
-         Documentation(),
-         dictionary,
-         "RenderableSmallBody"
-        );
-}
-   
+}  
     
 void RenderableSmallBody::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {
@@ -136,7 +85,6 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     std::streamoff csvLine = -1;
     int fieldCount = 0;
     float lineSkipFraction = 1.0;
-    float lineSkipTotal = 0.0;
     float currLineFraction;
     int currLineCount;
     int lastLineCount = -1;
@@ -148,7 +96,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         numberOfLines -= 1;
         if (_upperLimit == 0 || _upperLimit > numberOfLines) {
             //If limit wasn't specified in dictionary, set to lines in file (-header)
-            _upperLimit = numberOfLines;
+            _upperLimit = static_cast<unsigned int>(numberOfLines);
         }
         else {
             lineSkipFraction = static_cast<float>(_upperLimit) /
