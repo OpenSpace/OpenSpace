@@ -53,10 +53,84 @@ namespace {
         "Path",
         "The file path to the TLE file to read"
     };
+    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+        "Segments",
+        "Segments",
+        "The number of segments to use for each orbit ellipse"
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the trail if the selected rendering "
+        "method includes lines. If the rendering mode is set to Points, this value is "
+        "ignored."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+        "Color",
+        "Color",
+        "This value determines the RGB main color for the lines and points of the trail."
+    };
+    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
+        "TrailFade",
+        "Trail Fade",
+        "This value determines how fast the trail fades and is an appearance property. "
+    };
+    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
+        "UpperLimit",
+        "Upper Limit",
+        "Upper limit on the number of objects for this renderable, regardless of "
+        "how many objects are contained in the data file"
+    };
 }
 
 namespace openspace {
-    
+
+documentation::Documentation RenderableSatellites::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableSatellites",
+        "space_renderable_satellites",
+        {
+            {
+                SegmentsInfo.identifier,
+                new DoubleVerifier,
+                Optional::No,
+                SegmentsInfo.description
+            },
+            {
+                UpperLimitInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                UpperLimitInfo.description
+            },
+            {
+                PathInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                PathInfo.description
+            },
+            {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LineWidthInfo.description
+            },
+            {
+                LineColorInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::No,
+                LineColorInfo.description
+            },
+            {
+                TrailFadeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TrailFadeInfo.description
+            }
+        }
+    };
+}
+
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {

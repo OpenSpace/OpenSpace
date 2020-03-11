@@ -43,7 +43,7 @@ static double importAngleValue(const std::string& angle);
 class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
     RenderableSmallBody(const ghoul::Dictionary& dictionary);
-    //static documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     void readOrbitalParamsFromThisLine(int& fieldCount, std::streamoff& csvLine,

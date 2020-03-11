@@ -47,7 +47,6 @@ public:
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
     /**
         * Reads the provided data file and calls the KeplerTranslation::setKeplerElments
         * method with the correct values. If \p filename is a valid data file but contains

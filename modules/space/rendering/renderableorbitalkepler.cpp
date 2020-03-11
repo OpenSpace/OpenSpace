@@ -81,7 +81,7 @@ namespace {
         "Upper limit on the number of objects for this renderable, regardless of "
         "how many objects are contained in the data file"
     };
-    
+
     constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNum = "LineNumber";
 }
@@ -346,53 +346,7 @@ int RenderableOrbitalKepler::daysIntoGivenYear(int month, int dayOfMonth) {
     }
     return dayCount;
 }
-
-documentation::Documentation RenderableOrbitalKepler::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableOrbitalKepler",
-        "space_renderable_keplerian_orbitals",
-        {
-            {
-                SegmentsInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                UpperLimitInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                UpperLimitInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            },
-            {
-                TrailFadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TrailFadeInfo.description
-            }
-        }
-    };
-}
-    
+  
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
