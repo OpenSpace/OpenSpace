@@ -28,6 +28,8 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
@@ -473,8 +475,12 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.x = windowPos.x;
     event.y = windowPos.y;
     event.type = eventType;
-    //TODO: We should probably use key mods for touch as well:
-    // event.modifiers = mods;
+    const std::vector<std::pair<Key, KeyModifier>> &keyModVec = 
+        global::navigationHandler.inputState().pressedKeys();
+    for (auto keyModPair : keyModVec) {
+        const KeyModifier mods = keyModVec[0].second;
+        event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
+    }
     event.pointer_type = cef_pointer_type_t::CEF_POINTER_TYPE_TOUCH;
     return event;
 }
