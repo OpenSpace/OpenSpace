@@ -54,6 +54,24 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     _rotationInterpolator = RotationInterpolator{ start, end, this, Slerp };
 
     _points.push_back(start.position());
+
+    // Add a point to first go straight out if starting close to planet
+    double thresholdFactor = 3.0;
+    glm::dvec3 startNodePos = start.node()->worldPosition();
+    double startNodeRadius = start.nodeDetails.validBoundingSphere;
+    glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
+
+    if (glm::length(startNodeToStartPos) < thresholdFactor * startNodeRadius) {
+        glm::dvec3 viewDir = glm::normalize(start.rotation() * glm::dvec3(0.0, 0.0, -1.0));
+        double distance = startNodeRadius;
+
+        glm::dvec3 newPos = start.position() - distance * viewDir;
+        _points.push_back(newPos);
+    }
+
+    // TODO: Add a point to approach straigt towards a specific pose near planet
+    // TODO: Calculate nice end pose if not defined
+
     _points.push_back(end.position());
 
     std::vector<SceneGraphNode*> relevantNodes = findRelevantNodes();
@@ -144,7 +162,7 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
                 glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDir);
                 glm::dvec3 orthogonal = collisionPointToCenter - parallell;
 
-                double distance = 2.0 * radius;
+                double distance = 3.0 * radius;
                 glm::dvec3 extraKnot = pointWorld - distance * glm::normalize(orthogonal);
                 _points.insert(_points.begin() + i + 1, extraKnot);
 
