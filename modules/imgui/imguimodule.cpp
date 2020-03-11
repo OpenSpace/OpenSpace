@@ -171,10 +171,6 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             uint32_t mouseButtons = delegate.mouseButtons(2);
 
             const double dt = std::max(delegate.averageDeltaTime(), 0.0);
-            if (touchInput.active && mouseButtons == 0) {
-                mouseButtons = touchInput.action;
-                mousePosition = touchInput.pos;
-            }
             // We don't do any collection of immediate mode user interface, so it
             // is fine to open and close a frame immediately
             gui.startFrame(
@@ -250,6 +246,24 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             else {
                 return false;
             }
+        }
+    );
+
+    global::callback::touchDetected.emplace_back(
+        [&](TouchInput input) -> bool {
+            return gui.touchDetectedCallback(input);
+        }
+    );
+
+    global::callback::touchUpdated.emplace_back(
+        [&](TouchInput input) -> bool {
+            return gui.touchUpdatedCallback(input);
+        }
+    );
+
+    global::callback::touchExit.emplace_back(
+        [&](TouchInput input) {
+            gui.touchExitCallback(input);
         }
     );
 }
