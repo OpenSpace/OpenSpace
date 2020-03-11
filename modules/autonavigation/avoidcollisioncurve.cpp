@@ -60,12 +60,26 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     glm::dvec3 startNodePos = start.node()->worldPosition();
     double startNodeRadius = start.nodeDetails.validBoundingSphere;
     glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
+    glm::dvec3 startViewDir = glm::normalize(start.rotation() * glm::dvec3(0.0, 0.0, -1.0));
 
     if (glm::length(startNodeToStartPos) < thresholdFactor * startNodeRadius) {
-        glm::dvec3 viewDir = glm::normalize(start.rotation() * glm::dvec3(0.0, 0.0, -1.0));
         double distance = startNodeRadius;
 
-        glm::dvec3 newPos = start.position() - distance * viewDir;
+        glm::dvec3 newPos = start.position() - distance * startViewDir;
+        _points.push_back(newPos);
+    }
+
+    // Add point for moving out if the end state is in opposite direction
+    //TODO: determine if its best to compare to end orientation or position 
+    glm::dvec3 startToEnd = end.position() - start.position();
+    double cosStartAngle = glm::dot(normalize(-startViewDir), normalize(startToEnd));
+
+    if (cosStartAngle > 0.7) {
+        glm::dquat middleRotation = this->rotationAt(0.5); // undefined behaviour for other types than Slerp!
+        glm::dvec3 middleViewDir = glm::normalize(middleRotation * glm::dvec3(0.0, 0.0, -1.0));
+        double distance = 0.4 * glm::length(startToEnd);
+
+        glm::dvec3 newPos = start.position() + 0.2 * startToEnd - distance * middleViewDir;
         _points.push_back(newPos);
     }
 
