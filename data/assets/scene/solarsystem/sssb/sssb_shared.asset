@@ -13,7 +13,7 @@ function downloadSssbDatabaseFile(sceneAsset, name, identifier)
     })
 end
 
-local createSssbGroupObject = function(filename, sssbFolder, trailColor)
+local createSssbGroupObject = function(filename, guiName, sssbFolder, trailColor)
     assert(filename, "'filename' needs to be provided")
     assert(sssbFolder, "'sssbFolder' needs to be provided")
     trailColor = trailColor or { 0.75, 0.1, 0.1 }
@@ -30,7 +30,8 @@ local createSssbGroupObject = function(filename, sssbFolder, trailColor)
             Fade = 0.5,
         },
         GUI = {
-            Path = "/Solar System/Small Solar System Body"
+            Path = "/Solar System/Small Solar System Body",
+			Name = guiName
        }
     }
 end

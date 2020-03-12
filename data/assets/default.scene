@@ -2,8 +2,6 @@ asset.require('./base')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 asset.require('scene/solarsystem/planets/earth/satellites/satellites.asset')
-asset.require('scene/solarsystem/sssb/pha')
-asset.require('scene/solarsystem/sssb/main_asteroid_belt')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()

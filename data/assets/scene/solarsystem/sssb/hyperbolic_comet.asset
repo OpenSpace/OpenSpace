@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'hyperbolic_comet', 'sssb_data_hyperbolic_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_hyperbolic_comet.csv', filepath, { 0.9, 0.3, 0.1 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_hyperbolic_comet.csv', "Hyperbolic Comet", filepath, { 0.9, 0.3, 0.1 })
 object.Renderable.Enabled = false
 object.Renderable.Segments = 50
 object.Renderable.Fade = 5

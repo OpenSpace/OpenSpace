@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'inner_main_belt_asteroid', 'sssb_data_inner_main_belt_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_inner_main_belt_asteroid.csv', filepath, { 0.9, 0.3, 0.1 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_inner_main_belt_asteroid.csv', "Inner Main Belt Asteroid", filepath, { 0.9, 0.3, 0.1 })
 object.Renderable.Enabled = false
 object.Renderable.Segments = 50
 object.Renderable.Fade = 5
