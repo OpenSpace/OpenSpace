@@ -40,12 +40,13 @@
 #define ENABLE_DIRECTMSG
 
 namespace {
+    using namespace std::chrono;
     constexpr const char* _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
     std::thread* gMouseHookThread;
     HHOOK gMouseHook = nullptr;
     bool gStarted = false;
-    std::chrono::microseconds gStartTime = std::chrono::microseconds(0);
+    microseconds gStartTime = microseconds(0);
     const long long gFrequency = []() -> long long {
       LARGE_INTEGER frequency;
       QueryPerformanceFrequency(&frequency);
@@ -84,9 +85,13 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 break;
             }
 
-            using namespace std::chrono;
-            const microseconds timestamp = duration<UINT64, std::micro>(
-                info.PerformanceCount * std::micro::den / gFrequency) - gStartTime;
+            //Implementation from microsoft STL of high_resolution_clock(steady_clock):
+            const long long freq = gFrequency;
+            const long long whole = (info.PerformanceCount / freq) * std::micro::den;
+            const long long part  = (info.PerformanceCount % freq) * 
+                                    std::micro::den / freq;
+            const microseconds timestamp = 
+                duration<UINT64, std::micro>(whole + part) - gStartTime;
 
             RECT rect;
             GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
@@ -218,11 +223,8 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
 
     if (!gStarted) {
         gStarted = true;
-        LARGE_INTEGER count;
-        QueryPerformanceCounter(&count);
-        gStartTime = std::chrono::duration<UINT64, std::micro>(
-            count.QuadPart * std::micro::den / gFrequency
-        );
+        gStartTime = 
+            duration_cast<microseconds>(high_resolution_clock::now().time_since_epoch());
 #ifdef ENABLE_TUIOMESSAGES
         gTuioServer = new TUIO::TuioServer("localhost", 3333);
         TUIO::TuioTime::initSession();
