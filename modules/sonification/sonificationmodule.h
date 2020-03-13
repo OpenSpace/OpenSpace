@@ -34,6 +34,7 @@
 #include <openspace/scene/scene.h>
 #include <vector>
 #include <utility>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
@@ -62,18 +63,32 @@ private:
     //Main function for _thread
     void threadMain(std::atomic<bool>& isRunning);
 
+    //On change methods for each property
+    void onMercuryChanged(bool value);
+    void onVenusChanged(bool value);
+    void onEarthChanged(bool value);
+    void onMarsChanged(bool value);
+    void onJupiterChanged(bool value);
+    void onSaturnChanged(bool value);
+    void onUranusChanged(bool value);
+    void onNeptuneChanged(bool value);
+
     //Struct to hold data for all the planets
     struct Planet {
         Planet() {
             _identifier = "";
             _distance = 0.0;
             _angle = 0.0;
+            _enabled = false;
+            _update = false;
         }
 
         Planet(std::string identifier) {
             _identifier = identifier;
             _distance = 0.0;
             _angle = 0.0;
+            _enabled = false;
+            _update = false;
         }
 
         void setDistance(double distance) {
@@ -88,6 +103,8 @@ private:
         double _distance;
         double _angle;
         std::vector<std::pair<std::string, double>> _moons;
+        bool _enabled;
+        bool _update;
     };
 
     char* _buffer;
@@ -100,6 +117,16 @@ private:
     double _timePrecision;
     Planet _planets[NUM_PLANETS];
     bool _isPlanetaryView;
+
+    //Properties
+    properties::BoolProperty _isMercuryOn;
+    properties::BoolProperty _isVenusOn;
+    properties::BoolProperty _isEarthOn;
+    properties::BoolProperty _isMarsOn;
+    properties::BoolProperty _isJupiterOn;
+    properties::BoolProperty _isSaturnOn;
+    properties::BoolProperty _isUranusOn;
+    properties::BoolProperty _isNeptuneOn;
 };
 
 } // namespace openspace

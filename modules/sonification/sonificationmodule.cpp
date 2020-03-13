@@ -40,11 +40,64 @@
 #define SC_PORT 57120
 #define BUFFER_SIZE 1024
 
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo EnableMercuryInfo = {
+        "isMercuryOn",
+        "Enable Mercury Sonification",
+        "Play Mercury Sonification or turn it off"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableVenusInfo = {
+        "isVenusOn",
+        "Enable Venus Sonification",
+        "Play Venus Sonification or turn it off"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableEarthInfo = {
+        "isEarthOn",
+        "Enable Earth Sonification",
+        "Play Earth Sonification or turn it off"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableMarsInfo = {
+        "isMarsOn",
+        "Enable Mars Sonification",
+        "Play Mars Sonification or turn it off"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableJupiterInfo = {
+        "isJupiterOn",
+        "Enable Jupiter Sonification",
+        "Play Jupiter Sonification or turn it off"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableSaturnInfo = {
+        "isSaturnOn",
+        "Enable Saturn Sonification",
+        "Play Saturn Sonification or turn it off"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableUranusInfo = {
+        "isUranusOn",
+        "Enable Uranus Sonification",
+        "Play Uranus Sonification or turn it off"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableNeptuneInfo = {
+        "isNeptuneOn",
+        "Enable Neptune Sonification",
+        "Play Neptune Sonification or turn it off"
+    };
+} // namespace
+
 namespace openspace {
 
-
 SonificationModule::SonificationModule()
-    : OpenSpaceModule("Sonification")
+    : OpenSpaceModule("Sonification"), _isMercuryOn(EnableMercuryInfo, false),
+    _isVenusOn(EnableVenusInfo, false), _isEarthOn(EnableEarthInfo, false),
+    _isMarsOn(EnableMarsInfo, false), _isJupiterOn(EnableJupiterInfo, false),
+    _isSaturnOn(EnableSaturnInfo, false), _isUranusOn(EnableUranusInfo, false),
+    _isNeptuneOn(EnableNeptuneInfo, false)
 {
     //Create buffer and stream to send to SuperCollider
     _buffer = new char[BUFFER_SIZE];
@@ -99,6 +152,66 @@ SonificationModule::SonificationModule()
     _planets[7] = Planet("Neptune");
     _planets[7]._moons.reserve(1);
     _planets[7]._moons.push_back({ "Triton", 0.0 });
+
+    //Add onChange for the properties
+    _isMercuryOn.onChange([this]() { onMercuryChanged(_isMercuryOn.value()); } );
+    _isVenusOn.onChange([this]() { onVenusChanged(_isVenusOn.value()); } );
+    _isEarthOn.onChange([this]() { onEarthChanged(_isEarthOn.value()); } );
+    _isMarsOn.onChange([this]() { onMarsChanged(_isMarsOn.value()); } );
+    _isJupiterOn.onChange([this]() { onJupiterChanged(_isJupiterOn.value()); } );
+    _isSaturnOn.onChange([this]() { onSaturnChanged(_isSaturnOn.value()); } );
+    _isUranusOn.onChange([this]() { onUranusChanged(_isUranusOn.value()); } );
+    _isNeptuneOn.onChange([this]() { onNeptuneChanged(_isNeptuneOn.value()); } );
+
+    //Add the properties
+    addProperty(_isMercuryOn);
+    addProperty(_isVenusOn);
+    addProperty(_isEarthOn);
+    addProperty(_isMarsOn);
+    addProperty(_isJupiterOn);
+    addProperty(_isSaturnOn);
+    addProperty(_isUranusOn);
+    addProperty(_isNeptuneOn);
+}
+
+void SonificationModule::onMercuryChanged(bool value) {
+    _planets[0]._enabled = value;
+    _planets[0]._update = true;
+}
+
+void SonificationModule::onVenusChanged(bool value) {
+    _planets[1]._enabled = value;
+    _planets[1]._update = true;
+}
+
+void SonificationModule::onEarthChanged(bool value) {
+    _planets[2]._enabled = value;
+    _planets[2]._update = true;
+}
+
+void SonificationModule::onMarsChanged(bool value) {
+    _planets[3]._enabled = value;
+    _planets[3]._update = true;
+}
+
+void SonificationModule::onJupiterChanged(bool value) {
+    _planets[4]._enabled = value;
+    _planets[4]._update = true;
+}
+
+void SonificationModule::onSaturnChanged(bool value) {
+    _planets[5]._enabled = value;
+    _planets[5]._update = true;
+}
+
+void SonificationModule::onUranusChanged(bool value) {
+    _planets[6]._enabled = value;
+    _planets[6]._update = true;
+}
+
+void SonificationModule::onNeptuneChanged(bool value) {
+    _planets[7]._enabled = value;
+    _planets[7]._update = true;
 }
 
 SonificationModule::~SonificationModule() {
@@ -149,7 +262,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                         //Easy switch between different angles
                         //Angle from planet to moon with respect to camera
 
-                        //NOTE: This will not work if the camera is looking straight down on the planet,
+                        //NOTE: This might not work if the camera is looking straight down on the planet,
                         //weired behaviour when switching from upside to downside vice versa
                         double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(planetToProjectedMoon), glm::normalize(cameraUpVector));
 
@@ -161,9 +274,6 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                             updateMoons = true;
                             _planets[i]._moons[m].second = moonAngle;
                         }
-                    }
-                    else {
-                        std::cout << "Could not find moon " << _planets[i]._moons[m].first << " of " << identifier << std::endl;
                     }
                 }
             }
@@ -199,7 +309,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 UdpTransmitSocket socket = UdpTransmitSocket(
                     IpEndpointName(SC_IP_ADDRESS, SC_PORT));
                 _stream.Clear();
-                _stream << osc::BeginMessage(label.c_str()) << distance << angle << timeSpeed;
+                _stream << osc::BeginMessage(label.c_str()) << distance << angle << timeSpeed << int(_planets[i]._enabled);
 
                 //Add the information of the moons if any
                 for (int m = 0; m < _planets[i]._moons.size(); ++m) {
@@ -208,6 +318,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
 
                 _stream << osc::EndMessage;
                 socket.Send(_stream.Data(), _stream.Size());
+                _planets[i]._update = false;
             }
         }
     }
@@ -267,19 +378,21 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                     //Extract data from all the planets
                     for (int i = 0; i < NUM_PLANETS; ++i) {
                         
-                        //Only send data if something new has happened
-                        //If the node is in focus, increase sensitivity
-                        if (focusNode->identifier().compare(_planets[i]._identifier) == 0) {
-                            _anglePrecision = 0.01;
-                            _distancePrecision = 10.0;
-                        }
-                        else {
-                            _anglePrecision = 0.05;
-                            _distancePrecision = 200.0;
-                        }
+                        if (_planets[i]._enabled || _planets[i]._update) {
+                            //Only send data if something new has happened
+                            //If the node is in focus, increase sensitivity
+                            if (focusNode->identifier().compare(_planets[i]._identifier) == 0) {
+                                _anglePrecision = 0.05;
+                                _distancePrecision = 1000.0;
+                            }
+                            else {
+                                _anglePrecision = 0.1;
+                                _distancePrecision = 10000.0;
+                            }
 
-                        extractData(_planets[i]._identifier, i, scene,
-                            cameraPosition, cameraDirection, cameraUpVector);
+                            extractData(_planets[i]._identifier, i, scene,
+                                cameraPosition, cameraDirection, cameraUpVector);
+                        }
                     }
                 }
             }
