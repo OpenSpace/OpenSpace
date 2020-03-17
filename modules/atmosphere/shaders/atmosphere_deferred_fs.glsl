@@ -593,13 +593,13 @@ void main() {
             dvec4 positionWorldCoords = dSGCTViewToWorldMatrix * position;
 
             // World to Object (Normal and Position in meters)
-            dvec4 positionObjectsCoords = dInverseModelTransformMatrix * positionWorldCoords;
+            dvec4 positionObjectCoords = dInverseModelTransformMatrix * positionWorldCoords;
 
             
             // Distance of the pixel in the gBuffer to the observer
             // JCC (12/12/2017): AMD distance function is buggy.
-            //double pixelDepth = distance(cameraPositionInObject.xyz, positionObjectsCoords.xyz);
-            double pixelDepth = length(cameraPositionInObject.xyz - positionObjectsCoords.xyz);
+            //double pixelDepth = distance(cameraPositionInObject.xyz, positionObjectCoords.xyz);
+            double pixelDepth = length(cameraPositionInObject.xyz - positionObjectCoords.xyz);
             
             // JCC (12/13/2017): Trick to remove floating error in texture.
             // We see a squared noise on planet's surface when seeing the planet
@@ -619,8 +619,8 @@ void main() {
             }
 
             // All calculations are done in Km:
-            pixelDepth                *= 0.001;
-            positionObjectsCoords.xyz *= 0.001;
+            pixelDepth               *= 0.001;
+            positionObjectCoords.xyz *= 0.001;
             
             if (pixelDepth < offset) {
                 // ATM Occluded - Something in fron of ATM.
@@ -634,7 +634,7 @@ void main() {
                 // Moving observer from camera location to top atmosphere
                 // If the observer is already inside the atm, offset = 0.0
                 // and no changes at all.
-                vec3  x  = vec3(ray.origin.xyz + t*ray.direction.xyz);
+                vec3  x  = vec3(ray.origin.xyz + t * ray.direction.xyz);
                 float r  = 0.0f;//length(x);
                 vec3  v  = vec3(ray.direction.xyz);
                 float mu = 0.0f;//dot(x, v) / r;
@@ -655,7 +655,7 @@ void main() {
                 bool groundHit = false;
                 vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
                                                         s, r, mu, attenuation, 
-                                                        vec3(positionObjectsCoords.xyz),
+                                                        vec3(positionObjectCoords.xyz),
                                                         groundHit, maxLength, pixelDepth,
                                                         color, sunIntensityInscatter); 
                 vec3 groundColorV = vec3(0.0);

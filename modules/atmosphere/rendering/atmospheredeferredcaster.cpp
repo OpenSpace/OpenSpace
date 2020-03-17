@@ -111,6 +111,7 @@ namespace {
 
     constexpr const float ATM_EPS = 2.f;
     constexpr const float KM_TO_M = 1000.f;
+    constexpr const float M_PI = 3.1415926535897932384626433832795f;
 } // namespace
 
 namespace openspace {
@@ -464,30 +465,27 @@ void AtmosphereDeferredcaster::setSunRadianceIntensity(float sunRadiance) {
     _sunRadianceIntensity = sunRadiance;
 }
 
-void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(
-                                                           const glm::vec3& rayScattCoeff)
+void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(glm::vec3& rayScattCoeff)
 {
     _rayleighScatteringCoeff = std::move(rayScattCoeff);
 }
 
-void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(
-                                                           const glm::vec3& ozoneExtCoeff)
+void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(glm::vec3& ozoneExtCoeff)
 {
     _ozoneExtinctionCoeff = std::move(ozoneExtCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieScatteringCoefficients(
-                                                           const glm::vec3& mieScattCoeff)
+void AtmosphereDeferredcaster::setMieScatteringCoefficients(glm::vec3& mieScattCoeff)
 {
     _mieScatteringCoeff = std::move(mieScattCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff)
+void AtmosphereDeferredcaster::setMieExtinctionCoefficients(glm::vec3& mieExtCoeff)
 {
     _mieExtinctionCoeff = std::move(mieExtCoeff);
 }
 
-void AtmosphereDeferredcaster::setEllipsoidRadii(const glm::dvec3& radii) {
+void AtmosphereDeferredcaster::setEllipsoidRadii(glm::dvec3& radii) {
     _ellipsoidRadii = std::move(radii);
 }
 
@@ -496,7 +494,7 @@ void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
 }
 
 void AtmosphereDeferredcaster::setShadowConfigArray(
-                                const std::vector<ShadowConfiguration>& shadowConfigArray)
+                                std::vector<ShadowConfiguration>& shadowConfigArray)
 {
     _shadowConfArray = std::move(shadowConfigArray);
 }
@@ -1155,6 +1153,164 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
 }
 
+void AtmosphereDeferredcaster::saveSkyLuminance() const {
+    // Saves current FBO first
+    GLint defaultFBO;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
+    GLint m_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+    // Creates the FBO for the calculations
+    gl::GLuint calcFBO;
+    glGenFramebuffers(1, &calcFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+
+    // Create the FBO rendering texture (where calculations will be stored)
+    GLuint curveDataTexture;
+    glGenTextures(1, &curveDataTexture);
+    glBindTexture(GL_TEXTURE_2D, curveDataTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    const GLuint numberOfCurveSamples = 1000;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, numberOfCurveSamples, 1, 0, 
+                 GL_RGB, GL_FLOAT, nullptr);
+    
+    // Set texture as the rendering buffer in the current FBO
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        curveDataTexture,
+        0
+    );
+    checkFrameBufferState("CIE Curve Calculations FBO");
+
+    // Compile Shader Programming
+    std::unique_ptr<ghoul::opengl::ProgramObject> cieCurveExtractionProgramObject;
+    
+    cieCurveExtractionProgramObject = ghoul::opengl::ProgramObject::Build(
+        "CIECurveExtractionProgram",
+        absPath("${MODULE_ATMOSPHERE}/shaders/extract_cie_curve_vs.glsl"),
+        absPath("${MODULE_ATMOSPHERE}/shaders/extract_cie_curve_fs.glsl")
+    );
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    cieCurveExtractionProgramObject->setIgnoreSubroutineUniformLocationError(
+        IgnoreError::Yes
+    );
+    cieCurveExtractionProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
+
+
+    glViewport(0, 0, numberOfCurveSamples, 1);
+    cieCurveExtractionProgramObject->activate();
+    loadAtmosphereDataIntoShaderProgram(cieCurveExtractionProgramObject);
+    
+    static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    glClearBufferfv(GL_COLOR, 0, black);
+
+    
+    // Prepare for rendering/calculations
+    gl::GLuint quadCalcVAO;
+    gl::GLuint quadCalcVBO;
+    createRenderQuad(&quadCalcVAO, &quadCalcVBO, static_cast<gl::GLfloat>(1.0f));
+
+    
+    // Starting Calculations...
+    LDEBUG("Extracting CIE curves...");
+
+    //==========================================================
+    //================== Extracting CIE Curves =================
+    //==========================================================
+    cieCurveExtractionProgramObject->activate();
+
+    cieCurveExtractionProgramObject->setUniform("Rg", _atmospherePlanetRadius);
+    cieCurveExtractionProgramObject->setUniform("Rt", _atmosphereRadius);
+    cieCurveExtractionProgramObject->setUniform(
+        "groundRadianceEmittion",
+        _planetGroundRadianceEmittion
+    );
+    cieCurveExtractionProgramObject->setUniform("HR", _rayleighHeightScale);
+    cieCurveExtractionProgramObject->setUniform("betaRayleigh", _rayleighScatteringCoeff);
+    cieCurveExtractionProgramObject->setUniform("HM", _mieHeightScale);
+    cieCurveExtractionProgramObject->setUniform("betaMieExtinction", _mieExtinctionCoeff);
+    cieCurveExtractionProgramObject->setUniform("mieG", _miePhaseConstant);
+    cieCurveExtractionProgramObject->setUniform("sunRadiance", _sunRadianceIntensity);
+    cieCurveExtractionProgramObject->setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    cieCurveExtractionProgramObject->setUniform("HO", _ozoneHeightScale);
+    cieCurveExtractionProgramObject->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
+    cieCurveExtractionProgramObject->setUniform("SAMPLES_R", _r_samples);
+    cieCurveExtractionProgramObject->setUniform("SAMPLES_MU", _mu_samples);
+    cieCurveExtractionProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
+    cieCurveExtractionProgramObject->setUniform("SAMPLES_NU", _nu_samples);
+
+    ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
+    transmittanceTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+    cieCurveExtractionProgramObject->setUniform(
+        "transmittanceTexture",
+        transmittanceTableTextureUnit
+    );
+
+    ghoul::opengl::TextureUnit irradianceTableTextureUnit;
+    irradianceTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
+    cieCurveExtractionProgramObject->setUniform(
+        "irradianceTexture", 
+        irradianceTableTextureUnit
+    );
+
+    ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
+    inScatteringTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
+    cieCurveExtractionProgramObject->setUniform(
+        "inscatterTexture", inScatteringTableTextureUnit
+    );
+    
+    std::array<GLfloat, 9> sunZenithArray = { 0.f, 10.f, 20.f, 30.f, 40.f, 50.f, 60.f, 70.f, 80.f };
+    for (const auto& sunZenith : sunZenithArray) {
+        
+        cieCurveExtractionProgramObject->setUniform("sunZenith", sunZenith * M_PI / 180.f);
+        
+        glClear(GL_COLOR_BUFFER_BIT);
+        renderQuadForCalc(quadCalcVAO, 6);
+
+        // save data to disk
+        saveTextureToTxTFile(
+            GL_COLOR_ATTACHMENT0, 
+            fmt::format("{}_CIE_curve_sun_zenith_{}.txt", _loggerCat, sunZenith),
+            numberOfCurveSamples, 
+            1
+        );
+    }
+    
+    cieCurveExtractionProgramObject->deactivate();
+
+    // free VRAM
+    glDeleteTextures(1, &curveDataTexture);
+    glDeleteFramebuffers(1, &calcFBO);
+    glDeleteBuffers(1, &quadCalcVBO);
+    glDeleteVertexArrays(1, &quadCalcVAO);
+
+    // Restores system state
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    glViewport(
+        m_viewport[0],
+        m_viewport[1],
+        m_viewport[2],
+        m_viewport[3]
+    );
+    glDeleteBuffers(1, &quadCalcVBO);
+    glDeleteVertexArrays(1, &quadCalcVAO);
+    glDeleteFramebuffers(1, &calcFBO);
+
+    LDEBUG("Ended extracting CIE curves...");
+}
+
 void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     //==========================================================
     //========= Load Shader Programs for Calculations ==========
@@ -1208,9 +1364,12 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     glDeleteFramebuffers(1, &calcFBO);
 
     LDEBUG("Ended precalculations for Atmosphere effects...");
+
+    // Just for the paper:
+    saveSkyLuminance();
 }
 
-void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) {
+void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) const {
     glGenVertexArrays(1, vao);
     glGenBuffers(1, vbo);
     glBindVertexArray(*vao);
@@ -1241,7 +1400,7 @@ void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloa
 }
 
 void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
-                                std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg)
+                                std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg) const
 {
     shaderProg->setUniform("Rg", _atmospherePlanetRadius);
     shaderProg->setUniform("Rt", _atmosphereRadius);
@@ -1334,7 +1493,7 @@ void AtmosphereDeferredcaster::checkFrameBufferState(
     }
 }
 
-void AtmosphereDeferredcaster::renderQuadForCalc(GLuint vao, GLsizei numberOfVertices) {
+void AtmosphereDeferredcaster::renderQuadForCalc(GLuint vao, GLsizei numberOfVertices) const {
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, numberOfVertices);
     glBindVertexArray(0);
@@ -1377,8 +1536,8 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachme
 
     ppmFile.open(fileName.c_str(), std::fstream::out);
     if (ppmFile.is_open()) {
-        unsigned char * pixels = new unsigned char[width*height * 3];
-        for (int t = 0; t < width*height * 3; ++t)
+        unsigned char* pixels = new unsigned char[width * height * 3];
+        for (int t = 0; t < width * height * 3; ++t)
             pixels[t] = 255;
 
         if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
@@ -1416,6 +1575,53 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachme
         delete[] pixels;
 
         ppmFile.close();
+    }
+}
+
+
+void AtmosphereDeferredcaster::saveTextureToTxTFile(GLenum color_buffer_attachment,
+    const std::string& fileName,
+    int width, int height) const
+{
+    std::fstream txtFile;
+
+    txtFile.open(fileName.c_str(), std::fstream::out);
+    if (txtFile.is_open()) {
+        float* pixels = new float[width * height * 3];
+        for (int t = 0; t < width * height * 3; ++t)
+            pixels[t] = 255.0;
+
+        if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
+            glReadBuffer(color_buffer_attachment);
+            glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, pixels);
+
+        }
+        else {
+            glReadPixels(
+                0,
+                0,
+                width,
+                height,
+                GL_DEPTH_COMPONENT,
+                GL_FLOAT,
+                pixels
+            );
+        }
+
+        std::cout << "\nWriting to TXT file...\n";
+        int k = 0;
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                txtFile << pixels[k] << ", "
+                    << pixels[k + 1] << ", "
+                    << pixels[k + 2] << " ";
+                k += 3;
+            }
+            txtFile << std::endl;
+        }
+        delete[] pixels;
+
+        txtFile.close();
     }
 }
 

@@ -79,12 +79,12 @@ public:
     void setMieHeightScale(float mieHeightScale);
     void setMiePhaseConstant(float miePhaseConstant);
     void setSunRadianceIntensity(float sunRadiance);
-    void setRayleighScatteringCoefficients(const glm::vec3& rayScattCoeff);
-    void setOzoneExtinctionCoefficients(const glm::vec3& ozoneExtCoeff);
-    void setMieScatteringCoefficients(const glm::vec3& mieScattCoeff);
-    void setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff);
-    void setEllipsoidRadii(const glm::dvec3& radii);
-    void setShadowConfigArray(const std::vector<ShadowConfiguration>& shadowConfigArray);
+    void setRayleighScatteringCoefficients(glm::vec3& rayScattCoeff);
+    void setOzoneExtinctionCoefficients(glm::vec3& ozoneExtCoeff);
+    void setMieScatteringCoefficients(glm::vec3& mieScattCoeff);
+    void setMieExtinctionCoefficients(glm::vec3& mieExtCoeff);
+    void setEllipsoidRadii(glm::dvec3& radii);
+    void setShadowConfigArray(std::vector<ShadowConfiguration>& shadowConfigArray);
     void setHardShadows(bool enabled);
     void enableSunFollowing(bool enable);
 
@@ -99,18 +99,25 @@ private:
     void deleteUnusedComputationTextures();
     void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
         GLsizei vertexSize);
-    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size);
+    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) const;
     void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
         int layer, bool doCalculation = true);
     void checkFrameBufferState(const std::string& codePosition) const;
     void loadAtmosphereDataIntoShaderProgram(
         std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg
-    );
-    void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices);
+    ) const;
+    void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices) const;
     void saveTextureToPPMFile(GLenum color_buffer_attachment, const std::string& fileName,
+        int width, int height) const;
+    void saveTextureToTxTFile(GLenum color_buffer_attachment, const std::string& fileName,
         int width, int height) const;
     bool isAtmosphereInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position,
         double radius) const;
+
+    //JCC: This method is used only for the ATM Paper
+    //     Given the view direction and Sun position, it saves the Sky illumination 
+    //     covering PI rad on zenith angle
+    void saveSkyLuminance() const;
 
     // Number of planet radii to use as distance threshold for culling
     const double DISTANCE_CULLING_RADII = 5000;
