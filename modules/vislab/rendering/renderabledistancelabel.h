@@ -40,6 +40,8 @@ public:
 private:
 
      properties::StringProperty _nodelineId;
+     properties::IntProperty _distanceUnit;
+     properties::StringProperty _customUnitDescriptor;
      bool _errorThrown = false;
 };
 
