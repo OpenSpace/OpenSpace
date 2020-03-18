@@ -38,6 +38,7 @@
 
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
+#define NUM_SETTINGS 5
 
 #include <openspace/util/openspacemodule.h>
 
@@ -64,14 +65,17 @@ private:
     void threadMain(std::atomic<bool>& isRunning);
 
     //On change methods for each property
-    void onMercuryChanged(bool value);
-    void onVenusChanged(bool value);
-    void onEarthChanged(bool value);
-    void onMarsChanged(bool value);
-    void onJupiterChanged(bool value);
-    void onSaturnChanged(bool value);
-    void onUranusChanged(bool value);
-    void onNeptuneChanged(bool value);
+    void onEarthEnabledChanged(bool value);
+    void onEarthSizeDayChanged(bool value);
+    void onEarthGravityChanged(bool value);
+    void onEarthAtmosphereChanged(bool value);
+    void onEarthMoonsChanged(bool value);
+
+    void onMarsEnabledChanged(bool value);
+    void onMarsSizeDayChanged(bool value);
+    void onMarsGravityChanged(bool value);
+    void onMarsAtmosphereChanged(bool value);
+    void onMarsMoonsChanged(bool value);
 
     //Struct to hold data for all the planets
     struct Planet {
@@ -79,7 +83,6 @@ private:
             _identifier = "";
             _distance = 0.0;
             _angle = 0.0;
-            _enabled = false;
             _update = false;
         }
 
@@ -87,7 +90,6 @@ private:
             _identifier = identifier;
             _distance = 0.0;
             _angle = 0.0;
-            _enabled = false;
             _update = false;
         }
 
@@ -103,7 +105,7 @@ private:
         double _distance;
         double _angle;
         std::vector<std::pair<std::string, double>> _moons;
-        bool _enabled;
+        bool _settings[NUM_SETTINGS] = {false, false, false, false, false};
         bool _update;
     };
 
@@ -119,14 +121,33 @@ private:
     bool _isPlanetaryView;
 
     //Properties
-    properties::BoolProperty _isMercuryOn;
-    properties::BoolProperty _isVenusOn;
-    properties::BoolProperty _isEarthOn;
-    properties::BoolProperty _isMarsOn;
-    properties::BoolProperty _isJupiterOn;
-    properties::BoolProperty _isSaturnOn;
-    properties::BoolProperty _isUranusOn;
-    properties::BoolProperty _isNeptuneOn;
+    struct PlanetProperty : properties::PropertyOwner {
+        PlanetProperty(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
+
+        //Common
+        properties::BoolProperty enabled;
+        properties::BoolProperty sizeDayEnabled;
+        properties::BoolProperty gravityEnabled;
+
+        //Unique
+        properties::BoolProperty atmosphereEnabled;
+        properties::BoolProperty moonsEnabled;
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _EarthInfo = {
+        "Earth",
+        "Earth",
+        "Sonification settings for Earth"
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _MarsInfo = {
+        "Mars",
+        "Mars",
+        "Sonification settings for Mars"
+    };
+
+    PlanetProperty _earthProperty = PlanetProperty(_EarthInfo);
+    PlanetProperty _marsProperty = PlanetProperty(_MarsInfo);
 };
 
 } // namespace openspace
