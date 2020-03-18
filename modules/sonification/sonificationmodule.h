@@ -65,6 +65,15 @@ private:
     void threadMain(std::atomic<bool>& isRunning);
 
     //On change methods for each property
+    void onMercuryEnabledChanged(bool value);
+    void onMercurySizeDayChanged(bool value);
+    void onMercuryGravityChanged(bool value);
+
+    void onVenusEnabledChanged(bool value);
+    void onVenusSizeDayChanged(bool value);
+    void onVenusGravityChanged(bool value);
+    void onVenusAtmosphereChanged(bool value);
+
     void onEarthEnabledChanged(bool value);
     void onEarthSizeDayChanged(bool value);
     void onEarthGravityChanged(bool value);
@@ -134,18 +143,32 @@ private:
         properties::BoolProperty moonsEnabled;
     };
 
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _MercuryInfo = {
+        "Mercury",
+        "Mercury Sonification",
+        "Sonification settings for Mercury"
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _VenusInfo = {
+        "Venus",
+        "Venus Sonification",
+        "Sonification settings for Venus"
+    };
+
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _EarthInfo = {
         "Earth",
-        "Earth",
+        "Earth Sonification",
         "Sonification settings for Earth"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _MarsInfo = {
         "Mars",
-        "Mars",
+        "Mars Sonification",
         "Sonification settings for Mars"
     };
 
+    PlanetProperty _mercuryProperty = PlanetProperty(_MercuryInfo);
+    PlanetProperty _venusProperty = PlanetProperty(_VenusInfo);
     PlanetProperty _earthProperty = PlanetProperty(_EarthInfo);
     PlanetProperty _marsProperty = PlanetProperty(_MarsInfo);
 };

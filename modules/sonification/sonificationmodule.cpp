@@ -43,32 +43,32 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "EnabledInfo",
-        "Enable Sonification",
-        "Play Sonification or turn it off"
+        "Enable all",
+        "Play all sonifications for the planet or turn it off"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDayInfo",
-        "Size/Day Sonification",
-        "Play Size/Day Sonification or turn it off"
+        "Size/Day",
+        "Play Size/Day sonification or turn it off"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
         "GravityInfo",
-        "Gravity Sonification",
-        "Play Gravity Sonification or turn it off"
+        "Gravity",
+        "Play Gravity sonification or turn it off"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "AtmosphereInfo",
-        "Atmosphere Sonification",
-        "Play Atmosphere Sonification or turn it off"
+        "Atmosphere",
+        "Play Atmosphere sonification or turn it off"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
         "MoonsInfo",
-        "Moons Sonification",
-        "Play Moons Sonification or turn it off"
+        "Moons",
+        "Play Moons sonification or turn it off"
     };
 
 } // namespace
@@ -135,12 +135,25 @@ SonificationModule::SonificationModule()
     }
 
     //Add onChange for the properties
-    _earthProperty.enabled.onChange([this]() { onEarthEnabledChanged(_earthProperty.enabled.value()); } );
-    _earthProperty.sizeDayEnabled.onChange([this]() { onEarthSizeDayChanged(_earthProperty.sizeDayEnabled.value()); } );
-    _earthProperty.gravityEnabled.onChange([this]() { onEarthGravityChanged(_earthProperty.gravityEnabled.value()); } );
-    _earthProperty.atmosphereEnabled.onChange([this]() { onEarthAtmosphereChanged(_earthProperty.atmosphereEnabled.value()); } );
-    _earthProperty.moonsEnabled.onChange([this]() { onEarthMoonsChanged(_earthProperty.moonsEnabled.value()); } );
+    //Mercury
+    _mercuryProperty.enabled.onChange([this]() { onMercuryEnabledChanged(_mercuryProperty.enabled.value()); } );
+    _mercuryProperty.sizeDayEnabled.onChange([this]() { onMercurySizeDayChanged(_mercuryProperty.sizeDayEnabled.value()); } );
+    _mercuryProperty.gravityEnabled.onChange([this]() { onMercuryGravityChanged(_mercuryProperty.gravityEnabled.value()); } );
 
+    //Venus
+    _venusProperty.enabled.onChange([this]() { onVenusEnabledChanged(_venusProperty.enabled.value()); });
+    _venusProperty.sizeDayEnabled.onChange([this]() { onVenusSizeDayChanged(_venusProperty.sizeDayEnabled.value()); });
+    _venusProperty.gravityEnabled.onChange([this]() { onVenusGravityChanged(_venusProperty.gravityEnabled.value()); });
+    _venusProperty.atmosphereEnabled.onChange([this]() { onVenusAtmosphereChanged(_venusProperty.atmosphereEnabled.value()); });
+
+    //Earth
+    _earthProperty.enabled.onChange([this]() { onEarthEnabledChanged(_earthProperty.enabled.value()); });
+    _earthProperty.sizeDayEnabled.onChange([this]() { onEarthSizeDayChanged(_earthProperty.sizeDayEnabled.value()); });
+    _earthProperty.gravityEnabled.onChange([this]() { onEarthGravityChanged(_earthProperty.gravityEnabled.value()); });
+    _earthProperty.atmosphereEnabled.onChange([this]() { onEarthAtmosphereChanged(_earthProperty.atmosphereEnabled.value()); });
+    _earthProperty.moonsEnabled.onChange([this]() { onEarthMoonsChanged(_earthProperty.moonsEnabled.value()); });
+
+    //Mars
     _marsProperty.enabled.onChange([this]() { onMarsEnabledChanged(_marsProperty.enabled.value()); });
     _marsProperty.sizeDayEnabled.onChange([this]() { onMarsSizeDayChanged(_marsProperty.sizeDayEnabled.value()); });
     _marsProperty.gravityEnabled.onChange([this]() { onMarsGravityChanged(_marsProperty.gravityEnabled.value()); });
@@ -148,10 +161,67 @@ SonificationModule::SonificationModule()
     _marsProperty.moonsEnabled.onChange([this]() { onMarsMoonsChanged(_marsProperty.moonsEnabled.value()); });
 
     //Add the properties
+    addPropertySubOwner(_mercuryProperty);
+    addPropertySubOwner(_venusProperty);
     addPropertySubOwner(_earthProperty);
     addPropertySubOwner(_marsProperty);
 }
 
+//Mercury
+void SonificationModule::onMercuryEnabledChanged(bool value) {
+    _planets[0]._settings[0] = value;
+    _planets[0]._settings[1] = value;
+    _planets[0]._settings[2] = value;
+
+    _mercuryProperty.sizeDayEnabled = value;
+    _mercuryProperty.gravityEnabled = value;
+    _mercuryProperty.atmosphereEnabled = value;
+    _mercuryProperty.moonsEnabled = value;
+    _planets[0]._update = true;
+}
+
+void SonificationModule::onMercurySizeDayChanged(bool value) {
+    _planets[0]._settings[1] = value;
+    _planets[0]._update = true;
+}
+
+void SonificationModule::onMercuryGravityChanged(bool value) {
+    _planets[0]._settings[2] = value;
+    _planets[0]._update = true;
+}
+
+
+//Venus
+void SonificationModule::onVenusEnabledChanged(bool value) {
+    _planets[1]._settings[0] = value;
+    _planets[1]._settings[1] = value;
+    _planets[1]._settings[2] = value;
+    _planets[1]._settings[3] = value;
+
+    _venusProperty.sizeDayEnabled = value;
+    _venusProperty.gravityEnabled = value;
+    _venusProperty.atmosphereEnabled = value;
+    _venusProperty.moonsEnabled = value;
+    _planets[1]._update = true;
+}
+
+void SonificationModule::onVenusSizeDayChanged(bool value) {
+    _planets[1]._settings[1] = value;
+    _planets[1]._update = true;
+}
+
+void SonificationModule::onVenusGravityChanged(bool value) {
+    _planets[1]._settings[2] = value;
+    _planets[1]._update = true;
+}
+
+void SonificationModule::onVenusAtmosphereChanged(bool value) {
+    _planets[1]._settings[3] = value;
+    _planets[1]._update = true;
+}
+
+
+//Earth
 void SonificationModule::onEarthEnabledChanged(bool value) {
     _planets[2]._settings[0] = value;
     _planets[2]._settings[1] = value;
@@ -187,6 +257,7 @@ void SonificationModule::onEarthMoonsChanged(bool value) {
 }
 
 
+//Mars
 void SonificationModule::onMarsEnabledChanged(bool value) {
     _planets[3]._settings[0] = value;
     _planets[3]._settings[1] = value;
@@ -222,10 +293,6 @@ void SonificationModule::onMarsMoonsChanged(bool value) {
 }
 
 
-SonificationModule::~SonificationModule() {
-
-}
-
 SonificationModule::PlanetProperty::PlanetProperty(
     properties::PropertyOwner::PropertyOwnerInfo planetInfo)
     : properties::PropertyOwner(planetInfo),
@@ -241,8 +308,10 @@ SonificationModule::PlanetProperty::PlanetProperty(
     addProperty(gravityEnabled);
 
     //Unique
-    addProperty(atmosphereEnabled);
-    addProperty(moonsEnabled);
+    if(planetInfo.identifier.compare("Mercury") != 0)
+        addProperty(atmosphereEnabled);
+    if(planetInfo.identifier.compare("Mercury") != 0 && planetInfo.identifier.compare("Venus") != 0)
+        addProperty(moonsEnabled);
 }
 
 //Extract the data from the given identifier
@@ -434,10 +503,35 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 }
 
 void SonificationModule::internalDeinitialize() {
+    //Turn off the sonification in SuperCollider
+    for (int i = 0; i < NUM_PLANETS; ++i) {
+        for (int s = 0; s < NUM_SETTINGS; ++s) {
+            _planets[i]._settings[s] = false;
+        }
+
+        UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+        _stream.Clear();
+        std::string label = "/" + _planets[i]._identifier;
+        osc::Blob settingsBlob = osc::Blob(_planets[i]._settings, NUM_SETTINGS);
+        _stream << osc::BeginMessage(label.c_str()) <<
+            _planets[i]._distance << _planets[i]._angle << _previousTimeSpeed << settingsBlob;
+
+        //Add the information of the moons if any
+        for (int m = 0; m < _planets[i]._moons.size(); ++m) {
+            _stream << _planets[i]._moons[m].second;
+        }
+
+        _stream << osc::EndMessage;
+        socket.Send(_stream.Data(), _stream.Size());
+    }
+
+    //Clear data
     delete[] _buffer;
     _isRunning = false;
     if (_thread.joinable())
         _thread.join();
 }
+
+SonificationModule::~SonificationModule() { }
 
 } // namespace openspace
