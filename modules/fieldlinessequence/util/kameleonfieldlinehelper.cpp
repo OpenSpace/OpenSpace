@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -236,7 +236,8 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
                 val = interpolator->interpolate("p", p.x, p.y, p.z);
                 val *= ToKelvin;
                 val /= interpolator->interpolate("rho", p.x, p.y, p.z);
-            } else {
+            }
+            else {
                 val = interpolator->interpolate(extraScalarVars[i], p.x, p.y, p.z);
 
                 // When measuring density in ENLIL CCMC multiply by the radius^2
@@ -265,7 +266,8 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
                 // the magnetic field vector!
                 val = glm::dot(glm::vec3(x,y,z), normMagnetic);
 
-            } else {
+            }
+            else {
                 val = std::sqrt(x*x + y*y + z*z);
             }
             state.appendToExtra(i + nXtraScalars, val);
@@ -315,7 +317,8 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             ));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
-        } else {
+        }
+        else {
            extraQuantityNames.push_back(str);
         }
     }
@@ -359,11 +362,13 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                     extraMagVars.begin() + i + 3
                 );
                 i -= 3;
-            } else {
+            }
+            else {
                 extraQuantityNames.push_back(std::move(name));
             }
         }
-    } else {
+    }
+    else {
         // WRONG NUMBER OF MAGNITUDE VARIABLES.. REMOVE ALL!
         extraMagVars.clear();
         LWARNING(fmt::format(

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -86,8 +86,8 @@ public:
     struct ProgressInfo {
         float progress = 0.f;
 
-        int currentSize = -1;
-        int totalSize = -1;
+        int64_t currentSize = -1;
+        int64_t totalSize = -1;
     };
 
     void updateItem(const std::string& itemIdentifier, const std::string& itemName,
@@ -120,8 +120,8 @@ private:
         ProgressInfo progress;
 
         bool hasLocation;
-        glm::vec2 ll;
-        glm::vec2 ur;
+        glm::vec2 ll = glm::vec2(0.f);
+        glm::vec2 ur = glm::vec2(0.f);
 
         std::chrono::system_clock::time_point finishedTime;
     };

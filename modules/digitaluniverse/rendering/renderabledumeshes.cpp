@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,19 +75,6 @@ namespace {
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
         "all point."
-    };
-
-    //constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-    //    "ScaleFactor",
-    //    "Scale Factor",
-    //    "This value is used as a multiplicative factor that is applied to the apparent "
-    //    "size of each point."
-    //};
-
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "This value is used to define the color of the astronomical object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
@@ -177,7 +164,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             {
                 keyColor,
                 new Vector3Verifier<float>,
-                Optional::No,
+                Optional::Yes,
                 "Astronomical Object Color (r,g,b)."
             },
             {
@@ -249,12 +236,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-    , _textColor(
-        TextColorInfo,
-        glm::vec4(1.0f, 1.0, 1.0f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _textColor(TextColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
@@ -427,7 +409,7 @@ void RenderableDUMeshes::initializeGL() {
 }
 
 void RenderableDUMeshes::deinitializeGL() {
-    for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
@@ -483,7 +465,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
     //_program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
-    for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
         for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
@@ -723,14 +705,18 @@ bool RenderableDUMeshes::readSpeckFile() {
             continue;
         }
 
-        if (line.substr(0, 4) != "mesh") {
+        std::size_t found = line.find("mesh");
+        if (found == std::string::npos) {
+        //if (line.substr(0, 4) != "mesh") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
-            file.seekg(position);
-            break;
+            //file.seekg(position);
+            //break;
+            continue;
         }
+        else {
 
-        if (line.substr(0, 4) == "mesh") {
+        //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
             // mesh -t texnum -c colorindex -s style {
             // where textnum is the index of the texture;
@@ -876,7 +862,7 @@ bool RenderableDUMeshes::readLabelFile() {
 
         std::stringstream str(line);
 
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }

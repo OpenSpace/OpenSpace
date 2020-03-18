@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,6 +79,8 @@ public:
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                                 const glm::dvec3& targetModelSpace) const;
 
+    virtual bool renderedWithDesiredData() const;
+
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);
     bool matchesRenderBinMask(int binMask);
@@ -92,13 +94,14 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _boundingSphere;
     properties::StringProperty _renderableType;
 
+    void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
 private:
     RenderBin _renderBin = RenderBin::Opaque;
-    float _boundingSphere = 0.f;
 };
 
 } // namespace openspace

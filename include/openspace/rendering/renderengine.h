@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,7 +78,6 @@ public:
     RendererImplementation rendererImplementation() const;
 
     void updateShaderPrograms();
-    void updateFade();
     void updateRenderer();
     void updateScreenSpaceRenderables();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
@@ -92,6 +91,9 @@ public:
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float opacity);
+
+    float hdrExposure() const;
+    bool isHdrDisabled() const;
 
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
@@ -140,13 +142,20 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
+     * Take a screenshot and store in the ${SCREENSHOTS} directory
+     */
+    void takeScreenshot();
+
+    /**
+     * Get the filename of the latest screenshot
+     */
+    unsigned int latestScreenshotNumber() const;
+
+    /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
      */
     static scripting::LuaLibrary luaLibrary();
-
-    // Temporary fade functionality
-    void startFading(int direction, float fadeDuration);
 
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
@@ -154,6 +163,8 @@ public:
     glm::mat4 globalRotation() const;
     glm::mat4 screenSpaceRotation() const;
     glm::mat4 nodeRotation() const;
+
+    uint64_t frameNumber() const;
 
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
@@ -181,39 +192,56 @@ private:
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
-    properties::TriggerProperty _takeScreenshot;
-    bool _shouldTakeScreenshot = false;
     properties::BoolProperty _applyWarping;
-    properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _showFrameInformation;
+#ifdef OPENSPACE_WITH_INSTRUMENTATION
+    struct FrameInfo {
+        uint64_t iFrame;
+        double deltaTime;
+        double avgDeltaTime;
+    };
+
+    struct {
+        std::vector<FrameInfo> frames;
+        uint64_t lastSavedFrame = 0;
+        uint16_t saveEveryNthFrame = 2048;
+    } _frameInfo;
+    properties::BoolProperty _saveFrameInformation;
+#endif // OPENSPACE_WITH_INSTRUMENTATION
     properties::BoolProperty _disableMasterRendering;
 
-    float _globalBlackOutFactor = 1.f;
-    float _fadeDuration = 2.f;
-    float _currentFadeTime = 0.f;
-    int _fadeDirection = 0;
-    properties::IntProperty _nAaSamples;
+    properties::FloatProperty _globalBlackOutFactor;
+    
+    properties::BoolProperty _enableFXAA;
+
+    properties::BoolProperty _disableHDRPipeline;
     properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
+
+    properties::FloatProperty _hue;
+    properties::FloatProperty _saturation;
+    properties::FloatProperty _value;
+    
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
-
+    
     uint64_t _frameNumber = 0;
+    unsigned int _latestScreenshotNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontBig;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
-        glm::ivec4 rotation;
-        glm::ivec4 zoom;
-        glm::ivec4 roll;
+        glm::ivec4 rotation = glm::ivec4(0);
+        glm::ivec4 zoom = glm::ivec4(0);
+        glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
 };
 

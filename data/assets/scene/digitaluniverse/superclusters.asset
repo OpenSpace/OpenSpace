@@ -6,14 +6,14 @@ local textures = asset.syncedResource({
     Name = "Galaxy Superclusters Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_superclusters_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({
     Name = "Galaxy Superclusters Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_superclusters_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -21,16 +21,20 @@ local object = {
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
+        DrawElements = false,
         Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.65,
+        Opacity = 0.65,
         File = speck .. "/superclust.speck",
-        Texture = textures .. "/point3.png",
+        Texture = textures .. "/point3A.png",
         LabelFile = speck .. "/superclust.label",
-        TextColor = { 0.6, 0.6, 0.6, 1.0 },
+        TextColor = { 0.9, 0.9, 0.9, 1.0 },
         ScaleFactor = 531.0,
         TextSize = 22.44,
         TextMinSize = 8.0,
-        Unit = "Mpc"
+        Unit = "Mpc",
+        DrawLabels = true,
+        --BillboardMaxSize = 7.2,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Galaxy Superclusters",

@@ -1,0 +1,120 @@
+-- Apollo mission insignias on their locations on the Lunar surface.
+-- The insignias are invisible by default, but can be enabled using shown or hidden using
+-- the exported functions `showInsignias(interpolationDuration)` and `hideInsignias(interpolationDuration)`.
+
+local assetHelper = asset.require('util/asset_helper')
+
+local insigniasPath =  asset.syncedResource({
+    Name = "Apollo Insignias",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_insignias",
+    Version = 1
+})
+local moon = asset.require('scene/solarsystem/planets/earth/moon/moon')
+
+local landingData = {
+    {
+        Identifier = "Apollo11",
+        Name = "Apollo 11",
+        Name = "Apollo 11",
+        Texture = "apollo11.png",
+        LunarModule = {0.67409, 23.47298, 0.0},
+    },
+    {
+        Identifier = "Apollo12",
+        Name = "Apollo 12",
+        Texture = "apollo12.png",
+        LunarModule = {-3.01381, -23.41930, 0.0}    
+    },
+    {
+        Identifier = "Apollo14",
+        Name = "Apollo 14",
+        Texture = "apollo14.png",
+        LunarModule = {-3.64544, -17.47139, 0.0}
+    },
+    {
+        Identifier = "Apollo15",
+        Name = "Apollo 15",
+        Texture = "apollo15.png",
+        LunarModule = {26.13224, 3.63400, 0.0}
+    },
+    {
+        Identifier = "Apollo16",
+        Name = "Apollo 16",
+        Texture = "apollo16.png",
+        LunarModule = {-8.97341, 15.49859, 0.0}
+    },
+    {
+        Identifier = "Apollo17",
+        Name = "Apollo 17",
+        Texture = "apollo17.png",
+        LunarModule = {20.18809, 30.77475, 0.0}
+    }
+}
+
+local nodes = {}
+local size = 100000;
+
+for i = 1, #landingData do
+    local entry = landingData[i]
+    nodes[i] = {
+        Identifier = entry.Identifier .. "Insignia",
+        Parent = moon.Moon.Identifier,
+        Transform = {
+            Translation = {
+                Type = "GlobeTranslation",
+                Globe = moon.Moon.Identifier,
+                Latitude = entry.LunarModule[1],
+                Longitude = entry.LunarModule[2],
+                Altitude = entry.LunarModule[3] + size * 1.1,
+                UseHeightmap = false
+            },
+        },
+        Renderable = {
+            Type = "RenderablePlaneImageLocal",
+            Size = size,
+            Origin = "Center",
+            Billboard = true,
+            Texture = insigniasPath .. "/" .. entry.Texture,
+            Opacity = 0.0
+        },
+        GUI = {
+            Path = "/Other/Labels",
+            Name = entry.Name .. " Insignia"
+        }
+    }
+end
+
+asset.onInitialize(function () 
+    openspace.bindShortcut(
+        'Show Apollo Landing Labels',
+        'openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)',
+        'Show patches of the Apollo missions on their respective landing sites',
+        '/Missions/Apollo'
+    )
+
+    openspace.bindShortcut(
+        'Hide Apollo Landing Labels',
+        'openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)',
+        'Hide patches of the Apollo missions on their respective landing sites',
+        '/Missions/Apollo'
+    )
+end)
+
+asset.export('showInsignia', function (missinNumber, interpolationDuration)
+    openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 1, interpolationDuration)
+end)
+
+asset.export('hideInsignia', function (missinNumber, interpolationDuration)
+    openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 0, interpolationDuration)
+end)
+
+asset.export('showInsignias', function (interpolationDuration)
+    openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, interpolationDuration)
+end)
+
+asset.export('hideInsignias', function (interpolationDuration)
+    openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, interpolationDuration)
+end)
+
+assetHelper.registerSceneGraphNodesAndExport(asset, nodes)

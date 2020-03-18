@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -42,9 +42,21 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SHADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/galaxyraycast.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_ge.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/raycasterbounds_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/raycasterbounds_vs.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 create_new_module(
   "Galaxy"
   galaxy
   STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

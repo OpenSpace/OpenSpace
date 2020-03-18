@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,7 +69,7 @@ namespace {
         return "[" + formatLuaString(it.key()) + "] = " + formatLua(it);
     }
 
-    std::string formatLuaTable(const nlohmann::json& json) {
+    std::string formatObjectAsLuaTable(const nlohmann::json& json) {
         std::string output = "{";
         auto it = json.begin();
         for (size_t i = 0; i < json.size(); ++i, ++it) {
@@ -81,9 +81,24 @@ namespace {
         return output + "}";
     }
 
+    std::string formatArrayAsLuaTable(const nlohmann::json& json) {
+        std::string output = "{";
+        auto it = json.begin();
+        for (size_t i = 0; i < json.size(); ++i, ++it) {
+            output += formatLua(it);
+            if (i < json.size() - 1) {
+                output += ",";
+            }
+        }
+        return output + "}";
+    }
+
     std::string formatLua(const nlohmann::json::const_iterator& it) {
         if (it->is_object()) {
-            return formatLuaTable(it->get<nlohmann::json>());
+            return formatObjectAsLuaTable(it->get<nlohmann::json>());
+        }
+        if (it->is_array()) {
+            return formatArrayAsLuaTable(it->get<nlohmann::json>());
         }
         if (it->is_number()) {
             return fmt::format("{:E}", it->get<double>());

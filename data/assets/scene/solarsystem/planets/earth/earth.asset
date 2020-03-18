@@ -1,7 +1,7 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require('./earth_textures').TexturesPath
-local labelsPath = asset.require('./earth_labels').LabelsPath
+local labelsPath = asset.require('./earth_globelabels').LabelsPath
 
 asset.request('./trail')
 
@@ -14,12 +14,6 @@ local mapServiceConfigsPath = asset.localResource("map_service_configs")
 local Earth = {
     Identifier = "Earth",
     Parent = transforms.EarthIAU.Identifier,
-    Transform = {
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
-        }
-    },
     Renderable = {
         Type = "RenderableGlobe",
         Radii = earthEllipsoid,
@@ -97,7 +91,7 @@ local Earth = {
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                         "MODIS_Aqua_CorrectedReflectance_TrueColor",
-                        "2012-05-08",
+                        "2002-07-04",
                         "Yesterday",
                         "1d",
                         "250m",
@@ -110,7 +104,7 @@ local Earth = {
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                         "MODIS_Terra_CorrectedReflectance_TrueColor",
-                        "2012-05-08",
+                        "2000-02-24",
                         "Yesterday",
                         "1d",
                         "250m",
@@ -132,7 +126,7 @@ local Earth = {
                     Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-                        "AMSR2_Sea_Ice_Concentration_12km",
+                        "AMSRU2_Sea_Ice_Concentration_12km",
                         "2012-05-08",
                         "Yesterday",
                         "1d",
@@ -293,6 +287,45 @@ local Earth = {
     }
 }
 
+local EarthLabel = {
+    Identifier = "EarthLabel",
+    Parent = Earth.Identifier,
+    -- Transform = {
+    --     Translation = {
+    --         Type = "SpiceTranslation",
+    --         Target = "EARTH",
+    --         Observer = "EARTH BARYCENTER"
+    --     },
+    --     -- Rotation = {
+    --     --     Type = "SpiceRotation",
+    --     --     SourceFrame = "IAU_MOON",
+    --     --     DestinationFrame = "GALACTIC"
+    --     -- }
+    -- },
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Earth",
+        FontSize = 100.0,
+        LabelSize = 8.6,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        EnableFading = true,
+        FadeStartUnit = "au",
+        FadeStartDistance = 1.5,
+        FadeStartSpeed = 1.0,
+        FadeEndUnit = "au",
+        FadeEndDistance = 15.0,
+        FadeEndSpeed = 25.0
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Earth Label",
+        Path = "/Solar System/Planets/Earth"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Earth })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Earth, EarthLabel })

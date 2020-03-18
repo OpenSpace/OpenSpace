@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +57,6 @@ struct TestResult {
          */
         enum class Reason {
             MissingKey,       ///< The offending key that was requested was not found
-            ExtraKey,         ///< The exhaustive documentation contained an extra key
             WrongType,        ///< The key's value was not of the expected type
             Verification,     ///< The value did not pass a necessary non-type verifier
             UnknownIdentifier ///< The identifier for a ReferencingVerifier did not exist

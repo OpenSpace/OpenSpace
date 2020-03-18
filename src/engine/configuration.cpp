@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,7 @@ namespace {
     // These are also used in the _doc include file
     constexpr const char* KeySGCTConfig = "SGCTConfig";
     constexpr const char* KeyAsset = "Asset";
+    constexpr const char* KeyProfile = "Profile";
     constexpr const char* KeyGlobalCustomizationScripts = "GlobalCustomizationScripts";
     constexpr const char* KeyPaths = "Paths";
     constexpr const char* KeyFonts = "Fonts";
@@ -51,13 +52,9 @@ namespace {
     constexpr const char* KeyImmediateFlush = "ImmediateFlush";
     constexpr const char* KeyLogs = "Logs";
     constexpr const char* KeyCapabilitiesVerbosity = "CapabilitiesVerbosity";
-    constexpr const char* KeyLuaDocumentation = "LuaDocumentation";
-    constexpr const char* KeyPropertyDocumentation = "PropertyDocumentation";
-    constexpr const char* KeyScriptLog = "ScriptLog";
-    constexpr const char* KeyKeyboardShortcuts = "KeyboardShortcuts";
+    constexpr const char* KeyDocumentationPath = "Path";
     constexpr const char* KeyDocumentation = "Documentation";
-    constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
-    constexpr const char* KeyLicenseDocumentation = "LicenseDocumentation";
+    constexpr const char* KeyScriptLog = "ScriptLog";
     constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";
     constexpr const char* KeyPerSceneCache = "PerSceneCache";
     constexpr const char* KeyOnScreenTextScaling = "OnScreenTextScaling";
@@ -84,6 +81,7 @@ namespace {
     constexpr const char* KeyFilterSeverity = "FilterSeverity";
     constexpr const char* KeyCheckOpenGLState = "CheckOpenGLState";
     constexpr const char* KeyLogEachOpenGLCall = "LogEachOpenGLCall";
+    constexpr const char* KeyVersionCheckUrl = "VersionCheckUrl";
     constexpr const char* KeyUseMultithreadedInitialization =
                                                          "UseMultithreadedInitialization";
     constexpr const char* KeyLoadingScreen = "LoadingScreen";
@@ -195,13 +193,7 @@ namespace {
                 static_cast<Configuration::DocumentationInfo&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            d.getValue(KeyLuaDocumentation, v.lua);
-            d.getValue(KeyPropertyDocumentation, v.property);
-            d.getValue("ScenePropertyDocumentation", v.sceneProperty);
-            d.getValue(KeyKeyboardShortcuts, v.keyboard);
-            d.getValue(KeyDocumentation, v.documentation);
-            d.getValue(KeyFactoryDocumentation, v.factory);
-            d.getValue(KeyLicenseDocumentation, v.license);
+            d.getValue(KeyDocumentationPath, v.path);
         }
         // NOLINTNEXTLINE
         else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
@@ -286,10 +278,12 @@ void parseLuaState(Configuration& configuration) {
 
     getValue(s, KeySGCTConfig, c.windowConfiguration);
     getValue(s, KeyAsset, c.asset);
+    getValue(s, KeyProfile, c.profile);
     getValue(s, KeyGlobalCustomizationScripts, c.globalCustomizationScripts);
     getValue(s, KeyPaths, c.pathTokens);
     getValue(s, KeyFonts, c.fonts);
     getValue(s, KeyScriptLog, c.scriptLog);
+    getValue(s, KeyVersionCheckUrl, c.versionCheckUrl);
     getValue(s, KeyUseMultithreadedInitialization, c.useMultithreadedInitialization);
     getValue(s, KeyCheckOpenGLState, c.isCheckingOpenGLState);
     getValue(s, KeyLogEachOpenGLCall, c.isLoggingOpenGLCalls);
@@ -304,7 +298,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyMasterRotation, c.masterRotation);
     getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
-
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);
     getValue(s, KeyLoadingScreen, c.loadingScreen);

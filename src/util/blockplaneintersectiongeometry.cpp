@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,6 +79,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 
     const glm::vec3 halfSize = _size * 0.5f;
     glm::vec3 intersections[12];
+    std::fill(std::begin(intersections), std::end(intersections), glm::vec3(0.f));
     int nIntersections = 0;
 
     for (int i = 0; i < 12; i++) {
@@ -120,7 +121,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
         float sinA = glm::dot(glm::cross(vector1, vectorI), _normal);
         float cosA = glm::dot(vector1, vectorI);
-        angles[i - 1] = { i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)) };
+        angles[i - 1] = { i, glm::sign(sinA) * (1.f - cosA) };
     }
 
     // Sort the vectors by angle in the plane

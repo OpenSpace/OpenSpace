@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,11 +46,14 @@ class RenderEngine;
 class ScreenSpaceRenderable;
 class SyncEngine;
 class TimeManager;
+class VersionChecker;
 class VirtualPropertyManager;
 struct WindowDelegate;
 namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
+    struct WebsocketInputStates;
+    class InteractionMonitor;
     class KeybindingManager;
     class NavigationHandler;
     class SessionRecording;
@@ -81,10 +84,13 @@ RenderEngine& gRenderEngine();
 std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables();
 SyncEngine& gSyncEngine();
 TimeManager& gTimeManager();
+VersionChecker& gVersionChecker();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
 configuration::Configuration& gConfiguration();
+interaction::InteractionMonitor& gInteractionMonitor();
 interaction::JoystickInputStates& gJoystickInputStates();
+interaction::WebsocketInputStates& gWebsocketInputStates();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 interaction::SessionRecording& gSessionRecording();
@@ -112,11 +118,15 @@ static std::vector<std::unique_ptr<ScreenSpaceRenderable>>& screenSpaceRenderabl
     detail::gScreenspaceRenderables();
 static SyncEngine& syncEngine = detail::gSyncEngine();
 static TimeManager& timeManager = detail::gTimeManager();
+static VersionChecker& versionChecker = detail::gVersionChecker();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static configuration::Configuration& configuration = detail::gConfiguration();
+static interaction::InteractionMonitor& interactionMonitor = detail::gInteractionMonitor();
 static interaction::JoystickInputStates& joystickInputStates =
     detail::gJoystickInputStates();
+static interaction::WebsocketInputStates& websocketInputStates =
+    detail::gWebsocketInputStates();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();

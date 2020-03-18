@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,9 +55,11 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
     // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
     if (requestedType == TypeLua) {
         response = json::parse(global::scriptEngine.generateJson());
-    } else if (requestedType == TypeFactories) {
+    }
+    else if (requestedType == TypeFactories) {
         response = json::parse(FactoryManager::ref().generateJson());
-    } else if (requestedType == TypeKeyboard) {
+    }
+    else if (requestedType == TypeKeyboard) {
         response = json::parse(global::keybindingManager.generateJson());
     }
 

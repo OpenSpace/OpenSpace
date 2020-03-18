@@ -1,26 +1,26 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="127.0.0.1">
     <Node address="127.0.0.1" port="20401">
-        <Window fullScreen="false" numberOfSamples="8" border="true">
+        <Window fullScreen="false" border="true">
             <Pos x="10" y="100" />
             <Size x="1280" y="720" />
-            <Viewport>
+            <Viewport tracked="true">
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
                 <PlanarProjection>
-                    <FOV down="16.875" left="30.0" right="30.0" up="16.875" />
+                    <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
                     <Orientation heading="0.0" pitch="0.0" roll="0.0" />
                 </PlanarProjection>
             </Viewport>
         </Window>
-        <Window fullScreen="false" numberOfSamples="8" border="true">
+        <Window fullScreen="false" border="true">
             <Pos x="340" y="100" />
             <Size x="1280" y="720" />
             <Viewport>
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
                 <PlanarProjection>
-                    <FOV down="16.875" left="30.0" right="30.0" up="16.875" />
+                    <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
                     <Orientation heading="0.0" pitch="0.0" roll="0.0" />
                 </PlanarProjection>
             </Viewport>

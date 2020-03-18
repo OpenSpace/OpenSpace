@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,6 @@
 
 namespace {
     constexpr const char* KeyIdentifier = "Indentifier";
-    constexpr const char* KeyUrl = "URL";
     constexpr const char* _loggerCat = "ScreenSpaceBrowser";
 
     const openspace::properties::Property::PropertyInfo DimensionsInfo = {
@@ -44,9 +43,15 @@ namespace {
         "Set the dimensions of the web browser windows."
     };
     const openspace::properties::Property::PropertyInfo UrlInfo = {
+        "Url",
         "URL",
-        "url",
         "The URL to load"
+    };
+
+    const openspace::properties::Property::PropertyInfo ReloadInfo = {
+        "Reload",
+        "Reload",
+        "Reload the web browser"
     };
 
 } // namespace
@@ -65,25 +70,25 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _url(UrlInfo)
     , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
+    , _reload(ReloadInfo)
 {
-    if (dictionary.hasKey(KeyIdentifier)) {
-        setIdentifier(dictionary.value<std::string>(KeyIdentifier));
-    } else {
-        static int id = 0;
-        setIdentifier("ScreenSpaceBrowser " + std::to_string(id));
-        ++id;
-    }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyUrl)) {
-        _url = dictionary.value<std::string>(KeyUrl);
+    std::string identifier;
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
+    }
+    else {
+        identifier = "ScreenSpaceBrowser";
+    }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(identifier);
+
+    if (dictionary.hasKeyAndValue<std::string>(UrlInfo.identifier)) {
+        _url = dictionary.value<std::string>(UrlInfo.identifier);
     }
 
     glm::vec2 windowDimensions = global::windowDelegate.currentSubwindowSize();
     _dimensions = windowDimensions;
-
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(windowDimensions, 1.0f)
-    );
 
     _renderHandler = new ScreenSpaceRenderHandler();
     _keyboardHandler = new WebKeyboardHandler();
@@ -94,9 +99,11 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
     _url.onChange([this]() { _isUrlDirty = true; });
     _dimensions.onChange([this]() { _isDimensionsDirty = true; });
+    _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
 
     addProperty(_url);
     addProperty(_dimensions);
+    addProperty(_reload);
 
     WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
     if (webBrowser) {
@@ -104,17 +111,24 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     }
 }
 
-bool ScreenSpaceBrowser::initialize() {
-    _originalViewportSize = global::windowDelegate.currentWindowSize();
+bool ScreenSpaceBrowser::initializeGL() {
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+         glm::uvec3(_dimensions.value(), 1.0f)
+    );
+
     _renderHandler->setTexture(*_texture);
 
     createShaders();
 
+    _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
     return isReady();
 }
 
-bool ScreenSpaceBrowser::deinitialize() {
+bool ScreenSpaceBrowser::deinitializeGL() {
+    _renderHandler->setTexture(0);
+    _texture = nullptr;
+
     std::string urlString;
     _url.getStringValue(urlString);
     LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", urlString));
@@ -125,11 +139,12 @@ bool ScreenSpaceBrowser::deinitialize() {
     if (webBrowser) {
         webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();
-        return true;
+    }
+    else {
+        LWARNING("Could not find WebBrowserModule");
     }
 
-    LWARNING("Could not find WebBrowserModule");
-    return false;
+    return ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceBrowser::render() {
@@ -146,6 +161,8 @@ void ScreenSpaceBrowser::render() {
 }
 
 void ScreenSpaceBrowser::update() {
+    _objectSize = _texture->dimensions();
+
     if (_isUrlDirty) {
         _browserInstance->loadUrl(_url);
         _isUrlDirty = false;
@@ -153,13 +170,16 @@ void ScreenSpaceBrowser::update() {
 
     if (_isDimensionsDirty) {
         _browserInstance->reshape(_dimensions.value());
-        _originalViewportSize = _dimensions.value();
         _isDimensionsDirty = false;
     }
 }
 
 bool ScreenSpaceBrowser::isReady() const {
     return _shader && _texture;
+}
+
+void ScreenSpaceBrowser::bindTexture() {
+    _texture->bind();
 }
 
 } // namespace openspace

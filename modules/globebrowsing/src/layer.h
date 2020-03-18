@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,8 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 struct LayerGroup;
@@ -64,12 +66,15 @@ public:
 
     void onChange(std::function<void(Layer*)> callback);
 
-    void update();
+    // Return:  number of tiles that were updated
+    int update();
 
     glm::ivec2 tilePixelStartOffset() const;
     glm::ivec2 tilePixelSizeDifference() const;
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
         const glm::vec2& tileUV, const glm::uvec2& resolution);
+
+    static documentation::Documentation Documentation();
 
 private:
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
@@ -89,8 +94,8 @@ private:
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 
-    glm::ivec2 _padTilePixelStartOffset;
-    glm::ivec2 _padTilePixelSizeDifference;
+    glm::ivec2 _padTilePixelStartOffset = glm::ivec2(0);
+    glm::ivec2 _padTilePixelSizeDifference = glm::ivec2(0);
 
     const layergroupid::GroupID _layerGroupId;
 

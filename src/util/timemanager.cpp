@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     // Properties for time interpolation
@@ -109,7 +110,7 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     const bool pause = isPaused();
 
     const TimeKeyframeData current = { time(), deltaTime(), false, false };
-    const TimeKeyframeData next = { targetTime, targetDeltaTime(), pause, false };
+    const TimeKeyframeData next = { Time(targetTime), targetDeltaTime(), pause, false };
 
     clearKeyframes();
     addKeyframe(now, current);
@@ -129,6 +130,8 @@ void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) 
 }
 
 void TimeManager::preSynchronization(double dt) {
+    ZoneScoped
+
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
 
@@ -138,7 +141,7 @@ void TimeManager::preSynchronization(double dt) {
     if (newTime != _lastTime) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _timeChangeCallbacks) {
+        for (const std::pair<K, V>& it : _timeChangeCallbacks) {
             it.second();
         }
     }
@@ -148,14 +151,14 @@ void TimeManager::preSynchronization(double dt) {
     {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _deltaTimeChangeCallbacks) {
+        for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
             it.second();
         }
     }
     if (_timelineChanged) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _timelineChangeCallbacks) {
+        for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
             it.second();
         }
     }
@@ -190,15 +193,16 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
             *firstFutureKeyframe,
             applicationTime
         );
-    } else if (hasPastKeyframes) {
+    }
+    else if (hasPastKeyframes) {
         // Extrapolate based on last past keyframe
         const double deltaApplicationTime = applicationTime - lastPastKeyframe->timestamp;
-        Time predictedTime = {
+        Time predictedTime(
             lastPastKeyframe->data.time.j2000Seconds() +
             deltaApplicationTime *
                 (lastPastKeyframe->data.pause ? 0.0 : lastPastKeyframe->data.delta)
-        };
-        return TimeKeyframeData{
+        );
+        return TimeKeyframeData {
             predictedTime,
             lastPastKeyframe->data.delta,
             false,
@@ -206,7 +210,7 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
         };
     }
     // As the last option, fall back on the current time.
-    return TimeKeyframeData{ _currentTime, _targetDeltaTime, _timePaused, false };
+    return TimeKeyframeData { _currentTime, _targetDeltaTime, _timePaused, false };
 }
 
 void TimeManager::progressTime(double dt) {
@@ -230,7 +234,7 @@ void TimeManager::progressTime(double dt) {
 
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<const K, V>& it : _timeJumpCallbacks) {
+        for (const std::pair<K, V>& it : _timeJumpCallbacks) {
             it.second();
         }
         return;
@@ -268,9 +272,11 @@ void TimeManager::progressTime(double dt) {
 
         _currentTime.data().setTime(interpolated.time.j2000Seconds());
         _deltaTime = interpolated.delta;
-    } else if (!hasConsumedLastPastKeyframe) {
+    }
+    else if (!hasConsumedLastPastKeyframe) {
         applyKeyframeData(lastPastKeyframe->data);
-    } else if (!isPaused()) {
+    }
+    else if (!isPaused()) {
         // If there are no keyframes to consider
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
@@ -316,7 +322,7 @@ TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past
         deltaAppTime;
 
     TimeKeyframeData data {
-        interpolatedTime,
+        Time(interpolatedTime),
         interpolatedDeltaTime,
         past.data.pause,
         past.data.jump
@@ -532,9 +538,9 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
     }
 
     const double now = global::windowDelegate.applicationTime();
-
-    Time newTime = time().j2000Seconds() +
-        (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration;
+    Time newTime(
+        time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
+    );
 
     TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
     TimeKeyframeData futureKeyframe = { newTime, newDeltaTime, false, false };
@@ -556,8 +562,9 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
 
     const double now = global::windowDelegate.applicationTime();
     double targetDelta = pause ? 0.0 : _targetDeltaTime;
-    Time newTime = time().j2000Seconds() +
-        (_deltaTime + targetDelta) * 0.5 * interpolationDuration;
+    Time newTime(
+        time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
+    );
 
     TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
     TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };

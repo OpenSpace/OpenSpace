@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,10 +50,10 @@ public:
 private:
     std::string _inFilenamePrefix;
     std::string _inFilenameSuffix;
-    size_t _inFirstIndex;
-    size_t _inNSlices;
+    size_t _inFirstIndex = 0;
+    size_t _inNSlices = 0;
     std::string _outFilename;
-    glm::ivec3 _outDimensions;
+    glm::ivec3 _outDimensions = glm::ivec3(0);
 };
 
 } // namespace openspace

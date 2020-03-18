@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -147,12 +147,12 @@ public:
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
 
     /**
-     * Write information about the license information for the scenegraph nodes that are
+     * Generate JSON about the license information for the scenegraph nodes that are
      * contained in this scene
      * \param path The file path that will contain the documentation about the licenses
      * used in this scene
      */
-    void writeSceneLicenseDocumentation(const std::string& path) const;
+    std::string generateSceneLicenseDocumentationJson();
 
     /**
      * Returns a map from identifier to scene graph node.

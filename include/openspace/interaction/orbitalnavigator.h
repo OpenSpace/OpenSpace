@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,12 +31,17 @@
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
+#include <openspace/interaction/scriptcamerastates.h>
+#include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
+
+#include <optional>
 
 namespace openspace {
     class SceneGraphNode;
@@ -58,7 +63,10 @@ public:
 
     Camera* camera() const;
     void setCamera(Camera* camera);
+    void clearPreviousState();
 
+    SceneGraphNode* focusNode() const;
+    void setFocusNode(const SceneGraphNode* focusNode);
     void setFocusNode(const std::string& focusNode);
     void setAnchorNode(const std::string& anchorNode);
     void setAimNode(const std::string& aimNode);
@@ -70,8 +78,16 @@ public:
     void resetNodeMovements();
 
     JoystickCameraStates& joystickStates();
+    const JoystickCameraStates& joystickStates() const;
+    
+    WebsocketCameraStates& websocketStates();
+    const WebsocketCameraStates& websocketStates() const;
+    
+    ScriptCameraStates& scriptStates();
+    const ScriptCameraStates& scriptStates() const;
 
-    bool followingNodeRotation() const;
+    bool shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const;
+    bool followingAnchorRotation() const;
     const SceneGraphNode* anchorNode() const;
     const SceneGraphNode* aimNode() const;
 
@@ -84,13 +100,13 @@ public:
 
 private:
     struct CameraRotationDecomposition {
-        glm::dquat localRotation;
-        glm::dquat globalRotation;
+        glm::dquat localRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
+        glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
     struct CameraPose {
-        glm::dvec3 position;
-        glm::dquat rotation;
+        glm::dvec3 position = glm::dvec3(0.0);
+        glm::dquat rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
@@ -105,7 +121,6 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setFocusNode(const SceneGraphNode* focusNode);
     void setAnchorNode(const SceneGraphNode* anchorNode);
     void setAimNode(const SceneGraphNode* aimNode);
 
@@ -128,9 +143,14 @@ private:
 
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
+    properties::FloatProperty _flightDestinationDistance;
+    properties::DoubleProperty _flightDestinationFactor;
+    properties::BoolProperty _applyLinearFlight;
 
+    properties::FloatProperty _velocitySensitivity;
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
+    properties::FloatProperty _websocketSensitivity;
 
     properties::BoolProperty _useAdaptiveStereoscopicDepth;
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
@@ -142,14 +162,15 @@ private:
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
+    WebsocketCameraStates _websocketStates;
+    ScriptCameraStates _scriptStates;
 
     const SceneGraphNode* _anchorNode = nullptr;
     const SceneGraphNode* _aimNode = nullptr;
 
-    glm::dvec3 _previousAnchorNodePosition;
-    glm::dquat _previousAnchorNodeRotation;
-
-    glm::dvec3 _previousAimNodePosition;
+    std::optional<glm::dvec3>_previousAnchorNodePosition;
+    std::optional<glm::dquat> _previousAnchorNodeRotation;
+    std::optional<glm::dvec3> _previousAimNodePosition;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;
@@ -231,6 +252,18 @@ private:
         const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
+    /**
+    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the focusLimit.
+    * The velocity of the zooming depend on distFromCameraToFocus and the final frame
+    * where the camera stops moving depends on the distance set in the variable focusLimit.
+    * The bool determines whether to move/fly towards the focus node or away from it.
+    * \returns a new position of the camera, closer to the focusLimit than the previous 
+    * position.
+    */
+    glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
+        double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
+        double destination) const;
+
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor
      * node defined by the differential anchorNodeRotationDiff.
@@ -275,10 +308,8 @@ private:
     /**
      * Interpolates between rotationDiff and a 0 rotation.
      */
-    glm::dquat interpolateRotationDifferential(double deltaTime,
-        double interpolationTime, const glm::dquat& rotationDiff,
-        const glm::dvec3& objectPosition, const glm::dvec3& cameraPosition,
-        const SurfacePositionHandle& positionHandle);
+    glm::dquat interpolateRotationDifferential(double deltaTime, double interpolationTime,
+        const glm::dvec3 cameraPosition, const glm::dquat& rotationDiff);
 
     /**
      * Get the vector from the camera to the surface of the anchor object in world space.

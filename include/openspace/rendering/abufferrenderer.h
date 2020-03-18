@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,11 +62,28 @@ public:
 
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
+    void setBlurrinessLevel(int level) override;
     void setHDRExposure(float hdrExposure) override;
-    void setHDRBackground(float hdrBackground) override;
     void setGamma(float gamma) override;
+    void setMaxWhite(float maxWhite) override;
+    void setToneMapOperator(int tmOp) override;
+    void setBloomThreMin(float minV) override;
+    void setBloomThreMax(float maxV) override;
+    void setBloomOrigFactor(float origFactor) override;
+    void setBloomNewFactor(float newFactor) override;
+    void setKey(float key) override;
+    void setYwhite(float white) override;
+    void setTmoSaturation(float sat) override;
+    void setHue(float hue) override;
+    void setValue(float value) override;
+    void setSaturation(float sat) override;
+    void setLightness(float lightness) override;
+    void setColorSpace(unsigned int colorspace) override;
 
-    float hdrBackground() const override;
+    
+    void enableBloom(bool enable) override;
+    void enableHistogram(bool enable) override;
+
     int nAaSamples() const override;
     const std::vector<double>& mSSAPattern() const override;
 
@@ -95,7 +112,7 @@ private:
     void saveTextureToMemory(GLenum color_buffer_attachment, int width, int height,
         std::vector<double> & memory) const;
 
-    glm::ivec2 _resolution = glm::ivec2(0, 0);
+    glm::ivec2 _resolution = glm::ivec2(0);
 
     bool _dirtyResolution = true;
     bool _dirtyRendererData = true;
@@ -131,11 +148,29 @@ private:
     GLuint _fragmentTexture;
     GLuint _vertexPositionBuffer;
     int _nAaSamples;
+    int _blurrinessLevel = 1;
 
     float _hdrExposure = 0.4f;
     float _hdrBackground = 2.8f;
     float _gamma = 2.2f;
+    float _maxWhite = 1.f;
     float _blackoutFactor;
+    bool _bloomEnabled = false;
+    float _bloomThresholdMin = 0.0;
+    float _bloomThresholdMax = 1.0;
+    float _bloomOrigFactor = 1.0;
+    float _bloomNewFactor = 1.0;
+    int _toneMapOperator = 0;
+    bool _histogramEnabled = false;
+    int _numberOfBins = 1024; // JCC TODO: Add a parameter control for this.
+    float _tmoKey = 0.18f;
+    float _tmoYwhite = 1e6f;
+    float _tmoSaturation = 1.0f;
+    float _hue = 1.f;
+    float _saturation = 1.f;
+    float _value = 1.f;
+    float _lightness = 1.f;
+    unsigned int _colorSpace = 1;
 
     std::vector<double> _mSAAPattern;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,6 @@ struct ShadowConfiguration;
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
-    AtmosphereDeferredcaster();
     virtual ~AtmosphereDeferredcaster() = default;
 
     void initialize();
@@ -101,18 +100,25 @@ private:
     void deleteUnusedComputationTextures();
     void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
         GLsizei vertexSize);
-    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size);
+    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) const;
     void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
         int layer, bool doCalculation = true);
     void checkFrameBufferState(const std::string& codePosition) const;
     void loadAtmosphereDataIntoShaderProgram(
         std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg
-    );
-    void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices);
+    ) const;
+    void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices) const;
     void saveTextureToPPMFile(GLenum color_buffer_attachment, const std::string& fileName,
+        int width, int height) const;
+    void saveTextureToTxTFile(GLenum color_buffer_attachment, const std::string& fileName,
         int width, int height) const;
     bool isAtmosphereInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position,
         double radius) const;
+
+    //JCC: This method is used only for the ATM Paper
+    //     Given the view direction and Sun position, it saves the Sky illumination 
+    //     covering PI rad on zenith angle
+    void saveSkyLuminance() const;
 
     // Number of planet radii to use as distance threshold for culling
     const double DISTANCE_CULLING_RADII = 5000;
@@ -141,62 +147,62 @@ private:
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache2;
 
-    GLuint _transmittanceTableTexture;
-    GLuint _irradianceTableTexture;
-    GLuint _inScatteringTableTexture;
-    GLuint _deltaETableTexture;
-    GLuint _deltaSRayleighTableTexture;
-    GLuint _deltaSMieTableTexture;
-    GLuint _deltaJTableTexture;
-    GLuint _atmosphereTexture;
+    GLuint _transmittanceTableTexture = 0;
+    GLuint _irradianceTableTexture = 0;
+    GLuint _inScatteringTableTexture = 0;
+    GLuint _deltaETableTexture = 0;
+    GLuint _deltaSRayleighTableTexture = 0;
+    GLuint _deltaSMieTableTexture = 0;
+    GLuint _deltaJTableTexture = 0;
+    GLuint _atmosphereTexture = 0;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
 
     // Atmosphere Data
-    bool _atmosphereCalculated;
-    bool _ozoneEnabled;
-    bool _sunFollowingCameraEnabled;
-    float _atmosphereRadius;
-    float _atmospherePlanetRadius;
-    float _planetAverageGroundReflectance;
-    float _planetGroundRadianceEmittion;
-    float _rayleighHeightScale;
-    float _ozoneHeightScale;
+    bool _atmosphereCalculated = false;
+    bool _ozoneEnabled = true;
+    bool _sunFollowingCameraEnabled = false;
+    float _atmosphereRadius = 0.f;
+    float _atmospherePlanetRadius = 0.f;
+    float _planetAverageGroundReflectance = 0.f;
+    float _planetGroundRadianceEmittion = 0.f;
+    float _rayleighHeightScale = 0.f;
+    float _ozoneHeightScale = 0.f;
     float _mieHeightScale;
-    float _miePhaseConstant;
-    float _sunRadianceIntensity;
+    float _miePhaseConstant = 0.f;
+    float _sunRadianceIntensity = 5.f;
 
-    glm::vec3 _rayleighScatteringCoeff;
-    glm::vec3 _ozoneExtinctionCoeff;
-    glm::vec3 _mieScatteringCoeff;
-    glm::vec3 _mieAbsorptionCoeff;
-    glm::vec3 _mieExtinctionCoeff;
-    glm::dvec3 _ellipsoidRadii;
+    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0);
+    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0);
+    glm::vec3 _mieScatteringCoeff = glm::vec3(0);
+    glm::vec3 _mieAbsorptionCoeff = glm::vec3(0);
+    glm::vec3 _mieExtinctionCoeff = glm::vec3(0);
+    glm::dvec3 _ellipsoidRadii = glm::dvec3(0);
 
     // Atmosphere Textures Dimmensions
-    int _transmittance_table_width;
-    int _transmittance_table_height;
-    int _irradiance_table_width;
-    int _irradiance_table_height;
-    int _delta_e_table_width;
-    int _delta_e_table_height;
-    int _r_samples;
-    int _mu_samples;
-    int _mu_s_samples;
-    int _nu_samples;
+    int _transmittance_table_width = 256;
+    int _transmittance_table_height = 64;
+    int _irradiance_table_width = 64;
+    int _irradiance_table_height = 16;
+    int _delta_e_table_width = 64;
+    int _delta_e_table_height = 16;
+    int _r_samples = 32;
+    int _mu_samples = 128;
+    int _mu_s_samples = 32;
+    int _nu_samples = 8;
 
     glm::dmat4 _modelTransform;
     double _time = 0.0;
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;
-    bool _hardShadowsEnabled;
+    bool _hardShadowsEnabled = false;
 
     // Atmosphere Debugging
-    float _calculationTextureScale;
-    bool _saveCalculationTextures;
+    float _calculationTextureScale = 1.f;
+    bool _saveCalculationTextures = false;
 };
 
 } // openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
@@ -77,30 +78,40 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         "ScreenSpaceImageLocal"
     );
 
-    int iIdentifier = 0;
-    if (_identifier.empty()) {
-        static int id = 0;
-        iIdentifier = id;
+    std::string identifier;
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
+    }
+    else {
+        identifier = "ScreenSpaceImageLocal";
+    }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(identifier);
 
-        if (iIdentifier == 0) {
-            setIdentifier("ScreenSpaceImageLocal");
+    _texturePath.onChange([this]() {
+        if (!FileSys.fileExists(FileSys.absolutePath(_texturePath))) {
+            LWARNINGC(
+                "ScreenSpaceImageLocal",
+                fmt::format("Image {} did not exist for {}", _texturePath, _identifier)
+            );
         }
         else {
-            setIdentifier("ScreenSpaceImageLocal" + std::to_string(iIdentifier));
+            _textureIsDirty = true;
         }
-        ++id;
-    }
-
-    if (_guiName.empty()) {
-        // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("ScreenSpaceImageLocal " + std::to_string(iIdentifier));
-    }
-
-    _texturePath.onChange([this]() { _textureIsDirty = true; });
+    });
     addProperty(_texturePath);
 
     if (dictionary.hasKey(TexturePathInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TexturePathInfo.identifier);
+        std::string path = dictionary.value<std::string>(TexturePathInfo.identifier);
+        if (!FileSys.fileExists(FileSys.absolutePath(path))) {
+            LWARNINGC(
+                "ScreenSpaceImageLocal",
+                fmt::format("Image {} did not exist for {}", path, _identifier)
+            );
+        }
+        else {
+            _texturePath = path;
+        }
     }
 }
 
@@ -130,12 +141,13 @@ void ScreenSpaceImageLocal::update() {
             _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
-
     }
 }
 
 void ScreenSpaceImageLocal::bindTexture() {
-    _texture->bind();
+    if (_texture) {
+        _texture->bind();
+    }
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -290,7 +290,7 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
         _orbitPlaneDirty = false;
     }
 
-    const double t = data.time.j2000Seconds() - _epoch;
+    const double t = data.time.j2000Seconds() -_epoch;
     const double meanMotion = glm::two_pi<double>() / _period;
     const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
     const double e = eccentricAnomaly(meanAnomaly);

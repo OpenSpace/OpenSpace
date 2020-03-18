@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,10 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/vector/vec3property.h>
+
+
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -73,11 +77,14 @@ private:
     properties::StringProperty _colorTexturePath;
 
     properties::FloatProperty _ambientIntensity;
+
     properties::FloatProperty _diffuseIntensity;
     properties::FloatProperty _specularIntensity;
 
     properties::BoolProperty _performShading;
-    properties::Mat3Property _modelTransform;
+    properties::BoolProperty _disableFaceCulling;
+    properties::DMat4Property _modelTransform;
+    properties::Vec3Property _rotationVec;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,

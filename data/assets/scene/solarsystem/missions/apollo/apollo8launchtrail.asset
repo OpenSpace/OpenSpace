@@ -1,0 +1,74 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local kernelsFolder = asset.syncedResource({
+    Name = "Apollo Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_spice",
+    Version = 1
+})
+
+local kernels = {
+    kernelsFolder .. "/moon_080317.tf",
+    kernelsFolder .. "/apollo8.tf",
+    kernelsFolder .. "/moon_pa_de421_1900-2050.bpc",
+    kernelsFolder .. '/apollo8.tsc',
+    kernelsFolder .. '/apollo8.bsp',
+    kernelsFolder .. '/apollo8_earthrise.bc',
+}
+
+local apolloSpiceId = "-908"
+
+
+local Apollo8LaunchTrail = {
+    Identifier = "Apollo8LaunchTrail",
+    Parent = "Earth",
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = apolloSpiceId,
+            Observer = "EARTH",
+            Frame = "IAU_EARTH",            
+            Kernels = kernels
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1968 DEC 21 12:51:00",
+        EndTime = "1968 DEC 21 23:23:22",
+        SampleInterval = 30
+    },
+    GUI = {
+        Name = "Apollo 8 Launch Trail",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+local Apollo8EarthBarycenterTrail = {
+    Identifier = "Apollo8EarthBarycenterTrail",
+    Parent = "EarthBarycenter",
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = apolloSpiceId,
+            Observer = "EARTH BARYCENTER",
+            Frame = "GALACTIC",            
+            Kernels = kernels
+        },
+        Color = { 1, 0.0, 0.0 },
+        StartTime = "1968 DEC 21",
+        EndTime = "1968 DEC 28",
+        SampleInterval = 30,
+        Enabled = false,
+    },
+    GUI = {
+        Name = "Apollo 8 Earth Barycenter Trail",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+local exportList = {
+    Apollo8LaunchTrail,
+    Apollo8EarthBarycenterTrail,
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, exportList)

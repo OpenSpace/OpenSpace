@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="127.0.0.1">
   <Node ip="127.0.0.1" port="20401">
-    <Window fullscreen="false" fxaa="false" msaa="1" name="Spherical Projection">
+    <Window fullscreen="false" name="Spherical Projection">
       <Stereo type="none" />
       <Pos x="0" y="100" />
       <!-- 16:9 aspect ratio -->
@@ -17,6 +17,8 @@
           - 8k (8192)
         tilt specifies the dome tilt angle in degrees from the horizontal
       -->
+      <!-- mesh path is relative to working directory-->
+      <!-- NOTE, if no working directory is set, mesh must be absolute path -->
       <Viewport name="warped fisheye" mesh="mesh/standard_16x9.data">
         <Pos x="0.0" y="0.0" />
         <Size x="1.0" y="1.0" />
@@ -25,7 +27,7 @@
         </FisheyeProjection>
       </Viewport>
     </Window>
-    <Window fullScreen="false" msaa="1" name="GUI" tags="GUI">
+    <Window fullScreen="false" name="GUI" tags="GUI">
         <Stereo type="none" />
         <Size x="1280" y="720" />
         <Res x="2048" y="2048" />
@@ -34,7 +36,7 @@
             <Pos x="0.0" y="0.0" />
             <Size x="1.0" y="1.0" />
             <PlanarProjection>
-                <FOV down="16.875" left="30.0" right="30.0" up="16.875" />
+                <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
                 <Orientation heading="0.0" pitch="0.0" roll="0.0" />
             </PlanarProjection>
         </Viewport>

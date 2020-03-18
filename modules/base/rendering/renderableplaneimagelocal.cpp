@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ namespace {
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this plane. This image has to be square."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
        "RenderableType",
        "RenderableType",
@@ -85,6 +85,8 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         "RenderablePlaneImageLocal"
     );
 
+    addProperty(_blendMode);
+
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
@@ -100,7 +102,8 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         );
         if (renderType == "Background") {
             setRenderBin(Renderable::RenderBin::Background);
-        } else if (renderType == "Opaque") {
+        }
+        else if (renderType == "Opaque") {
             setRenderBin(Renderable::RenderBin::Opaque);
         }
         else if (renderType == "Transparent") {

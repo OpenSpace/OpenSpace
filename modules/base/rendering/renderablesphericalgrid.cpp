@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -137,7 +137,12 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
     }
-    _segments.onChange([&]() { _gridIsDirty = true; });
+    _segments.onChange([&]() {
+        if (_segments.value() % 2 == 1) {
+            _segments = _segments - 1;
+        }
+        _gridIsDirty = true;
+    });
     addProperty(_segments);
 
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
@@ -259,7 +264,10 @@ void RenderableSphericalGrid::update(const UpdateData&) {
         _isize = 6 * _segments * _segments;
         _vsize = (_segments + 1) * (_segments + 1);
         _varray.resize(_vsize);
+        Vertex v = { 0.f, 0.f, 0.f };
+        std::fill(_varray.begin(), _varray.end(), v);
         _iarray.resize(_isize);
+        std::fill(_iarray.begin(), _iarray.end(), 0);
 
         int nr = 0;
         const float fsegments = static_cast<float>(_segments);

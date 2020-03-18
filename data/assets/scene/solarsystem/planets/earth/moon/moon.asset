@@ -4,6 +4,7 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 local earthAsset = asset.require('../earth')
 asset.require('spice/base')
 asset.request('./trail')
+local labelsPath = asset.require('./moon_labels').LabelsPath
 
 
 
@@ -38,42 +39,68 @@ local Moon = {
                     Identifier = "WAC_Utah",
                     Name = "WAC [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/Wac.wms",
-                    Enabled = true
+                    Enabled = true,
+                    Settings = { Gamma = 0.84 }
                 },
                 {
                     Identifier = "WAC_Sweden",
                     Name = "WAC [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/WAC.wms"
+                    FilePath = mapServiceConfigs .. "/LiU/WAC.wms",
+                    Settings = { Gamma = 0.84 }
                 },
                 {
                     Identifier = "ClemUvvis_Utah",
                     Name = "Clem Uvvis [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms"
+                    FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms",
+                    Settings = {
+                        Gamma = 1.14,
+                        Multiplier = 1.4
+                    }
                 },
                 {
                     Identifier = "ClemUvvis_Sweden",
                     Name = "Clem Uvvis [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Clem_Uvvis.wms"
+                    FilePath = mapServiceConfigs .. "/LiU/Clem_Uvvis.wms",
+                    Settings = {
+                        Gamma = 1.14,
+                        Multiplier = 1.4
+                    }
                 },
                 {
                     Identifier = "UvvisHybrid_Utah",
                     Name = "Uvvis Hybrid [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms"
+                    FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms",
+                    Settings = {
+                        Gamma = 0.52,
+                        Multiplier = 0.65
+                    }
                 },
                 {
                     Identifier = "UvvisHybrid_Sweden",
                     Name = "Uvvis Hybrid [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Uvvis_Hybrid.wms"
+                    FilePath = mapServiceConfigs .. "/LiU/Uvvis_Hybrid.wms",
+                    Settings = {
+                        Gamma = 0.52,
+                        Multiplier = 0.65
+                    }
                 },
                 {
                     Identifier = "Kaguya_Utah",
                     Name = "Kaguya [Utah]",
-                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.wms"
+                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.vrt",
+                    Settings = {
+                        Gamma = 1.0,
+                        Multiplier = 1.23
+                    }
                 },
                 {
                     Identifier = "Kaguya_Sweden",
                     Name = "Kaguya [Sweden]",
-                    FilePath = mapServiceConfigs .. "/LiU/Kaguya.wms"
+                    FilePath = mapServiceConfigs .. "/LiU/Kaguya.vrt",
+                    Settings = {
+                        Gamma = 1.0,
+                        Multiplier = 1.23
+                    }
                 },
                 {
                     Identifier = "Lola_Clr_Shade_Utah",
@@ -124,6 +151,22 @@ local Moon = {
                 Name = earthAsset.Earth.Name,
                 Radius = 6.371E6
             }
+        },
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/moon.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 14.0,
+            LabelsSize = 8.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 500000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = {1.0, 1.0, 0.0, 1.0}
         }
     },
     GUI = {

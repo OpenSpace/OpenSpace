@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,9 @@
 #include <modules/space/rendering/simplespheregeometry.h>
 
 #include <openspace/documentation/verifier.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/powerscaledsphere.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/sphere.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
@@ -124,7 +124,7 @@ void SimpleSphereGeometry::createSphere() {
     const glm::vec3 radius = _radius.value();
 
     delete _sphere;
-    _sphere = new PowerScaledSphere(radius, _segments);
+    _sphere = new Sphere(radius, _segments);
     _sphere->initialize();
 }
 

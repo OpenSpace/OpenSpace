@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ public:
 
 private:
     std::function<T(float)> _transferFunction;
-    float _t = 0.f;
+    float _t = 1.f;
     float _interpolationTime = 1.f;
     float _scaledDeltaTime = 0.f;
 };

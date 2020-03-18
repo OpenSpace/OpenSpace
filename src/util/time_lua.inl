@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,8 @@ int time_setDeltaTime(lua_State* L) {
         }
         const double newDeltaTime = lua_tonumber(L, 1);
         global::timeManager.setDeltaTime(newDeltaTime);
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         const char* msg = lua_pushfstring(L,
             "Bad number of arguments. Expected 1 or 2.");
@@ -159,7 +160,8 @@ int time_togglePause(lua_State* L) {
 
     if (nArguments == 0) {
         global::timeManager.setPause(!global::timeManager.isPaused());
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -210,7 +212,8 @@ int time_interpolateTogglePause(lua_State* L) {
             global::timeManager.defaultPauseInterpolationDuration() :
             global::timeManager.defaultUnpauseInterpolationDuration()
         );
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -236,7 +239,8 @@ int time_setPause(lua_State* L) {
     if (nArguments == 1) {
         const bool pause = lua_toboolean(L, 1) == 1;
         global::timeManager.setPause(pause);
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -284,7 +288,8 @@ int time_interpolatePause(lua_State* L) {
             global::timeManager.defaultPauseInterpolationDuration() :
             global::timeManager.defaultUnpauseInterpolationDuration()
         );
-    } else {
+    }
+    else {
         lua_settop(L, 0);
         return luaL_error(
             L,
@@ -333,16 +338,17 @@ int time_setTime(lua_State* L) {
     if (nArguments == 1) {
         if (isNumber) {
             double value = lua_tonumber(L, 1);
-            global::timeManager.setTimeNextFrame(value);
+            global::timeManager.setTimeNextFrame(Time(value));
             return 0;
         }
         if (isString) {
             const char* time = lua_tostring(L, 1);
-            global::timeManager.setTimeNextFrame(Time::convertTime(time));
+            global::timeManager.setTimeNextFrame(Time(Time::convertTime(time)));
             return 0;
         }
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    } else {
+    }
+    else {
         return luaL_error(
             L,
             "bad number of arguments, expected 1 or 2, got %i",
@@ -424,7 +430,7 @@ int time_interpolateTime(lua_State* L) {
             global::timeManager.interpolateTime(targetTime, duration);
         }
         else {
-            global::timeManager.setTimeNextFrame(targetTime);
+            global::timeManager.setTimeNextFrame(Time(targetTime));
         }
     }
     return 0;
@@ -486,7 +492,7 @@ int time_interpolateTimeRelative(lua_State* L) {
         }
         else {
             global::timeManager.setTimeNextFrame(
-                global::timeManager.time().j2000Seconds() + delta
+                Time(global::timeManager.time().j2000Seconds() + delta)
             );
         }
     }

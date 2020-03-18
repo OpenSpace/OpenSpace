@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -141,6 +141,7 @@ public:
 
     HttpDownload();
     HttpDownload(HttpDownload&& d) = default;
+    HttpDownload& operator=(HttpDownload&&) = default;
     virtual ~HttpDownload() = default;
     void onProgress(ProgressCallback progressCallback);
     void onHeader(HeaderCallback headerCallback);
@@ -169,6 +170,7 @@ class SyncHttpDownload : public virtual HttpDownload {
 public:
     SyncHttpDownload(std::string url);
     SyncHttpDownload(SyncHttpDownload&& d) = default;
+    SyncHttpDownload& operator=(SyncHttpDownload&&) = default;
     virtual ~SyncHttpDownload() = default;
     void download(HttpRequest::RequestOptions opt);
 
@@ -182,6 +184,7 @@ class AsyncHttpDownload : public virtual HttpDownload {
 public:
     AsyncHttpDownload(std::string url);
     AsyncHttpDownload(AsyncHttpDownload&& d);
+    AsyncHttpDownload& operator=(AsyncHttpDownload&&) = default;
     virtual ~AsyncHttpDownload() = default;
     void start(HttpRequest::RequestOptions opt);
     void cancel();
@@ -208,6 +211,7 @@ public:
     HttpFileDownload() = default;
     HttpFileDownload(std::string destination, Overwrite = Overwrite::No);
     HttpFileDownload(HttpFileDownload&& d) = default;
+    HttpFileDownload& operator=(HttpFileDownload&&) = default;
     virtual ~HttpFileDownload() = default;
 
     const std::string& destination() const;
@@ -233,6 +237,8 @@ class HttpMemoryDownload : public virtual HttpDownload {
 public:
     HttpMemoryDownload() = default;
     HttpMemoryDownload(HttpMemoryDownload&& d) = default;
+    HttpMemoryDownload& operator=(HttpMemoryDownload&&) = default;
+
     virtual ~HttpMemoryDownload() = default;
     const std::vector<char>& downloadedData() const;
 

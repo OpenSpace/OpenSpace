@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -41,7 +41,9 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablenodeline.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.h
@@ -54,8 +56,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rotation/timelinerotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/constantrotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
@@ -65,6 +66,10 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.h
+  
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -85,7 +90,9 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablenodeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.cpp
@@ -98,8 +105,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rotation/timelinerotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/constantrotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp
@@ -109,6 +115,9 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -119,6 +128,8 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/grid_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/line_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/line_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_fs.glsl

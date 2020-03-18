@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,6 +93,21 @@ std::vector<std::function<void(double, double)>>& gMousePosition() {
 
 std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
     static std::vector<std::function<bool(double, double)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(TouchInput)>>& gTouchDetected() {
+    static std::vector<std::function<bool(TouchInput)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(TouchInput)>>& gTouchUpdated() {
+    static std::vector<std::function<bool(TouchInput)>> g;
+    return g;
+}
+
+std::vector<std::function<void(TouchInput)>>& gTouchExit() {
+    static std::vector<std::function<void(TouchInput)>> g;
     return g;
 }
 

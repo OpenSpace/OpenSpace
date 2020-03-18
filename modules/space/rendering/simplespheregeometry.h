@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 
 namespace openspace {
     class Renderable;
-    class PowerScaledSphere;
+    class Sphere;
 } // namespace openspace
 
 namespace openspace::documentation { struct Documentation; }
@@ -57,7 +57,7 @@ private:
 
     properties::Vec3Property _radius;
     properties::IntProperty _segments;
-    PowerScaledSphere* _sphere;
+    Sphere* _sphere;
 };
 
 } // namespace openspace::planetgeometry

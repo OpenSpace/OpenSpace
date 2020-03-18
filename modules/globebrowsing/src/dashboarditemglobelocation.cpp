@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -173,9 +173,16 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     bool isEast = lon > 0.0;
     lon = std::abs(lon);
 
-    const double altitude = glm::length(
+    double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
     );
+
+    if (glm::length(cameraPositionModelSpace) <
+        glm::length(posHandle.centerToReferenceSurface))
+    {
+        altitude = -altitude;
+    }
+
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
     penPosition.y -= _font->height();

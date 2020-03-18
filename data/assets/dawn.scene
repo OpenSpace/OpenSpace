@@ -1,42 +1,21 @@
-local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
+asset.require('./base')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.request('scene/solarsystem/planets')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
 asset.require('scene/solarsystem/missions/dawn/ceres')
 asset.require('scene/solarsystem/missions/dawn/dawn')
 asset.require('scene/solarsystem/missions/dawn/vesta')
 
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-
-asset.require('util/webgui')
-
 local DawnAsset = asset.require('scene/solarsystem/missions/dawn/dawn')
-
 asset.onInitialize(function ()
     openspace.time.setTime("2011 AUG 06 00:00:00")
 
-    openspace.setDefaultGuiSorting()
+    openspace.markInterestingNodes({ "Dawn", "Ceres", "Vesta" })
 
-    openspace.markInterestingNodes({
-        "Dawn", "Ceres", "Vesta"
-    })
-
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = DawnAsset.Dawn.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
-        Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
     })
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({
-        "Dawn", "Ceres", "Vesta"
-    })
+    openspace.removeInterestingNodes({ "Dawn", "Ceres", "Vesta" })
 end)

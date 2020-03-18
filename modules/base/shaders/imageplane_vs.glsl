@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+// @TODO (abock, 2019-12-27) Move this file to the spacecraftinstruments module
+
 #version __CONTEXT__
 
 #include "PowerScaling/powerScaling_vs.hglsl"
@@ -36,7 +38,7 @@ uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
-    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+    vec4 position = vec4(in_position.xyz, 1);
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     vec4 positionScreenSpace = z_normalization(positionClipSpace);
 

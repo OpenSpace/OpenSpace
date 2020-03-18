@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,7 +58,7 @@ double StaticScale::scaleValue(const UpdateData&) const {
     return _scaleValue;
 }
 
-StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6) {
+StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.f, 0.1f, 100.f) {
     addProperty(_scaleValue);
 
     _scaleValue.onChange([this]() {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -544,6 +545,8 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 }
 
 void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+    ZoneScoped
+
     const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
 
     PerfMeasure("ABufferRenderer::render");
@@ -702,6 +705,14 @@ void ABufferRenderer::setNAaSamples(int nAaSamples) {
     _dirtyResolution = true;
 }
 
+void ABufferRenderer::setBlurrinessLevel(int level) {
+    ghoul_assert(
+        level > 0 && nAaSamples < 4,
+        "Blurriness level has to be between 1 and 3"
+    );
+    _blurrinessLevel = level;
+}
+
 void ABufferRenderer::setHDRExposure(float hdrExposure) {
     _hdrExposure = hdrExposure;
     if (_hdrExposure < 0.f) {
@@ -709,15 +720,6 @@ void ABufferRenderer::setHDRExposure(float hdrExposure) {
         _hdrExposure = 1.0;
     }
 }
-
-void ABufferRenderer::setHDRBackground(float hdrBackground) {
-    _hdrBackground = hdrBackground;
-    if (_hdrBackground < 0.f) {
-        LERROR("HDR Background constant must be greater than zero.");
-        _hdrBackground = 1.0;
-    }
-}
-
 
 void ABufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
@@ -727,8 +729,72 @@ void ABufferRenderer::setGamma(float gamma) {
     }
 }
 
-float ABufferRenderer::hdrBackground() const {
-    return _hdrBackground;
+void ABufferRenderer::setMaxWhite(float maxWhite) {
+    _maxWhite = maxWhite;
+}
+
+void ABufferRenderer::setToneMapOperator(int tmOp) {
+    _toneMapOperator = tmpOp;
+};
+
+void ABufferRenderer::setToneMapOperator(int tmOp) {
+    _toneMapOperator = tmOp;
+}
+
+void ABufferRenderer::setBloomThreMin(float minV) {
+    _bloomThresholdMin = minV;
+}
+
+void ABufferRenderer::setBloomThreMax(float maxV) {
+    _bloomThresholdMax = maxV;
+}
+
+void ABufferRenderer::setBloomOrigFactor(float origFactor) {
+    _bloomOrigFactor = origFactor;
+}
+
+void ABufferRenderer::setBloomNewFactor(float newFactor) {
+    _bloomNewFactor = newFactor;
+}
+
+void ABufferRenderer::setKey(float key) {
+    _tmoKey = key;
+}
+
+void ABufferRenderer::setYwhite(float white) {
+    _tmoYwhite = white;
+}
+
+void ABufferRenderer::setTmoSaturation(float sat) {
+    _tmoSaturation = sat;
+}
+
+void ABufferRenderer::setHue(float hue) {
+    _hue = hue;
+}
+
+void ABufferRenderer::setValue(float value) {
+    _value = value;
+}
+
+void ABufferRenderer::setSaturation(float sat) {
+    _saturation = sat;
+}
+
+void ABufferRenderer::setLightness(float lightness) {
+    _lightness = lightness;
+}
+
+void ABufferRenderer::setColorSpace(unsigned int colorspace) {
+    _colorSpace = colorspace;
+}
+
+void ABufferRenderer::enableBloom(bool enable) {
+    _bloomEnabled = enable;
+}
+
+void ABufferRenderer::enableHistogram(bool enable) {
+    _histogramEnabled = enable;
 }
 
 int ABufferRenderer::nAaSamples() const {
@@ -909,7 +975,8 @@ void ABufferRenderer::updateRaycastData() {
 
         if (helperPath.empty()) {
             data.namespaceName = "NAMESPACE_" + std::to_string(nextNamespaceIndex++);
-        } else {
+        }
+        else {
             auto iter = namespaceIndices.find(helperPath);
             if (iter == namespaceIndices.end()) {
                 int namespaceIndex = nextNamespaceIndex++;

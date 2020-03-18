@@ -16,6 +16,7 @@ local Atmosphere = {
             PlanetRadius    = 6377.0,
             PlanetAverageGroundReflectance = 0.1,
             GroundRadianceEmittion = 0.6,
+            SunIntensity = 6.9,
             Rayleigh = {
               Coefficients = {
                 -- Wavelengths are given in 10^-9m

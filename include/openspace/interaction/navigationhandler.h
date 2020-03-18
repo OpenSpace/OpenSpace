@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,18 @@
 #ifndef __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 #define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
-#include <openspace/properties/propertyowner.h>
-
+#include <openspace/documentation/documentation.h>
+#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/keyframenavigator.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
+#include <optional>
 
 namespace openspace {
     class Camera;
@@ -43,11 +48,31 @@ namespace openspace::scripting { struct LuaLibrary; }
 namespace openspace::interaction {
 
 struct JoystickInputStates;
+struct WebsocketInputStates;
 class KeyframeNavigator;
 class OrbitalNavigator;
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
+    struct NavigationState {
+        NavigationState() = default;
+        NavigationState(const ghoul::Dictionary& dictionary);
+        NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
+            glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
+            double yaw = 0.0, double pitch = 0.0);
+
+        ghoul::Dictionary dictionary() const;
+        static documentation::Documentation Documentation();
+
+        std::string anchor;
+        std::string aim;
+        std::string referenceFrame;
+        glm::dvec3 position = glm::dvec3(0.0);
+        std::optional<glm::dvec3> up;
+        double yaw = 0.0;
+        double pitch = 0.0;
+    };
+
     NavigationHandler();
     ~NavigationHandler();
 
@@ -55,10 +80,14 @@ public:
     void deinitialize();
 
     // Mutators
+
+    void setFocusNode(SceneGraphNode* node);
+    void resetCameraDirection();
+
+    void setNavigationStateNextFame(NavigationState state);
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
 
-    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void updateCamera(double deltaTime);
     void setEnableKeyFrameInteraction();
     void setDisableKeyFrameInteraction();
@@ -66,12 +95,12 @@ public:
     void stopPlayback();
 
     // Accessors
-    ghoul::Dictionary cameraStateDictionary();
     Camera* camera() const;
+    const SceneGraphNode* anchorNode() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
-    KeyframeNavigator& keyframeNavigator() const;
+    KeyframeNavigator& keyframeNavigator();
     bool isKeyFrameInteractionEnabled() const;
     float interpolationTime() const;
 
@@ -100,10 +129,22 @@ public:
     void clearJoystickButtonCommand(int button);
     std::vector<std::string> joystickButtonCommand(int button) const;
 
+    // Websockets
+    void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
+        WebsocketCameraStates::AxisInvert shouldInvert =
+        WebsocketCameraStates::AxisInvert::No,
+        WebsocketCameraStates::AxisNormalize shouldNormalize =
+        WebsocketCameraStates::AxisNormalize::No);
+    
+    NavigationState navigationState() const;
+    NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
+    void saveNavigationState(const std::string& filepath,
+        const std::string& referenceFrameIdentifier);
 
-    void saveCameraStateToFile(const std::string& filepath);
-    void restoreCameraStateFromFile(const std::string& filepath);
+    void loadNavigationState(const std::string& filepath);
+
+    void setNavigationStateNextFrame(NavigationState state);
 
     /**
     * \return The Lua library that contains all Lua functions available to affect the
@@ -112,16 +153,20 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    bool _cameraUpdatedFromScript = false;
+    void applyNavigationState(const NavigationHandler::NavigationState& ns);
+
     bool _playbackModeEnabled = false;
 
-    std::unique_ptr<InputState> _inputState;
+    InputState _inputState;
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
-    std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
+    OrbitalNavigator _orbitalNavigator;
+    KeyframeNavigator _keyframeNavigator;
 
+    std::optional<NavigationState> _pendingNavigationState;
+
+    properties::BoolProperty _disableInputs;
     properties::BoolProperty _useKeyFrameInteraction;
 };
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/util/syncdata.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
 
 namespace openspace {
@@ -58,12 +59,16 @@ void SyncEngine::decodeSyncables(std::vector<char> data) {
 }
 
 void SyncEngine::preSynchronization(IsMaster isMaster) {
+    ZoneScoped
+
     for (Syncable* syncable : _syncables) {
         syncable->preSync(isMaster);
     }
 }
 
 void SyncEngine::postSynchronization(IsMaster isMaster) {
+    ZoneScoped
+
     for (Syncable* syncable : _syncables) {
         syncable->postSync(isMaster);
     }

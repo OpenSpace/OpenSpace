@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,13 @@ int addDashboardItem(lua_State* L) {
         }
         lua_settop(L, 0);
 
-        global::dashboard.addDashboardItem(DashboardItem::createFromDictionary(d));
+        try {
+            global::dashboard.addDashboardItem(DashboardItem::createFromDictionary(d));
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC("addDashboardItem", e.what());
+            return ghoul::lua::luaError(L, "Error adding dashboard item");
+        }
 
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;

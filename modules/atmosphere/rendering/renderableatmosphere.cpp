@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -237,7 +237,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _atmosphereHeightP(AtmosphereHeightInfo, 60.0f, 0.1f, 99.0f)
     , _groundAverageReflectanceP(AverageGroundReflectanceInfo, 0.1f, 0.0f, 1.0f)
     , _groundRadianceEmittionP(GroundRadianceEmittioninfo, 0.3f, 0.0f, 1.0f)
-    , _rayleighHeightScaleP(RayleighHeightScaleInfo, 8.0f, 0.1f, 20.0f)
+    , _rayleighHeightScaleP(RayleighHeightScaleInfo, 8.0f, 0.1f, 50.0f)
     , _rayleighScatteringCoeffXP(RayleighScatteringCoeffXInfo, 1.0f, 0.01f, 100.0f)
     , _rayleighScatteringCoeffYP(RayleighScatteringCoeffYInfo, 1.0f, 0.01f, 100.0f)
     , _rayleighScatteringCoeffZP(RayleighScatteringCoeffZInfo, 1.0f, 0.01f, 100.0f)
@@ -266,26 +266,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunIntensityP(SunIntensityInfo, 50.0f, 0.1f, 1000.0f)
     , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
-    , _atmosphereEnabled(false)
-    , _ozoneLayerEnabled(false)
-    , _sunFollowingCameraEnabled(false)
-    , _atmosphereRadius(0.f)
-    , _atmospherePlanetRadius(0.f)
-    , _planetAverageGroundReflectance(0.f)
-    , _planetGroundRadianceEmittion(0.f)
-    , _rayleighHeightScale(0.f)
-    , _ozoneHeightScale(0.f)
-    , _mieHeightScale(0.f)
-    , _miePhaseConstant(0.f)
-    , _sunRadianceIntensity(50.f)
-    , _mieExtinctionCoeff(glm::vec3(0.f))
-    , _rayleighScatteringCoeff(glm::vec3(0.f))
-    , _ozoneExtinctionCoeff(glm::vec3(0.f))
-    , _mieScatteringCoeff(glm::vec3(0.f))
-    , _saveCalculationsToTexture(false)
-    , _preCalculatedTexturesScale(1.0)
-    , _shadowEnabled(false)
-    , _hardShadows(false)
  {
     ghoul_precondition(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyIdentifier),
@@ -415,6 +395,17 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 "Atmosphere Effects. Disabling atmosphere effects for this planet."
             );
         }
+        
+        if (atmosphereDictionary.hasKey(SunIntensityInfo.identifier)) {
+            _sunRadianceIntensity =
+                atmosphereDictionary.value<float>(SunIntensityInfo.identifier);
+        }
+        
+        if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier)) {
+            _mieScattExtPropCoefProp = atmosphereDictionary.value<float>(
+                MieScatteringExtinctionPropCoeffInfo.identifier
+            );
+        }
 
         if (!atmosphereDictionary.getValue(
                 GroundRadianceEmittioninfo.identifier,
@@ -433,7 +424,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
         if (success) {
             // Not using right now.
-            glm::vec3 rayleighWavelengths;
+            glm::vec3 rayleighWavelengths = glm::vec3(0.f);
             rayleighDictionary.getValue(
                 "Coefficients.Wavelengths",
                 rayleighWavelengths
@@ -452,8 +443,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             }
 
             if (!rayleighDictionary.getValue(
-                    keyRayleighHeightScale,
-                    _rayleighHeightScale))
+                keyRayleighHeightScale,
+                _rayleighHeightScale)
+            )
             {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
@@ -653,6 +645,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
             _mieScatteringExtinctionPropCoefficientP =
                 _mieScatteringCoeff.x / _mieExtinctionCoeff.x;
+
             _mieScatteringExtinctionPropCoefficientP.onChange(updateAtmosphere);
             addProperty(_mieScatteringExtinctionPropCoefficientP);
 

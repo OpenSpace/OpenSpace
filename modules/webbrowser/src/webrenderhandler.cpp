@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,18 +71,21 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     const glm::ivec2 rectSize = upperUpdatingRectBound - lowerUpdatingRectBound;
     if (rectSize.x > 0 && rectSize.y > 0) {
         _textureIsDirty = true;
-    } else {
+    }
+    else {
         return;
     }
 
     // Copy the updated rectangle line by line.
     for (int y = lowerUpdatingRectBound.y; y < upperUpdatingRectBound.y; ++y) {
         int lineOffset = y * w + lowerUpdatingRectBound.x;
+        // Chromium stores image upside down compared to OpenGL, so we flip it:
+        int invLineOffset = (h - y - 1) * w + lowerUpdatingRectBound.x;
         int rectWidth = upperUpdatingRectBound.x - lowerUpdatingRectBound.x;
         std::copy(
             reinterpret_cast<const Pixel*>(buffer) + lineOffset,
             reinterpret_cast<const Pixel*>(buffer) + lineOffset + rectWidth,
-            _browserBuffer.data() + lineOffset
+            _browserBuffer.data() + invLineOffset
         );
     }
 
@@ -115,7 +118,8 @@ void WebRenderHandler::updateTexture() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glBindTexture(GL_TEXTURE_2D, 0);
-    } else if (_textureIsDirty) {
+    }
+    else if (_textureIsDirty) {
         glBindTexture(GL_TEXTURE_2D, _texture);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, _browserBufferSize.x);
 
@@ -123,14 +127,15 @@ void WebRenderHandler::updateTexture() {
             GL_TEXTURE_2D,
             0,
             _lowerDirtyRectBound.x,
-            _lowerDirtyRectBound.y,
+            _browserBufferSize.y - _upperDirtyRectBound.y,
             _upperDirtyRectBound.x - _lowerDirtyRectBound.x,
             _upperDirtyRectBound.y - _lowerDirtyRectBound.y,
             GL_BGRA_EXT,
             GL_UNSIGNED_BYTE,
             reinterpret_cast<char*>(
                 _browserBuffer.data() +
-                _lowerDirtyRectBound.y * _browserBufferSize.x + _lowerDirtyRectBound.x
+                (_browserBufferSize.y - _upperDirtyRectBound.y) *
+                _browserBufferSize.x + _lowerDirtyRectBound.x
             )
         );
 
@@ -148,7 +153,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
     if (_browserBuffer.empty()) {
         return false;
     }
-    int index = x + (_browserBufferSize.x * y);
+    int index = x + _browserBufferSize.x * (_browserBufferSize.y - y - 1);
     index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
     return _browserBuffer[index].a;
 }

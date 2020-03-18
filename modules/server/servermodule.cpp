@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <ghoul/io/socket/websocket.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
@@ -72,37 +73,43 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
 }
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    using namespace ghoul::io;
+    global::callback::preSync.emplace_back([this]() {
+        ZoneScopedN("ServerModule")
 
-    if (configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
-        ghoul::Dictionary interfaces =
-            configuration.value<ghoul::Dictionary>(KeyInterfaces);
+        preSync();
+    });
 
-        for (std::string& key : interfaces.keys()) {
-            if (!interfaces.hasValue<ghoul::Dictionary>(key)) {
-                continue;
-            }
-            ghoul::Dictionary interfaceDictionary =
-                interfaces.value<ghoul::Dictionary>(key);
+    if (!configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
+        return;
+    }
+    ghoul::Dictionary interfaces = configuration.value<ghoul::Dictionary>(KeyInterfaces);
 
-            std::unique_ptr<ServerInterface> serverInterface =
-                ServerInterface::createFromDictionary(interfaceDictionary);
+    for (const std::string& key : interfaces.keys()) {
+        ghoul::Dictionary interfaceDictionary = interfaces.value<ghoul::Dictionary>(key);
+
+        // @TODO (abock, 2019-09-17);  This is a hack to make the parsing of the 
+        // openspace.cfg file not corrupt the heap and cause a potential crash at shutdown
+        // (see ticket https://github.com/OpenSpace/OpenSpace/issues/982)
+        // The AllowAddresses are specified externally and are injected here
+        interfaceDictionary.setValue(
+            "AllowAddresses",
+            configuration.value<ghoul::Dictionary>("AllowAddresses")
+        );
+
+        std::unique_ptr<ServerInterface> serverInterface =
+            ServerInterface::createFromDictionary(interfaceDictionary);
 
 
-            if (global::windowDelegate.isMaster()) {
-                serverInterface->initialize();
-            }
-
-            _interfaceOwner.addPropertySubOwner(serverInterface.get());
-
-            if (serverInterface) {
-                _interfaces.push_back(std::move(serverInterface));
-            }
+        if (global::windowDelegate.isMaster()) {
+            serverInterface->initialize();
         }
 
-    }
+        _interfaceOwner.addPropertySubOwner(serverInterface.get());
 
-    global::callback::preSync.emplace_back([this]() { preSync(); });
+        if (serverInterface) {
+            _interfaces.push_back(std::move(serverInterface));
+        }
+    }
 }
 
 void ServerModule::preSync() {
@@ -154,6 +161,8 @@ void ServerModule::preSync() {
 }
 
 void ServerModule::cleanUpFinishedThreads() {
+    ZoneScoped
+
     for (ConnectionData& connectionData : _connections) {
         Connection& connection = *connectionData.connection;
         if (!connection.socket() || !connection.socket()->isConnected()) {
@@ -173,6 +182,8 @@ void ServerModule::cleanUpFinishedThreads() {
 }
 
 void ServerModule::disconnectAll() {
+    ZoneScoped
+
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (global::windowDelegate.isMaster()) {
             serverInterface->deinitialize();
@@ -190,6 +201,8 @@ void ServerModule::disconnectAll() {
 }
 
 void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
+    ZoneScoped
+
     std::string messageString;
     while (connection->socket()->getMessage(messageString)) {
         std::lock_guard<std::mutex> lock(_messageQueueMutex);
@@ -198,6 +211,8 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
 }
 
 void ServerModule::consumeMessages() {
+    ZoneScoped
+
     std::lock_guard<std::mutex> lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();

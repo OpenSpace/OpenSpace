@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -298,7 +298,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10000.f)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -598,6 +598,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
             continue;
         }
 
+        // We only bind a new texture when it is needed
         if (currentTextureIndex != pAMapItem.first) {
             _textureMap[pAMapItem.first]->bind();
             currentTextureIndex = pAMapItem.first;
@@ -708,12 +709,14 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
-        double distCamera = glm::length(data.camera.positionVec3());
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        distCamera /= scale;
         const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        //const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
+        const float a = 1.f / ((fadeRange.y - fadeRange.x));
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const float funcValue = static_cast<float>(a * distCamera + b);
-        fadeInVariable *= std::min(funcValue, 1.f);
+        const float funcValue = a * distCamera + b;
+        fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
 
         if (funcValue < 0.01f) {
             return;
@@ -844,7 +847,7 @@ bool RenderablePlanesCloud::loadData() {
 
 bool RenderablePlanesCloud::loadTextures() {
     if (!_textureFileMap.empty()) {
-        for (const std::pair<int, std::string>& pair : _textureFileMap) {
+        for (const std::pair<const int, std::string>& pair : _textureFileMap) {
             const auto& p = _textureMap.insert(std::make_pair(
                 pair.first,
                 ghoul::io::TextureReader::ref().loadTexture(pair.second)
@@ -881,7 +884,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::streampos position = file.tellg();
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
@@ -900,9 +902,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
             line.substr(0, 10) != "polyorivar" &&
             line.substr(0, 10) != "maxcomment")
         {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
+            // Started reading data
             break;
         }
 
@@ -993,9 +993,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
     _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
 
     do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
-        std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
@@ -1004,6 +1001,11 @@ bool RenderablePlanesCloud::readSpeckFile() {
         }
 
         if (line.empty()) {
+            std::getline(file, line);
+            continue;
+        }
+        else if (line[0] == '#') {
+            std::getline(file, line);
             continue;
         }
 
@@ -1012,6 +1014,8 @@ bool RenderablePlanesCloud::readSpeckFile() {
         glm::vec3 u(0.f);
         glm::vec3 v(0.f);
         int textureIndex = 0;
+
+        std::vector<float> values(_nValuesPerAstronomicalObject);
 
         for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
             str >> values[i];
@@ -1046,6 +1050,9 @@ bool RenderablePlanesCloud::readSpeckFile() {
             }
         }
         _fullData.insert(_fullData.end(), values.begin(), values.end());
+
+        // reads new line
+        std::getline(file, line);
     } while (!file.eof());
 
     return true;
@@ -1111,7 +1118,7 @@ bool RenderablePlanesCloud::readLabelFile() {
 
         std::stringstream str(line);
 
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }

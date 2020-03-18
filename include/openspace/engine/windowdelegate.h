@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,8 @@
 namespace openspace {
 
 struct WindowDelegate {
+    enum class Frustum { Mono, LeftEye, RightEye };
+
     void (*terminate)() = [](){};
 
     void (*setBarrier)(bool enabled) = [](bool) {};
@@ -72,8 +74,6 @@ struct WindowDelegate {
 
     int (*currentNumberOfAaSamples)() = []() { return 1; };
 
-    bool (*isRegularRendering)() = []() { return true; };
-
     bool (*hasGuiWindow)() = []() { return false; };
 
     bool (*isGuiWindow)() = []() { return false; };
@@ -96,16 +96,12 @@ struct WindowDelegate {
 
     glm::ivec4 (*viewportPixelCoordinates)() = []() { return glm::ivec4(0, 0, 0, 0); };
 
-    bool (*isExternalControlConnected)() = []() { return false; };
-
     void (*sendMessageToExternalControl)(const std::vector<char>& message) =
         [](const std::vector<char>&) {};
 
-    bool (*isSimpleRendering)() = []() { return true; };
-
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    void (*takeScreenshot)(bool applyWarping) = [](bool) { };
+    unsigned int(*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };
 
     void (*swapBuffer)() = []() {};
 
@@ -116,11 +112,19 @@ struct WindowDelegate {
     double (*getHorizFieldOfView)() = []() { return 0.0; };
 
     void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
+    
+    void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* { 
+        return nullptr; 
+    };
 
     using GLProcAddress = void(*)(void);
 
     GLProcAddress (*openGLProcedureAddress)(const char*) =
         [](const char*) -> GLProcAddress { return []() {}; };
+
+    Frustum (*frustumMode)() = []() { return Frustum::Mono; };
+
+    uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 };
 
 } // namespace openspace

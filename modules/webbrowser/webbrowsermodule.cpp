@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
@@ -72,7 +73,11 @@ WebBrowserModule::WebBrowserModule()
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
 {
-    global::callback::deinitialize.emplace_back([this]() { deinitialize(); });
+    global::callback::deinitialize.emplace_back([this]() {
+        ZoneScopedN("WebBrowserModule")
+
+        deinitialize();
+    });
 
     _browserUpdateInterval.onChange([this]() {
         webbrowser::interval = std::chrono::microseconds(
@@ -94,11 +99,13 @@ WebBrowserModule::WebBrowserModule()
 }
 
 void WebBrowserModule::internalDeinitialize() {
+    ZoneScoped
+
     if (!_enabled) {
         return;
     }
 
-    _eventHandler.detachBrowser();
+    _eventHandler.resetBrowserInstance();
 
     bool forceBrowserShutdown = true;
     for (BrowserInstance* browser : _browsers) {
@@ -118,9 +125,12 @@ std::string WebBrowserModule::findHelperExecutable() {
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+    ZoneScoped
+
     if (dictionary.hasKeyAndValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
-    } else {
+    }
+    else {
         _webHelperLocation = findHelperExecutable();
     }
 
@@ -142,16 +152,6 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(_webHelperLocation);
     LDEBUG("Starting CEF... done!");
 
-    global::callback::preSync.emplace_back([this]() {
-        if (_cefHost && !_browsers.empty()) {
-            _cefHost->doMessageLoopWork();
-
-            const std::chrono::time_point<std::chrono::high_resolution_clock> timeAfter =
-                std::chrono::high_resolution_clock::now();
-            webbrowser::latestCall = timeAfter;
-        }
-    });
-
     if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
         _updateBrowserBetweenRenderables =
             dictionary.value<bool>(UpdateBrowserBetweenRenderablesInfo.identifier);
@@ -172,6 +172,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 }
 
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
+    ZoneScoped
+
     if (_enabled) {
         _browsers.push_back(browser);
         if (_updateBrowserBetweenRenderables) {
@@ -187,7 +189,8 @@ void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
     const auto p = std::find(_browsers.begin(), _browsers.end(), browser);
     if (p != _browsers.end()) {
         _browsers.erase(p);
-    } else {
+    }
+    else {
         LWARNING("Could not find browser in list of browsers.");
     }
 
@@ -218,14 +221,18 @@ bool WebBrowserModule::isEnabled() const {
     return _enabled;
 }
 
-namespace webbrowser {
-
 /**
  * Logic for the webbrowser performance hotfix,
  * described in more detail in globalscallbacks.h.
  */
+namespace webbrowser {
 
-std::chrono::microseconds interval = std::chrono::microseconds(1);
+ /**
+* The time interval to describe how often the CEF message loop needs to
+* be pumped to work properly. A value of 10000 us updates CEF a 100 times
+* per second which is enough for fluid interaction without wasting resources
+*/
+std::chrono::microseconds interval = std::chrono::microseconds(10000);
 std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 CefHost* cefHost = nullptr;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_CEFWEBGUI___CEFWEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
+#include <modules/webgui/webguimodule.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -53,6 +55,8 @@ private:
     properties::StringProperty _url;
     properties::FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
+
+    WebGuiModule::CallbackHandle _endpointCallback = -1;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -52,6 +53,12 @@ namespace {
         "Renderable Type",
         "This tells the type of the renderable.",
         openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
+        "BoundingSphere",
+        "Bounding Sphere",
+        "The size of the bounding sphere radius."
     };
 
 } // namespace
@@ -109,7 +116,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
+    , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
 {
+    ZoneScoped
+
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
 
@@ -118,7 +128,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
-    } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+    }
+    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         const std::vector<std::string>& keys = tagNames.keys();
         for (const std::string& key : keys) {
@@ -134,16 +145,28 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(OpacityInfo.identifier)) {
-        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
+        _opacity = static_cast<float>(dictionary.value<double>(
+            OpacityInfo.identifier)
+       );
     }
 
     addProperty(_enabled);
 
     //set type for UI
     if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        _renderableType = dictionary.value<std::string>(RenderableTypeInfo.identifier);
+        _renderableType = dictionary.value<std::string>(
+            RenderableTypeInfo.identifier
+       );
     }
+
+    if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
+        _boundingSphere = static_cast<float>(
+            dictionary.value<double>(BoundingSphereInfo.identifier)
+       );
+    }
+
     addProperty(_renderableType);
+    addProperty(_boundingSphere);
 }
 
 void Renderable::initialize() {}
@@ -177,6 +200,10 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     };
 }
 
+bool Renderable::renderedWithDesiredData() const {
+    return true;
+}
+
 Renderable::RenderBin Renderable::renderBin() const {
     return _renderBin;
 }
@@ -205,6 +232,15 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
     _enabled.onChange([this, c = std::move(callback)]() {
         c(isEnabled());
     });
+}
+
+void Renderable::setRenderBinFromOpacity() {
+    if (_opacity > 0.f && _opacity < 1.f) {
+        setRenderBin(Renderable::RenderBin::Transparent);
+    }
+    else {
+        setRenderBin(Renderable::RenderBin::Opaque);
+    }
 }
 
 void Renderable::registerUpdateRenderBinFromOpacity() {

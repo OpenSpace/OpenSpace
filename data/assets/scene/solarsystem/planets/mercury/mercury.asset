@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
-local labelsPath = asset.require('./mercury_labels').LabelsPath
+local labelsPath = asset.require('./mercury_globelabels').LabelsPath
 
 
 asset.require("spice/base")
@@ -28,11 +28,6 @@ local color_layers = {
         Name = "Messenger MDIS [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Messenger_MDIS.wms",
     },
-    {
-        Identifier = "Messenger_MDIS_AWS",
-        Name = "Messenger MDIS [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/MessengerMdis.wms"
-    },
     --mossaic
     {
         Identifier = "Messenger_Mosaic_Utah",
@@ -43,11 +38,6 @@ local color_layers = {
         Identifier = "Messenger_Mosaic_Sweden",
         Name = "Messenger Mosaic [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic.wms"
-    },
-    {
-        Identifier = "Messenger_Mosaic_AWS",
-        Name = "Messenger Mosaic [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/MessengerMosaic.wms"
     },
     --bdr
     {
@@ -199,10 +189,6 @@ local Mercury = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_MERCURY",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {
@@ -237,5 +223,25 @@ local Mercury = {
     }
 }
 
+local MercuryLabel = {
+    Identifier = "MercuryLabel",
+    Parent = Mercury.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Mercury",
+        FontSize = 100.0,
+        LabelSize = 8.3,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Mercury Label",
+        Path = "/Solar System/Planets/Mercury"
+    }
+}
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })

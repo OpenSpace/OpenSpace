@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,6 +60,7 @@ uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
 const double PARSEC = 3.08567756E16;
+//const double PARSEC = 3.08567782E16;
 
 const vec2 corners[4] = vec2[4](
     vec2(0.0, 0.0),
@@ -79,25 +80,7 @@ float bvToKelvin(float bv) {
 
 void main() {
     vs_position = gl_in[0].gl_Position; // in object space
-    
-    // JCC: Don't display the Sun for now.
-    if ((vs_position.x == 0.0) &&
-        (vs_position.y == 0.0) &&
-        (vs_position.z == 0.0))
-    {
-        return;
-    }
-    
-    vs_position = gl_in[0].gl_Position; // in object space
     dvec4 dpos  = modelMatrix * dvec4(vs_position); 
-
-    dvec4 clipTestPos = cameraViewProjectionMatrix * dpos;
-    clipTestPos /= clipTestPos.w;
-    if ((clipTestPos.x < -1.0 || clipTestPos.x > 1.0) ||
-        (clipTestPos.y < -1.0 || clipTestPos.y > 1.0))
-    {
-        return;
-    }
 
     ge_bvLumAbsMagAppMag = vs_bvLumAbsMagAppMag[0];
     ge_velocity    = vs_velocity[0];
@@ -112,13 +95,15 @@ void main() {
         double distanceToStar      = length((dpos.xyz - eyePosition));  
         double apparentBrightness  = pSize * luminosity / (distanceToStar);
         scaleMultiply              = apparentBrightness;
-    } else if (psfParamConf == 1) {
+    }
+    else if (psfParamConf == 1) {
         float L_over_Lsun = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMagAppMag.z);
         float starTemperature = bvToKelvin(ge_bvLumAbsMagAppMag.x);
         float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);
         scaleMultiply = ((lumCent * (ge_bvLumAbsMagAppMag.y + 5E9)) + 
                         (radiusCent * double(starRadius))) * pow(10.0, magnitudeExponent);
-    } else if (psfParamConf == 2) {
+    }
+    else if (psfParamConf == 2) {
         double luminosity              = double(1.0 - ge_bvLumAbsMagAppMag.y);
         double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);
         double apparentBrightness      = luminosity / distanceToStarInParsecs;
@@ -130,10 +115,12 @@ void main() {
                                          (radiusCent * double(starRadius)) + 
                                          (brightnessCent * apparentBrightness * 5E15)) * 
                                          pow(10.0, magnitudeExponent);
-    } else if (psfParamConf == 3) {
+    }
+    else if (psfParamConf == 3) {
         float absMag = ge_bvLumAbsMagAppMag.z;
         scaleMultiply = (-absMag + 35.f) * pow(10.0, magnitudeExponent + 8.5f);
-    } else if (psfParamConf == 4) {
+    }
+    else if (psfParamConf == 4) {
         float absMag = vs_bvLumAbsMagAppMag[0].z;
         double distanceToStarInMeters = length(dpos.xyz - eyePosition);
         double distanceToCenterInMeters = length(eyePosition);
@@ -151,7 +138,8 @@ void main() {
         //scaleMultiply = appMag * pow(10.0, magnitudeExponent + 8.5f);
         scaleMultiply = exp((-30.0 - appMag) * 0.45) * pow(10.0, magnitudeExponent + 8.f);
         //scaleMultiply = pow(10.0, (appMag - absMag)*(1.0/5.0) + 1.0) * pow(10.0, magnitudeExponent + 3.f);
-    } else if (psfParamConf == 5) {
+    }
+    else if (psfParamConf == 5) {
         float absMag = ge_bvLumAbsMagAppMag.z;
         scaleMultiply = exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5f) * 2000;
     }
@@ -160,96 +148,43 @@ void main() {
     dvec3 scaledUp       = dvec3(0.0);
     vec4 bottomLeftVertex, bottomRightVertex, topLeftVertex, topRightVertex;
   
-    // if (distanceToStarInParsecs > 1800.0) {
-    //     scaledRight    = scaleMultiply * invariantRight * 0.5f;
-    //     scaledUp       = scaleMultiply * invariantUp * 0.5f;
-    // } else {
-        dvec3 normal   = normalize(eyePosition - dpos.xyz);
-        dvec3 newRight = normalize(cross(cameraUp, normal));
-        dvec3 newUp    = cross(normal, newRight);
-        scaledRight    = scaleMultiply * newRight;
-        scaledUp       = scaleMultiply * newUp;
-    //}
-   
+    dvec3 normal   = normalize(eyePosition - dpos.xyz);
+    dvec3 newRight = normalize(cross(cameraUp, normal));
+    dvec3 newUp    = cross(normal, newRight);
+    scaledRight    = scaleMultiply * newRight;
+    scaledUp       = scaleMultiply * newUp;
+    
     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
     gs_screenSpaceDepth  = bottomLeftVertex.w;
     
-    topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
+    topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix *
+                        dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
 
-    // Testing size:
-    // vec3 tmpPos = vec3(eyePositionDelta);
-    // vec4 falseBottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                     dvec4(tmpPos - scaledRight - scaledUp, dpos.w)));
+    bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
     
-    // vec4 falseTopRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                         dvec4(tmpPos + scaledUp + scaledRight, dpos.w)));  
-    // vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
-    // vec2 topRight = falseTopRightVertex.xy/falseTopRightVertex.w;
-    // vec2 bottomLeft = falseBottomLeftVertex.xy/falseBottomLeftVertex.w;
-    
-    // Complete algebra
-    // topRight =  ((topRight + vec2(1.0)) * halfViewSize) - vec2(0.5);
-    // bottomLeft = ((bottomLeft + vec2(1.0)) * halfViewSize) - vec2(0.5);
-    //vec2 sizes = abs(topRight - bottomLeft);
-    
-    // Optimized version
-    // vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
-    
-    // float height = sizes.y;
-    // float width  = sizes.x;
-
-    // if ((height > billboardSize) ||
-    //     (width > billboardSize)) { 
-    //     float correctionScale = height > billboardSize ? billboardSize / height :
-    //                                                      billboardSize / width;
-
-    //     scaledRight *= correctionScale;
-    //     scaledUp    *= correctionScale;
-    //     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
-    //                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    //     gs_screenSpaceDepth = bottomLeftVertex.w;
-    //     topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))); 
-
-    
-    //     bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                 dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-        
-    //     topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-
-    // } else {
-        // if (width < 2.0f) {
-        //     float maxVar = 2.0f;
-        //     float minVar = 1.0f;
-        //     float var    = (height + width);    
-        //     float ta = ( (var - minVar)/(maxVar - minVar) );
-        //     if (ta == 0.0f)
-        //         return;
-        // }  
-        // float minSize = 30.f; 
-        // if ((width < minSize) || (height < minSize))
-        //     return;         
-        bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                    dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-        topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+    topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    // } 
-
+    
     // Build primitive
-    gl_Position = topLeftVertex;
-    psfCoords   = vec2(-1.0, 1.0);
-    EmitVertex();
+    
     gl_Position = bottomLeftVertex;
     psfCoords   = vec2(-1.0, -1.0);
     EmitVertex();
-    gl_Position = topRightVertex;
-    psfCoords   = vec2(1.0, 1.0);
-    EmitVertex();
+    
     gl_Position = bottomRightVertex;
     psfCoords   = vec2(1.0, -1.0);
     EmitVertex();
+
+    gl_Position = topLeftVertex;
+    psfCoords   = vec2(-1.0, 1.0);
+    EmitVertex();
+    
+    gl_Position = topRightVertex;
+    psfCoords   = vec2(1.0, 1.0);
+    EmitVertex();
+    
     EndPrimitive();
+
 }

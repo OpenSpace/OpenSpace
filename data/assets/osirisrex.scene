@@ -1,93 +1,99 @@
+asset.require('./base')
+
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
 asset.require('scene/solarsystem/missions/osirisrex/osirisrex')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
 
 -- Custom Keybindings
 local Keybindings = {
     {
         Key = "a",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'OsirisRex')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex')" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'OsirisRex'.",
+        Name = "Focus on OsirisRex",
+        GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
     {
         Key = "s",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'BennuBarycenter')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter')" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Bennu'",
+        Name = "Focus on Bennu",
+        GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
-    {
-        Key = "F6",
-        Command = "openspace.printInfo('Set time: Launch');openspace.time.setTime('2016 SEP 08 23:05:00');",
-        Documentation = "Sets the time to the launch.",
-        Local = false
-    },
-    {
-        Key = "F7",
-        Command = "openspace.printInfo('Set time: Gravity Assist');openspace.time.setTime('2017 SEP 22 15:00:00');",
-        Documentation = "Sets the time to the Earth gravity assist.",
-        Local = false
-    },
+    -- TODO
+    -- Maybe these can be fixed later
+    -- {
+    --     Key = "F6",
+    --     Command = "openspace.printInfo('Set time: Launch');openspace.time.setTime('2016 SEP 08 23:05:00');",
+    --     Documentation = "Sets the time to the launch of Osiris Rex.",
+    --     Name = "Set launch time",
+    --     GuiPath = "/Missions/Osiris Rex",
+    --     Local = false
+    -- },
+    -- {
+    --     Key = "F7",
+    --     Command = "openspace.printInfo('Set time: Gravity Assist');openspace.time.setTime('2017 SEP 22 15:00:00');",
+    --     Documentation = "Sets the time to the Earth gravity assist.",
+    --     Name = "Set Earth gravity assist time",
+    --     GuiPath = "/Missions/Osiris Rex",
+    --     Local = false
+    -- },
     {
         Key = "F8",
         Command = "openspace.printInfo('Set time: Approach');openspace.time.setTime('2018-SEP-11 21:31:01.183');",
         Documentation = "Sets the time to the approach at Bennu.",
+        Name = "Set Bennu approach time",
+        GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
     {
         Key = "F9",
         Command = "openspace.printInfo('Set time: Preliminary Survey');openspace.time.setTime('2018-NOV-20 01:13:12.183');",
         Documentation = "Sets the time to the preliminary survey of Bennu.",
+        Name = "Set Bennu survey time",
+        GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
     {
         Key = "F10",
         Command = "openspace.printInfo('Set time: Orbital B');openspace.time.setTime('2019-APR-08 10:35:27.186');",
         Documentation = "Sets the time to the orbital B event.",
+        Name = "Set orbital B event time",
+        GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
     {
         Key = "F11",
         Command = "openspace.printInfo('Set time: Recon');openspace.time.setTime('2019-MAY-25 03:50:31.195');",
         Documentation = "Sets the time to the recon event.",
+        Name = "Set recon event time",
+        GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
     {
         Key = "q",
         Command = propertyHelper.invert('Scene.SunMarker.Renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Sun.",
+        Name = "Toggle Sun marker",
+        GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
-    {
-        Key = "e",
-        Command = propertyHelper.invert('Scene.EarthMarker.Renderable.Enabled'),
-        Documentation = "Toggles the visibility of the text marking the location of the Earth.",
-        Local = false
-    },
-    {
-        Key = "h",
-        Name="Hide Trails",
-        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Disables visibility of the trails",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-
+    -- {
+    --     Key = "e",
+    --     Command = propertyHelper.invert('Scene.EarthMarker.Renderable.Enabled'),
+    --     Documentation = "Toggles the visibility of the text marking the location of the Earth.",
+    --     Name = "Toggle Earth marker",
+    --     GuiPath = "/Missions/Osiris Rex",
+    --     Local = false
+    -- }
 }
 
 local OsirisRexAsset = asset.require('scene/solarsystem/missions/osirisrex/model')
@@ -116,32 +122,26 @@ assetHelper.registerDashboardItems(asset, {
 })
 
 asset.onInitialize(function ()
-    -- openspace.time.setTime("2019 APR 16 12:03:00.00")
-    openspace.time.setTime("2016 SEP 8 23:00:00.500")
-    sceneHelper.bindKeys(Keybindings)
 
-    openspace.setDefaultGuiSorting()
+    openspace.time.setTime("2018 10 30 23:00:00.500")
+
+    sceneHelper.bindKeys(Keybindings)
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
         2160, 4320, 8640
     })
 
-    openspace.markInterestingNodes({
-        "OsirisRex", "BennuBarycenter", "Earth"
-    })
+    openspace.markInterestingNodes({ "OsirisRex", "BennuBarycenter", "Earth" })
 
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = OsirisRexAsset.OsirisRex.Identifier,
-        Position = { 26974590199.661884, 76314608558.908020, -127086452897.101791 },
-        Rotation = { 0.729548, -0.126024, 0.416827, 0.527382 },
+        Position = { 26974590199.661884, 76314608558.908020, -127086452897.101791 }
     })
 end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeInterestingNodes({
-        "OsirisRex", "BennuBarycenter", "Earth"
-    })
+    openspace.removeInterestingNodes({ "OsirisRex", "BennuBarycenter", "Earth" })
 end)

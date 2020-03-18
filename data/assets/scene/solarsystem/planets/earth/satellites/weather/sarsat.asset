@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local shared = asset.require('util/tle_helper')
 
 local group = {
     Title = "Search & Rescue (SARSAT)",
@@ -8,16 +8,4 @@ local group = {
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
-
-
-local objectNames = {}
-
-asset.onInitialize(function ()
-    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
-end)
-
-asset.onDeinitialize(function ()
-    for _, n in ipairs(objectNames) do
-        openspace.removeSceneGraphNode(n)
-    end
-end)
+shared.registerSatelliteGroupObjects(asset, group, tle, true)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -133,15 +133,15 @@ std::string Property::fullyQualifiedIdentifier() const {
     return identifier;
 }
 
-ghoul::any Property::get() const {
-    return ghoul::any();
+std::any Property::get() const {
+    return std::any();
 }
 
 bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(ghoul::any) {} // NOLINT
+void Property::set(std::any) {} // NOLINT
 
 bool Property::setLuaValue(lua_State*) {
     return false;
@@ -365,7 +365,7 @@ std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
 
-void Property::setInterpolationTarget(ghoul::any) {} // NOLINT
+void Property::setInterpolationTarget(std::any) {} // NOLINT
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::setStringInterpolationTarget(std::string) {} // NOLINT
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,14 +65,11 @@ bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     return false;
 }
 
-std::vector<RawTile> AsyncTileDataProvider::rawTiles() {
-    std::vector<RawTile> readyResults;
+void AsyncTileDataProvider::clearTiles() {
     std::optional<RawTile> finishedJob = popFinishedRawTile();
     while (finishedJob) {
-        readyResults.push_back(std::move(finishedJob.value()));
         finishedJob = popFinishedRawTile();
     }
-    return readyResults;
 }
 
 std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
@@ -84,7 +81,6 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         // No longer enqueued. Remove from set of enqueued tiles
         _enqueuedTileRequests.erase(key);
         // Pbo is still mapped. Set the id for the raw tile
-        product.pbo = 0;
         if (product.error != RawTile::ReadError::None) {
             product.imageData = nullptr;
             return std::nullopt;
@@ -100,6 +96,10 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
     const bool alreadyEnqueued = _concurrentJobManager.touch(tileIndex.hashKey());
+    // Early out so we don't need to check the already enqueued requests
+    if (alreadyEnqueued) {
+        return false;
+    }
 
     // Concurrent job manager can start jobs which will pop them from enqueued, however
     // they are still in _enqueuedTileRequests until finished
@@ -134,7 +134,7 @@ void AsyncTileDataProvider::update() {
     switch (_resetMode) {
         case ResetMode::ShouldResetAll: {
             // Clean all finished jobs
-            rawTiles();
+            clearTiles();
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::Yes);
@@ -144,7 +144,7 @@ void AsyncTileDataProvider::update() {
         }
         case ResetMode::ShouldResetAllButRawTileDataReader: {
             // Clean all finished jobs
-            rawTiles();
+            clearTiles();
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::No);
@@ -154,7 +154,7 @@ void AsyncTileDataProvider::update() {
         }
         case ResetMode::ShouldBeDeleted: {
             // Clean all finished jobs
-            rawTiles();
+            clearTiles();
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.empty()) {
                 _shouldBeDeleted = true;

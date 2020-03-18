@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,11 +110,11 @@ struct TextTileProvider : public TileProvider {
 
     std::unique_ptr<ghoul::fontrendering::FontRenderer> fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> font;
-    size_t fontSize;
+    size_t fontSize = 0;
 
     std::string text;
-    glm::vec2 textPosition;
-    glm::vec4 textColor;
+    glm::vec2 textPosition = glm::vec2(0.f);
+    glm::vec4 textColor = glm::vec4(0.f);
 
     GLuint fbo = 0;
 
@@ -222,8 +222,10 @@ TileDepthTransform depthTransform(TileProvider& tp);
 /**
  * This method should be called once per frame. Here, TileProviders
  * are given the opportunity to update their internal state.
+ *
+ * \return The number of tiles that have been updated in this call
  */
-void update(TileProvider& tp);
+int update(TileProvider& tp);
 
 /**
  * Provides a uniform way of all TileProviders to reload or

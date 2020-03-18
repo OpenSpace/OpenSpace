@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,10 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
@@ -48,9 +50,11 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/versionchecker.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/opengl/texture.h>
 
@@ -128,6 +132,11 @@ TimeManager& gTimeManager() {
     return g;
 }
 
+VersionChecker& gVersionChecker() {
+    static VersionChecker g;
+    return g;
+}
+
 VirtualPropertyManager& gVirtualPropertyManager() {
     static VirtualPropertyManager g;
     return g;
@@ -143,8 +152,18 @@ configuration::Configuration& gConfiguration() {
     return g;
 }
 
+interaction::InteractionMonitor& gInteractionMonitor() {
+    static interaction::InteractionMonitor g;
+    return g;
+}
+
 interaction::JoystickInputStates& gJoystickInputStates() {
     static interaction::JoystickInputStates g;
+    return g;
+}
+
+interaction::WebsocketInputStates& gWebsocketInputStates() {
+    static interaction::WebsocketInputStates g;
     return g;
 }
 
@@ -197,11 +216,14 @@ scripting::ScriptScheduler& gScriptScheduler() {
 } // namespace detail
 
 void initialize() {
+    ZoneScoped
+
     global::rootPropertyOwner.addPropertySubOwner(global::moduleEngine);
 
     global::navigationHandler.setPropertyOwner(&global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
     global::rootPropertyOwner.addPropertySubOwner(global::navigationHandler);
+    global::rootPropertyOwner.addPropertySubOwner(global::interactionMonitor);
     global::rootPropertyOwner.addPropertySubOwner(global::sessionRecording);
     global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
 
@@ -216,10 +238,13 @@ void initialize() {
 }
 
 void initializeGL() {
+    ZoneScoped
 
 }
 
 void deinitialize() {
+    ZoneScoped
+
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         ssr->deinitialize();
     }
@@ -233,6 +258,8 @@ void deinitialize() {
 }
 
 void deinitializeGL() {
+    ZoneScoped
+
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         ssr->deinitializeGL();
     }

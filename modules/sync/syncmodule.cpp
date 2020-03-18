@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <modules/sync/syncmodule.h>
 
 #include <modules/sync/syncs/httpsynchronization.h>
-#include <modules/sync/syncs/torrentsynchronization.h>
 #include <modules/sync/syncs/urlsynchronization.h>
 #include <modules/sync/tasks/syncassettask.h>
 #include <openspace/documentation/documentation.h>
@@ -63,7 +62,8 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     if (configuration.hasKey(KeySynchronizationRoot)) {
         _synchronizationRoot = configuration.value<std::string>(KeySynchronizationRoot);
-    } else {
+    }
+    else {
         LWARNINGC(
             "SyncModule",
             "No synchronization root specified. Disabling resource synchronization"
@@ -87,19 +87,6 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
         }
     );
 
-#ifdef SYNC_USE_LIBTORRENT
-    fSynchronization->registerClass(
-        "TorrentSynchronization",
-        [this](bool, const ghoul::Dictionary& dictionary) {
-            return new TorrentSynchronization(
-                dictionary,
-                _synchronizationRoot,
-                _torrentClient
-            );
-        }
-    );
-#endif // SYNC_USE_LIBTORRENT
-
     fSynchronization->registerClass(
         "UrlSynchronization",
         [this](bool, const ghoul::Dictionary& dictionary) {
@@ -113,17 +100,6 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     auto fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<SyncAssetTask>("SyncAssetTask");
-
-#ifdef SYNC_USE_LIBTORRENT
-    _torrentClient.initialize();
-    global::callback::deinitialize.emplace_back([&]() { _torrentClient.deinitialize(); });
-#endif // SYNC_USE_LIBTORRENT
-}
-
-void SyncModule::internalDeinitialize() {
-#ifdef SYNC_USE_LIBTORRENT
-    _torrentClient.deinitialize();
-#endif // SYNC_USE_LIBTORRENT
 }
 
 std::string SyncModule::synchronizationRoot() const {
@@ -140,10 +116,7 @@ std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
 
 std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
-        HttpSynchronization::Documentation(),
-#ifdef SYNC_USE_LIBTORRENT
-        TorrentSynchronization::Documentation()
-#endif // SYNC_USE_LIBTORRENT
+        HttpSynchronization::Documentation()
     };
 }
 

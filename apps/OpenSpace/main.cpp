@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,6 +45,8 @@
 #include <chrono>
 #include <ctime>
 #include <stb_image.h>
+#include <Tracy.hpp>
+#include <TracyOpenGL.hpp>
 
 #ifdef WIN32
 #include <openspace/openspace.h>
@@ -75,6 +77,8 @@ constexpr const bool EnableDetailedVtune = false;
 #ifdef OPENSPACE_HAS_NVTOOLS
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
+
+using namespace openspace;
 
 namespace {
 
@@ -157,9 +161,9 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 
     std::string dumpFile = fmt::format(
         "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
-        openspace::OPENSPACE_VERSION_MAJOR,
-        openspace::OPENSPACE_VERSION_MINOR,
-        openspace::OPENSPACE_VERSION_PATCH,
+        OPENSPACE_VERSION_MAJOR,
+        OPENSPACE_VERSION_MINOR,
+        OPENSPACE_VERSION_PATCH,
         stLocalTime.wYear,
         stLocalTime.wMonth,
         stLocalTime.wDay,
@@ -247,11 +251,20 @@ std::pair<int, int> supportedOpenGLVersion() {
     return { major, minor };
 }
 
+//
+//  Context creation function
+//
+void mainContextCreationFunc(GLFWwindow* win) {
+    // @TODO (abock, 2020-02-10) Remove this after updating SGCT to 3.0
+    TracyGpuContext
+}
 
 //
 //  Init function
 //
 void mainInitFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.init, nullptr);
@@ -260,7 +273,7 @@ void mainInitFunc() {
     LTRACE("main::mainInitFunc(begin)");
 
     LDEBUG("Initializing OpenSpace Engine started");
-    openspace::global::openSpaceEngine.initialize();
+    global::openSpaceEngine.initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
     {
@@ -287,20 +300,8 @@ void mainInitFunc() {
 
 
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
-    openspace::global::openSpaceEngine.initializeGL();
+    global::openSpaceEngine.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
-
-    {
-
-        //using namespace ghoul::opengl;
-        //std::unique_ptr<ghoul::opengl::Texture> t = ghoul::io::TextureReader::ref().loadTexture(absPath("${DATA}/openspace-icon.png"));
-
-
-        //GLFWimage icons[1];
-        //icons[0].pixels =
-    }
-
-
 
 
     // Find if we have at least one OpenVR window
@@ -378,7 +379,7 @@ void mainInitFunc() {
     //
 
     std::string screenshotPath = "${SCREENSHOTS}";
-    if (openspace::global::configuration.shouldUseScreenshotDate) {
+    if (global::configuration.shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
         char mbstr[128];
@@ -393,7 +394,10 @@ void mainInitFunc() {
 
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        constexpr const char* screenshotNames = "OpenSpace";
+        const std::string screenshotNames = nWindows > 1 ?
+            fmt::format("OpenSpace_{}", i) :
+            "OpenSpace";
+
         sgct_core::ScreenCapture* cpt0 = w->getScreenCapturePointer(0);
         sgct_core::ScreenCapture* cpt1 = w->getScreenCapturePointer(1);
 
@@ -417,6 +421,12 @@ void mainInitFunc() {
 
 
 void mainPreSyncFunc() {
+    // @TODO (abock, 2020-02-10) Remove this after merging SGCT version 3.0
+    FrameMark
+
+
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.preSync, nullptr);
@@ -424,13 +434,21 @@ void mainPreSyncFunc() {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainPreSyncFunc(begin)");
 
-    openspace::global::openSpaceEngine.preSynchronization();
+    try {
+        global::openSpaceEngine.preSynchronization();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATALC(e.component, e.message);
+        sgct::Engine::instance()->terminate();
+    }
 
     // Query joystick status
-    using namespace openspace::interaction;
+    using namespace interaction;
 
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
-        JoystickInputState& state = openspace::global::joystickInputStates[i];
+        ZoneScopedN("Joystick state");
+
+        JoystickInputState& state = global::joystickInputStates[i];
 
         int present = glfwJoystickPresent(i);
         if (present == GLFW_FALSE) {
@@ -513,6 +531,8 @@ void mainPreSyncFunc() {
 
 
 void mainPostSyncPreDrawFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.postSyncPreDraw, nullptr);
@@ -523,7 +543,7 @@ void mainPostSyncPreDrawFunc() {
 #endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::postSynchronizationPreDraw(begin)");
 
-    openspace::global::openSpaceEngine.postSynchronizationPreDraw();
+    global::openSpaceEngine.postSynchronizationPreDraw();
 
 #ifdef OPENVR_SUPPORT
     if (FirstOpenVRWindow) {
@@ -547,6 +567,8 @@ void mainPostSyncPreDrawFunc() {
 
 
 void mainRenderFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.render, nullptr);
@@ -571,7 +593,7 @@ void mainRenderFunc() {
 #endif
 
     try {
-        openspace::global::openSpaceEngine.render(
+        global::openSpaceEngine.render(
             SgctEngine->getModelMatrix(),
             viewMatrix,
             projectionMatrix
@@ -595,6 +617,8 @@ void mainRenderFunc() {
 
 
 void mainDraw2DFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.draw2D, nullptr);
@@ -603,7 +627,7 @@ void mainDraw2DFunc() {
     LTRACE("main::mainDraw2DFunc(begin)");
 
     try {
-        openspace::global::openSpaceEngine.drawOverlays();
+        global::openSpaceEngine.drawOverlays();
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -625,6 +649,8 @@ void mainDraw2DFunc() {
 
 
 void mainPostDrawFunc() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.postDraw, nullptr);
@@ -639,7 +665,7 @@ void mainPostDrawFunc() {
     }
 #endif // OPENVR_SUPPORT
 
-    openspace::global::openSpaceEngine.postDraw();
+    global::openSpaceEngine.postDraw();
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
@@ -679,7 +705,9 @@ void mainPostDrawFunc() {
 
 
 
-void mainKeyboardCallback(int key, int, int action, int mods) {
+void mainKeyboardCallback(int key, int, int action, int modifiers) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.keyboard, nullptr);
@@ -687,11 +715,10 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainKeyboardCallback(begin)");
 
-    openspace::global::openSpaceEngine.keyboardCallback(
-        openspace::Key(key),
-        openspace::KeyModifier(mods),
-        openspace::KeyAction(action)
-    );
+    const Key k = Key(key);
+    const KeyModifier m = KeyModifier(modifiers);
+    const KeyAction a = KeyAction(action);
+    global::openSpaceEngine.keyboardCallback(k, m, a);
 
     LTRACE("main::mainKeyboardCallback(begin)");
 #ifdef OPENSPACE_HAS_VTUNE
@@ -704,6 +731,8 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 
 
 void mainMouseButtonCallback(int key, int action, int modifiers) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.mouseButton, nullptr);
@@ -711,11 +740,10 @@ void mainMouseButtonCallback(int key, int action, int modifiers) {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainMouseButtonCallback(begin)");
 
-    openspace::global::openSpaceEngine.mouseButtonCallback(
-        openspace::MouseButton(key),
-        openspace::MouseAction(action),
-        openspace::KeyModifier(modifiers)
-    );
+    const MouseButton k = MouseButton(key);
+    const MouseAction a = MouseAction(action);
+    const KeyModifier m = KeyModifier(modifiers);
+    global::openSpaceEngine.mouseButtonCallback(k, a, m);
 
     LTRACE("main::mainMouseButtonCallback(end)");
 #ifdef OPENSPACE_HAS_VTUNE
@@ -728,13 +756,15 @@ void mainMouseButtonCallback(int key, int action, int modifiers) {
 
 
 void mainMousePosCallback(double x, double y) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.mousePos, nullptr);
     }
 #endif // OPENSPACE_HAS_VTUNE
 
-    openspace::global::openSpaceEngine.mousePositionCallback(x, y);
+    global::openSpaceEngine.mousePositionCallback(x, y);
 
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
@@ -746,6 +776,8 @@ void mainMousePosCallback(double x, double y) {
 
 
 void mainMouseScrollCallback(double posX, double posY) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.mouseScroll, nullptr);
@@ -753,7 +785,7 @@ void mainMouseScrollCallback(double posX, double posY) {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainMouseScrollCallback(begin");
 
-    openspace::global::openSpaceEngine.mouseScrollWheelCallback(posX, posY);
+    global::openSpaceEngine.mouseScrollWheelCallback(posX, posY);
 
     LTRACE("main::mainMouseScrollCallback(end)");
 #ifdef OPENSPACE_HAS_VTUNE
@@ -765,17 +797,17 @@ void mainMouseScrollCallback(double posX, double posY) {
 
 
 
-void mainCharCallback(unsigned int codepoint, int mods) {
+void mainCharCallback(unsigned int codepoint, int modifiers) {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.character, nullptr);
     }
 #endif // OPENSPACE_HAS_VTUNE
 
-    openspace::global::openSpaceEngine.charCallback(
-        codepoint,
-        openspace::KeyModifier(mods)
-    );
+    const KeyModifier m = KeyModifier(modifiers);
+    global::openSpaceEngine.charCallback(codepoint, m);
 
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
@@ -787,6 +819,8 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 
 
 void mainEncodeFun() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.encode, nullptr);
@@ -794,7 +828,7 @@ void mainEncodeFun() {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainEncodeFun(begin)");
 
-    std::vector<char> data = openspace::global::openSpaceEngine.encode();
+    std::vector<char> data = global::openSpaceEngine.encode();
     _synchronizationBuffer.setVal(std::move(data));
     sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
 
@@ -809,6 +843,8 @@ void mainEncodeFun() {
 
 
 void mainDecodeFun() {
+    ZoneScoped
+
 #ifdef OPENSPACE_HAS_VTUNE
     if (EnableDetailedVtune) {
         __itt_frame_begin_v3(_vTune.decode, nullptr);
@@ -818,7 +854,7 @@ void mainDecodeFun() {
 
     sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
     std::vector<char> data = _synchronizationBuffer.getVal();
-    openspace::global::openSpaceEngine.decode(std::move(data));
+    global::openSpaceEngine.decode(std::move(data));
 
     LTRACE("main::mainDecodeFun(end)");
 #ifdef OPENSPACE_HAS_VTUNE
@@ -831,6 +867,8 @@ void mainDecodeFun() {
 
 
 void mainLogCallback(const char* msg) {
+    ZoneScoped
+
     std::string message = msg;
     if (message.empty() || message == ".") {
         // We don't want the empty '.' message that SGCT sends while it is waiting for
@@ -845,15 +883,21 @@ void mainLogCallback(const char* msg) {
 
 
 void setSgctDelegateFunctions() {
-    openspace::WindowDelegate& sgctDelegate = openspace::global::windowDelegate;
+    WindowDelegate& sgctDelegate = global::windowDelegate;
     sgctDelegate.terminate = []() { sgct::Engine::instance()->terminate(); };
     sgctDelegate.setBarrier = [](bool enabled) {
+        ZoneScoped
+
         sgct::SGCTWindow::setBarrier(enabled);
     };
     sgctDelegate.setSynchronization = [](bool enabled) {
+        ZoneScoped
+
         sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
     };
     sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
+        ZoneScoped
+
         size_t n = sgct::Engine::instance()->getNumberOfWindows();
         for (size_t i = 0; i < n; ++i) {
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -863,27 +907,51 @@ void setSgctDelegateFunctions() {
         }
     };
     sgctDelegate.windowHasResized = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
     };
-    sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance()->getAvgDt(); };
+    sgctDelegate.averageDeltaTime = []() {
+        ZoneScoped
+
+        return sgct::Engine::instance()->getAvgDt();
+    };
     sgctDelegate.deltaTimeStandardDeviation = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getDtStandardDeviation();
     };
     sgctDelegate.minDeltaTime = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getMinDt();
     };
     sgctDelegate.maxDeltaTime = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getMaxDt();
     };
-    sgctDelegate.deltaTime = []() { return sgct::Engine::instance()->getDt(); };
-    sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
+    sgctDelegate.deltaTime = []() {
+        ZoneScoped
+
+        return sgct::Engine::instance()->getDt();
+    };
+    sgctDelegate.applicationTime = []() {
+        ZoneScoped
+
+        return sgct::Engine::getTime();
+    };
     sgctDelegate.mousePosition = []() {
+        ZoneScoped
+
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         double posX, posY;
         sgct::Engine::getMousePos(id, &posX, &posY);
         return glm::vec2(posX, posY);
     };
     sgctDelegate.mouseButtons = [](int maxNumber) {
+        ZoneScoped
+
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         uint32_t result = 0;
         for (int i = 0; i < maxNumber; ++i) {
@@ -895,12 +963,21 @@ void setSgctDelegateFunctions() {
         return result;
     };
     sgctDelegate.currentWindowSize = []() {
+        ZoneScoped
+
         return glm::ivec2(
             sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
             sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
     };
     sgctDelegate.currentSubwindowSize = []() {
+        ZoneScoped
+
         auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+        if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
+            sgct_core::Viewport* viewport =
+                sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+            return glm::ivec2(window->getXResolution()*viewport->getXSize(), window->getYResolution()*viewport->getYSize());
+        }
         switch (window->getStereoMode()) {
             case sgct::SGCTWindow::Side_By_Side_Stereo:
             case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
@@ -913,18 +990,28 @@ void setSgctDelegateFunctions() {
         }
     };
     sgctDelegate.currentWindowResolution = []() {
+        ZoneScoped
+
         int x, y;
         auto window = sgct::Engine::instance()->getCurrentWindowPtr();
         window->getFinalFBODimensions(x, y);
         return glm::ivec2(x, y);
     };
     sgctDelegate.currentDrawBufferResolution = []() {
+        ZoneScoped
+
         sgct_core::Viewport* viewport =
             sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
         if (viewport != nullptr) {
             if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
                 int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
                 return glm::ivec2(res, res);
+            }
+            else if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
+                int x, y;
+                auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+                window->getFinalFBODimensions(x, y);
+                return glm::ivec2(x*viewport->getXSize(), y*viewport->getYSize());
             }
             else {
                 int x, y;
@@ -936,6 +1023,8 @@ void setSgctDelegateFunctions() {
         return glm::ivec2(-1, -1);
     };
     sgctDelegate.currentViewportSize = []() {
+        ZoneScoped
+
         sgct_core::Viewport* viewport =
             sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
         if (viewport != nullptr) {
@@ -947,25 +1036,21 @@ void setSgctDelegateFunctions() {
         return glm::ivec2(-1, -1);
     };
     sgctDelegate.dpiScaling = []() {
+        ZoneScoped
+
         return glm::vec2(
             sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
             sgct::Engine::instance()->getCurrentWindowPtr()->getYScale()
         );
     };
     sgctDelegate.currentNumberOfAaSamples = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
     };
-    sgctDelegate.isRegularRendering = []() {
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
-        ghoul_assert(
-            w->getNumberOfViewports() > 0,
-            "At least one viewport must exist at this time"
-        );
-        sgct_core::Viewport* vp = w->getViewport(0);
-        sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();
-        return nlp == nullptr;
-    };
     sgctDelegate.hasGuiWindow = []() {
+        ZoneScoped
+
         auto engine = sgct::Engine::instance();
         for (size_t i = 0; i < engine->getNumberOfWindows(); ++i) {
             if (engine->getWindowPtr(i)->checkIfTagExists("GUI")) {
@@ -975,82 +1060,143 @@ void setSgctDelegateFunctions() {
         return false;
     };
     sgctDelegate.isGuiWindow = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getCurrentWindowPtr()->checkIfTagExists("GUI");
     };
-    sgctDelegate.isMaster = []() { return sgct::Engine::instance()->isMaster(); };
+    sgctDelegate.isMaster = []() {
+        ZoneScoped
+
+        return sgct::Engine::instance()->isMaster();
+    };
     sgctDelegate.isUsingSwapGroups = []() {
+        ZoneScoped
+
         return sgct::SGCTWindow::isUsingSwapGroups();
     };
     sgctDelegate.isSwapGroupMaster = []() {
+        ZoneScoped
+
         return sgct::SGCTWindow::isSwapGroupMaster();
     };
     sgctDelegate.viewProjectionMatrix = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
     };
     sgctDelegate.modelMatrix = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getModelMatrix();
     };
     sgctDelegate.setNearFarClippingPlane = [](float nearPlane, float farPlane) {
+        ZoneScoped
+
         sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
     };
     sgctDelegate.setEyeSeparationDistance = [](float distance) {
+        ZoneScoped
+
         sgct::Engine::instance()->setEyeSeparation(distance);
     };
     sgctDelegate.viewportPixelCoordinates = []() {
+        ZoneScoped
+
         sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();
         if (!window || !window->getCurrentViewport()) {
-            return glm::ivec4(0, 0, 0, 0);
+            return glm::ivec4(0);
         }
         else {
             const int* data = sgct::Engine::instance()->getCurrentViewportPixelCoords();
             return glm::ivec4(data[0], data[2], data[1], data[3]);
         }
     };
-    sgctDelegate.isExternalControlConnected = []() {
-        return sgct::Engine::instance()->isExternalControlConnected();
-    };
     sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
+        ZoneScoped
+
         sgct::Engine::instance()->sendMessageToExternalControl(
             message.data(),
             static_cast<int>(message.size())
         );
     };
-    sgctDelegate.isSimpleRendering = []() {
-        return (sgct::Engine::instance()->getCurrentRenderTarget() !=
-                sgct::Engine::NonLinearBuffer);
-    };
     sgctDelegate.isFisheyeRendering = []() {
+        ZoneScoped
+
         sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
         return dynamic_cast<sgct_core::FisheyeProjection*>(
             w->getViewport(0)->getNonLinearProjectionPtr()
         ) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
+        ZoneScoped
+
         sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
         sgct::Engine::instance()->takeScreenshot();
+        return sgct::Engine::instance()->getScreenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
+        ZoneScoped
+
         GLFWwindow* w = glfwGetCurrentContext();
         glfwSwapBuffers(w);
         glfwPollEvents();
     };
     sgctDelegate.nWindows = []() {
+        ZoneScoped
+
         return static_cast<int>(sgct::Engine::instance()->getNumberOfWindows());
     };
     sgctDelegate.currentWindowId = []() {
+        ZoneScoped
+
         return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
+        ZoneScoped
+
         return glfwGetProcAddress(func);
     };
     sgctDelegate.getHorizFieldOfView = []() {
+        ZoneScoped
+
         return static_cast<double>(
             sgct::Engine::instance()->getWindowPtr(0)->getHorizFieldOfViewDegrees()
         );
     };
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
+        ZoneScoped
+
         sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(0);
         w->setHorizFieldOfView(hFovDeg);
+    };
+    #ifdef WIN32
+    sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
+        ZoneScoped
+
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(windowIndex);
+        if (w) {
+                HWND hWnd = glfwGetWin32Window(w->getWindowHandle());
+                return reinterpret_cast<void*>(hWnd);
+        }
+        return nullptr;
+    };
+    #endif // WIN32
+    sgctDelegate.frustumMode = []() {
+        ZoneScoped
+
+        using FM = sgct_core::Frustum::FrustumMode;
+        switch (sgct::Engine::instance()->getCurrentFrustumMode()) {
+            case FM::MonoEye: return WindowDelegate::Frustum::Mono;
+            case FM::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
+            case FM::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+        }
+    };
+    sgctDelegate.swapGroupFrameNumber = []() {
+        ZoneScoped
+
+        unsigned int fn = 0;
+        sgct::Engine::instance()->getCurrentWindowPtr()->getSwapGroupFrameNumber(fn);
+        return static_cast<uint64_t>(fn);
     };
 }
 
@@ -1113,7 +1259,7 @@ int main(int argc, char** argv) {
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
-    openspace::CommandlineArguments commandlineArguments;
+    CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.configurationName, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
@@ -1132,7 +1278,7 @@ int main(int argc, char** argv) {
         "evaluated before it is passed to OpenSpace."
     ));
 
-    // setCommandLine returns a referece to the vector that will be filled later
+    // setCommandLine returns a reference to the vector that will be filled later
     const std::vector<std::string>& sgctArguments = parser.setCommandLine(
         { argv, argv + argc }
     );
@@ -1153,8 +1299,6 @@ int main(int argc, char** argv) {
     // Create the OpenSpace engine and get arguments for the SGCT engine
     std::string windowConfiguration;
     try {
-        using namespace openspace;
-
         // Find configuration
         std::string configurationFilePath = commandlineArguments.configurationName;
         if (commandlineArguments.configurationName.empty()) {
@@ -1175,7 +1319,7 @@ int main(int argc, char** argv) {
             configurationFilePath
         );
 
-        // If the user requested a commandline-based configuation script that should
+        // If the user requested a commandline-based configuration script that should
         // overwrite some of the values, this is the time to do it
         if (!commandlineArguments.configurationOverride.empty()) {
             LDEBUG("Executing Lua script passed through the commandline:");
@@ -1190,16 +1334,17 @@ int main(int argc, char** argv) {
         // Determining SGCT configuration file
         LDEBUG("SGCT Configuration file: " + global::configuration.windowConfiguration);
 
-        windowConfiguration = openspace::global::configuration.windowConfiguration;
+        windowConfiguration = global::configuration.windowConfiguration;
     }
-    catch (const openspace::documentation::SpecificationError& e) {
+    catch (const documentation::SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
-        for (const openspace::documentation::TestResult::Offense& o : e.result.offenses) {
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
             LERRORC(o.offender, ghoul::to_string(o.reason));
         }
-        for (const openspace::documentation::TestResult::Warning& w : e.result.warnings) {
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
             LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
+        ghoul::deinitialize();
         exit(EXIT_FAILURE);
     }
     catch (const ghoul::RuntimeError& e) {
@@ -1208,10 +1353,11 @@ int main(int argc, char** argv) {
         if (ghoul::logging::LogManager::isInitialized()) {
             LogMgr.flushLogs();
         }
+        ghoul::deinitialize();
         return EXIT_FAILURE;
     }
 
-    openspace::global::openSpaceEngine.registerPathTokens();
+    global::openSpaceEngine.registerPathTokens();
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
@@ -1233,6 +1379,7 @@ int main(int argc, char** argv) {
     SgctEngine = new sgct::Engine(arguments);
 
     // Bind functions
+    SgctEngine->setContextCreationCallback(mainContextCreationFunc);
     SgctEngine->setInitOGLFunction(mainInitFunc);
     SgctEngine->setPreSyncFunction(mainPreSyncFunc);
     SgctEngine->setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
@@ -1305,8 +1452,8 @@ int main(int argc, char** argv) {
 
     auto cleanup = [&](bool isInitialized) {
         if (isInitialized) {
-            openspace::global::openSpaceEngine.deinitializeGL();
-            openspace::global::openSpaceEngine.deinitialize();
+            global::openSpaceEngine.deinitializeGL();
+            global::openSpaceEngine.deinitialize();
         }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
@@ -1333,6 +1480,8 @@ int main(int argc, char** argv) {
             }
         }
 #endif // OPENSPACE_HAS_SPOUT
+
+        ghoul::deinitialize();
     };
 
     if (!initSuccess) {

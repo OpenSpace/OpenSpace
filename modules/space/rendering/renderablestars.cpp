@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,12 +53,12 @@ namespace {
     constexpr const char* KeyStaticFilterValue = "StaticFilter";
     constexpr const char* KeyStaticFilterReplacement = "StaticFilterReplacement";
 
-    constexpr const std::array<const char*, 16> UniformNames = {
-        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", 
-        "colorOption", "magnitudeExponent", "eyePosition", "psfParamConf", 
-        "lumCent", "radiusCent", "brightnessCent", "colorTexture", 
-        "alphaValue", "psfTexture", "otherDataTexture", "otherDataRange", 
-        "filterOutOfRange"
+    constexpr const std::array<const char*, 17> UniformNames = {
+        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
+        "colorOption", "magnitudeExponent", "eyePosition", "psfParamConf",
+        "lumCent", "radiusCent", "brightnessCent", "colorTexture",
+        "alphaValue", "psfTexture", "otherDataTexture", "otherDataRange",
+        "filterOutOfRange", "fixedColor"
     };
 
     constexpr int8_t CurrentCacheVersion = 3;
@@ -68,6 +68,8 @@ namespace {
 
     constexpr const int PsfMethodSpencer = 0;
     constexpr const int PsfMethodMoffat = 1;
+
+    constexpr double PARSEC = 0.308567756E17;
 
     struct CommonDataLayout {
         std::array<float, 3> position;
@@ -96,7 +98,7 @@ namespace {
         "Speck File",
         "The speck file that is loaded to get the data for rendering these stars."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
@@ -122,6 +124,12 @@ namespace {
         "Range of the other data values",
         "This value is the min/max value range that is used to normalize the other data "
         "values so they can be used by the specified color map."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
+        "FixedColorValue",
+        "Color used for fixed star colors",
+        "The color that should be used if the 'Fixed Color' value is used."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
@@ -172,7 +180,7 @@ namespace {
         "Stars closer than this distance are given full opacity. "
         "Farther away, stars dim proportionally to the logarithm of their distance."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {
         "RenderMethod",
         "Render Method",
@@ -214,7 +222,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
         "LumPercent",
         "Luminosity Contribution",
-        "Luminosity Contribution."        
+        "Luminosity Contribution."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
@@ -276,6 +284,20 @@ namespace {
         "Beta",
         "Moffat's Beta Constant."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+        "FadeInDistances",
+        "Fade-In Start and End Distances",
+        "These values determine the initial and final distances from the center of "
+        "our galaxy from which the astronomical object will start and end "
+        "fading-in."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+        "DisableFadeIn",
+        "Disable Fade-in effect",
+        "Enables/Disables the Fade-in effect."
+    };
 }  // namespace
 
 namespace openspace {
@@ -312,7 +334,9 @@ documentation::Documentation RenderableStars::Documentation() {
             },*/
             {
                 ColorOptionInfo.identifier,
-                new StringInListVerifier({ "Color", "Velocity", "Speed", "Other Data" }),
+                new StringInListVerifier({
+                    "Color", "Velocity", "Speed", "Other Data", "Fixed Color"
+                }),
                 Optional::Yes,
                 ColorOptionInfo.description
             },
@@ -374,6 +398,18 @@ documentation::Documentation RenderableStars::Documentation() {
                 Optional::No,
                 SizeCompositionOptionInfo.description
             },
+            {
+                FadeInDistancesInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FadeInDistancesInfo.description
+            },
+            {
+                DisableFadeInInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInInfo.description
+            },
         }
     };
 }
@@ -395,11 +431,18 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(-10.f, -10.f),
         glm::vec2(10.f, 10.f)
     )
+    , _fixedColor(FixedColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _psfMethodOption(PSFMethodOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _psfMultiplyOption(SizeCompositionOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _psfMethodOption(
+        PSFMethodOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _psfMultiplyOption(
+        SizeCompositionOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _lumCent(LumPercentInfo, 0.5f, 0.f, 3.f)
     , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 3.f)
     , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
@@ -419,6 +462,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
     , _parametersOwner(ParametersOwnerOptionInfo)
     , _moffatMethodOwner(MoffatMethodOptionInfo)
+    , _fadeInDistance(
+        FadeInDistancesInfo,
+        glm::vec2(0.f),
+        glm::vec2(0.f),
+        glm::vec2(100.f)
+    )
+    , _disableFadeInDistance(DisableFadeInInfo, true)
 {
     using File = ghoul::filesystem::File;
 
@@ -447,12 +497,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             dictionary.value<std::string>(OtherDataColorMapInfo.identifier)
         );
     }
-        
+
+    _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
+    addProperty(_fixedColor);
+
     _colorOption.addOptions({
         { ColorOption::Color, "Color" },
         { ColorOption::Velocity, "Velocity" },
         { ColorOption::Speed, "Speed" },
-        { ColorOption::OtherData, "Other Data" }
+        { ColorOption::OtherData, "Other Data" },
+        { ColorOption::FixedColor, "Fixed Color" }
     });
     if (dictionary.hasKey(ColorOptionInfo.identifier)) {
         const std::string colorOption = dictionary.value<std::string>(
@@ -467,15 +521,18 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         else if (colorOption == "Speed") {
             _colorOption = ColorOption::Speed;
         }
-        else {
+        else if (colorOption == "OtherData") {
             _colorOption = ColorOption::OtherData;
+        }
+        else {
+            _colorOption = ColorOption::FixedColor;
         }
     }
     _colorOption.onChange([&] { _dataIsDirty = true; });
     addProperty(_colorOption);
 
     _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback([&](const File&) { 
+    _colorTextureFile->setCallback([&](const File&) {
         _colorTextureIsDirty = true;
     });
     addProperty(_colorTexturePath);
@@ -520,10 +577,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         "Point Spread Function Based"
     );
     _renderingMethodOption.addOption(RenderOptionTexture, "Textured Based");
-    addProperty(_renderingMethodOption);     
+    addProperty(_renderingMethodOption);
 
     if (dictionary.hasKey(RenderMethodOptionInfo.identifier)) {
-        std::string renderingMethod = 
+        std::string renderingMethod =
             dictionary.value<std::string>(RenderMethodOptionInfo.identifier);
         if (renderingMethod == "PSF") {
             _renderingMethodOption = RenderOptionPointSpreadFunction;
@@ -540,14 +597,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         PsfTextureInfo.identifier
     ));
     _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
-    _pointSpreadFunctionTexturePath.onChange([&]() { 
-        _pointSpreadFunctionTextureIsDirty = true; 
+    _pointSpreadFunctionTexturePath.onChange([&]() {
+        _pointSpreadFunctionTextureIsDirty = true;
     });
-    _pointSpreadFunctionFile->setCallback([&](const File&) { 
+    _pointSpreadFunctionFile->setCallback([&](const File&) {
         _pointSpreadFunctionTextureIsDirty = true;
     });
     _userProvidedTextureOwner.addProperty(_pointSpreadFunctionTexturePath);
-        
+
     if (dictionary.hasKey(TransparencyInfo.identifier)) {
         _alphaValue = static_cast<float>(
             dictionary.value<double>(TransparencyInfo.identifier)
@@ -569,12 +626,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _psfMultiplyOption.addOption(5, "Distance Modulus");
 
     if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
-        std::string sizeCompositionOption = 
+        std::string sizeCompositionOption =
             dictionary.value<std::string>(SizeCompositionOptionInfo.identifier);
-        
+
         if (sizeCompositionOption == "App Brightness") {
             _psfMultiplyOption = 0;
-        } else if (sizeCompositionOption == "Lum and Size") {
+        }
+        else if (sizeCompositionOption == "Lum and Size") {
             _psfMultiplyOption = 1;
         }
         else if (sizeCompositionOption == "Lum, Size and App Brightness") {
@@ -628,6 +686,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_userProvidedTextureOwner);
     addPropertySubOwner(_parametersOwner);
     addPropertySubOwner(_moffatMethodOwner);
+
+    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        _fadeInDistance = v;
+        _disableFadeInDistance = false;
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
+    }
 }
 
 RenderableStars::~RenderableStars() {}
@@ -667,7 +733,7 @@ void RenderableStars::initializeGL() {
     glBindVertexArray(_psfVao);
     glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
 
-    const GLfloat vertex_data[] = {
+    const GLfloat vertexData[] = {
         //x      y     s     t
         -1.f, -1.f, 0.f, 0.f,
          1.f,  1.f, 1.f, 1.f,
@@ -677,7 +743,7 @@ void RenderableStars::initializeGL() {
          1.f,  1.f, 1.f, 1.f
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glVertexAttribPointer(
         0,
         4,
@@ -767,7 +833,6 @@ void RenderableStars::renderPSFToTexture() {
     GLenum blendDestRGB;
     GLenum blendSrcAlpha;
     GLenum blendSrcRGB;
-    GLboolean depthMask;
 
     glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
     glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
@@ -782,9 +847,9 @@ void RenderableStars::renderPSFToTexture() {
     glBindFramebuffer(GL_FRAMEBUFFER, psfFBO);
     GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, drawBuffers);
-        
+
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _psfTexture, 0);
-        
+
     glViewport(0, 0, _psfTextureSize, _psfTextureSize);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -812,7 +877,7 @@ void RenderableStars::renderPSFToTexture() {
     glBindVertexArray(_psfVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
-        
+
     program->deactivate();
 
     // JCC: Convolution is disabled while FFT is not enabled
@@ -824,9 +889,9 @@ void RenderableStars::renderPSFToTexture() {
     //glDrawBuffers(1, drawBuffers);
 
     //glFramebufferTexture(
-    //    GL_FRAMEBUFFER, 
-    //    GL_COLOR_ATTACHMENT0, 
-    //    _convolvedTexture, 
+    //    GL_FRAMEBUFFER,
+    //    GL_COLOR_ATTACHMENT0,
+    //    _convolvedTexture,
     //    0
     //);
 
@@ -853,7 +918,7 @@ void RenderableStars::renderPSFToTexture() {
 
     //programConvolve->setUniform("psfTextureSize", _psfTextureSize);
     //programConvolve->setUniform(
-    //    "convolvedfTextureSize", 
+    //    "convolvedfTextureSize",
     //    _convolvedfTextureSize
     //);
 
@@ -884,7 +949,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     if (_fullData.empty()) {
         return;
     }
-        
+
     // Saving current OpenGL state
     GLenum blendEquationRGB;
     GLenum blendEquationAlpha;
@@ -921,7 +986,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
-    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
     glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
@@ -934,14 +998,36 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     );
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
-        
+
     _program->setUniform(_uniformCache.psfParamConf, _psfMultiplyOption.value());
     _program->setUniform(_uniformCache.lumCent, _lumCent);
     _program->setUniform(_uniformCache.radiusCent, _radiusCent);
     _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
 
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    if (_colorOption == ColorOption::FixedColor) {
+        if (_uniformCache.fixedColor == -1) {
+            _uniformCache.fixedColor = _program->uniformLocation("fixedColor");
+        }
+        _program->setUniform(_uniformCache.fixedColor, _fixedColor);
+    }
+
+    float fadeInVariable = 1.f;
+    if (!_disableFadeInDistance) {
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        const glm::vec2 fadeRange = _fadeInDistance;
+        const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
+        const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        const double funcValue = a * distCamera + b;
+        fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
+
+        _program->setUniform(_uniformCache.alphaValue, _alphaValue * fadeInVariable);
+    }
+    else {
+        _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    }
+
     
+
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
 
@@ -1045,6 +1131,7 @@ void RenderableStars::update(const UpdateData&) {
         const int colorOption = _colorOption;
         switch (colorOption) {
             case ColorOption::Color:
+            case ColorOption::FixedColor:
                 glVertexAttribPointer(
                     positionAttrib,
                     3,
@@ -1322,7 +1409,7 @@ void RenderableStars::readSpeckFile() {
     std::string line;
     while (true) {
         std::streampos position = file.tellg();
-        std::getline(file, line);
+        std::getline(file, line, '\n');
 
         if (line[0] == '#' || line.empty()) {
             continue;
@@ -1336,9 +1423,6 @@ void RenderableStars::readSpeckFile() {
             // before the beginning of the current line
             if (_enableTestGrid) {
                 file.seekg(position - std::streamoff(8));
-            }
-            else {
-                file.seekg(position);
             }
             break;
         }
@@ -1361,7 +1445,7 @@ void RenderableStars::readSpeckFile() {
 
             // +3 because the position x, y, z
             if (name == "lum") {
-                _lumArrayPos = _nValuesPerStar + 3; 
+                _lumArrayPos = _nValuesPerStar + 3;
             }
             else if (name == "absmag") {
                 _absMagArrayPos = _nValuesPerStar + 3;
@@ -1390,13 +1474,12 @@ void RenderableStars::readSpeckFile() {
 
     do {
         std::vector<float> values(_nValuesPerStar);
-
-        std::getline(file, line);
         std::stringstream str(line);
 
         for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
         }
+        
         bool nullArray = true;
         for (float v : values) {
             if (v != 0.0) {
@@ -1404,18 +1487,21 @@ void RenderableStars::readSpeckFile() {
                 break;
             }
         }
-        minLumValue = values[_lumArrayPos] < minLumValue ? 
+        minLumValue = values[_lumArrayPos] < minLumValue ?
             values[_lumArrayPos] : minLumValue;
-        maxLumValue = values[_lumArrayPos] > maxLumValue ? 
+        maxLumValue = values[_lumArrayPos] > maxLumValue ?
             values[_lumArrayPos] : maxLumValue;
         if (!nullArray) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         }
+
+        std::getline(file, line, '\n');
+
     } while (!file.eof());
 
     // Normalize Luminosity:
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        _fullData[i + _lumArrayPos] = 
+        _fullData[i + _lumArrayPos] =
             (_fullData[i + _lumArrayPos] - minLumValue) / (maxLumValue - minLumValue);
     }
 }
@@ -1494,7 +1580,7 @@ void RenderableStars::saveCachedFile(const std::string& file) const {
     fileStream.write(reinterpret_cast<const char*>(&_appMagArrayPos), sizeof(int32_t));
     fileStream.write(reinterpret_cast<const char*>(&_bvColorArrayPos), sizeof(int32_t));
     fileStream.write(reinterpret_cast<const char*>(&_velocityArrayPos), sizeof(int32_t));
-    fileStream.write(reinterpret_cast<const char*>(&_speedArrayPos), sizeof(int32_t));        
+    fileStream.write(reinterpret_cast<const char*>(&_speedArrayPos), sizeof(int32_t));
 
     // -3 as we don't want to save the xyz values that are in the beginning of the file
     for (int i = 0; i < _nValuesPerStar - 3; ++i) {
@@ -1516,11 +1602,16 @@ void RenderableStars::createDataSlice(ColorOption option) {
     );
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        glm::vec3 position = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+        glm::vec3 position = glm::vec3(
+            _fullData[i + 0],
+            _fullData[i + 1],
+            _fullData[i + 2]
+        );
         position *= openspace::distanceconstants::Parsec;
 
         switch (option) {
             case ColorOption::Color:
+            case ColorOption::FixedColor:
             {
                 union {
                     ColorVBOLayout value;
@@ -1606,8 +1697,8 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 layout.value.position = { { position[0], position[1], position[2] } };
 
                 int index = _otherDataOption.value();
-                // plus 3 because of the position 
-                layout.value.value = _fullData[i + index + 3]; 
+                // plus 3 because of the position
+                layout.value.value = _fullData[i + index + 3];
 
                 if (_staticFilterValue.has_value() &&
                     layout.value.value == _staticFilterValue)

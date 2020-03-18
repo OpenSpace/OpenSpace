@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,6 +28,8 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesmallbody.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.h
@@ -42,6 +44,8 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesmallbody.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.cpp
@@ -55,6 +59,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/debrisViz_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/debrisViz_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
