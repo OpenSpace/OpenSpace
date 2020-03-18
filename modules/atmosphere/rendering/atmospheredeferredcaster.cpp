@@ -480,13 +480,12 @@ void AtmosphereDeferredcaster::setMieScatteringCoefficients(glm::vec3& mieScattC
     _mieScatteringCoeff = std::move(mieScattCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieAbsorptionCoefficients(
-    const glm::vec3& mieAbsorbCoeff)
+void AtmosphereDeferredcaster::setMieAbsorptionCoefficients(glm::vec3& mieAbsorbCoeff)
 {
     _mieAbsorptionCoeff = std::move(mieAbsorbCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff)
+void AtmosphereDeferredcaster::setMieExtinctionCoefficients(glm::vec3& mieExtCoeff)
 {
     _mieExtinctionCoeff = std::move(mieExtCoeff);
 }

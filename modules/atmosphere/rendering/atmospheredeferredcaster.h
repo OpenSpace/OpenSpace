@@ -79,13 +79,13 @@ public:
     void setMieHeightScale(float mieHeightScale);
     void setMiePhaseConstant(float miePhaseConstant);
     void setSunRadianceIntensity(float sunRadiance);
-    void setRayleighScatteringCoefficients(const glm::vec3& rayScattCoeff);
-    void setOzoneExtinctionCoefficients(const glm::vec3& ozoneExtCoeff);
-    void setMieScatteringCoefficients(const glm::vec3& mieScattCoeff);
-    void setMieAbsorptionCoefficients(const glm::vec3& mieAbsorbCoeff);
-    void setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff);
-    void setEllipsoidRadii(const glm::dvec3& radii);
-    void setShadowConfigArray(const std::vector<ShadowConfiguration>& shadowConfigArray);
+    void setRayleighScatteringCoefficients(glm::vec3& rayScattCoeff);
+    void setOzoneExtinctionCoefficients(glm::vec3& ozoneExtCoeff);
+    void setMieScatteringCoefficients(glm::vec3& mieScattCoeff);
+    void setMieAbsorptionCoefficients(glm::vec3& mieAbsorbCoeff);
+    void setMieExtinctionCoefficients(glm::vec3& mieExtCoeff);
+    void setEllipsoidRadii(glm::dvec3& radii);
+    void setShadowConfigArray(std::vector<ShadowConfiguration>& shadowConfigArray);
     void setHardShadows(bool enabled);
     void enableSunFollowing(bool enable);
 

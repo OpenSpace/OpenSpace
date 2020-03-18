@@ -822,8 +822,8 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
         _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
         _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-        glm::vec3 mieAbsorptionCoeff = _mieAbsorptionCoeffP;
-        _deferredcaster->setMieAbsorptionCoefficients(mieAbsorptionCoeff * glm::vec3(0.001f));
+        glm::vec3 mieAbsorptionCoeff = glm::vec3(_mieAbsorptionCoeffP) * glm::vec3(0.001f);
+        _deferredcaster->setMieAbsorptionCoefficients(mieAbsorptionCoeff);
         _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
         //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
 
