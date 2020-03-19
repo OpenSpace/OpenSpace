@@ -806,6 +806,16 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
+
+
+    // Temp for testing Ozone new perfil
+    std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject2 = ghoul::opengl::ProgramObject::Build(
+            "transmittanceCalcProgram2",
+            absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl")
+    );
+    
+    
     // ===========================================================
     // See Precomputed Atmosphere Scattering from Bruneton et al. paper, algorithm 4.1:
     // ===========================================================
@@ -817,8 +827,8 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     );
     checkFrameBufferState("_transmittanceTableTexture");
     glViewport(0, 0, _transmittance_table_width, _transmittance_table_height);
-    _transmittanceProgramObject->activate();
-    loadAtmosphereDataIntoShaderProgram(_transmittanceProgramObject);
+    _transmittanceProgramObject2->activate();
+    loadAtmosphereDataIntoShaderProgram(_transmittanceProgramObject2);
     //glClear(GL_COLOR_BUFFER_BIT);
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     glClearBufferfv(GL_COLOR, 0, black);
@@ -831,7 +841,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             _transmittance_table_height
         );
     }
-    _transmittanceProgramObject->deactivate();
+    _transmittanceProgramObject2->deactivate();
 
     // line 2 in algorithm 4.1
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaETableTexture, 0);
