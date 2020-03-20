@@ -391,20 +391,14 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
     else {
         _appearance.lineWidth = 2.0;
     }
-
-    auto reinitializeTrailBuffers = [this]() {
-        initializeGL();
-    };
-
+    reinitializeTrailBuffers = std::function<void()>([this] { initializeGL(); });
     _path.onChange(reinitializeTrailBuffers);
     _nSegments.onChange(reinitializeTrailBuffers);
-    _upperLimit.onChange(reinitializeTrailBuffers);
 
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
     addProperty(_opacity);
-    addProperty(_upperLimit);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }

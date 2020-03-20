@@ -68,6 +68,8 @@ protected:
     double epochFromSubstring(const std::string& epochString);
     double epochFromYMDdSubstring(const std::string& epochString);
     int daysIntoGivenYear(int month, int dayOfMonth);
+    std::function<void()> reinitializeTrailBuffers;
+
     const std::vector<int> LeapYears = {
         1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
@@ -105,6 +107,7 @@ protected:
     const double convertDaysToSecs = 86400.;
     std::vector<KeplerParameters> _data;
     properties::UIntProperty _upperLimit;
+    properties::Property::OnChangeHandle _upperLimitCallbackHandle;
 
 private:
     struct Vertex {

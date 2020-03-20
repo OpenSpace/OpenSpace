@@ -135,6 +135,8 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
+    _upperLimitCallbackHandle = _upperLimit.onChange(reinitializeTrailBuffers);
+    addProperty(_upperLimit);
 }  
     
 void RenderableSmallBody::readDataFile(const std::string& filename) {
@@ -168,8 +170,12 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         std::getline(file, line); // get rid of first line (header)
         numberOfLines -= 1;
         if (_upperLimit == 0 || _upperLimit > numberOfLines) {
-            //If limit wasn't specified in dictionary, set to lines in file (-header)
+            //If a limit wasn't specified in dictionary, set it to # lines in file
+            // minus the header line (but temporarily disable callback to avoid 2nd call)
+            _upperLimit.removeOnChange(_upperLimitCallbackHandle);
+            _upperLimit.setMaxValue(numberOfLines);
             _upperLimit = static_cast<unsigned int>(numberOfLines);
+            _upperLimitCallbackHandle = _upperLimit.onChange(reinitializeTrailBuffers);
         }
         else {
             lineSkipFraction = static_cast<float>(_upperLimit) /
@@ -184,30 +190,47 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             return;
         }
 
-        for (csvLine = 1; csvLine <= numberOfLines; csvLine++) {
+        unsigned int sequentialLineErrors = 0;
+        for (csvLine = 1; csvLine <= numberOfLines; csvLine++, sequentialLineErrors++) {
             currLineFraction = static_cast<float>(csvLine - 1) * lineSkipFraction;
             currLineCount = static_cast<int>(currLineFraction);
             if (currLineCount > lastLineCount) {
-                readOrbitalParamsFromThisLine(fieldCount, csvLine, file);
+                try {
+                    readOrbitalParamsFromThisLine(fieldCount, csvLine, file);
+                    sequentialLineErrors = 0;
+                }
+                catch (std::invalid_argument&) {
+                    const char* errMsg = "Unable to convert field {} to double value "\
+                        "(invalid_argument exception) at line {}/{} of {}";
+                    LERROR(fmt::format(
+                        errMsg,
+                        fieldCount, csvLine + 1, numberOfLines, filename
+                    ));
+                }
+                catch (std::out_of_range&) {
+                    const char* errMsg = "Unable to convert field {} to double value "\
+                        "(out_of_range exception) at line {}/{} of {}";
+                    LERROR(fmt::format(
+                        errMsg,
+                        fieldCount, csvLine + 1, numberOfLines, filename
+                    ));
+                }
+                catch (std::ios_base::failure& f) {
+                    throw f;
+                }
+
+                if (sequentialLineErrors == 4) {
+                    _data.clear();
+                    _sbNames.clear();
+                    LERROR(fmt::format(
+                        "Abandoning data file {} (too many sequential line errors).",
+                        filename
+                    ));
+                    break;
+                }
             }
             lastLineCount = currLineCount;
         }
-    }
-    catch (std::invalid_argument&) {
-        const char* errMsg = "Unable to convert field {} to double value "\
-            "(invalid_argument exception) at line {}/{} of {}";
-        LERROR(fmt::format(
-            errMsg,
-            fieldCount, csvLine + 1, numberOfLines, filename
-        ));
-    }
-    catch (std::out_of_range&) {
-        const char* errMsg = "Unable to convert field {} to double value "\
-            "(out_of_range exception) at line {}/{} of {}";
-        LERROR(fmt::format(
-            errMsg,
-            fieldCount, csvLine + 1, numberOfLines, filename
-        ));
     }
     catch (std::ios_base::failure&) {
         const char* errMsg = "File read exception (ios_base::failure) while trying "\
@@ -225,10 +248,17 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
                                                         std::streamoff& csvLine,
                                                         std::ifstream& file)
 {
+    const int numDataFields = 8;
     std::string name;
     std::string field;
-    fieldCount = 0;
     KeplerParameters keplerElements;
+
+    //If there was a read/conversion error in the previous line, then read the remainder
+    // of that line and throw it out first before proceeding with the next line.
+    if (fieldCount != (numDataFields + 1) && csvLine != 1) {
+        std::getline(file, field);
+    }
+    fieldCount = 0;
 
     // Object designator string
     std::getline(file, name, ',');
