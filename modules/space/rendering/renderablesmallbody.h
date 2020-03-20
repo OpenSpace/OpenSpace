@@ -126,6 +126,8 @@ private:
     const double convertDaysToSecs = 86400.;
 };
 
+static double importAngleValue(const std::string& angle);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
