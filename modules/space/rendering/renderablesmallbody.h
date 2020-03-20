@@ -57,6 +57,8 @@ private:
     std::vector<unsigned int> _indexBufferData;
 };
 
+static double importAngleValue(const std::string& angle);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__

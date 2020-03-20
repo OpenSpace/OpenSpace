@@ -34,7 +34,6 @@ namespace {
 
     constexpr const double AngleEpsilon = 1E-7;
     constexpr const double DistanceRatioAimThreshold = 1E-4;
-    constexpr const double FlightDestinationFactor = 1E-4;
 
     constexpr const openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -155,6 +154,12 @@ namespace {
         "The final distance we want to fly to, with regards to the anchor node."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FlightDestinationFactorInfo = {
+        "FlightDestinationFactor",
+        "Flight Destination Factor",
+        "The minimal distance factor that we need to reach to end linear flight."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo
         StereoInterpolationTimeInfo = {
             "StereoInterpolationTime",
@@ -232,6 +237,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
     , _flightDestinationDistance(FlightDestinationDistanceInfo, 2e8f, 0.0f, 1e10f)
+    , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -362,6 +368,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_minimumAllowedDistance);
     addProperty(_velocitySensitivity);
     addProperty(_flightDestinationDistance);
+    addProperty(_flightDestinationFactor);
     addProperty(_applyLinearFlight);
 
     addProperty(_useAdaptiveStereoscopicDepth);
@@ -440,7 +447,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
 
         // Make the approximation delta size depending on the flight distance
-        double arrivalThreshold = _flightDestinationDistance.value() * FlightDestinationFactor;
+        double arrivalThreshold = _flightDestinationDistance.value() * _flightDestinationFactor;
 
         // Fly towards the flight destination distance. When getting closer than arrivalThreshold terminate the flight
         if (abs(distFromCameraToFocus - _flightDestinationDistance.value()) > arrivalThreshold) {
