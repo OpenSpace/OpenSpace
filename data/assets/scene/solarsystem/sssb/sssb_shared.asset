@@ -27,7 +27,7 @@ local createSssbGroupObject = function(filename, guiName, sssbFolder, trailColor
             Path = sssbFolder.."/"..filename,
             Segments = 200,
             Color = trailColor,
-            Fade = 0.5,
+            TrailFade = 0.5,
         },
         GUI = {
             Path = "/Solar System/Small Solar System Body",

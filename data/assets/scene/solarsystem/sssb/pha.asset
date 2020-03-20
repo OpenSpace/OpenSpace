@@ -4,5 +4,7 @@ local sharedSssb = asset.require('./sssb_shared')
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'pha', 'sssb_data_pha')
 local object = sharedSssb.createSssbGroupObject('sssb_data_pha.csv', "Potentially Hazardous Asteroids", filepath, { 0.75, 0.2, 0.2 })
 object.Renderable.Enabled = false
+object.Renderable.Segments = 100
+object.Renderable.TrailFade = 17
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

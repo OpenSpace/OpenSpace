@@ -5,7 +5,6 @@ local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'mars-crossing_aster
 local object = sharedSssb.createSssbGroupObject('sssb_data_mars-crossing_asteroid.csv', "Mars-crossing Asteroid", filepath, { 0.9, 0.3, 0.1 })
 object.Renderable.Enabled = false
 object.Renderable.Segments = 50
-object.Renderable.Fade = 5
-object.Renderable.UpperLimit = 50000
+object.Renderable.TrailFade = 13
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
