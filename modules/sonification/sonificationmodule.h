@@ -89,33 +89,33 @@ private:
     //Struct to hold data for all the planets
     struct Planet {
         Planet() {
-            _identifier = "";
-            _distance = 0.0;
-            _angle = 0.0;
-            _update = false;
+            identifier = "";
+            distance = 0.0;
+            angle = 0.0;
+            update = false;
         }
 
-        Planet(std::string identifier) {
-            _identifier = identifier;
-            _distance = 0.0;
-            _angle = 0.0;
-            _update = false;
+        Planet(std::string inIdentifier) {
+            identifier = inIdentifier;
+            distance = 0.0;
+            angle = 0.0;
+            update = false;
         }
 
-        void setDistance(double distance) {
-            _distance = distance;
+        void setDistance(double inDistance) {
+            distance = inDistance;
         }
 
-        void setAngle(double angle) {
-            _angle = angle;
+        void setAngle(double inAngle) {
+            angle = inAngle;
         }
 
-        std::string _identifier;
-        double _distance;
-        double _angle;
-        std::vector<std::pair<std::string, double>> _moons;
-        bool _settings[NUM_SETTINGS] = {false, false, false, false, false};
-        bool _update;
+        std::string identifier;
+        double distance;
+        double angle;
+        std::vector<std::pair<std::string, double>> moons;
+        bool settings[NUM_SETTINGS] = {false, false, false, false, false};
+        bool update;
     };
 
     char* _buffer;
@@ -143,6 +143,25 @@ private:
         properties::BoolProperty moonsEnabled;
     };
 
+    struct PlanetHeadProperty : properties::PropertyOwner {
+        PlanetHeadProperty(properties::PropertyOwner::PropertyOwnerInfo planetHeadInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inMercuryInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inVenusInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inEarthInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inMarsInfo);
+
+        PlanetProperty mercuryProperty;
+        PlanetProperty venusProperty;
+        PlanetProperty earthProperty;
+        PlanetProperty marsProperty;
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _PlanetsInfo = {
+        "Planets",
+        "Planets Sonification",
+        "Sonification settings for the planets"
+    };
+
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _MercuryInfo = {
         "Mercury",
         "Mercury Sonification",
@@ -167,10 +186,8 @@ private:
         "Sonification settings for Mars"
     };
 
-    PlanetProperty _mercuryProperty = PlanetProperty(_MercuryInfo);
-    PlanetProperty _venusProperty = PlanetProperty(_VenusInfo);
-    PlanetProperty _earthProperty = PlanetProperty(_EarthInfo);
-    PlanetProperty _marsProperty = PlanetProperty(_MarsInfo);
+    PlanetHeadProperty _planetsProperty = PlanetHeadProperty(_PlanetsInfo, _MercuryInfo,
+        _VenusInfo, _EarthInfo, _MarsInfo);
 };
 
 } // namespace openspace
