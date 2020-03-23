@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_pfss_oi")
+local fieldlinesDirectory = asset.localResource("/pfss_oi.asset")
 local transferFunctions = asset.localResource("transferfunctions")
 local windSpeedPolarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"
@@ -15,7 +15,7 @@ local fieldlines = {
     -- Parent = transforms.HNMReferenceFrame.Identifier, -- Use this for ADAPT GONG (Parker Solar Probe endpoints)
     Renderable = {
         Type = "RenderableFieldlinesSequence",
-        Enabled = false,
+        Enabled = true,
         SourceFolder = fieldlinesDirectory,
         -- Dynamic web content wants a url with a unique id where the data may be fetched.
         DynamicWebContent = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=1179",

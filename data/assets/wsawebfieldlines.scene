@@ -193,11 +193,11 @@ asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
     sceneHelper.bindKeys(Keybindings)
     -- Sun magnetogram texture testing
-    openspace.time.setTime("2017 JUL 1 04:00:00.000")
+    openspace.time.setTime("2017 JUL 3 09:00:00.000")
     
     -- Set different deltatimes
     sceneHelper.setDeltaTimeKeys({
-        1, 3600, 430000
+        1801, 3600, 430000
     })
 
     openspace.setDefaultGuiSorting()

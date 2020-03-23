@@ -59,7 +59,10 @@ WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string server
     _nAvailableWeb = 0; // haven't downloaded that list yet
         
     _worker = WebFieldlinesWorker(syncDir, serverUrl);
-                
+
+    for (int i = 0; i < _window.nTriggerTimes; i++) {
+        _worker.addToDownloadedList(std::make_pair(_startTimes[i], _sourceFiles[i]));
+    }
 }
        
 // Returns true if time is inside the current window
@@ -155,7 +158,6 @@ void WebFieldlinesWindow::getNewTriggerTimesWebList(double time) {
     _worker.getRangeOfAvailableTriggerTimes(time, _triggerTimesWeb);
     _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
 }
-
 
 bool WebFieldlinesWindow::workerWindowIsReady() {
     return _worker.windowIsComplete();

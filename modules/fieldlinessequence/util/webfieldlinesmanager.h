@@ -41,7 +41,7 @@ public:
     // These may in the future be the same.
     void initializeWebFieldlinesManager(std::string identifier, std::string url, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
     
-    std::string initializeSyncDirectory(std::string identifier);
+    std::string initializeSyncDirectory(std::string identifier, std::unique_ptr<ghoul::Dictionary> & dictionary);
     
     // Temporary function - this should be moved to the worker. It's to download
     // the start lines if the directory is empty or launching for the first time

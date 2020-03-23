@@ -80,8 +80,8 @@ namespace {
     constexpr const char* KeyColorTableRanges = "ColorTableRanges";
     // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     constexpr const char* KeyMaskingRanges = "MaskingRanges";
-    // [STRING] Value should be path to folder where states are saved (JSON/CDF input
-    // => osfls output & oslfs input => JSON output)
+    // [STRING] Value should be path to folder where states are saved 
+    // (JSON/CDF input => osfls output & oslfs input => JSON output)
     constexpr const char* KeyOutputFolder = "OutputFolder";
     // [STRING] Value should either be "Quantity" or "Uniform"
     constexpr const char* KeyColoringMethod = "ColoringMethod";
@@ -286,11 +286,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pJumpToStartBtn(TimeJumpButtonInfo)
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
+
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
     // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
-    SourceFileType sourceFileType = SourceFileType::Invalid;
+    // TODO . Make sourceFileType input in extractMandatory not be 
+    // manipulated inside function.
+    SourceFileType sourceFileType = SourceFileType::Invalid;    
     if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
         // Wait for a fieldline
         return;
@@ -383,7 +386,11 @@ void RenderableFieldlinesSequence::initializeGL() {
  */
 bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
                                                            SourceFileType& sourceFileType)
+    // TODO .Make sourceFileType input in extractMandatory not be 
+    // manipulated inside function.
+
 {
+    // init _identifier
     _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
@@ -434,7 +441,8 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         if (!_dynWebContentUrl.empty()) {
             _dynamicWebContent = true;
             LINFO("Initializing sync-directory and downloading a startset");
-            sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
+            sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier, 
+                                                                            _dictionary);
             _webFieldlinesManager.preDownload(_dynWebContentUrl);
         }
         else {
@@ -470,7 +478,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
                 [](char c) { return static_cast<char>(::tolower(c)); }
             );
             return sub != inputFileTypeString;
-        }),
+            }),
             _sourceFiles.end()
             );
 
@@ -493,7 +501,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     }
 
     return true;
-}
+}   // end of extractMandatoryInfoFromDictionary
 
 void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     std::string& outputFolderPath)
@@ -1321,6 +1329,10 @@ void RenderableFieldlinesSequence::readNewState(const std::string& filePath) {
     _newState = std::make_unique<FieldlinesState>();
     if (_newState->loadStateFromOsfls(filePath)) {
         _newStateIsReady = true;
+    }
+    else {
+        LERROR("The provided file seem to be corrupt, did it download properly?: " 
+                + filePath);
     }
     _isLoadingStateFromDisk = false;
 }

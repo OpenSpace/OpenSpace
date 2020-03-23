@@ -51,8 +51,6 @@ namespace {
             return MapType::Gong;
         } else if (s == "adaptgong" || s == "adapt") {
             return MapType::AdaptGong;
-        } else if (s == "adapt") {
-            return MapType::AdaptGong;
         }
         LERROR("MapType invalid. Using GONG.");
         return MapType::AdaptGong;
@@ -281,7 +279,7 @@ void RenderableTimeVaryingSphere::initializeGL() {
     prepareForTimeVaryingTexture();
     computeSequenceEndTime();
     
-    _webFieldlinesManager.initializeSyncDirectory(_identifier);
+    _webFieldlinesManager.initializeSyncDirectory(_identifier, _dictionary);
     initializeWebManager();
 }
 
@@ -307,7 +305,7 @@ void RenderableTimeVaryingSphere::render(
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     
-    if (_webContent) {
+    if (!_webContentUrl.empty()) {
         if (!_webFieldlinesManager.hasUpdated &&
             _webFieldlinesManager.checkIfWindowIsReadyToLoad())
         {
@@ -410,21 +408,22 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary() {
     _dictionary->getValue("Identifier", _identifier);
     
     std::string sourceFolderPath;
-    
-    // If web content is set to true
-    if(_dictionary->getValue(WebContentInfo.identifier, _webContent)){
-        _dictionary->getValue(WebContentUrlInfo.identifier, _webContentUrl);
-        if (_dictionary->getValue(SourceFolderInfo.identifier, sourceFolderPath)) {
+
+    // TODO Remove _webContent. It's redundant if webContentURL is there anyway.
+    _dictionary->getValue(WebContentInfo.identifier, _webContent);
+    if(_dictionary->getValue(WebContentUrlInfo.identifier, _webContentUrl)){
+        if (!_dictionary->getValue(SourceFolderInfo.identifier, sourceFolderPath)) {
             LERROR(fmt::format(
-                "{}: The field {} is provided while {} is set to true, and"
-                " will be disregarded",
-                _identifier, SourceFolderInfo.identifier,
-                WebContentInfo.identifier
+                "{}: The field {} or {} is missing.",
+                _identifier, SourceFolderInfo.identifier, WebContentUrlInfo.identifier
             ));
+            return false;
         }
         if (!_webContentUrl.empty()) {
             LINFO("Initializing sync-directory for web content.");
-            sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier);
+            // Changes sourceFolderPath instead of dummy path
+            sourceFolderPath = _webFieldlinesManager.initializeSyncDirectory(_identifier,
+                                                                            _dictionary);
         }
         else {
             LERROR(fmt::format(
@@ -434,47 +433,37 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary() {
             return false;
         }
     }
-    else{ // Else load local files from SourceFolder
-        if (!_dictionary->getValue(SourceFolderInfo.identifier, sourceFolderPath)) {
-            LERROR(fmt::format(
-           "{}: The field {} is missing to load textures from disk. "
-           "Provide it, or set {} to true to load content from web.",
-           _identifier, SourceFolderInfo.identifier,
-           WebContentInfo.identifier
-           ));
-            return false;
-        }
-        std::string fileExtension = "fits";
+
+    std::string fileExtension = "fits";
         
-        // Ensure that the source folder exists and then extract
-        // the files with the same extension as <fileExtension>
-        ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
-        if (FileSys.directoryExists(sourceFolder)) {
-            // Extract all file paths from the provided folder
-            _sourceFiles = sourceFolder.readFiles(
-                ghoul::filesystem::Directory::Recursive::No,
-                ghoul::filesystem::Directory::Sort::Yes
-            );
+    // Ensure that the source folder exists and then extract
+    // the files with the same extension as <fileExtension>
+    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
+    if (FileSys.directoryExists(sourceFolder)) {
+        // Extract all file paths from the provided folder
+        _sourceFiles = sourceFolder.readFiles(
+            ghoul::filesystem::Directory::Recursive::No,
+            ghoul::filesystem::Directory::Sort::Yes
+        );
             
-            // Remove all files that don't have fits as extension
-            removeOtherFiles(fileExtension);
+        // Remove all files from _sourceFiles that don't have fits as extension
+        removeOtherFiles(fileExtension);
             
-            // Ensure that there are available and valid source files left
-            if (_sourceFiles.empty()) {
-                LERROR(fmt::format(
-                    "{}: {} contains no {} files",
-                    _identifier, sourceFolderPath, fileExtension
-                ));
-                return false;
-            }
-        }
-        else {
+        // Ensure that there are available and valid source files left
+       /* if (_sourceFiles.empty()) {
             LERROR(fmt::format(
-                "{}: {} is not a valid directory for source files",
-                _identifier, sourceFolderPath
+                "{}: {} contains no {} files",
+                _identifier, sourceFolderPath, fileExtension
             ));
             return false;
-        }
+        }*/
+    }
+    else {
+        LERROR(fmt::format(
+            "{}: {} is not a valid directory for source files",
+            _identifier, sourceFolderPath
+        ));
+        return false;
     }
     
     return true;
@@ -583,16 +572,16 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
     
 // TODO: Reading texture from disk. Must be thread safe! It's not...
 void RenderableTimeVaryingSphere::readNewTexture(const std::string& filePath) {
-    std::vector<float> imagedata;
-    processWSAFitsFile(filePath, &imagedata);
-    if (loadTextureData(&imagedata)) {
+    std::vector<float> imagedata = processWSAFitsFile(filePath);
+    if (loadTextureData(std::move(imagedata))) {
         _newTextureIsReady = true;
     }
     _isLoadingTextureFromDisk = false;
 }
     
-void RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath,
-                                                  std::vector<float> *imagedata){
+std::vector<float> RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath){
+    std::vector<float> res;
+
     FitsFileReader fitsFileReader(false);
     
     // Since WSA has more HDUs than the primary one, we want to force use of the primary
@@ -650,6 +639,7 @@ void RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath,
                 b = 1.0 - (colorIntensity*0.5 + 0.5); // gray
             }
         }
+        // glm vec3
         std::vector<float> rgb = {r,g,b};
         rgbLayers.push_back(rgb);
     }
@@ -663,16 +653,18 @@ void RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath,
                     rgbLayers.begin() + (i * 180) + 179 );
         for(int j = 0; j < 180; j++){
             int index = i * 180 + j;
-            imagedata->push_back(rgbLayers[index][0]);
-            imagedata->push_back(rgbLayers[index][1]);
-            imagedata->push_back(rgbLayers[index][2]);
+            res.push_back(rgbLayers[index][0]);
+            res.push_back(rgbLayers[index][1]);
+            res.push_back(rgbLayers[index][2]);
         }
     }
+
+    return res;
 }
     
-bool RenderableTimeVaryingSphere::loadTextureData(std::vector<float> *imagedata){
+bool RenderableTimeVaryingSphere::loadTextureData(std::vector<float> imagedata){
     auto texture = std::make_unique<ghoul::opengl::Texture>(
-                                                    std::move(imagedata->data()),
+                                                    std::move(imagedata.data()),
                                                     glm::vec3(180, 90, 1),
                                                     ghoul::opengl::Texture::Format::RGB,
                                                     GL_RGB32F,

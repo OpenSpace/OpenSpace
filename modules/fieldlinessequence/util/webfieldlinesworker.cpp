@@ -43,26 +43,31 @@ WebFieldlinesWorker::WebFieldlinesWorker(std::string syncDir, std::string server
 : _syncDir(syncDir), _serverUrl(serverUrl) {
     // Maybe to be used
     _endpointSingleDownload = _serverUrl;
-    // should be set by argument to be more general
+    // TODO should be set by argument to be more general
     // [DEPRICATED FOR NOW, DO WE NEED THIS?]
 }
 
 WebFieldlinesWorker::~WebFieldlinesWorker() {
     // Deleting all files that were downloaded during the run.
     // Cancel any potential download
-    if (_downloading && _downloading->hasStarted())
+    if (_downloading && _downloading->hasStarted()) {
         _downloading->wait();
+    }
 
-    if (_availableTimesDownloader && _availableTimesDownloader->hasStarted())
+    if (_downloading && _availableTimesDownloader
+                     && _availableTimesDownloader->hasStarted()) {
         _downloading->wait();
+    }
 
     // Remove all files
     std::vector<std::string> temp =
         ghoul::filesystem::Directory(_syncDir).readFiles();
     // Sneaky check, just want to make sure it is only deleting fieldlines for now
     if (!_fileExtension.empty()) {
-        if (temp.back().substr(temp.back().size() - _fileExtension.size()) == _fileExtension &&
-            temp.front().substr(temp.front().size() - _fileExtension.size()) == _fileExtension)
+        if (temp.back().substr(temp.back().size() - _fileExtension.size()) == 
+            _fileExtension &&
+            temp.front().substr(temp.front().size() - _fileExtension.size()) == 
+            _fileExtension)
         {
             std::for_each(temp.begin(), temp.end(), [&](auto it) {
                 FileSys.deleteFile(it);
@@ -72,8 +77,9 @@ WebFieldlinesWorker::~WebFieldlinesWorker() {
 }
     
 // PUBLIC FUNCTIONS
-void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time, std::vector<std::pair<double,
-                                                    std::string>> &_triggerTimesWeb)
+void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time, 
+                                                        std::vector<std::pair<double,
+                                                        std::string>> &_triggerTimesWeb)
 {
     
     // We don't want to keep sending request, if we just get empty responses.
@@ -96,11 +102,13 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time, std::vect
         AsyncHttpMemoryDownload mmryDld = AsyncHttpMemoryDownload(url);
         _availableTimesDownloader = std::make_unique<AsyncHttpMemoryDownload>(url);
         HttpRequest::RequestOptions opt = {};
-        opt.requestTimeoutSeconds = 0;
+        opt.requestTimeoutSeconds = 5;
         _availableTimesDownloader->start(opt);
     }
 
-    if (!_noMoreRequests && _availableTimesDownloader && _availableTimesDownloader->hasStarted() && _availableTimesDownloader->hasSucceeded()) {
+    if (!_noMoreRequests && _availableTimesDownloader && 
+                _availableTimesDownloader->hasStarted() && 
+                _availableTimesDownloader->hasSucceeded()) {
         _availableTimesDownloader->wait();
         std::string stringResult;
         std::vector<std::string> urlList;
@@ -135,8 +143,8 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time, std::vect
             );
         }
 
-        std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end());
         // If by any chance it would not sort in properly
+        std::sort(_triggerTimesWeb.begin(), _triggerTimesWeb.end());
 
         if (_triggerTimesWeb.size() == 0 ||
             std::equal(temp.begin(),
@@ -197,8 +205,8 @@ void WebFieldlinesWorker::downloadWindow(
 
         std::advance(forwardIt, startingPoint);
         std::for_each(forwardIt, triggerTimes.end(), [this, &downloaded](auto it) {
-            if (!downloaded && !fileIsOnDisk(it.first)) {
-                downloadOsfls(it);
+            if (!downloaded && !fileIsOnDisk(it.first, it.second)) {
+                downloadOsfls(it); 
                 downloaded = true;
                 _doneUpdating = false;
             }
@@ -210,7 +218,7 @@ void WebFieldlinesWorker::downloadWindow(
                 triggerTimes.rbegin(),
                 triggerTimes.rend(),
                 [this, &downloaded](auto it) {
-                    if (!downloaded && !fileIsOnDisk(it.first)) {
+                    if (!downloaded && !fileIsOnDisk(it.first, it.second)) {
                         downloadOsfls(it);
                         downloaded = true;
                         _doneUpdating = false;
@@ -237,6 +245,7 @@ void WebFieldlinesWorker::downloadWindow(
 }
 
 // Updates the list of available sourcefiles, owned by renderablefieldlinessequence.
+// TODO RFLS
 void WebFieldlinesWorker::updateRFSSourceFiles(std::vector<std::string>& _sourceFiles) {
     if (_readyToUpdateSourceFiles) {
         std::vector<std::string> toInsert;
@@ -309,13 +318,13 @@ bool WebFieldlinesWorker::edgeMode() {
     return _noMoreRequests && _bigWindowHasData;
 }
     
-std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKey)
-{
+std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKey){
     _downloadedSomething = true;
     _latestDownload = downloadKey;
 
     const std::string fileName =
-        downloadKey.second.substr(downloadKey.second.find_last_of('/', downloadKey.second.size() - 1));
+                        downloadKey.second.substr(downloadKey.second.find_last_of("\\/", 
+                                                  downloadKey.second.size() - 1));
     std::string url = downloadKey.second;
     std::string destinationPath =
         absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + fileName);
@@ -323,16 +332,19 @@ std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> dow
 
     // Extracting the file type
     if (_fileExtension.empty())
-        _fileExtension = fileName.substr(fileName.find_last_of('.', fileName.size() - 1), fileName.size());
+        _fileExtension = fileName.substr(fileName.find_last_of('.', fileName.size() - 1), 
+                                                                        fileName.size());
     
     _downloading = std::make_unique<AsyncHttpFileDownload>(
         url, destinationPath, HttpFileDownload::Overwrite::Yes
     );
 
     HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 0;
+    opt.requestTimeoutSeconds = 5;
 
     _downloading->start(opt);
+    _downloading->wait();
+
     _readyToDownload = false;
 
     return destinationPath;
@@ -340,13 +352,18 @@ std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> dow
 
 // This function searches for triggerTime in _downloadedTriggerTimes, 
 // to see weather a file has already been downloaded or not
-bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime) {
-    return std::find_if(
+bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime, std::string path) {
+    
+    bool exists = FileSys.fileExists(path);
+    
+    bool inList = std::find_if(
         _downloadedTriggerTimes.begin(),
         _downloadedTriggerTimes.end(),
         [&triggerTime] (std::pair<double, std::string> const &element) {
             return element.first == triggerTime;
         }) != _downloadedTriggerTimes.end();
+
+        return inList;  //(exists&&
 }
     
 void WebFieldlinesWorker::parseTriggerTimesList(std::string s,
@@ -396,7 +413,8 @@ void WebFieldlinesWorker::triggerTimeDouble2String(double i, std::string& s) {
     
 // Inserts the pair in sorted order
 void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pair) {
-    const std::string fileName = pair.second.substr(pair.second.find_last_of('/', pair.second.size() - 1) + 1);
+    const std::string fileName = pair.second.substr(pair.second.find_last_of('/', 
+                                                         pair.second.size() - 1) + 1);
     _downloadedTriggerTimes.insert(
         std::upper_bound(
             _downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), pair
@@ -406,7 +424,7 @@ void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pai
 
 bool WebFieldlinesWorker::compareTimetriggersEqual(double first, double second) {
     const double eps = 100.0;
-    return first > second - eps && first < second + eps;
+    return first > (second - eps) && first < (second + eps);
 }
     
 } // namespace openspace

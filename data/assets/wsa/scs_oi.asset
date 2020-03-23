@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_scs_oi")
+local fieldlinesDirectory = asset.localResource("/scs_oi.asset")
 local transferFunctions = asset.localResource("transferfunctions")
 local windSpeedPolarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"

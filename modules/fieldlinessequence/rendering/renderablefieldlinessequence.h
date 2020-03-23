@@ -209,6 +209,16 @@ private:
     //  Web Fieldlines manager downloads and updates renderable field lines with        //
     //  field lines downloaded from the web.                                            //
     WebFieldlinesManager _webFieldlinesManager;
+
+    /** 
+    * Cache testing 
+    */
+    
+    //std::string _pointsFilename;
+    
+    /**
+    * Cache testing
+    */
     
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //

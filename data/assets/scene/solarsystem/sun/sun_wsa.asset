@@ -2,7 +2,7 @@ local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
-local wsaOutDirectory = asset.localResource("wsa_out_fits")
+local wsaOutDirectory = asset.localResource("sun_wsa.asset") -- wsa_out_fits
 
 
 local Sun = {

@@ -123,8 +123,8 @@ private:
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void readNewTexture(const std::string& filePath);
     void updateActiveTriggerTimeIndex(double currentTime);
-    void processWSAFitsFile(std::string filePath, std::vector<float> *imagedata);
-    bool loadTextureData(std::vector<float> *imagedata);
+    std::vector<float> processWSAFitsFile(std::string filePath);
+    bool loadTextureData(std::vector<float> imagedata);
     void loadDefaultTexture();
 
 };

@@ -32,6 +32,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/engine/globals.h>
 
+#include <ghoul/filesystem/cachemanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebFieldlinesManager";
@@ -44,11 +45,11 @@ namespace openspace{
 // --------------------------- PUBLIC FUNCTIONS --------------------------- //
 
 // IMPORTANT: This initializing function must be called AFTER initializeSyncDirectory
-// Might be included in this function in the future.
+// TODO Might be included in this function in the future.
 void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier,
-                                                                          std::string url,
-                                                   std::vector<std::string>& _sourceFiles,
-                                                         std::vector<double>& _startTimes)
+                                                          std::string url,
+                                            std::vector<std::string>& _sourceFiles,
+                                                 std::vector<double>& _startTimes)
 {
     // Initialize the sliding window
     _webFieldlinesWindow =
@@ -62,20 +63,28 @@ void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier
 // field line identifier. The separation of this sync-directory initialization and
 // the initialization function of the class is because of RFLS, that can't
 // handle empty directories to begin with.
-std::string WebFieldlinesManager::initializeSyncDirectory(std::string identifier) {
-    std::string path =
-        absPath("${BASE}/sync/http/web_fieldlines") + FileSys.PathSeparator;
+
+std::string WebFieldlinesManager::initializeSyncDirectory(std::string identifier, 
+                                 std::unique_ptr<ghoul::Dictionary> & dictionary) {
+
+    // this does not work since cacheManager assumes that the given
+    // file is the one being cached
+    // std::string path = FileSys.cacheManager()->cachedFilename(
+    //     identifier,
+    //     "WebFieldlinesManager",
+    //     ghoul::filesystem::CacheManager::Persistent::No
+    // );
+    // //remove file name
+    // ghoul::filesystem::File f(path);
+    // path = f.directoryName();
+
+    std::string path = absPath("${TEMPORARY}") + FileSys.PathSeparator + identifier;
         
     if (!FileSys.directoryExists(path)) {
         FileSys.createDirectory(path);
     }
-
-    path = absPath(path + identifier);
-    if(!FileSys.directoryExists(path)) {
-        FileSys.createDirectory(path);
-    }
-
-    _syncDir = path;
+    
+    _syncDir = path;    
     return _syncDir;
 }
     
@@ -144,9 +153,10 @@ void WebFieldlinesManager::preDownload(std::string dUrl){
     }
     /* End of experiment */
 
-    AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
+    AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, 
+                                          HttpFileDownload::Overwrite::Yes);
     HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 0;
+    opt.requestTimeoutSeconds = 5;
     ashd.start(opt);
     ashd.wait();
 }

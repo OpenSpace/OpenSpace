@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
 local transferFunctions = asset.localResource("transferfunctions")
-local fieldlinesDirectory = asset.localResource("fl_sub_earth")
+local fieldlinesDirectory = asset.localResource("/sub_earth.asset")
 local polarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
 
