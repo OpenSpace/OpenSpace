@@ -495,6 +495,11 @@ public:
      */
     virtual std::string generateAdditionalJsonDescription() const;
 
+    /**
+     * Reset the valChanged flag to an unchanged state, as if value has not been changed.
+     */
+    void resetToUnchanged();
+
 protected:
     static const char* IdentifierKey;
     static const char* NameKey;
@@ -530,6 +535,9 @@ protected:
 
     /// The callback function sthat will be invoked whenever the value changes
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
+
+    /// Flag indicating that this property value has been changed after initialization
+    bool valChanged = false;
 
 private:
     void notifyDeleteListeners();

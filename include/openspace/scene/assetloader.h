@@ -226,6 +226,9 @@ private:
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyDeinitializationFunctionRefs;
     int _assetsTableRef;
+
+    std::vector<std::string> profileAssetsAdded;
+    std::vector<std::string> profileAssetsRemoved;
 };
 
 } // namespace openspace

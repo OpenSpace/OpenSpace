@@ -76,6 +76,7 @@ public:
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
+    void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
     void mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);

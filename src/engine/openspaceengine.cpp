@@ -1299,10 +1299,24 @@ void OpenSpaceEngine::postDraw() {
 
     if (_isFirstRenderingFirstFrame) {
         global::windowDelegate.setSynchronization(true);
+        resetPropertyChangeFlags();
         _isFirstRenderingFirstFrame = false;
     }
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
+}
+
+void OpenSpaceEngine::resetPropertyChangeFlags() {
+    ZoneScoped
+
+    std::vector<SceneGraphNode*> nodes =
+            global::renderEngine.scene()->allSceneGraphNodes();
+    for (auto n : nodes) {
+        std::vector<openspace::properties::Property*> props = n->properties();
+        for (auto p : props) {
+            p->resetToUnchanged();
+        }
+    }
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {

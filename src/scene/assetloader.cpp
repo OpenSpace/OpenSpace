@@ -473,6 +473,7 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
 
 std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
+    profileAssetsAdded.push_back(identifier);
     return request(identifier);
 }
 
@@ -480,6 +481,7 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
 void AssetLoader::remove(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
     unrequest(identifier);
+    profileAssetsRemoved.push_back(identifier);
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {

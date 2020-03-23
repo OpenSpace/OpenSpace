@@ -312,6 +312,10 @@ void Property::notifyDeleteListeners() {
     }
 }
 
+void Property::resetToUnchanged() {
+    valChanged = false;
+}
+
 std::string Property::generateBaseJsonDescription() const {
     std::string cName = className();
     std::string cNameSan = sanitizeString(cName);
