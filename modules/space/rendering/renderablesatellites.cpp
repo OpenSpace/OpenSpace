@@ -75,12 +75,6 @@ namespace {
         "Trail Fade",
         "This value determines how fast the trail fades and is an appearance property. "
     };
-    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
-        "UpperLimit",
-        "Upper Limit",
-        "Upper limit on the number of objects for this renderable, regardless of "
-        "how many objects are contained in the data file"
-    };
 }
 
 namespace openspace {
@@ -96,12 +90,6 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 new DoubleVerifier,
                 Optional::No,
                 SegmentsInfo.description
-            },
-            {
-                UpperLimitInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                UpperLimitInfo.description
             },
             {
                 PathInfo.identifier,
