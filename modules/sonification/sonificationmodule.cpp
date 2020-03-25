@@ -41,34 +41,73 @@
 #define BUFFER_SIZE 1024
 
 namespace {
+    //Solar View
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo SolarInfo = {
+       "Solar View",
+       "Solar View Sonification",
+       "Sonification settings for the solar view. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableAllInfo = {
+        "EnabledallInfo",
+        "All",
+        "Play sonification for all planets. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableMercuryInfo = {
+        "EnabledMercuryInfo",
+        "Mercury",
+        "Play sonification for Mercury. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableVenusInfo = {
+        "EnabledVenusInfo",
+        "Venus",
+        "Play sonification for Venus. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableEarthInfo = {
+        "EnabledEarthInfo",
+        "Earth",
+        "Play sonification for Earth. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableMarsInfo = {
+        "EnabledMarsInfo",
+        "Mars",
+        "Play sonification for Mars. Only works if the sun IS in focus."
+    };
+
+
+    //Planetary View
     constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "EnabledInfo",
         "Enable all",
-        "Play all sonifications for the planet or turn it off"
+        "Play all sonifications for the planet or turn it off. Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDayInfo",
         "Size/Day",
-        "Play Size/Day sonification or turn it off"
+        "Play Size/Day sonification or turn it off. Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
         "GravityInfo",
         "Gravity",
-        "Play Gravity sonification or turn it off"
+        "Play Gravity sonification or turn it off. Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "AtmosphereInfo",
         "Atmosphere",
-        "Play Atmosphere sonification or turn it off"
+        "Play Atmosphere sonification or turn it off. Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
         "MoonsInfo",
         "Moons",
-        "Play Moons sonification or turn it off"
+        "Play Moons sonification or turn it off. Only works if the sun is NOT in focus."
     };
 
 } // namespace
@@ -135,6 +174,14 @@ SonificationModule::SonificationModule()
     }
 
     //Add onChange for the properties
+    //Solar
+    _solarProperty.allEnabled.onChange([this]() { onSolarAllEnabledChanged(_solarProperty.allEnabled.value()); });
+    _solarProperty.mercuryEnabled.onChange([this]() { onSolarMercuryEnabledChanged(_solarProperty.mercuryEnabled.value()); });
+    _solarProperty.venusEnabled.onChange([this]() { onSolarVenusEnabledChanged(_solarProperty.venusEnabled.value()); });
+    _solarProperty.earthEnabled.onChange([this]() { onSolarEarthEnabledChanged(_solarProperty.earthEnabled.value()); });
+    _solarProperty.marsEnabled.onChange([this]() { onSolarMarsEnabledChanged(_solarProperty.marsEnabled.value()); });
+
+    //Planetary View
     //Mercury
     _planetsProperty.mercuryProperty.enabled.onChange([this]() { onMercuryEnabledChanged(_planetsProperty.mercuryProperty.enabled.value()); } );
     _planetsProperty.mercuryProperty.sizeDayEnabled.onChange([this]() { onMercurySizeDayChanged(_planetsProperty.mercuryProperty.sizeDayEnabled.value()); } );
@@ -162,13 +209,107 @@ SonificationModule::SonificationModule()
 
     //Add the properties
     addPropertySubOwner(_planetsProperty);
+    addPropertySubOwner(_solarProperty);
 }
 
+
+//Solar View
+void SonificationModule::onSolarAllEnabledChanged(bool value) {
+    if (_isPlanetaryView && value) {
+        _solarProperty.allEnabled = false;
+        return;
+    }
+
+    _solarSettings[0] = value;
+    _solarSettings[1] = value;
+    _solarSettings[2] = value;
+    _solarSettings[3] = value;
+
+    _solarProperty.mercuryEnabled = value;
+    _solarProperty.venusEnabled = value;
+    _solarProperty.earthEnabled = value;
+    _solarProperty.marsEnabled = value;
+}
+
+void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
+    if (_isPlanetaryView && value) {
+        _solarProperty.mercuryEnabled = false;
+        return;
+    }
+
+    _solarSettings[0] = value;
+
+    std::string label = "/Sun";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_SOLAR_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onSolarVenusEnabledChanged(bool value) {
+    if (_isPlanetaryView && value) {
+        _solarProperty.venusEnabled = false;
+        return;
+    }
+
+    _solarSettings[1] = value;
+
+    std::string label = "/Sun";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_SOLAR_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onSolarEarthEnabledChanged(bool value) {
+    if (_isPlanetaryView && value) {
+        _solarProperty.earthEnabled = false;
+        return;
+    }
+
+    _solarSettings[2] = value;
+
+    std::string label = "/Sun";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_SOLAR_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onSolarMarsEnabledChanged(bool value) {
+    if (_isPlanetaryView && value) {
+        _solarProperty.marsEnabled = false;
+        return;
+    }
+
+    _solarSettings[3] = value;
+
+    std::string label = "/Sun";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_SOLAR_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+
+//Planetart View
 //Mercury
 void SonificationModule::onMercuryEnabledChanged(bool value) {
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.mercuryProperty.enabled = false;
+        return;
+    }
+
     _planets[0].settings[0] = value;
     _planets[0].settings[1] = value;
-    _planets[0].settings[2] = value;
 
     _planetsProperty.mercuryProperty.sizeDayEnabled = value;
     _planetsProperty.mercuryProperty.gravityEnabled = value;
@@ -178,22 +319,36 @@ void SonificationModule::onMercuryEnabledChanged(bool value) {
 }
 
 void SonificationModule::onMercurySizeDayChanged(bool value) {
-    _planets[0].settings[1] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.mercuryProperty.sizeDayEnabled = false;
+        return;
+    }
+
+    _planets[0].settings[0] = value;
     _planets[0].update = true;
 }
 
 void SonificationModule::onMercuryGravityChanged(bool value) {
-    _planets[0].settings[2] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.mercuryProperty.gravityEnabled = false;
+        return;
+    }
+
+    _planets[0].settings[1] = value;
     _planets[0].update = true;
 }
 
 
 //Venus
 void SonificationModule::onVenusEnabledChanged(bool value) {
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.venusProperty.enabled = false;
+        return;
+    }
+
     _planets[1].settings[0] = value;
     _planets[1].settings[1] = value;
     _planets[1].settings[2] = value;
-    _planets[1].settings[3] = value;
 
     _planetsProperty.venusProperty.sizeDayEnabled = value;
     _planetsProperty.venusProperty.gravityEnabled = value;
@@ -203,28 +358,47 @@ void SonificationModule::onVenusEnabledChanged(bool value) {
 }
 
 void SonificationModule::onVenusSizeDayChanged(bool value) {
-    _planets[1].settings[1] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.venusProperty.sizeDayEnabled = false;
+        return;
+    }
+
+    _planets[1].settings[0] = value;
     _planets[1].update = true;
 }
 
 void SonificationModule::onVenusGravityChanged(bool value) {
-    _planets[1].settings[2] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.venusProperty.gravityEnabled = false;
+        return;
+    }
+
+    _planets[1].settings[1] = value;
     _planets[1].update = true;
 }
 
 void SonificationModule::onVenusAtmosphereChanged(bool value) {
-    _planets[1].settings[3] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.venusProperty.atmosphereEnabled = false;
+        return;
+    }
+
+    _planets[1].settings[2] = value;
     _planets[1].update = true;
 }
 
 
 //Earth
 void SonificationModule::onEarthEnabledChanged(bool value) {
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.earthProperty.enabled = false;
+        return;
+    }
+
     _planets[2].settings[0] = value;
     _planets[2].settings[1] = value;
     _planets[2].settings[2] = value;
     _planets[2].settings[3] = value;
-    _planets[2].settings[4] = value;
 
     _planetsProperty.earthProperty.sizeDayEnabled = value;
     _planetsProperty.earthProperty.gravityEnabled = value;
@@ -234,33 +408,57 @@ void SonificationModule::onEarthEnabledChanged(bool value) {
 }
 
 void SonificationModule::onEarthSizeDayChanged(bool value) {
-    _planets[2].settings[1] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.earthProperty.sizeDayEnabled = false;
+        return;
+    }
+
+    _planets[2].settings[0] = value;
     _planets[2].update = true;
 }
 
 void SonificationModule::onEarthGravityChanged(bool value) {
-    _planets[2].settings[2] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.earthProperty.gravityEnabled = false;
+        return;
+    }
+
+    _planets[2].settings[1] = value;
     _planets[2].update = true;
 }
 
 void SonificationModule::onEarthAtmosphereChanged(bool value) {
-    _planets[2].settings[3] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.earthProperty.atmosphereEnabled = false;
+        return;
+    }
+
+    _planets[2].settings[2] = value;
     _planets[2].update = true;
 }
 
 void SonificationModule::onEarthMoonsChanged(bool value) {
-    _planets[2].settings[4] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.earthProperty.moonsEnabled = false;
+        return;
+    }
+
+    _planets[2].settings[3] = value;
     _planets[2].update = true;
 }
 
 
 //Mars
 void SonificationModule::onMarsEnabledChanged(bool value) {
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.marsProperty.enabled = false;
+        return;
+    }
+
     _planets[3].settings[0] = value;
     _planets[3].settings[1] = value;
     _planets[3].settings[2] = value;
     _planets[3].settings[3] = value;
-    _planets[3].settings[4] = value;
 
     _planetsProperty.marsProperty.sizeDayEnabled = value;
     _planetsProperty.marsProperty.gravityEnabled = value;
@@ -270,22 +468,42 @@ void SonificationModule::onMarsEnabledChanged(bool value) {
 }
 
 void SonificationModule::onMarsSizeDayChanged(bool value) {
-    _planets[3].settings[1] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.marsProperty.sizeDayEnabled = false;
+        return;
+    }
+
+    _planets[3].settings[0] = value;
     _planets[3].update = true;
 }
 
 void SonificationModule::onMarsGravityChanged(bool value) {
-    _planets[3].settings[2] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.marsProperty.gravityEnabled = false;
+        return;
+    }
+
+    _planets[3].settings[1] = value;
     _planets[3].update = true;
 }
 
 void SonificationModule::onMarsAtmosphereChanged(bool value) {
-    _planets[3].settings[3] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.marsProperty.atmosphereEnabled = false;
+        return;
+    }
+
+    _planets[3].settings[2] = value;
     _planets[3].update = true;
 }
 
 void SonificationModule::onMarsMoonsChanged(bool value) {
-    _planets[3].settings[4] = value;
+    if (!_isPlanetaryView && value) {
+        _planetsProperty.marsProperty.moonsEnabled = false;
+        return;
+    }
+
+    _planets[3].settings[3] = value;
     _planets[3].update = true;
 }
 
@@ -309,6 +527,22 @@ SonificationModule::PlanetProperty::PlanetProperty(
         addProperty(atmosphereEnabled);
     if(planetInfo.identifier.compare("Mercury") != 0 && planetInfo.identifier.compare("Venus") != 0)
         addProperty(moonsEnabled);
+}
+
+
+SonificationModule::SolarProperty::SolarProperty()
+    : properties::PropertyOwner(SolarInfo),
+    allEnabled(EnableAllInfo, false),
+    mercuryEnabled(EnableMercuryInfo, false),
+    venusEnabled(EnableVenusInfo, false),
+    earthEnabled(EnableEarthInfo, false),
+    marsEnabled(EnableMarsInfo, false)
+{
+    addProperty(allEnabled);
+    addProperty(mercuryEnabled);
+    addProperty(venusEnabled);
+    addProperty(earthEnabled);
+    addProperty(marsEnabled);
 }
 
 
@@ -423,7 +657,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 UdpTransmitSocket socket = UdpTransmitSocket(
                     IpEndpointName(SC_IP_ADDRESS, SC_PORT));
                 _stream.Clear();
-                osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_SETTINGS);
+                osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
                 _stream << osc::BeginMessage(label.c_str()) << distance << angle << timeSpeed << settingsBlob;
 
                 //Add the information of the moons if any
@@ -484,10 +718,26 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                         socket.Send(_stream.Data(), _stream.Size());
 
                         //If focus is on the sun, switch sonification view
-                        if (focusNode->identifier().compare("Sun") == 0)
+                        if (focusNode->identifier().compare("Sun") == 0) {
                             _isPlanetaryView = false;
-                        else
+                            std::vector<properties::PropertyOwner*> planetOwners = _planetsProperty.propertySubOwners();
+
+                            for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin(); owner < planetOwners.end(); ++owner) {
+                                std::vector<properties::Property*> planetProperties = (*owner)->properties();
+
+                                for (std::vector<properties::Property*>::iterator i = planetProperties.begin(); i < planetProperties.end(); ++i) {
+                                    (*i)->set(false);
+                                }
+                            }
+                        }
+                        else {
                             _isPlanetaryView = true;
+                            std::vector<properties::Property*> solarProperties = _solarProperty.properties();
+
+                            for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
+                                (*i)->set(false);
+                            }
+                        }
                     }
 
                     //Extract data from all the planets
@@ -522,14 +772,26 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 void SonificationModule::internalDeinitialize() {
     //Turn off the sonification in SuperCollider
     for (int i = 0; i < NUM_PLANETS; ++i) {
-        for (int s = 0; s < NUM_SETTINGS; ++s) {
+        for (int s = 0; s < NUM_PLANETARY_SETTINGS; ++s) {
             _planets[i].settings[s] = false;
         }
+
+        for (int s = 0; s < NUM_SOLAR_SETTINGS; ++s) {
+            _solarSettings[s] = false;
+        }
+
+        std::string solarLabel = "/Sun";
+        UdpTransmitSocket solarSocket = UdpTransmitSocket(
+            IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+        _stream.Clear();
+        osc::Blob solarSettingsBlob = osc::Blob(_solarSettings, NUM_SOLAR_SETTINGS);
+        _stream << osc::BeginMessage(solarLabel.c_str()) << solarSettingsBlob << osc::EndMessage;
+        solarSocket.Send(_stream.Data(), _stream.Size());
 
         UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
         _stream.Clear();
         std::string label = "/" + _planets[i].identifier;
-        osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_SETTINGS);
+        osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
         _stream << osc::BeginMessage(label.c_str()) <<
             _planets[i].distance << _planets[i].angle << _previousTimeSpeed << settingsBlob;
 

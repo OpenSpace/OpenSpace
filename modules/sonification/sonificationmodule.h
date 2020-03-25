@@ -38,7 +38,8 @@
 
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
-#define NUM_SETTINGS 5
+#define NUM_PLANETARY_SETTINGS 4
+#define NUM_SOLAR_SETTINGS 4
 
 #include <openspace/util/openspacemodule.h>
 
@@ -65,21 +66,33 @@ private:
     void threadMain(std::atomic<bool>& isRunning);
 
     //On change methods for each property
+    //Solar
+    void onSolarAllEnabledChanged(bool value);
+    void onSolarMercuryEnabledChanged(bool value);
+    void onSolarVenusEnabledChanged(bool value);
+    void onSolarEarthEnabledChanged(bool value);
+    void onSolarMarsEnabledChanged(bool value);
+
+    //Planetary
+    //Mercury
     void onMercuryEnabledChanged(bool value);
     void onMercurySizeDayChanged(bool value);
     void onMercuryGravityChanged(bool value);
 
+    //Venus
     void onVenusEnabledChanged(bool value);
     void onVenusSizeDayChanged(bool value);
     void onVenusGravityChanged(bool value);
     void onVenusAtmosphereChanged(bool value);
 
+    //Earth
     void onEarthEnabledChanged(bool value);
     void onEarthSizeDayChanged(bool value);
     void onEarthGravityChanged(bool value);
     void onEarthAtmosphereChanged(bool value);
     void onEarthMoonsChanged(bool value);
 
+    //Mars
     void onMarsEnabledChanged(bool value);
     void onMarsSizeDayChanged(bool value);
     void onMarsGravityChanged(bool value);
@@ -114,7 +127,9 @@ private:
         double distance;
         double angle;
         std::vector<std::pair<std::string, double>> moons;
-        bool settings[NUM_SETTINGS] = {false, false, false, false, false};
+        //Settings for each planet
+        //[0] size/day enabled, [1] gravity enabled, [2] atmosphere enabled, [3] moons enabled
+        bool settings[NUM_PLANETARY_SETTINGS] = {false, false, false, false};
         bool update;
     };
 
@@ -128,8 +143,12 @@ private:
     double _timePrecision;
     Planet _planets[NUM_PLANETS];
     bool _isPlanetaryView;
+    //Settings for each planet
+    //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled
+    bool _solarSettings[NUM_SOLAR_SETTINGS] = { false, false, false, false};
 
     //Properties
+    //Planetary View
     struct PlanetProperty : properties::PropertyOwner {
         PlanetProperty(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
 
@@ -157,37 +176,51 @@ private:
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _PlanetsInfo = {
-        "Planets",
+        "Planetary View",
         "Planets Sonification",
-        "Sonification settings for the planets"
+        "Sonification settings for the planets. Only works if the sun is NOT in focus."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _MercuryInfo = {
         "Mercury",
         "Mercury Sonification",
-        "Sonification settings for Mercury"
+        "Sonification settings for Mercury. Only works if the sun is NOT in focus."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _VenusInfo = {
         "Venus",
         "Venus Sonification",
-        "Sonification settings for Venus"
+        "Sonification settings for Venus. Only works if the sun is NOT in focus."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _EarthInfo = {
         "Earth",
         "Earth Sonification",
-        "Sonification settings for Earth"
+        "Sonification settings for Earth. Only works if the sun is NOT in focus."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _MarsInfo = {
         "Mars",
         "Mars Sonification",
-        "Sonification settings for Mars"
+        "Sonification settings for Mars. Only works if the sun is NOT in focus."
     };
 
     PlanetHeadProperty _planetsProperty = PlanetHeadProperty(_PlanetsInfo, _MercuryInfo,
         _VenusInfo, _EarthInfo, _MarsInfo);
+
+    //Solar View
+    struct SolarProperty : properties::PropertyOwner {
+        SolarProperty();
+
+        properties::BoolProperty allEnabled;
+        properties::BoolProperty mercuryEnabled;
+        properties::BoolProperty venusEnabled;
+        properties::BoolProperty earthEnabled;
+        properties::BoolProperty marsEnabled;
+    };
+
+    SolarProperty _solarProperty = SolarProperty();
+
 };
 
 } // namespace openspace
