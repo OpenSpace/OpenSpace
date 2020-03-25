@@ -32,6 +32,9 @@
 
 namespace openspace {
 
+// The TouchInput represents a single finger/device-input at a specific point in time.
+// the fingerId and touchDeviceId coupled with the timestamp allows this to be compared
+// with other TouchInputs in order to calculate gesture-like behaviour.
 struct TouchInput {
     TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
     glm::vec2 screenCoordinates(glm::vec2 resolution) const;
@@ -49,17 +52,22 @@ struct TouchInput {
     double timestamp;       // timestamp in seconds from global touch initialization
 };
 
+// The TouchInputHolder holds one or many TouchInputs, in order to track the history of 
+// the finger/input device
 class TouchInputHolder {
 public:
     TouchInputHolder(TouchInput input);
 
-    // tryAddInput:
     // Succeeds upon a different input than last.
     // Fails upon a too similar input as last.
     // Updates time for the last input if same position.
     bool tryAddInput(TouchInput input);
+    
     void clearInputs();
 
+    // Checks whether or not this Holder actually holds a specific input (based on IDs)
+    // Succeeds when `input` is held by this Holder
+    // Fails if `input` is not held by this Holder
     bool holdsInput(const TouchInput &input) const;
 
     size_t touchDeviceId() const;
