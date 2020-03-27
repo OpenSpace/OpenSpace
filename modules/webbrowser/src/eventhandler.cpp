@@ -28,6 +28,8 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
@@ -208,6 +210,13 @@ void EventHandler::initialize() {
             }
 
             if (_validTouchStates.empty()) {
+#ifdef WIN32
+                CefTouchEvent event = touchEvent(
+                    input,
+                    cef_touch_event_type_t::CEF_TET_PRESSED
+                );
+                _browserInstance->sendTouchEvent(event);
+#else
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
@@ -217,6 +226,7 @@ void EventHandler::initialize() {
                     false,
                     BrowserInstance::SingleClick
                 );
+#endif
                 _validTouchStates.emplace_back(input);
             }
             else {
@@ -245,11 +255,20 @@ void EventHandler::initialize() {
             );
 
             if (it == _validTouchStates.cbegin()) {
+#ifdef WIN32
+
+                CefTouchEvent event = touchEvent(
+                    input,
+                    cef_touch_event_type_t::CEF_TET_MOVED
+                );
+                _browserInstance->sendTouchEvent(event);
+#else
                 glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
+#endif
                 return true;
             }
             else if (it != _validTouchStates.cend()){
@@ -280,8 +299,15 @@ void EventHandler::initialize() {
             if (found == _validTouchStates.cend()) {
                 return;
             }
-
+#ifdef WIN32
+            CefTouchEvent event = touchEvent(
+                input,
+                cef_touch_event_type_t::CEF_TET_RELEASED
+            );
+            _browserInstance->sendTouchEvent(event);
+#endif
             _validTouchStates.erase(found);
+#ifndef WIN32
             if (_validTouchStates.empty()) {
                 glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
@@ -294,6 +320,7 @@ void EventHandler::initialize() {
                     BrowserInstance::SingleClick
                 );
             }
+#endif
         }
     );
 }
@@ -337,7 +364,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
 bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     // check time
     using namespace std::chrono;
-    
+
     auto now = high_resolution_clock::now();
     milliseconds maxTimeDifference(doubleClickTime());
     auto requiredTime = button.lastClickTime + maxTimeDifference;
@@ -437,6 +464,27 @@ CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
     event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
     return event;
 }
+
+#ifdef WIN32
+CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
+    const cef_touch_event_type_t eventType) const
+{
+    const glm::vec2 windowPos = input.currentWindowCoordinates();
+    CefTouchEvent event = {};
+    event.id = static_cast<int>(input.fingerId);
+    event.x = windowPos.x;
+    event.y = windowPos.y;
+    event.type = eventType;
+    const std::vector<std::pair<Key, KeyModifier>> &keyModVec = 
+        global::navigationHandler.inputState().pressedKeys();
+    for (auto keyModPair : keyModVec) {
+        const KeyModifier mods = keyModVec[0].second;
+        event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
+    }
+    event.pointer_type = cef_pointer_type_t::CEF_POINTER_TYPE_TOUCH;
+    return event;
+}
+#endif
 
 void EventHandler::setBrowserInstance(BrowserInstance* browserInstance) {
     LDEBUG("Setting browser instance.");

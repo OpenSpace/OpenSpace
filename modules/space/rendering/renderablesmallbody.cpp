@@ -105,8 +105,8 @@ enum Months {
     December
 };
 
-int daysIntoGivenYear(int year, int month, int dayOfMonth) {
-    //month and dayCount are zero-based
+int daysIntoGivenYear(int month, int dayOfMonth) {
+    //month and dayCount are zero-based. Does NOT account for leap year.
     month -= 1;
     int dayCount = dayOfMonth - 1;
 
@@ -140,7 +140,7 @@ double epochFromYMDdSubstring(const std::string& epochString) {
     // 2.a
     int monthNum = std::atoi(epochString.substr(4, 2).c_str());
     int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
-    int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
+    int wholeDaysInto = daysIntoGivenYear(monthNum, dayOfMonthNum);
     double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
     double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
 
@@ -344,7 +344,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
                 throw std::invalid_argument("Unable to read inclination from line"
                     + std::to_string(csvLine + 1));
             }
-            keplerElements.inclination = std::stod(field);
+            keplerElements.inclination = importAngleValue(field);
             fieldCount++;
 
             // Longitude of ascending node (degrees)
@@ -352,7 +352,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
                 throw std::invalid_argument("Unable to read ascending node from line"
                     + std::to_string(csvLine + 1));
             }
-            keplerElements.ascendingNode = std::stod(field);
+            keplerElements.ascendingNode = importAngleValue(field);
             fieldCount++;
 
             // Argument of Periapsis (degrees)
@@ -360,7 +360,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
                 throw std::invalid_argument("Unable to read arg of periapsis from line"
                     + std::to_string(csvLine + 1));
             }
-            keplerElements.argumentOfPeriapsis = std::stod(field);
+            keplerElements.argumentOfPeriapsis = importAngleValue(field);
             fieldCount++;
 
             // Mean Anomaly (degrees)
@@ -368,7 +368,7 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
                 throw std::invalid_argument("Unable to read mean anomaly from line"
                     + std::to_string(csvLine + 1));
             }
-            keplerElements.meanAnomaly = std::stod(field);
+            keplerElements.meanAnomaly = importAngleValue(field);
             fieldCount++;
 
             // Period (days)
@@ -410,6 +410,15 @@ void RenderableSmallBody::readJplSbDb(const std::string& filename) {
     }
 
     file.close();
+}
+
+static double importAngleValue(const std::string& angle) {
+    double output = std::stod(angle);
+    output = std::fmod(output, 360.0);
+    if (output < 0.0) {
+        output += 360.0;
+    }
+    return output;
 }
 
 void RenderableSmallBody::initializeGL() {

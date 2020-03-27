@@ -784,4 +784,22 @@ float RenderableLabels::unit(int unit) const {
     }
 }
 
+std::string RenderableLabels::toString(int unit) const {
+    switch (static_cast<Unit>(unit)) {
+        case Meter: return MeterUnit;
+        case Kilometer: return KilometerUnit;
+        case Megameter: return  MegameterUnit;
+        case Gigameter: return GigameterUnit;
+        case AU: return AstronomicalUnit;
+        case Terameter: return TerameterUnit;
+        case Petameter: return PetameterUnit;
+        case Parsec: return ParsecUnit;
+        case Kiloparsec: return KiloparsecUnit;
+        case Megaparsec: return MegaparsecUnit;
+        case Gigaparsec: return GigaparsecUnit;
+        case GigalightYears: return GigalightyearUnit;
+        default: throw std::logic_error("Missing case label");
+    }
+}
+
 } // namespace openspace
