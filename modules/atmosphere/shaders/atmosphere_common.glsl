@@ -74,6 +74,7 @@ uniform float mieG;
 uniform float sunRadiance;
 
 uniform bool ozoneLayerEnabled;
+uniform bool oxygenAbsLayerEnabled;
 
 uniform int TRANSMITTANCE_W;
 uniform int TRANSMITTANCE_H;

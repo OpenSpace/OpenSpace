@@ -338,8 +338,9 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         irradianceFactor = 1.0;
     }
     else {
-        attenuation = analyticTransmittance(r, mu, t);
-        //attenuation = transmittance(r, mu, t); 
+        // JCC: analyticTransmittance doesn't include the Ozone layer absorption.
+        //attenuation = analyticTransmittance(r, mu, t);
+        attenuation = transmittance(r, mu, t); 
         groundHit = false;
     }
 
@@ -421,8 +422,6 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     else {
         //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
         return spaceColor.rgb + finalScatteringRadiance;
-        // return attenuation * spaceColor.rgb +
-        // (vec3(1.0) - attenuation) * finalScatteringRadiance;
     }    
 }
 
@@ -528,7 +527,7 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
     vec3 transmittance  = (r <= Rt) ? ( mu < -sqrt(1.0f - Rg2/(r*r)) ? 
                           vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
     // JCC: Change this function to a impostor texture with gaussian decay color weighted
-    // by tge sunRadiance, transmittance and irradianceColor (11/03/2017)                          
+    // by the sunRadiance, transmittance and irradianceColor (11/03/2017)                          
     float sunFinalColor = smoothstep(cos(M_PI / 500.0f), cos(M_PI / 900.0f), dot(v, s)) * 
                           sunRadiance * (1.0f - irradianceFactor);
 

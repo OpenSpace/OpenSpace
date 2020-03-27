@@ -156,12 +156,16 @@ void main() {
         radianceToLuminance(inscatterColorZenith.g, 0.550),
         radianceToLuminance(inscatterColorZenith.b, 0.440)
     );
+
+    //zenithLuminance = vec3(114974.916437,71305.954816,65310.548555) * inscatterColorZenith;
+
     vec3 elementLuminance = vec3(
         radianceToLuminance(inscatterColor.r, 0.680),
         radianceToLuminance(inscatterColor.g, 0.550),
         radianceToLuminance(inscatterColor.b, 0.440)
     );
 
+    //elementLuminance = inscatterColor * vec3(114974.916437,71305.954816,65310.548555);
 
     //float mu = dot(x, v) / r;
     //vec3 sunColorV = sunColor(x, tF, v, s, r, mu);                                                

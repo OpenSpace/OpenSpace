@@ -97,6 +97,7 @@ private:
     properties::FloatProperty _rayleighScatteringCoeffYP;
     properties::FloatProperty _rayleighScatteringCoeffZP;
     properties::BoolProperty  _ozoneEnabledP;
+    properties::BoolProperty  _oxygenEnableP;
     properties::FloatProperty _ozoneHeightScaleP;
     properties::FloatProperty _ozoneCoeffXP;
     properties::FloatProperty _ozoneCoeffYP;
@@ -114,6 +115,7 @@ private:
 
     bool _atmosphereEnabled = false;
     bool _ozoneLayerEnabled = false;
+    bool _oxygenAbsEnabled = false;
     bool _sunFollowingCameraEnabled = false;
     float _atmosphereRadius = 0.f;
     float _atmospherePlanetRadius = 0.f;

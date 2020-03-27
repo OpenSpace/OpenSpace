@@ -75,6 +75,7 @@ public:
     void setPlanetGroundRadianceEmittion(float groundRadianceEmittion);
     void setRayleighHeightScale(float rayleighHeightScale);
     void enableOzone(bool enable);
+    void enableOxygen(bool enable);
     void setOzoneHeightScale(float ozoneHeightScale);
     void setMieHeightScale(float mieHeightScale);
     void setMiePhaseConstant(float miePhaseConstant);
@@ -138,7 +139,7 @@ private:
 
     UniformCache(cullAtmosphere, Rg, Rt,
         groundRadianceEmittion, HR, betaRayleigh, HM,
-        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled,
+        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, oxygenAbsLayerEnabled,
         HO, betaOzoneExtinction, SAMPLES_R,
         SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
     UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
@@ -163,6 +164,7 @@ private:
     // Atmosphere Data
     bool _atmosphereCalculated = false;
     bool _ozoneEnabled = true;
+    bool _oxygenEnabled = true;
     bool _sunFollowingCameraEnabled = false;
     float _atmosphereRadius = 0.f;
     float _atmospherePlanetRadius = 0.f;

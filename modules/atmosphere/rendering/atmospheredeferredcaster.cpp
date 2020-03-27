@@ -89,10 +89,10 @@
 namespace {
     constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr const std::array<const char*, 17> UniformNames1 = {
+    constexpr const std::array<const char*, 18> UniformNames1 = {
         "cullAtmosphere", "Rg", "Rt", "groundRadianceEmittion", "HR", "betaRayleigh",
-        "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
-        "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU"
+        "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "oxygenAbsLayerEnabled",
+        "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU"
     };
 
     constexpr const std::array<const char*, 10> UniformNames2 = {
@@ -193,6 +193,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache.mieG, _miePhaseConstant);
             program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
             program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
+            program.setUniform(_uniformCache.oxygenAbsLayerEnabled, _oxygenEnabled);
             program.setUniform(_uniformCache.HO, _ozoneHeightScale);
             program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
             program.setUniform(_uniformCache.SAMPLES_R, _r_samples);
@@ -447,6 +448,10 @@ void AtmosphereDeferredcaster::setRayleighHeightScale(float rayleighHeightScale)
 
 void AtmosphereDeferredcaster::enableOzone(bool enable) {
     _ozoneEnabled = enable;
+}
+
+void AtmosphereDeferredcaster::enableOxygen(bool enable) {
+    _oxygenEnabled = enable;
 }
 
 void AtmosphereDeferredcaster::setOzoneHeightScale(float ozoneHeightScale) {
@@ -1256,6 +1261,7 @@ void AtmosphereDeferredcaster::saveSkyLuminance() const {
     cieCurveExtractionProgramObject->setUniform("mieG", _miePhaseConstant);
     cieCurveExtractionProgramObject->setUniform("sunRadiance", _sunRadianceIntensity);
     cieCurveExtractionProgramObject->setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    cieCurveExtractionProgramObject->setUniform("oxygenAbsLayerEnabled", _oxygenEnabled);
     cieCurveExtractionProgramObject->setUniform("HO", _ozoneHeightScale);
     cieCurveExtractionProgramObject->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
     cieCurveExtractionProgramObject->setUniform("SAMPLES_R", _r_samples);
@@ -1295,9 +1301,16 @@ void AtmosphereDeferredcaster::saveSkyLuminance() const {
         renderQuadForCalc(quadCalcVAO, 6);
 
         // save data to disk
+        std::string fileName;
+        if (_ozoneEnabled) {
+            fileName = fmt::format("{}_CIE_curve_sun_zenith_O3_{}.txt", _loggerCat, sunZenith);
+        }
+        else {
+            fileName = fmt::format("{}_CIE_curve_sun_zenith_{}.txt", _loggerCat, sunZenith);
+        }
         saveTextureToTxTFile(
             GL_COLOR_ATTACHMENT0, 
-            fmt::format("{}_CIE_curve_sun_zenith_{}.txt", _loggerCat, sunZenith),
+            fileName,
             numberOfCurveSamples, 
             1
         );
@@ -1439,6 +1452,7 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
     shaderProg->setUniform("SAMPLES_MU_S", _mu_s_samples);
     shaderProg->setUniform("SAMPLES_NU", _nu_samples);
     shaderProg->setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    shaderProg->setUniform("oxygenAbsLayerEnabled", _oxygenEnabled);
     shaderProg->setUniform("HO", _ozoneHeightScale);
     shaderProg->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 }

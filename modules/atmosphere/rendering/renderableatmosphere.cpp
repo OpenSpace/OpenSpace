@@ -66,6 +66,7 @@ namespace {
     const char* keyRayleigh                 = "Rayleigh";
     const char* keyRayleighHeightScale      = "H_R";
     const char* keyOzone                    = "Ozone";
+    const char* keyOxygen                   = "Oxygen";
     const char* keyOzoneHeightScale         = "H_O";
     const char* keyMie                      = "Mie";
     const char* keyMieHeightScale           = "H_M";
@@ -128,6 +129,12 @@ namespace {
         "Ozone",
         "Ozone Layer Enabled",
         "Enables/Disable Ozone Layer during pre-calculation phase"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OxygenAbsInfo = {
+        "Oxygen",
+        "Oxygen Absorption Enabled",
+        "Enables/Disable Oxygen Absorption during pre-calculation phase"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
@@ -242,6 +249,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _rayleighScatteringCoeffYP(RayleighScatteringCoeffYInfo, 1.0f, 0.01f, 100.0f)
     , _rayleighScatteringCoeffZP(RayleighScatteringCoeffZInfo, 1.0f, 0.01f, 100.0f)
     , _ozoneEnabledP(OzoneLayerInfo, true)
+    , _oxygenEnableP(OxygenAbsInfo, true)
     , _ozoneHeightScaleP(OzoneHeightScaleInfo, 8.0f, 0.1f, 20.0f)
     , _ozoneCoeffXP(OzoneLayerCoeffXInfo, 2.44f, 0.01f, 100.0f)
     , _ozoneCoeffYP(OzoneLayerCoeffYInfo, 5.91f, 0.01f, 100.0f)
@@ -483,6 +491,25 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _ozoneLayerEnabled = false;
         }
 
+        ghoul::Dictionary oxygenDictionary;
+        success = atmosphereDictionary.getValue(keyOxygen, oxygenDictionary);
+        if (success) {
+            _oxygenAbsEnabled = true;
+            /*if (!oxygenDictionary.getValue(keyOzoneHeightScale, _ozoneHeightScale)) {
+                _ozoneLayerEnabled = false;
+            }
+
+            if (!oxygenDictionary.getValue(
+                "Coefficients.Extinction",
+                _ozoneExtinctionCoeff))
+            {
+                _ozoneLayerEnabled = false;
+            }*/
+        }
+        else {
+            _oxygenAbsEnabled = false;
+        }
+
         ghoul::Dictionary mieDictionary;
         success = atmosphereDictionary.getValue(keyMie, mieDictionary);
         if (success) {
@@ -599,6 +626,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _rayleighScatteringCoeffZP = _rayleighScatteringCoeff.z * 1000.0f;
             _rayleighScatteringCoeffZP.onChange(updateAtmosphere);
             addProperty(_rayleighScatteringCoeffZP);
+
+            _oxygenEnableP = _oxygenAbsEnabled;
+            _oxygenEnableP.onChange(updateAtmosphere);
+            addProperty(_oxygenEnableP);
 
             _ozoneEnabledP = _ozoneLayerEnabled;
             _ozoneEnabledP.onChange(updateAtmosphere);
@@ -771,22 +802,23 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _planetGroundRadianceEmittion   = _groundRadianceEmittionP;
     _rayleighHeightScale            = _rayleighHeightScaleP;
     _rayleighScatteringCoeff = glm::vec3(
-        _rayleighScatteringCoeffXP * 0.001f,
-        _rayleighScatteringCoeffYP * 0.001f,
-        _rayleighScatteringCoeffZP * 0.001f
-    );
-    _ozoneLayerEnabled    = _ozoneEnabledP;
-    _ozoneHeightScale     = _ozoneHeightScaleP;
-    _ozoneExtinctionCoeff = glm::vec3(_ozoneCoeffXP.value() * 0.001f,
-        _ozoneCoeffYP.value() * 0.001f,
-        _ozoneCoeffZP.value() * 0.001f);
+        _rayleighScatteringCoeffXP,
+        _rayleighScatteringCoeffYP,
+        _rayleighScatteringCoeffZP
+    ) * glm::vec3(1e-3);
+    _ozoneLayerEnabled      = _ozoneEnabledP;
+    _oxygenAbsEnabled       = _oxygenEnableP;
+    _ozoneHeightScale       = _ozoneHeightScaleP;
+    _ozoneExtinctionCoeff   = glm::vec3(_ozoneCoeffXP.value(),
+        _ozoneCoeffYP.value(),
+        _ozoneCoeffZP.value()) * glm::vec3(1e-3);
 
     _mieHeightScale     = _mieHeightScaleP;
     _mieScatteringCoeff = glm::vec3(
-        _mieScatteringCoeffXP * 0.001f,
-        _mieScatteringCoeffYP * 0.001f,
-        _mieScatteringCoeffZP * 0.001f
-    );
+        _mieScatteringCoeffXP,
+        _mieScatteringCoeffYP,
+        _mieScatteringCoeffZP
+    ) * glm::vec3(1e-3);
 
     glm::vec3 mieA = _mieAbsorptionCoeffP;
     if (mieA.x != 0.0f ||
@@ -814,6 +846,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _deferredcaster->setPlanetGroundRadianceEmittion(_planetGroundRadianceEmittion);
         _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
         _deferredcaster->enableOzone(_ozoneLayerEnabled);
+        _deferredcaster->enableOxygen(_oxygenAbsEnabled);
         _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
         _deferredcaster->setMieHeightScale(_mieHeightScale);
         _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
