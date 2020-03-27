@@ -444,6 +444,7 @@ std::shared_ptr<Asset> AssetLoader::require(const std::string& identifier) {
     std::shared_ptr<Asset> asset = getAsset(identifier);
     std::shared_ptr<Asset> dependant = _currentAsset;
     dependant->require(asset);
+    _profileAssetsRequired.push_back(asset->assetFilePath());
     return asset;
 }
 
@@ -452,6 +453,7 @@ std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
     std::shared_ptr<Asset> parent = _currentAsset;
     parent->request(asset);
     assetRequested(parent, asset);
+    _profileAssetsRequested.push_back(asset->assetFilePath());
     return asset;
 }
 
@@ -473,7 +475,7 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
 
 std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
-    profileAssetsAdded.push_back(identifier);
+
     return request(identifier);
 }
 
@@ -481,7 +483,7 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
 void AssetLoader::remove(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
     unrequest(identifier);
-    profileAssetsRemoved.push_back(identifier);
+    _profileAssetsRemoved.push_back(identifier);
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {

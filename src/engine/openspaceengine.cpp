@@ -338,6 +338,7 @@ void OpenSpaceEngine::initialize() {
         // an asset name if both are provided.
         global::configuration.asset =
             absPath("${TEMPORARY}/") + global::configuration.profile;
+        global::configuration.usingProfile = true;
     }
 
     // Set up asset loader

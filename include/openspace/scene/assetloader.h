@@ -227,8 +227,9 @@ private:
         _onDependencyDeinitializationFunctionRefs;
     int _assetsTableRef;
 
-    std::vector<std::string> profileAssetsAdded;
-    std::vector<std::string> profileAssetsRemoved;
+    std::vector<std::string> _profileAssetsRequired;
+    std::vector<std::string> _profileAssetsRequested;
+    std::vector<std::string> _profileAssetsRemoved;
 };
 
 } // namespace openspace

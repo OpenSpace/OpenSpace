@@ -65,6 +65,7 @@ namespace scripting {
     class ScriptEngine;
     class ScriptScheduler;
 } // namespace scripting
+class Profile;
 
 namespace global {
 
@@ -100,6 +101,7 @@ properties::PropertyOwner& gRootPropertyOwner();
 properties::PropertyOwner& gScreenSpaceRootPropertyOwner();
 scripting::ScriptEngine& gScriptEngine();
 scripting::ScriptScheduler& gScriptScheduler();
+Profile& gProfile();
 
 } // namespace detail
 
@@ -138,6 +140,7 @@ static properties::PropertyOwner& screenSpaceRootPropertyOwner =
     detail::gScreenSpaceRootPropertyOwner();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
+static Profile& profile = detail::gProfile();
 
 void initialize();
 void initializeGL();
