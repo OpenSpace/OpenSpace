@@ -40,12 +40,18 @@
 #define ENABLE_DIRECTMSG
 
 namespace {
+    using namespace std::chrono;
     constexpr const char* _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
     std::thread* gMouseHookThread;
     HHOOK gMouseHook = nullptr;
     bool gStarted = false;
-    std::chrono::microseconds gStartTime = std::chrono::microseconds(0);
+    microseconds gStartTime = microseconds(0);
+    const long long gFrequency = []() -> long long {
+      LARGE_INTEGER frequency;
+      QueryPerformanceFrequency(&frequency);
+      return frequency.QuadPart;
+    }();
     std::unordered_map<
         UINT32,
         std::unique_ptr<openspace::TouchInputHolder>
@@ -79,10 +85,14 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 break;
             }
 
-            using namespace std::chrono;
-            const microseconds timestamp = duration_cast<microseconds>(
-                high_resolution_clock::now().time_since_epoch()
-            ) - gStartTime;
+            //Implementation from microsoft STL of high_resolution_clock(steady_clock):
+            const long long freq = gFrequency;
+            const long long whole = (info.PerformanceCount / freq) * std::micro::den;
+            const long long part  = (info.PerformanceCount % freq) * 
+                                    std::micro::den / freq;
+            const microseconds timestamp = 
+                duration<UINT64, std::micro>(whole + part) - gStartTime;
+
             RECT rect;
             GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
 
@@ -100,7 +110,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 static_cast<size_t>(info.pointerId),
                 xPos,
                 yPos,
-                static_cast<double>(timestamp.count())/1'000'000.0
+                static_cast<double>(timestamp.count()) / 1'000'000.0
             );
 
             if (info.pointerFlags & POINTER_FLAG_DOWN) {
@@ -213,9 +223,8 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
 
     if (!gStarted) {
         gStarted = true;
-        gStartTime = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
-        );
+        gStartTime = 
+            duration_cast<microseconds>(high_resolution_clock::now().time_since_epoch());
 #ifdef ENABLE_TUIOMESSAGES
         gTuioServer = new TUIO::TuioServer("localhost", 3333);
         TUIO::TuioTime::initSession();
