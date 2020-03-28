@@ -44,6 +44,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -88,6 +89,10 @@ public:
     bool mouseWheelCallback(double position);
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
     bool charCallback(unsigned int character, KeyModifier modifier);
+
+    bool touchDetectedCallback(TouchInput input);
+    bool touchUpdatedCallback(TouchInput input);
+    void touchExitCallback(TouchInput input);
 
     void startFrame(float deltaTime, const glm::vec2& windowSize,
         const glm::vec2& dpiScaling, const glm::vec2& mousePos,
@@ -169,6 +174,8 @@ private:
         properties::Property::Visibility::Developer;
 
     std::vector<ImGuiContext*> _contexts;
+
+    std::vector<TouchInput> _validTouchStates;
 };
 
 void CaptionText(const char* text);

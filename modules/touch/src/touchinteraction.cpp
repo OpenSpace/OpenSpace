@@ -29,7 +29,6 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #endif
 
-#include <modules/imgui/imguimodule.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/touch/include/directinputsolver.h>
 #include <openspace/engine/globals.h>
@@ -212,12 +211,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiButtonSizeInfo = {
-        "GuiButtonSize",
-        "GUI button size in pixels",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
@@ -298,12 +291,6 @@ TouchInteraction::TouchInteraction()
     , _panEnabled(PanModeInfo, false)
     , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
     , _slerpTime(SlerpTimeInfo, 3.f, 0.1f, 5.f)
-    , _guiButton(
-        GuiButtonSizeInfo,
-        glm::ivec2(32, 64),
-        glm::ivec2(8, 16),
-        glm::ivec2(128, 256)
-    )
     , _friction(
         FrictionInfo,
         glm::vec4(0.025f, 0.025f, 0.02f, 0.02f),
@@ -315,10 +302,6 @@ TouchInteraction::TouchInteraction()
         0.1f,
         0.f,
         1.f
-    )
-    , _ignoreGui( // @TODO Missing documentation
-        { "Ignore GUI", "Disable GUI touch interaction", "" },
-        false
     )
     , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
@@ -351,10 +334,8 @@ TouchInteraction::TouchInteraction()
     addProperty(_panEnabled);
     addProperty(_interpretPan);
     addProperty(_slerpTime);
-    addProperty(_guiButton);
     addProperty(_friction);
     addProperty(_pickingRadiusMinimum);
-    addProperty(_ignoreGui);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     addPropertySubOwner(_debugProperties);
@@ -416,69 +397,36 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     }
 
     size_t numFingers = list.size();
-    if (!isGuiMode(pos, numFingers)) {
-        bool isTransitionBetweenModes = (_wasPrevModeDirectTouch != _directTouchMode);
-        if (isTransitionBetweenModes) {
-            _vel.orbit = glm::dvec2(0.0);
-            _vel.zoom = 0.0;
-            _vel.roll = 0.0;
-            _vel.pan = glm::dvec2(0.0);
-            resetAfterInput();
-        }
+    bool isTransitionBetweenModes = (_wasPrevModeDirectTouch != _directTouchMode);
+    if (isTransitionBetweenModes) {
+        _vel.orbit = glm::dvec2(0.0);
+        _vel.zoom = 0.0;
+        _vel.roll = 0.0;
+        _vel.pan = glm::dvec2(0.0);
+        resetAfterInput();
+    }
 
-        if (_directTouchMode && _selected.size() > 0 && numFingers == _selected.size()) {
+    if (_directTouchMode && _selected.size() > 0 && numFingers == _selected.size()) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-            _debugProperties.interactionMode = "Direct";
+        _debugProperties.interactionMode = "Direct";
 #endif
-            directControl(list);
-        }
-        if (_lmSuccess) {
-            findSelectedNode(list);
-        }
+        directControl(list);
+    }
+    if (_lmSuccess) {
+        findSelectedNode(list);
+    }
 
-        if (!_directTouchMode) {
+    if (!_directTouchMode) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-            _debugProperties.interactionMode = "Velocities";
+        _debugProperties.interactionMode = "Velocities";
 #endif
-            computeVelocities(list, lastProcessed);
-        }
-
-        _wasPrevModeDirectTouch = _directTouchMode;
-        // evaluates if current frame is in directTouchMode (will be used next frame)
-        _directTouchMode =
-            (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
-    }
-}
-
-bool TouchInteraction::isGuiMode(glm::dvec2 screenPosition, size_t numFingers) {
-    if (_ignoreGui) {
-        return false;
+        computeVelocities(list, lastProcessed);
     }
 
-    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
-    _guiON = module.gui.isEnabled();
-
-    if (_tap && numFingers == 1 &&
-        std::abs(screenPosition.x) < _guiButton.value().x &&
-        std::abs(screenPosition.y) < _guiButton.value().y)
-    {
-        // pressed invisible button
-        _guiON = !_guiON;
-        module.gui.setEnabled(_guiON);
-
-        LINFO(fmt::format(
-            "GUI mode is {}. Inside box by: ({}%, {}%)",
-            _guiON ? "activated" : "deactivated",
-            static_cast<int>(100 * (screenPosition.x / _guiButton.value().x)),
-            static_cast<int>(100 * (screenPosition.y / _guiButton.value().y))
-        ));
-    }
-    else if (_guiON) {
-        // emulate touch input as a mouse
-        module.touchInput = { _guiON, screenPosition, 1 };
-    }
-
-    return _guiON;
+    _wasPrevModeDirectTouch = _directTouchMode;
+    // evaluates if current frame is in directTouchMode (will be used next frame)
+    _directTouchMode =
+        (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
 }
 
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
@@ -521,11 +469,6 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     else {
         // prevents touch to infinitely be active (due to windows bridge case where event
         // doesnt get consumed sometimes when LMA fails to converge)
-        Touch touch;
-        touch.active = true;
-        touch.pos = glm::dvec2(0.0);
-        touch.action = 1;
-        global::moduleEngine.module<ImGUIModule>()->touchInput = touch;
         resetAfterInput();
     }
 }
@@ -1231,23 +1174,8 @@ void TouchInteraction::resetAfterInput() {
             _vel.orbit = _lastVel.orbit * spinDelta;
         }
     }
-    // Reset emulated mouse values
-    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
-    if (_guiON) {
-        bool activeLastFrame = module.touchInput.action;
-        module.touchInput.active = false;
-        if (activeLastFrame) {
-            module.touchInput.active = true;
-            module.touchInput.action = 0;
-        }
-    }
-    else {
-        module.touchInput.active = false;
-        module.touchInput.action = 0;
-    }
+
     _lmSuccess = true;
-    // Ensure that _guiON is consistent with properties in OnScreenGUI and
-    _guiON = module.gui.isEnabled();
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0);
@@ -1281,7 +1209,6 @@ void TouchInteraction::resetToDefault() {
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
     _slerpTime.set(3.0f);
-    _guiButton.set(glm::ivec2(32, 64));
     _friction.set(glm::vec4(0.025, 0.025, 0.02, 0.02));
 }
 
