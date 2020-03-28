@@ -42,6 +42,20 @@ namespace {
         "Property to track a nodeline. When tracking the label text will be updating the "
         "distance from the nodeline start and end."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
+        "DistanceUnit",
+        "Distance Unit",
+        "Property to define the unit in which the distance should be displayed."
+        "Defaults to 'km' if not specified."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CustomUnitDescriptorInfo = {
+        "CustomUnitDescriptor",
+        "Custom Unit Descriptor",
+        "Property to define a custom unit descriptor to use to describe the distance value."
+        "Defaults to the units SI descriptor if not specified."
+    };
 }
 
 namespace openspace {
@@ -58,6 +72,18 @@ documentation::Documentation RenderableDistanceLabel::Documentation() {
                 Optional::No,
                 NodeLineInfo.description
             },
+            {
+                DistanceUnitInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                DistanceUnitInfo.description
+            },
+            {
+                CustomUnitDescriptorInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                CustomUnitDescriptorInfo.description
+            }
         }
     };
 }
@@ -65,6 +91,8 @@ documentation::Documentation RenderableDistanceLabel::Documentation() {
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
     : RenderableLabels(dictionary)
     , _nodelineId(NodeLineInfo)
+    , _distanceUnit(DistanceUnitInfo, 1, 0, 11)
+    , _customUnitDescriptor(CustomUnitDescriptorInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -75,6 +103,16 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
     if (dictionary.hasKey(NodeLineInfo.identifier)) {
         _nodelineId = dictionary.value<std::string>(NodeLineInfo.identifier);
         addProperty(_nodelineId);
+    }
+    if (dictionary.hasKey(DistanceUnitInfo.identifier)) {
+        _distanceUnit = static_cast<int>(
+            dictionary.value<double>(DistanceUnitInfo.identifier)
+        );
+        addProperty(_distanceUnit);
+    }
+    if (dictionary.hasKey(CustomUnitDescriptorInfo.identifier)) {
+        _customUnitDescriptor = dictionary.value<std::string>(CustomUnitDescriptorInfo.identifier);
+        addProperty(_customUnitDescriptor);
     }
 }
 
@@ -87,7 +125,6 @@ void RenderableDistanceLabel::update(const UpdateData&) {
 
     SceneGraphNode* nodelineNode = RE.scene()->sceneGraphNode(_nodelineId);
     if (nodelineNode) {
-        // Calculate distance
         RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(
             nodelineNode->renderable()
         );
@@ -97,15 +134,23 @@ void RenderableDistanceLabel::update(const UpdateData&) {
             return;
         }
 
-        double myDistance = nodeline->distance();
+        // Get used unit scale
+        const float scale = unit(_distanceUnit);
 
-        // Format string
-        float scale = unit(Kilometer);
-        std::string distanceText = std::to_string(std::round(myDistance / scale));
+        // Get unit descriptor text
+        std::string unitDescriptor = toString(_distanceUnit);
+        if (!_customUnitDescriptor.value().empty()) {
+            unitDescriptor = _customUnitDescriptor.value();
+        }
+
+        // Get distance as string and remove fractional part
+        std::string distanceText = std::to_string(std::round(nodeline->distance() / scale));
         int pos = static_cast<int>(distanceText.find("."));
         std::string subStr = distanceText.substr(pos);
         distanceText.erase(pos, subStr.size());
-        std::string finalText = distanceText + " Km";
+
+        // Create final label text and set it
+        const std::string finalText = distanceText + " " + unitDescriptor;
         setLabelText(finalText);
 
         // Update placement of label with transformation matrix

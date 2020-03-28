@@ -35,6 +35,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <array>
 #include <chrono>
 #include <memory>
 
@@ -94,7 +95,7 @@ public:
         std::vector<TouchInput>& lastProcessed);
 
     // Calculates the new camera state with velocities and time since last frame
-    void step(double dt);
+    void step(double dt, bool directTouch = false);
 
     // Called each frame we have no new input, used to reset data
     void resetAfterInput();
@@ -159,6 +160,7 @@ private:
     properties::IntProperty _deceleratesPerSecond;
     properties::FloatProperty _touchScreenSize;
     properties::FloatProperty _tapZoomFactor;
+    properties::FloatProperty _pinchZoomFactor;
     properties::FloatProperty _nodeRadiusThreshold;
     properties::FloatProperty _rollAngleThreshold;
     properties::FloatProperty _orbitSpeedThreshold;
@@ -193,7 +195,7 @@ private:
     double pinchConsecZoomFactor = 0;
     //int stepVelUpdate = 0;
 #endif
-
+    std::array<TouchInputHolder, 2> _pinchInputs;
     // Class variables
     VelocityStates _vel;
     VelocityStates _lastVel;
