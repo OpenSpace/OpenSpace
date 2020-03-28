@@ -118,10 +118,10 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo PinchZoomFactorInfo = {
-            "PinchZoomFactor",
-            "Scaling distance travelled on pinch",
-            "This value is used to reduce the amount of pinching needed. A linear"
-            "kind of sensitivity that will alter the pinch-zoom speed."
+        "PinchZoomFactor",
+        "Scaling distance travelled on pinch",
+        "This value is used to reduce the amount of pinching needed. A linear kind of "
+        "sensitivity that will alter the pinch-zoom speed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
@@ -285,7 +285,12 @@ TouchInteraction::TouchInteraction()
         0.25f
     )
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
-    , _zoomOutLimit(ZoomOutLimitInfo, std::numeric_limits<double>::max(), 1000.0, std::numeric_limits<double>::max())
+    , _zoomOutLimit(
+        ZoomOutLimitInfo,
+        std::numeric_limits<double>::max(),
+        1000.0,
+        std::numeric_limits<double>::max()
+    )
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
@@ -315,10 +320,9 @@ TouchInteraction::TouchInteraction()
         { "Ignore GUI", "Disable GUI touch interaction", "" },
         false
     )
-    , _pinchInputs({ TouchInput(0x0, 0x0, 0.0, 0.0, 0.0), 
-                     TouchInput(0x0, 0x0, 0.0, 0.0, 0.0) })
+    , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
-    , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0 /*4.0*/, 2.75, glm::dvec2(0.08, 0.045) }
+    , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
@@ -790,11 +794,10 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
         else {
             const bool sameInput0 = _pinchInputs[0].holdsInput(list[0].latestInput());
             const bool sameInput1 = _pinchInputs[1].holdsInput(list[1].latestInput());
-            if(sameInput0 && sameInput1)
-            {
+            if (sameInput0 && sameInput1) {
                 _pinchInputs[0].tryAddInput(list[0].latestInput());
                 _pinchInputs[1].tryAddInput(list[1].latestInput());
-            }else{
+            } else {
                 _pinchInputs[0] = TouchInputHolder(list[0].latestInput());
                 _pinchInputs[1] = TouchInputHolder(list[1].latestInput());
             }
@@ -1131,17 +1134,18 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
             // Possible with other navigations performed outside touch interaction
             const bool currentPosViolatingZoomOutLimit =
-                (currentPosDistance >= _zoomOutLimit.value());
+                (currentPosDistance >= _zoomOutLimit);
             const bool willNewPositionViolateZoomOutLimit =
-                (newPosDistance >= _zoomOutLimit.value());
+                (newPosDistance >= _zoomOutLimit);
             bool willNewPositionViolateZoomInLimit =
                 (newPosDistance < zoomInBounds);
             bool willNewPositionViolateDirection =
                 (currentPosDistance <= length(zoomDistanceIncrement));
 
-            if (!willNewPositionViolateZoomInLimit
-                && !willNewPositionViolateDirection
-                && !willNewPositionViolateZoomOutLimit) {
+            if (!willNewPositionViolateZoomInLimit &&
+                !willNewPositionViolateDirection &&
+                !willNewPositionViolateZoomOutLimit)
+            {
                 camPos += zoomDistanceIncrement;
             }
             else if (currentPosViolatingZoomOutLimit) {
