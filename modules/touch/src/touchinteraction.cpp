@@ -1175,20 +1175,6 @@ void TouchInteraction::resetAfterInput() {
         }
     }
 
-    // Reset emulated mouse values
-    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
-    if (_guiON) {
-        bool activeLastFrame = module.touchInput.action;
-        module.touchInput.active = false;
-        if (activeLastFrame) {
-            module.touchInput.active = true;
-            module.touchInput.action = 0;
-        }
-    }
-    else {
-        module.touchInput.active = false;
-        module.touchInput.action = 0;
-    }
     _lmSuccess = true;
 
     // Reset variables
