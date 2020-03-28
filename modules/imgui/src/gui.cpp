@@ -639,13 +639,13 @@ bool GUI::charCallback(unsigned int character, KeyModifier) {
 
 bool GUI::touchDetectedCallback(TouchInput input) {
     ImGuiIO& io = ImGui::GetIO();
-    glm::vec2 windowPos = input.currentWindowCoordinates();
-    bool consumeEvent = ImGui::IsPosHoveringAnyWindow({windowPos.x, windowPos.y});
+    const glm::vec2 windowPos = input.currentWindowCoordinates();
+    const bool consumeEvent = ImGui::IsPosHoveringAnyWindow({ windowPos.x, windowPos.y });
 
-    if(!consumeEvent) {
+    if (!consumeEvent) {
         return false;
     }
-    if(_validTouchStates.empty()) {
+    if (_validTouchStates.empty()) {
         io.MousePos = {windowPos.x, windowPos.y};
         io.MouseClicked[0] = true;
     }
@@ -654,7 +654,7 @@ bool GUI::touchDetectedCallback(TouchInput input) {
 }
 
 bool GUI::touchUpdatedCallback(TouchInput input) {
-    if(_validTouchStates.empty()) {
+    if (_validTouchStates.empty()) {
         return false;
     }
     ImGuiIO& io = ImGui::GetIO();
