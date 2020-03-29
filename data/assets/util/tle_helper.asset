@@ -12,7 +12,7 @@ function downloadTLEFile(sceneAsset, url, name, filename)
         Type = "UrlSynchronization",
         Identifier = "satellite_tle_data_" .. identifier,
         Url = url,
-		Override = true
+        Override = true
     }
 
     if (filename ~= '')  then
