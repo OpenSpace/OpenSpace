@@ -91,4 +91,4 @@ private:
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
+#endif // __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__

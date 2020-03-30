@@ -50,11 +50,11 @@ public:
     const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
 
     CameraPose traversePath(double dt);
+    std::string getCurrentAnchor() const;
+    bool hasReachedEnd() const;
 
-    bool hasReachedEnd();
-    double speedAtTime(double time);
+    double speedAtTime(double time) const;
     CameraPose interpolatedPose(double u) const; 
-    std::string getCurrentAnchor() const; 
 
 private: 
     void initCurve();
@@ -63,7 +63,7 @@ private:
     struct SpeedFunction {
         SpeedFunction() = default;
         SpeedFunction(double duration);
-        double value(double t);
+        double value(double t) const;
 
         // store the sum of the function over the duration of the segment, 
         // so we don't need to recompue it every time we access the speed 
@@ -81,7 +81,7 @@ private:
 
     // Playback variables
     double _traveledDistance = 0.0; 
-    double _currentTime = 0.0; // Time since playback started
+    double _progressedTime = 0.0; // Time since playback started
 };
 
 } // namespace openspace::autonavigation

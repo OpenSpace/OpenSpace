@@ -80,13 +80,13 @@ CameraPose PathSegment::traversePath(double dt) {
     // In case there is an error in the speed VS distance VS duration relation, 
     // make sure that we actually reach the end point.
     double displacement;
-    if (_currentTime > _duration && !hasReachedEnd()) {
+    if (_progressedTime > _duration && !hasReachedEnd()) {
         // TODO: reach the target in a reasonable amount of time and with smooth motion
         LWARNING("Did not reach the target in the given duration. Moving toward the target in constant speed. TODO: fix so that this does not happen"); // TODO: fix and then remove this 
         displacement = dt * speedAtTime(_duration - _duration * dt);
     }
     else {
-        displacement = dt * speedAtTime(_currentTime);
+        displacement = dt * speedAtTime(_progressedTime);
     }
 
     _traveledDistance += displacement;
@@ -99,12 +99,17 @@ CameraPose PathSegment::traversePath(double dt) {
     //LINFO(fmt::format("u = {}", relativeDisplacement));
     //LINFO(fmt::format("currentTime = {}", _currentTime));
 
-    _currentTime += dt;
+    _progressedTime += dt;
 
     return interpolatedPose(relativeDisplacement);
 }
 
-bool PathSegment::hasReachedEnd() {
+std::string PathSegment::getCurrentAnchor() const {
+    bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
+    return (pastHalfway) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
+}
+
+bool PathSegment::hasReachedEnd() const {
     return (_traveledDistance / pathLength()) >= 1.0;
 }
 
@@ -114,7 +119,7 @@ bool PathSegment::hasReachedEnd() {
  * Thus, we scale according to the constraint in eq. 14 in Eberly 2007
  * (https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf)
  */
-double PathSegment::speedAtTime(double time) {
+double PathSegment::speedAtTime(double time) const {
     ghoul_assert(time >= 0 && time <= _duration, "Time out of range [0, duration]");
     double t = time / _duration;
     return (pathLength() * _speedFunction.value(t)) / _speedFunction.integratedSum;
@@ -127,14 +132,8 @@ CameraPose PathSegment::interpolatedPose(double u) const {
     return cs;
 }
 
-std::string PathSegment::getCurrentAnchor() const {
-    bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
-    return (pastHalfway) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
-}
-
 // Initialise the curve, based on the start, end state and curve type
 void PathSegment::initCurve() {
-    // in case there already is a curve object, reset the pointer. 
     _curve.reset();
 
     switch (_curveType) {
@@ -166,7 +165,7 @@ PathSegment::SpeedFunction::SpeedFunction(double duration) {
     integratedSum = speedSum;
 }
 
-double PathSegment::SpeedFunction::value(double t) {
+double PathSegment::SpeedFunction::value(double t) const {
     ghoul_assert(t >= 0 && t <= 1, "Variable t out of range [0,1]");
 
     const double t1 = 0.2;

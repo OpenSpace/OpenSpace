@@ -79,7 +79,6 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
 }
 
 Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
-    // default rotation interpolation
     _rotationInterpolator = RotationInterpolator{ start, end, this, LookAt };
 
     glm::dvec3 startNodePos = start.node()->worldPosition();
@@ -110,7 +109,6 @@ Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
         // Assuming we move straigh out to point to a distance proportional to radius, angle is enough to check collision risk
         double cosStartAngle = glm::dot(startTangentDirection, startToEndDirection);
         double cosEndAngle = glm::dot(endTangentDirection, startToEndDirection);
-        double cosStartDir = glm::dot(startTangentDirection, endTangentDirection);
 
         //TODO: investigate suitable values, could be risky close to surface..
         bool TARGET_BEHIND_STARTNODE = cosStartAngle < -0.8;

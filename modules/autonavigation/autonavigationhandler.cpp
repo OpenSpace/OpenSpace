@@ -133,7 +133,6 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
             break;
     }
 
-    // OBS! Would it be better to save the spec in the handler class? 
     _stopAtTargets = spec.stopAtTargets();
 
     // Check if we have a specified start navigation state. If so, update first segment
@@ -389,8 +388,7 @@ void AutoNavigationHandler::addPause(std::optional<double> duration) {
     _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
 }
 
-void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double> duration) {
-
+void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double> duration){
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 

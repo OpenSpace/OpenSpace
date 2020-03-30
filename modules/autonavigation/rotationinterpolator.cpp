@@ -37,10 +37,8 @@ namespace openspace::autonavigation {
 
 RotationInterpolator::RotationInterpolator(
     const Waypoint& start, const Waypoint& end, PathCurve* curve, RotationMethod method)
-    : _start(start), _end(end), _method(method)
-{
-    _curve = curve;
-}
+    : _start(start), _end(end), _method(method), _curve(curve)
+{}
 
 glm::dquat RotationInterpolator::rotationAt(double u) {
     switch (_method)
@@ -70,8 +68,8 @@ glm::dquat RotationInterpolator::easedSlerp(double u) {
     return glm::slerp(_start.rotation(), _end.rotation(), uScaled);
 }
 
-// Look at start node until tStart, then turn to look at end node from tEnd
-// Will overwrite rotation of navigation states! 
+// Look at start node until tStart, then turn to look at end node from tEnd.
+// OBS! Will overwrite rotation of navigation states!! 
 glm::dquat RotationInterpolator::lookAtInterpolator(double u) {
     double tStart = 0.15;
     double tEnd = 0.7;
