@@ -39,8 +39,8 @@ namespace {
 namespace openspace::autonavigation {
 
 PathSegment::PathSegment(
-    Waypoint start, Waypoint end, double startTime, CurveType type)
-    : _start(start), _end(end), _startTime(startTime), _curveType(type)
+    Waypoint start, Waypoint end, CurveType type)
+    : _start(start), _end(end), _curveType(type)
 {
     initCurve();
 
@@ -69,15 +69,43 @@ const Waypoint PathSegment::end() const { return _end; }
 
 const double PathSegment::duration() const { return _duration; }
 
-const double PathSegment::startTime() const { return _startTime; }
-
-const double PathSegment::endTime() const { return _startTime + _duration; }
-
 const double PathSegment::pathLength() const { return _curve->length(); }
 
 // TODO: remove function for debugging
 const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
     return _curve->getPoints();
+}
+
+CameraPose PathSegment::traversePath(double dt) {
+    // In case there is an error in the speed VS distance VS duration relation, 
+    // make sure that we actually reach the end point.
+    double displacement;
+    if (_currentTime > _duration && !hasReachedEnd()) {
+        // TODO: reach the target in a reasonable amount of time and with smooth motion
+        LWARNING("Did not reach the target in the given duration. Moving toward the target in constant speed. TODO: fix so that this does not happen"); // TODO: fix and then remove this 
+        displacement = dt * speedAtTime(_duration - _duration * dt);
+    }
+    else {
+        displacement = dt * speedAtTime(_currentTime);
+    }
+
+    _traveledDistance += displacement;
+
+    double relativeDisplacement = _traveledDistance / pathLength();
+    relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
+
+    // TEST: 
+    //LINFO("-----------------------------------");
+    //LINFO(fmt::format("u = {}", relativeDisplacement));
+    //LINFO(fmt::format("currentTime = {}", _currentTime));
+
+    _currentTime += dt;
+
+    return interpolatedPose(relativeDisplacement);
+}
+
+bool PathSegment::hasReachedEnd() {
+    return (_traveledDistance / pathLength()) >= 1.0;
 }
 
 /*
@@ -92,15 +120,16 @@ double PathSegment::speedAtTime(double time) {
     return (pathLength() * _speedFunction.value(t)) / _speedFunction.integratedSum;
 }
 
-CameraPose PathSegment::interpolate(double u) const {
+CameraPose PathSegment::interpolatedPose(double u) const {
     CameraPose cs;
     cs.position = _curve->positionAt(u);
     cs.rotation = _curve->rotationAt(u);
     return cs;
 }
 
-std::string PathSegment::getCurrentAnchor(double u) const {
-    return (u > 0.5) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
+std::string PathSegment::getCurrentAnchor() const {
+    bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
+    return (pastHalfway) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
 }
 
 // Initialise the curve, based on the start, end state and curve type
@@ -126,9 +155,10 @@ void PathSegment::initCurve() {
 
 PathSegment::SpeedFunction::SpeedFunction(double duration) {
     // apply duration constraint (eq. 14 in Eberly)
-    double speedSum = 0.0;
     const int steps = 100;
     double dt = duration / steps;
+    // TODO: better approximation 
+    double speedSum = 0.0;
     for (double t = 0.0; t <= 1.0; t += 1.0 / steps) {
         speedSum += dt * value(t);
     }

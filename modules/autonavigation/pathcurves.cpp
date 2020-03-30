@@ -80,7 +80,7 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
 
 Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
     // default rotation interpolation
-    _rotationInterpolator = RotationInterpolator{ start, end, this, PiecewiseSlerp };
+    _rotationInterpolator = RotationInterpolator{ start, end, this, LookAt };
 
     glm::dvec3 startNodePos = start.node()->worldPosition();
     glm::dvec3 endNodePos = end.node()->worldPosition();

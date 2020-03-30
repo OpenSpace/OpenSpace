@@ -50,7 +50,6 @@ public:
 
     // Accessors
     Camera* camera() const;
-    double pathDuration() const;
     bool hasFinished() const;
 
     void updateCamera(double deltaTime);
@@ -79,11 +78,9 @@ private:
     void addSegment(Waypoint& state, std::optional<double> duration);
 
     // this list essentially represents the camera path
-    std::vector<PathSegment> _pathSegments;
+    std::vector<std::unique_ptr<PathSegment>> _pathSegments;
 
     bool _isPlaying = false;
-    double _currentTime = 0.0;
-    double _distanceAlongCurrentSegment = 0.0; 
     unsigned int _currentSegmentIndex = 0;
 
     bool _stopAtTargets;

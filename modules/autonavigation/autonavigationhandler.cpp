@@ -80,15 +80,9 @@ Camera* AutoNavigationHandler::camera() const {
     return global::navigationHandler.camera();
 }
 
-double AutoNavigationHandler::pathDuration() const {
-    if (_pathSegments.empty()) 
-        return 0.0;
-
-    return _pathSegments.back().endTime();
-}
-
 bool AutoNavigationHandler::hasFinished() const {
-    return _currentTime > pathDuration();
+    int lastIndex = (int)_pathSegments.size() - 1;
+    return _currentSegmentIndex > lastIndex; 
 }
 
 void AutoNavigationHandler::updateCamera(double deltaTime) {
@@ -96,18 +90,10 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     if (!_isPlaying || _pathSegments.empty()) return;
 
-    PathSegment currentSegment = _pathSegments[_currentSegmentIndex];
+    std::unique_ptr<PathSegment> &currentSegment = _pathSegments[_currentSegmentIndex];
 
-    // compute interpolated camera state
-    double prevDistance = _distanceAlongCurrentSegment;
-    double displacement = deltaTime * currentSegment.speedAtTime(_currentTime - currentSegment.startTime());
-    _distanceAlongCurrentSegment += displacement;
-
-    double relativeDisplacement = _distanceAlongCurrentSegment / currentSegment.pathLength();
-    relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
-
-    CameraPose newPose = currentSegment.interpolate(relativeDisplacement);
-    std::string newAnchor = currentSegment.getCurrentAnchor(relativeDisplacement);
+    CameraPose newPose = currentSegment->traversePath(deltaTime);
+    std::string newAnchor = currentSegment->getCurrentAnchor();
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
@@ -119,27 +105,20 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     camera()->setPositionVec3(newPose.position);
     camera()->setRotation(newPose.rotation);
 
-    // Have we walked past the current segment?
-    if (_currentTime > currentSegment.endTime()) {
+    if (currentSegment->hasReachedEnd()) {
         _currentSegmentIndex++;
-        _distanceAlongCurrentSegment = 0.0;
 
-        // Stepped past the last segment
-        if (_currentSegmentIndex > _pathSegments.size() - 1) {
+        if (hasFinished()) {
             LINFO("Reached end of path.");
             _isPlaying = false;
             return;
         }
-
-        currentSegment = _pathSegments[_currentSegmentIndex];
 
         if (_stopAtTargets) {
             pausePath();
             return;
         }
     }
-
-    _currentTime += deltaTime;
 }
 
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
@@ -160,7 +139,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
     // Check if we have a specified start navigation state. If so, update first segment
     if (spec.hasStartState() && _pathSegments.size() > 0) {
         Waypoint startState{ spec.startState() , _minAllowedBoundingSphere};
-        _pathSegments[0].setStart(startState);
+        _pathSegments[0]->setStart(startState);
     }
 
     if (success) {
@@ -174,9 +153,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 void AutoNavigationHandler::clearPath() {
     LINFO("Clearing path...");
     _pathSegments.clear();
-    _currentTime = 0.0;
     _currentSegmentIndex = 0;
-    _distanceAlongCurrentSegment = 0.0;
 }
 
 void AutoNavigationHandler::startPath() {
@@ -195,7 +172,6 @@ void AutoNavigationHandler::startPath() {
     }
 
     LINFO("Starting path...");
-    _currentTime = 0.0;
     _isPlaying = true;
 }
 
@@ -222,7 +198,7 @@ void AutoNavigationHandler::continuePath() {
     LINFO("Continuing path...");
 
     // Recompute start camera state for the upcoming path segment,
-    _pathSegments[_currentSegmentIndex].setStart(wayPointFromCamera());
+    _pathSegments[_currentSegmentIndex]->setStart(wayPointFromCamera());
     _isPlaying = true;
 }
 
@@ -242,9 +218,9 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
 
     const double du = 1.0 / nPerSegment;
 
-    for (PathSegment &p : _pathSegments) {
+    for (std::unique_ptr<PathSegment> &p : _pathSegments) {
         for (double u = 0.0; u < 1.0; u += du) {
-            auto position = p.interpolate(u).position;
+            glm::dvec3 position = p->interpolatedPose(u).position;
             positions.push_back(position);
         }
     }
@@ -262,8 +238,8 @@ std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
         return points;
     }
 
-    for (PathSegment &p : _pathSegments) {
-        std::vector<glm::dvec3> curvePoints = p.getControlPoints();
+    for (std::unique_ptr<PathSegment> &p : _pathSegments) {
+        std::vector<glm::dvec3> curvePoints = p->getControlPoints();
         points.insert(points.end(), curvePoints.begin(), curvePoints.end());
     }
 
@@ -278,7 +254,7 @@ Waypoint AutoNavigationHandler::wayPointFromCamera() {
 }
 
 Waypoint AutoNavigationHandler::lastWayPoint() {
-    return _pathSegments.empty() ? wayPointFromCamera() : _pathSegments.back().end();
+    return _pathSegments.empty() ? wayPointFromCamera() : _pathSegments.back()->end();
 }
 
 bool AutoNavigationHandler::handleInstruction(const Instruction& ins, int index) {
@@ -401,32 +377,30 @@ bool AutoNavigationHandler::handlePauseInstruction(const Instruction& ins) {
 }
 
 void AutoNavigationHandler::addPause(std::optional<double> duration) {
-    double startTime = pathDuration();
     Waypoint waypoint = lastWayPoint();
-    PathSegment newSegment{ waypoint, waypoint, startTime, CurveType::Pause };
+    PathSegment segment = PathSegment(waypoint, waypoint, CurveType::Pause);
 
     // TODO: implement more complex behavior later
 
     // TODO: handle duration better
     if (duration.has_value()) {
-        newSegment.setDuration(duration.value());
+        segment.setDuration(duration.value());
     }
-    _pathSegments.push_back(newSegment);
+    _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
 }
 
 void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double> duration) {
-    double startTime = pathDuration();
 
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    PathSegment newSegment{ lastWayPoint(), waypoint, startTime, CurveType(curveType) };
+    PathSegment segment = PathSegment(lastWayPoint(), waypoint, CurveType(curveType));
 
     // TODO: handle duration better
     if (duration.has_value()) {
-        newSegment.setDuration(duration.value());
+        segment.setDuration(duration.value());
     }
-    _pathSegments.push_back(newSegment);
+    _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
 }
 
 } // namespace openspace::autonavigation
