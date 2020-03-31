@@ -168,23 +168,22 @@ PathSegment::SpeedFunction::SpeedFunction(double duration) {
 double PathSegment::SpeedFunction::value(double t) const {
     ghoul_assert(t >= 0 && t <= 1, "Variable t out of range [0,1]");
 
-    const double t1 = 0.2;
-    const double t2 = 0.8; // > t1
-    // TODO: more advanced computation of limits, possibly based on distances
-
+    const double tPeak = 0.5;
     double speed = 1.0;
 
     // accelerate
-    if (t < t1) {
-        double tScaled = t / t1;
+    if (t <= tPeak) {
+        double tScaled = t / tPeak;
         speed = ghoul::cubicEaseInOut(tScaled);
     }
     // deaccelerate
-    else if (t > t2) {
-        double tScaled = (t - t2) / (1.0 - t2);
+    else {
+        double tScaled = (t - tPeak) / (1.0 - tPeak);
         speed = 1.0 - ghoul::cubicEaseInOut(tScaled);
     }
 
+    // avoid zero speed
+    speed += 0.001;
     return speed;
 }
 
