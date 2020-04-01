@@ -79,6 +79,26 @@ namespace {
     };
 
 
+    //Compare View
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo CompareInfo = {
+       "Compare View",
+       "Compare Sonifications",
+       "Sonification settings for the compare view."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareOptionsInfo = {
+        "CompareOptions",
+        "Choose planet to compare",
+        "Chooses what planets to compare"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareOptionsInfoT = {
+        "CompareOptionsT",
+        "Choose planet to compare",
+        "Chooses what planets to compare"
+    };
+
+
     //Planetary View
     constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "EnabledInfo",
@@ -121,7 +141,7 @@ SonificationModule::SonificationModule()
     _buffer = new char[BUFFER_SIZE];
     _stream = osc::OutboundPacketStream(_buffer, BUFFER_SIZE);
     _isRunning = true;
-    _isPlanetaryView = true;
+    _GUIState = SonificationModule::GUIMode::Planetary;
     _previousTimeSpeed = 0.0;
     _timePrecision = 0.001;
 
@@ -181,6 +201,10 @@ SonificationModule::SonificationModule()
     _solarProperty.earthEnabled.onChange([this]() { onSolarEarthEnabledChanged(_solarProperty.earthEnabled.value()); });
     _solarProperty.marsEnabled.onChange([this]() { onSolarMarsEnabledChanged(_solarProperty.marsEnabled.value()); });
 
+    //Compare
+    _compareProperty.firstPlanet.onChange([this]() { onFirstCompareChanged(_compareProperty.firstPlanet.option()); });
+    _compareProperty.secondPlanet.onChange([this]() { onSecondCompareChanged(_compareProperty.secondPlanet.option()); });
+
     //Planetary View
     //Mercury
     _planetsProperty.mercuryProperty.enabled.onChange([this]() { onMercuryEnabledChanged(_planetsProperty.mercuryProperty.enabled.value()); } );
@@ -210,12 +234,13 @@ SonificationModule::SonificationModule()
     //Add the properties
     addPropertySubOwner(_planetsProperty);
     addPropertySubOwner(_solarProperty);
+    addPropertySubOwner(_compareProperty);
 }
 
 
 //Solar View
 void SonificationModule::onSolarAllEnabledChanged(bool value) {
-    if (_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Solar && value) {
         _solarProperty.allEnabled = false;
         return;
     }
@@ -232,7 +257,7 @@ void SonificationModule::onSolarAllEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
-    if (_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Solar && value) {
         _solarProperty.mercuryEnabled = false;
         return;
     }
@@ -249,7 +274,7 @@ void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarVenusEnabledChanged(bool value) {
-    if (_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Solar && value) {
         _solarProperty.venusEnabled = false;
         return;
     }
@@ -266,7 +291,7 @@ void SonificationModule::onSolarVenusEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarEarthEnabledChanged(bool value) {
-    if (_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Solar && value) {
         _solarProperty.earthEnabled = false;
         return;
     }
@@ -283,7 +308,7 @@ void SonificationModule::onSolarEarthEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarMarsEnabledChanged(bool value) {
-    if (_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Solar && value) {
         _solarProperty.marsEnabled = false;
         return;
     }
@@ -300,10 +325,20 @@ void SonificationModule::onSolarMarsEnabledChanged(bool value) {
 }
 
 
+//Compare
+void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Option value) {
+    std::cout << "First compare changed to: " << value.description << std::endl;
+}
+
+void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Option value) {
+    std::cout << "Second compare changed to: " << value.description << std::endl;
+}
+
+
 //Planetart View
 //Mercury
 void SonificationModule::onMercuryEnabledChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.mercuryProperty.enabled = false;
         return;
     }
@@ -319,7 +354,7 @@ void SonificationModule::onMercuryEnabledChanged(bool value) {
 }
 
 void SonificationModule::onMercurySizeDayChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.mercuryProperty.sizeDayEnabled = false;
         return;
     }
@@ -329,7 +364,7 @@ void SonificationModule::onMercurySizeDayChanged(bool value) {
 }
 
 void SonificationModule::onMercuryGravityChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.mercuryProperty.gravityEnabled = false;
         return;
     }
@@ -341,7 +376,7 @@ void SonificationModule::onMercuryGravityChanged(bool value) {
 
 //Venus
 void SonificationModule::onVenusEnabledChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.venusProperty.enabled = false;
         return;
     }
@@ -358,7 +393,7 @@ void SonificationModule::onVenusEnabledChanged(bool value) {
 }
 
 void SonificationModule::onVenusSizeDayChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.venusProperty.sizeDayEnabled = false;
         return;
     }
@@ -368,7 +403,7 @@ void SonificationModule::onVenusSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onVenusGravityChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.venusProperty.gravityEnabled = false;
         return;
     }
@@ -378,7 +413,7 @@ void SonificationModule::onVenusGravityChanged(bool value) {
 }
 
 void SonificationModule::onVenusAtmosphereChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.venusProperty.atmosphereEnabled = false;
         return;
     }
@@ -390,7 +425,7 @@ void SonificationModule::onVenusAtmosphereChanged(bool value) {
 
 //Earth
 void SonificationModule::onEarthEnabledChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.earthProperty.enabled = false;
         return;
     }
@@ -408,7 +443,7 @@ void SonificationModule::onEarthEnabledChanged(bool value) {
 }
 
 void SonificationModule::onEarthSizeDayChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.earthProperty.sizeDayEnabled = false;
         return;
     }
@@ -418,7 +453,7 @@ void SonificationModule::onEarthSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onEarthGravityChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.earthProperty.gravityEnabled = false;
         return;
     }
@@ -428,7 +463,7 @@ void SonificationModule::onEarthGravityChanged(bool value) {
 }
 
 void SonificationModule::onEarthAtmosphereChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.earthProperty.atmosphereEnabled = false;
         return;
     }
@@ -438,7 +473,7 @@ void SonificationModule::onEarthAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onEarthMoonsChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.earthProperty.moonsEnabled = false;
         return;
     }
@@ -450,7 +485,7 @@ void SonificationModule::onEarthMoonsChanged(bool value) {
 
 //Mars
 void SonificationModule::onMarsEnabledChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.marsProperty.enabled = false;
         return;
     }
@@ -468,7 +503,7 @@ void SonificationModule::onMarsEnabledChanged(bool value) {
 }
 
 void SonificationModule::onMarsSizeDayChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.marsProperty.sizeDayEnabled = false;
         return;
     }
@@ -478,7 +513,7 @@ void SonificationModule::onMarsSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onMarsGravityChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.marsProperty.gravityEnabled = false;
         return;
     }
@@ -488,7 +523,7 @@ void SonificationModule::onMarsGravityChanged(bool value) {
 }
 
 void SonificationModule::onMarsAtmosphereChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.marsProperty.atmosphereEnabled = false;
         return;
     }
@@ -498,7 +533,7 @@ void SonificationModule::onMarsAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onMarsMoonsChanged(bool value) {
-    if (!_isPlanetaryView && value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
         _planetsProperty.marsProperty.moonsEnabled = false;
         return;
     }
@@ -546,6 +581,30 @@ SonificationModule::SolarProperty::SolarProperty()
 }
 
 
+SonificationModule::CompareProperty::CompareProperty()
+    : properties::PropertyOwner(CompareInfo),
+    firstPlanet(CompareOptionsInfo, properties::OptionProperty::DisplayType::Dropdown),
+    secondPlanet(CompareOptionsInfoT, properties::OptionProperty::DisplayType::Dropdown)
+{
+    firstPlanet.addOptions({
+        { 0, "Mercury" },
+        { 1, "Venus" },
+        { 2, "Earth" },
+        { 3, "Mars" }
+        });
+
+    secondPlanet.addOptions({
+        { 0, "Mercury" },
+        { 1, "Venus" },
+        { 2, "Earth" },
+        { 3, "Mars" }
+        });
+
+    addProperty(firstPlanet);
+    addProperty(secondPlanet);
+}
+
+
 SonificationModule::PlanetHeadProperty::PlanetHeadProperty(
     properties::PropertyOwner::PropertyOwnerInfo planetHeadInfo,
     properties::PropertyOwner::PropertyOwnerInfo mercuryInfo,
@@ -586,7 +645,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
             bool updateMoons = false;
 
             //Calculate angle differently if planetary view or solar view
-            if (_isPlanetaryView) {
+            if (_GUIState == SonificationModule::GUIMode::Planetary) {
                 //Calculate angle from camera to the planet in the camera plane
                 //Project v down to the camera plane, Pplane(v)
                 //Pn(v) is v projected on the normal n of the plane
@@ -719,7 +778,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 
                         //If focus is on the sun, switch sonification view
                         if (focusNode->identifier().compare("Sun") == 0) {
-                            _isPlanetaryView = false;
+                            _GUIState = SonificationModule::GUIMode::Solar;
                             std::vector<properties::PropertyOwner*> planetOwners = _planetsProperty.propertySubOwners();
 
                             for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin(); owner < planetOwners.end(); ++owner) {
@@ -731,7 +790,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                             }
                         }
                         else {
-                            _isPlanetaryView = true;
+                            _GUIState = SonificationModule::GUIMode::Planetary;
                             std::vector<properties::Property*> solarProperties = _solarProperty.properties();
 
                             for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {

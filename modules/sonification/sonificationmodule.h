@@ -35,6 +35,7 @@
 #include <vector>
 #include <utility>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/optionproperty.h>
 
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
@@ -47,6 +48,12 @@ namespace openspace {
 
 class SonificationModule : public OpenSpaceModule {
 public:
+    enum GUIMode {
+        Solar,
+        Planetary,
+        Compare
+    };
+
     SonificationModule();
     ~SonificationModule();
 
@@ -72,6 +79,10 @@ private:
     void onSolarVenusEnabledChanged(bool value);
     void onSolarEarthEnabledChanged(bool value);
     void onSolarMarsEnabledChanged(bool value);
+
+    //Compare
+    void onFirstCompareChanged(properties::OptionProperty::Option value);
+    void onSecondCompareChanged(properties::OptionProperty::Option value);
 
     //Planetary
     //Mercury
@@ -142,7 +153,8 @@ private:
     double _previousTimeSpeed;
     double _timePrecision;
     Planet _planets[NUM_PLANETS];
-    bool _isPlanetaryView;
+    GUIMode _GUIState;
+
     //Settings for each planet
     //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled
     bool _solarSettings[NUM_SOLAR_SETTINGS] = { false, false, false, false};
@@ -221,6 +233,15 @@ private:
 
     SolarProperty _solarProperty = SolarProperty();
 
+    //Compare View
+    struct CompareProperty : properties::PropertyOwner {
+        CompareProperty();
+
+        properties::OptionProperty firstPlanet;
+        properties::OptionProperty secondPlanet;
+    };
+
+    CompareProperty _compareProperty = CompareProperty();
 };
 
 } // namespace openspace
