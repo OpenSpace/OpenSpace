@@ -91,6 +91,7 @@ Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::stri
 Waypoint::Waypoint(const NavigationState& ns, const double minBoundingSphere) {
     // OBS! The following code is exactly the same as used in 
     // NavigationHandler::applyNavigationState. Should probably be made into a function.
+    // TODO: make that function
     const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
     const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
 
@@ -124,7 +125,7 @@ Waypoint::Waypoint(const NavigationState& ns, const double minBoundingSphere) {
 
     pose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 
-    nodeDetails = WaypointNodeDetails{ ns.referenceFrame, minBoundingSphere };
+    nodeDetails = WaypointNodeDetails{ ns.anchor, minBoundingSphere };
 }
 
 glm::dvec3 Waypoint::position() const { return pose.position; }
