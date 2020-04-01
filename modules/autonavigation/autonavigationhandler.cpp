@@ -56,6 +56,12 @@ namespace {
         "The defualt curve type chosen when generating a path, if none is specified."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo IncludeRollInfo = {
+        "IncludeRollInfo",
+        "Include Roll",
+        "If disabled, roll is removed from the interpolation of camera orientation."
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -64,6 +70,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     : properties::PropertyOwner({ "AutoNavigationHandler" })
     , _minAllowedBoundingSphere(MinimalBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _defaultCurveOption(DefaultCurveOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _includeRoll(IncludeRollInfo, false)
 {
     addProperty(_minAllowedBoundingSphere);
 
@@ -72,6 +79,7 @@ AutoNavigationHandler::AutoNavigationHandler()
         { CurveType::Linear, "Linear"} 
     });
     addProperty(_defaultCurveOption);
+    addProperty(_includeRoll);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -100,6 +108,18 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     std::string currentAnchor = global::navigationHandler.anchorNode()->identifier();
     if (currentAnchor != newAnchor) {
         global::navigationHandler.orbitalNavigator().setAnchorNode(newAnchor);
+    }
+
+    if (!_includeRoll) {
+        const double notTooCloseDistance = 100.0;
+        glm::dvec3 cameraDir = glm::normalize(newPose.rotation * Camera::ViewDirectionCameraSpace);
+        glm::dvec3 lookAtPos = newPose.position + notTooCloseDistance * cameraDir;
+        glm::dquat rollFreeRotation = helpers::getLookAtQuaternion(
+            newPose.position,
+            lookAtPos,
+            camera()->lookUpVectorWorldSpace()
+        );
+        newPose.rotation = rollFreeRotation;
     }
 
     camera()->setPositionVec3(newPose.position);

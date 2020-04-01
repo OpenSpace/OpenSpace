@@ -87,6 +87,8 @@ private:
 
     properties::DoubleProperty _minAllowedBoundingSphere;
     properties::OptionProperty _defaultCurveOption;
+    properties::BoolProperty _includeRoll;
+
 };
 
 } // namespace openspace::autonavigation
