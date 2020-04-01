@@ -240,9 +240,16 @@ SonificationModule::SonificationModule()
 
 //Solar View
 void SonificationModule::onSolarAllEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Solar && value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
         _solarProperty.allEnabled = false;
         return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Compare) {
+        _compareProperty.firstPlanet.setValue(0);
+        _compareProperty.secondPlanet.setValue(0);
+
+        _GUIState = SonificationModule::GUIMode::Solar;
     }
 
     _solarSettings[0] = value;
@@ -257,9 +264,16 @@ void SonificationModule::onSolarAllEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Solar && value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
         _solarProperty.mercuryEnabled = false;
         return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Compare) {
+        _compareProperty.firstPlanet.setValue(0);
+        _compareProperty.secondPlanet.setValue(0);
+
+        _GUIState = SonificationModule::GUIMode::Solar;
     }
 
     _solarSettings[0] = value;
@@ -274,9 +288,16 @@ void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarVenusEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Solar && value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
         _solarProperty.venusEnabled = false;
         return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Compare) {
+        _compareProperty.firstPlanet.setValue(0);
+        _compareProperty.secondPlanet.setValue(0);
+
+        _GUIState = SonificationModule::GUIMode::Solar;
     }
 
     _solarSettings[1] = value;
@@ -291,9 +312,16 @@ void SonificationModule::onSolarVenusEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarEarthEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Solar && value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
         _solarProperty.earthEnabled = false;
         return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Compare) {
+        _compareProperty.firstPlanet.setValue(0);
+        _compareProperty.secondPlanet.setValue(0);
+
+        _GUIState = SonificationModule::GUIMode::Solar;
     }
 
     _solarSettings[2] = value;
@@ -308,9 +336,16 @@ void SonificationModule::onSolarEarthEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarMarsEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Solar && value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
         _solarProperty.marsEnabled = false;
         return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Compare) {
+        _compareProperty.firstPlanet.setValue(0);
+        _compareProperty.secondPlanet.setValue(0);
+
+        _GUIState = SonificationModule::GUIMode::Solar;
     }
 
     _solarSettings[3] = value;
@@ -327,11 +362,49 @@ void SonificationModule::onSolarMarsEnabledChanged(bool value) {
 
 //Compare
 void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Option value) {
-    std::cout << "First compare changed to: " << value.description << std::endl;
+    if (_GUIState == SonificationModule::Planetary && value.value != 0) {
+        _compareProperty.firstPlanet.setValue(0);
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        std::vector<properties::Property*> solarProperties = _solarProperty.properties();
+        for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
+            (*i)->set(false);
+        }
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    _stream << osc::BeginMessage(label.c_str()) << value.value << _compareProperty.secondPlanet.value() << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Option value) {
-    std::cout << "Second compare changed to: " << value.description << std::endl;
+    if (_GUIState == SonificationModule::Planetary && value.value != 0) {
+        _compareProperty.secondPlanet.setValue(0);
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        std::vector<properties::Property*> solarProperties = _solarProperty.properties();
+        for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
+            (*i)->set(false);
+        }
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << value.value << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
 }
 
 
@@ -587,17 +660,19 @@ SonificationModule::CompareProperty::CompareProperty()
     secondPlanet(CompareOptionsInfoT, properties::OptionProperty::DisplayType::Dropdown)
 {
     firstPlanet.addOptions({
-        { 0, "Mercury" },
-        { 1, "Venus" },
-        { 2, "Earth" },
-        { 3, "Mars" }
+        { 0, "Choose Planet" },
+        { 1, "Mercury" },
+        { 2, "Venus" },
+        { 3, "Earth" },
+        { 4, "Mars" }
         });
 
     secondPlanet.addOptions({
-        { 0, "Mercury" },
-        { 1, "Venus" },
-        { 2, "Earth" },
-        { 3, "Mars" }
+        { 0, "Choose Planet" },
+        { 1, "Mercury" },
+        { 2, "Venus" },
+        { 3, "Earth" },
+        { 4, "Mars" }
         });
 
     addProperty(firstPlanet);
@@ -796,6 +871,9 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                             for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
                                 (*i)->set(false);
                             }
+
+                            _compareProperty.firstPlanet.setValue(0);
+                            _compareProperty.secondPlanet.setValue(0);
                         }
                     }
 
