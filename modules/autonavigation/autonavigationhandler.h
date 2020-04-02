@@ -50,6 +50,7 @@ public:
 
     // Accessors
     Camera* camera() const;
+    const SceneGraphNode* anchor() const;
     bool hasFinished() const;
 
     void updateCamera(double deltaTime);

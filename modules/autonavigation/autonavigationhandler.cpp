@@ -88,6 +88,10 @@ Camera* AutoNavigationHandler::camera() const {
     return global::navigationHandler.camera();
 }
 
+const SceneGraphNode* AutoNavigationHandler::anchor() const {
+    return global::navigationHandler.anchorNode();
+}
+
 bool AutoNavigationHandler::hasFinished() const {
     int lastIndex = (int)_pathSegments.size() - 1;
     return _currentSegmentIndex > lastIndex; 
@@ -105,13 +109,14 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
-    std::string currentAnchor = global::navigationHandler.anchorNode()->identifier();
+    std::string currentAnchor = anchor()->identifier();
     if (currentAnchor != newAnchor) {
         global::navigationHandler.orbitalNavigator().setAnchorNode(newAnchor);
     }
 
     if (!_includeRoll) {
-        const double notTooCloseDistance = 100.0;
+        glm::dvec3 anchorPos = anchor()->worldPosition();
+        const double notTooCloseDistance = deltaTime * glm::distance(anchorPos, newPose.position);
         glm::dvec3 cameraDir = glm::normalize(newPose.rotation * Camera::ViewDirectionCameraSpace);
         glm::dvec3 lookAtPos = newPose.position + notTooCloseDistance * cameraDir;
         glm::dquat rollFreeRotation = helpers::getLookAtQuaternion(
