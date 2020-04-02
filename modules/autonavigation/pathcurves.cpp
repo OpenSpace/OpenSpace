@@ -204,9 +204,14 @@ glm::dvec3 Bezier3Curve::positionAt(double u) {
 // compute curve parameter intervals based on relative arc length
 void Bezier3Curve::initParameterIntervals() {
     std::vector<double> newIntervals;
-    for (double t = 0.0; t <= 1.0; t += 1.0 / _nrSegments) {
-        newIntervals.push_back(arcLength(t) / _length);
+    double dt = 1.0 / _nrSegments;
+
+    newIntervals.push_back(0.0);
+    for (int i = 1; i < _nrSegments; i++) {
+        newIntervals.push_back(arcLength(dt * i) / _length);
     }
+    newIntervals.push_back(1.0);
+
     _parameterIntervals.swap(newIntervals);
 }
 
