@@ -40,7 +40,6 @@
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
 #define NUM_PLANETARY_SETTINGS 4
-#define NUM_SOLAR_SETTINGS 4
 
 #include <openspace/util/openspacemodule.h>
 
@@ -79,6 +78,10 @@ private:
     void onSolarVenusEnabledChanged(bool value);
     void onSolarEarthEnabledChanged(bool value);
     void onSolarMarsEnabledChanged(bool value);
+    void onSolarJupiterEnabledChanged(bool value);
+    void onSolarSaturnEnabledChanged(bool value);
+    void onSolarUranusEnabledChanged(bool value);
+    void onSolarNeptuneEnabledChanged(bool value);
 
     //Compare
     void onFirstCompareChanged(properties::OptionProperty::Option value);
@@ -109,6 +112,34 @@ private:
     void onMarsGravityChanged(bool value);
     void onMarsAtmosphereChanged(bool value);
     void onMarsMoonsChanged(bool value);
+
+    //Jupiter
+    void onJupiterEnabledChanged(bool value);
+    void onJupiterSizeDayChanged(bool value);
+    void onJupiterGravityChanged(bool value);
+    void onJupiterAtmosphereChanged(bool value);
+    void onJupiterMoonsChanged(bool value);
+
+    //Saturn
+    void onSaturnEnabledChanged(bool value);
+    void onSaturnSizeDayChanged(bool value);
+    void onSaturnGravityChanged(bool value);
+    void onSaturnAtmosphereChanged(bool value);
+    void onSaturnMoonsChanged(bool value);
+
+    //Uranus
+    void onUranusEnabledChanged(bool value);
+    void onUranusSizeDayChanged(bool value);
+    void onUranusGravityChanged(bool value);
+    void onUranusAtmosphereChanged(bool value);
+    void onUranusMoonsChanged(bool value);
+
+    //Neptune
+    void onNeptuneEnabledChanged(bool value);
+    void onNeptuneSizeDayChanged(bool value);
+    void onNeptuneGravityChanged(bool value);
+    void onNeptuneAtmosphereChanged(bool value);
+    void onNeptuneMoonsChanged(bool value);
 
     //Struct to hold data for all the planets
     struct Planet {
@@ -157,7 +188,7 @@ private:
 
     //Settings for each planet
     //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled
-    bool _solarSettings[NUM_SOLAR_SETTINGS] = { false, false, false, false};
+    bool _solarSettings[NUM_PLANETS] = { false, false, false, false, false, false, false, false};
 
     //Properties
     //Planetary View
@@ -179,12 +210,20 @@ private:
             properties::PropertyOwner::PropertyOwnerInfo inMercuryInfo,
             properties::PropertyOwner::PropertyOwnerInfo inVenusInfo,
             properties::PropertyOwner::PropertyOwnerInfo inEarthInfo,
-            properties::PropertyOwner::PropertyOwnerInfo inMarsInfo);
+            properties::PropertyOwner::PropertyOwnerInfo inMarsInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inJupiterInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inSaturnInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inUranusInfo,
+            properties::PropertyOwner::PropertyOwnerInfo inNeptuneInfo);
 
         PlanetProperty mercuryProperty;
         PlanetProperty venusProperty;
         PlanetProperty earthProperty;
         PlanetProperty marsProperty;
+        PlanetProperty jupiterProperty;
+        PlanetProperty saturnProperty;
+        PlanetProperty uranusProperty;
+        PlanetProperty neptuneProperty;
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _PlanetsInfo = {
@@ -217,8 +256,32 @@ private:
         "Sonification settings for Mars. Only works if the sun is NOT in focus."
     };
 
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _JupiterInfo = {
+        "Jupiter",
+        "Jupiter Sonification",
+        "Sonification settings for Jupiter. Only works if the sun is NOT in focus."
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _SaturnInfo = {
+        "Saturn",
+        "Saturn Sonification",
+        "Sonification settings for Saturn. Only works if the sun is NOT in focus."
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _UranusInfo = {
+        "Uranus",
+        "Uranus Sonification",
+        "Sonification settings for Uranus. Only works if the sun is NOT in focus."
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo _NeptuneInfo = {
+        "Neptune",
+        "Neptune Sonification",
+        "Sonification settings for Neptune. Only works if the sun is NOT in focus."
+    };
+
     PlanetHeadProperty _planetsProperty = PlanetHeadProperty(_PlanetsInfo, _MercuryInfo,
-        _VenusInfo, _EarthInfo, _MarsInfo);
+        _VenusInfo, _EarthInfo, _MarsInfo, _JupiterInfo, _SaturnInfo, _UranusInfo, _NeptuneInfo);
 
     //Solar View
     struct SolarProperty : properties::PropertyOwner {
@@ -229,6 +292,10 @@ private:
         properties::BoolProperty venusEnabled;
         properties::BoolProperty earthEnabled;
         properties::BoolProperty marsEnabled;
+        properties::BoolProperty jupiterEnabled;
+        properties::BoolProperty saturnEnabled;
+        properties::BoolProperty uranusEnabled;
+        properties::BoolProperty neptuneEnabled;
     };
 
     SolarProperty _solarProperty = SolarProperty();
