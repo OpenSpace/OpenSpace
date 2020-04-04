@@ -53,19 +53,6 @@ namespace {
 
 namespace openspace {
 
-Profile::Profile()
-    : properties::PropertyOwner({"Scene", "Scene"})
-    , _initializer(std::move(initializer))
-{
-    _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
-    _rootDummy.setScene(this);
-}
-
-Profile::~Profile() {
-    clear();
-    _rootDummy.setScene(nullptr);
-}
-
 void Profile::saveCurrentSettingsToProfile(std::string filename) {
     if (! global::configuration.usingProfile) {
         std::string errorMessage = "Program was not started using a profile, "

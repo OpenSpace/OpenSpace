@@ -47,8 +47,6 @@ namespace scripting { struct LuaLibrary; }
 
 class Profile {
 public:
-    Profile();
-
     void saveCurrentSettingsToProfile(std::string filename);
 
     /**

@@ -25,15 +25,10 @@
 #ifndef __OPENSPACE_CORE___PROFILEFILE___H__
 #define __OPENSPACE_CORE___PROFILEFILE___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicense.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/exception.h>
-#include <mutex>
-#include <set>
-#include <unordered_map>
+#include <string>
+#include <istream>
+#include <fstream>
+#include <functional>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
@@ -44,18 +39,15 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-
 class ProfileFile {
 public:
-    ProfileFile(std::string filename);
-    ~ProfileFile();
+    void readLines(std::function<bool(std::string&)> reader);
+    void readFromFile(std::string filename);
+    void processIndividualLine(bool& insideSection, std::string line);
+    void write(std::ostream& output);
+    void writeToFile(std::string filename);
 
-    //Need a copy constructor here to do a deep copy
-
-    void read();
-    void write();
-
-    void setFilename(std::string filename);
+    const std::string getVersion() const;
 
     //Methods for updating contents
     void updateTime();
@@ -67,21 +59,24 @@ public:
     void addMarkNodesLine(std::string line);
 
     //Methods for getting contents of each section
-    std::string time();
-    std::string camera();
-    std::vector<std::string> modules();
-    std::vector<std::string> assets();
-    std::vector<std::string> properties();
-    std::vector<std::string> keybindings();
-    std::vector<std::string> markNodes();
+    std::string time() const;
+    std::string camera() const;
+    std::vector<std::string> modules() const;
+    std::vector<std::string> assets() const;
+    std::vector<std::string> properties() const;
+    std::vector<std::string> keybindings() const;
+    std::vector<std::string> markNodes() const;
 
 private:
-    void logError(std::string message);
+    std::string errorString(std::string message);
     void clearAllFields();
     bool isBlank(std::string line);
-    int  splitByTab(std::string line, std::vector<std::string>& result);
+    size_t splitByTab(std::string line, std::vector<std::string>& result);
+    void verifyRequiredFields(std::string sectionName, std::vector<std::string> fields,
+                              std::vector<std::string> standard, unsigned int nFields);
+
     bool determineSection(std::string line);
-    void parseCurrentSection(std::string line);
+    void (ProfileFile::* parseCurrentSection)(std::string);
     void parseVersion(std::string line);
     void parseModule(std::string line);
     void parseAsset(std::string line);
@@ -90,28 +85,34 @@ private:
     void parseTime(std::string line);
     void parseCamera(std::string line);
     void parseMarkNodes(std::string line);
-    void verifyRequiredFields(std::string sectionName, std::vector<std::string> fields,
-                              std::vector<std::string> standard, unsigned int nFields);
+    void addAllElements(std::ostream& file, std::vector<std::string>& list);
 
-    const int versionLinesExpected = 1;
-    const int timeLinesExpected = 1;
-    const int cameraLinesExpected = 1;
+    const size_t _versionLinesExpected = 1;
+    const size_t _timeLinesExpected = 1;
+    const size_t _cameraLinesExpected = 1;
+    const size_t _versionFieldsExpected = 1;
+    const size_t _moduleFieldsExpected = 3;
+    const size_t _assetFieldsExpected = 2;
+    const size_t _propertyFieldsExpected = 3;
+    const size_t _keybindingFieldsExpected = 6;
+    const size_t _timeFieldsExpected = 2;
+    const size_t _cameraNavigationFieldsExpected = 8;
+    const size_t _cameraGeoFieldsExpected = 5;
+    const size_t _markNodesFieldsExpected = 1;
 
-    const int versionFieldsExpected = 1;
-    const int moduleFieldsExpected = 3;
-    const int assetFieldsExpected = 2;
-    const int propertyFieldsExpected = 3;
-    const int keybindingFieldsExpected = 6;
-    const int timeFieldsExpected = 2;
-    const int cameraNavigationFieldsExpected = 8;
-    const int cameraGeoFieldsExpected = 5;
-    const int markNodesFieldsExpected = 1;
+    const std::string header_Version    = "#Version";
+    const std::string header_Module     = "#Module";
+    const std::string header_Asset      = "#Asset";
+    const std::string header_Property   = "#Property";
+    const std::string header_Keybinding = "#Keybinding";
+    const std::string header_Time       = "#Time";
+    const std::string header_Camera     = "#Camera";
+    const std::string header_MarkNodes  = "#MarkNodes";
 
-    std::string _filename;
-    unsigned int _lineNum = 1;
-    unsigned int _numLinesVersion = 0;
-    unsigned int _numLinesTime    = 0;
-    unsigned int _numLinesCamera  = 0;
+    size_t _lineNum = 1;
+    size_t _numLinesVersion = 0;
+    size_t _numLinesTime    = 0;
+    size_t _numLinesCamera  = 0;
 
     std::string _version;
     std::string _time;
