@@ -62,6 +62,13 @@ namespace {
         "If disabled, roll is removed from the interpolation of camera orientation."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo StopAtTargetsPerDefaultInfo = {
+        "StopAtTargetsPerDefault",
+        "Stop At Targets Per Default",
+        "Applied during path creation. If enabled, stops are automatically added between" 
+        " the path segments. The user must then choose to continue the apth after reaching a target"
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -71,6 +78,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _minAllowedBoundingSphere(MinimalBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _defaultCurveOption(DefaultCurveOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _includeRoll(IncludeRollInfo, false)
+    , _stopAtTargetsPerDefault(StopAtTargetsPerDefaultInfo, false)
 {
     addProperty(_minAllowedBoundingSphere);
 
@@ -80,6 +88,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     });
     addProperty(_defaultCurveOption);
     addProperty(_includeRoll);
+    addProperty(_stopAtTargetsPerDefault);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -139,7 +148,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
             return;
         }
 
-        if (_stopAtTargets) {
+        if (_stopAtTargetsPerDefault) {
             pausePath();
             return;
         }
@@ -149,6 +158,9 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
     clearPath();
 
+    if(spec.stopAtTargetsSpecified())
+        _stopAtTargetsPerDefault = spec.stopAtTargets();
+
     bool success = true;
     for (int i = 0; i < spec.instructions()->size(); i++) {
         const Instruction& ins = spec.instructions()->at(i);
@@ -157,8 +169,6 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
         if (!success)
             break;
     }
-
-    _stopAtTargets = spec.stopAtTargets();
 
     // Check if we have a specified start navigation state. If so, update first segment
     if (spec.hasStartState() && _pathSegments.size() > 0) {
@@ -293,10 +303,6 @@ bool AutoNavigationHandler::handleInstruction(const Instruction& ins, int index)
         success = handleNavigationStateInstruction(ins);
         break;
 
-    case InstructionType::Pause:
-        success = handlePauseInstruction(ins);
-        break;
-
     default:
         LERROR("Non-implemented instruction type.");
         success = false;
@@ -363,8 +369,7 @@ bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& ins) 
     glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 
     Waypoint endState{ targetPos, targetRot, identifier, _minAllowedBoundingSphere };
-
-    addSegment(endState, ins.props->duration);
+    addSegment(endState, ins);
     return true;
 }
 
@@ -379,49 +384,19 @@ bool AutoNavigationHandler::handleNavigationStateInstruction(const Instruction& 
     }
 
     Waypoint endState{ props->navState , _minAllowedBoundingSphere };
-
-    addSegment(endState, ins.props->duration);
+    addSegment(endState, ins);
     return true;
 }
 
-bool AutoNavigationHandler::handlePauseInstruction(const Instruction& ins) {
-    // Verify instruction type
-    PauseInstructionProps* props =
-        dynamic_cast<PauseInstructionProps*>(ins.props.get());
-
-    if (!props) {
-        LERROR(fmt::format("Could not handle pause instruction."));
-        return false;
-    }
-
-    // TODO: implement more complex behavior later
-
-    addPause(ins.props->duration);
-    return true;
-}
-
-void AutoNavigationHandler::addPause(std::optional<double> duration) {
-    Waypoint waypoint = lastWayPoint();
-    PathSegment segment = PathSegment(waypoint, waypoint, CurveType::Pause);
-
-    // TODO: implement more complex behavior later
-
-    // TODO: handle duration better
-    if (duration.has_value()) {
-        segment.setDuration(duration.value());
-    }
-    _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
-}
-
-void AutoNavigationHandler::addSegment(Waypoint& waypoint, std::optional<double> duration){
+void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction& ins){
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
     PathSegment segment = PathSegment(lastWayPoint(), waypoint, CurveType(curveType));
 
     // TODO: handle duration better
-    if (duration.has_value()) {
-        segment.setDuration(duration.value());
+    if (ins.props->duration.has_value()) {
+        segment.setDuration(ins.props->duration.value());
     }
     _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
 }

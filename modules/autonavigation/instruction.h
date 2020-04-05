@@ -30,7 +30,7 @@
 
 namespace openspace::autonavigation {
 
-enum class InstructionType { TargetNode, NavigationState, Pause };
+enum class InstructionType { TargetNode, NavigationState };
 
 struct InstructionProps {
     InstructionProps() = default;
@@ -52,13 +52,6 @@ struct NavigationStateInstructionProps : public InstructionProps {
     NavigationStateInstructionProps(const ghoul::Dictionary& dictionary);
 
     interaction::NavigationHandler::NavigationState navState;
-};
-
-struct PauseInstructionProps : public InstructionProps {
-    PauseInstructionProps(const ghoul::Dictionary& dictionary);
-
-    // For now, a pause instruction does not have any special props.
-    // Might be added later
 };
 
 struct Instruction {

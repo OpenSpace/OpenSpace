@@ -73,23 +73,20 @@ private:
 
     bool handleTargetNodeInstruction(const Instruction& ins);
     bool handleNavigationStateInstruction(const Instruction& ins);
-    bool handlePauseInstruction(const Instruction& ins);
 
-    void addPause(std::optional<double> duration);
-    void addSegment(Waypoint& state, std::optional<double> duration);
+    void addSegment(Waypoint& state, const Instruction& ins);
 
     // this list essentially represents the camera path
     std::vector<std::unique_ptr<PathSegment>> _pathSegments;
 
+
     bool _isPlaying = false;
     unsigned int _currentSegmentIndex = 0;
-
-    bool _stopAtTargets;
 
     properties::DoubleProperty _minAllowedBoundingSphere;
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
-
+    properties::BoolProperty _stopAtTargetsPerDefault;
 };
 
 } // namespace openspace::autonavigation

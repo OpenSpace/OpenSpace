@@ -46,13 +46,13 @@ public:
     // Accessors
     const std::vector<Instruction>* instructions() const;
     const bool stopAtTargets() const; 
+    const bool stopAtTargetsSpecified() const;
     const NavigationState& startState() const;
-
     const bool hasStartState() const;
 
 private:
     std::vector<Instruction> _instructions;
-    bool _stopAtTargets = false; // default is to play the entire path without stops
+    std::optional<bool> _stopAtTargets; 
     std::optional<NavigationState> _startState;
 
     // TODO: maxSpeed or speedFactor or something?

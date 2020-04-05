@@ -139,10 +139,6 @@ NavigationStateInstructionProps::NavigationStateInstructionProps(
     }
 }
 
-PauseInstructionProps::PauseInstructionProps(const ghoul::Dictionary& dictionary) 
-    : InstructionProps(dictionary)
-{ }
-
 Instruction::Instruction(const ghoul::Dictionary& dictionary) {
 
     // TODO: test against some documentation?
@@ -155,10 +151,6 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
     else if (dictionary.hasValue<ghoul::Dictionary>(KeyNavigationState)) {
         type = InstructionType::NavigationState;
         props = std::make_shared<NavigationStateInstructionProps>(dictionary);
-    }
-    else if (dictionary.hasValue<double>(KeyDuration)) {
-        type = InstructionType::Pause;
-        props = std::make_shared<PauseInstructionProps>(dictionary);
     }
     else {
         throw ghoul::RuntimeError(

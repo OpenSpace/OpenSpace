@@ -96,7 +96,11 @@ const std::vector<Instruction>* PathSpecification::instructions() const {
 }
 
 const bool PathSpecification::stopAtTargets() const {
-    return _stopAtTargets;
+    return _stopAtTargets.value();
+}
+
+const bool PathSpecification::stopAtTargetsSpecified() const {
+    return _stopAtTargets.has_value();
 }
 
 const interaction::NavigationHandler::NavigationState& PathSpecification::startState() const {
