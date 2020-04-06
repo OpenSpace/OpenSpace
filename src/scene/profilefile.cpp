@@ -116,7 +116,7 @@ void ProfileFile::writeToFile(std::string filename) {
     }
 
     try {
-        write(outFile);
+        outFile << writeToString();
     }
     catch (std::ofstream::failure& e) {
         LERROR("Data write error to file: " + filename);
@@ -130,36 +130,39 @@ void ProfileFile::writeToFile(std::string filename) {
     }
 }
 
-void ProfileFile::write(std::ostream& output) {
-    output << header_Version << std::endl;
-    output << _version << std::endl << std::endl;
-    output << header_Module << std::endl;
+std::string ProfileFile::writeToString() {
+    std::string output;
+    output = header_Version + '\n';
+    output += _version + '\n' + '\n';
+    output += header_Module + '\n';
     addAllElements(output, _modules);
-    output << std::endl;
-    output << header_Asset << std::endl;
+    output += '\n';
+    output += header_Asset + '\n';
     addAllElements(output, _assets);
-    output << std::endl;
-    output << header_Property << std::endl;
+    output += '\n';
+    output += header_Property + '\n';
     addAllElements(output, _properties);
-    output << std::endl;
-    output << header_Keybinding << std::endl;
+    output += '\n';
+    output += header_Keybinding + '\n';
     addAllElements(output, _keybindings);
-    output << std::endl;
-    output << header_Time << std::endl;
-    output << _time << std::endl << std::endl;
-    output << header_Camera << std::endl;
-    output << _camera << std::endl;
-    output << header_MarkNodes << std::endl;
+    output += '\n';
+    output += header_Time + '\n';
+    output += _time + '\n' + '\n';
+    output += header_Camera + '\n';
+    output += _camera + '\n' + '\n';
+    output += header_MarkNodes + '\n';
     addAllElements(output, _markNodes);
+
+    return output;
 }
 
 const std::string ProfileFile::getVersion() const {
     return _version;
 }
 
-void ProfileFile::addAllElements(std::ostream& file, std::vector<std::string>& list) {
+void ProfileFile::addAllElements(std::string& str, std::vector<std::string>& list) {
     for (auto s : list) {
-        file << s << std::endl;
+        str += s + '\n';
     }
 }
 
@@ -261,11 +264,11 @@ std::vector<std::string> ProfileFile::markNodes() const {
 void ProfileFile::parseVersion(std::string line) {
     std::vector<std::string> fields;
 
-    if (++_numLinesVersion > _versionLinesExpected) {
+    if (++_numLinesVersion > versionLinesExpected) {
         throw ghoul::RuntimeError(errorString("Too many lines in Version section"),
             "profileFile");
     }
-    if (splitByTab(line, fields) > _versionFieldsExpected) {
+    if (splitByTab(line, fields) > versionFieldsExpected) {
         throw ghoul::RuntimeError(errorString("No tabs allowed in Version entry"),
             "profileFile");
     }
@@ -277,8 +280,8 @@ void ProfileFile::parseVersion(std::string line) {
 void ProfileFile::parseModule(std::string line) {
     std::vector<std::string> fields;
 
-    if (splitByTab(line, fields) != _moduleFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(_moduleFieldsExpected) +
+    if (splitByTab(line, fields) != moduleFieldsExpected) {
+        throw ghoul::RuntimeError(errorString(std::to_string(moduleFieldsExpected) +
             " fields required in a Module entry"), "profileFile");
     }
     std::vector<std::string> standard = {
@@ -286,30 +289,30 @@ void ProfileFile::parseModule(std::string line) {
         "",
         ""
     };
-    verifyRequiredFields("Module", fields, standard, _moduleFieldsExpected);
+    verifyRequiredFields("Module", fields, standard, moduleFieldsExpected);
     _modules.push_back(line);
 }
 
 void ProfileFile::parseAsset(std::string line) {
     std::vector<std::string> fields;
 
-    if (splitByTab(line, fields) != _assetFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(_assetFieldsExpected) +
+    if (splitByTab(line, fields) != assetFieldsExpected) {
+        throw ghoul::RuntimeError(errorString(std::to_string(assetFieldsExpected) +
             " fields required in an Asset entry"), "profileFile");
     }
     std::vector<std::string> standard = {
         "asset name",
         ""
     };
-    verifyRequiredFields("Asset", fields, standard, _assetFieldsExpected);
+    verifyRequiredFields("Asset", fields, standard, assetFieldsExpected);
     _assets.push_back(line);
 }
 
 void ProfileFile::parseProperty(std::string line) {
     std::vector<std::string> fields;
 
-    if (splitByTab(line, fields) != _propertyFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(_propertyFieldsExpected) +
+    if (splitByTab(line, fields) != propertyFieldsExpected) {
+        throw ghoul::RuntimeError(errorString(std::to_string(propertyFieldsExpected) +
             " fields required in Property entry"), "profileFile");
     }
     std::vector<std::string> standard = {
@@ -317,15 +320,15 @@ void ProfileFile::parseProperty(std::string line) {
         "name",
         "value"
     };
-    verifyRequiredFields("Property", fields, standard, _propertyFieldsExpected);
+    verifyRequiredFields("Property", fields, standard, propertyFieldsExpected);
     _properties.push_back(line);
 }
 
 void ProfileFile::parseKeybinding(std::string line) {
     std::vector<std::string> fields;
 
-    if (splitByTab(line, fields) != _keybindingFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(_keybindingFieldsExpected)
+    if (splitByTab(line, fields) != keybindingFieldsExpected) {
+        throw ghoul::RuntimeError(errorString(std::to_string(keybindingFieldsExpected)
             + " fields required in Keybinding entry"), "profileFile");
     }
     std::vector<std::string> standard = {
@@ -336,38 +339,38 @@ void ProfileFile::parseKeybinding(std::string line) {
         "local(T/F)",
         "script to execute"
     };
-    verifyRequiredFields("Keybinding", fields, standard, _keybindingFieldsExpected);
+    verifyRequiredFields("Keybinding", fields, standard, keybindingFieldsExpected);
     _keybindings.push_back(line);
 }
 
 void ProfileFile::parseTime(std::string line) {
     std::vector<std::string> fields;
 
-    if (++_numLinesTime > _timeLinesExpected) {
+    if (++_numLinesTime > timeLinesExpected) {
         throw ghoul::RuntimeError(errorString("Too many lines in time section"),
             "profileFile");
     }
-    if (splitByTab(line, fields) != _timeFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(_timeFieldsExpected) +
+    if (splitByTab(line, fields) != timeFieldsExpected) {
+        throw ghoul::RuntimeError(errorString(std::to_string(timeFieldsExpected) +
             " fields required in Time entry"), "profileFile");
     }
     std::vector<std::string> standard = {
         "time set type",
         "time value to set"
     };
-    verifyRequiredFields("Time", fields, standard, _timeFieldsExpected);
+    verifyRequiredFields("Time", fields, standard, timeFieldsExpected);
     _time = line;
 }
 
 void ProfileFile::parseCamera(std::string line) {
     std::vector<std::string> fields;
 
-    if (++_numLinesCamera > _cameraLinesExpected) {
+    if (++_numLinesCamera > cameraLinesExpected) {
         throw ghoul::RuntimeError(errorString("Too many lines in camera section"),
             "profileFile");
     }
     size_t nFields = splitByTab(line, fields);
-    if (nFields == _cameraNavigationFieldsExpected) {
+    if (nFields == cameraNavigationFieldsExpected) {
         std::vector<std::string> standard = {
             "Type of camera set (setNavigationState)",
             "setNavigationState Anchor",
@@ -379,9 +382,9 @@ void ProfileFile::parseCamera(std::string line) {
             ""
         };
         verifyRequiredFields("Camera navigation", fields, standard,
-            _cameraNavigationFieldsExpected);
+            cameraNavigationFieldsExpected);
     }
-    else if (nFields == _cameraGeoFieldsExpected) {
+    else if (nFields == cameraGeoFieldsExpected) {
         std::vector<std::string> standard = {
             "Type of camera set (goToGeo)",
             "",
@@ -390,12 +393,12 @@ void ProfileFile::parseCamera(std::string line) {
             ""
         };
         verifyRequiredFields("Camera goToGeo", fields, standard,
-            _cameraGeoFieldsExpected);
+            cameraGeoFieldsExpected);
     }
     else {
         throw ghoul::RuntimeError(errorString(std::to_string(
-            _cameraNavigationFieldsExpected) + " or " + std::to_string(
-            _cameraGeoFieldsExpected) + " fields required in Camera entry"),
+            cameraNavigationFieldsExpected) + " or " + std::to_string(
+            cameraGeoFieldsExpected) + " fields required in Camera entry"),
             "profileFile");
     }
     _camera = line;
@@ -404,15 +407,15 @@ void ProfileFile::parseCamera(std::string line) {
 void ProfileFile::parseMarkNodes(std::string line) {
     std::vector<std::string> fields;
 
-    if (splitByTab(line, fields) != _markNodesFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(_markNodesFieldsExpected) +
+    if (splitByTab(line, fields) != markNodesFieldsExpected) {
+        throw ghoul::RuntimeError(errorString(std::to_string(markNodesFieldsExpected) +
             " field required in an Mark Nodes entry"), "profileFile");
     }
     std::vector<std::string> standard = {
         "Mark Interesting Node name"
     };
     verifyRequiredFields("Mark Interesting Nodes", fields, standard,
-        _markNodesFieldsExpected);
+        markNodesFieldsExpected);
     _markNodes.push_back(line);
 }
 

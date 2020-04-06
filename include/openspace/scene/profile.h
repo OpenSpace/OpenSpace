@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/scene/profilefile.h>
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicense.h>
@@ -50,6 +50,14 @@ public:
     void saveCurrentSettingsToProfile(std::string filename);
 
     /**
+     * Returns the string contents of a profileFile object converted to scene/asset
+     * equivalent syntax.
+     * \param pf The profileFile object to be converted
+     * \return The full string contents of scene/asset equivalent of the profile file.
+     */
+    std::string convertToAsset(ProfileFile& pf);
+
+    /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
      * \return The Lua library that contains all Lua functions available for profiles
@@ -57,6 +65,14 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    std::string convertToAsset_assets(ProfileFile& pf);
+    std::string convertToAsset_modules(ProfileFile& pf);
+    std::string convertToAsset_properties(ProfileFile& pf);
+    std::string convertToAsset_markNodes(ProfileFile& pf);
+    std::string convertToAsset_keybindings(ProfileFile& pf);
+    std::string convertToAsset_time(ProfileFile& pf);
+    std::string convertToAsset_camera(ProfileFile& pf);
+
 };
 
 } // namespace openspace

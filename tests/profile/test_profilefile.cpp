@@ -80,26 +80,30 @@ testProfileFormat buildTestProfile1() {
     return tp1;
 }
 
-std::string stringFromSingleProfileSection(std::vector<std::string>& section) {
+std::string stringFromSingleProfileSection(std::vector<std::string>& section,
+                                                     bool blankLineSeparator)
+{
     std::string result;
     for (std::string s : section) {
         result += s + "\n";
     }
-    result += "\n";
+    if (blankLineSeparator) {
+        result += "\n";
+    }
     return result;
 }
 
 std::string stringFromTestProfileFormat(testProfileFormat& tpf) {
     std::string fullProfile;
 
-    fullProfile += stringFromSingleProfileSection(tpf.tsv);
-    fullProfile += stringFromSingleProfileSection(tpf.tsm);
-    fullProfile += stringFromSingleProfileSection(tpf.tsa);
-    fullProfile += stringFromSingleProfileSection(tpf.tsp);
-    fullProfile += stringFromSingleProfileSection(tpf.tsk);
-    fullProfile += stringFromSingleProfileSection(tpf.tst);
-    fullProfile += stringFromSingleProfileSection(tpf.tsc);
-    fullProfile += stringFromSingleProfileSection(tpf.tsn);
+    fullProfile += stringFromSingleProfileSection(tpf.tsv, true);
+    fullProfile += stringFromSingleProfileSection(tpf.tsm, true);
+    fullProfile += stringFromSingleProfileSection(tpf.tsa, true);
+    fullProfile += stringFromSingleProfileSection(tpf.tsp, true);
+    fullProfile += stringFromSingleProfileSection(tpf.tsk, true);
+    fullProfile += stringFromSingleProfileSection(tpf.tst, true);
+    fullProfile += stringFromSingleProfileSection(tpf.tsc, true);
+    fullProfile += stringFromSingleProfileSection(tpf.tsn, false);
 
     return fullProfile;
 }
@@ -265,4 +269,21 @@ TEST_CASE("profileFile: Required field missing", "[profileFile]") {
             Catch::Matchers::Contains ("Keybinding local(T/F)(arg 4/6) is required")
         );
     }
+}
+
+TEST_CASE("profileFile: Write test", "[profileFile]") {
+    testProfileFormat test = buildTestProfile1();
+    std::string testFull_string = stringFromTestProfileFormat(test);
+    std::istringstream iss(testFull_string);
+    ProfileFile pf;
+    pf.readLines([&iss](std::string& line) {
+        if (getline(iss, line))
+            return true;
+        else
+            return false;
+        }
+    );
+
+    std::string result = pf.writeToString();
+    REQUIRE(testFull_string == result);
 }

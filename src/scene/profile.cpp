@@ -62,6 +62,207 @@ void Profile::saveCurrentSettingsToProfile(std::string filename) {
     std::string initProfile = global::configuration.profile;
 }
 
+std::string Profile::convertToAsset(ProfileFile& pf) {
+    std::string result;
+
+    result += convertToAsset_modules(pf) + "\n";
+    result += convertToAsset_assets(pf) + "\n";
+    result += "asset.onInitialize(function ()\n";
+    result += convertToAsset_time(pf) + "\n";
+    result += convertToAsset_keybindings(pf) + "\n";
+    result += convertToAsset_markNodes(pf);
+    result += convertToAsset_properties(pf);
+    result += convertToAsset_camera(pf);
+    result += "end)\n";
+
+    return result;
+}
+
+std::string Profile::convertToAsset_modules(ProfileFile& pf) {
+    std::string result;
+    std::vector<std::string> fields;
+
+    for (std::string m : pf.modules()) {
+        pf.splitByTab(m, fields);
+        if (fields[moduleFieldLoaded] != "" && fields[moduleFieldNotLoaded] != "") {
+            result += "if openspace.modules.isLoaded(\"" + fields[moduleFieldName];
+            result += "\") then\n    " + fields[moduleFieldLoaded] + "\nelse\n";
+            result += "   " + fields[moduleFieldNotLoaded] + "\nend\n";
+        }
+        else if (fields[moduleFieldNotLoaded] == "") {
+            result += "if not openspace.modules.isLoaded(\"" + fields[moduleFieldName];
+            result += "\") then\n    " + fields[moduleFieldNotLoaded] + "\nend\n";
+        }
+        else if (fields[moduleFieldLoaded] == "") {
+            result += "if openspace.modules.isLoaded(\"" + fields[moduleFieldName];
+            result += "\") then\n    " + fields[moduleFieldLoaded] + "\nend\n";
+        }
+    }
+    return result;
+}
+
+std::string Profile::convertToAsset_assets(ProfileFile& pf) {
+    std::string result;
+    std::vector<std::string> fields;
+    std::string assetR;
+
+    result += "asset.require(\"base\");\n";
+    result += "'local assetHelper = asset.require(\"util/asset_helper\")\n";
+    result += "'local propertyHelper = asset.require(\"util/property_helper\")\n";
+    result += "'local sceneHelper = asset.require(\"util/scene_helper\")\n";
+    result += "'local renderableHelper = asset.require(\"util/renderable_helper\")\n";
+
+    for (size_t i = 0; i < pf.assets().size(); ++i) {
+        std::string a = pf.assets()[i];
+        pf.splitByTab(a, fields);
+
+        if (fields[assetFieldReqd] == "required") {
+            assetR = "require";
+        }
+        else if (fields[assetFieldReqd] == "requested") {
+            assetR = "request";
+        }
+        else {
+            std::string err = "Asset " + std::to_string(i + 1) + " of ";
+            err += std::to_string(pf.assets().size()) + " has bad arg 2/2 which must ";
+            err += "be either 'required' or 'requested'";
+            throw ghoul::RuntimeError(err);
+        }
+        result += "asset." + assetR + "(\"" + fields[assetFieldName] + "\")\n";
+    }
+    return result;
+}
+
+std::string Profile::convertToAsset_properties(ProfileFile& pf) {
+    std::string result;
+    std::vector<std::string> fields;
+
+    for (size_t i = 0; i < pf.properties().size(); ++i) {
+        std::string p = pf.properties()[i];
+        pf.splitByTab(p, fields);
+
+        if (fields[propertyFieldType] != "setPropertyValue"
+            && fields[propertyFieldType] != "setPropertyValueSingle")
+        {
+            std::string err = "Property" + std::to_string(i + 1) + " of ";
+            err += std::to_string(pf.properties().size()) + " has bad arg 1/1 which ";
+            err += "must be either 'setPropertyValue' or 'setPropertyValueSingle'";
+            throw ghoul::RuntimeError(err);
+        }
+        else {
+            result = "  openspace." + fields[propertyFieldType] + "(\""
+                + fields[propertyFieldName] + "\", " + fields[propertyFieldValue] + ")\n";
+        }
+    }
+    return result;
+}
+
+std::string Profile::convertToAsset_keybindings(ProfileFile& pf) {
+    std::string result;
+    std::vector<std::string> fields;
+    std::string assetR;
+
+    result += "local Keybindings = {\n";
+    for (size_t i = 0; i < pf.keybindings().size(); ++i) {
+        std::string k = pf.keybindings()[i];
+        pf.splitByTab(k, fields);
+
+        result += "  {\n";
+        result += "    Key = \"" + fields[0] + "\",\n";
+        result += "    Documentation = \"" + fields[1] + "\",\n";
+        result += "    Name = \"" + fields[2] + "\",\n";
+        result += "    GuiPath = \"" + fields[3] + "\",\n";
+        result += "    Local = " + fields[4] + ",\n";
+        result += "    Command = " + fields[5] + "\n";
+        result += "  }\n";
+    }
+    result += "}\n";
+    return result;
+}
+
+std::string Profile::convertToAsset_markNodes(ProfileFile& pf) {
+    std::string result;
+
+    if (pf.markNodes().size() > 0) {
+        result += "  openspace.markInterestingNodes({'";
+    }
+    for (std::string m : pf.markNodes()) {
+        result += "\"" + m + "\", ";
+    }
+    result += "})\n";
+    return result;
+}
+
+std::string Profile::convertToAsset_time(ProfileFile& pf) {
+    std::string result;
+    std::vector<std::string> fields;
+    std::string assetR;
+
+    pf.splitByTab(pf.time(), fields);
+
+    if (fields[timeFieldType] == "absolute") {
+        result += "  openspace.time.setTime(\"" + fields[timeFieldSet] + "\")\n";
+    }
+    else if (fields[timeFieldType] == "relative") {
+        result += "  local now = openspace.time.currentWallTime(); ";
+        result += "openspace.time.setTime(";
+        result += "openspace.time.advancedTime(now, \"" + fields[timeFieldSet] + "\"))\n";
+    }
+    else {
+        std::string err = "Time entry's arg 1/1 must be either 'absolute' or 'relative'";
+        throw ghoul::RuntimeError(err);
+    }
+    return result;
+}
+
+std::string Profile::convertToAsset_camera(ProfileFile& pf) {
+    std::string result;
+    std::vector<std::string> fields;
+    std::string assetR;
+
+    pf.splitByTab(pf.camera(), fields);
+
+    if (fields[cameraFieldType] == "setNavigationState") {
+        result += "  openspace.navigation.setNavigationState({ ";
+        result += "Anchor = " + fields[cameraNavigationFieldAnchor] + ", ";
+        if (fields[cameraNavigationFieldAim] != "") {
+            result += "Aim = " + fields[cameraNavigationFieldAim] + ", ";
+        }
+        if (fields[cameraNavigationFieldRef] != "") {
+            result += "ReferenceFrame = " + fields[cameraNavigationFieldRef] + ", ";
+        }
+        result += "Position = " + fields[cameraNavigationFieldPosition] + ", ";
+        if (fields[cameraNavigationFieldUp] != "") {
+            result += "Up = {" + fields[cameraNavigationFieldPosition] + "}, ";
+        }
+        if (fields[cameraNavigationFieldYaw] != "") {
+            result += "Yaw = " + fields[cameraNavigationFieldYaw] + ", ";
+        }
+        if (fields[cameraNavigationFieldPitch] != "") {
+            result += "Pitch = " + fields[cameraNavigationFieldPitch] + " ";
+        }
+        result += "})\n";
+    }
+    else if (fields[cameraFieldType] == "goToGeo") {
+        result += "  openspace.globebrowsing.goToGeo({ ";
+        if (fields[cameraGeoFieldAnchor] != "") {
+            result += fields[cameraGeoFieldAnchor] + ", ";
+        }
+        result += fields[cameraGeoFieldLatitude] + ", ";
+        result += fields[cameraGeoFieldLongitude] + ", ";
+        if (fields[cameraGeoFieldAltitude] != "") {
+            result += fields[cameraGeoFieldAltitude] + ", ";
+        }
+        result += ")\n";
+    }
+    else {
+        std::string err = "Camera entry's arg 1/1 must be either ";
+        err += "'setNavigationState' or 'goToGeo'";
+        throw ghoul::RuntimeError(err);
+    }
+    return result;
+}
+
 scripting::LuaLibrary Profile::luaLibrary() {
     return {
         "",
