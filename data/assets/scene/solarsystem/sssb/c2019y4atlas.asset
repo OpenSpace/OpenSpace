@@ -1,0 +1,48 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local orbit = asset.syncedResource({
+    Name = "Comet C/2019 Y4 ATLAS",
+    Type = "HttpSynchronization",
+    Identifier = "horizons_c2019y4atlas",
+    Version = 1
+}) .. "/c2019y4atlas.txt"
+
+local C2019Y4AtlasTrail = {
+    Identifier = "C2019Y4AtlasTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = orbit
+        },
+        Color = { 0.533333, 0.850980, 0.996078 },
+        EnableFade = false,
+        StartTime = "1950 JAN 1 0:00:00",
+        EndTime = "2100 JAN 1 00:00:00",
+        SampleInterval = 35000,
+        TimeStampSubsampleFactor = 1
+    },
+    GUI = {
+        Name = "C2019 Y4 Atlas Trail",
+        Path = "/Solar System/Comets"
+    }
+}
+
+local C2019Y4AtlasPosition = {
+    Identifier = "C2019Y4AtlasPosition",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = orbit
+        },
+    },
+    GUI = {
+        Name = "C 2019 Y4 Atlas",
+        Path = "/Solar System/Comets"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {C2019Y4AtlasPosition, C2019Y4AtlasTrail })
