@@ -136,7 +136,8 @@ namespace openspace::autonavigation::interpolation {
     {
         ghoul_assert(points.size() > 4, "Minimum of four control points needed for interpolation!");
         ghoul_assert((points.size() - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
-        ghoul_assert(_nrSegments == (tKnots.size() - 1), "Number of interval times must match number of segments");
+        int nrSegments = (points.size() - 1) / 3;
+        ghoul_assert(nrSegments == (tKnots.size() - 1), "Number of interval times must match number of segments");
 
         if (t <= 0.0) return points.front();
         if (t >= 1.0) return points.back();
