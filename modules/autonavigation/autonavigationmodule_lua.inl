@@ -83,7 +83,7 @@ namespace openspace::autonavigation::luascriptfunctions {
             insDict.setValue("Duration", duration);
         }
 
-        PathSpecification spec = PathSpecification(Instruction{insDict});
+        PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
 
         AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>(); 
         AutoNavigationHandler& handler = module->AutoNavigationHandler();

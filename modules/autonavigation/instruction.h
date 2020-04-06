@@ -25,42 +25,53 @@
 #ifndef __OPENSPACE_MODULE___PATHINSTRUCTION___H__
 #define __OPENSPACE_MODULE___PATHINSTRUCTION___H__
 
+#include <modules/autonavigation/waypoint.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <optional>
 
 namespace openspace::autonavigation {
 
-enum class InstructionType { TargetNode, NavigationState };
+struct Instruction {
+    Instruction() = default;
+    Instruction(const ghoul::Dictionary& dictionary);
+    virtual ~Instruction();
 
-struct InstructionProps {
-    InstructionProps() = default;
-    InstructionProps(const ghoul::Dictionary& dictionary);
-    virtual ~InstructionProps() = 0; 
+    virtual std::vector<Waypoint> getWaypoints() const = 0;
+
+    // TODO
+    //static documentation::Documentation Documentation();
 
     std::optional<double> duration;
+
+    // TODO: include pause information
 };
 
-struct TargetNodeInstructionProps : public InstructionProps {
-    TargetNodeInstructionProps(const ghoul::Dictionary& dictionary);
+struct TargetNodeInstruction : public Instruction {
+    TargetNodeInstruction(const ghoul::Dictionary& dictionary);
 
-    std::string targetNode;
+    std::vector<Waypoint> getWaypoints() const override;
+
+    // TODO
+    //static documentation::Documentation Documentation();
+
+    std::string nodeIdentifier;
     std::optional<glm::dvec3> position; // relative to target node (model space)
     std::optional<double> height;
 };
 
-struct NavigationStateInstructionProps : public InstructionProps {
-    NavigationStateInstructionProps(const ghoul::Dictionary& dictionary);
+struct NavigationStateInstruction : public Instruction {
+    using NavigationState = interaction::NavigationHandler::NavigationState;
 
-    interaction::NavigationHandler::NavigationState navState;
+    NavigationStateInstruction(const ghoul::Dictionary& dictionary);
+
+    std::vector<Waypoint> getWaypoints() const override;
+
+    // TODO
+    //static documentation::Documentation Documentation();
+
+    NavigationState navigationState;
 };
 
-struct Instruction {
-    Instruction() = default;
-    Instruction(const ghoul::Dictionary& dictionary);
-
-    InstructionType type;
-    std::shared_ptr<InstructionProps> props;
-};
 
 } // namespace openspace::autonavigation
 

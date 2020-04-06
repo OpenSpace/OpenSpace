@@ -68,17 +68,10 @@ public:
 private:
     Waypoint wayPointFromCamera();
     Waypoint lastWayPoint();
-
-    bool handleInstruction(const Instruction& ins, int index);
-
-    bool handleTargetNodeInstruction(const Instruction& ins);
-    bool handleNavigationStateInstruction(const Instruction& ins);
-
-    void addSegment(Waypoint& state, const Instruction& ins);
+    void addSegment(Waypoint& waypoint, const Instruction* ins);
 
     // this list essentially represents the camera path
     std::vector<std::unique_ptr<PathSegment>> _pathSegments;
-
 
     bool _isPlaying = false;
     unsigned int _currentSegmentIndex = 0;

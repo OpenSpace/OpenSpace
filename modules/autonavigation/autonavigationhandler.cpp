@@ -102,7 +102,7 @@ const SceneGraphNode* AutoNavigationHandler::anchor() const {
 }
 
 bool AutoNavigationHandler::hasFinished() const {
-    int lastIndex = (int)_pathSegments.size() - 1;
+    unsigned int lastIndex = (unsigned int)_pathSegments.size() - 1;
     return _currentSegmentIndex > lastIndex; 
 }
 
@@ -163,11 +163,13 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 
     bool success = true;
     for (int i = 0; i < spec.instructions()->size(); i++) {
-        const Instruction& ins = spec.instructions()->at(i);
-        success = handleInstruction(ins, i);
-
-        if (!success)
-            break;
+        const Instruction* ins = spec.instruction(i);
+        if (ins) {
+            // TODO: allow for a list of waypoints
+            std::vector<Waypoint> waypoints = ins->getWaypoints();
+            if (waypoints.size() > 0)
+                addSegment(waypoints[0], ins);
+        }
     }
 
     // Check if we have a specified start navigation state. If so, update first segment
@@ -291,112 +293,15 @@ Waypoint AutoNavigationHandler::lastWayPoint() {
     return _pathSegments.empty() ? wayPointFromCamera() : _pathSegments.back()->end();
 }
 
-bool AutoNavigationHandler::handleInstruction(const Instruction& ins, int index) {
-    bool success = true;
-    switch (ins.type)
-    {
-    case InstructionType::TargetNode:
-        success = handleTargetNodeInstruction(ins);
-        break;
-
-    case InstructionType::NavigationState:
-        success = handleNavigationStateInstruction(ins);
-        break;
-
-    default:
-        LERROR("Non-implemented instruction type.");
-        success = false;
-        break;
-    }
-
-    if (!success) {
-        LERROR(fmt::format("Failed handling instruction number {}.", std::to_string(index + 1)));
-        return false;
-    }
-
-    return true;
-}
-
-bool AutoNavigationHandler::handleTargetNodeInstruction(const Instruction& ins) {
-    // Verify instruction type
-    TargetNodeInstructionProps* props = 
-        dynamic_cast<TargetNodeInstructionProps*>(ins.props.get());
-
-    if (!props) {
-        LERROR("Could not handle target node instruction.");
-        return false;
-    }
-
-    // Compute end state 
-    std::string& identifier = props->targetNode;
-    const SceneGraphNode* targetNode = sceneGraphNode(identifier);
-
-    if (!targetNode) {
-        LERROR(fmt::format("Could not find node '{}' to target", identifier));
-        return false;
-    }
-
-    glm::dvec3 targetPos;
-    if (props->position.has_value()) {
-        // note that the anchor and reference frame is our targetnode. 
-        // The position in instruction is given is relative coordinates.
-        targetPos = targetNode->worldPosition() + 
-            targetNode->worldRotationMatrix() * props->position.value();
-    }
-    else {
-        // TODO: Instead of this case, allow the curve to set its final position
-
-        glm::dvec3 nodePos = targetNode->worldPosition();
-        glm::dvec3 nodeToPrev = lastWayPoint().position() - nodePos;
-        // TODO: compute position in a more clever way
-
-        const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode, _minAllowedBoundingSphere);
-        const double defaultHeight = 2 * radius;
-
-        bool hasHeight = props->height.has_value();
-        double height = hasHeight ? props->height.value() : defaultHeight;
-
-        // move target position out from surface, along vector to camera
-        targetPos = nodePos + glm::normalize(nodeToPrev) * (radius + height);
-    }
-
-    glm::dmat4 lookAtMat = glm::lookAt(
-        targetPos,
-        targetNode->worldPosition(),
-        camera()->lookUpVectorWorldSpace()
-    );
-
-    glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
-
-    Waypoint endState{ targetPos, targetRot, identifier, _minAllowedBoundingSphere };
-    addSegment(endState, ins);
-    return true;
-}
-
-bool AutoNavigationHandler::handleNavigationStateInstruction(const Instruction& ins) {
-    // Verify instruction type
-    NavigationStateInstructionProps* props =
-        dynamic_cast<NavigationStateInstructionProps*>(ins.props.get());
-
-    if (!props) {
-        LERROR(fmt::format("Could not handle navigation state instruction."));
-        return false;
-    }
-
-    Waypoint endState{ props->navState , _minAllowedBoundingSphere };
-    addSegment(endState, ins);
-    return true;
-}
-
-void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction& ins){
+void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* ins){
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
     PathSegment segment = PathSegment(lastWayPoint(), waypoint, CurveType(curveType));
 
     // TODO: handle duration better
-    if (ins.props->duration.has_value()) {
-        segment.setDuration(ins.props->duration.value());
+    if (ins->duration.has_value()) {
+        segment.setDuration(ins->duration.value());
     }
     _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
 }

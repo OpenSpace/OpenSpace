@@ -35,64 +35,74 @@ namespace {
     constexpr const char* KeyStopAtTargets = "StopAtTargets";
     constexpr const char* KeyStartState = "StartState";
 
+    // Instruction Types
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyTypeTargetNode = "Node";
+    constexpr const char* KeyTypeNavigationState = "NavigationState";
+
 } // namespace
 
 namespace openspace::autonavigation {
 
-PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
-    try {
-        documentation::testSpecificationAndThrow(
-            Documentation(),
-            dictionary,
-            "Path Specification"
-        );
-    }
-    catch (ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Unable to generate path specification from dictionary. Does not match documentation: {}", e.message));
-        return;
-    }
+using NavigationState = interaction::NavigationHandler::NavigationState;
 
-    // Read instructions from dictionary
-    ghoul::Dictionary instructions = dictionary.value<ghoul::Dictionary>(KeyInstructions); 
+PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "Path Specification"
+    );
+
+    ghoul::Dictionary instructions = 
+        dictionary.value<ghoul::Dictionary>(KeyInstructions); 
 
     for (size_t i = 1; i <= instructions.size(); ++i) {
-        ghoul::Dictionary insDict = instructions.value<ghoul::Dictionary>(std::to_string(i));
+        ghoul::Dictionary insDict = 
+            instructions.value<ghoul::Dictionary>(std::to_string(i));
 
-        _instructions.push_back(Instruction{ insDict });
+        if (!insDict.hasValue<std::string>(KeyType)) {
+            throw ghoul::RuntimeError(
+                "Each instruction must have a specified type."
+            );
+        }
+
+        std::string type = insDict.value<std::string>(KeyType);
+        tryReadInstruction(i, type, insDict);
     }
 
-    // Read stop at targets flag
     if (dictionary.hasValue<bool>(KeyStopAtTargets)) {
         _stopAtTargets = dictionary.value<bool>(KeyStopAtTargets);
     }
 
-    // Read start state
     if (dictionary.hasValue<ghoul::Dictionary>(KeyStartState)) {
         auto navStateDict = dictionary.value<ghoul::Dictionary>(KeyStartState);
 
         try {
             openspace::documentation::testSpecificationAndThrow(
-                interaction::NavigationHandler::NavigationState::Documentation(),
+                NavigationState::Documentation(),
                 navStateDict,
                 "NavigationState"
             );
         }
         catch (ghoul::RuntimeError& e) {
-            LERROR(fmt::format("Unable to read start navigation state. Does not match documentation: {}", e.message));
+            LERROR(fmt::format("Unable to read start navigation state. {}", e.message));
             return;
         }
 
-        _startState = interaction::NavigationHandler::NavigationState(navStateDict);
+        _startState = NavigationState(navStateDict);
     }
 }
 
-PathSpecification::PathSpecification(const Instruction instruction) {
-    _instructions.push_back(instruction);
-    _stopAtTargets = false;
+PathSpecification::PathSpecification(const TargetNodeInstruction instruction) {
+    _instructions.push_back(std::make_unique<TargetNodeInstruction>(instruction));
 }
 
-const std::vector<Instruction>* PathSpecification::instructions() const {
+const std::vector<std::unique_ptr<Instruction>>* PathSpecification::instructions() const {
     return &_instructions;
+}
+
+const Instruction* PathSpecification::instruction(int i) const {
+    return (_instructions.size() > i) ? _instructions[i].get() : nullptr;
 }
 
 const bool PathSpecification::stopAtTargets() const {
@@ -103,7 +113,7 @@ const bool PathSpecification::stopAtTargetsSpecified() const {
     return _stopAtTargets.has_value();
 }
 
-const interaction::NavigationHandler::NavigationState& PathSpecification::startState() const {
+const NavigationState& PathSpecification::startState() const {
     return _startState.value();
 }
 
@@ -138,6 +148,38 @@ documentation::Documentation PathSpecification::Documentation() {
             },
         }
     };
+}
+
+void PathSpecification::tryReadInstruction(int index, std::string type,
+                                           ghoul::Dictionary& dictionary) 
+{
+    // create correct type of instruction and present and throw error with useful
+    // error message if we failed. 
+    if (type == KeyTypeTargetNode) {
+        try {
+            _instructions.push_back(std::make_unique<TargetNodeInstruction>(dictionary));
+        }
+        catch (ghoul::RuntimeError& e) {
+            throw ghoul::RuntimeError(
+                fmt::format("Failed reading instruction {}: {}", index, e.message));
+        }
+    }
+    else if (type == KeyTypeNavigationState) {
+        try {
+            _instructions.push_back(
+                std::make_unique<NavigationStateInstruction>(dictionary));
+        }
+        catch (ghoul::RuntimeError& e) {
+            throw ghoul::RuntimeError(
+                fmt::format("Failed reading instruction {}: {}", index, e.message));
+        }
+    }
+    else {
+        throw ghoul::RuntimeError(fmt::format(
+            "Failed reading instruction {}: Uknown instruction type '{}'", 
+            index, type)
+        );
+    }
 }
 
 } // namespace openspace::autonavigation

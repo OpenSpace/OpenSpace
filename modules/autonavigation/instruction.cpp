@@ -25,6 +25,11 @@
 #include <modules/autonavigation/instruction.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/camera.h>
+#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -40,73 +45,30 @@ namespace {
 
 namespace openspace::autonavigation {
 
-documentation::Documentation TargetNodeInstructionDocumentation() {
-    using namespace documentation;
-
-    return {
-        "Target Node Instruction",
-        "target_node_instruction",
-        {
-            {
-                KeyTarget,
-                new StringVerifier,
-                Optional::No,
-                "The identifier of the target node."
-            },
-            {
-                KeyDuration,
-                new DoubleVerifier,
-                Optional::Yes,
-                "The desired duration for the camera movement."
-            },
-            {
-                KeyPosition,
-                new Vector3Verifier<double>,
-                Optional::Yes,
-                "The desired final position for the camera movement, given in model space."
-            },
-            {
-                KeyHeight,
-                new DoubleVerifier,
-                Optional::Yes,
-                "The desired height from surface for final position (meters). Will be ignored if a target position is set. "
-            },
-        }
-    };
-}
-
-InstructionProps::InstructionProps(const ghoul::Dictionary& dictionary) {
-    // TODO: validate against some documentation?
-
+Instruction::Instruction(const ghoul::Dictionary& dictionary) {
     if (dictionary.hasValue<double>(KeyDuration)) {
         duration = dictionary.value<double>(KeyDuration);
     }
+
+    // TODO: include info about pauses/stops
 }
 
-InstructionProps::~InstructionProps() {}
+Instruction::~Instruction() {}
 
-TargetNodeInstructionProps::TargetNodeInstructionProps(
-    const ghoul::Dictionary& dictionary) : InstructionProps(dictionary)
+TargetNodeInstruction::TargetNodeInstruction(const ghoul::Dictionary& dictionary) 
+    : Instruction(dictionary)
 {
-    try {
-        documentation::testSpecificationAndThrow(
-            TargetNodeInstructionDocumentation(),
-            dictionary,
-            "Target Node Instruction"
-        );
-    }
-    catch (ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Unable to generate target node instruction from dictionary. Does not match documentation: {}", e.message));
-        return;
-    }
-
     if (!dictionary.hasValue<std::string>(KeyTarget)) {
         throw ghoul::RuntimeError(
             "A camera path instruction requires a target node, to go to or use as reference frame."
         );
     }
 
-    targetNode = dictionary.value<std::string>(KeyTarget);
+    nodeIdentifier = dictionary.value<std::string>(KeyTarget);
+
+    if (!sceneGraphNode(nodeIdentifier)) {
+        throw ghoul::RuntimeError(fmt::format("Could not find target node '{}'", nodeIdentifier));
+    }
 
     if (dictionary.hasValue<glm::dvec3>(KeyPosition)) {
         position = dictionary.value<glm::dvec3>(KeyPosition);
@@ -117,46 +79,76 @@ TargetNodeInstructionProps::TargetNodeInstructionProps(
     }
 }
 
-NavigationStateInstructionProps::NavigationStateInstructionProps(
-    const ghoul::Dictionary& dictionary) : InstructionProps(dictionary)
+std::vector<Waypoint> TargetNodeInstruction::getWaypoints() const {
+    const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
+    if (!targetNode) {
+        LERROR(fmt::format("Could not find target node '{}'", nodeIdentifier));
+        return std::vector<Waypoint>();
+    }
+
+    glm::dvec3 targetPos;
+    if (position.has_value()) {
+        // note that the anchor and reference frame is our targetnode. 
+        // The position in instruction is given is relative coordinates.
+        targetPos = targetNode->worldPosition() +
+            targetNode->worldRotationMatrix() * position.value();
+    }
+    else {
+        // TODO: Instead of this case, allow the curve to set its final position
+
+        //glm::dvec3 nodePos = targetNode->worldPosition();
+        //glm::dvec3 nodeToPrev = lastWayPoint().position() - nodePos;
+        //// TODO: compute position in a more clever way
+
+        //const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode, _minAllowedBoundingSphere);
+        //const double defaultHeight = 2 * radius;
+
+        //bool hasHeight = props->height.has_value();
+        //double height = hasHeight ? props->height.value() : defaultHeight;
+
+        //// move target position out from surface, along vector to camera
+        //targetPos = nodePos + glm::normalize(nodeToPrev) * (radius + height);
+
+
+        // OBS! TEMPORARY!! TODO: fix so that a camera pose is optional in Waypoint
+        const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode, 10.0);
+        targetPos = targetNode->worldPosition() + 3 * radius * glm::dvec3(1.0, 0.0, 0.0);
+    }
+
+    Camera* camera = global::navigationHandler.camera();
+
+    glm::dmat4 lookAtMat = glm::lookAt(
+        targetPos,
+        targetNode->worldPosition(),
+        camera->lookUpVectorWorldSpace()
+    );
+
+    glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
+
+    Waypoint wp{ targetPos, targetRot, nodeIdentifier, 10.0 }; // TODO: make property for min valid boudnignsphere
+
+    return std::vector<Waypoint>({ wp });
+}
+
+NavigationStateInstruction::NavigationStateInstruction(
+    const ghoul::Dictionary& dictionary): Instruction(dictionary)
 {
     if (dictionary.hasValue<ghoul::Dictionary>(KeyNavigationState)) {
         auto navStateDict = dictionary.value<ghoul::Dictionary>(KeyNavigationState);
 
-        try {
-            openspace::documentation::testSpecificationAndThrow(
-                interaction::NavigationHandler::NavigationState::Documentation(),
-                navStateDict,
-                "NavigationState"
-            );
-        }
-        catch (ghoul::RuntimeError& e) {
-            LERROR(fmt::format("Unable to generate navigation state instruction from dictionary. Does not match documentation: {}", e.message));
-            return;
-        }
+        openspace::documentation::testSpecificationAndThrow(
+            NavigationState::Documentation(),
+            navStateDict,
+            "NavigationState"
+        );
 
-        navState = interaction::NavigationHandler::NavigationState(navStateDict);
+        navigationState = NavigationState(navStateDict);
     }
 }
 
-Instruction::Instruction(const ghoul::Dictionary& dictionary) {
-
-    // TODO: test against some documentation?
-
-    // Deduce the instruction type based on the fields in the dictionary
-    if (dictionary.hasValue<std::string>(KeyTarget)) {
-        type = InstructionType::TargetNode;
-        props = std::make_shared<TargetNodeInstructionProps>(dictionary);
-    }
-    else if (dictionary.hasValue<ghoul::Dictionary>(KeyNavigationState)) {
-        type = InstructionType::NavigationState;
-        props = std::make_shared<NavigationStateInstructionProps>(dictionary);
-    }
-    else {
-        throw ghoul::RuntimeError(
-            "Could not deduce instruction type."
-        );
-    }
+std::vector<Waypoint> NavigationStateInstruction::getWaypoints() const {
+    Waypoint wp{ navigationState, 10.0 }; // TODO: make property for min valid boudnignsphere
+    return std::vector<Waypoint>({ wp });
 }
 
 } // namespace openspace::autonavigation
