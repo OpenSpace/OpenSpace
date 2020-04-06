@@ -24,6 +24,9 @@
 
 #include <modules/autonavigation/waypoint.h>
 
+#include <modules/autonavigation/autonavigationmodule.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
@@ -34,8 +37,7 @@ namespace {
 
 namespace openspace::autonavigation {
 
-WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier, 
-                                         const double minBoundingSphere) 
+WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier) 
 {
     const SceneGraphNode* node = sceneGraphNode(nodeIdentifier); 
     if (!node) {
@@ -44,15 +46,17 @@ WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier,
     }
 
     identifier = nodeIdentifier;
-    validBoundingSphere = findValidBoundingSphere(node, minBoundingSphere);
+    validBoundingSphere = findValidBoundingSphere(node);
 }
 
-double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node,
-                                                    const double minBoundingSphere) 
+double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node) 
 {
     double bs = static_cast<double>(node->boundingSphere());
 
-    if (bs < minBoundingSphere) {
+    const double minValidBoundingSphere = 
+        global::moduleEngine.module<AutoNavigationModule>()->minValidBoundingSphere();
+
+    if (bs < minValidBoundingSphere) {
 
         // If the bs of the target is too small, try to find a good value in a child node.
         // Only check the closest children, to avoid deep traversal in the scene graph. Also,
@@ -60,7 +64,7 @@ double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node,
         // target well is higher for these nodes.
         for (SceneGraphNode* child : node->children()) {
             bs = static_cast<double>(child->boundingSphere());
-            if (bs > minBoundingSphere) {
+            if (bs > minValidBoundingSphere) {
                 LWARNING(fmt::format(
                     "The scene graph node '{}' has no, or a very small, bounding sphere. Using bounding sphere of child node '{}' in computations.",
                     node->identifier(), 
@@ -72,23 +76,22 @@ double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node,
         }
 
         LWARNING(fmt::format("The scene graph node '{}' has no, or a very small,"
-            "bounding sphere. This might lead to unexpected results.", node->identifier()));
+            "bounding sphere. Using minimal value. This might lead to unexpected results.", node->identifier()));
 
-        bs = minBoundingSphere;
+        bs = minValidBoundingSphere;
     }
 
     return bs;
 }
 
-Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref, 
-                   const double minBoundingSphere)
-    : nodeDetails(ref, minBoundingSphere)
+Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
+    : nodeDetails(ref)
 {
     pose.position = pos;
     pose.rotation = rot;
 }
 
-Waypoint::Waypoint(const NavigationState& ns, const double minBoundingSphere) {
+Waypoint::Waypoint(const NavigationState& ns) {
     // OBS! The following code is exactly the same as used in 
     // NavigationHandler::applyNavigationState. Should probably be made into a function.
     // TODO: make that function
@@ -125,7 +128,7 @@ Waypoint::Waypoint(const NavigationState& ns, const double minBoundingSphere) {
 
     pose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 
-    nodeDetails = WaypointNodeDetails{ ns.anchor, minBoundingSphere };
+    nodeDetails = WaypointNodeDetails{ ns.anchor };
 }
 
 glm::dvec3 Waypoint::position() const { return pose.position; }

@@ -76,7 +76,6 @@ private:
     bool _isPlaying = false;
     unsigned int _currentSegmentIndex = 0;
 
-    properties::DoubleProperty _minAllowedBoundingSphere;
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
     properties::BoolProperty _stopAtTargetsPerDefault;

@@ -43,13 +43,6 @@
 namespace {
     constexpr const char* _loggerCat = "AutoNavigationHandler";
 
-    constexpr const openspace::properties::Property::PropertyInfo MinimalBoundingSphereInfo = {
-        "MinimalBoundingSphere",
-        "Minimal BoundingSphere",
-        "The minimal allowed value for a bounding sphere. Used for computation of target "
-        "positions and path generation, to avoid issues when there is no bounding sphere."
-    };
-
     constexpr const openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultCurveOption",
         "Default Curve Option",
@@ -75,13 +68,10 @@ namespace openspace::autonavigation {
 
 AutoNavigationHandler::AutoNavigationHandler()
     : properties::PropertyOwner({ "AutoNavigationHandler" })
-    , _minAllowedBoundingSphere(MinimalBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _defaultCurveOption(DefaultCurveOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _includeRoll(IncludeRollInfo, false)
     , _stopAtTargetsPerDefault(StopAtTargetsPerDefaultInfo, false)
 {
-    addProperty(_minAllowedBoundingSphere);
-
     _defaultCurveOption.addOptions({
         { CurveType::Bezier3, "Bezier3" },
         { CurveType::Linear, "Linear"} 
@@ -174,7 +164,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 
     // Check if we have a specified start navigation state. If so, update first segment
     if (spec.hasStartState() && _pathSegments.size() > 0) {
-        Waypoint startState{ spec.startState() , _minAllowedBoundingSphere};
+        Waypoint startState{ spec.startState() };
         _pathSegments[0]->setStart(startState);
     }
 
@@ -286,7 +276,7 @@ Waypoint AutoNavigationHandler::wayPointFromCamera() {
     glm::dvec3 pos = camera()->positionVec3();
     glm::dquat rot = camera()->rotationQuaternion();
     std::string node = global::navigationHandler.anchorNode()->identifier();
-    return Waypoint{ pos, rot, node, _minAllowedBoundingSphere };
+    return Waypoint{ pos, rot, node };
 }
 
 Waypoint AutoNavigationHandler::lastWayPoint() {

@@ -39,10 +39,9 @@ struct CameraPose {
 // The waypoint node is the anchor or target node. 
 struct WaypointNodeDetails {
     WaypointNodeDetails() = default;
-    WaypointNodeDetails(const std::string nodeIdentifier, const double minBoundingSphere);
+    WaypointNodeDetails(const std::string nodeIdentifier);
 
-    static double findValidBoundingSphere(const SceneGraphNode* node,
-        const double minBoundingSphere);
+    static double findValidBoundingSphere(const SceneGraphNode* node);
 
     std::string identifier;
     double validBoundingSphere; // to be able to handle nodes with faulty bounding spheres
@@ -54,9 +53,8 @@ struct Waypoint {
     // TODO: create waypoints from a dictionary
 
     Waypoint() = default;
-    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref, 
-        const double minBoundingSphere);
-    Waypoint(const NavigationState& ns, const double minBoundingSphere);
+    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
+    Waypoint(const NavigationState& ns);
 
     glm::dvec3 position() const;
     glm::dquat rotation() const;

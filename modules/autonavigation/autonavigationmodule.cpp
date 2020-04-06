@@ -32,16 +32,32 @@
 
 namespace {
     constexpr const char* _loggerCat = "AutoNavigationModule";
+
+    constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
+        "MinimalValidBoundingSphere",
+        "Minimal Valid Bounding Sphere",
+        "The minimal allowed value for a bounding sphere. Used for computation of target "
+        "positions and path generation, to avoid issues when there is no bounding sphere."
+    };
 } // namespace
 
 namespace openspace {
 
-AutoNavigationModule::AutoNavigationModule() : OpenSpaceModule(Name) {
+AutoNavigationModule::AutoNavigationModule() 
+    : OpenSpaceModule(Name),
+    _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
+{
     addPropertySubOwner(_autoNavigationHandler);
+
+    addProperty(_minValidBoundingSphere);
 }
 
 autonavigation::AutoNavigationHandler& AutoNavigationModule::AutoNavigationHandler() {
     return _autoNavigationHandler;
+}
+
+double AutoNavigationModule::minValidBoundingSphere() const {
+    return _minValidBoundingSphere;
 }
 
 std::vector<documentation::Documentation> AutoNavigationModule::documentations() const {

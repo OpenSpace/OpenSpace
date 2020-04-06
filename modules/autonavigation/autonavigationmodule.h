@@ -40,6 +40,7 @@ public:
     virtual ~AutoNavigationModule() = default;
 
     autonavigation::AutoNavigationHandler& AutoNavigationHandler();
+    double minValidBoundingSphere() const;
 
     std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;
@@ -48,6 +49,8 @@ private:
     void internalInitialize(const ghoul::Dictionary&) override;
 
     autonavigation::AutoNavigationHandler _autoNavigationHandler;
+
+    properties::DoubleProperty _minValidBoundingSphere;
 };
 
 } // namespace openspace

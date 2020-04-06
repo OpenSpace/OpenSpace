@@ -111,7 +111,7 @@ std::vector<Waypoint> TargetNodeInstruction::getWaypoints() const {
 
 
         // OBS! TEMPORARY!! TODO: fix so that a camera pose is optional in Waypoint
-        const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode, 10.0);
+        const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);
         targetPos = targetNode->worldPosition() + 3 * radius * glm::dvec3(1.0, 0.0, 0.0);
     }
 
@@ -125,8 +125,7 @@ std::vector<Waypoint> TargetNodeInstruction::getWaypoints() const {
 
     glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 
-    Waypoint wp{ targetPos, targetRot, nodeIdentifier, 10.0 }; // TODO: make property for min valid boudnignsphere
-
+    Waypoint wp{ targetPos, targetRot, nodeIdentifier }; 
     return std::vector<Waypoint>({ wp });
 }
 
@@ -147,7 +146,7 @@ NavigationStateInstruction::NavigationStateInstruction(
 }
 
 std::vector<Waypoint> NavigationStateInstruction::getWaypoints() const {
-    Waypoint wp{ navigationState, 10.0 }; // TODO: make property for min valid boudnignsphere
+    Waypoint wp{ navigationState};
     return std::vector<Waypoint>({ wp });
 }
 
