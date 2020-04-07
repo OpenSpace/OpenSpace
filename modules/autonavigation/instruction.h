@@ -44,6 +44,8 @@ struct Instruction {
     std::optional<double> duration;
 
     // TODO: include pause information
+    std::optional<bool> stopAtTarget;
+    std::optional<double> stopDuration; // only relevant is stopAtTarget true
 };
 
 struct TargetNodeInstruction : public Instruction {

@@ -35,8 +35,11 @@
 namespace {
     constexpr const char* _loggerCat = "PathInstruction";
 
-    constexpr const char* KeyTarget = "Target";
     constexpr const char* KeyDuration = "Duration";
+    constexpr const char* KeyStopAtTarget = "StopAtTarget";
+    constexpr const char* KeyStopDetails = "StopDetails";
+
+    constexpr const char* KeyTarget = "Target";
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyHeight = "Height";
 
@@ -51,6 +54,18 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
     }
 
     // TODO: include info about pauses/stops
+    if (dictionary.hasValue<bool>(KeyStopAtTarget)) {
+        stopAtTarget = dictionary.value<bool>(KeyStopAtTarget);
+    }
+
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyStopDetails)) {
+        ghoul::Dictionary stopDictionary = 
+            dictionary.value<ghoul::Dictionary>(KeyStopDetails);
+
+        if (stopDictionary.hasValue<double>(KeyDuration)) {
+            stopDuration = stopDictionary.value<double>(KeyDuration);
+        }
+    }
 }
 
 Instruction::~Instruction() {}
@@ -146,7 +161,7 @@ NavigationStateInstruction::NavigationStateInstruction(
 }
 
 std::vector<Waypoint> NavigationStateInstruction::getWaypoints() const {
-    Waypoint wp{ navigationState};
+    Waypoint wp{ navigationState };
     return std::vector<Waypoint>({ wp });
 }
 

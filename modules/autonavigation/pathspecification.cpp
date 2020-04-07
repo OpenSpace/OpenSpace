@@ -150,11 +150,11 @@ documentation::Documentation PathSpecification::Documentation() {
     };
 }
 
+// create correct type of instruction and present and throw error with useful
+// error message if we failed. 
 void PathSpecification::tryReadInstruction(int index, std::string type,
                                            ghoul::Dictionary& dictionary) 
 {
-    // create correct type of instruction and present and throw error with useful
-    // error message if we failed. 
     if (type == KeyTypeTargetNode) {
         try {
             _instructions.push_back(std::make_unique<TargetNodeInstruction>(dictionary));

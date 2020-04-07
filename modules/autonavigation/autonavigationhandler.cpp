@@ -58,7 +58,7 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo StopAtTargetsPerDefaultInfo = {
         "StopAtTargetsPerDefault",
         "Stop At Targets Per Default",
-        "Applied during path creation. If enabled, stops are automatically added between" 
+        "Applied during path creation. If enabled, stops are automatically added between"
         " the path segments. The user must then choose to continue the apth after reaching a target"
     };
 
@@ -101,6 +101,11 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     if (!_isPlaying || _pathSegments.empty()) return;
 
+    if (_activeStop) {
+        applyStopBehaviour(deltaTime);
+        return;
+    }
+
     std::unique_ptr<PathSegment> &currentSegment = _pathSegments[_currentSegmentIndex];
 
     CameraPose newPose = currentSegment->traversePath(deltaTime);
@@ -114,16 +119,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     }
 
     if (!_includeRoll) {
-        glm::dvec3 anchorPos = anchor()->worldPosition();
-        const double notTooCloseDistance = deltaTime * glm::distance(anchorPos, newPose.position);
-        glm::dvec3 cameraDir = glm::normalize(newPose.rotation * Camera::ViewDirectionCameraSpace);
-        glm::dvec3 lookAtPos = newPose.position + notTooCloseDistance * cameraDir;
-        glm::dquat rollFreeRotation = helpers::getLookAtQuaternion(
-            newPose.position,
-            lookAtPos,
-            camera()->lookUpVectorWorldSpace()
-        );
-        newPose.rotation = rollFreeRotation;
+        removeRollRotation(newPose, deltaTime);
     }
 
     camera()->setPositionVec3(newPose.position);
@@ -138,8 +134,10 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
             return;
         }
 
-        if (_stopAtTargetsPerDefault) {
-            pausePath();
+        int stopIndex = _currentSegmentIndex - 1;
+
+        if (_stops[stopIndex].shouldStop) {
+            pauseAtTarget(stopIndex);
             return;
         }
     }
@@ -148,17 +146,30 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 void AutoNavigationHandler::createPath(PathSpecification& spec) {
     clearPath();
 
-    if(spec.stopAtTargetsSpecified())
+    if (spec.stopAtTargetsSpecified()) {
         _stopAtTargetsPerDefault = spec.stopAtTargets();
+        LINFO("Property for stop at targets per default was overridden by path specification.");    
+    }
 
-    bool success = true;
-    for (int i = 0; i < spec.instructions()->size(); i++) {
-        const Instruction* ins = spec.instruction(i);
-        if (ins) {
+    const int nrInstructions = spec.instructions()->size();
+
+    for (int i = 0; i < nrInstructions; i++) {
+        const Instruction* instruction = spec.instruction(i);
+        if (instruction) {
+            std::vector<Waypoint> waypoints = instruction->getWaypoints();
+
+            if (waypoints.size() == 0) {
+                LWARNING(fmt::format("No path segment was created from instruction {}. No waypoints could be created.", i));
+                return;
+            }
+
             // TODO: allow for a list of waypoints
-            std::vector<Waypoint> waypoints = ins->getWaypoints();
-            if (waypoints.size() > 0)
-                addSegment(waypoints[0], ins);
+            addSegment(waypoints[0], instruction);
+
+            // Add info about stops between segments
+            if (i < nrInstructions - 1) {
+                addStopDetails(instruction);
+            }
         }
     }
 
@@ -168,12 +179,10 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
         _pathSegments[0]->setStart(startState);
     }
 
-    if (success) {
-        LINFO("Succefully generated camera path.");
-        startPath();
-    }
-    else
-        LERROR("Could not create path.");
+    LINFO(fmt::format(
+        "Succefully generated camera path with {} segments.", _pathSegments.size()
+    ));
+    startPath();
 }
 
 void AutoNavigationHandler::clearPath() {
@@ -188,6 +197,11 @@ void AutoNavigationHandler::startPath() {
         return;
     }
 
+    ghoul_assert(
+        _stops.size() == (_pathSegments.size() - 1), 
+        "Must have exactly one stop entry between every segment."
+    );
+
     // TODO: remove this line at the end of our project. Used to simplify testing
     global::timeManager.setPause(true);
 
@@ -199,15 +213,31 @@ void AutoNavigationHandler::startPath() {
 
     LINFO("Starting path...");
     _isPlaying = true;
+    _activeStop = nullptr;
 }
 
-void AutoNavigationHandler::pausePath() {
-    if (!_isPlaying) {
+void AutoNavigationHandler::pauseAtTarget(int i) {
+    if (!_isPlaying || _activeStop) {
         LERROR("Cannot pause a path that isn't playing");
         return;
     }
-    LINFO(fmt::format("Paused path at target {} / {}", _currentSegmentIndex, _pathSegments.size()));
-    _isPlaying = false;
+
+    _activeStop = &_stops[i];
+
+    if (!_activeStop) return;
+
+    bool hasDuration = _activeStop->duration.has_value();
+    std::string infoString = hasDuration 
+        ? fmt::format("{} seconds", _activeStop->duration.value())
+        : "until continued";
+
+    LINFO(fmt::format("Paused path at target {} / {} ({})",
+        _currentSegmentIndex,
+        _pathSegments.size(),
+        infoString
+    ));
+
+    _progressedTimeInStop = 0.0;
 }
 
 void AutoNavigationHandler::continuePath() {
@@ -216,7 +246,7 @@ void AutoNavigationHandler::continuePath() {
         return;
     }
 
-    if (_isPlaying) {
+    if (_isPlaying && !_activeStop) {
         LERROR("Cannot resume a path that is already playing");
         return;
     }
@@ -225,7 +255,7 @@ void AutoNavigationHandler::continuePath() {
 
     // Recompute start camera state for the upcoming path segment,
     _pathSegments[_currentSegmentIndex]->setStart(wayPointFromCamera());
-    _isPlaying = true;
+    _activeStop = nullptr;
 }
 
 void AutoNavigationHandler::stopPath() {
@@ -283,6 +313,30 @@ Waypoint AutoNavigationHandler::lastWayPoint() {
     return _pathSegments.empty() ? wayPointFromCamera() : _pathSegments.back()->end();
 }
 
+void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTime) {
+    glm::dvec3 anchorPos = anchor()->worldPosition();
+    const double notTooCloseDistance = deltaTime * glm::distance(anchorPos, pose.position);
+    glm::dvec3 cameraDir = glm::normalize(pose.rotation * Camera::ViewDirectionCameraSpace);
+    glm::dvec3 lookAtPos = pose.position + notTooCloseDistance * cameraDir;
+    glm::dquat rollFreeRotation = helpers::getLookAtQuaternion(
+        pose.position,
+        lookAtPos,
+        camera()->lookUpVectorWorldSpace()
+    );
+    pose.rotation = rollFreeRotation;
+}
+
+void AutoNavigationHandler::applyStopBehaviour(double deltaTime) {
+    _progressedTimeInStop += deltaTime;
+    // TODO: Apply pause behaviour
+
+    if (!_activeStop->duration.has_value()) return;
+
+    if (_progressedTimeInStop >= _activeStop->duration.value()) {
+        continuePath();
+    }
+}
+
 void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* ins){
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
@@ -294,6 +348,20 @@ void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* in
         segment.setDuration(ins->duration.value());
     }
     _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
+}
+
+void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
+    StopDetails stopEntry{ _stopAtTargetsPerDefault };
+
+    if (ins->stopAtTarget.has_value()) {
+        stopEntry.shouldStop = ins->stopAtTarget.value();
+    }
+
+    if (stopEntry.shouldStop) {
+        stopEntry.duration = ins->stopDuration;
+    }
+
+    _stops.push_back(stopEntry);
 }
 
 } // namespace openspace::autonavigation

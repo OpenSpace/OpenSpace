@@ -57,7 +57,7 @@ public:
     void createPath(PathSpecification& spec);
     void clearPath();
     void startPath();
-    void pausePath();
+    void pauseAtTarget(int i);
     void continuePath();
     void stopPath();
 
@@ -68,10 +68,26 @@ public:
 private:
     Waypoint wayPointFromCamera();
     Waypoint lastWayPoint();
+    void removeRollRotation(CameraPose& pose, double deltaTime);
+
+    void applyStopBehaviour(double deltaTime);
+
     void addSegment(Waypoint& waypoint, const Instruction* ins);
+    void addStopDetails(const Instruction* ins);
 
     // this list essentially represents the camera path
     std::vector<std::unique_ptr<PathSegment>> _pathSegments;
+
+    struct StopDetails {
+        bool shouldStop;
+        std::optional<double> duration;
+        // TODO: behaviour
+    };
+
+    std::vector<StopDetails> _stops; // 1 between every segment
+
+    StopDetails* _activeStop = nullptr; 
+    double _progressedTimeInStop = 0.0;
 
     bool _isPlaying = false;
     unsigned int _currentSegmentIndex = 0;
