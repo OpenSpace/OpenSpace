@@ -351,7 +351,8 @@ void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* in
 }
 
 void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
-    StopDetails stopEntry{ _stopAtTargetsPerDefault };
+    StopDetails stopEntry;
+    stopEntry.shouldStop = _stopAtTargetsPerDefault.value();
 
     if (ins->stopAtTarget.has_value()) {
         stopEntry.shouldStop = ins->stopAtTarget.value();
