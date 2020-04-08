@@ -89,10 +89,12 @@ AutoNavigationHandler::AutoNavigationHandler()
     addProperty(_includeRoll);
     addProperty(_stopAtTargetsPerDefault);
 
+    // Must be listed in the same order as in enum definition
     _defaultStopBehavior.addOptions({
         { AtNodeNavigator::Behavior::None, "None" },
-        { AtNodeNavigator::Behavior::Orbit, "Orbit" },
+        { AtNodeNavigator::Behavior::Orbit, "Orbit" }
     });
+    _defaultStopBehavior = AtNodeNavigator::Behavior::None;
     addProperty(_defaultStopBehavior);
 }
 
@@ -386,9 +388,32 @@ void AutoNavigationHandler::addStopDetails(Waypoint& endWaypoint, const Instruct
         stopEntry.duration = ins->stopDuration;
 
         std::string anchorIdentifier = endWaypoint.nodeDetails.identifier;
-        stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value()); // OBS! Will this work if they're not in the same order??
+        stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value()); 
+
         if (ins->stopBehavior.has_value()) {
-            // TODO: 
+            std::string behaviorString = ins->stopBehavior.value();
+
+            // This is a bit ugly, since it relies on the OptionProperty::Option and
+            // AtNodeNavigator::Behavior being implicitly converted to the same int value.
+            // TODO: Come up with a nicer solution (this get to work for now...)
+
+            using Option = properties::OptionProperty::Option;
+            std::vector<Option> options = _defaultStopBehavior.options();
+            std::vector<Option>::iterator foundIt = std::find_if(
+                options.begin(), 
+                options.end(), 
+                [&](Option& o) { return o.description == behaviorString; }
+            );
+
+            if (foundIt != options.end()) {
+                stopEntry.behavior = AtNodeNavigator::Behavior((*foundIt).value);
+            }
+            else {
+                LERROR(fmt::format(
+                    "Stop behaviour '{}' is not a valid option. Using default behaviour.",
+                    behaviorString
+                ));
+            }
         }
     }
 

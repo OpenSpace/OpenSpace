@@ -32,7 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "AtAnchorNavigator";
+    constexpr const char* _loggerCat = "AtNodeNavigator";
 
     constexpr const openspace::properties::Property::PropertyInfo OrbitSpeedFactorInfo = {
         "OrbitSpeedFactor",
@@ -44,7 +44,7 @@ namespace {
 namespace openspace::autonavigation {
 
 AtNodeNavigator::AtNodeNavigator()
-    : properties::PropertyOwner({ "AtAnchorNavigator" })
+    : properties::PropertyOwner({ "AtNodeNavigator" })
     , _orbitSpeedFactor(OrbitSpeedFactorInfo, 0.5, 0.0, 20.0)
 {
     addProperty(_orbitSpeedFactor);
@@ -78,7 +78,7 @@ void AtNodeNavigator::updateCamera(double deltaTime) {
         // Do nothing
         break;
     default:
-        LERROR("Unknown behaviour type!");
+        LERROR("Behavior type not implemented.");
         break;
     }
 }

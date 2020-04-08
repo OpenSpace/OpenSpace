@@ -32,8 +32,8 @@ namespace openspace::autonavigation {
 class AtNodeNavigator : public properties::PropertyOwner {
 public:
     enum Behavior {
+        None = 0,
         Orbit,
-        None
     };
 
     AtNodeNavigator();
