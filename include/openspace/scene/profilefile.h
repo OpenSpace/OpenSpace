@@ -126,26 +126,123 @@ public:
      * form.
      * \param filename The filename to write to.
      */
-    void writeToFile(std::string filename);
+    void writeToFile(const std::string filename);
 
-    //Methods for updating contents
-    void updateTime();
-    void updateCamera();
-    void addModuleLine(std::string line);
-    void addAssetLine(std::string line);
-    void addPropertyLine(std::string line);
-    void addKeybindingLine(std::string line);
-    void addMarkNodesLine(std::string line);
+    /**
+     * Updates the full string that defines the starting time. The format for this line
+     * is defined by ProfileFile::parseTime and Profile::convertToAsset_time
+     * \param line The time entry line to replace current time entry
+     */
+    void updateTime(const std::string line);
 
-    //Methods for getting contents of each section
+    /**
+     * Updates the full string that defines the starting camera position. The format for
+     * this line is defined by ProfileFile::parseCamera and Profile::convertToAsset_camera
+     * \param line The camera entry line to replace current camera entry
+     */
+    void updateCamera(const std::string line);
+
+    /**
+     * Adds a new module line to the list of module lines to be analyzed by the profile
+     * at startup. The format for a module line is defined by ProfileFile::parseModule and
+     * Profile::convertToAsset_modules
+     * \param line The module name to be added
+     */
+    void addModuleLine(const std::string line);
+
+    /**
+     * Adds a new asset to the list of assets to be loaded at startup. The format for an
+     * asset line is defined by ProfileFile::parseAsset and Profile::convertToAsset_assets
+     * \param line The asset name to be added
+     */
+    void addAssetLine(const std::string line);
+
+    /**
+     * Adds a new property set command to the list of property settings to be
+     * performed at startup. The format for a property set command line is defined by
+     * ProfileFile::parseProperty and Profile::convertToAsset_properties
+     * \param line The property set command to be added
+     */
+    void addPropertyLine(const std::string line);
+
+    /**
+     * Adds a new keybinding shortcut to the list of keybindings. The format for a
+     * keybinding line is defined by ProfileFile::parseKeybinding and
+     * Profile::convertToAsset_keybindings
+     * \param line The keyboard shortcut line to be added
+     */
+    void addKeybindingLine(const std::string line);
+
+    /**
+     * Adds a new scenegraph node name to be added to the list of those marked as
+     * 'interesting'. The format for a mark nodes line is defined by
+     * ProfileFile::parseMarkNodes and Profile::convertToAsset_markNodes
+     * \param line The scenegraph node to be added
+     */
+    void addMarkNodesLine(const std::string line);
+
+    /**
+     * Returns the version number (profiles syntax version) string
+     * \return The version string
+     */
     const std::string getVersion() const;
+
+    /**
+     * Returns the profile's time string. See updateTime comment header for notes on
+     * syntax of this time string
+     * \return The time string
+     */
     std::string time() const;
+
+    /**
+     * Returns the profile's camera string. See updateCamera comment header for notes on
+     * syntax of this camera string
+     * \return The camera string
+     */
     std::string camera() const;
+
+    /**
+     * Returns the vector of OpenSpace modules listed in this profile. See addModuleLine
+     * comment header for notes on the syntax of each entry.
+     * \return The vector of module lines
+     */
     std::vector<std::string> modules() const;
+
+    /**
+     * Returns the vector of OpenSpace assets listed in this profile. See addAssetLine
+     * comment header for notes on the syntax of each entry.
+     * \return The vector of asset lines
+     */
     std::vector<std::string> assets() const;
+
+    /**
+     * Returns the vector of OpenSpace property set commands included in this profile.
+     * See addPropertyLine comment header for notes on the syntax of each entry.
+     * \return The vector of property set commands
+     */
     std::vector<std::string> properties() const;
+
+    /**
+     * Returns the vector of OpenSpace keybinding shortcut definitions included in this
+     * profile. See addKeybindingLine comment header for syntax notes of each entry.
+     * \return The vector of keybinding shortcut definitions
+     */
     std::vector<std::string> keybindings() const;
+
+    /**
+     * Returns the vector of OpenSpace scenegraph nodes marked as 'interesting'.
+     * See addMarkNodesLine comment header for syntax notes of each entry.
+     * \return The vector of nodes to be marked as interesting.
+     */
     std::vector<std::string> markNodes() const;
+
+    /**
+     * Splits a tab-delimited line (of any type) into a vector with individual string
+     * entries.
+     * \param line The tab-delimited line from which to extract the fields
+     * \param result A vector of n strings that is populated by the split operation
+     * \return The number of fields that were extracted
+     */
     size_t splitByTab(std::string line, std::vector<std::string>& result);
 
 private:

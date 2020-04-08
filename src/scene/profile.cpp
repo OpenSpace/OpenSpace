@@ -67,11 +67,12 @@ std::string Profile::convertToAsset(ProfileFile& pf) {
 
     result += convertToAsset_modules(pf) + "\n";
     result += convertToAsset_assets(pf) + "\n";
+    result += convertToAsset_keybindings(pf) + "\n";
     result += "asset.onInitialize(function ()\n";
     result += convertToAsset_time(pf) + "\n";
-    result += convertToAsset_keybindings(pf) + "\n";
-    result += convertToAsset_markNodes(pf);
-    result += convertToAsset_properties(pf);
+    result += "  sceneHelper.bindKeys(Keybindings)\n\n";
+    result += convertToAsset_markNodes(pf) + "\n";
+    result += convertToAsset_properties(pf) + "\n";
     result += convertToAsset_camera(pf);
     result += "end)\n";
 
@@ -107,10 +108,10 @@ std::string Profile::convertToAsset_assets(ProfileFile& pf) {
     std::string assetR;
 
     result += "asset.require(\"base\");\n";
-    result += "'local assetHelper = asset.require(\"util/asset_helper\")\n";
-    result += "'local propertyHelper = asset.require(\"util/property_helper\")\n";
-    result += "'local sceneHelper = asset.require(\"util/scene_helper\")\n";
-    result += "'local renderableHelper = asset.require(\"util/renderable_helper\")\n";
+    result += "local assetHelper = asset.require(\"util/asset_helper\")\n";
+    result += "local propertyHelper = asset.require(\"util/property_helper\")\n";
+    result += "local sceneHelper = asset.require(\"util/scene_helper\")\n";
+    result += "local renderableHelper = asset.require(\"util/renderable_helper\")\n";
 
     for (size_t i = 0; i < pf.assets().size(); ++i) {
         std::string a = pf.assets()[i];
@@ -121,6 +122,9 @@ std::string Profile::convertToAsset_assets(ProfileFile& pf) {
         }
         else if (fields[assetFieldReqd] == "requested") {
             assetR = "request";
+        }
+        else if (fields[assetFieldReqd] == "") {
+            assetR = "require";
         }
         else {
             std::string err = "Asset " + std::to_string(i + 1) + " of ";
@@ -150,7 +154,7 @@ std::string Profile::convertToAsset_properties(ProfileFile& pf) {
             throw ghoul::RuntimeError(err);
         }
         else {
-            result = "  openspace." + fields[propertyFieldType] + "(\""
+            result += "  openspace." + fields[propertyFieldType] + "(\""
                 + fields[propertyFieldName] + "\", " + fields[propertyFieldValue] + ")\n";
         }
     }
@@ -174,7 +178,7 @@ std::string Profile::convertToAsset_keybindings(ProfileFile& pf) {
         result += "    GuiPath = \"" + fields[3] + "\",\n";
         result += "    Local = " + fields[4] + ",\n";
         result += "    Command = " + fields[5] + "\n";
-        result += "  }\n";
+        result += "  },\n";
     }
     result += "}\n";
     return result;
@@ -184,7 +188,7 @@ std::string Profile::convertToAsset_markNodes(ProfileFile& pf) {
     std::string result;
 
     if (pf.markNodes().size() > 0) {
-        result += "  openspace.markInterestingNodes({'";
+        result += "  openspace.markInterestingNodes({";
     }
     for (std::string m : pf.markNodes()) {
         result += "\"" + m + "\", ";
@@ -223,7 +227,7 @@ std::string Profile::convertToAsset_camera(ProfileFile& pf) {
     pf.splitByTab(pf.camera(), fields);
 
     if (fields[cameraFieldType] == "setNavigationState") {
-        result += "  openspace.navigation.setNavigationState({ ";
+        result += "  openspace.navigation.setNavigationState({";
         result += "Anchor = " + fields[cameraNavigationFieldAnchor] + ", ";
         if (fields[cameraNavigationFieldAim] != "") {
             result += "Aim = " + fields[cameraNavigationFieldAim] + ", ";
@@ -231,9 +235,9 @@ std::string Profile::convertToAsset_camera(ProfileFile& pf) {
         if (fields[cameraNavigationFieldRef] != "") {
             result += "ReferenceFrame = " + fields[cameraNavigationFieldRef] + ", ";
         }
-        result += "Position = " + fields[cameraNavigationFieldPosition] + ", ";
+        result += "Position = {" + fields[cameraNavigationFieldPosition] + "}, ";
         if (fields[cameraNavigationFieldUp] != "") {
-            result += "Up = {" + fields[cameraNavigationFieldPosition] + "}, ";
+            result += "Up = {" + fields[cameraNavigationFieldUp] + "}, ";
         }
         if (fields[cameraNavigationFieldYaw] != "") {
             result += "Yaw = " + fields[cameraNavigationFieldYaw] + ", ";

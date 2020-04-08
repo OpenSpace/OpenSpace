@@ -22,64 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROFILE___H__
-#define __OPENSPACE_CORE___PROFILE___H__
+#include "catch2/catch.hpp"
+#include "test_common.h"
 
-#include <openspace/scene/profilefile.h>
-
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicense.h>
-#include <ghoul/misc/easing.h>
+#include "openspace/scene/profile.h"
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/exception.h>
-#include <mutex>
-#include <set>
-#include <unordered_map>
-#include <vector>
+#include <iostream>
+#include <iomanip>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+using namespace openspace;
 
-namespace openspace {
+namespace {
+}
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
+static void addLineHeaderForFailureMessage(std::string& s, size_t lineNumber) {
+    s = "@line " + std::to_string(lineNumber) + ": '" + s + "'";
+}
 
+TEST_CASE("profile: Convert profileFile to asset", "[profile]") {
+    testProfileFormat test = buildTestProfile1();
+    std::string testFull_string = stringFromTestProfileFormat(test);
 
-class Profile {
-public:
-    /**
-     * Saves all current settings, starting from the profile that was loaded at startup,
-     * and all of the property & asset changes that were made since startup.
-     * \param filename The filename of the new profile to be saved
-     */
-    void saveCurrentSettingsToProfile(std::string filename);
+    ProfileFile pf = makeProfileFromString(testFull_string);
 
-    /**
-     * Returns the string contents of a profileFile object converted to scene/asset
-     * equivalent syntax.
-     * \param pf The profileFile object to be converted
-     * \return The full string contents of scene/asset equivalent of the profile file.
-     */
-    std::string convertToAsset(ProfileFile& pf);
+    Profile p;
+    REQUIRE_NOTHROW(
+        p.convertToAsset(pf)
+    );
+}
 
-    /**
-     * Returns the Lua library that contains all Lua functions available to provide
-     * profile functionality.
-     * \return The Lua library that contains all Lua functions available for profiles
-     */
-    static scripting::LuaLibrary luaLibrary();
+TEST_CASE("profile: Verify conversion to scene", "[profile]") {
+    ProfileFile pf = makeProfileFromString(newHorizonsProfileInput);
 
-private:
-    std::string convertToAsset_assets(ProfileFile& pf);
-    std::string convertToAsset_modules(ProfileFile& pf);
-    std::string convertToAsset_properties(ProfileFile& pf);
-    std::string convertToAsset_markNodes(ProfileFile& pf);
-    std::string convertToAsset_keybindings(ProfileFile& pf);
-    std::string convertToAsset_time(ProfileFile& pf);
-    std::string convertToAsset_camera(ProfileFile& pf);
+    Profile p;
+    std::string result;
+    REQUIRE_NOTHROW(
+        result = p.convertToAsset(pf)
+    );
 
-};
+    std::string testing, comparing;
+    StringPerLineReader sr_result(result);
+    StringPerLineReader sr_standard(newHorizonsExpectedSceneOutput);
 
-} // namespace openspace
+    size_t lineN = 1;
+    while (sr_result.getNextLine(testing)) {
+        sr_standard.getNextLine(comparing);
+        addLineHeaderForFailureMessage(testing, lineN);
+        addLineHeaderForFailureMessage(comparing, lineN);
+        REQUIRE(testing == comparing);
+        lineN++;
+    }
+    //If this fails there are extra lines in the comparison string that weren't in result
+    REQUIRE(sr_standard.getNextLine(comparing) == false);
+}
 
-#endif // __OPENSPACE_CORE___PROFILE___H__

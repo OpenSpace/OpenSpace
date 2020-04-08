@@ -34,7 +34,9 @@ add_executable(
   test_lrucache.cpp
   test_luaconversions.cpp
   test_optionproperty.cpp
+  profile/test_common.cpp
   profile/test_profilefile.cpp
+  profile/test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
   test_spicemanager.cpp

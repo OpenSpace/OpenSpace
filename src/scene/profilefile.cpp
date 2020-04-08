@@ -106,7 +106,7 @@ void ProfileFile::processIndividualLine(bool& insideSection, std::string line) {
     }
 }
 
-void ProfileFile::writeToFile(std::string filename) {
+void ProfileFile::writeToFile(const std::string filename) {
     std::ofstream outFile;
     try {
         outFile.open(filename, std::ofstream::out | std::ofstream::app);
@@ -448,6 +448,28 @@ size_t ProfileFile::splitByTab(std::string line, std::vector<std::string>& resul
         result.push_back("");
     }
     return result.size();
+}
+
+void ProfileFile::updateTime(const std::string line) {
+    _time = line;
+}
+void ProfileFile::updateCamera(const std::string line) {
+    _camera = line;
+}
+void ProfileFile::addModuleLine(const std::string line) {
+    _modules.push_back(line);
+}
+void ProfileFile::addAssetLine(const std::string line) {
+    _assets.push_back(line);
+}
+void ProfileFile::addPropertyLine(const std::string line) {
+    _properties.push_back(line);
+}
+void ProfileFile::addKeybindingLine(const std::string line) {
+    _keybindings.push_back(line);
+}
+void ProfileFile::addMarkNodesLine(const std::string line) {
+    _markNodes.push_back(line);
 }
 
 }  // namespace openspace
