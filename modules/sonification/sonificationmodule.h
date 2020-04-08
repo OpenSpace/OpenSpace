@@ -39,7 +39,7 @@
 
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
-#define NUM_PLANETARY_SETTINGS 4
+#define NUM_PLANETARY_SETTINGS 5
 
 #include <openspace/util/openspacemodule.h>
 
@@ -92,17 +92,20 @@ private:
     void onMercuryEnabledChanged(bool value);
     void onMercurySizeDayChanged(bool value);
     void onMercuryGravityChanged(bool value);
+    void onMercuryTemperatureChanged(bool value);
 
     //Venus
     void onVenusEnabledChanged(bool value);
     void onVenusSizeDayChanged(bool value);
     void onVenusGravityChanged(bool value);
+    void onVenusTemperatureChanged(bool value);
     void onVenusAtmosphereChanged(bool value);
 
     //Earth
     void onEarthEnabledChanged(bool value);
     void onEarthSizeDayChanged(bool value);
     void onEarthGravityChanged(bool value);
+    void onEarthTemperatureChanged(bool value);
     void onEarthAtmosphereChanged(bool value);
     void onEarthMoonsChanged(bool value);
 
@@ -110,6 +113,7 @@ private:
     void onMarsEnabledChanged(bool value);
     void onMarsSizeDayChanged(bool value);
     void onMarsGravityChanged(bool value);
+    void onMarsTemperatureChanged(bool value);
     void onMarsAtmosphereChanged(bool value);
     void onMarsMoonsChanged(bool value);
 
@@ -117,6 +121,7 @@ private:
     void onJupiterEnabledChanged(bool value);
     void onJupiterSizeDayChanged(bool value);
     void onJupiterGravityChanged(bool value);
+    void onJupiterTemperatureChanged(bool value);
     void onJupiterAtmosphereChanged(bool value);
     void onJupiterMoonsChanged(bool value);
 
@@ -124,6 +129,7 @@ private:
     void onSaturnEnabledChanged(bool value);
     void onSaturnSizeDayChanged(bool value);
     void onSaturnGravityChanged(bool value);
+    void onSaturnTemperatureChanged(bool value);
     void onSaturnAtmosphereChanged(bool value);
     void onSaturnMoonsChanged(bool value);
 
@@ -131,6 +137,7 @@ private:
     void onUranusEnabledChanged(bool value);
     void onUranusSizeDayChanged(bool value);
     void onUranusGravityChanged(bool value);
+    void onUranusTemperatureChanged(bool value);
     void onUranusAtmosphereChanged(bool value);
     void onUranusMoonsChanged(bool value);
 
@@ -138,6 +145,7 @@ private:
     void onNeptuneEnabledChanged(bool value);
     void onNeptuneSizeDayChanged(bool value);
     void onNeptuneGravityChanged(bool value);
+    void onNeptuneTemperatureChanged(bool value);
     void onNeptuneAtmosphereChanged(bool value);
     void onNeptuneMoonsChanged(bool value);
 
@@ -170,7 +178,8 @@ private:
         double angle;
         std::vector<std::pair<std::string, double>> moons;
         //Settings for each planet
-        //[0] size/day enabled, [1] gravity enabled, [2] atmosphere enabled, [3] moons enabled
+        //[0] size/day enabled, [1] gravity enabled, [2] temperature enabled,
+        //[3] atmosphere enabled, [4] moons enabled
         bool settings[NUM_PLANETARY_SETTINGS] = {false, false, false, false};
         bool update;
     };
@@ -187,7 +196,8 @@ private:
     GUIMode _GUIState;
 
     //Settings for each planet
-    //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled
+    //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled,
+    //[4] jupiter enabled, [5] saturn enabled, [6] uranus enabled, [7] neptuen enabled
     bool _solarSettings[NUM_PLANETS] = { false, false, false, false, false, false, false, false};
 
     //Properties
@@ -199,6 +209,7 @@ private:
         properties::BoolProperty enabled;
         properties::BoolProperty sizeDayEnabled;
         properties::BoolProperty gravityEnabled;
+        properties::BoolProperty temperatureEnabled;
 
         //Unique
         properties::BoolProperty atmosphereEnabled;
