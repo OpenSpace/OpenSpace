@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
 #define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
 
+#include <modules/autonavigation/atnodenavigator.h>
 #include <modules/autonavigation/pathsegment.h>
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -57,9 +58,8 @@ public:
     void createPath(PathSpecification& spec);
     void clearPath();
     void startPath();
-    void pauseAtTarget(int i);
     void continuePath();
-    void stopPath();
+    void abortPath();
 
     // TODO: remove functions for debugging
     std::vector<glm::dvec3> getCurvePositions(int nPerSegment); //debug
@@ -69,11 +69,12 @@ private:
     Waypoint wayPointFromCamera();
     Waypoint lastWayPoint();
     void removeRollRotation(CameraPose& pose, double deltaTime);
+    void pauseAtTarget(int i);
 
     void applyStopBehaviour(double deltaTime);
 
     void addSegment(Waypoint& waypoint, const Instruction* ins);
-    void addStopDetails(const Instruction* ins);
+    void addStopDetails(Waypoint& endWaypoint, const Instruction* ins);
 
     // this list essentially represents the camera path
     std::vector<std::unique_ptr<PathSegment>> _pathSegments;
@@ -81,11 +82,12 @@ private:
     struct StopDetails {
         bool shouldStop;
         std::optional<double> duration;
-        // TODO: behaviour
+        AtNodeNavigator::Behavior behavior;
     };
 
     std::vector<StopDetails> _stops; // 1 between every segment
 
+    AtNodeNavigator _atNodeNavigator; // responsible for navigation during stops
     StopDetails* _activeStop = nullptr; 
     double _progressedTimeInStop = 0.0;
 
@@ -95,6 +97,7 @@ private:
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
     properties::BoolProperty _stopAtTargetsPerDefault;
+    properties::OptionProperty _defaultStopBehavior;
 };
 
 } // namespace openspace::autonavigation

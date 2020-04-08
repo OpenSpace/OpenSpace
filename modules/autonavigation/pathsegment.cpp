@@ -143,9 +143,6 @@ void PathSegment::initCurve() {
     case CurveType::Linear:
         _curve = std::make_shared<LinearCurve>(_start, _end);
         break;
-    case CurveType::Pause:
-        _curve = std::make_shared<PauseCurve>(_start);
-        break;
     default:
         LERROR("Could not create curve. Type does not exist!");
         return;

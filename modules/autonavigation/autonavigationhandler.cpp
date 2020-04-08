@@ -34,7 +34,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -59,7 +58,13 @@ namespace {
         "StopAtTargetsPerDefault",
         "Stop At Targets Per Default",
         "Applied during path creation. If enabled, stops are automatically added between"
-        " the path segments. The user must then choose to continue the apth after reaching a target"
+        " the path segments. The user must then choose to continue the path after reaching a target"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo DefaultStopBehaviorInfo = {
+        "DefaultStopBehavior",
+        "Default Stop Behavior",
+        "The default camera behavior that is applied when the camera reaches and stops at a target."
     };
 
 } // namespace
@@ -71,14 +76,24 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _defaultCurveOption(DefaultCurveOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _includeRoll(IncludeRollInfo, false)
     , _stopAtTargetsPerDefault(StopAtTargetsPerDefaultInfo, false)
+    , _defaultStopBehavior(DefaultStopBehaviorInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
+    addPropertySubOwner(_atNodeNavigator);
+
     _defaultCurveOption.addOptions({
         { CurveType::Bezier3, "Bezier3" },
         { CurveType::Linear, "Linear"} 
     });
     addProperty(_defaultCurveOption);
+
     addProperty(_includeRoll);
     addProperty(_stopAtTargetsPerDefault);
+
+    _defaultStopBehavior.addOptions({
+        { AtNodeNavigator::Behavior::None, "None" },
+        { AtNodeNavigator::Behavior::Orbit, "Orbit" },
+    });
+    addProperty(_defaultStopBehavior);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -151,7 +166,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
         LINFO("Property for stop at targets per default was overridden by path specification.");    
     }
 
-    const int nrInstructions = spec.instructions()->size();
+    const int nrInstructions = (int)spec.instructions()->size();
 
     for (int i = 0; i < nrInstructions; i++) {
         const Instruction* instruction = spec.instruction(i);
@@ -168,7 +183,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 
             // Add info about stops between segments
             if (i < nrInstructions - 1) {
-                addStopDetails(instruction);
+                addStopDetails(waypoints.back(), instruction);
             }
         }
     }
@@ -188,6 +203,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 void AutoNavigationHandler::clearPath() {
     LINFO("Clearing path...");
     _pathSegments.clear();
+    _stops.clear();
     _currentSegmentIndex = 0;
 }
 
@@ -216,30 +232,6 @@ void AutoNavigationHandler::startPath() {
     _activeStop = nullptr;
 }
 
-void AutoNavigationHandler::pauseAtTarget(int i) {
-    if (!_isPlaying || _activeStop) {
-        LERROR("Cannot pause a path that isn't playing");
-        return;
-    }
-
-    _activeStop = &_stops[i];
-
-    if (!_activeStop) return;
-
-    bool hasDuration = _activeStop->duration.has_value();
-    std::string infoString = hasDuration 
-        ? fmt::format("{} seconds", _activeStop->duration.value())
-        : "until continued";
-
-    LINFO(fmt::format("Paused path at target {} / {} ({})",
-        _currentSegmentIndex,
-        _pathSegments.size(),
-        infoString
-    ));
-
-    _progressedTimeInStop = 0.0;
-}
-
 void AutoNavigationHandler::continuePath() {
     if (_pathSegments.empty() || hasFinished()) {
         LERROR("No path to resume (path is empty or has finished).");
@@ -258,7 +250,7 @@ void AutoNavigationHandler::continuePath() {
     _activeStop = nullptr;
 }
 
-void AutoNavigationHandler::stopPath() {
+void AutoNavigationHandler::abortPath() {
     _isPlaying = false;
 }
 
@@ -326,9 +318,41 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
     pose.rotation = rollFreeRotation;
 }
 
+void AutoNavigationHandler::pauseAtTarget(int i) {
+    if (!_isPlaying || _activeStop) {
+        LERROR("Cannot pause a path that isn't playing");
+        return;
+    }
+
+    if (i < 0 || i > _stops.size() - 1) {
+        LERROR("Invalid target number: " + std::to_string(i));
+        return;
+    }
+
+    _activeStop = &_stops[i];
+
+    if (!_activeStop) return;
+
+    _atNodeNavigator.setBehavior(_activeStop->behavior);
+    _atNodeNavigator.setNode(_pathSegments[i]->end().nodeDetails.identifier);
+
+    bool hasDuration = _activeStop->duration.has_value();
+
+    std::string infoString = hasDuration ? 
+        fmt::format("{} seconds", _activeStop->duration.value()) : "until continued";
+
+    LINFO(fmt::format("Paused path at target {} / {} ({})",
+        _currentSegmentIndex,
+        _pathSegments.size(),
+        infoString
+    ));
+
+    _progressedTimeInStop = 0.0;
+}
+
 void AutoNavigationHandler::applyStopBehaviour(double deltaTime) {
     _progressedTimeInStop += deltaTime;
-    // TODO: Apply pause behaviour
+    _atNodeNavigator.updateCamera(deltaTime);
 
     if (!_activeStop->duration.has_value()) return;
 
@@ -350,7 +374,7 @@ void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* in
     _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
 }
 
-void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
+void AutoNavigationHandler::addStopDetails(Waypoint& endWaypoint, const Instruction* ins) {
     StopDetails stopEntry;
     stopEntry.shouldStop = _stopAtTargetsPerDefault.value();
 
@@ -360,6 +384,12 @@ void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
 
     if (stopEntry.shouldStop) {
         stopEntry.duration = ins->stopDuration;
+
+        std::string anchorIdentifier = endWaypoint.nodeDetails.identifier;
+        stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value()); // OBS! Will this work if they're not in the same order??
+        if (ins->stopBehavior.has_value()) {
+            // TODO: 
+        }
     }
 
     _stops.push_back(stopEntry);

@@ -35,7 +35,6 @@ namespace openspace::autonavigation {
 enum CurveType {
     Bezier3,
     Linear,
-    Pause // OBS! Temporary special case for handling pauses
 };
 
 class PathCurve {
@@ -73,14 +72,6 @@ private:
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 positionAt(double u);
-};
-
-// OBS! This is a temporary class specialised for handling pauses. 
-// TODO: handle better in the future. 
-class PauseCurve : public PathCurve {
-public:
-    PauseCurve(const Waypoint& state);
     glm::dvec3 positionAt(double u);
 };
 

@@ -227,16 +227,4 @@ glm::dvec3 LinearCurve::positionAt(double u) {
     return interpolation::linear(u, _points[0], _points[1]);
 }
 
-// TODO: Iprove handling of pauses
-PauseCurve::PauseCurve(const Waypoint& waypoint) {
-    _points.push_back(waypoint.position());
-    _length = 1.0; // OBS! Length of a pause curve makes no sense, but it also doesn't matter
-    _rotationInterpolator = RotationInterpolator{ waypoint, waypoint, this, Fixed };
-}
-
-glm::dvec3 PauseCurve::positionAt(double u) {
-    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
-    return _points[0];
-}
-
 } // namespace openspace::autonavigation

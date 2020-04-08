@@ -38,6 +38,7 @@ namespace {
     constexpr const char* KeyDuration = "Duration";
     constexpr const char* KeyStopAtTarget = "StopAtTarget";
     constexpr const char* KeyStopDetails = "StopDetails";
+    constexpr const char* KeyBehavior = "Behavior";
 
     constexpr const char* KeyTarget = "Target";
     constexpr const char* KeyPosition = "Position";
@@ -64,6 +65,10 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
 
         if (stopDictionary.hasValue<double>(KeyDuration)) {
             stopDuration = stopDictionary.value<double>(KeyDuration);
+        }
+
+        if (stopDictionary.hasValue<std::string>(KeyBehavior)) {
+            stopBehavior = stopDictionary.value<std::string>(KeyBehavior);
         }
     }
 }

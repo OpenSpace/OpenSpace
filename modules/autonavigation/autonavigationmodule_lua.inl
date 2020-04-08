@@ -56,7 +56,7 @@ namespace openspace::autonavigation::luascriptfunctions {
 
         AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        handler.stopPath();
+        handler.abortPath();
 
         return 0;
     }

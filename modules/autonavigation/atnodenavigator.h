@@ -22,61 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___PATHINSTRUCTION___H__
-#define __OPENSPACE_MODULE___PATHINSTRUCTION___H__
+#ifndef __OPENSPACE_MODULE___ATNODENAVIGATOR___H__
+#define __OPENSPACE_MODULE___ATNODENAVIGATOR___H__
 
-#include <modules/autonavigation/waypoint.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <optional>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace openspace::autonavigation {
 
-struct Instruction {
-    Instruction() = default;
-    Instruction(const ghoul::Dictionary& dictionary);
-    virtual ~Instruction();
+class AtNodeNavigator : public properties::PropertyOwner {
+public:
+    enum Behavior {
+        Orbit,
+        None
+    };
 
-    virtual std::vector<Waypoint> getWaypoints() const = 0;
+    AtNodeNavigator();
+    ~AtNodeNavigator();
 
-    // TODO
-    //static documentation::Documentation Documentation();
+    void setNode(std::string identifier);
+    void setBehavior(Behavior behavior);
 
-    std::optional<double> duration;
+    void updateCamera(double deltaTime);
 
-    std::optional<bool> stopAtTarget;
+private:
+    Camera* camera() const;
 
-    // only relevant is stopAtTarget true
-    std::optional<double> stopDuration;
-    std::optional<std::string> stopBehavior;
+    //Behaviors
+    void orbitNode(double deltaTime);
+
+    SceneGraphNode* _node; 
+    Behavior _behavior;
+
+    properties::DoubleProperty _orbitSpeedFactor;
 };
-
-struct TargetNodeInstruction : public Instruction {
-    TargetNodeInstruction(const ghoul::Dictionary& dictionary);
-
-    std::vector<Waypoint> getWaypoints() const override;
-
-    // TODO
-    //static documentation::Documentation Documentation();
-
-    std::string nodeIdentifier;
-    std::optional<glm::dvec3> position; // relative to target node (model space)
-    std::optional<double> height;
-};
-
-struct NavigationStateInstruction : public Instruction {
-    using NavigationState = interaction::NavigationHandler::NavigationState;
-
-    NavigationStateInstruction(const ghoul::Dictionary& dictionary);
-
-    std::vector<Waypoint> getWaypoints() const override;
-
-    // TODO
-    //static documentation::Documentation Documentation();
-
-    NavigationState navigationState;
-};
-
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___PATHINSTRUCTION___H__
+#endif // __OPENSPACE_MODULE___ATNODENAVIGATOR___H__
