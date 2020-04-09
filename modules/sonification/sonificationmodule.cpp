@@ -546,6 +546,11 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
         _GUIState = SonificationModule::GUIMode::Compare;
     }
 
+    if (value.value == _compareProperty.secondPlanet.option().value) {
+        _compareProperty.firstPlanet.setValue(0);
+        return;
+    }
+
     std::string label = "/Compare";
     UdpTransmitSocket socket = UdpTransmitSocket(
         IpEndpointName(SC_IP_ADDRESS, SC_PORT));
@@ -567,6 +572,11 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
         }
 
         _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    if (value.value == _compareProperty.firstPlanet.option().value) {
+        _compareProperty.secondPlanet.setValue(0);
+        return;
     }
 
     std::string label = "/Compare";
