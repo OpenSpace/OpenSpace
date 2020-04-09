@@ -53,10 +53,13 @@ namespace {
         "Path",
         "The file path to the data file to read"
     };
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Segments",
-        "The number of segments to use for each orbit ellipse"
+    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+        "SegmentQuality",
+        "Segment Quality",
+        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
+        "100 (highest) that controls the number of line segments in the rendering of the "
+        "orbital trail. This does not control the direct number of segments because "
+        "these automatically increase according to the eccentricity of the orbit."
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
@@ -350,7 +353,7 @@ int RenderableOrbitalKepler::daysIntoGivenYear(int month, int dayOfMonth) {
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
-    , _nSegments(SegmentsInfo, 120, 4, 1024)
+    , _segmentQuality(SegmentQualityInfo, 10, 1, 100)
     , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
 {
     documentation::testSpecificationAndThrow(
@@ -360,7 +363,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
         );
 
     _path = dictionary.value<std::string>(PathInfo.identifier);
-    _nSegments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+    _segmentQuality = static_cast<int>(
+        dictionary.value<double>(SegmentQualityInfo.identifier));
 
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
@@ -393,11 +397,11 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
     }
     reinitializeTrailBuffers = std::function<void()>([this] { initializeGL(); });
     _path.onChange(reinitializeTrailBuffers);
-    _nSegments.onChange(reinitializeTrailBuffers);
+    _segmentQuality.onChange(reinitializeTrailBuffers);
 
     addPropertySubOwner(_appearance);
     addProperty(_path);
-    addProperty(_nSegments);
+    addProperty(_segmentQuality);
     addProperty(_opacity);
 
     setRenderBin(Renderable::RenderBin::Overlay);
@@ -481,11 +485,11 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(_vertexArray);
     for (size_t i = 0; i < nrOrbits; ++i) {
-        glDrawArrays(GL_LINE_STRIP, vertices, _nSegments + 1);
-        vertices = vertices + _nSegments + 1;
+        glDrawArrays(GL_LINE_STRIP, vertices, _segmentSize[i] + 1);
+        vertices = vertices + _segmentSize[i] + 1;
     }
     glBindVertexArray(0);
-    
+
     _programObject->deactivate();
 
 }
@@ -493,11 +497,18 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitalKepler::updateBuffers() {
     readDataFile(_path);
 
-    const size_t nVerticesPerOrbit = _nSegments + 1;
-    _vertexBufferData.resize(_data.size() * nVerticesPerOrbit);
-    size_t orbitindex = 0;
+    size_t nVerticesPerOrbit = 0;
 
-    for (const auto& orbit : _data) {
+    int numOrbits = _data.size();
+    for (size_t i = 0; i < numOrbits; ++i) {
+        nVerticesPerOrbit += _segmentSize[i] + 1;
+    }
+    _vertexBufferData.resize(nVerticesPerOrbit);
+
+    size_t vertexBufIdx = 0;
+    for (size_t orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
+        openspace::RenderableOrbitalKepler::KeplerParameters orbit = _data[orbitIdx];
+
         _keplerTranslator.setKeplerElements(
             orbit.eccentricity,
             orbit.semiMajorAxis,
@@ -509,32 +520,30 @@ void RenderableOrbitalKepler::updateBuffers() {
             orbit.epoch
         );
 
-        for (size_t i=0 ; i < nVerticesPerOrbit; ++i) {
-            size_t index = orbitindex * nVerticesPerOrbit  + i;
-
+        for (size_t j = 0 ; j < _segmentSize[orbitIdx]; ++j) {
             double timeOffset = orbit.period * 
-                    static_cast<double>(i)/ static_cast<double>(_nSegments); 
-            
+                    static_cast<double>(j)/ static_cast<double>(_segmentSize[orbitIdx]);
+
             glm::dvec3 position = _keplerTranslator.position({
                 {},
                 Time(timeOffset + orbit.epoch),
                 Time(0.0),
                 false
             });
-            
+
             double positionX = position.x; 
             double positionY = position.y; 
             double positionZ = position.z; 
 
-            _vertexBufferData[index].x = static_cast<float>(positionX);
-            _vertexBufferData[index].y = static_cast<float>(positionY);
-            _vertexBufferData[index].z = static_cast<float>(positionZ);
-            _vertexBufferData[index].time = static_cast<float>(timeOffset);
-            _vertexBufferData[index].epoch = orbit.epoch;
-            _vertexBufferData[index].period = orbit.period;
+            _vertexBufferData[vertexBufIdx].x = static_cast<float>(positionX);
+            _vertexBufferData[vertexBufIdx].y = static_cast<float>(positionY);
+            _vertexBufferData[vertexBufIdx].z = static_cast<float>(positionZ);
+            _vertexBufferData[vertexBufIdx].time = static_cast<float>(timeOffset);
+            _vertexBufferData[vertexBufIdx].epoch = orbit.epoch;
+            _vertexBufferData[vertexBufIdx].period = orbit.period;
+
+            vertexBufIdx++;
         }
-      
-        ++orbitindex;
     }
 
     glBindVertexArray(_vertexArray);
@@ -552,7 +561,6 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4 * sizeof(GL_FLOAT)));
-
 
     glBindVertexArray(0);
 

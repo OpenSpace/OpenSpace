@@ -106,7 +106,9 @@ protected:
     const double convertAuToKm = 1.496e8;
     const double convertDaysToSecs = 86400.;
     std::vector<KeplerParameters> _data;
+    std::vector<size_t> _segmentSize;
     properties::UIntProperty _upperLimit;
+    properties::UIntProperty _segmentQuality;
     properties::Property::OnChangeHandle _upperLimitCallbackHandle;
 
 private:
@@ -144,7 +146,6 @@ private:
 
     ghoul::opengl::ProgramObject* _programObject;
     properties::StringProperty _path;
-    properties::UIntProperty _nSegments;
     RenderableTrail::Appearance _appearance;
     glm::vec3 _position = glm::vec3(0.f);
 

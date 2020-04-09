@@ -130,6 +130,8 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
             "Satellite TLE file {} does not exist.", filename
         ));
     }
+    _data.clear();
+    _segmentSize.clear();
 
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -235,7 +237,7 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
         keplerElements.period = period;
 
         _data.push_back(keplerElements);
-
+        _segmentSize.push_back(_segmentQuality * 10);
     }
     file.close();
 }

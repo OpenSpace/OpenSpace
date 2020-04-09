@@ -54,10 +54,13 @@ namespace {
         "Path",
         "The file path to the SBDB .csv file to read"
     };
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Segments",
-        "The number of segments to use for each orbit ellipse"
+    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+        "SegmentQuality",
+        "Segment Quality",
+        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
+        "100 (highest) that controls the number of line segments in the rendering of the "
+        "orbital trail. This does not control the direct number of segments because "
+        "these automatically increase according to the eccentricity of the orbit."
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
@@ -93,10 +96,10 @@ documentation::Documentation RenderableSmallBody::Documentation() {
         "space_renderable_small_body",
         {
             {
-                SegmentsInfo.identifier,
+                SegmentQualityInfo.identifier,
                 new DoubleVerifier,
                 Optional::No,
-                SegmentsInfo.description
+                SegmentQualityInfo.description
             },
             {
                 UpperLimitInfo.identifier,
@@ -155,6 +158,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
     _data.clear();
     _sbNames.clear();
+    _segmentSize.clear();
 
     std::string line;
     std::streamoff csvLine = -1;
@@ -332,6 +336,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
 
     _data.push_back(keplerElements);
     _sbNames.push_back(name);
+    _segmentSize.push_back(_segmentQuality * 10 * (keplerElements.eccentricity / 0.05));
 }
 
 static double importAngleValue(const std::string& angle) {
