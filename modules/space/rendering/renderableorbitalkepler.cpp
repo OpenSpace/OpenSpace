@@ -360,11 +360,12 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
          Documentation(),
          dictionary,
          "RenderableOrbitalKepler"
-        );
+    );
 
     _path = dictionary.value<std::string>(PathInfo.identifier);
     _segmentQuality = static_cast<int>(
-        dictionary.value<double>(SegmentQualityInfo.identifier));
+        dictionary.value<double>(SegmentQualityInfo.identifier)
+    );
 
     if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
@@ -381,7 +382,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
     if (dictionary.hasKeyAndValue<double>(UpperLimitInfo.identifier)) {
         _upperLimit = static_cast<unsigned int>(
             dictionary.value<double>(UpperLimitInfo.identifier)
-            );
+        );
     }
     else {
         _upperLimit = 0;
@@ -507,7 +508,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     size_t vertexBufIdx = 0;
     for (size_t orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
-        openspace::RenderableOrbitalKepler::KeplerParameters orbit = _data[orbitIdx];
+        KeplerParameters orbit = _data[orbitIdx];
 
         _keplerTranslator.setKeplerElements(
             orbit.eccentricity,
@@ -522,7 +523,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
         for (size_t j = 0 ; j < _segmentSize[orbitIdx]; ++j) {
             double timeOffset = orbit.period * 
-                    static_cast<double>(j)/ static_cast<double>(_segmentSize[orbitIdx]);
+                static_cast<double>(j)/ static_cast<double>(_segmentSize[orbitIdx]);
 
             glm::dvec3 position = _keplerTranslator.position({
                 {},
