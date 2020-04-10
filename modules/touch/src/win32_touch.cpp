@@ -40,29 +40,32 @@
 #define ENABLE_DIRECTMSG
 
 namespace {
-    using namespace std::chrono;
     constexpr const char* _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
-    std::thread* gMouseHookThread;
+    std::thread* gMouseHookThread = nullptr;
     HHOOK gMouseHook = nullptr;
     bool gStarted = false;
-    microseconds gStartTime = microseconds(0);
-    const long long gFrequency = []() -> long long {
-      LARGE_INTEGER frequency;
-      QueryPerformanceFrequency(&frequency);
-      return frequency.QuadPart;
-    }();
+    std::chrono::microseconds gStartTime = std::chrono::microseconds(0);
     std::unordered_map<
         UINT32,
         std::unique_ptr<openspace::TouchInputHolder>
     > gTouchInputsMap;
+
 #ifdef ENABLE_TUIOMESSAGES
     TUIO::TuioServer* gTuioServer = nullptr;
     std::unordered_map<UINT, TUIO::TuioCursor*> gCursorMap;
 #endif
+
+    const long long gFrequency = []() -> long long {
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        return frequency.QuadPart;
+    }();
+
 } // namespace
 
 namespace openspace {
+
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 
 // This hook will only work for Win8+ Digitizers.
@@ -90,8 +93,8 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             const long long whole = (info.PerformanceCount / freq) * std::micro::den;
             const long long part  = (info.PerformanceCount % freq) * 
                                     std::micro::den / freq;
-            const microseconds timestamp = 
-                duration<UINT64, std::micro>(whole + part) - gStartTime;
+            const std::chrono::microseconds timestamp = 
+                std::chrono::duration<UINT64, std::micro>(whole + part) - gStartTime;
 
             RECT rect;
             GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
@@ -100,17 +103,17 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             // native touch to screen conversion
             ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-            float xPos = static_cast<float>(p.x) /
-                         static_cast<float>(rect.right - rect.left);
-            float yPos = static_cast<float>(p.y) /
-                         static_cast<float>(rect.bottom - rect.top);
+            const float xPos = static_cast<float>(p.x) /
+                               static_cast<float>(rect.right - rect.left);
+            const float yPos = static_cast<float>(p.y) /
+                               static_cast<float>(rect.bottom - rect.top);
 
             TouchInput touchInput(
                 reinterpret_cast<size_t>(info.sourceDevice),
                 static_cast<size_t>(info.pointerId),
                 xPos,
                 yPos,
-                static_cast<double>(timestamp.count()) / 1'000'000.0
+                static_cast<double>(timestamp.count()) / 1000000.0
             );
 
             if (info.pointerFlags & POINTER_FLAG_DOWN) {
@@ -170,8 +173,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 
-Win32TouchHook::Win32TouchHook(void* nativeWindow)
-{
+Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     HWND hWnd = reinterpret_cast<HWND>(nativeWindow);
     if (hWnd == nullptr) {
         LINFO("No windowhandle available for touch input.");
@@ -223,8 +225,9 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
 
     if (!gStarted) {
         gStarted = true;
-        gStartTime = 
-            duration_cast<microseconds>(high_resolution_clock::now().time_since_epoch());
+        gStartTime = std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()
+        );
 #ifdef ENABLE_TUIOMESSAGES
         gTuioServer = new TUIO::TuioServer("localhost", 3333);
         TUIO::TuioTime::initSession();
@@ -232,7 +235,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
         gTouchHook = SetWindowsHookExW(
             WH_GETMESSAGE,
             HookCallback,
-            GetModuleHandleW(NULL),
+            GetModuleHandleW(nullptr),
             GetCurrentThreadId()
         );
 
