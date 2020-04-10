@@ -94,11 +94,6 @@ struct WindowDelegate {
 
     void (*setEyeSeparationDistance)(float distance) = [](float) {};
 
-    glm::ivec4 (*viewportPixelCoordinates)() = []() { return glm::ivec4(0, 0, 0, 0); };
-
-    void (*sendMessageToExternalControl)(const std::vector<char>& message) =
-        [](const std::vector<char>&) {};
-
     bool (*isFisheyeRendering)() = []() { return false; };
 
     unsigned int(*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };

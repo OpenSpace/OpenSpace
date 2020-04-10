@@ -673,9 +673,9 @@ void OpenSpaceEngine::initializeGL() {
 
     global::moduleEngine.initializeGL();
 
+
     for (const std::function<void()>& func : global::callback::initializeGL) {
         ZoneScopedN("[Module] initializeGL")
-
         func();
     }
 
@@ -1452,14 +1452,14 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 }
 
 
-std::vector<char> OpenSpaceEngine::encode() {
+std::vector<std::byte> OpenSpaceEngine::encode() {
     ZoneScoped
 
-    std::vector<char> buffer = global::syncEngine.encodeSyncables();
+    std::vector<std::byte> buffer = global::syncEngine.encodeSyncables();
     return buffer;
 }
 
-void OpenSpaceEngine::decode(std::vector<char> data) {
+void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     ZoneScoped
 
     global::syncEngine.decodeSyncables(std::move(data));
