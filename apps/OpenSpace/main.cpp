@@ -162,6 +162,7 @@ std::vector<SpoutWindow> SpoutWindows;
 
 #endif // OPENSPACE_HAS_SPOUT
 
+}
 
 //
 //  MiniDump generation
