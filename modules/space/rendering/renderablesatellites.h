@@ -43,6 +43,11 @@ public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);
     void readDataFile(const std::string& filename);
     static documentation::Documentation Documentation();
+    void initializeFileReading();
+
+private:
+    void skipSingleEntryInFile(std::ifstream& file);
+    const unsigned int nLineEntriesPerSatellite = 3;
 };
 
 } // namespace openspace

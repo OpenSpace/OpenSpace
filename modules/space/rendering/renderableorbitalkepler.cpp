@@ -82,7 +82,8 @@ namespace {
         "UpperLimit",
         "Upper Limit",
         "Upper limit on the number of objects for this renderable, regardless of "
-        "how many objects are contained in the data file"
+        "how many objects are contained in the data file. Produces an evenly-distributed"
+        "sample from the data file."
     };
     static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
@@ -93,7 +94,7 @@ namespace {
     static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSizeInfo",
         "Size of Render Block",
-        "Number of objects to render from StartRenderIdx"
+        "Number of objects to render sequentially from StartRenderIdx"
     };
     constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNum = "LineNumber";

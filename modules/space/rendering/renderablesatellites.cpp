@@ -141,13 +141,24 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
                                    std::istreambuf_iterator<char>(), '\n' );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
-    // 3 because a TLE has 3 lines per element/ object.
-    _numObjects = numberOfLines / 3;
+    _numObjects = numberOfLines / nLineEntriesPerSatellite;
+
+    if (!_isFileReadinitialized) {
+        _isFileReadinitialized = true;
+        initializeFileReading();
+    }
 
     std::string line = "-";
-    for (std::streamoff i = 0; i < _numObjects; i++) {
-        std::getline(file, line); // get rid of title
-        
+    std::string name;
+    unsigned int endElement = _startRenderIdx + _sizeRender - 1;
+    endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
+    //Burn lines if not starting at first element
+    for (unsigned int k = 0; k < _startRenderIdx; ++k) {
+        skipSingleEntryInFile(file);
+    }
+    for (std::streamoff i = _startRenderIdx; i <= endElement; i++) {
+        //Read title line
+        std::getline(file, name);
         KeplerParameters keplerElements;
 
         std::getline(file, line);
@@ -160,6 +171,13 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
             //     4   10-11   International Designator (Last two digits of launch year)
             //     5   12-14   International Designator (Launch number of the year)
             //     6   15-17   International Designator(piece of the launch)    A
+            name += " " + line.substr(2, 15);
+            if (_startRenderIdx > 0 && _startRenderIdx == i) {
+                LINFO(fmt::format(
+                    "Set render block to start at object  {}",
+                    name
+                ));
+            }
             //     7   19-20   Epoch Year(last two digits of year)
             //     8   21-32   Epoch(day of the year and fractional portion of the day)
             //     9   34-43   First Time Derivative of the Mean Motion divided by two
@@ -237,9 +255,29 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
         keplerElements.period = period;
 
         _data.push_back(keplerElements);
-        _segmentSize.push_back(_segmentQuality * 100);
+        _segmentSize.push_back(_segmentQuality * 16);
     }
     file.close();
 }
-    
+
+void RenderableSatellites::initializeFileReading() {
+    _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
+    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
+    _startRenderIdx.setMaxValue(_numObjects - 1);
+    _sizeRender.setMaxValue(_numObjects);
+    _startRenderIdx = static_cast<unsigned int>(0);
+    _sizeRender = static_cast<unsigned int>(_numObjects);
+    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(
+        updateStartRenderIdxSelect);
+    _sizeRenderCallbackHandle = _sizeRender.onChange(
+        updateRenderSizeSelect);
+}
+
+void RenderableSatellites::skipSingleEntryInFile(std::ifstream& file) {
+    std::string line;
+    for (unsigned int i = 0; i < nLineEntriesPerSatellite; i++) {
+        std::getline(file, line);
+    }
+}
+
 }

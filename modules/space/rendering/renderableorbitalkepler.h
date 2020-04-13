@@ -106,6 +106,7 @@ protected:
         double period = 0.0;
     };
     std::streamoff _numObjects;
+    bool _isFileReadinitialized = false;
     const double convertAuToKm = 1.496e8;
     const double convertDaysToSecs = 86400.;
     std::vector<KeplerParameters> _data;

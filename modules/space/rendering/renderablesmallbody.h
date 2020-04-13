@@ -49,11 +49,10 @@ private:
     void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
         unsigned int& csvLine, std::ifstream& file);
     void readDataFile(const std::string& filename);
+    void initializeFileReading();
     void skipSingleLineInFile(std::ifstream& file);
 
     std::vector<std::string> _sbNames;
-
-    bool _initialized = false;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
@@ -61,6 +60,7 @@ private:
 };
 
 static double importAngleValue(const std::string& angle);
+static std::string& formatObjectName(std::string& name);
 
 } // namespace openspace
 
