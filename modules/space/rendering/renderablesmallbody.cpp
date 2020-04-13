@@ -154,14 +154,14 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     file.open(filename);
 
     std::streamoff numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
-                                   std::istreambuf_iterator<char>(), '\n' );
+        std::istreambuf_iterator<char>(), '\n' );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
     _data.clear();
     _sbNames.clear();
     _segmentSize.clear();
 
     std::string line;
-    std::streamoff csvLine = -1;
+    unsigned int csvLine = 0;
     int fieldCount = 0;
     float lineSkipFraction = 1.0;
     float currLineFraction;
@@ -173,18 +173,42 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     try {
         std::getline(file, line); // get rid of first line (header)
         numberOfLines -= 1;
-        if (_upperLimit == 0 || _upperLimit > numberOfLines) {
+        if (_numObjects != numberOfLines) {
+            _initialized = false;
+        }
+        _numObjects = numberOfLines;
+
+        if (!_initialized) {
+            _initialized = true;
+
+            _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
+            _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
+            _startRenderIdx.setMaxValue(_numObjects - 1);
+            _sizeRender.setMaxValue(_numObjects);
+            _startRenderIdx = static_cast<unsigned int>(0);
+            _sizeRender = static_cast<unsigned int>(_numObjects);
+            _startRenderIdxCallbackHandle = _startRenderIdx.onChange(
+                updateStartRenderIdxSelect);
+            _sizeRenderCallbackHandle = _sizeRender.onChange(
+                updateRenderSizeSelect);
+
             //If a limit wasn't specified in dictionary, set it to # lines in file
             // minus the header line (but temporarily disable callback to avoid 2nd call)
             _upperLimit.removeOnChange(_upperLimitCallbackHandle);
-            _upperLimit.setMaxValue(numberOfLines);
-            _upperLimit = static_cast<unsigned int>(numberOfLines);
+            _upperLimit.setMaxValue(_numObjects);
+            _upperLimit = static_cast<unsigned int>(_numObjects);
             _upperLimitCallbackHandle = _upperLimit.onChange(reinitializeTrailBuffers);
         }
         else {
-            lineSkipFraction = static_cast<float>(_upperLimit) /
-                static_cast<float>(numberOfLines);
+            if (_sizeRender < _numObjects || _startRenderIdx > 0) {
+                lineSkipFraction = 1.0;
+            }
+            else {
+                lineSkipFraction = static_cast<float>(_upperLimit)
+                    / static_cast<float>(_numObjects);
+            }
         }
+
         if (line.compare(expectedHeaderLine) != 0) {
             LERROR(fmt::format(
                 "File {} does not have the appropriate JPL SBDB header at line 1.",
@@ -195,12 +219,23 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         }
 
         unsigned int sequentialLineErrors = 0;
-        for (csvLine = 1; csvLine <= numberOfLines; csvLine++, sequentialLineErrors++) {
+        unsigned int endElement = _startRenderIdx + _sizeRender - 1;
+        endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
+        //Burn lines if not starting at first element
+        for (unsigned int k = 0; k < _startRenderIdx; ++k) {
+            skipSingleLineInFile(file);
+        }
+        bool firstDataLine = true;
+        for (csvLine = _startRenderIdx + 1;
+             csvLine <= endElement + 1;
+             csvLine++, sequentialLineErrors++)
+        {
             currLineFraction = static_cast<float>(csvLine - 1) * lineSkipFraction;
             currLineCount = static_cast<int>(currLineFraction);
             if (currLineCount > lastLineCount) {
                 try {
-                    readOrbitalParamsFromThisLine(fieldCount, csvLine, file);
+                    readOrbitalParamsFromThisLine(firstDataLine, fieldCount, csvLine,
+                        file);
                     sequentialLineErrors = 0;
                 }
                 catch (std::invalid_argument&) {
@@ -233,7 +268,11 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                     break;
                 }
             }
+            else {
+                skipSingleLineInFile(file);
+            }
             lastLineCount = currLineCount;
+            firstDataLine = false;
         }
     }
     catch (std::ios_base::failure&) {
@@ -248,8 +287,14 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     file.close();
 }
 
-void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
-                                                        std::streamoff& csvLine,
+void RenderableSmallBody::skipSingleLineInFile(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+}
+
+void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
+                                                        int& fieldCount,
+                                                        unsigned int& csvLine,
                                                         std::ifstream& file)
 {
     const int numDataFields = 8;
@@ -259,7 +304,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
 
     //If there was a read/conversion error in the previous line, then read the remainder
     // of that line and throw it out first before proceeding with the next line.
-    if (fieldCount != (numDataFields + 1) && csvLine != 1) {
+    if (fieldCount != (numDataFields + 1) && !firstDataLine) {
         std::getline(file, field);
     }
     fieldCount = 0;
@@ -336,7 +381,8 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(int& fieldCount,
 
     _data.push_back(keplerElements);
     _sbNames.push_back(name);
-    _segmentSize.push_back(_segmentQuality * 10 * (keplerElements.eccentricity / 0.05));
+    double scale = static_cast<double>(_segmentQuality) * 10.0;
+    _segmentSize.push_back(scale + (scale / pow(1 - keplerElements.eccentricity, 1.2)));
 }
 
 static double importAngleValue(const std::string& angle) {

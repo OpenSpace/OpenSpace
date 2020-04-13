@@ -69,6 +69,8 @@ protected:
     double epochFromYMDdSubstring(const std::string& epochString);
     int daysIntoGivenYear(int month, int dayOfMonth);
     std::function<void()> reinitializeTrailBuffers;
+    std::function<void()> updateStartRenderIdxSelect;
+    std::function<void()> updateRenderSizeSelect;
 
     const std::vector<int> LeapYears = {
         1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
@@ -103,6 +105,7 @@ protected:
         double epoch = 0.0;
         double period = 0.0;
     };
+    std::streamoff _numObjects;
     const double convertAuToKm = 1.496e8;
     const double convertDaysToSecs = 86400.;
     std::vector<KeplerParameters> _data;
@@ -110,6 +113,10 @@ protected:
     properties::UIntProperty _upperLimit;
     properties::UIntProperty _segmentQuality;
     properties::Property::OnChangeHandle _upperLimitCallbackHandle;
+    properties::UIntProperty _startRenderIdx;
+    properties::UIntProperty _sizeRender;
+    properties::Property::OnChangeHandle _startRenderIdxCallbackHandle;
+    properties::Property::OnChangeHandle _sizeRenderCallbackHandle;
 
 private:
     struct Vertex {

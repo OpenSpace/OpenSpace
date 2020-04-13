@@ -142,10 +142,10 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
     // 3 because a TLE has 3 lines per element/ object.
-    std::streamoff numberOfObjects = numberOfLines / 3;
+    _numObjects = numberOfLines / 3;
 
     std::string line = "-";
-    for (std::streamoff i = 0; i < numberOfObjects; i++) {
+    for (std::streamoff i = 0; i < _numObjects; i++) {
         std::getline(file, line); // get rid of title
         
         KeplerParameters keplerElements;
@@ -237,7 +237,7 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
         keplerElements.period = period;
 
         _data.push_back(keplerElements);
-        _segmentSize.push_back(_segmentQuality * 10);
+        _segmentSize.push_back(_segmentQuality * 100);
     }
     file.close();
 }

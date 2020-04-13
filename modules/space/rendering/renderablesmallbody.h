@@ -46,11 +46,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void readOrbitalParamsFromThisLine(int& fieldCount, std::streamoff& csvLine,
-        std::ifstream& file);
+    void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
+        unsigned int& csvLine, std::ifstream& file);
     void readDataFile(const std::string& filename);
+    void skipSingleLineInFile(std::ifstream& file);
 
     std::vector<std::string> _sbNames;
+
+    bool _initialized = false;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.

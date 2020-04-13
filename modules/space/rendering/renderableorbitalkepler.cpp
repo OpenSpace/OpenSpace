@@ -57,7 +57,7 @@ namespace {
         "SegmentQuality",
         "Segment Quality",
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
-        "100 (highest) that controls the number of line segments in the rendering of the "
+        "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
         "these automatically increase according to the eccentricity of the orbit."
     };
@@ -84,7 +84,17 @@ namespace {
         "Upper limit on the number of objects for this renderable, regardless of "
         "how many objects are contained in the data file"
     };
-
+    static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
+        "StartRenderIdx",
+        "Starting Index of Render",
+        "Index of object in renderable group to start rendering (all prior objects will "
+        "be ignored)."
+    };
+    static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
+        "RenderSizeInfo",
+        "Size of Render Block",
+        "Number of objects to render from StartRenderIdx"
+    };
     constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNum = "LineNumber";
 }
@@ -349,12 +359,14 @@ int RenderableOrbitalKepler::daysIntoGivenYear(int month, int dayOfMonth) {
     }
     return dayCount;
 }
-  
+
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
-    , _segmentQuality(SegmentQualityInfo, 10, 1, 100)
+    , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
     , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
+    , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
+    , _sizeRender(RenderSizeInfo, 1, 1, 2)
 {
     documentation::testSpecificationAndThrow(
          Documentation(),
@@ -388,6 +400,24 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
         _upperLimit = 0;
     }
 
+    if (dictionary.hasKeyAndValue<double>(StartRenderIdxInfo.identifier)) {
+        _startRenderIdx = static_cast<unsigned int>(
+            dictionary.value<double>(StartRenderIdxInfo.identifier)
+            );
+    }
+    else {
+        _startRenderIdx = 0;
+    }
+
+    if (dictionary.hasKeyAndValue<double>(RenderSizeInfo.identifier)) {
+        _sizeRender = static_cast<unsigned int>(
+            dictionary.value<double>(RenderSizeInfo.identifier)
+            );
+    }
+    else {
+        _sizeRender = 0;
+    }
+
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
         _appearance.lineWidth = static_cast<float>(
             dictionary.value<double>(LineWidthInfo.identifier)
@@ -404,6 +434,13 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
     addProperty(_path);
     addProperty(_segmentQuality);
     addProperty(_opacity);
+    addProperty(_startRenderIdx);
+    addProperty(_sizeRender);
+
+    updateStartRenderIdxSelect = std::function<void()>([this] { initializeGL(); });
+    updateRenderSizeSelect = std::function<void()>([this] { initializeGL(); });
+    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(updateStartRenderIdxSelect);
+    _sizeRenderCallbackHandle = _sizeRender.onChange(updateRenderSizeSelect);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }
@@ -498,13 +535,13 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitalKepler::updateBuffers() {
     readDataFile(_path);
 
-    size_t nVerticesPerOrbit = 0;
+    size_t nVerticesTotal = 0;
 
     int numOrbits = _data.size();
     for (size_t i = 0; i < numOrbits; ++i) {
-        nVerticesPerOrbit += _segmentSize[i] + 1;
+        nVerticesTotal += _segmentSize[i] + 1;
     }
-    _vertexBufferData.resize(nVerticesPerOrbit);
+    _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
     for (size_t orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
@@ -521,7 +558,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             orbit.epoch
         );
 
-        for (size_t j = 0 ; j < _segmentSize[orbitIdx]; ++j) {
+        for (size_t j = 0 ; j < (_segmentSize[orbitIdx] + 1); ++j) {
             double timeOffset = orbit.period * 
                 static_cast<double>(j)/ static_cast<double>(_segmentSize[orbitIdx]);
 
