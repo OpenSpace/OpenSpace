@@ -62,38 +62,14 @@ public:
     virtual void readDataFile(const std::string& filename) = 0;
 
 protected:
-    int countDays(int year);
-    int countLeapSeconds(int year, int dayOfYear);
-    double calculateSemiMajorAxis(double meanMotion);
-    double epochFromSubstring(const std::string& epochString);
+    double calculateSemiMajorAxis(double meanMotion) const;
+    double epochFromSubstring(const std::string& epochString) const;
     double epochFromYMDdSubstring(const std::string& epochString);
-    int daysIntoGivenYear(int month, int dayOfMonth);
-    std::function<void()> reinitializeTrailBuffers;
-    std::function<void()> updateStartRenderIdxSelect;
-    std::function<void()> updateRenderSizeSelect;
 
-    const std::vector<int> LeapYears = {
-        1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
-        2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
-        2044, 2048, 2052, 2056
-    };
-    const std::vector<int> DaysOfMonths = {
-    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-    };
-    enum Months {
-        January = 0,
-        February,
-        March,
-        April,
-        May,
-        June,
-        July,
-        August,
-        September,
-        October,
-        November,
-        December
-    };
+    std::function<void()> _reinitializeTrailBuffers;
+    std::function<void()> _updateStartRenderIdxSelect;
+    std::function<void()> _updateRenderSizeSelect;
+
     struct KeplerParameters {
         double inclination = 0.0;
         double semiMajorAxis = 0.0;
@@ -107,8 +83,8 @@ protected:
     };
     std::streamoff _numObjects;
     bool _isFileReadinitialized = false;
-    const double convertAuToKm = 1.496e8;
-    const double convertDaysToSecs = 86400.;
+    inline static constexpr double convertAuToKm = 1.496e8;
+    inline static constexpr double convertDaysToSecs = 86400.0;
     std::vector<KeplerParameters> _data;
     std::vector<size_t> _segmentSize;
     properties::UIntProperty _upperLimit;
@@ -145,10 +121,6 @@ private:
     GLuint _vertexArray;
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
-
-    //GLuint _vaoTest; // vertexArrayObject
-    //GLuint _vboTest; // vertextBufferObject
-    //GLuint _eboTest; // elementBufferObject/ indexBufferObject   
 
     void updateBuffers();
 

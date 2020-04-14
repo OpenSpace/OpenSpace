@@ -40,13 +40,68 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
-#include <math.h>
 #include <fstream>
+#include <math.h>
 #include <vector> 
 
 namespace {
     constexpr const char* ProgramName = "OrbitalKepler";
     constexpr const char* _loggerCat = "OrbitalKepler";
+    constexpr const char* KeyFile = "Path";
+    constexpr const char* KeyLineNum = "LineNumber";
+
+    constexpr const std::array<int, 36> LeapYears = {
+        1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
+        2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
+        2044, 2048, 2052, 2056
+    };
+    constexpr const std::array<int, 12> DaysOfMonths = {
+        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
+
+    // Find the position of the current year in the vector; its position in
+// the vector gives the number of leap seconds
+    struct LeapSecond {
+        int year;
+        int dayOfYear;
+        bool operator<(const LeapSecond& rhs) const {
+            return std::tie(year, dayOfYear) < std::tie(rhs.year, rhs.dayOfYear);
+        }
+    };
+
+    constexpr const LeapSecond Epoch = { 2000, 1 };
+
+    // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
+    constexpr const std::array<LeapSecond, 28> LeapSeconds = {
+        LeapSecond{ 1972,   1 },
+        LeapSecond{ 1972, 183 },
+        LeapSecond{ 1973,   1 },
+        LeapSecond{ 1974,   1 },
+        LeapSecond{ 1975,   1 },
+        LeapSecond{ 1976,   1 },
+        LeapSecond{ 1977,   1 },
+        LeapSecond{ 1978,   1 },
+        LeapSecond{ 1979,   1 },
+        LeapSecond{ 1980,   1 },
+        LeapSecond{ 1981, 182 },
+        LeapSecond{ 1982, 182 },
+        LeapSecond{ 1983, 182 },
+        LeapSecond{ 1985, 182 },
+        LeapSecond{ 1988,   1 },
+        LeapSecond{ 1990,   1 },
+        LeapSecond{ 1991,   1 },
+        LeapSecond{ 1992, 183 },
+        LeapSecond{ 1993, 182 },
+        LeapSecond{ 1994, 182 },
+        LeapSecond{ 1996,   1 },
+        LeapSecond{ 1997, 182 },
+        LeapSecond{ 1999,   1 },
+        LeapSecond{ 2006,   1 },
+        LeapSecond{ 2009,   1 },
+        LeapSecond{ 2012, 183 },
+        LeapSecond{ 2015, 182 },
+        LeapSecond{ 2017,   1 }
+    };
 
     static const openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
@@ -96,107 +151,73 @@ namespace {
         "Size of Render Block",
         "Number of objects to render sequentially from StartRenderIdx"
     };
-    constexpr const char* KeyFile = "Path";
-    constexpr const char* KeyLineNum = "LineNumber";
-}
+
+    // Count the number of full days since the beginning of 2000 to the beginning of
+    // the parameter 'year'
+    int countDays(int year) {
+        // Find the position of the current year in the vector, the difference
+        // between its position and the position of 2000 (for J2000) gives the
+        // number of leap years
+        constexpr const int Epoch = 2000;
+        constexpr const int DaysRegularYear = 365;
+        constexpr const int DaysLeapYear = 366;
+
+        if (year == Epoch) {
+            return 0;
+        }
+
+        // Get the position of the most recent leap year
+        const auto lb = std::lower_bound(LeapYears.begin(), LeapYears.end(), year);
+
+        // Get the position of the epoch
+        const auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
+
+        // The distance between the two iterators gives us the number of leap years
+        const int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
+
+        const int nYears = std::abs(year - Epoch);
+        const int nRegularYears = nYears - nLeapYears;
+
+        // Get the total number of days as the sum of leap years + non leap years
+        const int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
+        return result;
+    }
+
+    // Returns the number of leap seconds that lie between the {year, dayOfYear}
+    // time point and { 2000, 1 }
+    int countLeapSeconds(int year, int dayOfYear) {
+        // Get the position of the last leap second before the desired date
+        LeapSecond date{ year, dayOfYear };
+        const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
+
+        // Get the position of the Epoch
+        const auto y2000 = std::lower_bound(
+            LeapSeconds.begin(),
+            LeapSeconds.end(),
+            Epoch
+        );
+
+        // The distance between the two iterators gives us the number of leap years
+        const int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
+        return nLeapSeconds;
+    }
+
+    int daysIntoGivenYear(int month, int dayOfMonth) {
+        //month and dayCount are zero-based. Does NOT account for leap year.
+        month -= 1;
+        int dayCount = dayOfMonth - 1;
+
+        for (int m = 0; m < month; ++m) {
+            dayCount += DaysOfMonths[m];
+        }
+        return dayCount;
+    }
+
+} // namespace
 
 namespace openspace {
 
-// Count the number of full days since the beginning of 2000 to the beginning of
-// the parameter 'year'
-int RenderableOrbitalKepler::countDays(int year) {
-    // Find the position of the current year in the vector, the difference
-    // between its position and the position of 2000 (for J2000) gives the
-    // number of leap years
-    constexpr const int Epoch = 2000;
-    constexpr const int DaysRegularYear = 365;
-    constexpr const int DaysLeapYear = 366;
-
-    if (year == Epoch) {
-        return 0;
-    }
-
-    // Get the position of the most recent leap year
-    const auto lb = std::lower_bound(LeapYears.begin(), LeapYears.end(), year);
-
-    // Get the position of the epoch
-    const auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
-
-    // The distance between the two iterators gives us the number of leap years
-    const int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
-
-    const int nYears = std::abs(year - Epoch);
-    const int nRegularYears = nYears - nLeapYears;
-
-    // Get the total number of days as the sum of leap years + non leap years
-    const int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
-    return result;
-}
-
-// Returns the number of leap seconds that lie between the {year, dayOfYear}
-// time point and { 2000, 1 }
-int RenderableOrbitalKepler::countLeapSeconds(int year, int dayOfYear) {
-    // Find the position of the current year in the vector; its position in
-    // the vector gives the number of leap seconds
-    struct LeapSecond {
-        int year;
-        int dayOfYear;
-        bool operator<(const LeapSecond& rhs) const {
-            return std::tie(year, dayOfYear) < std::tie(rhs.year, rhs.dayOfYear);
-        }
-    };
-
-    const LeapSecond Epoch = { 2000, 1 };
-
-    // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
-    static const std::vector<LeapSecond> LeapSeconds = {
-        { 1972,   1 },
-        { 1972, 183 },
-        { 1973,   1 },
-        { 1974,   1 },
-        { 1975,   1 },
-        { 1976,   1 },
-        { 1977,   1 },
-        { 1978,   1 },
-        { 1979,   1 },
-        { 1980,   1 },
-        { 1981, 182 },
-        { 1982, 182 },
-        { 1983, 182 },
-        { 1985, 182 },
-        { 1988,   1 },
-        { 1990,   1 },
-        { 1991,   1 },
-        { 1992, 183 },
-        { 1993, 182 },
-        { 1994, 182 },
-        { 1996,   1 },
-        { 1997, 182 },
-        { 1999,   1 },
-        { 2006,   1 },
-        { 2009,   1 },
-        { 2012, 183 },
-        { 2015, 182 },
-        { 2017,   1 }
-    };
-
-    // Get the position of the last leap second before the desired date
-    LeapSecond date { year, dayOfYear };
-    const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
-
-    // Get the position of the Epoch
-    const auto y2000 = std::lower_bound(
-        LeapSeconds.begin(),
-        LeapSeconds.end(),
-        Epoch
-    );
-
-    // The distance between the two iterators gives us the number of leap years
-    const int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
-    return nLeapSeconds;
-}
-
-double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) {
+double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) const {
     constexpr const double GravitationalConstant = 6.6740831e-11;
     constexpr const double MassEarth = 5.9721986e24;
     constexpr const double muEarth = GravitationalConstant * MassEarth;
@@ -207,16 +228,17 @@ double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) {
     // with a = semimajor axis
     // P = period in seconds
     // mu = G*M_earth
-    double period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
+    const double period =
+        std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
 
-    const double pisq = glm::pi<double>() * glm::pi<double>();
-    double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
+    constexpr const double pisq = glm::pi<double>() * glm::pi<double>();
+    const double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
 
     // We need the semi major axis in km instead of m
     return semiMajorAxis / 1000.0;
 }
 
-double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochString) {
+double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochString) const {
     // The epochString is in the form:
     // YYDDD.DDDDDDDD
     // With YY being the last two years of the launch epoch, the first DDD the day
@@ -239,10 +261,8 @@ double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochStrin
     // those from 00-56 correspond to 2000-2056. We'll see each other again in 057!
 
     // 1. Get the full year
-    std::string yearPrefix = [y = epochString.substr(0, 2)](){
-        int year = std::atoi(y.c_str());
-        return year >= 57 ? "19" : "20";
-    }();
+    std::string yearPrefix =
+        std::atoi(epochString.substr(0, 2).c_str()) > 57 ? "19" : "20";
     const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
     const int daysSince2000 = countDays(year);
 
@@ -251,11 +271,8 @@ double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochStrin
     double daysInYear = std::atof(epochString.substr(2).c_str());
 
     // 2.b
-    const bool isInLeapYear = std::find(
-        LeapYears.begin(),
-        LeapYears.end(),
-        year
-    ) != LeapYears.end();
+    const bool isInLeapYear =
+        std::find(LeapYears.begin(), LeapYears.end(), year) != LeapYears.end();
     if (isInLeapYear && daysInYear >= 60) {
         // We are in a leap year, so we have an effective day more if we are
         // beyond the end of february (= 31+29 days)
@@ -277,9 +294,7 @@ double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochStrin
     );
 
     // 5
-    const double nSecondsEpochOffset = static_cast<double>(
-        seconds(hours(12)).count()
-    );
+    const double nSecondsEpochOffset = static_cast<double>(seconds(hours(12)).count());
 
     // Combine all of the values
     const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
@@ -315,11 +330,8 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
     double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
 
     // 2.b
-    const bool isInLeapYear = std::find(
-        LeapYears.begin(),
-        LeapYears.end(),
-        year
-    ) != LeapYears.end();
+    const bool isInLeapYear =
+        std::find(LeapYears.begin(), LeapYears.end(), year) != LeapYears.end();
     if (isInLeapYear && daysInYear >= 60) {
         // We are in a leap year, so we have an effective day more if we are
         // beyond the end of february (= 31+29 days)
@@ -341,28 +353,15 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
     );
 
     // 5
-    const double nSecondsEpochOffset = static_cast<double>(
-        seconds(hours(12)).count()
-        );
+    const double nSecondsEpochOffset = static_cast<double>(seconds(hours(12)).count());
 
     // Combine all of the values
     const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
     return epoch;
 }
 
-int RenderableOrbitalKepler::daysIntoGivenYear(int month, int dayOfMonth) {
-    //month and dayCount are zero-based. Does NOT account for leap year.
-    month -= 1;
-    int dayCount = dayOfMonth - 1;
-
-    for (int m = Months::January; m < month; ++m) {
-        dayCount += DaysOfMonths[m];
-    }
-    return dayCount;
-}
-
-RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
+    : Renderable(dict)
     , _path(PathInfo)
     , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
     , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
@@ -370,66 +369,41 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
 {
     documentation::testSpecificationAndThrow(
-         Documentation(),
-         dictionary,
-         "RenderableOrbitalKepler"
+        Documentation(),
+        dict,
+        "RenderableOrbitalKepler"
     );
 
-    _path = dictionary.value<std::string>(PathInfo.identifier);
-    _segmentQuality = static_cast<int>(
-        dictionary.value<double>(SegmentQualityInfo.identifier)
-    );
+    _path = dict.value<std::string>(PathInfo.identifier);
+    _segmentQuality = static_cast<int>(dict.value<double>(SegmentQualityInfo.identifier));
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
-        _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
-    }
-    if (dictionary.hasKeyAndValue<double>(TrailFadeInfo.identifier)) {
-        _appearance.lineFade = static_cast<float>(
-            dictionary.value<double>(TrailFadeInfo.identifier)
-        );
-    }
-    else {
-        _appearance.lineFade = 20;
+    if (dict.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
+        _appearance.lineColor = dict.value<glm::vec3>(LineColorInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(UpperLimitInfo.identifier)) {
-        _upperLimit = static_cast<unsigned int>(
-            dictionary.value<double>(UpperLimitInfo.identifier)
-        );
-    }
-    else {
-        _upperLimit = 0;
-    }
+    _appearance.lineFade = dict.hasKeyAndValue<double>(TrailFadeInfo.identifier) ?
+        static_cast<float>(dict.value<double>(TrailFadeInfo.identifier)) :
+        20.f;
 
-    if (dictionary.hasKeyAndValue<double>(StartRenderIdxInfo.identifier)) {
-        _startRenderIdx = static_cast<unsigned int>(
-            dictionary.value<double>(StartRenderIdxInfo.identifier)
-            );
-    }
-    else {
-        _startRenderIdx = 0;
-    }
+    _upperLimit = dict.hasKeyAndValue<double>(UpperLimitInfo.identifier) ?
+        static_cast<unsigned int>(dict.value<double>(UpperLimitInfo.identifier)) :
+        0.f;
 
-    if (dictionary.hasKeyAndValue<double>(RenderSizeInfo.identifier)) {
-        _sizeRender = static_cast<unsigned int>(
-            dictionary.value<double>(RenderSizeInfo.identifier)
-            );
-    }
-    else {
-        _sizeRender = 0;
-    }
+    _startRenderIdx = dict.hasKeyAndValue<double>(StartRenderIdxInfo.identifier) ?
+        static_cast<unsigned int>(dict.value<double>(StartRenderIdxInfo.identifier)) :
+        0;
 
-    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
-        _appearance.lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
-    else {
-        _appearance.lineWidth = 2.0;
-    }
-    reinitializeTrailBuffers = std::function<void()>([this] { initializeGL(); });
-    _path.onChange(reinitializeTrailBuffers);
-    _segmentQuality.onChange(reinitializeTrailBuffers);
+    _sizeRender = dict.hasKeyAndValue<double>(RenderSizeInfo.identifier) ?
+        static_cast<unsigned int>(dict.value<double>(RenderSizeInfo.identifier)) :
+        0;
+
+    _appearance.lineWidth = dict.hasKeyAndValue<double>(LineWidthInfo.identifier) ?
+        static_cast<float>(dict.value<double>(LineWidthInfo.identifier)) :
+        2.f;
+
+    _reinitializeTrailBuffers = std::function<void()>([this] { initializeGL(); });
+    _path.onChange(_reinitializeTrailBuffers);
+    _segmentQuality.onChange(_reinitializeTrailBuffers);
 
     addPropertySubOwner(_appearance);
     addProperty(_path);
@@ -438,10 +412,10 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dictio
     addProperty(_startRenderIdx);
     addProperty(_sizeRender);
 
-    updateStartRenderIdxSelect = std::function<void()>([this] { initializeGL(); });
-    updateRenderSizeSelect = std::function<void()>([this] { initializeGL(); });
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(updateRenderSizeSelect);
+    _updateStartRenderIdxSelect = std::function<void()>([this] { initializeGL(); });
+    _updateRenderSizeSelect = std::function<void()>([this] { initializeGL(); });
+    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
+    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }
@@ -489,13 +463,13 @@ bool RenderableOrbitalKepler::isReady() const {
 }
 
 void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
-    if (_data.empty())
+    if (_data.empty()) {
         return;
+    }
 
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, _opacity);
     _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
-
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -508,7 +482,9 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     );
 
     // Because we want the property to work similar to the planet trails
-    float fade = static_cast<float>(pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.0));
+    const float fade = static_cast<float>(
+        pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.0)
+    );
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
@@ -530,7 +506,6 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(0);
 
     _programObject->deactivate();
-
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
@@ -546,7 +521,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     size_t vertexBufIdx = 0;
     for (size_t orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
-        KeplerParameters orbit = _data[orbitIdx];
+        const KeplerParameters& orbit = _data[orbitIdx];
 
         _keplerTranslator.setKeplerElements(
             orbit.eccentricity,
@@ -570,13 +545,9 @@ void RenderableOrbitalKepler::updateBuffers() {
                 false
             });
 
-            double positionX = position.x; 
-            double positionY = position.y; 
-            double positionZ = position.z; 
-
-            _vertexBufferData[vertexBufIdx].x = static_cast<float>(positionX);
-            _vertexBufferData[vertexBufIdx].y = static_cast<float>(positionY);
-            _vertexBufferData[vertexBufIdx].z = static_cast<float>(positionZ);
+            _vertexBufferData[vertexBufIdx].x = static_cast<float>(position.x);
+            _vertexBufferData[vertexBufIdx].y = static_cast<float>(position.y);
+            _vertexBufferData[vertexBufIdx].z = static_cast<float>(position.z);
             _vertexBufferData[vertexBufIdx].time = static_cast<float>(timeOffset);
             _vertexBufferData[vertexBufIdx].epoch = orbit.epoch;
             _vertexBufferData[vertexBufIdx].period = orbit.period;
@@ -599,10 +570,16 @@ void RenderableOrbitalKepler::updateBuffers() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout),  nullptr);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4 * sizeof(GL_FLOAT)));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_DOUBLE,
+        GL_FALSE,
+        sizeof(TrailVBOLayout),
+        reinterpret_cast<GLvoid*>(4 * sizeof(GL_FLOAT))
+    );
 
     glBindVertexArray(0);
-
 }
     
-}
+} // namespace opensapce

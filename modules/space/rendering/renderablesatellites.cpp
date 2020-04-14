@@ -268,9 +268,9 @@ void RenderableSatellites::initializeFileReading() {
     _startRenderIdx = static_cast<unsigned int>(0);
     _sizeRender = static_cast<unsigned int>(_numObjects);
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(
-        updateStartRenderIdxSelect);
+        _updateStartRenderIdxSelect);
     _sizeRenderCallbackHandle = _sizeRender.onChange(
-        updateRenderSizeSelect);
+        _updateRenderSizeSelect);
 }
 
 void RenderableSatellites::skipSingleEntryInFile(std::ifstream& file) {
