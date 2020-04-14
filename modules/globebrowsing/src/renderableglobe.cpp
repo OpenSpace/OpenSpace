@@ -1135,11 +1135,20 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        _globalRenderer.program->setUniform(
+        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
+        // way is to figure out with the uniform is optimized away. I assume that it is 
+        // because the shader doesn't get recompiled when the last layer of the night
+        // or water is disabled;  so the shader thinks it has to do the calculation, but
+        // there are actually no layers left
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
+
 
 
     // Local shader
@@ -1156,10 +1165,18 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        _localRenderer.program->setUniform(
+        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
+        // way is to figure out with the uniform is optimized away. I assume that it is 
+        // because the shader doesn't get recompiled when the last layer of the night
+        // or water is disabled;  so the shader thinks it has to do the calculation, but
+        // there are actually no layers left
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _globalRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
     constexpr const int ChunkBufferSize = 2048;
@@ -1616,7 +1633,7 @@ void RenderableGlobe::recompileShaders() {
         //);
         layeredTextureInfo.lastLayerIdx = static_cast<int>(
             layerGroup.activeLayers().size() - 1
-            );
+        );
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
         for (Layer* layer : layers) {

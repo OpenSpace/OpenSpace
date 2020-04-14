@@ -377,16 +377,16 @@ vec4 calculateShadedColor(vec4 currentColor, vec3 ellipsoidNormalCameraSpace,
     vec3 shadedColor = currentColor.rgb * 0.05;
 
     vec3 n = normalize(ellipsoidNormalCameraSpace);
-    vec3 l = lightDirectionCameraSpace;
-        
+
     float power = orenNayarDiffuse(
         -lightDirectionCameraSpace,
-        viewDirectionCameraSpace, 
+        viewDirectionCameraSpace,
         ellipsoidNormalCameraSpace,
         roughness);
 
+    vec3 l = lightDirectionCameraSpace;
     power = max(smoothstep(0.0f, 0.1f, max(dot(-l, n), 0.0f)) * power, 0.0f);
-    
+
     vec4 color = vec4(shadedColor + currentColor.rgb * power, currentColor.a);
     return color;
 }
