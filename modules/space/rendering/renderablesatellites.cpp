@@ -152,7 +152,7 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
 
     std::string line = "-";
     std::string name;
-    unsigned int endElement = _startRenderIdx + _sizeRender - 1;
+    long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
     //Burn lines if not starting at first element
     for (unsigned int k = 0; k < _startRenderIdx; ++k) {
@@ -265,8 +265,8 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
 void RenderableSatellites::initializeFileReading() {
     _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
     _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
-    _startRenderIdx.setMaxValue(_numObjects - 1);
-    _sizeRender.setMaxValue(_numObjects);
+    _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
+    _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
     _startRenderIdx = static_cast<unsigned int>(0);
     _sizeRender = static_cast<unsigned int>(_numObjects);
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(

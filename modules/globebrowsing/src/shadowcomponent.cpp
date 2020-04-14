@@ -199,8 +199,8 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
         glm::vec2 depthMapSize =
             _shadowMapDictionary.value<glm::vec2>(DepthMapSizeInfo.identifier);
-        _shadowDepthTextureWidth = depthMapSize.x;
-        _shadowDepthTextureHeight = depthMapSize.y;
+        _shadowDepthTextureWidth = static_cast<int>(depthMapSize.x);
+        _shadowDepthTextureHeight = static_cast<int>(depthMapSize.y);
         _dynamicDepthTextureRes = false;
     }
     else {

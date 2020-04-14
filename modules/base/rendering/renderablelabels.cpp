@@ -636,9 +636,8 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.f;
 
     if (_enableFadingEffect) {
-        float distanceNodeToCamera = glm::distance(
-            data.camera.positionVec3(),
-            data.modelTransform.translation
+        float distanceNodeToCamera = static_cast<float>(
+            glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
         );
         float sUnit = unit(_fadeStartUnitOption);
         float eUnit = unit(_fadeEndUnitOption);
@@ -743,6 +742,7 @@ float RenderableLabels::changedPerlinSmoothStepFunc(float x, float startX,
     else if (x >= endX) {
         return std::clamp(f2, 0.f, 1.f);
     }
+    return x;
 }
 
 float RenderableLabels::linearSmoothStepFunc(float x, float startX, float endX,
@@ -763,17 +763,18 @@ float RenderableLabels::linearSmoothStepFunc(float x, float startX, float endX,
     else if (x >= endX) {
         return std::clamp(f2, 0.f, 1.f);
     }
+    return x;
 }
 
 float RenderableLabels::unit(int unit) const {
     switch (static_cast<Unit>(unit)) {
         case Meter: return 1.f;
-        case Kilometer: return 1e3;
-        case Megameter: return  1e6;
-        case Gigameter: return 1e9;
+        case Kilometer: return 1e3f;
+        case Megameter: return  1e6f;
+        case Gigameter: return 1e9f;
         case AU: return 149597870700.f;
-        case Terameter: return 1e12;
-        case Petameter: return 1e15;
+        case Terameter: return 1e12f;
+        case Petameter: return 1e15f;
         case Parsec: return static_cast<float>(PARSEC);
         case Kiloparsec: return static_cast<float>(1e3 * PARSEC);
         case Megaparsec: return static_cast<float>(1e6 * PARSEC);

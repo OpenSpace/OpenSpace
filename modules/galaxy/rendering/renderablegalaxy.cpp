@@ -463,9 +463,9 @@ void RenderableGalaxy::initializeGL() {
         }
         else {
             FileSys.cacheManager()->removeCacheFile(_pointsFilename);
-            Result res = loadPointFile(_pointsFilename);
-            pointPositions = std::move(res.positions);
-            pointColors = std::move(res.color);
+            Result resPoint = loadPointFile(_pointsFilename);
+            pointPositions = std::move(resPoint.positions);
+            pointColors = std::move(resPoint.color);
             saveCachedFile(
                 cachedPointsFile,
                 pointPositions,
@@ -561,7 +561,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
     _pointTransform[3] += translation;
 
     _raycaster->setDownscaleRender(_downScaleVolumeRendering);
-    _raycaster->setMaxSteps(_numberOfRayCastingSteps);
+    _raycaster->setMaxSteps(static_cast<int>(_numberOfRayCastingSteps));
     _raycaster->setStepSize(_stepSize);
     _raycaster->setAspect(_aspect);
     _raycaster->setModelTransform(volumeTransform);
@@ -798,7 +798,7 @@ float RenderableGalaxy::safeLength(const glm::vec3& vector) const {
     return glm::length(vector / maxComponent) * maxComponent;
 }
 
-RenderableGalaxy::Result RenderableGalaxy::loadPointFile(const std::string& file) {
+RenderableGalaxy::Result RenderableGalaxy::loadPointFile(const std::string&) {
     std::vector<glm::vec3> pointPositions;
     std::vector<glm::vec3> pointColors;
     int64_t nPoints;

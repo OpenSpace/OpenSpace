@@ -478,7 +478,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     const std::vector<std::pair<Key, KeyModifier>>& keyModVec =
         global::navigationHandler.inputState().pressedKeys();
     for (const std::pair<Key, KeyModifier>& keyModPair : keyModVec) {
-        const KeyModifier mods = keyModVec[0].second;
+        const KeyModifier mods = keyModPair.second;
         event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
     }
     event.pointer_type = cef_pointer_type_t::CEF_POINTER_TYPE_TOUCH;

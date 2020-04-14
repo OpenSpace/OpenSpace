@@ -216,7 +216,7 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
 
 void FlightControllerTopic::connect() {
     _isDone = false;
-    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _payload[TypeKey] = Connect;
     setFocusNodes();
     setInterestingTimes();
@@ -376,7 +376,7 @@ void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
     setFriction(false);
     auto input = json[AutopilotInputKey][ValuesKey];
 
-    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _inputState.isConnected = true;
 
     for (auto it = input.begin(); it != input.end(); ++it) {
@@ -413,7 +413,7 @@ void FlightControllerTopic::handleAutopilot(const nlohmann::json &json) {
 }
 
 void FlightControllerTopic::processInputState(const nlohmann::json& json) {
-    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _inputState.isConnected = true;
 
     // Get "inputState" object from "payload"

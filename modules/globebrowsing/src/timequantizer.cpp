@@ -540,7 +540,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
                 static_cast<double>(_start.year());
             minIncrementsAdjust = minYearsToAdjust / value;
             quantized.setYear(
-                _start.year() + static_cast<int>(minIncrementsAdjust) * value
+                _start.year() + static_cast<int>(minIncrementsAdjust * value)
             );
             break;
         case 'M':

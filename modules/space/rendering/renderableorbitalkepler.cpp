@@ -69,7 +69,7 @@ namespace {
         }
     };
 
-    constexpr const LeapSecond Epoch = { 2000, 1 };
+    constexpr const LeapSecond LeapEpoch = { 2000, 1 };
 
     // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
     constexpr const std::array<LeapSecond, 28> LeapSeconds = {
@@ -194,7 +194,7 @@ namespace {
         const auto y2000 = std::lower_bound(
             LeapSeconds.begin(),
             LeapSeconds.end(),
-            Epoch
+            LeapEpoch
         );
 
         // The distance between the two iterators gives us the number of leap years
@@ -387,15 +387,15 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 
     _upperLimit = dict.hasKeyAndValue<double>(UpperLimitInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(UpperLimitInfo.identifier)) :
-        0.f;
+        0u;
 
     _startRenderIdx = dict.hasKeyAndValue<double>(StartRenderIdxInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(StartRenderIdxInfo.identifier)) :
-        0;
+        0u;
 
     _sizeRender = dict.hasKeyAndValue<double>(RenderSizeInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(RenderSizeInfo.identifier)) :
-        0;
+        0u;
 
     _appearance.lineWidth = dict.hasKeyAndValue<double>(LineWidthInfo.identifier) ?
         static_cast<float>(dict.value<double>(LineWidthInfo.identifier)) :
@@ -500,8 +500,8 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(_vertexArray);
     for (size_t i = 0; i < nrOrbits; ++i) {
-        glDrawArrays(GL_LINE_STRIP, vertices, _segmentSize[i] + 1);
-        vertices = vertices + _segmentSize[i] + 1;
+        glDrawArrays(GL_LINE_STRIP, vertices, static_cast<GLsizei>(_segmentSize[i] + 1));
+        vertices = vertices + static_cast<GLint>(_segmentSize[i]) + 1;
     }
     glBindVertexArray(0);
 
@@ -513,7 +513,7 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     size_t nVerticesTotal = 0;
 
-    int numOrbits = _data.size();
+    int numOrbits = static_cast<int>(_data.size());
     for (size_t i = 0; i < numOrbits; ++i) {
         nVerticesTotal += _segmentSize[i] + 1;
     }

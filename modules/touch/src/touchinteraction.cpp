@@ -1082,13 +1082,13 @@ void TouchInteraction::step(double dt, bool directTouch) {
             bool willNewPositionViolateZoomInLimit =
                 (newPosDistance < zoomInBounds);
             bool willNewPositionViolateDirection =
-                (currentPosDistance <= length(zoomDistanceIncrement));
+                (currentPosDistance <= length(zoomDistanceInc));
 
             if (!willNewPositionViolateZoomInLimit &&
                 !willNewPositionViolateDirection &&
                 !willNewPositionViolateZoomOutLimit)
             {
-                camPos += zoomDistanceIncrement;
+                camPos += zoomDistanceInc;
             }
             else if (currentPosViolatingZoomOutLimit) {
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -1098,7 +1098,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
                 if (newPosDistance < currentPosDistance) {
-                    camPos += zoomDistanceIncrement;
+                    camPos += zoomDistanceInc;
                 }
             }
             else {

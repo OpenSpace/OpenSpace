@@ -61,7 +61,7 @@ namespace {
                 glPushDebugGroup(
                     GL_DEBUG_SOURCE_APPLICATION,
                     0,
-                    name.length(),
+                    static_cast<GLsizei>(name.length()),
                     name.data()
                 );
             }
@@ -608,8 +608,12 @@ void FramebufferRenderer::updateDownscaleTextures() {
         GL_TEXTURE_2D,
         0,
         GL_RGBA32F,
-        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
-        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        static_cast<GLsizei>(
+            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
+        static_cast<GLsizei>(
+            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -625,8 +629,12 @@ void FramebufferRenderer::updateDownscaleTextures() {
         GL_TEXTURE_2D,
         0,
         GL_DEPTH_COMPONENT32F,
-        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
-        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        static_cast<GLsizei>(
+            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
+        static_cast<GLsizei>(
+            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
@@ -928,8 +936,12 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D,
         0,
         GL_RGBA32F,
-        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
-        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        static_cast<GLsizei>(
+            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
+        static_cast<GLsizei>(
+            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -945,8 +957,12 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D,
         0,
         GL_DEPTH_COMPONENT32F,
-        _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor,
-        _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor,
+        static_cast<GLsizei>(
+            _resolution.x * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
+        static_cast<GLsizei>(
+            _resolution.y * _downscaleVolumeRendering.currentDownscaleFactor
+        ),
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
@@ -1313,7 +1329,12 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         if (raycaster->downscaleRender() < 1.f) {
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
-            glViewport(viewport[0], viewport[1], viewport[2] * s, viewport[3] * s);
+            glViewport(
+                viewport[0],
+                viewport[1],
+                static_cast<GLsizei>(viewport[2] * s),
+                static_cast<GLsizei>(viewport[3] * s)
+            );
             if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
                 _downscaleVolumeRendering.currentDownscaleFactor = s;
                 updateDownscaleTextures();

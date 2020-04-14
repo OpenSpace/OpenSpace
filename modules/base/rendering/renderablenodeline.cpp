@@ -240,13 +240,13 @@ void RenderableNodeLine::updateVertexData() {
         global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition()
     );
 
-    _vertexArray.push_back(_startPos.x);
-    _vertexArray.push_back(_startPos.y);
-    _vertexArray.push_back(_startPos.z);
+    _vertexArray.push_back(static_cast<float>(_startPos.x));
+    _vertexArray.push_back(static_cast<float>(_startPos.y));
+    _vertexArray.push_back(static_cast<float>(_startPos.z));
 
-    _vertexArray.push_back(_endPos.x);
-    _vertexArray.push_back(_endPos.y);
-    _vertexArray.push_back(_endPos.z);
+    _vertexArray.push_back(static_cast<float>(_endPos.x));
+    _vertexArray.push_back(static_cast<float>(_endPos.y));
+    _vertexArray.push_back(static_cast<float>(_endPos.z));
 
     _vertexArray;
 
