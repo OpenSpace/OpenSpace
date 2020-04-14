@@ -1026,8 +1026,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.alphaValue, _alphaValue);
     }
 
-    
-
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
 
@@ -1479,7 +1477,7 @@ void RenderableStars::readSpeckFile() {
         for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
         }
-        
+
         bool nullArray = true;
         for (float v : values) {
             if (v != 0.0) {

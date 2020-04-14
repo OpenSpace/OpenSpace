@@ -188,7 +188,7 @@ private:
      */
     float getHeight(const glm::dvec3& position) const;
 
-    void renderChunks(const RenderData& data, RendererTasks& rendererTask, 
+    void renderChunks(const RenderData& data, RendererTasks& rendererTask,
         const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
     );
 

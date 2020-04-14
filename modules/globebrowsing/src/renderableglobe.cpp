@@ -697,7 +697,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
         _hasRings = true;
-        
+
         ghoul::Dictionary ringsDic;
         dictionary.getValue("Rings", ringsDic);
     }
@@ -799,7 +799,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 if (_hasRings && _ringsComponent.isEnabled()) {
                     _ringsComponent.draw(lightRenderData, RingsComponent::GeometryOnly);
                 }
-                    
+
                 glEnable(GL_BLEND);
 
                 _shadowComponent.setViewDepthMap(false);
@@ -968,7 +968,7 @@ const glm::dmat4& RenderableGlobe::modelTransform() const {
 //  Rendering code
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&, 
+void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                                    const ShadowComponent::ShadowMapData& shadowData,
                                    bool renderGeomOnly)
 {
@@ -986,7 +986,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             const float dsf = static_cast<float>(
                 _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
             );
-            
+
             // We are setting the setIgnoreUniformLocationError as it is not super trivial
             // and brittle to figure out apriori whether the uniform was optimized away
             // or not. It should be something long the lines of:
@@ -1108,9 +1108,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     const bool hasWaterLayer = !_layerManager.layerGroup(
         layergroupid::GroupID::WaterMasks
     ).activeLayers().empty();
-    
+
     _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
-    
+
     const bool hasHeightLayer = !_layerManager.layerGroup(
         layergroupid::HeightLayers
     ).activeLayers().empty();
@@ -1136,7 +1136,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
         // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
-        // way is to figure out with the uniform is optimized away. I assume that it is 
+        // way is to figure out with the uniform is optimized away. I assume that it is
         // because the shader doesn't get recompiled when the last layer of the night
         // or water is disabled;  so the shader thinks it has to do the calculation, but
         // there are actually no layers left
@@ -1166,7 +1166,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
         // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
-        // way is to figure out with the uniform is optimized away. I assume that it is 
+        // way is to figure out with the uniform is optimized away. I assume that it is
         // because the shader doesn't get recompiled when the last layer of the night
         // or water is disabled;  so the shader thinks it has to do the calculation, but
         // there are actually no layers left
@@ -1346,9 +1346,9 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_generalProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
-        // Adding the model transformation to the final shadow matrix so we have a 
-           // complete transformation from the model coordinates to the clip space of 
-           // the light position.
+        // Adding the model transformation to the final shadow matrix so we have a
+        // complete transformation from the model coordinates to the clip space of the
+        // light position.
         program.setUniform(
             "shadowMatrix",
             shadowData.shadowMatrix * modelTransform()
@@ -1362,14 +1362,14 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     glEnable(GL_DEPTH_TEST);
-    
+
     if (!renderGeomOnly) {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
     }
 
     _grid.drawUsingActiveProgram();
-    
+
     for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
         l.deactivate();
     }
@@ -1476,9 +1476,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_generalProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
-        // Adding the model transformation to the final shadow matrix so we have a 
-           // complete transformation from the model coordinates to the clip space of 
-           // the light position.
+        // Adding the model transformation to the final shadow matrix so we have a
+        // complete transformation from the model coordinates to the clip space of the
+        // light position.
         program.setUniform(
             "shadowMatrix",
             shadowData.shadowMatrix * modelTransform()
@@ -1496,7 +1496,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
     }
-    
+
     _grid.drawUsingActiveProgram();
 
     for (GPULayerGroup& l : _localRenderer.gpuLayerGroups) {

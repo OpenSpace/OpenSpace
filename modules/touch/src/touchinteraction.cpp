@@ -680,7 +680,8 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
             double res = 0.0;
 
             float lastAngle = lastPoint.angleToPos(_centroid.x, _centroid.y);
-            float currentAngle = inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
+            float currentAngle =
+                inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
             if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
                 res = currentAngle + (2.0 * glm::pi<float>() - lastAngle);
             }
@@ -820,9 +821,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 #endif
 
             _constTimeDecayCoeff.zoom = 1.0;
-            _vel.zoom = zoomFactor * 
-                _pinchZoomFactor * 
-                _zoomSensitivityProportionalDist * 
+            _vel.zoom = zoomFactor * _pinchZoomFactor * _zoomSensitivityProportionalDist *
                 std::max(_touchScreenSize.value() * 0.1, 1.0);
             break;
         }
@@ -1033,7 +1032,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
                     centerToActualSurfaceModelSpace;
                 const double nodeRadius = length(centerToActualSurface);
 
-                // Because of heightmaps we should make sure we do not go through the surface
+                // Because of heightmaps we need to ensure we don't go through the surface
                 if (_zoomInLimit.value() < nodeRadius) {
 #ifdef TOUCH_DEBUG_PROPERTIES
                     LINFO(fmt::format("{}: Zoom In limit should be larger than anchor "
@@ -1058,9 +1057,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
                 const double distanceFromSurface =
                     length(currentPosDistance) - anchor->boundingSphere();
                 if (distanceFromSurface > 0.1) {
-                    const double ratioOfDistanceToNodeVsSurface =
+                    const double ratioOfDistanceToNodeVsSurf =
                         length(currentPosDistance) / distanceFromSurface;
-                    if (ratioOfDistanceToNodeVsSurface > _zoomSensitivityDistanceThreshold) {
+                    if (ratioOfDistanceToNodeVsSurf > _zoomSensitivityDistanceThreshold) {
                         zoomVelocity *= pow(
                             std::abs(distanceFromSurface),
                             static_cast<float>(_zoomSensitivityExponential)
@@ -1072,8 +1071,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
                 }
             }
 
-            const glm::dvec3 zoomDistanceIncrement = directionToCenter * zoomVelocity * dt;
-            const double newPosDistance = length(centerToCamera + zoomDistanceIncrement);
+            const glm::dvec3 zoomDistanceInc = directionToCenter * zoomVelocity * dt;
+            const double newPosDistance = length(centerToCamera + zoomDistanceInc);
 
             // Possible with other navigations performed outside touch interaction
             const bool currentPosViolatingZoomOutLimit =
@@ -1182,7 +1181,7 @@ void TouchInteraction::resetAfterInput() {
     _lastVel.zoom = 0.0;
     _lastVel.roll = 0.0;
     _lastVel.pan = glm::dvec2(0.0);
-    
+
     _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
     _pinchInputs[0].clearInputs();
     _pinchInputs[1].clearInputs();

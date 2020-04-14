@@ -52,7 +52,7 @@ struct TouchInput {
     double timestamp;       // timestamp in seconds from global touch initialization
 };
 
-// The TouchInputHolder holds one or many TouchInputs, in order to track the history of 
+// The TouchInputHolder holds one or many TouchInputs, in order to track the history of
 // the finger/input device
 class TouchInputHolder {
 public:
@@ -62,7 +62,7 @@ public:
     // Fails upon a too similar input as last.
     // Updates time for the last input if same position.
     bool tryAddInput(TouchInput input);
-    
+
     void clearInputs();
 
     // Checks whether or not this Holder actually holds a specific input (based on IDs)

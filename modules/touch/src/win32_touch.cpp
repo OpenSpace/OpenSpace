@@ -91,9 +91,9 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             //Implementation from microsoft STL of high_resolution_clock(steady_clock):
             const long long freq = gFrequency;
             const long long whole = (info.PerformanceCount / freq) * std::micro::den;
-            const long long part  = (info.PerformanceCount % freq) * 
+            const long long part  = (info.PerformanceCount % freq) *
                                     std::micro::den / freq;
-            const std::chrono::microseconds timestamp = 
+            const std::chrono::microseconds timestamp =
                 std::chrono::duration<UINT64, std::micro>(whole + part) - gStartTime;
 
             RECT rect;

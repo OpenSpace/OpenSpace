@@ -42,7 +42,7 @@
 #include <chrono>
 #include <fstream>
 #include <math.h>
-#include <vector> 
+#include <vector>
 
 namespace {
     constexpr const char* ProgramName = "OrbitalKepler";
@@ -434,7 +434,7 @@ void RenderableOrbitalKepler::initializeGL() {
            );
        }
    );
-    
+
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
     _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
@@ -444,7 +444,7 @@ void RenderableOrbitalKepler::initializeGL() {
 
     updateBuffers();
 }
-    
+
 void RenderableOrbitalKepler::deinitializeGL() {
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteVertexArrays(1, &_vertexArray);
@@ -535,7 +535,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         );
 
         for (size_t j = 0 ; j < (_segmentSize[orbitIdx] + 1); ++j) {
-            double timeOffset = orbit.period * 
+            double timeOffset = orbit.period *
                 static_cast<double>(j)/ static_cast<double>(_segmentSize[orbitIdx]);
 
             glm::dvec3 position = _keplerTranslator.position({
@@ -563,7 +563,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         GL_ARRAY_BUFFER,
         _vertexBufferData.size() * sizeof(TrailVBOLayout),
         _vertexBufferData.data(),
-        GL_STATIC_DRAW    
+        GL_STATIC_DRAW
     );
 
     glEnableVertexAttribArray(0);
@@ -581,5 +581,5 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     glBindVertexArray(0);
 }
-    
+
 } // namespace opensapce

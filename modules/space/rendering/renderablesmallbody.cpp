@@ -43,7 +43,7 @@
 #include <chrono>
 #include <fstream>
 #include <math.h>
-#include <vector> 
+#include <vector>
 
 namespace {
     constexpr const char* ProgramName = "RenderableSmallBody";
@@ -140,8 +140,8 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
 {
     _upperLimitCallbackHandle = _upperLimit.onChange(_reinitializeTrailBuffers);
     addProperty(_upperLimit);
-}  
-    
+}
+
 void RenderableSmallBody::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {
         throw ghoul::RuntimeError(fmt::format(
@@ -154,7 +154,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     file.open(filename);
 
     std::streamoff numberOfLines = std::count(
-        std::istreambuf_iterator<char>(file), 
+        std::istreambuf_iterator<char>(file),
         std::istreambuf_iterator<char>(),
         '\n'
     );

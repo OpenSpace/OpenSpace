@@ -112,9 +112,9 @@ struct WindowDelegate {
     double (*getHorizFieldOfView)() = []() { return 0.0; };
 
     void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
-    
-    void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* { 
-        return nullptr; 
+
+    void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* {
+        return nullptr;
     };
 
     using GLProcAddress = void(*)(void);

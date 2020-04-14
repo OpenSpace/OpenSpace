@@ -146,7 +146,9 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     }
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(dictionary.value<double>(LineWidthInfo.identifier));
+        _lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
+        );
     }
 
     _start.onChange([&]() { validateNodes(); });
@@ -264,7 +266,7 @@ void RenderableNodeLine::updateVertexData() {
 
 void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     updateVertexData();
-    
+
     _program->activate();
 
     glm::dmat4 anchorTranslation(1.0);
@@ -316,7 +318,7 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     // Bind and draw
     bindGL();
     glDrawArrays(GL_LINES, 0, 2);
-    
+
     // Restore GL State
     unbindGL();
     _program->deactivate();

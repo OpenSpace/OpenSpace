@@ -144,7 +144,7 @@ private:
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
         screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
-    
+
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;

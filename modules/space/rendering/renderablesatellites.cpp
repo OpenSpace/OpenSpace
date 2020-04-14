@@ -42,7 +42,7 @@
 #include <chrono>
 #include <math.h>
 #include <fstream>
-#include <vector> 
+#include <vector>
 
 namespace {
     constexpr const char* ProgramName = "RenderableSatellites";
@@ -121,9 +121,8 @@ documentation::Documentation RenderableSatellites::Documentation() {
 
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
-{
-}
-    
+{}
+
 void RenderableSatellites::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {
         throw ghoul::RuntimeError(fmt::format(
@@ -137,8 +136,11 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     file.open(filename);
 
-    std::streamoff numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
-                                   std::istreambuf_iterator<char>(), '\n' );
+    std::streamoff numberOfLines = std::count(
+        std::istreambuf_iterator<char>(file),
+        std::istreambuf_iterator<char>(),
+        '\n'
+    );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
     _numObjects = numberOfLines / nLineEntriesPerSatellite;

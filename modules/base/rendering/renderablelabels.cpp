@@ -48,7 +48,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "base::RenderableLabels";
-    
+
     constexpr const char* MeterUnit = "m";
     constexpr const char* KilometerUnit = "Km";
     constexpr const char* MegameterUnit = "Mm";
@@ -203,7 +203,7 @@ documentation::Documentation RenderableLabels::Documentation() {
                 LabelColorInfo.identifier,
                 new DoubleVector4Verifier,
                 Optional::Yes,
-                LabelColorInfo.description, 
+                LabelColorInfo.description,
             },
             {
                 LabelColorInfo.identifier,
@@ -392,7 +392,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     addProperty(_labelText);
 
     addProperty(_labelOrientationOption);
-    
+
     _labelColor.setViewOption(properties::Property::ViewOptions::Color);
     if (dictionary.hasKey(LabelColorInfo.identifier)) {
         _labelColor = dictionary.value<glm::vec4>(LabelColorInfo.identifier);
@@ -634,7 +634,7 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
     //}
 
     float fadeInVariable = 1.f;
-    
+
     if (_enableFadingEffect) {
         float distanceNodeToCamera = glm::distance(
             data.camera.positionVec3(),
@@ -644,7 +644,6 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
         float eUnit = unit(_fadeEndUnitOption);
         float startX = _fadeStartDistance * sUnit;
         float endX = _fadeEndDistance * eUnit;
-        //fadeInVariable = changedPerlinSmoothStepFunc(distanceNodeToCamera, startX, endX);
         fadeInVariable = linearSmoothStepFunc(
             distanceNodeToCamera,
             startX,
@@ -676,7 +675,7 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
     renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
-    
+
     //if (additiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
@@ -688,18 +687,18 @@ void RenderableLabels::setLabelText(const std::string & newText) {
     _labelText = newText;
 }
 
-void RenderableLabels::renderLabels(const RenderData& data, 
+void RenderableLabels::renderLabels(const RenderData& data,
                                     const glm::dmat4& modelViewProjectionMatrix,
                                     const glm::dvec3& orthoRight,
                                     const glm::dvec3& orthoUp, float fadeInVariable)
 {
     glm::vec4 textColor = _labelColor;
-    
+
     textColor.a *= fadeInVariable;
     textColor.a *= _opacity;
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    
+
     labelInfo.orthoRight       = orthoRight;
     labelInfo.orthoUp          = orthoUp;
     labelInfo.minSize          = static_cast<int>(_labelMinSize);
@@ -716,7 +715,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     glm::vec3 transformedPos(
         _transformationMatrix * glm::dvec4(data.modelTransform.translation, 1.0)
     );
-    
+
     ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
         *_font,
         transformedPos,
@@ -727,11 +726,11 @@ void RenderableLabels::renderLabels(const RenderData& data,
 }
 
 float RenderableLabels::changedPerlinSmoothStepFunc(float x, float startX,
-                                                    float endX) const 
+                                                    float endX) const
 {
-    float f1 = 6.f * powf((x - startX), 5.f) - 15.f * powf((x - startX), 4.f) + 
+    float f1 = 6.f * powf((x - startX), 5.f) - 15.f * powf((x - startX), 4.f) +
                10.f * powf((x - startX), 3.f);
-    float f2 = -6.f * powf((x - endX), 5.f) + 15.f * powf((x - endX), 4.f) - 
+    float f2 = -6.f * powf((x - endX), 5.f) + 15.f * powf((x - endX), 4.f) -
                10.f * powf((x - endX), 3.f) + 1.f;
     float f3 = 1.f;
 
@@ -743,7 +742,7 @@ float RenderableLabels::changedPerlinSmoothStepFunc(float x, float startX,
     }
     else if (x >= endX) {
         return std::clamp(f2, 0.f, 1.f);
-    } 
+    }
 }
 
 float RenderableLabels::linearSmoothStepFunc(float x, float startX, float endX,
@@ -754,7 +753,7 @@ float RenderableLabels::linearSmoothStepFunc(float x, float startX, float endX,
     float f1 = sdiv * (x - startX) + 1.f;
     float f2 = ediv * (x - endX) + 1.f;
     float f3 = 1.f;
-   
+
     if (x <= startX) {
         return std::clamp(f1, 0.f, 1.f);
     }

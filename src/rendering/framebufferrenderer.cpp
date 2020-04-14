@@ -76,7 +76,7 @@ namespace {
 
 
     constexpr const std::array<const char*, 7> HDRUniformNames = {
-        "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma", 
+        "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
         "Hue", "Saturation", "Value"
     };
 
@@ -456,8 +456,8 @@ void FramebufferRenderer::initialize() {
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
 
     ghoul::opengl::updateUniformLocations(
-        *_hdrFilteringProgram, 
-        _hdrUniformCache, 
+        *_hdrFilteringProgram,
+        _hdrUniformCache,
         HDRUniformNames
     );
     ghoul::opengl::updateUniformLocations(
@@ -525,7 +525,7 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
 void FramebufferRenderer::applyTMO(float blackoutFactor) {
     const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
     std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-    
+
     if (doPerformanceMeasurements) {
         perfInternal = std::make_unique<performance::PerformanceMeasurement>(
             "FramebufferRenderer::render::TMO"
@@ -536,7 +536,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
     hdrFeedingTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _pingPongBuffers.colorTexture[_pingPongIndex]);
-    
+
     _hdrFilteringProgram->setUniform(
         _hdrUniformCache.hdrFeedingTexture,
         hdrFeedingTextureUnit
@@ -683,7 +683,7 @@ void FramebufferRenderer::writeDownscaledVolume() {
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolume,
         downscaledTextureUnit
     );
-    
+
     ghoul::opengl::TextureUnit downscaledDepthUnit;
     downscaledDepthUnit.activate();
     glBindTexture(
@@ -1160,7 +1160,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         glEnable(GL_DEPTH_TEST);
     }
     _pingPongIndex = 0;
-    
+
     // Measurements cache variable
     const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
 
@@ -1173,7 +1173,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     if (!scene || !camera) {
         return;
-    }    
+    }
 
     {
         // deferred g-buffer
@@ -1236,7 +1236,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         GLDebugGroup group("Deferred Caster Tasks");
 
         // We use ping pong rendering in order to be able to
-        // render to the same final buffer, multiple 
+        // render to the same final buffer, multiple
         // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
@@ -1263,7 +1263,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
-    
+
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
     if (_enableFXAA) {
@@ -1277,7 +1277,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // by the Operating System. Also, the resolve procedure is executed in this step.
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     }
-    
+
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
         GLDebugGroup group("Apply TMO");
@@ -1290,7 +1290,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
         applyFXAA();
     }
-    
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
@@ -1312,11 +1311,11 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            float scaleDown = raycaster->downscaleRender();
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
-            glViewport(viewport[0], viewport[1], viewport[2] * scaleDown, viewport[3] * scaleDown);
-            if (_downscaleVolumeRendering.currentDownscaleFactor != scaleDown) {
-                _downscaleVolumeRendering.currentDownscaleFactor = scaleDown;
+            const float s = raycaster->downscaleRender();
+            glViewport(viewport[0], viewport[1], viewport[2] * s, viewport[3] * s);
+            if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
+                _downscaleVolumeRendering.currentDownscaleFactor = s;
                 updateDownscaleTextures();
             }
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1357,7 +1356,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
         if (raycastProgram) {
             raycastProgram->setUniform("rayCastSteps", raycaster->maxSteps());
-            
+
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
@@ -1383,7 +1382,10 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
                 );
             }
             else {
-                raycastProgram->setUniform("windowSize", static_cast<glm::vec2>(_resolution));
+                raycastProgram->setUniform(
+                    "windowSize",
+                    static_cast<glm::vec2>(_resolution)
+                );
             }
 
             glDisable(GL_DEPTH_TEST);
