@@ -54,7 +54,7 @@ protected:
     std::vector<glm::dvec3> _points; 
     double _length; // the total length of the curve (approximated)
 
-    RotationInterpolator _rotationInterpolator;
+    std::unique_ptr<RotationInterpolator> _rotationInterpolator;
 };
 
 class Bezier3Curve : public PathCurve {

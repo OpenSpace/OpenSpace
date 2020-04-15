@@ -35,81 +35,72 @@ namespace {
 
 namespace openspace::autonavigation {
 
-RotationInterpolator::RotationInterpolator(
-    const Waypoint& start, const Waypoint& end, PathCurve* curve, RotationMethod method)
-    : _start(start), _end(end), _method(method), _curve(curve)
+RotationInterpolator::RotationInterpolator(const glm::dquat start, const glm::dquat end)
+    : _start(start), _end(end)
 {}
 
-glm::dquat RotationInterpolator::rotationAt(double u) {
-    switch (_method)
-    {
-    case Slerp:
-        return easedSlerp(u);
-        break;
-    case PiecewiseSlerp:
-        return piecewiseSlerp(u);
-        break;
-    case Fixed:
-        return _start.rotation();
-        break;
-    case LookAt:
-        return lookAtInterpolator(u);
-        break;
-    default:
-        LERROR("Non-implemented orientation interpolation method!");
-        return _start.rotation();
-        break;
-    }
-}
+EasedSlerpInterpolator::EasedSlerpInterpolator(glm::dquat start, glm::dquat end)
+    : RotationInterpolator(start, end)
+{}
 
-glm::dquat RotationInterpolator::easedSlerp(double u) {
+glm::dquat EasedSlerpInterpolator::interpolate(double u) {
     double uScaled = helpers::shiftAndScale(u, 0.1, 0.9);
     uScaled = ghoul::cubicEaseInOut(uScaled);
-    return glm::slerp(_start.rotation(), _end.rotation(), uScaled);
+    return glm::slerp(_start, _end, uScaled);
 }
 
+LookAtInterpolator::LookAtInterpolator(glm::dquat start, glm::dquat end, 
+    glm::dvec3 startLookAtPos, glm::dvec3 endLookAtPos, PathCurve* path)
+    : RotationInterpolator(start, end),
+    _startLookAtPos(startLookAtPos), 
+    _endLookAtPos(endLookAtPos), 
+    _path(path)
+{}
+
 // Look at start node until tStart, then turn to look at end node from tEnd.
-// OBS! Will overwrite rotation of navigation states!! 
-glm::dquat RotationInterpolator::lookAtInterpolator(double u) {
+// OBS! Does not care about actual end and start value!!
+glm::dquat LookAtInterpolator::interpolate(double u) {
     double tStart = 0.15;
     double tEnd = 0.7;
     double uNew = helpers::shiftAndScale(u, tStart, tEnd);
     uNew = ghoul::cubicEaseInOut(uNew);
 
-    glm::dvec3 startNodePos = _start.node()->worldPosition();
-    glm::dvec3 endNodePos = _end.node()->worldPosition();
-    glm::dvec3 lookAtPos = interpolation::linear(uNew, startNodePos, endNodePos);
+    glm::dvec3 lookAtPos = interpolation::linear(uNew, _startLookAtPos, _endLookAtPos);
+    glm::dvec3 startUpVec = _start * glm::dvec3(0.0, 1.0, 0.0);
 
-    glm::dvec3 startUpVec = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-
-    return helpers::getLookAtQuaternion(_curve->positionAt(u), lookAtPos, startUpVec);
+    return helpers::getLookAtQuaternion(_path->positionAt(u), lookAtPos, startUpVec);
 }
 
+PiecewiseLookAtInterpolator::PiecewiseLookAtInterpolator(glm::dquat start, glm::dquat end,
+    glm::dvec3 startTargetPos, glm::dvec3 endTargetPos, PathCurve* path)
+    : RotationInterpolator(start, end),
+    _startTargetPos(startTargetPos),
+    _endTargetPos(endTargetPos),
+    _path(path)
+{}
+
 // Interpolate between a number of keyframes for orientation using SLERP
-glm::dquat RotationInterpolator::piecewiseSlerp(double u) {
+glm::dquat PiecewiseLookAtInterpolator::interpolate(double u) {
     ghoul_assert(_curve, "Rotation interpolation requires access to curve positions.");
 
     // breakpoints for subintervals
     const double u1 = 0.3;
     const double u2 = 0.8; // TODO: these should probably be based on distance
 
-    glm::dvec3 startNodePos = _start.node()->worldPosition();
-    glm::dvec3 endNodePos = _end.node()->worldPosition();
-
-    glm::dvec3 startUpVec = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 endUpVec = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+    glm::dvec3 startUpVec = _start * glm::dvec3(0.0, 1.0, 0.0);
+    glm::dvec3 endUpVec = _end * glm::dvec3(0.0, 1.0, 0.0);
 
     glm::dquat lookAtStartQ =
-        helpers::getLookAtQuaternion(_curve->positionAt(u1), startNodePos, startUpVec);
+        helpers::getLookAtQuaternion(_path->positionAt(u1), _startTargetPos, startUpVec);
 
     glm::dquat lookAtEndQ =
-        helpers::getLookAtQuaternion(_curve->positionAt(u2), endNodePos, endUpVec);
+        helpers::getLookAtQuaternion(_path->positionAt(u2), _endTargetPos, endUpVec);
 
     std::vector<std::pair<glm::dquat, double>> keyframes{
-        {_start.rotation(), 0.0},
+        {_start, 0.0},
         {lookAtStartQ, u1},
         {lookAtEndQ, u2},
-        {_end.rotation(), 1.0}
+        {_end, 1.0}
     };
 
     // Find the current segment and compute interpolation

@@ -69,7 +69,7 @@ double PathCurve::arcLength(double limit) {
 }
 
 glm::dquat PathCurve::rotationAt(double u) {
-    return _rotationInterpolator.rotationAt(u);
+    return _rotationInterpolator->interpolate(u);
 }
 
 // TODO: remove when not needed
@@ -79,10 +79,12 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
 }
 
 Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
-    _rotationInterpolator = RotationInterpolator{ start, end, this, LookAt };
-
     glm::dvec3 startNodePos = start.node()->worldPosition();
     glm::dvec3 endNodePos = end.node()->worldPosition();
+
+    _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+        start.rotation(), end.rotation(), startNodePos, endNodePos, this);
+
     double startNodeRadius = start.nodeDetails.validBoundingSphere;
     double endNodeRadius = end.nodeDetails.validBoundingSphere;
 
@@ -219,7 +221,8 @@ LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
     _points.push_back(start.position());
     _points.push_back(end.position());
     _length = glm::distance(end.position(), start.position());
-    _rotationInterpolator = RotationInterpolator{ start, end, this, Slerp };
+    _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+        start.rotation(), end.rotation());
 }
 
 glm::dvec3 LinearCurve::positionAt(double u) {
