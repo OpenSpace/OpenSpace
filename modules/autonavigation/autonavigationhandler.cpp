@@ -32,6 +32,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/query/query.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
@@ -171,21 +172,30 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
     const int nrInstructions = (int)spec.instructions()->size();
 
     for (int i = 0; i < nrInstructions; i++) {
-        const Instruction* instruction = spec.instruction(i);
+        Instruction* instruction = spec.instruction(i);
         if (instruction) {
             std::vector<Waypoint> waypoints = instruction->getWaypoints();
 
             if (waypoints.size() == 0) {
-                LWARNING(fmt::format("No path segment was created from instruction {}. No waypoints could be created.", i));
-                return;
+                TargetNodeInstruction* targetNodeIns = dynamic_cast<TargetNodeInstruction*>(instruction);
+                if (targetNodeIns) {
+                    // TODO: allow curves to compute default waypoint instead
+                    Waypoint wp = computeDefaultWaypoint(targetNodeIns);
+                    addSegment(wp, instruction);
+                }
+                else {
+                    LWARNING(fmt::format("No path segment was created from instruction {}. No waypoints could be created.", i));
+                    return;
+                }
             }
-
-            // TODO: allow for a list of waypoints
-            addSegment(waypoints[0], instruction);
+            else {
+                // TODO: allow for a list of waypoints
+                addSegment(waypoints[0], instruction);
+            }
 
             // Add info about stops between segments
             if (i < nrInstructions - 1) {
-                addStopDetails(waypoints.back(), instruction);
+                addStopDetails(lastWayPoint(), instruction);
             }
         }
     }
@@ -376,7 +386,7 @@ void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* in
     _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
 }
 
-void AutoNavigationHandler::addStopDetails(Waypoint& endWaypoint, const Instruction* ins) {
+void AutoNavigationHandler::addStopDetails(const Waypoint& endWaypoint, const Instruction* ins) {
     StopDetails stopEntry;
     stopEntry.shouldStop = _stopAtTargetsPerDefault.value();
 
@@ -418,6 +428,33 @@ void AutoNavigationHandler::addStopDetails(Waypoint& endWaypoint, const Instruct
     }
 
     _stops.push_back(stopEntry);
+}
+
+// OBS! The desired default waypoint may vary between curve types. 
+// TODO: let the curves compute the default positions instead
+Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstruction* ins) {
+    SceneGraphNode* targetNode = sceneGraphNode(ins->nodeIdentifier);
+    if (!targetNode) {
+        LERROR(fmt::format("Could not find target node '{}'", ins->nodeIdentifier));
+        return Waypoint();
+    }
+    glm::dvec3 nodePos = targetNode->worldPosition();
+    glm::dvec3 nodeToPrev = lastWayPoint().position() - nodePos;
+
+    const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);
+    const double defaultHeight = 2 * radius;
+
+    bool hasHeight = ins->height.has_value();
+    double height = hasHeight ? ins->height.value() : defaultHeight;
+
+    glm::dvec3 targetPos = nodePos + glm::normalize(nodeToPrev) * (radius + height);
+    glm::dquat targetRot = helpers::getLookAtQuaternion(
+        targetPos,
+        targetNode->worldPosition(),
+        camera()->lookUpVectorWorldSpace()
+    );
+
+    return Waypoint{ targetPos, targetRot, ins->nodeIdentifier };
 }
 
 } // namespace openspace::autonavigation

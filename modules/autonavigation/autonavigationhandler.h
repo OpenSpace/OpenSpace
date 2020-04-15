@@ -42,6 +42,7 @@ namespace openspace::autonavigation {
 
 struct Waypoint;
 struct Instruction;
+struct TargetNodeInstruction;
 class PathSpecification;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
@@ -74,7 +75,9 @@ private:
     void applyStopBehaviour(double deltaTime);
 
     void addSegment(Waypoint& waypoint, const Instruction* ins);
-    void addStopDetails(Waypoint& endWaypoint, const Instruction* ins);
+    void addStopDetails(const Waypoint& endWaypoint, const Instruction* ins);
+
+    Waypoint computeDefaultWaypoint(const TargetNodeInstruction* ins);
 
     // this list essentially represents the camera path
     std::vector<std::unique_ptr<PathSegment>> _pathSegments;

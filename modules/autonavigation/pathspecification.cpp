@@ -101,7 +101,7 @@ const std::vector<std::unique_ptr<Instruction>>* PathSpecification::instructions
     return &_instructions;
 }
 
-const Instruction* PathSpecification::instruction(int i) const {
+Instruction* PathSpecification::instruction(int i) const {
     return (_instructions.size() > i) ? _instructions[i].get() : nullptr;
 }
 

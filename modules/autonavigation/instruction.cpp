@@ -28,8 +28,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <openspace/query/query.h>
+#include <openspace/util/camera.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -112,41 +112,22 @@ std::vector<Waypoint> TargetNodeInstruction::getWaypoints() const {
         // The position in instruction is given is relative coordinates.
         targetPos = targetNode->worldPosition() +
             targetNode->worldRotationMatrix() * position.value();
-    }
-    else {
-        // TODO: Instead of this case, allow the curve to set its final position
 
-        //glm::dvec3 nodePos = targetNode->worldPosition();
-        //glm::dvec3 nodeToPrev = lastWayPoint().position() - nodePos;
-        //// TODO: compute position in a more clever way
+        Camera* camera = global::navigationHandler.camera();
 
-        //const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode, _minAllowedBoundingSphere);
-        //const double defaultHeight = 2 * radius;
+        glm::dmat4 lookAtMat = glm::lookAt(
+            targetPos,
+            targetNode->worldPosition(),
+            camera->lookUpVectorWorldSpace()
+        );
 
-        //bool hasHeight = props->height.has_value();
-        //double height = hasHeight ? props->height.value() : defaultHeight;
+        glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 
-        //// move target position out from surface, along vector to camera
-        //targetPos = nodePos + glm::normalize(nodeToPrev) * (radius + height);
-
-
-        // OBS! TEMPORARY!! TODO: fix so that a camera pose is optional in Waypoint
-        const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);
-        targetPos = targetNode->worldPosition() + 3 * radius * glm::dvec3(1.0, 0.0, 0.0);
+        Waypoint wp{ targetPos, targetRot, nodeIdentifier };
+        return std::vector<Waypoint>({ wp });
     }
 
-    Camera* camera = global::navigationHandler.camera();
-
-    glm::dmat4 lookAtMat = glm::lookAt(
-        targetPos,
-        targetNode->worldPosition(),
-        camera->lookUpVectorWorldSpace()
-    );
-
-    glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
-
-    Waypoint wp{ targetPos, targetRot, nodeIdentifier }; 
-    return std::vector<Waypoint>({ wp });
+    return std::vector<Waypoint>();
 }
 
 NavigationStateInstruction::NavigationStateInstruction(

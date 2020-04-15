@@ -45,7 +45,7 @@ public:
 
     // Accessors
     const std::vector<std::unique_ptr<Instruction>>* instructions() const;
-    const Instruction* instruction(int i) const;
+    Instruction* instruction(int i) const;
     const bool stopAtTargets() const; 
     const bool stopAtTargetsSpecified() const;
     const NavigationState& startState() const;
