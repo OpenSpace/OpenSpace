@@ -130,6 +130,8 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
         _extraQuantityNames[i] = varName;
     }
 
+    ifs.close();
+
     return true;
 }
 

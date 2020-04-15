@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESWINDOW___H__
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESWINDOW___H__
 
+#include <modules/fieldlinessequence/util/datastructures.h>
 #include <modules/fieldlinessequence/util/webfieldlinesworker.h>
 #include <vector>
 
@@ -33,8 +34,9 @@ namespace openspace {
 struct Window {
     
     // This is the essence of the Window, pairs of triggertimes and download keys
-    std::vector<std::pair<double, std::string>> triggerTimes;
-    
+    // std::vector<std::pair<double, std::string>> triggerTimes;
+    std::vector<TriggerTime> triggerTimes;
+
     int activeTriggerTime;
     
     // Amount of steps from current timetrigger to first respectively last trigger in window
@@ -65,6 +67,7 @@ struct Window {
     
 class WebFieldlinesWindow{
 public:
+
     // Constructors
     WebFieldlinesWindow() = default;
     

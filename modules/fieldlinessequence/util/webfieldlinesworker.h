@@ -25,15 +25,18 @@
 #ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESWORKER___H__
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESWORKER___H__
 
+#include <modules/fieldlinessequence/util/datastructures.h>
 #include <string>
 #include <vector>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/httprequest.h>
 
+
 namespace openspace {
     
 class WebFieldlinesWorker{
 public:
+
     // Constructor
     WebFieldlinesWorker() = default;
 
@@ -48,9 +51,9 @@ public:
     
     // Download all the steps within one window.
     // Spawn one thread per file to download?
-    void downloadWindow(std::vector<std::pair<double, std::string>> triggerTimes);
+    void downloadWindow(std::vector<TriggerTime> triggerTimes);
 
-    void updateRFSSourceFiles(std::vector<std::string>& _sourceFiles);
+    void updateRFSSourceFiles(std::vector<std::string>& sourceFiles);
 
     // Returns true when the worker has downloaded a window and saved the path 
     // to the files in _sourceFiles
@@ -68,7 +71,7 @@ public:
     bool edgeMode();
 
     // Add a downloaded file to the list of downloaded files
-    void addToDownloadedList(std::pair<double, std::string> pair);
+    void addToDownloadedList(const double time, const std::string path);
 
 private:
 
@@ -84,7 +87,7 @@ private:
     Time _minTime;
 
     // Might need this later
-    std::pair<double, std::string> _latestDownload;
+    TriggerTime _latestDownload;
 
     // Contains a list of all the trigger times that has been downloaded already,
     std::vector<std::pair<double, std::string>> _downloadedTriggerTimes;
@@ -114,9 +117,9 @@ private:
     std::pair<double, double> acceptableToStartRequestingAgain = std::make_pair(0.0, 0.0);
     
     // Download one file to sync directory
-    std::string downloadOsfls(std::pair<double, std::string> downloadKey);
+    void downloadOsfls(TriggerTime downloadKey);
     
-    bool fileIsOnDisk(double triggerTime, std::string path);
+    bool isFileInDownloadedList(const double triggerTime);
     
     /********************************************
     |               Helper Functions            |

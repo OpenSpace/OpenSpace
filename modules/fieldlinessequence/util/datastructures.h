@@ -22,59 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESMANAGER___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESMANAGER___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___DATASTRUCTURES___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___DATASTRUCTURES___H__
 
-#include <modules/fieldlinessequence/util/webfieldlineswindow.h>
-#include <vector>
+//#include <algorithm>
 #include <string>
 
-namespace openspace {
-
-class WebFieldlinesManager{
-public:
-    // Constructor
-    WebFieldlinesManager() = default;
-
-    // To replace the constructor, takes the identifier of the field line, is used for storing the field lines mainly
-    // Also takes a second parameter containing the name of the field line model used.
-    // These may in the future be the same.
-    void initializeWebFieldlinesManager(std::string identifier, std::string url, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
-    
-    std::string initializeSyncDirectory(std::string identifier, std::unique_ptr<ghoul::Dictionary> & dictionary);
-    
-    // Temporary function - this should be moved to the worker. It's to download
-    // the start lines if the directory is empty or launching for the first time
-    void preDownload(std::string dUrl);
-
-    // Returns the sync directory
-    std::string getDirectory();
-    
-    // Function to run in FieldLinesSequence's update loop
-    void update();
-
-    // Returns wether the worker has finished downloading a window.
-    bool isWindowReadyToLoad();
-
-	void resetWorker();
-
-    bool hasUpdated = false;
-
-    bool notifyUpdate = false;
-
-private:
-
-    // Flag wether the manager is properly connected
-    bool _connected = false;
-
-    std::string _syncDir;
-        
-    // The datastructure for managing the interval of fieldline sets to be downloaded
-    WebFieldlinesWindow _webFieldlinesWindow;
-    
+struct TriggerTime {
+    double triggertime = 0.0;
+    std::string url;
+    bool downloaded = false;
 };
 
 
-} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___WEBFIELDLINESMANAGER___H__
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

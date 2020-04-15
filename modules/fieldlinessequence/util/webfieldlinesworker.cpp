@@ -31,6 +31,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
 
+// Tracy
+//#include <Tracy.hpp>
+
+#include <ghoul/misc/assert.h>
+
 
 namespace {
     constexpr const char* _loggerCat = "FieldlinesSequence[ Web FLs Worker ]";
@@ -39,7 +44,7 @@ namespace {
 
 namespace openspace{
 
-WebFieldlinesWorker::WebFieldlinesWorker(std::string syncDir, std::string serverUrl)
+    WebFieldlinesWorker::WebFieldlinesWorker(std::string syncDir, std::string serverUrl)
 : _syncDir(syncDir), _serverUrl(serverUrl) {
     // Maybe to be used
     _endpointSingleDownload = _serverUrl;
@@ -102,14 +107,14 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time,
         AsyncHttpMemoryDownload mmryDld = AsyncHttpMemoryDownload(url);
         _availableTimesDownloader = std::make_unique<AsyncHttpMemoryDownload>(url);
         HttpRequest::RequestOptions opt = {};
-        opt.requestTimeoutSeconds = 5;
+        opt.requestTimeoutSeconds = 0;
         _availableTimesDownloader->start(opt);
+        _availableTimesDownloader->wait();
     }
 
     if (!_noMoreRequests && _availableTimesDownloader && 
                 _availableTimesDownloader->hasStarted() && 
                 _availableTimesDownloader->hasSucceeded()) {
-        _availableTimesDownloader->wait();
         std::string stringResult;
         std::vector<std::string> urlList;
         std::vector<std::string> timeList;
@@ -122,8 +127,8 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time,
             _availableTimesDownloader->downloadedData().end(),
             std::back_inserter(stringResult),
             [](char c) {
-            return c;
-        }
+                return c;
+            }
         );
 
         auto res = json::parse(stringResult);
@@ -173,8 +178,9 @@ void WebFieldlinesWorker::getRangeOfAvailableTriggerTimes(double time,
 // future timesteps, then steps backwards from the startingpoint 
 // TODO(Axel): Different behaviour depending on direction the user is moving in,
 // might be wanted?
+//#pragma optimize( "", off ) // unoptimized code section 
 void WebFieldlinesWorker::downloadWindow(
-                                 std::vector<std::pair<double, std::string>> triggerTimes)
+                                 std::vector<TriggerTime> triggerTimes)
 {
     // Helper variables
     size_t startingPoint = triggerTimes.size() / 2;
@@ -188,39 +194,56 @@ void WebFieldlinesWorker::downloadWindow(
 
     // Is there a download thread to be joined and added to the list?
     if (_downloading && _downloading->hasSucceeded() && _newWindow) {
-        _downloading->wait();
-        addToDownloadedList(_latestDownload);
+        //ZoneScopedN("wait(), add to downloaded list")
+
+        if (true) {
+            //ZoneScopedN("Actually still waited for something to download")
+            _downloading->wait();
+        }
+        addToDownloadedList(_latestDownload.triggertime, _latestDownload.url);
+        _latestDownload.downloaded = true;
         _readyToDownload = true;
         // This is to trigger one update of the fieldline timestamp that the user is
         // currently on, while the rest of them will be downloaded in the background,
         // and updated once ready
-        if (_latestDownload.second == triggerTimes[startingPoint].second)
+        if (_latestDownload.url == triggerTimes[startingPoint].url) {
             oneUpdate = true;
+        }
     }
 
     if (_readyToDownload) {
-        // Forwards
-        std::vector<std::pair<double, std::string>>::iterator forwardIt =
-            triggerTimes.begin();
+        //ZoneScopedN("is ready to download")
 
+        // Forwards
+        std::vector<TriggerTime>::iterator forwardIt =
+            triggerTimes.begin();
         std::advance(forwardIt, startingPoint);
-        std::for_each(forwardIt, triggerTimes.end(), [this, &downloaded](auto it) {
-            if (!downloaded && !fileIsOnDisk(it.first, it.second)) {
+
+        //TODO it.downloaded is redundant as it is now. Ment to replace "DownloadedList"
+        std::for_each(forwardIt, triggerTimes.end(), [this, &downloaded](TriggerTime& it){
+            if (!downloaded && !it.downloaded && 
+                            !isFileInDownloadedList(it.triggertime)) { 
+                //ZoneScopedN("Forward")
+              
                 downloadOsfls(it); 
                 downloaded = true;
+                it.downloaded = true;
                 _doneUpdating = false;
             }
         });
-
+               
         // Backwards
         if (!downloaded) {
             std::for_each(
                 triggerTimes.rbegin(),
                 triggerTimes.rend(),
-                [this, &downloaded](auto it) {
-                    if (!downloaded && !fileIsOnDisk(it.first, it.second)) {
+                [this, &downloaded](TriggerTime it) {
+                    if (!downloaded && !it.downloaded && 
+                                !isFileInDownloadedList(it.triggertime)) {
+                        //ZoneScopedN("Backwards")
                         downloadOsfls(it);
                         downloaded = true;
+                        it.downloaded = true;
                         _doneUpdating = false;
                     }
                 }
@@ -243,10 +266,11 @@ void WebFieldlinesWorker::downloadWindow(
         oneUpdate = false;
     }
 }
+//#pragma optimize( "", on )    // end of unoptimized code session
 
 // Updates the list of available sourcefiles, owned by renderablefieldlinessequence.
 // TODO RFLS
-void WebFieldlinesWorker::updateRFSSourceFiles(std::vector<std::string>& _sourceFiles) {
+void WebFieldlinesWorker::updateRFSSourceFiles(std::vector<std::string>& sourceFiles) {
     if (_readyToUpdateSourceFiles) {
         std::vector<std::string> toInsert;
         std::transform(
@@ -258,30 +282,30 @@ void WebFieldlinesWorker::updateRFSSourceFiles(std::vector<std::string>& _source
             }
         );
 
-        auto sourcePtr = _sourceFiles.begin();
+        auto sourcePtr = sourceFiles.begin();
         std::for_each(
             toInsert.begin(),
             toInsert.end(),
-            [&sourcePtr, &_sourceFiles] (auto insertableElement) {
-                for (sourcePtr; sourcePtr != _sourceFiles.end(); sourcePtr++) {
-                    if (sourcePtr != (--_sourceFiles.end())) {
+            [&sourcePtr, &sourceFiles] (auto insertableElement) {
+                for (sourcePtr; sourcePtr != sourceFiles.end(); sourcePtr++) {
+                    if (sourcePtr != (--sourceFiles.end())) {
                         if (insertableElement > *sourcePtr &&
                             insertableElement < *sourcePtr++)
                         {
-                            _sourceFiles.insert(sourcePtr++, insertableElement);
+                            sourceFiles.insert(sourcePtr++, insertableElement);
                             break;
                         }
                     }
                     if (insertableElement < *sourcePtr) {
-                        sourcePtr = _sourceFiles.insert(sourcePtr, insertableElement);
+                        sourcePtr = sourceFiles.insert(sourcePtr, insertableElement);
                         break;
                     }
                     if (insertableElement == *sourcePtr) {
                         break;
                     }
                 }
-                if (sourcePtr == _sourceFiles.end()) {
-                    sourcePtr = _sourceFiles.insert(sourcePtr, insertableElement);
+                if (sourcePtr == sourceFiles.end()) {
+                    sourcePtr = sourceFiles.insert(sourcePtr, insertableElement);
                 }
             }
         );
@@ -318,14 +342,14 @@ bool WebFieldlinesWorker::edgeMode() {
     return _noMoreRequests && _bigWindowHasData;
 }
     
-std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> downloadKey){
+void WebFieldlinesWorker::downloadOsfls(TriggerTime downloadKey){
     _downloadedSomething = true;
     _latestDownload = downloadKey;
 
     const std::string fileName =
-                        downloadKey.second.substr(downloadKey.second.find_last_of("\\/", 
-                                                  downloadKey.second.size() - 1));
-    std::string url = downloadKey.second;
+                        downloadKey.url.substr(downloadKey.url.find_last_of("\\/", 
+                                                  downloadKey.url.size() - 1));
+    std::string url = downloadKey.url;
     std::string destinationPath =
         absPath(_syncDir + ghoul::filesystem::FileSystem::PathSeparator + fileName);
     // what the downloaded filename is to be
@@ -340,30 +364,35 @@ std::string WebFieldlinesWorker::downloadOsfls(std::pair<double,std::string> dow
     );
 
     HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 5;
+    opt.requestTimeoutSeconds = 0;
+    if (true) { //only to scope the ZoneScopedN
+        ZoneScopedN("before Start")
+        _downloading->start(opt);
+        _downloading->wait();
+        _readyToDownload = false;
+    }
 
-    _downloading->start(opt);
-    _downloading->wait();
-
-    _readyToDownload = false;
-
-    return destinationPath;
+    //return destinationPath;
 }
+
 
 // This function searches for triggerTime in _downloadedTriggerTimes, 
 // to see weather a file has already been downloaded or not
-bool WebFieldlinesWorker::fileIsOnDisk(double triggerTime, std::string path) {
-    
-    bool exists = FileSys.fileExists(path);
-    
-    bool inList = std::find_if(
-        _downloadedTriggerTimes.begin(),
-        _downloadedTriggerTimes.end(),
-        [&triggerTime] (std::pair<double, std::string> const &element) {
-            return element.first == triggerTime;
-        }) != _downloadedTriggerTimes.end();
+bool WebFieldlinesWorker::isFileInDownloadedList(const double time) {
+    //ZoneScopedN("file is on disk")
 
-        return inList;  //(exists&&
+    //bool exists = FileSys.fileExists(path);
+    
+    std::vector<std::pair<double, std::string>>::const_iterator inList = std::find_if(
+        _downloadedTriggerTimes.cbegin(),
+        _downloadedTriggerTimes.cend(),
+        [&time](const std::pair<double, std::string>& element) {
+            return element.first == time;
+        }
+    );
+        
+    return inList != _downloadedTriggerTimes.cend();
+    //return  exists; 
 }
     
 void WebFieldlinesWorker::parseTriggerTimesList(std::string s,
@@ -411,15 +440,32 @@ void WebFieldlinesWorker::triggerTimeDouble2String(double i, std::string& s) {
     s.replace(16, 1, "-");
 }
     
+
 // Inserts the pair in sorted order
-void WebFieldlinesWorker::addToDownloadedList(std::pair<double, std::string> pair) {
-    const std::string fileName = pair.second.substr(pair.second.find_last_of('/', 
-                                                         pair.second.size() - 1) + 1);
+void WebFieldlinesWorker::addToDownloadedList(const double time, const std::string path){     
+    const size_t begin = path.find_last_of("\\/");
+    const std::string fileName = path.substr(begin + 1);
+
+    ghoul_assert(std::is_sorted(_downloadedTriggerTimes.begin(),
+        _downloadedTriggerTimes.end()));
+
     _downloadedTriggerTimes.insert(
-        std::upper_bound(
-            _downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), pair
-        ), std::make_pair(pair.first, fileName)
+        std::find_if(
+            _downloadedTriggerTimes.cbegin(),
+            _downloadedTriggerTimes.cend(),
+            [&time](const std::pair<double, std::string>& p ) {
+                return p.first > time;
+            }
+        ),
+        // this pair is inserted when finding the first bigger time stamp
+        std::make_pair(time, fileName)  
     );
+
+    //_downloadedTriggerTimes.insert(
+    //    std::upper_bound(
+    //        _downloadedTriggerTimes.begin(), _downloadedTriggerTimes.end(), pair
+    //    ), std::make_pair(pair.first, fileName)
+    //);
 }
 
 bool WebFieldlinesWorker::compareTimetriggersEqual(double first, double second) {

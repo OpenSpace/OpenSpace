@@ -197,7 +197,7 @@ asset.onInitialize(function ()
     
     -- Set different deltatimes
     sceneHelper.setDeltaTimeKeys({
-        1801, 3600, 430000
+        1, 3600, 430000
     })
 
     openspace.setDefaultGuiSorting()

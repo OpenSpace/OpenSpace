@@ -41,6 +41,9 @@
 #include <fstream>
 #include <thread>
 
+ // Tracy
+#include <Tracy.hpp>
+
 namespace {
     constexpr const char* _loggerCat = "RenderableFieldlinesSequence";
 
@@ -483,13 +486,13 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
             );
 
         // Ensure that there are available and valid source files left
-        if (_sourceFiles.empty()) {
+        /*if (_sourceFiles.empty()) {
             LERROR(fmt::format(
                 "{}: {} contains no {} files",
                 _identifier, sourceFolderPath, inputFileTypeString
             ));
             return false;
-        }
+        }*/
     }
     else {
         LERROR(fmt::format(
@@ -1200,16 +1203,21 @@ void RenderableFieldlinesSequence::initializeWebManager() {
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
+    ZoneScoped
     if (_shaderProgram->isDirty()) {
+        ZoneScopedN("Rebuild from file if dirty")
         _shaderProgram->rebuildFromFile();
     }
 
     const double currentTime = data.time.j2000Seconds();
 
     if (_dynamicWebContent) {
+        ZoneScopedN("If dynamicWebContent. Update manager")
+
         if (!_webFieldlinesManager.hasUpdated &&
-            _webFieldlinesManager.checkIfWindowIsReadyToLoad())
+            _webFieldlinesManager.isWindowReadyToLoad())
         {
+            ZoneScopedN("If window is ready to load")
             _startTimes.clear();
             extractTriggerTimesFromFileNames();
                 
@@ -1230,6 +1238,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
+        ZoneScopedN("Is in interval")
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
 
         if (
@@ -1240,6 +1249,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
+            ZoneScopedN("Update Active Trigger Time Index ()")
             updateActiveTriggerTimeIndex(currentTime);
 
             if (_loadingStatesDynamically) {
@@ -1260,6 +1270,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
 
     if (_dynamicWebContent && _webFieldlinesManager.notifyUpdate) {
+        ZoneScopedN("If fieldlines manager notifyUpdate")
+
         updateActiveTriggerTimeIndex(currentTime);
         computeSequenceEndTime();
         _webFieldlinesManager.notifyUpdate = false;
@@ -1267,6 +1279,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     if (_mustLoadNewStateFromDisk) {
         if (!_isLoadingStateFromDisk && !_newStateIsReady) {
+            ZoneScopedN(" readNewState. Atempt to thread actually!")
+
             _isLoadingStateFromDisk = true;
             _mustLoadNewStateFromDisk = false;
             std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
@@ -1278,6 +1292,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
 
     if (_needsUpdate || _newStateIsReady) {
+        ZoneScopedN("If new state is ready or needs update. Updates vertex pos buffer")
 
         if (_loadingStatesDynamically) {
             _states[0] = std::move(*_newState);
@@ -1296,11 +1311,13 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
 
     if (_shouldUpdateColorBuffer) {
+        ZoneScopedN("updates vertex color buffer")
         updateVertexColorBuffer();
         _shouldUpdateColorBuffer = false;
     }
 
     if (_shouldUpdateMaskingBuffer) {
+        ZoneScopedN("update vertex masking buffer")
         updateVertexMaskingBuffer();
         _shouldUpdateMaskingBuffer = false;
     }

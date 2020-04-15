@@ -32,6 +32,9 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/engine/globals.h>
 
+ // Tracy
+//#include <Tracy.hpp>
+
 
 namespace {
     constexpr const char* _loggerCat = "WebFieldlinesWindow";
@@ -44,14 +47,14 @@ WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string server
                                                 std::vector<std::string>& _sourceFiles,
                                     std::vector<double>& _startTimes)
 {
+
     _window.backWidth = 3;
     _window.forwardWidth = 3;
     _window.nTriggerTimes = _sourceFiles.size();
 
     for(int i = 0; i < _window.nTriggerTimes ; i++){
-        _window.triggerTimes.push_back(
-            std::make_pair(_startTimes[i], _sourceFiles[i])
-        );
+        TriggerTime tt = { _startTimes[i], _sourceFiles[i], true };
+        _window.triggerTimes.push_back(tt);
     }
         
     rfs_sourceFiles = &_sourceFiles;
@@ -61,7 +64,7 @@ WebFieldlinesWindow::WebFieldlinesWindow(std::string syncDir, std::string server
     _worker = WebFieldlinesWorker(syncDir, serverUrl);
 
     for (int i = 0; i < _window.nTriggerTimes; i++) {
-        _worker.addToDownloadedList(std::make_pair(_startTimes[i], _sourceFiles[i]));
+        _worker.addToDownloadedList(_startTimes[i], _sourceFiles[i]);
     }
 }
        
@@ -75,10 +78,10 @@ bool WebFieldlinesWindow::timeIsInWindow(double time) {
 // Returns true if time is at edge of the current window,
 // and will probably need to update window
 bool WebFieldlinesWindow::timeIsInWindowMargin(double time, double direction) {
-    const int threshold = 2; // base this on speed later
+    const int threshold = 2; //TODO base this on speed later
         
     if (direction > 0){ // If time is moving forward
-        if (time >= _window.triggerTimes[_window.nTriggerTimes - threshold].first) {
+        if (time >= _window.triggerTimes[_window.nTriggerTimes - threshold].triggertime) {
             if (time > windowEnd()) {
                 return false;
             }
@@ -87,7 +90,7 @@ bool WebFieldlinesWindow::timeIsInWindowMargin(double time, double direction) {
         else return false;
     }
     else{ // If time is moving backwards
-        if (time <= _window.triggerTimes[threshold].first){
+        if (time <= _window.triggerTimes[threshold].triggertime){
             if (time < windowStart()) {
                 return false;
             }
@@ -126,12 +129,13 @@ void WebFieldlinesWindow::newWindow(double time) {
     // it is checked wether the current position is within
     // the boundaries with respect to back & forward width
     for(int i = std::max(index - _window.backWidth,0);
-        i <= std::min(index + _window.forwardWidth,
-            static_cast<int>(_triggerTimesWeb.size() -1));
-        i++) {
-        _window.triggerTimes.push_back(
-            std::make_pair(_triggerTimesWeb[i].first, _triggerTimesWeb[i].second)
-        );
+            i <= std::min(index + _window.forwardWidth,
+                static_cast<int>(_triggerTimesWeb.size() -1));
+            i++) {
+
+      //bool onFile = FileSys.fileExists();     //put onFile instead of false next line
+        TriggerTime tt = {_triggerTimesWeb[i].first, _triggerTimesWeb[i].second, false };
+        _window.triggerTimes.push_back(tt);
         _window.nTriggerTimes++;
     }
 
@@ -155,6 +159,7 @@ bool WebFieldlinesWindow::timeIsInTriggerTimesWebList(double time) {
 }
     
 void WebFieldlinesWindow::getNewTriggerTimesWebList(double time) {
+    // _triggerTimesWeb gets initialized here
     _worker.getRangeOfAvailableTriggerTimes(time, _triggerTimesWeb);
     _nAvailableWeb = static_cast<int>(_triggerTimesWeb.size());
 }
@@ -198,12 +203,12 @@ bool WebFieldlinesWindow::edgeWindowReady(){
 
 // Returns first trigger of window
 double WebFieldlinesWindow::windowStart(){
-    return _window.triggerTimes.front().first;
+    return _window.triggerTimes.front().triggertime;
 }
 
 // Returns last trigger of window
 double WebFieldlinesWindow::windowEnd(){
-    return _window.triggerTimes.back().first;
+    return _window.triggerTimes.back().triggertime;
 }
     
 } // namespace openspace

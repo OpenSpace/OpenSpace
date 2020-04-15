@@ -307,7 +307,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     
     if (!_webContentUrl.empty()) {
         if (!_webFieldlinesManager.hasUpdated &&
-            _webFieldlinesManager.checkIfWindowIsReadyToLoad())
+            _webFieldlinesManager.isWindowReadyToLoad())
         {
             _triggerTimes.clear();
             extractTriggerTimesFromFileNames();
@@ -580,7 +580,6 @@ void RenderableTimeVaryingSphere::readNewTexture(const std::string& filePath) {
 }
     
 std::vector<float> RenderableTimeVaryingSphere::processWSAFitsFile(std::string filePath){
-    std::vector<float> res;
 
     FitsFileReader fitsFileReader(false);
     
@@ -595,7 +594,7 @@ std::vector<float> RenderableTimeVaryingSphere::processWSAFitsFile(std::string f
     // Observatory header value
     //const std::string wsaMapType = *fitsFileReader.readHeaderValueString("OBSER");
     
-    std::vector<std::vector<float>> rgbLayers;
+    std::vector<glm::vec3> rgbLayers;
     float r, g, b;
     
     // the numbers 64800, 16200 means, grab the fifth layer in the fits file, where the
@@ -607,10 +606,8 @@ std::vector<float> RenderableTimeVaryingSphere::processWSAFitsFile(std::string f
     // since they have varying results depending on solar activity
     float damper = 1.0f;
     float multiplyer = 20.0f;
-    
     for (float mapvalue : magnetogram) {
         float colorIntensity = abs(mapvalue) / maxvalue; // normalized value
-        
         // would be neat to be able choose color scheme interactively
         //r = 1.0f, g = 1.0f, b = 1.0f; // white
         //r = 0.0f, g = 0.0f, b = 0.0f; // black
@@ -640,11 +637,14 @@ std::vector<float> RenderableTimeVaryingSphere::processWSAFitsFile(std::string f
             }
         }
         // glm vec3
-        std::vector<float> rgb = {r,g,b};
+        glm::vec3 rgb = glm::vec3(r,g,b);
         rgbLayers.push_back(rgb);
     }
     
     // shift with leading edge value and divide by two to match resolution (180)
+    // long0 is the 0 longitude of the sun. The rotate-double-forloop shifts 
+    // each column to map it correctly.
+    std::vector<float> res;
     int shift = (360 - long0) / 2;
     
     for(int i = 0; i < 90; i++) {
@@ -653,9 +653,9 @@ std::vector<float> RenderableTimeVaryingSphere::processWSAFitsFile(std::string f
                     rgbLayers.begin() + (i * 180) + 179 );
         for(int j = 0; j < 180; j++){
             int index = i * 180 + j;
-            res.push_back(rgbLayers[index][0]);
-            res.push_back(rgbLayers[index][1]);
-            res.push_back(rgbLayers[index][2]);
+            res.push_back(rgbLayers[index].x);  // vector[i] == vec3, .x == r
+            res.push_back(rgbLayers[index].y);  // vector[i] == vec3, .y == g
+            res.push_back(rgbLayers[index].z);  // vector[i] == vec3, .z == b
         }
     }
 

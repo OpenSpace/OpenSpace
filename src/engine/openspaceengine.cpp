@@ -1082,6 +1082,8 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
 
     if (_hasScheduledAssetLoading) {
+        ZoneScoped
+
         LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
         loadSingleAsset(_scheduledAssetPathToLoad);
         _hasScheduledAssetLoading = false;
