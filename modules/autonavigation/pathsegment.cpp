@@ -77,16 +77,14 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
 }
 
 CameraPose PathSegment::traversePath(double dt) {
-    // In case there is an error in the speed VS distance VS duration relation, 
-    // make sure that we actually reach the end point.
-    double displacement;
-    if (_progressedTime > _duration && !hasReachedEnd()) {
-        // TODO: reach the target in a reasonable amount of time and with smooth motion
-        LWARNING("Did not reach the target in the given duration. Moving toward the target in constant speed. TODO: fix so that this does not happen"); // TODO: fix and then remove this 
-        displacement = dt * speedAtTime(_duration - _duration * dt);
-    }
-    else {
-        displacement = dt * speedAtTime(_progressedTime);
+    // compute displacement along the path during this frame
+    double displacement = 0.0;
+    int steps = 2; // TODO: should possibly increase with larger risk of error
+    double h = dt / steps;
+    for (int i = 0; i < steps; ++i) {
+        double t = _progressedTime + i * h;
+        double speed = 0.5 * (speedAtTime(t - h) + speedAtTime(t + h)); // midpoint method
+        displacement += h * speed;
     }
 
     _traveledDistance += displacement;
@@ -97,7 +95,7 @@ CameraPose PathSegment::traversePath(double dt) {
     // TEST: 
     //LINFO("-----------------------------------");
     //LINFO(fmt::format("u = {}", relativeDisplacement));
-    //LINFO(fmt::format("currentTime = {}", _currentTime));
+    //LINFO(fmt::format("progressedTime = {}", _progressedTime));
 
     _progressedTime += dt;
 
@@ -121,7 +119,7 @@ bool PathSegment::hasReachedEnd() const {
  */
 double PathSegment::speedAtTime(double time) const {
     ghoul_assert(time >= 0 && time <= _duration, "Time out of range [0, duration]");
-    double t = time / _duration;
+    double t = std::clamp(time / _duration, 0.0, 1.0);
     return (pathLength() * _speedFunction.value(t)) / _speedFunction.integratedSum;
 }
 
