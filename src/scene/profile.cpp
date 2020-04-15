@@ -48,7 +48,6 @@ namespace {
     constexpr const char* _loggerCat = "Profile";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
-
 } // namespace
 
 namespace openspace {
@@ -60,6 +59,36 @@ void Profile::saveCurrentSettingsToProfile(std::string filename) {
         LERROR(errorMessage);
     }
     std::string initProfile = global::configuration.profile;
+}
+
+void Profile::convertToAssetFile(const std::string inProfilePath,
+                                 const std::string outFilePath)
+{
+    ProfileFile pf;
+
+    pf.readFromFile(inProfilePath);
+
+    std::ofstream outFile;
+    try {
+        outFile.open(outFilePath, std::ofstream::out);
+    }
+    catch (std::ofstream::failure& e) {
+        LERROR("Exception opening profile file for write: " + outFilePath);
+    }
+
+    try {
+        outFile << convertToAsset(pf);
+    }
+    catch (std::ofstream::failure& e) {
+        LERROR("Data write error to file: " + outFilePath);
+    }
+
+    try {
+        outFile.close();
+    }
+    catch (std::ofstream::failure& e) {
+        LERROR("Exception closing profile file after write: " + outFilePath);
+    }
 }
 
 std::string Profile::convertToAsset(ProfileFile& pf) {

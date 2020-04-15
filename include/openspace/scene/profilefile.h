@@ -137,22 +137,22 @@ public:
 
     /**
      * Updates the full string that defines the starting camera position. The format for
-     * this line is defined by ProfileFile::parseCamera and Profile::convertToAsset_camera
+     * this line is defined by ProfileFile::parseCamera & Profile::convertToAsset_camera
      * \param line The camera entry line to replace current camera entry
      */
     void updateCamera(const std::string line);
 
     /**
      * Adds a new module line to the list of module lines to be analyzed by the profile
-     * at startup. The format for a module line is defined by ProfileFile::parseModule and
-     * Profile::convertToAsset_modules
+     * at startup. The format for a module line is defined by ProfileFile::parseModule
+     * and Profile::convertToAsset_modules
      * \param line The module name to be added
      */
     void addModuleLine(const std::string line);
 
     /**
      * Adds a new asset to the list of assets to be loaded at startup. The format for an
-     * asset line is defined by ProfileFile::parseAsset and Profile::convertToAsset_assets
+     * asset line is defined by ProfileFile::parseAsset & Profile::convertToAsset_assets
      * \param line The asset name to be added
      */
     void addAssetLine(const std::string line);

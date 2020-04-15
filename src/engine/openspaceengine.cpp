@@ -51,6 +51,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -99,8 +100,6 @@
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const int CacheVersion = 1;
-    constexpr const char* ProfileToSceneConverter
-                                         = "${BASE}/scripts/convert_profile_to_scene.lua";
 
 } // namespace
 
@@ -300,38 +299,14 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration.profile.empty()) {
-        LINFO(
-            fmt::format("Run Lua script to convert {}.profile to scene",
-            global::configuration.profile)
-        );
-        ghoul::lua::LuaState lState;
+        std::string inputProfilePath = absPath("${ASSETS}");
+        std::string outputScenePath = absPath("${TEMPORARY}");
+        std::string inputProfile = inputProfilePath + "/" + global::configuration.profile
+            + ".profile";
+        std::string outputAsset = outputScenePath + "/" + global::configuration.profile
+            + ".asset";
 
-        // We can't use the absPath function here because we pass the path into the Lua
-        // function, which requires additional escaping
-        std::string inputProfilePath = generateFilePath("${ASSETS}");
-        std::string outputScenePath = generateFilePath("${TEMPORARY}");
-
-        std::string setProfileFilenameInLuaState = fmt::format(R"(
-            openspace = {{}}
-            openspace.profile = {{}}
-            function openspace.profile.getFilename()
-              return "{}.profile"
-            end
-            function openspace.profile.getProfileInputPath()
-              return "{}"
-            end
-            function openspace.profile.getSceneOutputPath()
-              return "{}"
-            end
-            )",
-            global::configuration.profile,
-            inputProfilePath,
-            outputScenePath
-        );
-
-        ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
-        ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
-
+        global::profile.convertToAssetFile(inputProfile, outputAsset);
 
         // Set asset name to that of the profile because a new scene file will be
         // created with that name, and also because the profile name will override

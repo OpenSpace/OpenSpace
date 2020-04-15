@@ -55,6 +55,16 @@ public:
     void saveCurrentSettingsToProfile(std::string filename);
 
     /**
+     * Reads in a .profile file, converts it to scene/asset equivalent syntax, and
+     * writes the result to the specified output path.
+     * \param inProfilePath The .profile file to be converted
+     * \param outFilePath The output file path that will be written with the converted
+     *                       contents (in an .asset file)
+     */
+    void convertToAssetFile(const std::string inProfilePath,
+        const std::string outFilePath);
+
+    /**
      * Returns the string contents of a profileFile object converted to scene/asset
      * equivalent syntax.
      * \param pf The profileFile object to be converted
