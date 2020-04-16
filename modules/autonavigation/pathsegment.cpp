@@ -83,7 +83,7 @@ CameraPose PathSegment::traversePath(double dt) {
     double h = dt / steps;
     for (int i = 0; i < steps; ++i) {
         double t = _progressedTime + i * h;
-        double speed = 0.5 * (speedAtTime(t - h) + speedAtTime(t + h)); // midpoint method
+        double speed = 0.5 * (speedAtTime(t - 0.5*h) + speedAtTime(t + 0.5*h)); // midpoint method
         displacement += h * speed;
     }
 
@@ -149,12 +149,13 @@ void PathSegment::initCurve() {
 
 PathSegment::SpeedFunction::SpeedFunction(double duration) {
     // apply duration constraint (eq. 14 in Eberly)
-    const int steps = 100;
-    double dt = duration / steps;
-    // TODO: better approximation 
     double speedSum = 0.0;
-    for (double t = 0.0; t <= 1.0; t += 1.0 / steps) {
-        speedSum += dt * value(t);
+    int steps = 100;
+    double dt = duration / steps;
+    const double h = 1.0 / steps;
+    for (double t = 0.0; t <= 1.0; t += h) {
+        double midpointSpeed = 0.5 * (value(t + 0.5*h) + value(t - 0.5*h));
+        speedSum += dt * midpointSpeed;
     }
 
     integratedSum = speedSum;
