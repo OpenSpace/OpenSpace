@@ -194,6 +194,8 @@ private:
     double _timePrecision;
     Planet _planets[NUM_PLANETS];
     GUIMode _GUIState;
+    std::string oldCompareFirst;
+    std::string oldCompareSecond;
 
     //Settings for each planet
     //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled,

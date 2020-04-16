@@ -31,6 +31,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/scripting/scriptengine.h>
 
  //Debug purposes
 #include <iostream>
@@ -546,10 +547,29 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
         _GUIState = SonificationModule::GUIMode::Compare;
     }
 
-    if (value.value == _compareProperty.secondPlanet.option().value) {
+    if (value.value != 0 && value.value == _compareProperty.secondPlanet.option().value) {
         _compareProperty.firstPlanet.setValue(0);
         return;
     }
+
+    if (oldCompareFirst != "") {
+        global::scriptEngine.queueScript(
+            "openspace.setPropertyValue('Scene." +
+            oldCompareFirst + ".Scale.Scale', 1);",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    if (value.value != 0) {
+        global::scriptEngine.queueScript(
+            "openspace.setPropertyValue('Scene." +
+            value.description + ".Scale.Scale', 2000);",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        oldCompareFirst = value.description;
+    }
+    else
+        oldCompareFirst = "";
 
     std::string label = "/Compare";
     UdpTransmitSocket socket = UdpTransmitSocket(
@@ -574,10 +594,29 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
         _GUIState = SonificationModule::GUIMode::Compare;
     }
 
-    if (value.value == _compareProperty.firstPlanet.option().value) {
+    if (value.value != 0 && value.value == _compareProperty.firstPlanet.option().value) {
         _compareProperty.secondPlanet.setValue(0);
         return;
     }
+
+    if (oldCompareSecond != "") {
+        global::scriptEngine.queueScript(
+            "openspace.setPropertyValue('Scene." +
+            oldCompareSecond + ".Scale.Scale', 1);",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    if (value.value != 0) {
+        global::scriptEngine.queueScript(
+            "openspace.setPropertyValue('Scene." +
+            value.description + ".Scale.Scale', 2000);",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        oldCompareSecond = value.description;
+    }
+    else
+        oldCompareSecond = "";
 
     std::string label = "/Compare";
     UdpTransmitSocket socket = UdpTransmitSocket(
