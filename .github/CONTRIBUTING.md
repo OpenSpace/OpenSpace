@@ -1,4 +1,4 @@
 ## How to contribute
 The easiest way to contribute is through a separate fork of the repository and submitting a pull-request. One of the core developers will judge the pull request and integrate it into the main `master` branch. Preferably, there is an accompanying issue (created by you or not) which is solved by the PR. In this case, feel free to use the phrase "(closes #XXX)" in the text of the pull request, where `XXX` is the number of the issue that you have solved. The PR should be in its own separate branch following the naming `pr/feature`, where `feature` is a short, descripting name of the additional feature or bug contained in the PR.
 
-For more information we refer to the [Wiki](https://github.com/OpenSpace/OpenSpace/wiki). If there are any questions, feel free to contact us via [email](mailto:alexander.bock@me.com?subject=OpenSpace: Contributing).
+For more information we refer to the [Wiki](https://openspace.github.io). If there are any questions, feel free to contact us via [email](mailto:mail@alexanderbock.eu?subject=OpenSpace: Contributing).
