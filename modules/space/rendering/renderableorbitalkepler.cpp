@@ -202,13 +202,20 @@ namespace {
         return nLeapSeconds;
     }
 
-    int daysIntoGivenYear(int month, int dayOfMonth) {
-        //month and dayCount are zero-based. Does NOT account for leap year.
+    int daysIntoGivenYear(int year, int month, int dayOfMonth) {
+        //month and dayCount are zero-based.
         month -= 1;
         int dayCount = dayOfMonth - 1;
+        const int February = 1;
+        const bool isInLeapYear =
+            std::find(LeapYears.begin(), LeapYears.end(), year)
+            != LeapYears.end();
 
         for (int m = 0; m < month; ++m) {
             dayCount += DaysOfMonths[m];
+            if (m == February && isInLeapYear) {
+                dayCount += 1;
+            }
         }
         return dayCount;
     }
@@ -310,7 +317,7 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
     // 2.
     int monthNum = std::atoi(epochString.substr(4, 2).c_str());
     int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
-    int wholeDaysInto = daysIntoGivenYear(monthNum, dayOfMonthNum);
+    int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
     double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
     double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
 
