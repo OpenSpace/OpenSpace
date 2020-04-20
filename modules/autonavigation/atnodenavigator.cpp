@@ -90,22 +90,36 @@ const SceneGraphNode* AtNodeNavigator::anchor() const {
 
 // Move along the right vector for the camera, while looking at the center of the node
 void AtNodeNavigator::orbitNode(double deltaTime) {
-    ghoul_assert(_node != nullptr, "Node to orbit must be set!")
+    ghoul_assert(anchor() != nullptr, "Node to orbit must be set!")
     glm::dvec3 prevPosition = camera()->positionVec3();
     glm::dquat prevRotation = camera()->rotationQuaternion();
 
-    glm::dvec3 nodeCenter = anchor()->worldPosition();
-    double distanceToNode = glm::distance(prevPosition, nodeCenter) - anchor()->boundingSphere();
-    double orbitSpeed = distanceToNode * 0.1 * _orbitSpeedFactor;
-
     const glm::dvec3 up = camera()->lookUpVectorWorldSpace();
-    glm::dvec3 forward = prevRotation * glm::dvec3(0.0, 0.0, -1.0);
-    glm::dvec3 right = glm::normalize(glm::cross(forward, up));
+    const double speedFactor = 0.1 * _orbitSpeedFactor;
 
-    glm::dvec3 newPosition = prevPosition + orbitSpeed * deltaTime * right;
+    glm::dvec3 nodeCenter = anchor()->worldPosition();
+    double orbitRadius = glm::distance(prevPosition, nodeCenter);
+    double distanceToSurface = orbitRadius - anchor()->boundingSphere();
+    double orbitSpeed = distanceToSurface * speedFactor;
 
-    glm::dmat4 lookAtMat = glm::lookAt(newPosition, nodeCenter, up);
-    glm::dquat newRotation = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
+    // compute a new position along the orbit
+    glm::dquat lookAtNodeRotation = helpers::getLookAtQuaternion(prevPosition, nodeCenter, up);
+    glm::dvec3 targetForward = lookAtNodeRotation * glm::dvec3(0.0, 0.0, -1.0);
+    glm::dvec3 rightOrbitTangent = glm::normalize(glm::cross(targetForward, up));
+
+    glm::dvec3 newPosition = prevPosition + orbitSpeed * deltaTime * rightOrbitTangent;
+
+    // adjust for numerical error
+    glm::dvec3 nodeToNewPos = newPosition - nodeCenter;
+    double distanceDiff = glm::length(nodeToNewPos) - glm::distance(prevPosition, nodeCenter);
+    newPosition -= distanceDiff * glm::normalize(nodeToNewPos);
+
+    // rotate with the orbit, but keep the relative orientation with regards to the anchor
+    glm::dquat localRotation = glm::inverse(lookAtNodeRotation) * prevRotation;
+    glm::dquat newLookAtRotation =
+        helpers::getLookAtQuaternion(newPosition, nodeCenter, up);
+
+    glm::dquat newRotation = newLookAtRotation * localRotation;
 
     camera()->setPositionVec3(newPosition);
     camera()->setRotation(newRotation);
