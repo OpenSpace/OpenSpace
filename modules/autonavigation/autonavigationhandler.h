@@ -101,6 +101,10 @@ private:
     properties::BoolProperty _includeRoll;
     properties::BoolProperty _stopAtTargetsPerDefault;
     properties::OptionProperty _defaultStopBehavior;
+
+    // for testing pause behaviors. 
+    // TODO: remove later, if it causes problems with regular navigation
+    properties::BoolProperty _applyStopBehaviorWhenIdle;
 };
 
 } // namespace openspace::autonavigation

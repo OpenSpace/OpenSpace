@@ -68,6 +68,12 @@ namespace {
         "The default camera behavior that is applied when the camera reaches and stops at a target."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo ApplyStopBehaviorWhenIdleInfo = {
+        "ApplyStopBehaviorWhenIdleInfo",
+        "Apply Stop Behavior When Idle",
+        "If enabled, the camera is controlled using the default stop behavior even when no path is playing."
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -78,12 +84,13 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _includeRoll(IncludeRollInfo, false)
     , _stopAtTargetsPerDefault(StopAtTargetsPerDefaultInfo, false)
     , _defaultStopBehavior(DefaultStopBehaviorInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
 {
     addPropertySubOwner(_atNodeNavigator);
 
     _defaultCurveOption.addOptions({
         { CurveType::Bezier3, "Bezier3" },
-        { CurveType::Linear, "Linear"} 
+        { CurveType::Linear, "Linear" }
     });
     addProperty(_defaultCurveOption);
 
@@ -97,6 +104,8 @@ AutoNavigationHandler::AutoNavigationHandler()
     });
     _defaultStopBehavior = AtNodeNavigator::Behavior::None;
     addProperty(_defaultStopBehavior);
+
+    addProperty(_applyStopBehaviorWhenIdle);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -117,7 +126,16 @@ bool AutoNavigationHandler::hasFinished() const {
 void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
-    if (!_isPlaying || _pathSegments.empty()) return;
+    if (!_isPlaying || _pathSegments.empty()) {
+        // for testing, apply at node behavior when idle
+        if (_applyStopBehaviorWhenIdle) {
+            if (_atNodeNavigator.behavior() != _defaultStopBehavior.value()) {
+                _atNodeNavigator.setBehavior(AtNodeNavigator::Behavior(_defaultStopBehavior.value()));
+            }
+            _atNodeNavigator.updateCamera(deltaTime);
+        }
+        return;
+    }
 
     if (_activeStop) {
         applyStopBehaviour(deltaTime);
@@ -257,7 +275,7 @@ void AutoNavigationHandler::continuePath() {
 
     LINFO("Continuing path...");
 
-    // Recompute start camera state for the upcoming path segment,
+    // recompute start camera state for the upcoming path segment,
     _pathSegments[_currentSegmentIndex]->setStart(wayPointFromCamera());
     _activeStop = nullptr;
 }
@@ -346,7 +364,6 @@ void AutoNavigationHandler::pauseAtTarget(int i) {
     if (!_activeStop) return;
 
     _atNodeNavigator.setBehavior(_activeStop->behavior);
-    _atNodeNavigator.setNode(_pathSegments[i]->end().nodeDetails.identifier);
 
     bool hasDuration = _activeStop->duration.has_value();
 

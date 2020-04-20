@@ -24,15 +24,19 @@
 
 #include <modules/autonavigation/atnodenavigator.h>
 
+#include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/waypoint.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/util/camera.h>
 #include <ghoul/logging/logmanager.h>
+#include <glm/gtx/rotate_vector.hpp>
 
 namespace {
     constexpr const char* _loggerCat = "AtNodeNavigator";
+
+    const double Epsilon = 1E-7;
 
     constexpr const openspace::properties::Property::PropertyInfo OrbitSpeedFactorInfo = {
         "OrbitSpeedFactor",
@@ -53,15 +57,8 @@ AtNodeNavigator::AtNodeNavigator()
 
 AtNodeNavigator::~AtNodeNavigator() {} // NOLINT
 
-void AtNodeNavigator::setNode(std::string identifier) {
-    SceneGraphNode* node = sceneGraphNode(identifier);
-    if (!node) {
-        LERROR(fmt::format(
-            "Could not find scene graph node '{}' to navigate in relation to.", identifier
-        ));
-        return;
-    }
-    _node = node;
+const AtNodeNavigator::Behavior AtNodeNavigator::behavior() const {
+    return _behavior;
 }
 
 void AtNodeNavigator::setBehavior(Behavior behavior) {
@@ -87,15 +84,19 @@ Camera* AtNodeNavigator::camera() const {
     return global::navigationHandler.camera();
 }
 
+const SceneGraphNode* AtNodeNavigator::anchor() const {
+    return global::navigationHandler.anchorNode();
+}
+
 // Move along the right vector for the camera, while looking at the center of the node
 void AtNodeNavigator::orbitNode(double deltaTime) {
     ghoul_assert(_node != nullptr, "Node to orbit must be set!")
     glm::dvec3 prevPosition = camera()->positionVec3();
     glm::dquat prevRotation = camera()->rotationQuaternion();
 
-    glm::dvec3 nodeCenter = _node->worldPosition();
-    double distanceToNode = glm::distance(prevPosition, nodeCenter) - _node->boundingSphere();
-    double orbitSpeed = distanceToNode * 0.1 * _orbitSpeedFactor; 
+    glm::dvec3 nodeCenter = anchor()->worldPosition();
+    double distanceToNode = glm::distance(prevPosition, nodeCenter) - anchor()->boundingSphere();
+    double orbitSpeed = distanceToNode * 0.1 * _orbitSpeedFactor;
 
     const glm::dvec3 up = camera()->lookUpVectorWorldSpace();
     glm::dvec3 forward = prevRotation * glm::dvec3(0.0, 0.0, -1.0);

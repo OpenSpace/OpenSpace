@@ -39,20 +39,19 @@ public:
     AtNodeNavigator();
     ~AtNodeNavigator();
 
-    void setNode(std::string identifier);
+    const Behavior behavior() const;
     void setBehavior(Behavior behavior);
 
     void updateCamera(double deltaTime);
 
 private:
     Camera* camera() const;
+    const SceneGraphNode* anchor() const;
 
     //Behaviors
     void orbitNode(double deltaTime);
 
-    SceneGraphNode* _node; 
     Behavior _behavior;
-
     properties::DoubleProperty _orbitSpeedFactor;
 };
 
