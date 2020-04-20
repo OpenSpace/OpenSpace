@@ -161,6 +161,12 @@ namespace {
         "Play Moons sonification or turn it off. Only works if the sun is NOT in focus."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
+        "RingsInfo",
+        "Rings",
+        "Play Rings sonification or turn it off. Only works if the sun is NOT in focus."
+    };
+
 } // namespace
 
 namespace openspace {
@@ -281,6 +287,7 @@ SonificationModule::SonificationModule()
     _planetsProperty.saturnProperty.temperatureEnabled.onChange([this]() { onSaturnTemperatureChanged(_planetsProperty.saturnProperty.temperatureEnabled.value()); });
     _planetsProperty.saturnProperty.atmosphereEnabled.onChange([this]() { onSaturnAtmosphereChanged(_planetsProperty.saturnProperty.atmosphereEnabled.value()); });
     _planetsProperty.saturnProperty.moonsEnabled.onChange([this]() { onSaturnMoonsChanged(_planetsProperty.saturnProperty.moonsEnabled.value()); });
+    _planetsProperty.saturnProperty.ringsEnabled.onChange([this]() { onSaturnRingsChanged(_planetsProperty.saturnProperty.ringsEnabled.value()); });
 
     //Uranus
     _planetsProperty.uranusProperty.enabled.onChange([this]() { onUranusEnabledChanged(_planetsProperty.uranusProperty.enabled.value()); });
@@ -963,12 +970,14 @@ void SonificationModule::onSaturnEnabledChanged(bool value) {
     _planets[5].settings[2] = value;
     _planets[5].settings[3] = value;
     _planets[5].settings[4] = value;
+    _planets[5].settings[5] = value;
 
     _planetsProperty.saturnProperty.sizeDayEnabled = value;
     _planetsProperty.saturnProperty.gravityEnabled = value;
     _planetsProperty.saturnProperty.temperatureEnabled = value;
     _planetsProperty.saturnProperty.atmosphereEnabled = value;
     _planetsProperty.saturnProperty.moonsEnabled = value;
+    _planetsProperty.saturnProperty.ringsEnabled = value;
     _planets[5].update = true;
 }
 
@@ -1019,6 +1028,16 @@ void SonificationModule::onSaturnMoonsChanged(bool value) {
     }
 
     _planets[5].settings[4] = value;
+    _planets[5].update = true;
+}
+
+void SonificationModule::onSaturnRingsChanged(bool value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
+        _planetsProperty.saturnProperty.ringsEnabled = false;
+        return;
+    }
+
+    _planets[5].settings[5] = value;
     _planets[5].update = true;
 }
 
@@ -1175,7 +1194,8 @@ SonificationModule::PlanetProperty::PlanetProperty(
     gravityEnabled(GravityInfo, false),
     temperatureEnabled(TemperatureInfo, false),
     atmosphereEnabled(AtmosphereInfo, false),
-    moonsEnabled(MoonsInfo, false)
+    moonsEnabled(MoonsInfo, false),
+    ringsEnabled(RingsInfo, false)
 {
     //Common
     addProperty(enabled);
@@ -1188,6 +1208,8 @@ SonificationModule::PlanetProperty::PlanetProperty(
         addProperty(atmosphereEnabled);
     if(planetInfo.identifier.compare("Mercury") != 0 && planetInfo.identifier.compare("Venus") != 0)
         addProperty(moonsEnabled);
+    if (planetInfo.identifier.compare("Saturn") == 0)
+        addProperty(ringsEnabled);
 }
 
 

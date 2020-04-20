@@ -39,7 +39,7 @@
 
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
-#define NUM_PLANETARY_SETTINGS 5
+#define NUM_PLANETARY_SETTINGS 6
 
 #include <openspace/util/openspacemodule.h>
 
@@ -132,6 +132,7 @@ private:
     void onSaturnTemperatureChanged(bool value);
     void onSaturnAtmosphereChanged(bool value);
     void onSaturnMoonsChanged(bool value);
+    void onSaturnRingsChanged(bool value);
 
     //Uranus
     void onUranusEnabledChanged(bool value);
@@ -180,7 +181,7 @@ private:
         //Settings for each planet
         //[0] size/day enabled, [1] gravity enabled, [2] temperature enabled,
         //[3] atmosphere enabled, [4] moons enabled
-        bool settings[NUM_PLANETARY_SETTINGS] = {false, false, false, false};
+        bool settings[NUM_PLANETARY_SETTINGS] = {false, false, false, false, false, false};
         bool update;
     };
 
@@ -216,6 +217,7 @@ private:
         //Unique
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty moonsEnabled;
+        properties::BoolProperty ringsEnabled;
     };
 
     struct PlanetHeadProperty : properties::PropertyOwner {
