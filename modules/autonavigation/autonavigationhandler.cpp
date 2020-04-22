@@ -394,13 +394,12 @@ void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* in
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    PathSegment segment = PathSegment(lastWayPoint(), waypoint, CurveType(curveType));
-
-    // TODO: handle duration better
-    if (ins->duration.has_value()) {
-        segment.setDuration(ins->duration.value());
-    }
-    _pathSegments.push_back(std::unique_ptr<PathSegment>(new PathSegment(segment)));
+    _pathSegments.push_back(std::make_unique<PathSegment>(
+        lastWayPoint(), 
+        waypoint, 
+        CurveType(curveType), 
+        ins->duration
+    ));
 }
 
 void AutoNavigationHandler::addStopDetails(const Waypoint& endWaypoint, const Instruction* ins) {
