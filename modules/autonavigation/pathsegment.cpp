@@ -26,6 +26,7 @@
 
 #include <modules/autonavigation/pathcurves.h>
 #include <openspace/engine/globals.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -35,7 +36,7 @@ namespace {
 namespace openspace::autonavigation {
 
 PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type, 
-                         std::optional<double> duration = std::nullopt)
+						 std::optional<double> duration = std::nullopt)
     : _start(start), _end(end), _curveType(type)
 {
     initCurve();
@@ -50,8 +51,6 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
         // the duration, based on the current position of the target. 
         _duration = 5;
     }
-
-    _speedFunction = std::make_unique<CubicDampenedSpeed>(); // TODO: per curve type
 }
 
 void PathSegment::setStart(Waypoint cs) {
@@ -115,21 +114,36 @@ double PathSegment::speedAtTime(double time) const {
 CameraPose PathSegment::interpolatedPose(double u) const {
     CameraPose cs;
     cs.position = _curve->positionAt(u);
-    cs.rotation = _curve->rotationAt(u);
+    cs.rotation = _rotationInterpolator->interpolate(u);
     return cs;
 }
 
-// Initialise the curve, based on the start, end state and curve type
 void PathSegment::initCurve() {
     _curve.reset();
 
-    switch (_curveType) {
+    switch (_curveType) 
+    {
     case CurveType::Bezier3:
-        _curve = std::make_shared<Bezier3Curve>(_start, _end);
+        _curve = std::make_unique<Bezier3Curve>(_start, _end);
+        _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+            _start.rotation(),
+            _end.rotation(),
+            _start.node()->worldPosition(),
+            _end.node()->worldPosition(),
+            _curve.get()
+        );
+        _speedFunction = std::make_unique<CubicDampenedSpeed>(); 
         break;
+
     case CurveType::Linear:
-        _curve = std::make_shared<LinearCurve>(_start, _end);
+        _curve = std::make_unique<LinearCurve>(_start, _end);
+        _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+            _start.rotation(), 
+            _end.rotation()
+        );
+        _speedFunction = std::make_unique<CubicDampenedSpeed>();
         break;
+
     default:
         LERROR("Could not create curve. Type does not exist!");
         return;

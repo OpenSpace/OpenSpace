@@ -25,8 +25,7 @@
 #include <modules/autonavigation/pathcurves.h>
 
 #include <modules/autonavigation/helperfunctions.h>
-#include <openspace/query/query.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <modules/autonavigation/waypoint.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -50,7 +49,9 @@ glm::dquat EasedSlerpInterpolator::interpolate(double u) {
 }
 
 LookAtInterpolator::LookAtInterpolator(glm::dquat start, glm::dquat end, 
-    glm::dvec3 startLookAtPos, glm::dvec3 endLookAtPos, PathCurve* path)
+                                       glm::dvec3 startLookAtPos, 
+                                       glm::dvec3 endLookAtPos, 
+                                       PathCurve* path)
     : RotationInterpolator(start, end),
     _startLookAtPos(startLookAtPos), 
     _endLookAtPos(endLookAtPos), 
@@ -71,8 +72,10 @@ glm::dquat LookAtInterpolator::interpolate(double u) {
     return helpers::getLookAtQuaternion(_path->positionAt(u), lookAtPos, startUpVec);
 }
 
-PiecewiseLookAtInterpolator::PiecewiseLookAtInterpolator(glm::dquat start, glm::dquat end,
-    glm::dvec3 startTargetPos, glm::dvec3 endTargetPos, PathCurve* path)
+PiecewiseLookAtInterpolator::PiecewiseLookAtInterpolator(glm::dquat start, glm::dquat end, 
+                                                         glm::dvec3 startTargetPos, 
+                                                         glm::dvec3 endTargetPos, 
+                                                         PathCurve* path)
     : RotationInterpolator(start, end),
     _startTargetPos(startTargetPos),
     _endTargetPos(endTargetPos),
@@ -90,11 +93,17 @@ glm::dquat PiecewiseLookAtInterpolator::interpolate(double u) {
     glm::dvec3 startUpVec = _start * glm::dvec3(0.0, 1.0, 0.0);
     glm::dvec3 endUpVec = _end * glm::dvec3(0.0, 1.0, 0.0);
 
-    glm::dquat lookAtStartQ =
-        helpers::getLookAtQuaternion(_path->positionAt(u1), _startTargetPos, startUpVec);
+    glm::dquat lookAtStartQ = helpers::getLookAtQuaternion(
+        _path->positionAt(u1), 
+        _startTargetPos, 
+        startUpVec
+    );
 
-    glm::dquat lookAtEndQ =
-        helpers::getLookAtQuaternion(_path->positionAt(u2), _endTargetPos, endUpVec);
+    glm::dquat lookAtEndQ = helpers::getLookAtQuaternion(
+        _path->positionAt(u2), 
+        _endTargetPos, 
+        endUpVec
+    );
 
     std::vector<std::pair<glm::dquat, double>> keyframes{
         {_start, 0.0},

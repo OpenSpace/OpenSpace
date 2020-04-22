@@ -46,15 +46,12 @@ public:
 
     // u is interpolation parameter in [0,1] (relative length)
     virtual glm::dvec3 positionAt(double u) = 0;
-    glm::dquat rotationAt(double u);
 
     std::vector<glm::dvec3> getPoints(); // for debugging
 
 protected:
     std::vector<glm::dvec3> _points; 
     double _length; // the total length of the curve (approximated)
-
-    std::unique_ptr<RotationInterpolator> _rotationInterpolator;
 };
 
 class Bezier3Curve : public PathCurve {
@@ -63,7 +60,7 @@ public:
     glm::dvec3 positionAt(double u);
 
 private:
-    void initParameterIntervals();
+    void initParameterIntervals(); // TODO: Move this logic out to base class
 
     std::vector<double> _parameterIntervals;
     unsigned int _nrSegments;

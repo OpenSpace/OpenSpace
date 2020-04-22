@@ -35,7 +35,8 @@ namespace openspace::autonavigation {
 
 class PathSegment {
 public:
-    PathSegment(Waypoint start, Waypoint end, CurveType type, std::optional<double> duration);
+    PathSegment(Waypoint start, Waypoint end, CurveType type, 
+                std::optional<double> duration);
     ~PathSegment() = default;
 
     // Mutators
@@ -65,8 +66,8 @@ private:
     CurveType _curveType; 
 
     std::unique_ptr<SpeedFunction> _speedFunction;
-
-    std::shared_ptr<PathCurve> _curve; 
+    std::unique_ptr<RotationInterpolator> _rotationInterpolator;
+    std::unique_ptr<PathCurve> _curve;
 
     // Playback variables
     double _traveledDistance = 0.0; 

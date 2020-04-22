@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 
-#include <modules/autonavigation/waypoint.h>
+#include <ghoul/glm.h>
 
 namespace openspace::autonavigation {
 
