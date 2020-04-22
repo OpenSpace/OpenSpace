@@ -44,25 +44,23 @@ SpeedFunction::~SpeedFunction() {}
 double SpeedFunction::scaledValue(double time, double duration, double pathLength) const {
     ghoul_assert(time >= 0 && time <= duration, "Time out of range [0, duration]");
     double t = std::clamp(time / duration, 0.0, 1.0);
-    return (pathLength * this->value(t)) / _integratedSum;
+    return (pathLength * this->value(t)) / (duration * _integratedSum);
 }
 
-void SpeedFunction::initIntegratedSum(double duration) {
+void SpeedFunction::initIntegratedSum() {
     // apply duration constraint (eq. 14 in Eberly)
     double speedSum = 0.0;
     int steps = 100;
-    double dt = duration / steps; // OBS! Duration can be added when computing scaled value! TODO!
-    const double h = 1.0 / steps;
+    double h = 1.0 / steps;
     for (double t = 0.0; t <= 1.0; t += h) {
         double midpointSpeed = 0.5 * (value(t + 0.5*h) + value(t - 0.5*h));
-        speedSum += dt * midpointSpeed;
+        speedSum += h * midpointSpeed;
     }
-
     _integratedSum = speedSum;
 }
 
-CubicDampenedSpeed::CubicDampenedSpeed(double duration) {
-    initIntegratedSum(duration);
+CubicDampenedSpeed::CubicDampenedSpeed() {
+    initIntegratedSum();
 }
 
 double CubicDampenedSpeed::value(double t) const {

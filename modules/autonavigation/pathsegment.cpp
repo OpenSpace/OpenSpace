@@ -51,7 +51,7 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
         _duration = 5;
     }
 
-    _speedFunction = std::make_unique<CubicDampenedSpeed>(_duration); // TODO: per curve type
+    _speedFunction = std::make_unique<CubicDampenedSpeed>(); // TODO: per curve type
 }
 
 void PathSegment::setStart(Waypoint cs) {
