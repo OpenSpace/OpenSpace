@@ -180,7 +180,7 @@ private:
         std::vector<std::pair<std::string, double>> moons;
         //Settings for each planet
         //[0] size/day enabled, [1] gravity enabled, [2] temperature enabled,
-        //[3] atmosphere enabled, [4] moons enabled
+        //[3] atmosphere enabled, [4] moons enabled, [5] rings enabled
         bool settings[NUM_PLANETARY_SETTINGS] = {false, false, false, false, false, false};
         bool update;
     };

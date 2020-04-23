@@ -237,6 +237,10 @@ SonificationModule::SonificationModule()
     _solarProperty.venusEnabled.onChange([this]() { onSolarVenusEnabledChanged(_solarProperty.venusEnabled.value()); });
     _solarProperty.earthEnabled.onChange([this]() { onSolarEarthEnabledChanged(_solarProperty.earthEnabled.value()); });
     _solarProperty.marsEnabled.onChange([this]() { onSolarMarsEnabledChanged(_solarProperty.marsEnabled.value()); });
+    _solarProperty.jupiterEnabled.onChange([this]() { onSolarJupiterEnabledChanged(_solarProperty.jupiterEnabled.value()); });
+    _solarProperty.saturnEnabled.onChange([this]() { onSolarSaturnEnabledChanged(_solarProperty.saturnEnabled.value()); });
+    _solarProperty.uranusEnabled.onChange([this]() { onSolarUranusEnabledChanged(_solarProperty.uranusEnabled.value()); });
+    _solarProperty.neptuneEnabled.onChange([this]() { onSolarNeptuneEnabledChanged(_solarProperty.neptuneEnabled.value()); });
 
     //Compare
     _compareProperty.firstPlanet.onChange([this]() { onFirstCompareChanged(_compareProperty.firstPlanet.option()); });
