@@ -48,7 +48,7 @@ TEST_CASE("profile: Convert profileFile to asset", "[profile]") {
 
     Profile p;
     REQUIRE_NOTHROW(
-        p.convertToAsset(pf)
+        p.convertToScene(pf)
     );
 }
 
@@ -58,7 +58,7 @@ TEST_CASE("profile: Verify conversion to scene", "[profile]") {
     Profile p;
     std::string result;
     REQUIRE_NOTHROW(
-        result = p.convertToAsset(pf)
+        result = p.convertToScene(pf)
     );
 
     std::string testing, comparing;

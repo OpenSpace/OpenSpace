@@ -306,7 +306,7 @@ void OpenSpaceEngine::initialize() {
         std::string outputAsset = outputScenePath + "/" + global::configuration.profile
             + ".asset";
 
-        global::profile.convertToAssetFile(inputProfile, outputAsset);
+        global::profile.convertToSceneFile(inputProfile, outputAsset);
 
         // Set asset name to that of the profile because a new scene file will be
         // created with that name, and also because the profile name will override
@@ -1276,10 +1276,19 @@ void OpenSpaceEngine::postDraw() {
     if (_isFirstRenderingFirstFrame) {
         global::windowDelegate.setSynchronization(true);
         resetPropertyChangeFlags();
+        resetAssetChangeTracking();
         _isFirstRenderingFirstFrame = false;
     }
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
+}
+
+void OpenSpaceEngine::resetAssetChangeTracking() {
+    global::openSpaceEngine._assetManager->listOfAllAssetEvents_reset();
+}
+
+std::vector<Profile::AssetEvent> OpenSpaceEngine::listOfAllAssetEvents() {
+    return global::openSpaceEngine._assetManager->listOfAllAssetEvents();
 }
 
 void OpenSpaceEngine::resetPropertyChangeFlags() {

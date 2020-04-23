@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
 #include <openspace/scene/assetlistener.h>
+#include <openspace/scene/profile.h>
 
 #include <memory>
 #include <vector>
@@ -70,6 +71,8 @@ public:
         std::shared_ptr<Asset> child) override;
 
     bool update();
+    const std::vector<Profile::AssetEvent>& listOfAllAssetEvents() const;
+    void listOfAllAssetEvents_reset();
     scripting::LuaLibrary luaLibrary();
 
 private:

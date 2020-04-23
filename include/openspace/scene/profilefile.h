@@ -92,6 +92,8 @@ const std::string header_MarkNodes  = "#MarkNodes";
 
 class ProfileFile {
 public:
+    using Lines = std::vector<std::string>;
+
     /**
      * Reads the contents of a profile file and populates vector containers for all
      * sections. This only pulls individual line entries into their proper sections;
@@ -158,6 +160,11 @@ public:
     void addAssetLine(const std::string line);
 
     /**
+     * Clears all asset entries
+     */
+    void clearAssets();
+
+    /**
      * Adds a new property set command to the list of property settings to be
      * performed at startup. The format for a property set command line is defined by
      * ProfileFile::parseProperty and Profile::convertToAsset_properties
@@ -213,28 +220,28 @@ public:
      * comment header for notes on the syntax of each entry.
      * \return The vector of asset lines
      */
-    std::vector<std::string> assets() const;
+    Lines assets() const;
 
     /**
      * Returns the vector of OpenSpace property set commands included in this profile.
      * See addPropertyLine comment header for notes on the syntax of each entry.
      * \return The vector of property set commands
      */
-    std::vector<std::string> properties() const;
+    Lines properties() const;
 
     /**
      * Returns the vector of OpenSpace keybinding shortcut definitions included in this
      * profile. See addKeybindingLine comment header for syntax notes of each entry.
      * \return The vector of keybinding shortcut definitions
      */
-    std::vector<std::string> keybindings() const;
+    Lines keybindings() const;
 
     /**
      * Returns the vector of OpenSpace scenegraph nodes marked as 'interesting'.
      * See addMarkNodesLine comment header for syntax notes of each entry.
      * \return The vector of nodes to be marked as interesting.
      */
-    std::vector<std::string> markNodes() const;
+    Lines markNodes() const;
 
     /**
      * Splits a tab-delimited line (of any type) into a vector with individual string
@@ -244,6 +251,8 @@ public:
      * \return The number of fields that were extracted
      */
     size_t splitByTab(std::string line, std::vector<std::string>& result);
+
+
 
 private:
     std::string errorString(std::string message);
@@ -272,11 +281,11 @@ private:
     std::string _version;
     std::string _time;
     std::string _camera;
-    std::vector<std::string> _modules;
-    std::vector<std::string> _assets;
-    std::vector<std::string> _properties;
-    std::vector<std::string> _keybindings;
-    std::vector<std::string> _markNodes;
+    Lines _modules;
+    Lines _assets;
+    Lines _properties;
+    Lines _keybindings;
+    Lines _markNodes;
 };
 
 } // namespace openspace

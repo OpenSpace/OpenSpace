@@ -241,23 +241,23 @@ std::string ProfileFile::camera() const {
     return _camera;
 }
 
-std::vector<std::string> ProfileFile::modules() const {
+ProfileFile::Lines ProfileFile::modules() const {
     return _modules;
 }
 
-std::vector<std::string> ProfileFile::assets() const {
+ProfileFile::Lines ProfileFile::assets() const {
     return _assets;
 }
 
-std::vector<std::string> ProfileFile::properties() const {
+ProfileFile::Lines ProfileFile::properties() const {
     return _properties;
 }
 
-std::vector<std::string> ProfileFile::keybindings() const {
+ProfileFile::Lines ProfileFile::keybindings() const {
     return _keybindings;
 }
 
-std::vector<std::string> ProfileFile::markNodes() const {
+ProfileFile::Lines ProfileFile::markNodes() const {
     return _markNodes;
 }
 
@@ -470,6 +470,10 @@ void ProfileFile::addKeybindingLine(const std::string line) {
 }
 void ProfileFile::addMarkNodesLine(const std::string line) {
     _markNodes.push_back(line);
+}
+
+void ProfileFile::clearAssets() {
+    _assets.clear();
 }
 
 }  // namespace openspace

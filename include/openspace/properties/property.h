@@ -496,6 +496,13 @@ public:
     virtual std::string generateAdditionalJsonDescription() const;
 
     /**
+     * Returns whether or not the property value has changed.
+     *
+     * \return true if the property has changed
+     */
+    bool hasChanged();
+
+    /**
      * Reset the valChanged flag to an unchanged state, as if value has not been changed.
      */
     void resetToUnchanged();

@@ -27,20 +27,26 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <string>
 #include <stack>
+#include <optional>
 
 #include "profile_lua.inl"
 
@@ -59,9 +65,172 @@ void Profile::saveCurrentSettingsToProfile(std::string filename) {
         LERROR(errorMessage);
     }
     std::string initProfile = global::configuration.profile;
+    ProfileFile pf;
+    pf.readFromFile(initProfile);
+    std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(pf);
+    addAssetsToProfileFile(ass, pf);
+    modifyPropertiesToReflectChanges(pf);
+    addCurrentTimeToProfileFile(pf);
+    addCurrentCameraToProfileFile(pf);
 }
 
-void Profile::convertToAssetFile(const std::string inProfilePath,
+std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFile& pf) {
+    std::vector<AssetEvent> a;
+    parseAssetFileLines(a, pf);
+    AllAssetDetails assetDetails;
+
+    assetDetails.base = a;
+    assetDetails.changed = global::openSpaceEngine.listOfAllAssetEvents();
+
+    for (AssetEvent event : assetDetails.changed) {
+        if (event.eventType == AssetEventType::require) {
+            handleChangedRequire(assetDetails.base, event.name);
+        }
+        else if (event.eventType == AssetEventType::request) {
+            handleChangedRequest(assetDetails.base, event.name);
+        }
+        else if (event.eventType == AssetEventType::remove) {
+            handleChangedRemove(assetDetails.base, event.name);
+        }
+    }
+    return assetDetails.base;
+}
+
+void Profile::handleChangedRequire(std::vector<AssetEvent>& base, std::string asset) {
+    for (auto b : base) {
+        if (b.name == asset && b.eventType == AssetEventType::request) {
+            base.push_back({asset, AssetEventType::require});
+        }
+    }
+}
+
+void Profile::handleChangedRequest(std::vector<AssetEvent>& base, std::string asset) {
+    bool addThisAsset = true;
+    std::vector<AssetEvent>::iterator f;
+    f = find_if(base.begin(), base.end(), [asset](AssetEvent ae)
+        { return (ae.name == asset); } );
+    if (f != base.end()) {
+        addThisAsset = false;
+    }
+
+    if (addThisAsset) {
+        AssetEvent ae = {asset, AssetEventType::request};
+        base.push_back(ae);
+    }
+}
+
+void Profile::handleChangedRemove(std::vector<AssetEvent>& base, std::string asset) {
+    std::vector<AssetEvent>::iterator f;
+    f = remove_if(base.begin(), base.end(), [asset](AssetEvent ae)
+        { return (ae.name == asset); } );
+}
+
+void Profile::addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, ProfileFile& pf)
+{
+    pf.clearAssets();
+    for (AssetEvent a : allAssets) {
+        std::string entry = a.name + "\t" + AssetEventTypeString.at(a.eventType);
+        pf.addAssetLine(entry);
+    }
+}
+
+void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf) {
+    std::vector<std::string> elements;
+    AssetEvent a;
+
+    for (std::string line : pf.assets()) {
+        pf.splitByTab(line, elements);
+
+        if (a.name.empty()) {
+            LERROR("Error in parsing asset file line '" + line
+                + "'. Asset name is needed (field 1/2).");
+        }
+        else {
+            a.name = elements[0];
+        }
+
+        if (elements[1] == AssetEventTypeString.at(AssetEventType::require)) {
+            a.eventType = AssetEventType::require;
+        }
+        else if (elements[1] == AssetEventTypeString.at(AssetEventType::require)) {
+            a.eventType = AssetEventType::request;
+        }
+        else if (elements[1] == "") {
+            a.eventType = AssetEventType::request;
+        }
+        else {
+            LERROR("Error in parsing asset file line '" + line
+                + "'. Invalid required param (field 2/2).");
+        }
+
+        results.push_back(a);
+    }
+}
+
+void Profile::modifyPropertiesToReflectChanges(ProfileFile& pf) {
+    std::vector<openspace::properties::Property*> changedProps
+        = getNodesThatHaveChangedProperties(pf);
+    std::string newLine;
+
+    for (auto prop : changedProps) {
+        newLine = "setPropertyValueSingle\t";
+        newLine += prop->identifier() + "\t";
+        newLine += prop->getStringValue() + "\n";
+        pf.addPropertyLine(newLine);
+    }
+}
+
+std::vector<openspace::properties::Property*> Profile::getNodesThatHaveChangedProperties(
+                                                                          ProfileFile& pf)
+{
+    ZoneScoped
+
+    std::vector<SceneGraphNode*> nodes =
+            global::renderEngine.scene()->allSceneGraphNodes();
+    std::vector<openspace::properties::Property*> changedProps;
+
+    for (auto n : nodes) {
+        std::vector<openspace::properties::Property*> props = n->properties();
+         for (auto p : props) {
+             if (p->hasChanged()) {
+                 changedProps.push_back(p);
+             }
+         }
+    }
+    return changedProps;
+}
+
+void Profile::addCurrentTimeToProfileFile(ProfileFile& pf) {
+    std::string t = global::timeManager.time().UTC();
+    std::string update = "absolute\t" + t + "\n";
+    pf.updateTime(update);
+}
+
+void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) {
+    std::string update = "setNavigationState\t";
+    interaction::NavigationHandler::NavigationState nav;
+    nav = global::navigationHandler.navigationState();
+    update += nav.anchor + "\t";
+    update += nav.aim + "\t";
+    update += nav.referenceFrame + "\t";
+    update += std::to_string(nav.position.x) + ",";
+    update += std::to_string(nav.position.y) + ",";
+    update += std::to_string(nav.position.z) + "\t";
+    if (nav.up.has_value()) {
+        glm::dvec3 u = nav.up.value();
+        //glm::dvec3 u = static_cast<glm::dvec3>(nav.up.value());
+        update += std::to_string(u.x) + ",";
+        update += std::to_string(u.y) + ",";
+        update += std::to_string(u.z);
+    }
+    update += "\t";
+    update += std::to_string(nav.yaw) + "\t";
+    update += std::to_string(nav.pitch) + "\n";
+
+    pf.updateCamera(update);
+}
+
+void Profile::convertToSceneFile(const std::string inProfilePath,
                                  const std::string outFilePath)
 {
     ProfileFile pf;
@@ -77,7 +246,7 @@ void Profile::convertToAssetFile(const std::string inProfilePath,
     }
 
     try {
-        outFile << convertToAsset(pf);
+        outFile << convertToScene(pf);
     }
     catch (std::ofstream::failure& e) {
         LERROR("Data write error to file: " + outFilePath);
@@ -91,24 +260,24 @@ void Profile::convertToAssetFile(const std::string inProfilePath,
     }
 }
 
-std::string Profile::convertToAsset(ProfileFile& pf) {
+std::string Profile::convertToScene(ProfileFile& pf) {
     std::string result;
 
-    result += convertToAsset_modules(pf) + "\n";
-    result += convertToAsset_assets(pf) + "\n";
-    result += convertToAsset_keybindings(pf) + "\n";
+    result += convertToScene_modules(pf) + "\n";
+    result += convertToScene_assets(pf) + "\n";
+    result += convertToScene_keybindings(pf) + "\n";
     result += "asset.onInitialize(function ()\n";
-    result += convertToAsset_time(pf) + "\n";
+    result += convertToScene_time(pf) + "\n";
     result += "  sceneHelper.bindKeys(Keybindings)\n\n";
-    result += convertToAsset_markNodes(pf) + "\n";
-    result += convertToAsset_properties(pf) + "\n";
-    result += convertToAsset_camera(pf);
+    result += convertToScene_markNodes(pf) + "\n";
+    result += convertToScene_properties(pf) + "\n";
+    result += convertToScene_camera(pf);
     result += "end)\n";
 
     return result;
 }
 
-std::string Profile::convertToAsset_modules(ProfileFile& pf) {
+std::string Profile::convertToScene_modules(ProfileFile& pf) {
     std::string result;
     std::vector<std::string> fields;
 
@@ -131,7 +300,7 @@ std::string Profile::convertToAsset_modules(ProfileFile& pf) {
     return result;
 }
 
-std::string Profile::convertToAsset_assets(ProfileFile& pf) {
+std::string Profile::convertToScene_assets(ProfileFile& pf) {
     std::string result;
     std::vector<std::string> fields;
     std::string assetR;
@@ -166,7 +335,7 @@ std::string Profile::convertToAsset_assets(ProfileFile& pf) {
     return result;
 }
 
-std::string Profile::convertToAsset_properties(ProfileFile& pf) {
+std::string Profile::convertToScene_properties(ProfileFile& pf) {
     std::string result;
     std::vector<std::string> fields;
 
@@ -190,7 +359,7 @@ std::string Profile::convertToAsset_properties(ProfileFile& pf) {
     return result;
 }
 
-std::string Profile::convertToAsset_keybindings(ProfileFile& pf) {
+std::string Profile::convertToScene_keybindings(ProfileFile& pf) {
     std::string result;
     std::vector<std::string> fields;
     std::string assetR;
@@ -213,7 +382,7 @@ std::string Profile::convertToAsset_keybindings(ProfileFile& pf) {
     return result;
 }
 
-std::string Profile::convertToAsset_markNodes(ProfileFile& pf) {
+std::string Profile::convertToScene_markNodes(ProfileFile& pf) {
     std::string result;
 
     if (pf.markNodes().size() > 0) {
@@ -226,7 +395,7 @@ std::string Profile::convertToAsset_markNodes(ProfileFile& pf) {
     return result;
 }
 
-std::string Profile::convertToAsset_time(ProfileFile& pf) {
+std::string Profile::convertToScene_time(ProfileFile& pf) {
     std::string result;
     std::vector<std::string> fields;
     std::string assetR;
@@ -248,7 +417,7 @@ std::string Profile::convertToAsset_time(ProfileFile& pf) {
     return result;
 }
 
-std::string Profile::convertToAsset_camera(ProfileFile& pf) {
+std::string Profile::convertToScene_camera(ProfileFile& pf) {
     std::string result;
     std::vector<std::string> fields;
     std::string assetR;

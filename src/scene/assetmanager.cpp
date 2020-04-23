@@ -121,6 +121,14 @@ std::shared_ptr<Asset> AssetManager::rootAsset() {
     return _assetLoader->rootAsset();
 }
 
+const std::vector<Profile::AssetEvent>& AssetManager::listOfAllAssetEvents() const {
+    return _assetLoader->listOfAllAssetEvents();
+}
+
+void AssetManager::listOfAllAssetEvents_reset() {
+    _assetLoader->listOfAllAssetEvents_reset();
+}
+
 scripting::LuaLibrary AssetManager::luaLibrary() {
     return {
         "asset",

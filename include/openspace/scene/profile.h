@@ -44,9 +44,23 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-
 class Profile {
 public:
+    enum class AssetEventType {
+        require,
+        request,
+        remove
+    };
+    const std::map<AssetEventType, std::string> AssetEventTypeString {
+        {AssetEventType::require, "required"},
+        {AssetEventType::request, "requested"},
+        {AssetEventType::remove,  "removed"},
+    };
+    struct AssetEvent {
+        std::string name;
+        AssetEventType eventType;
+    };
+
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
@@ -61,7 +75,7 @@ public:
      * \param outFilePath The output file path that will be written with the converted
      *                       contents (in an .asset file)
      */
-    void convertToAssetFile(const std::string inProfilePath,
+    void convertToSceneFile(const std::string inProfilePath,
         const std::string outFilePath);
 
     /**
@@ -70,7 +84,7 @@ public:
      * \param pf The profileFile object to be converted
      * \return The full string contents of scene/asset equivalent of the profile file.
      */
-    std::string convertToAsset(ProfileFile& pf);
+    std::string convertToScene(ProfileFile& pf);
 
     /**
      * Returns the Lua library that contains all Lua functions available to provide
@@ -80,14 +94,30 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    std::string convertToAsset_assets(ProfileFile& pf);
-    std::string convertToAsset_modules(ProfileFile& pf);
-    std::string convertToAsset_properties(ProfileFile& pf);
-    std::string convertToAsset_markNodes(ProfileFile& pf);
-    std::string convertToAsset_keybindings(ProfileFile& pf);
-    std::string convertToAsset_time(ProfileFile& pf);
-    std::string convertToAsset_camera(ProfileFile& pf);
+    struct AllAssetDetails {
+        std::vector<AssetEvent> base;
+        std::vector<AssetEvent> changed;
+    };
 
+    std::string convertToScene_assets(ProfileFile& pf);
+    std::string convertToScene_modules(ProfileFile& pf);
+    std::string convertToScene_properties(ProfileFile& pf);
+    std::string convertToScene_markNodes(ProfileFile& pf);
+    std::string convertToScene_keybindings(ProfileFile& pf);
+    std::string convertToScene_time(ProfileFile& pf);
+    std::string convertToScene_camera(ProfileFile& pf);
+
+    std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileFile& pf);
+    void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf);
+    void handleChangedRequire(std::vector<AssetEvent>& base, std::string asset);
+    void handleChangedRequest(std::vector<AssetEvent>& base, std::string asset);
+    void handleChangedRemove(std::vector<AssetEvent>& base, std::string asset);
+    void addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, ProfileFile& pf);
+    void modifyPropertiesToReflectChanges(ProfileFile& pf);
+    std::vector<openspace::properties::Property*> getNodesThatHaveChangedProperties(
+        ProfileFile& pf);
+    void addCurrentTimeToProfileFile(ProfileFile& pf);
+    void addCurrentCameraToProfileFile(ProfileFile& pf);
 };
 
 } // namespace openspace

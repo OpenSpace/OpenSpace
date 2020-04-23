@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___ASSETLOADER___H__
 
 #include <openspace/scene/asset.h>
+#include <openspace/scene/profile.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -169,10 +170,22 @@ public:
      */
     void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
 
+    /**
+     * Retrieve a reference to vector list of all assets events, including require,
+     * request, and remove
+     */
+    const std::vector<Profile::AssetEvent>& listOfAllAssetEvents() const;
+
+    /**
+     * Clear lists of all assets that have been either requested, required, or removed
+     */
+    void listOfAllAssetEvents_reset();
+
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
     std::shared_ptr<Asset> request(const std::string& identifier);
     void unrequest(const std::string& identifier);
+    void addToProfileTracking(std::string asset, Profile::AssetEventType type);
 
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
@@ -227,6 +240,7 @@ private:
         _onDependencyDeinitializationFunctionRefs;
     int _assetsTableRef;
 
+    std::vector<Profile::AssetEvent> _profileAssets;
     std::vector<std::string> _profileAssetsRequired;
     std::vector<std::string> _profileAssetsRequested;
     std::vector<std::string> _profileAssetsRemoved;

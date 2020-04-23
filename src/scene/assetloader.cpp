@@ -444,7 +444,7 @@ std::shared_ptr<Asset> AssetLoader::require(const std::string& identifier) {
     std::shared_ptr<Asset> asset = getAsset(identifier);
     std::shared_ptr<Asset> dependant = _currentAsset;
     dependant->require(asset);
-    _profileAssetsRequired.push_back(asset->assetFilePath());
+    addToProfileTracking(asset->assetFilePath(), Profile::AssetEventType::require);
     return asset;
 }
 
@@ -453,8 +453,13 @@ std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
     std::shared_ptr<Asset> parent = _currentAsset;
     parent->request(asset);
     assetRequested(parent, asset);
-    _profileAssetsRequested.push_back(asset->assetFilePath());
+    addToProfileTracking(asset->assetFilePath(), Profile::AssetEventType::request);
     return asset;
+}
+
+void AssetLoader::addToProfileTracking(std::string asset, Profile::AssetEventType type) {
+    Profile::AssetEvent pa = {asset, type};
+    _profileAssets.push_back(pa);
 }
 
 void AssetLoader::unrequest(const std::string& identifier) {
@@ -484,6 +489,7 @@ void AssetLoader::remove(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
     unrequest(identifier);
     _profileAssetsRemoved.push_back(identifier);
+    addToProfileTracking(identifier, Profile::AssetEventType::remove);
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
@@ -808,6 +814,14 @@ void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent,
     for (AssetListener* listener : _assetListeners) {
         listener->assetUnrequested(parent, child);
     }
+}
+
+const std::vector<Profile::AssetEvent>& AssetLoader::listOfAllAssetEvents() const {
+    return _profileAssets;
+}
+
+void AssetLoader::listOfAllAssetEvents_reset() {
+    _profileAssets.clear();
 }
 
 } // namespace openspace

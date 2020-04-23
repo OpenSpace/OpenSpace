@@ -312,6 +312,10 @@ void Property::notifyDeleteListeners() {
     }
 }
 
+bool Property::hasChanged() {
+    return valChanged;
+}
+
 void Property::resetToUnchanged() {
     valChanged = false;
 }
