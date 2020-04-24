@@ -60,7 +60,7 @@ namespace {
     };
 
     // Find the position of the current year in the vector; its position in
-// the vector gives the number of leap seconds
+    // the vector gives the number of leap seconds
     struct LeapSecond {
         int year;
         int dayOfYear;
@@ -202,13 +202,20 @@ namespace {
         return nLeapSeconds;
     }
 
-    int daysIntoGivenYear(int month, int dayOfMonth) {
-        //month and dayCount are zero-based. Does NOT account for leap year.
+    int daysIntoGivenYear(int year, int month, int dayOfMonth) {
+        //month and dayCount are zero-based.
         month -= 1;
         int dayCount = dayOfMonth - 1;
+        const int February = 1;
+        const bool isInLeapYear =
+            std::find(LeapYears.begin(), LeapYears.end(), year)
+            != LeapYears.end();
 
         for (int m = 0; m < month; ++m) {
             dayCount += DaysOfMonths[m];
+            if (m == February && isInLeapYear) {
+                dayCount += 1;
+            }
         }
         return dayCount;
     }
@@ -246,9 +253,7 @@ double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochStrin
 
     // The main overview of this function:
     // 1. Reconstruct the full year from the YY part
-    // 2. Calculate the number of seconds since the beginning of the year
-    // 2.a Get the number of full days since the beginning of the year
-    // 2.b If the year is a leap year, modify the number of days
+    // 2. Calculate the number of days since the beginning of the year
     // 3. Convert the number of days to a number of seconds
     // 4. Get the number of leap seconds since January 1st, 2000 and remove them
     // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
@@ -267,17 +272,7 @@ double RenderableOrbitalKepler::epochFromSubstring(const std::string& epochStrin
     const int daysSince2000 = countDays(year);
 
     // 2.
-    // 2.a
     double daysInYear = std::atof(epochString.substr(2).c_str());
-
-    // 2.b
-    const bool isInLeapYear =
-        std::find(LeapYears.begin(), LeapYears.end(), year) != LeapYears.end();
-    if (isInLeapYear && daysInYear >= 60) {
-        // We are in a leap year, so we have an effective day more if we are
-        // beyond the end of february (= 31+29 days)
-        --daysInYear;
-    }
 
     // 3
     using namespace std::chrono;
@@ -309,9 +304,7 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
 
     // The main overview of this function:
     // 1. Read the year value
-    // 2. Calculate the number of seconds since the beginning of the year
-    // 2.a Get the number of full days since the beginning of the year
-    // 2.b If the year is a leap year, modify the number of days
+    // 2. Calculate the number of days since the beginning of the year
     // 3. Convert the number of days to a number of seconds
     // 4. Get the number of leap seconds since January 1st, 2000 and remove them
     // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
@@ -322,21 +315,11 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
     const int daysSince2000 = countDays(year);
 
     // 2.
-    // 2.a
     int monthNum = std::atoi(epochString.substr(4, 2).c_str());
     int dayOfMonthNum = std::atoi(epochString.substr(6, 2).c_str());
-    int wholeDaysInto = daysIntoGivenYear(monthNum, dayOfMonthNum);
+    int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
     double fractionOfDay = std::atof(epochString.substr(9, 7).c_str());
     double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
-
-    // 2.b
-    const bool isInLeapYear =
-        std::find(LeapYears.begin(), LeapYears.end(), year) != LeapYears.end();
-    if (isInLeapYear && daysInYear >= 60) {
-        // We are in a leap year, so we have an effective day more if we are
-        // beyond the end of february (= 31+29 days)
-        --daysInYear;
-    }
 
     // 3
     using namespace std::chrono;
