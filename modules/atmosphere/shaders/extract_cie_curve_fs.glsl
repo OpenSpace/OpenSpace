@@ -60,7 +60,7 @@ vec3 inscatterRadianceCIE(inout vec3 x, inout float t, const vec3 v,
     float nu            = dot(v, s);
     float muSun         = dot(x, s) / r;
     float rayleighPhase = rayleighPhaseFunction(nu);
-    float miePhase      = miePhaseFunction(nu);
+    vec3 miePhase       = miePhaseFunction(nu);
 
     // S[L](x,s,v)
     // I.e. the next line has the scattering light for the "infinite" ray passing
@@ -77,8 +77,11 @@ vec3 inscatterRadianceCIE(inout vec3 x, inout float t, const vec3 v,
     // This step is done because imprecision problems happen when the Sun is slightly below
     // the horizon. When this happens, we avoid the Mie scattering contribution.
     inscatterRadiance.w *= smoothstep(0.0f, 0.02f, muSun);
-    vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) * 
-                        (betaRayleigh.r / betaRayleigh);
+    // vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) * 
+    //                     (betaRayleigh.r / betaRayleigh);
+    vec3 betaRayleighScatteringCoeff = scatteringCoefficientRayleigh(lambdaArray);
+    vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
+      (betaRayleighScatteringCoeff.r / betaRayleighScatteringCoeff);
 
     radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie * miePhase, 0.0f);
 

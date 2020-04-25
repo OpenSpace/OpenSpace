@@ -73,7 +73,7 @@ void main(void) {
       // we don't include the phase functions on those tables (that's why we calculate them now).
       if (firstIteraction == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
-        float phaseMie = miePhaseFunction(nu);
+        vec3 phaseMie  = miePhaseFunction(nu);
         vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb;
         vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nu).rgb;
         // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))

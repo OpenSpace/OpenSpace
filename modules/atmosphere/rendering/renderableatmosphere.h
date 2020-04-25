@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/textureunit.h>
@@ -52,6 +53,7 @@ namespace openspace {
 class AtmosphereDeferredcaster;
 
 struct TransformData;
+struct AdvancedATMModeData;
 
 // Shadow structure
 struct ShadowConfiguration {
@@ -88,6 +90,7 @@ public:
 private:
     glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
     void updateAtmosphereParameters();
+    void setDeferredCasterParameters(const bool executePreCalculations);
 
     properties::FloatProperty _atmosphereHeightP;
     properties::FloatProperty _groundAverageReflectanceP;
@@ -98,49 +101,71 @@ private:
     properties::FloatProperty _rayleighScatteringCoeffZP;
     properties::BoolProperty  _ozoneEnabledP;
     properties::BoolProperty  _oxygenEnableP;
-    properties::FloatProperty _ozoneHeightScaleP;
-    properties::FloatProperty _ozoneCoeffXP;
-    properties::FloatProperty _ozoneCoeffYP;
-    properties::FloatProperty _ozoneCoeffZP;
+    properties::Vec3Property  _ozoneAbsorptionCrossSectionP;
+    properties::FloatProperty _oxygenHeightScaleP;
+    properties::Vec3Property  _oxygenAbsorptionCrossSectionP;
     properties::FloatProperty _mieHeightScaleP;
     properties::FloatProperty _mieScatteringCoeffXP;
     properties::FloatProperty _mieScatteringCoeffYP;
     properties::FloatProperty _mieScatteringCoeffZP;
-    properties::Vec3Property _mieAbsorptionCoeffP;
+    properties::Vec3Property  _mieAbsorptionCoeffP;
     properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
     properties::FloatProperty _mieAsymmetricFactorGP;
     properties::FloatProperty _sunIntensityP;
     properties::BoolProperty  _sunFollowingCameraEnabledP;
     properties::BoolProperty  _hardShadowsEnabledP;
+    properties::BoolProperty  _enableAdvancedModeP;
 
-    bool _atmosphereEnabled = false;
-    bool _ozoneLayerEnabled = false;
-    bool _oxygenAbsEnabled = false;
-    bool _sunFollowingCameraEnabled = false;
-    float _atmosphereRadius = 0.f;
-    float _atmospherePlanetRadius = 0.f;
+    // Advanced Mode Parameters
+    properties::BoolProperty  _useOnlyAdvancedMieP;
+    properties::Vec3Property  _nRealRayleighP;
+    properties::Vec3Property  _nComplexRayleighP;
+    properties::Vec3Property  _nRealMieP;
+    properties::Vec3Property  _nComplexMieP;
+    properties::Vec3Property  _lambdaArrayP;
+    properties::Vec3Property  _KappaP;
+    properties::Vec3Property  _g1P;
+    properties::Vec3Property  _g2P;
+    properties::Vec3Property  _alphaP;
+    properties::FloatProperty _deltaPolarizabilityP;
+    properties::FloatProperty _NRayleighP;
+    properties::FloatProperty _NMieP;
+    properties::FloatProperty _NRayleighAbsMoleculeP;
+    properties::FloatProperty _radiusAbsMoleculeRayleighP;
+    properties::FloatProperty _meanRadiusParticleMieP;
+    properties::FloatProperty _turbidityP;
+    properties::FloatProperty _jungeExponentP;
+    properties::PropertyOwner _advancedModeOwner;
+    
+    bool _atmosphereEnabled               = false;
+    bool _ozoneLayerEnabled               = false;
+    bool _oxygenAbsEnabled                = false;
+    bool _sunFollowingCameraEnabled       = false;
+    bool _shadowEnabled                   = false;
+    bool _hardShadows                     = false;
+    bool _enableAdvancedMode              = false;
+    
+    float _atmosphereRadius               = 0.f;
+    float _atmospherePlanetRadius         = 0.f;
     float _planetAverageGroundReflectance = 0.f;
-    float _planetGroundRadianceEmittion = 0.f;
-    float _rayleighHeightScale = 0.f;
-    float _ozoneHeightScale = 0.f;
-    float _mieHeightScale = 0.f;
-    float _miePhaseConstant = 0.f;
-    float _sunRadianceIntensity = 5.f;
-    float _mieScattExtPropCoefProp = 1.f;
+    float _planetGroundRadianceEmittion   = 0.f;
+    float _rayleighHeightScale            = 0.f;
+    float _oxygenHeightScale              = 0.f;
+    float _mieHeightScale                 = 0.f;
+    float _miePhaseConstant               = 0.f;
+    float _sunRadianceIntensity           = 5.f;
+    float _mieScattExtPropCoefProp        = 1.f;
 
-    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
+    glm::vec3 _mieExtinctionCoeff      = glm::vec3(0.f);
     glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
-    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
-    glm::vec3 _mieScatteringCoeff = glm::dvec3(0.f);
+    glm::vec3 _ozoneExtinctionCoeff    = glm::vec3(0.f);
+    glm::vec3 _mieScatteringCoeff      = glm::dvec3(0.f);
 
     // Atmosphere Debug
-    bool _saveCalculationsToTexture = false;
+    bool _saveCalculationsToTexture   = false;
     float _preCalculatedTexturesScale = 1.f;
 
     std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
-
-    bool _shadowEnabled = false;
-    bool _hardShadows = false;
 
     glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 

@@ -98,8 +98,8 @@ void inscatter(const float r, const float mu, const float muSun, const float nu,
     S_Ri = S_Rj;
     S_Mi = S_Mj;
   }
-  S_R *= betaRayleigh * (rayDist / (2.0f * float(INSCATTER_INTEGRAL_SAMPLES)));
-  S_M *= betaMieScattering * (rayDist / (2.0f * float(INSCATTER_INTEGRAL_SAMPLES)));
+  S_R *= scatteringCoefficientRayleigh(lambdaArray) * (rayDist / (2.0f * float(INSCATTER_INTEGRAL_SAMPLES)));
+  S_M *= scatteringCoefficientMie(lambdaArray) * (rayDist / (2.0f * float(INSCATTER_INTEGRAL_SAMPLES)));
 }
 
 void main(void) {

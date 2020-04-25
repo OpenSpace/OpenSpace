@@ -822,6 +822,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                     _ringsComponent.draw(data, RingsComponent::GeometryAndShading);
                 }
             }
+            _globeLabelsComponent.draw(data);
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
             std::string layer = _lastChangedLayer ? _lastChangedLayer->guiName() : "";

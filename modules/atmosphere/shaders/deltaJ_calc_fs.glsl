@@ -148,7 +148,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
       // cos(angle between vec(v) and vec(w)), ||v|| = ||w|| = 1
       float nuWV            = dot(v, w);
       float phaseRayleighWV = rayleighPhaseFunction(nuWV);
-      float phaseMieWV      = miePhaseFunction(nuWV);
+      vec3 phaseMieWV       = miePhaseFunction(nuWV);
       
       vec3 groundNormal     = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
       vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), Rg);
@@ -166,7 +166,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
       // we don't include the phase functions on those tables (that's why we calculate them now).
       if ( firstIteraction == 1 ) {        
         float phaseRaySW = rayleighPhaseFunction(nuSW);
-        float phaseMieSW = miePhaseFunction(nuSW);
+        vec3 phaseMieSW  = miePhaseFunction(nuSW);
         // We can now access the values for the single InScattering in the textures deltaS textures.
         vec3  singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
         vec3  singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW).rgb;
@@ -184,8 +184,11 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the Atmosphere and Ocean from
       // Thomas and Stamnes, pg 9-10.
-      radianceJ += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
-                                 betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;        
+      radianceJ += radianceJ1 * 
+        (
+          scatteringCoefficientRayleigh(lambdaArray) * exp(-(r - Rg) / HR) * phaseRayleighWV 
+          + scatteringCoefficientMie(lambdaArray) * exp(-(r - Rg) / HM) * phaseMieWV
+        ) * dw;        
     }
   }
 }

@@ -65,8 +65,8 @@ uniform float AverageGroundReflectance;
 uniform float groundRadianceEmittion;
 uniform float HR;
 uniform vec3 betaRayleigh;
-//uniform float HO;
-uniform vec3 betaOzoneExtinction;
+uniform float HO2;
+uniform vec3 sigmaOzoneAbsCrossSecion;
 uniform float HM;
 uniform vec3 betaMieScattering;
 uniform vec3 betaMieExtinction;
@@ -95,7 +95,9 @@ const int INSCATTER_INTEGRAL_SAMPLES = 50;
 const int IRRADIANCE_INTEGRAL_SAMPLES = 32;
 const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
 
-const float M_PI = 3.141592657;
+const float M_PI = 3.14159265359f;
+const float INV_M_PI = 0.318309886184f;
+const float TO_RADIANS = M_PI / 180.f;
 
 uniform sampler2D transmittanceTexture;
 
@@ -110,35 +112,25 @@ float invSamplesNu = 1.0f / float(SAMPLES_NU);
 float RtMinusRg = float(Rt - Rg);
 float invRtMinusRg = 1.0f / RtMinusRg;
 
-float opticalDepth(const float localH, const float r, const float mu, const float d) {
-  float invH = 1.0/localH;
-  float a    = sqrt((0.5 * invH)*r);
-  vec2 a01   = a*vec2(mu, mu + d / r);
-  vec2 a01s  = sign(a01);
-  vec2 a01sq = a01*a01;
-  float x    = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
-  vec2 y     = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * vec2(1.0, exp(-d*invH*(d/(2.0*r)+mu)));
-  return sqrt((6.2831*H)*r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
-}
-
-vec3 analyticTransmittance(const float r, const float mu, const float d) {
-  if (ozoneLayerEnabled) {
-    return exp(
-      -(betaRayleigh + betaOzoneExtinction) * opticalDepth(HR, r, mu, d) - 
-        betaMieExtinction * opticalDepth(HM, r, mu, d)
-        );
-  } else {
-    return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
-               betaMieExtinction * opticalDepth(HM, r, mu, d));
-  }
-}
-
-vec3 irradiance(sampler2D sampler, const float r, const float muSun) {
-  float u_r     = (r - Rg) * invRtMinusRg;
-  float u_muSun = (muSun + 0.2) / (1.0 + 0.2);
-  return texture(sampler, vec2(u_muSun, u_r)).rgb;
-}
-
+uniform bool  advancedModeEnabled;
+uniform bool  useOnlyAdvancedMie;
+uniform float deltaPolarizability;
+uniform vec3  n_real_rayleigh;
+uniform vec3  n_complex_rayleigh;
+uniform vec3  n_real_mie;
+uniform vec3  n_complex_mie;
+uniform vec3  lambdaArray;
+uniform vec3  g1;
+uniform vec3  g2;
+uniform float alpha;
+uniform float N_rayleigh; // in m^3
+uniform float N_mie;
+uniform float N_rayleigh_abs_molecule;
+uniform float radius_abs_molecule_rayleigh;
+uniform float mean_radius_particle_mie;
+uniform float turbidity;
+uniform float jungeExponent;
+uniform vec3  Kappa;
 
 //================================================//
 //=============== General Functions ==============//
@@ -175,36 +167,95 @@ float rayDistance(const float r, const float mu) {
   return rayDistanceAtmosphere;
 }
 
+
+//-- Given the texture coordinate (in [0, 1]), calculates the
+// height (r in km) from the Bruneton mapping equations.
+// u_r := texture coordinate e [0, 1]
+float unmappingR(const float u) {
+  float rho = H * u;
+  float rho2 = rho * rho;
+  
+  return sqrt(Rg2 + rho2);
+}
+
+//-- Given the heigh from the center of the planet (in km), calculates the
+// texture coordinate (in [0, 1]) from the Bruneton mapping equations.
+// r := observer's heigh position (top of atm if in space) in km
+float mappingUfromR(const float r) {
+  return sqrt((r*r - Rg2) / H2);
+}
+
+//-- Given the texture coordinate (in [0, 1]), calculates the
+// height (r in km) from the Bruneton mapping equations.
+// u_r  := texture coordinate in [0, 1] for LUT of r = ||x||
+// u_mu := texture coordinate in [0, 1] for LUT of mu = (x dot v) / ||x||
+float unmappingMu(const float r, const float u_r, const float u_mu) {
+  // Paper Version
+  // float rho   = H * u_r;
+  // float rho2  = rho * rho;
+  // float d_min = Rt - r;
+  // float d_max = rho + H;
+  // float d     = d_min + u_mu * (d_max - d_min);
+
+  // float mu = 0.f;
+
+  // if (d == 0.f) {
+  //   mu = 1.f;  
+  // } else {
+  //   mu = clamp((H * H - rho2 - d * d) / (2.0 * r * d), -1.f, 1.f);
+  // }
+
+  // return mu;
+
+  // Earth's optimized
+  return -0.15f + tan(1.5f * u_mu) / tan(1.5f) * (1.0f + 0.15f);
+}
+
+//-- Given cosine between the view direction and the zenith angle (mu), 
+// calculates the texture coordinate (in [0, 1]) from the Bruneton 
+// mapping equations.
+// r  := height of starting point vec(x)
+// mu := cosine of theta [-delta, 1]
+float mappingUfromMu(const float r, const float mu) {
+  // Paper Verion
+  // float rho   = sqrt(r * r - Rg2);
+  // float delta = r * r * (mu * mu - 1.f) + Rt2;
+  // float d     = max(-r * mu + sqrt(delta), 0.f); 
+  // float d_min = Rt - r;
+  // float d_max = rho + H;
+  // float u_mu  = (d - d_min) / (d_max - d_min);
+  
+  // Earth's optimized
+  float u_mu = atan((mu + 0.15f) / (1.0f + 0.15f) * tan(1.5f)) / 1.5f;
+
+  return u_mu;
+}
+
 //-- Given the window's fragment coordinates, for a defined
-// viewport, gives back the interpolated r e [Rg, Rt] and
-// mu e [-1, 1] --
+// viewport, gives back the interpolated r e [Rg, Rt] and mu e [-1, 1] --
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 void unmappingRAndMu(out float r, out float mu) {
   float u_mu  = gl_FragCoord.x / float(TRANSMITTANCE_W);
   float u_r   = gl_FragCoord.y / float(TRANSMITTANCE_H);
   
-  // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
-  // So, extracting r from u_r in the above equation:
-  //r  = sqrt( Rg * Rg + (u_r * u_r) * (Rt * Rt - Rg * Rg) );
-  r  = Rg + (u_r * u_r) * RtMinusRg;
-  
-  // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
-  // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
-  // But the below one is better. See Colliene.
-  // One must remember that mu is defined from 0 to PI/2 + epsillon. 
-  mu = -0.15f + tan(1.5f * u_mu) / tan(1.5f) * (1.0f + 0.15f);
+  r  = unmappingR(u_r);
+  mu = unmappingMu(r, u_r, u_mu);
+
+  // old
+  //mu = -0.15f + tan(1.5f * u_mu) / tan(1.5f) * (1.0f + 0.15f);
 }
 
 //-- Given the windows's fragment coordinates, for a defined view port,
 // gives back the interpolated r e [Rg, Rt] and muSun e [-1, 1] --
-// r := height of starting point vect(x)
+// r := height of starting point vec(x)
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 void unmappingRAndMuSun(out float r, out float muSun) {
   // See Bruneton and Colliene to understand the mapping.
   muSun = -0.2f + (gl_FragCoord.x - 0.5f) / (float(OTHER_TEXTURES_W) - 1.0f) * (1.0f + 0.2f);
   //r  = Rg + (gl_FragCoord.y - 0.5f) / (float(OTHER_TEXTURES_H) - 1.0f) * (Rt - Rg);
-  r  = Rg + (gl_FragCoord.y - 0.5f) / (float(OTHER_TEXTURES_H) ) * RtMinusRg;
+  float u_r = (gl_FragCoord.y - 0.5f) / (float(OTHER_TEXTURES_H) - 1.0f);
+  r = unmappingR(u_r);
 }
 
 //-- Given the windows's fragment coordinates, for a defined view port,
@@ -215,18 +266,78 @@ void unmappingRAndMuSun(out float r, out float muSun) {
 void unmappingRAndMuSunIrradiance(out float r, out float muSun) {
   // See Bruneton and Colliene to understand the mapping.
   muSun = -0.2f + (gl_FragCoord.x - 0.5f) / (float(SKY_W) - 1.0f) * (1.0f + 0.2f);
-  r  = Rg + (gl_FragCoord.y - 0.5f) / (float(SKY_H) - 1.0f) * RtMinusRg;
+  float u_r = (gl_FragCoord.y - 0.5f) / (float(SKY_H) - 1.0f);
+  r = unmappingR(u_r);
 }
 
 //-- Given the windows's fragment coordinates, for a defined view port,
 // gives back the interpolated r e [Rg, Rt] and mu, muSun amd nu e [-1, 1] --
-// r := height of starting point vect(x)
-// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+// r     := height of starting point vect(x)
+// mu    := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
-// nu := cosone of the angle between vec(s) and vec(v)
-// dhdH := it is a vec4. dhdH.x stores the dminT := Rt - r, dhdH.y stores the dH value (see paper),
+// nu    := cosone of the angle between vec(s) and vec(v)
+// dhdH  := it is a vec4. dhdH.x stores the dminT := Rt - r, dhdH.y stores the dH value (see paper),
 // dhdH.z stores dminG := r - Rg and dhdH.w stores dh (see paper).
 void unmappingMuMuSunNu(const float r, vec4 dhdH, out float mu, out float muSun, out float nu) {
+  /* =========================
+     ------ New Version ------
+     =========================
+  */
+  /*
+  // Window coordinates of pixel (uncentering also)
+  float fragmentX = gl_FragCoord.x - 0.5f;
+  float fragmentY = gl_FragCoord.y - 0.5f;
+  float r2  = r * r;
+  
+  float halfSAMPLE_MU = float(SAMPLES_MU) / 2.0f;
+
+  // If the (vec(x) dot vec(v))/r is negative, i.e.,
+  // the light ray has great probability to touch
+  // the ground, we obtain mu considering the geometry
+  // of the ground
+  if (fragmentY < halfSAMPLE_MU) {
+    float rho   = dhdH.w;
+    float d_min = dhdH.z;
+    float d_max = rho;
+    //ud = frag_coord.z / SCATTERING_TEXTURE_R_SIZE
+    float ud = 1.0f - (fragmentY / (halfSAMPLE_MU - 1.0f))
+    float varInterpolate =  1.0 - 2.0 * ud;
+    float MAX_TEXTURE_SIZE = halfSAMPLE_MU
+    float d =  d_min + (d_max - d_min) * ((varInterpolate - 0.5 / MAX_TEXTURE_SIZE) / (1.0 - 1.0 / MAX_TEXTURE_SIZE));
+
+    mu = d == 0.f ? -1.f : clamp(-(rho * rho + d * d) / (2.0 * r * d), -1.f, 1.f);
+  }
+  // The light ray is touching the atmosphere and
+  // not the ground
+  else {
+    float rho   = dhdH.w;
+    float d_min = dhdH.x;
+    float d_max = rho + H;
+    //ud = frag_coord.z / SCATTERING_TEXTURE_R_SIZE
+    float ud = 1.0f - (fragmentY / (halfSAMPLE_MU - 1.0f))
+    float varInterpolate =  2.0 * ud - 1.0;
+    float d = d_min + (d_max - d_min) * ((varInterpolate - 0.5 / MAX_TEXTURE_SIZE) / (1.0 - 1.0 / MAX_TEXTURE_SIZE));
+    mu = d == 0.f ? 1.f : clamp((H * H - rho * rho - d * d) / (2.0 * r * d, -1.f, 1.f));
+  }
+  
+  float modValueMuSun = mod(fragmentX, float(SAMPLES_MU_S)) / (float(SAMPLES_MU_S) - 1.0f);
+  float uMuSun = (modValueMuSun - 0.5 / float(SAMPLES_MU_S)) / (1.0 - 1.0 / float(SAMPLES_MU_S));
+  float d_min = Rt2;
+  float d_max = H;
+  
+  float minMuSun = cos(102.0 * TO_RADIANS);
+  float A = -2.0 * minMuSun * Rg / (d_max - d_min);
+  float a = (A - uMuSun * A) / (1.0 + uMuSun * A);
+  Length d = d_min + min(a, A) * (d_max - d_min);
+  muSun = d == 0.f ? 1.f : clamp((H2 - d * d) / (2.0 * Rg * d));
+
+  nu = -1.0f + floor(fragmentX / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0f) * 2.0f;
+  */
+
+  /* =========================
+     ------ Old Version ------
+     =========================
+  */
   // Window coordinates of pixel (uncentering also)
   float fragmentX = gl_FragCoord.x - 0.5f;
   float fragmentY = gl_FragCoord.y - 0.5f;
@@ -269,8 +380,125 @@ void unmappingMuMuSunNu(const float r, vec4 dhdH, out float mu, out float muSun,
   // The following mapping is different from the paper. See Colliene for an details.
   muSun = tan((2.0f * modValueMuSun - 1.0f + 0.26f) * 1.1f) / tan(1.26f * 1.1f);
   nu = -1.0f + floor(fragmentX / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0f) * 2.0f;
+
+
 }
 
+// -- Given the height rm view-zenith angle (cosine) mu,
+// sun-zenith angle (cosine) muSun and the angle (cosine)
+// between the vec(s) and vec(v), nu, we access the 3D textures
+// and interpolate between them (r) to find the value for the
+// 4D texture. --
+// r := height of starting point vect(x)
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+// nu := cosine of the angle between vec(s) and vec(v)
+vec4 texture4D(sampler3D table, const float r, const float mu, 
+                const float muSun, const float nu)
+{ 
+  /* =========================
+     ------ New Version ------
+     =========================
+  */
+  /*
+=== PAREI AQUI!! ===
+  //float Rg2    = Rg * Rg;
+  //float Rt2    = Rt * Rt;
+  float r2     = r * r;
+  //float H      = sqrt(Rt2 - Rg2);
+  float rho    = sqrt(r2 - Rg2);
+  float rmu    = r * mu;
+  float delta  = rmu * rmu - r2 + Rg2;
+  //float invSamplesMu = 1.0f / float(SAMPLES_MU);
+  //float invSamplesR = 1.0f / float(SAMPLES_R);
+  //float invSamplesMuS = 1.0f / float(SAMPLES_MU_S);
+  //float invSamplesNu = 1.0f / float(SAMPLES_NU);
+  // vec4 cst     = rmu < 0.0f && delta > 0.0f ?
+  //   vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f / float(SAMPLES_MU)) :
+  //   vec4(-1.0f, H * H, H, 0.5f + 0.5f / float(SAMPLES_MU));
+
+  vec4 cst     = rmu < 0.0f && delta > 0.0f ?
+    vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f * invSamplesMu) :
+    vec4(-1.0f, H2, H, 0.5f + 0.5f * invSamplesMu);
+
+  //float u_r    = 0.5f / float(SAMPLES_R) + rho / H * (1.0f - 1.0f / float(SAMPLES_R));
+  float u_r    = 0.5f * invSamplesR + (rho / H) * (1.0f - invSamplesR);
+  // @Todo: JCC: Change to new version of mapping
+  //float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - 1.0f / float(SAMPLES_MU));
+  float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - invSamplesMu);
+  // float u_mu_s = 0.5f / float(SAMPLES_MU_S) +
+  //   (atan(max(muSun, -0.1975) * tan(1.26f * 1.1f)) / 1.1f + (1.0f - 0.26f)) * 0.5f * (1.0f - 1.0f / float(SAMPLES_MU_S));
+  float u_mu_s = 0.5f * invSamplesMuS +
+    (atan(max(muSun, -0.1975) * tan(1.386f)) * 0.9090909090909090 + (0.74f)) * 0.5f * (1.0f - invSamplesMuS);
+  float lerp = (nu + 1.0f) / 2.0f * (float(SAMPLES_NU) - 1.0f);
+  float u_nu = floor(lerp);
+  lerp = lerp - u_nu;
+
+  // return texture(table, vec3((u_nu + u_mu_s) / float(SAMPLES_NU), u_mu, u_r)) * (1.0f - lerp) +
+  //   texture(table, vec3((u_nu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
+  
+Number GetTextureCoordFromUnitRange(Number x, int texture_size) {
+  return 0.5 / Number(texture_size) + x * (1.0 - 1.0 / Number(texture_size));
+}
+
+
+  float d = DistanceToTopAtmosphereBoundary( atmosphere, atmosphere.bottom_radius, muSun);
+  float d_min = Rt2;
+  float d_max = H;
+  float a = (d - d_min) / (d_max - d_min);
+  float minMuSun = cos(102.0 * TO_RADIANS);
+  float A = -2.0 * minMuSun * Rg / (d_max - d_min);
+  float uMuSunInterpolation = max(1.0 - a / A, 0.0) / (1.0 + a);
+  float u_mu_s = 0.5 / float(SAMPLES_MU_S) + uMuSunInterpolation * (1.0 - 1.0 / float(SAMPLES_MU_S));
+
+  float u_nu = (nu + 1.0) / 2.0;
+
+
+  return texture(table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0f - lerp) +
+    texture(table, vec3((u_nu + u_mu_s + 1.0f) * invSamplesNu, u_mu, u_r)) * lerp;
+  */
+
+  /* =========================
+     ------ Old Version ------
+     =========================
+  */
+  //float Rg2    = Rg * Rg;
+  //float Rt2    = Rt * Rt;
+  float r2     = r * r;
+  //float H      = sqrt(Rt2 - Rg2);
+  float rho    = sqrt(r2 - Rg2);
+  float rmu    = r * mu;
+  float delta  = rmu * rmu - r2 + Rg2;
+  //float invSamplesMu = 1.0f / float(SAMPLES_MU);
+  //float invSamplesR = 1.0f / float(SAMPLES_R);
+  //float invSamplesMuS = 1.0f / float(SAMPLES_MU_S);
+  //float invSamplesNu = 1.0f / float(SAMPLES_NU);
+  // vec4 cst     = rmu < 0.0f && delta > 0.0f ?
+  //   vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f / float(SAMPLES_MU)) :
+  //   vec4(-1.0f, H * H, H, 0.5f + 0.5f / float(SAMPLES_MU));
+
+  vec4 cst     = rmu < 0.0f && delta > 0.0f ?
+    vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f * invSamplesMu) :
+    vec4(-1.0f, H2, H, 0.5f + 0.5f * invSamplesMu);
+
+  //float u_r    = 0.5f / float(SAMPLES_R) + rho / H * (1.0f - 1.0f / float(SAMPLES_R));
+  float u_r    = 0.5f * invSamplesR + rho / H * (1.0f - invSamplesR);
+  //float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - 1.0f / float(SAMPLES_MU));
+  float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - invSamplesMu);
+  // float u_mu_s = 0.5f / float(SAMPLES_MU_S) +
+  //   (atan(max(muSun, -0.1975) * tan(1.26f * 1.1f)) / 1.1f + (1.0f - 0.26f)) * 0.5f * (1.0f - 1.0f / float(SAMPLES_MU_S));
+  float u_mu_s = 0.5f * invSamplesMuS +
+    (atan(max(muSun, -0.1975) * tan(1.386f)) * 0.9090909090909090 + (0.74f)) * 0.5f * (1.0f - invSamplesMuS);
+  float lerp = (nu + 1.0f) / 2.0f * (float(SAMPLES_NU) - 1.0f);
+  float u_nu = floor(lerp);
+  lerp = lerp - u_nu;
+
+  // return texture(table, vec3((u_nu + u_mu_s) / float(SAMPLES_NU), u_mu, u_r)) * (1.0f - lerp) +
+  //   texture(table, vec3((u_nu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
+  
+  return texture(table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0f - lerp) +
+    texture(table, vec3((u_nu + u_mu_s + 1.0f) * invSamplesNu, u_mu, u_r)) * lerp;
+}
 
 //-- Function to access the transmittance texture. Given r
 // and mu, returns the transmittance of a ray starting at vec(x),
@@ -281,11 +509,16 @@ void unmappingMuMuSunNu(const float r, vec4 dhdH, out float mu, out float muSun,
 vec3 transmittanceLUT(const float r, const float mu) {
   // Given the position x (here the altitude r) and the view
   // angle v (here the cosine(v)= mu), we map this
-  float u_r  = sqrt((r - Rg) * invRtMinusRg);
+  float u_r  = mappingUfromR(r);
+  // Old
   //float u_r  = sqrt((r*r - Rg*Rg) / (Rt*Rt - Rg*Rg));
-  // See Colliene to understand the different mapping.
-  float u_mu = atan((mu + 0.15f) / (1.0f + 0.15f) * tan(1.5f)) / 1.5f;
   
+  // Old
+  // See Colliene to understand the different mapping.
+  //float u_mu = atan((mu + 0.15f) / (1.0f + 0.15f) * tan(1.5f)) / 1.5f;
+  
+  float u_mu = mappingUfromMu(r, mu);
+
   return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
 }
 
@@ -328,74 +561,133 @@ vec3 transmittance(const float r, const float mu, const float d) {
 // scattering cosine angle mu --
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 float rayleighPhaseFunction(const float mu) {
+  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+    // Penndorf
+    return 0.7629f * (1.f + 0.932f * mu * mu) * INV_M_PI * 0.25f;
+  } else {
     //return (3.0f / (16.0f * M_PI)) * (1.0f + mu * mu);
     return 0.0596831036 * (1.0f + mu * mu);
+  }
+}
+
+// -- Calculates DHG Mie phase function given thescattering cosine angle mu --
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+// g1 := forward scattering 
+// g2 := backward scattering
+// alpha: = ratio between g1 and g2
+vec3 DHG_MiePhaseFunction(const float mu) {
+  vec3 g1SQRD = g1 * g1;
+  vec3 g2SQRD = g2 * g2;
+  float exponent = 3.f/2f;
+  
+  vec3 denom1 = vec3(1.f) + g1SQRD - 2.f * g1 * mu;
+  vec3 denom2 = vec3(1.f) + g2SQRD - 2.f * g2 * mu;
+  vec3 d1Powered = vec3(pow(denom1.r, exponent), pow(denom1.g, exponent), pow(denom1.b, exponent));
+  vec3 d2Powered = vec3(pow(denom2.r, exponent), pow(denom2.g, exponent), pow(denom2.b, exponent));
+  
+  return (alpha * ((vec3(1.f) + g1SQRD)/d1Powered) + (vec3(1.f) - alpha) * ((vec3(1.f) + g2SQRD)/d2Powered)) 
+    * INV_M_PI * 0.25f;
 }
 
 // -- Calculates Mie phase function given the
 // scattering cosine angle mu --
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-float miePhaseFunction(const float mu) {
-  //return (3.0f / (8.0f * M_PI)) * 
-  //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
-  //      ( (2.0f + mieG * mieG) *
-  //        pow(1.0f + mieG * mieG - 2.0f * mieG * mu, 3.0f/2.0f) ) );
-  // return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG * mieG) *
-  //   pow(1.0f + (mieG * mieG) - 2.0f * mieG * mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
+vec3 miePhaseFunction(const float mu) {
+  if (advancedModeEnabled) {
+    return DHG_MiePhaseFunction(mu);
+  } else {
+    // return (3.0f / (8.0f * M_PI)) * 
+    //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
+    //      ( (2.0f + mieG * mieG) *
+    //        pow(1.0f + mieG * mieG - 2.0f * mieG * mu, 3.0f/2.0f) ) );
+    // return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG * mieG) *
+    //   pow(1.0f + (mieG * mieG) - 2.0f * mieG * mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
 
-  float mieG2 = mieG * mieG;
-  return 0.1193662072 * (1.0f - mieG2) *
-    pow(1.0f + mieG2 - 2.0f * mieG * mu, -1.5f) * (1.0f + mu * mu) / (2.0f + mieG2);
+    float mieG2 = mieG * mieG;
+    float cornette =  0.1193662072 * (1.0f - mieG2) *
+      pow(1.0f + mieG2 - 2.0f * mieG * mu, -1.5f) * (1.0f + mu * mu) / (2.0f + mieG2);
+
+    return vec3(cornette);
   }
+}
 
-// -- Given the height rm view-zenith angle (cosine) mu,
-// sun-zenith angle (cosine) muSun and the angle (cosine)
-// between the vec(s) and vec(v), nu, we access the 3D textures
-// and interpolate between them (r) to find the value for the
-// 4D texture. --
-// r := height of starting point vect(x)
-// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
-// nu := cosine of the angle between vec(s) and vec(v)
-vec4 texture4D(sampler3D table, const float r, const float mu, 
-                const float muSun, const float nu)
-{
-  //float Rg2    = Rg * Rg;
-  //float Rt2    = Rt * Rt;
-  float r2     = r * r;
-  //float H      = sqrt(Rt2 - Rg2);
-  float rho    = sqrt(r2 - Rg2);
-  float rmu    = r * mu;
-  float delta  = rmu * rmu - r2 + Rg2;
-  //float invSamplesMu = 1.0f / float(SAMPLES_MU);
-  //float invSamplesR = 1.0f / float(SAMPLES_R);
-  //float invSamplesMuS = 1.0f / float(SAMPLES_MU_S);
-  //float invSamplesNu = 1.0f / float(SAMPLES_NU);
-  // vec4 cst     = rmu < 0.0f && delta > 0.0f ?
-  //   vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f / float(SAMPLES_MU)) :
-  //   vec4(-1.0f, H * H, H, 0.5f + 0.5f / float(SAMPLES_MU));
+// -- Calculates Rayleigh Scattering Coefficients given the real part of the refractive index
+//    and the wavelength of the incident light.
+// lambda := wavelength of the incident light (680, 550, 440) nm in our case
+// m := Real(n(lambada))
+vec3 scatteringCoefficientRayleigh(const vec3 lambda) {
+  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+    vec3 lambda4 = lambda * lambda * lambda * lambda;
+    vec3 m2 = n_real_rayleigh * n_real_rayleigh;
+    vec3 alpha = (m2 - vec3(1.f));
+    float fDelta = (6.f + 3.f * deltaPolarizability) / (6.f - 7.f * deltaPolarizability);
+    float mTokm = 1000.f;
+    return mTokm * ((8.f * M_PI * M_PI * M_PI * alpha * alpha) / (3.f * N_rayleigh * lambda4)) * fDelta;
+  } else {
+    return betaRayleigh;
+  }
+}
 
-  vec4 cst     = rmu < 0.0f && delta > 0.0f ?
-    vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f * invSamplesMu) :
-    vec4(-1.0f, H2, H, 0.5f + 0.5f * invSamplesMu);
+// -- Calculates Rayleigh absorption Coefficients for a given type of molecule,
+//    given the refractive index and the wavelength of the incident light.
+// lambda := wavelength of the incident light (680, 550, 440) nm in our case
+vec3 absorptionCoefficientRayleight(const vec3 lambda) {
+  // n = m + ki => n^2 = (m^2 - k^2) + (2mk)i
+  vec3 k2 = 2.f * (n_real_rayleigh * n_complex_mie);
+  float r3 = radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh;
+  float mTokm = 1000.f;
+  return mTokm * (8.f * M_PI * M_PI * N_rayleigh_abs_molecule * r3) 
+    * ( ( (k2 - vec3(1.f)) / (k2 + vec3(2.f)) ) / lambda);
+}
 
-  //float u_r    = 0.5f / float(SAMPLES_R) + rho / H * (1.0f - 1.0f / float(SAMPLES_R));
-  float u_r    = 0.5f * invSamplesR + rho / H * (1.0f - invSamplesR);
-  //float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - 1.0f / float(SAMPLES_MU));
-  float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - invSamplesMu);
-  // float u_mu_s = 0.5f / float(SAMPLES_MU_S) +
-  //   (atan(max(muSun, -0.1975) * tan(1.26f * 1.1f)) / 1.1f + (1.0f - 0.26f)) * 0.5f * (1.0f - 1.0f / float(SAMPLES_MU_S));
-  float u_mu_s = 0.5f * invSamplesMuS +
-    (atan(max(muSun, -0.1975) * tan(1.386f)) * 0.9090909090909090 + (0.74f)) * 0.5f * (1.0f - invSamplesMuS);
-  float lerp = (nu + 1.0f) / 2.0f * (float(SAMPLES_NU) - 1.0f);
-  float u_nu = floor(lerp);
-  lerp = lerp - u_nu;
+vec3 extinctionCoefficientRayleigh(const vec3 lambda) {
+  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+    return scatteringCoefficientRayleigh(lambda) + absorptionCoefficientRayleight(lambda);
+  } else {
+    return scatteringCoefficientRayleigh(lambda);
+  }  
+}
 
-  // return texture(table, vec3((u_nu + u_mu_s) / float(SAMPLES_NU), u_mu, u_r)) * (1.0f - lerp) +
-  //   texture(table, vec3((u_nu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
-  
-  return texture(table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0f - lerp) +
-    texture(table, vec3((u_nu + u_mu_s + 1.0f) * invSamplesNu, u_mu, u_r)) * lerp;
+// -- Calculates Mie Scattering Coefficients given the wavelength of the incident light --.
+// lambda := wavelength of the incident light (680, 550, 440) nm in our case
+vec3 scatteringCoefficientMie(const vec3 lambda) {
+  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+    vec3 tmp = (2.f * M_PI / lambda);
+    vec3 lambdaJunge = vec3(
+      pow(tmp.x, jungeExponent - 2.f), 
+      pow(tmp.y, jungeExponent - 2.f), 
+      pow(tmp.z, jungeExponent - 2.f)
+      );
+    return 0.434f * (0.65f * turbidity - 0.65f) * pow(10.f, -16.f) * M_PI * Kappa * lambdaJunge * 1e3;
+  } else {
+    return betaMieScattering;
+  }
+}
+
+vec3 mieExtinctionEfficiency(const vec3 lambda) {
+  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+    vec3 rho = 4.f * M_PI * mean_radius_particle_mie * (n_real_mie - vec3(1.f)) / lambda;
+    vec3 tanBeta = n_complex_mie / (n_real_mie - vec3(1.f));
+    vec3 beta = atan(tanBeta);
+    vec3 rhoTanBeta = rho * tanBeta;
+    vec3 expRhoTanBeta = exp(-rhoTanBeta);
+    vec3 cosBetaOverRho = cos(beta) / rho;
+    vec3 cosBetaOverRho2 = cosBetaOverRho * cosBetaOverRho;
+    return 2.f - 4.f * expRhoTanBeta * cosBetaOverRho * sin(rho - beta)
+      + 4.f * expRhoTanBeta * cosBetaOverRho2 * cos(rho - 2.f * beta)
+      + 4.f * expRhoTanBeta * cosBetaOverRho2 * cos(2.f * beta);
+  } else {
+    return betaMieExtinction;
+  }
+}
+
+// -- Calculates the Mie Absorption Coefficients for dust (of particles with same radius size and type) --
+vec3 extinctionCoefficientMie(const vec3 lambda) {
+  if (advancedModeEnabled) {
+    return mieExtinctionEfficiency(lambda) * N_mie * M_PI * (mean_radius_particle_mie * mean_radius_particle_mie) * 1e3;
+  } else {
+    return betaMieExtinction;
+  }
 }
 
 // -- Given the irradiance texture table, the cosine of zenith sun vector
@@ -407,6 +699,13 @@ vec4 texture4D(sampler3D table, const float r, const float mu,
 vec3 irradianceLUT(sampler2D lut, const float muSun, const float r) {
   // See Bruneton paper and Coliene to understand the mapping
   float u_muSun = (muSun + 0.2f) / (1.0f + 0.2f);
-  float u_r     = (r - Rg) * invRtMinusRg;
+  float u_r     = mappingUfromR(r);
+  
   return texture(lut, vec2(u_muSun, u_r)).rgb;
+}
+
+vec3 irradiance(sampler2D sampler, const float r, const float muSun) {
+  float u_r     =  mappingUfromR(r);
+  float u_muSun = (muSun + 0.2) / (1.0 + 0.2);
+  return texture(sampler, vec2(u_muSun, u_r)).rgb;
 }

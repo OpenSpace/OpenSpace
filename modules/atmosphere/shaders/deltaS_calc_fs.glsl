@@ -42,6 +42,7 @@ void main(void) {
   vec4 rayleighInscattering0 = texture(deltaSRTexture, rst);
   vec4 mieInscattering0      = texture(deltaSMTexture, rst);
   
+  // JCC: This need to change. We can't save only the red component of Mie Scattering.
   // We are using only the red component of the Mie scattering
   // See the Precomputed Atmosphere Scattering paper for details about
   // the angular precision. 

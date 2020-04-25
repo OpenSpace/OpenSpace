@@ -47,6 +47,28 @@ struct ShadowConfiguration;
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
+    struct AdvancedATMModeData {
+        glm::vec3 nRealRayleigh;
+        glm::vec3 nComplexRayleigh;
+        glm::vec3 nRealMie;
+        glm::vec3 nComplexMie;
+        glm::vec3 lambdaArray;
+        glm::vec3 Kappa;
+        glm::vec3 g1;
+        glm::vec3 g2;
+        glm::vec3 alpha;
+        float deltaPolarizability;
+        float NRayleigh;
+        float NMie;
+        float NRayleighAbsMolecule;
+        float radiusAbsMoleculeRayleigh;
+        float meanRadiusParticleMie;
+        float turbidity;
+        float jungeExponent;
+        bool useOnlyAdvancedMie;
+    };
+
+public:
     virtual ~AtmosphereDeferredcaster() = default;
 
     void initialize();
@@ -76,19 +98,22 @@ public:
     void setRayleighHeightScale(float rayleighHeightScale);
     void enableOzone(bool enable);
     void enableOxygen(bool enable);
-    void setOzoneHeightScale(float ozoneHeightScale);
+    void setOxygenHeightScale(float ozoneHeightScale);
     void setMieHeightScale(float mieHeightScale);
     void setMiePhaseConstant(float miePhaseConstant);
     void setSunRadianceIntensity(float sunRadiance);
     void setRayleighScatteringCoefficients(glm::vec3& rayScattCoeff);
-    void setOzoneExtinctionCoefficients(glm::vec3& ozoneExtCoeff);
+    void setOxygenAbsCrossSections(glm::vec3 oxygenAbsCrossSections);
+    void setOzoneAbsCrossSections(glm::vec3 ozoneAbsCrossSections);
     void setMieScatteringCoefficients(glm::vec3& mieScattCoeff);
     void setMieAbsorptionCoefficients(glm::vec3& mieAbsorbCoeff);
     void setMieExtinctionCoefficients(glm::vec3& mieExtCoeff);
     void setEllipsoidRadii(glm::dvec3& radii);
     void setShadowConfigArray(std::vector<ShadowConfiguration>& shadowConfigArray);
+    void setAdvancedModeParameters(const AdvancedATMModeData &advData);
     void setHardShadows(bool enabled);
     void enableSunFollowing(bool enable);
+    void enableAdvancedMode(bool enable);
 
     void setPrecalculationTextureScale(float preCalculatedTexturesScale);
     void enablePrecalculationTexturesSaving();
@@ -141,59 +166,68 @@ private:
         groundRadianceEmittion, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, oxygenAbsLayerEnabled,
         HO, betaOzoneExtinction, SAMPLES_R,
-        SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
+        SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, advancedModeEnabled) _uniformCache;
     UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
         dSgctProjectionToModelTransformMatrix,
         dSGCTViewToWorldMatrix, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache2;
+    UniformCache(useOnlyAdvancedMie, deltaPolarizability, n_real_rayleigh, n_complex_rayleigh,
+        n_real_mie, n_complex_mie, lambdaArray, N_rayleigh, N_mie,
+        N_rayleigh_abs_molecule, radius_abs_molecule_rayleigh, mean_radius_particle_mie,
+        turbidity, jungeExponent, Kappa, g1, g2, alpha) _uniformCacheAdvMode;
 
-    GLuint _transmittanceTableTexture = 0;
-    GLuint _irradianceTableTexture = 0;
-    GLuint _inScatteringTableTexture = 0;
-    GLuint _deltaETableTexture = 0;
+    GLuint _transmittanceTableTexture  = 0;
+    GLuint _irradianceTableTexture     = 0;
+    GLuint _inScatteringTableTexture   = 0;
+    GLuint _deltaETableTexture         = 0;
     GLuint _deltaSRayleighTableTexture = 0;
-    GLuint _deltaSMieTableTexture = 0;
-    GLuint _deltaJTableTexture = 0;
-    GLuint _atmosphereTexture = 0;
+    GLuint _deltaSMieTableTexture      = 0;
+    GLuint _deltaJTableTexture         = 0;
+    GLuint _atmosphereTexture          = 0;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
 
     // Atmosphere Data
-    bool _atmosphereCalculated = false;
-    bool _ozoneEnabled = true;
-    bool _oxygenEnabled = true;
-    bool _sunFollowingCameraEnabled = false;
-    float _atmosphereRadius = 0.f;
-    float _atmospherePlanetRadius = 0.f;
+    bool _atmosphereCalculated            = false;
+    bool _ozoneEnabled                    = true;
+    bool _oxygenEnabled                   = true;
+    bool _sunFollowingCameraEnabled       = false;
+    bool _advancedMode                    = false;
+    float _atmosphereRadius               = 0.f;
+    float _atmospherePlanetRadius         = 0.f;
     float _planetAverageGroundReflectance = 0.f;
-    float _planetGroundRadianceEmittion = 0.f;
-    float _rayleighHeightScale = 0.f;
-    float _ozoneHeightScale = 0.f;
-    float _mieHeightScale;
-    float _miePhaseConstant = 0.f;
-    float _sunRadianceIntensity = 5.f;
+    float _planetGroundRadianceEmittion   = 0.f;
+    float _rayleighHeightScale            = 0.f;
+    float _oxygenHeightScale              = 0.f;
+    float _mieHeightScale                 = 0.f;
+    float _miePhaseConstant               = 0.f;
+    float _sunRadianceIntensity           = 5.f;
+
+    // Advanced ATM Mode Data
+    AdvancedATMModeData _advModeData;
 
     glm::vec3 _rayleighScatteringCoeff = glm::vec3(0);
-    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0);
-    glm::vec3 _mieScatteringCoeff = glm::vec3(0);
-    glm::vec3 _mieAbsorptionCoeff = glm::vec3(0);
-    glm::vec3 _mieExtinctionCoeff = glm::vec3(0);
-    glm::dvec3 _ellipsoidRadii = glm::dvec3(0);
+    glm::vec3 _oxygenAbsCrossSection   = glm::vec3(0);
+    glm::vec3 _ozoneAbsCrossSection    = glm::vec3(0);
+    glm::vec3 _mieScatteringCoeff      = glm::vec3(0);
+    glm::vec3 _mieAbsorptionCoeff      = glm::vec3(0);
+    glm::vec3 _mieExtinctionCoeff      = glm::vec3(0);
+    glm::dvec3 _ellipsoidRadii         = glm::dvec3(0);
 
     // Atmosphere Textures Dimmensions
-    int _transmittance_table_width = 256;
+    int _transmittance_table_width  = 256;
     int _transmittance_table_height = 64;
-    int _irradiance_table_width = 64;
-    int _irradiance_table_height = 16;
-    int _delta_e_table_width = 64;
-    int _delta_e_table_height = 16;
-    int _r_samples = 32;
-    int _mu_samples = 128;
-    int _mu_s_samples = 32;
-    int _nu_samples = 8;
+    int _irradiance_table_width     = 64;
+    int _irradiance_table_height    = 16;
+    int _delta_e_table_width        = 64;
+    int _delta_e_table_height       = 16;
+    int _r_samples                  = 32;
+    int _mu_samples                 = 128;
+    int _mu_s_samples               = 32;
+    int _nu_samples                 = 8;
 
     glm::dmat4 _modelTransform;
     double _time = 0.0;
@@ -204,7 +238,7 @@ private:
 
     // Atmosphere Debugging
     float _calculationTextureScale = 1.f;
-    bool _saveCalculationTextures = false;
+    bool _saveCalculationTextures  = false;
 };
 
 } // openspace

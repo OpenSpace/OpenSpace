@@ -89,10 +89,10 @@
 namespace {
     constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr const std::array<const char*, 18> UniformNames1 = {
+    constexpr const std::array<const char*, 19> UniformNames1 = {
         "cullAtmosphere", "Rg", "Rt", "groundRadianceEmittion", "HR", "betaRayleigh",
         "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "oxygenAbsLayerEnabled",
-        "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU"
+        "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU", "advancedModeEnabled"
     };
 
     constexpr const std::array<const char*, 10> UniformNames2 = {
@@ -100,6 +100,13 @@ namespace {
         "dSgctProjectionToModelTransformMatrix", "dSGCTViewToWorldMatrix", "dCamPosObj",
         "sunDirectionObj", "hardShadows", "transmittanceTexture", "irradianceTexture",
         "inscatterTexture"
+    };
+
+    constexpr const std::array<const char*, 18> UniformCacheAdvMode = {
+        "useOnlyAdvancedMie", "deltaPolarizability", "n_real_rayleigh", "n_complex_rayleigh",
+        "n_real_mie", "n_complex_mie", "lambdaArray", "N_rayleigh, N_mie",
+        "N_rayleigh_abs_molecule", "radius_abs_molecule_rayleigh", "mean_radius_particle_mie",
+        "turbidity", "jungeExponent", "Kappa", "g1", "g2", "alpha"
     };
 
     constexpr const char* GlslDeferredcastPath =
@@ -194,12 +201,32 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
             program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
             program.setUniform(_uniformCache.oxygenAbsLayerEnabled, _oxygenEnabled);
-            program.setUniform(_uniformCache.HO, _ozoneHeightScale);
-            program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
+            program.setUniform(_uniformCache.HO, _oxygenHeightScale);
+            program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneAbsCrossSection);
             program.setUniform(_uniformCache.SAMPLES_R, _r_samples);
             program.setUniform(_uniformCache.SAMPLES_MU, _mu_samples);
             program.setUniform(_uniformCache.SAMPLES_MU_S, _mu_s_samples);
             program.setUniform(_uniformCache.SAMPLES_NU, _nu_samples);
+            // Advanced Mode Parameters
+            program.setUniform(_uniformCacheAdvMode.deltaPolarizability, _advModeData.deltaPolarizability);
+            program.setUniform(_uniformCacheAdvMode.useOnlyAdvancedMie, _advModeData.useOnlyAdvancedMie);
+            program.setUniform(_uniformCacheAdvMode.jungeExponent, _advModeData.jungeExponent);
+            program.setUniform(_uniformCacheAdvMode.Kappa, _advModeData.Kappa);
+            program.setUniform(_uniformCacheAdvMode.lambdaArray, _advModeData.lambdaArray);
+            program.setUniform(_uniformCacheAdvMode.mean_radius_particle_mie, _advModeData.meanRadiusParticleMie);
+            program.setUniform(_uniformCacheAdvMode.n_complex_mie, _advModeData.nComplexMie);
+            program.setUniform(_uniformCacheAdvMode.n_complex_rayleigh, _advModeData.nComplexRayleigh);
+            program.setUniform(_uniformCacheAdvMode.N_mie, _advModeData.NMie);
+            program.setUniform(_uniformCacheAdvMode.N_rayleigh, _advModeData.NRayleigh);
+            program.setUniform(_uniformCacheAdvMode.N_rayleigh_abs_molecule, _advModeData.NRayleighAbsMolecule);
+            program.setUniform(_uniformCacheAdvMode.n_real_mie, _advModeData.nRealMie);
+            program.setUniform(_uniformCacheAdvMode.n_real_rayleigh, _advModeData.nRealRayleigh);
+            program.setUniform(_uniformCacheAdvMode.radius_abs_molecule_rayleigh, _advModeData.radiusAbsMoleculeRayleigh);
+            program.setUniform(_uniformCacheAdvMode.turbidity, _advModeData.turbidity);
+            program.setUniform(_uniformCacheAdvMode.g1, _advModeData.g1);
+            program.setUniform(_uniformCacheAdvMode.g2, _advModeData.g2);
+            program.setUniform(_uniformCacheAdvMode.alpha, _advModeData.alpha);
+
 
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
@@ -410,6 +437,7 @@ void AtmosphereDeferredcaster::initializeCachedVariables(
 {
     ghoul::opengl::updateUniformLocations(program, _uniformCache, UniformNames1);
     ghoul::opengl::updateUniformLocations(program, _uniformCache2, UniformNames2);
+    ghoul::opengl::updateUniformLocations(program, _uniformCacheAdvMode, UniformCacheAdvMode);
 }
 
 void AtmosphereDeferredcaster::update(const UpdateData&) {}
@@ -454,8 +482,8 @@ void AtmosphereDeferredcaster::enableOxygen(bool enable) {
     _oxygenEnabled = enable;
 }
 
-void AtmosphereDeferredcaster::setOzoneHeightScale(float ozoneHeightScale) {
-    _ozoneHeightScale = ozoneHeightScale;
+void AtmosphereDeferredcaster::setOxygenHeightScale(float oxygenHeightScale) {
+    _oxygenHeightScale = oxygenHeightScale;
 }
 
 void AtmosphereDeferredcaster::setMieHeightScale(float mieHeightScale) {
@@ -475,9 +503,14 @@ void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(glm::vec3& rayS
     _rayleighScatteringCoeff = std::move(rayScattCoeff);
 }
 
-void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(glm::vec3& ozoneExtCoeff)
+void AtmosphereDeferredcaster::setOzoneAbsCrossSections(glm::vec3 ozoneAbsCrossSections)
 {
-    _ozoneExtinctionCoeff = std::move(ozoneExtCoeff);
+    _ozoneAbsCrossSection = std::move(ozoneAbsCrossSections);
+}
+
+void AtmosphereDeferredcaster::setOxygenAbsCrossSections(glm::vec3 oxygenAbsCrossSections)
+{
+    _oxygenAbsCrossSection = std::move(oxygenAbsCrossSections);
 }
 
 void AtmosphereDeferredcaster::setMieScatteringCoefficients(glm::vec3& mieScattCoeff)
@@ -509,8 +542,16 @@ void AtmosphereDeferredcaster::setShadowConfigArray(
     _shadowConfArray = std::move(shadowConfigArray);
 }
 
+void AtmosphereDeferredcaster::setAdvancedModeParameters(const AdvancedATMModeData& advData) {
+    _advModeData = advData;
+}
+
 void AtmosphereDeferredcaster::enableSunFollowing(bool enable) {
     _sunFollowingCameraEnabled = enable;
+}
+
+void AtmosphereDeferredcaster::enableAdvancedMode(bool enable) {
+    _advancedMode = enable;
 }
 
 void AtmosphereDeferredcaster::setPrecalculationTextureScale(
@@ -1262,12 +1303,32 @@ void AtmosphereDeferredcaster::saveSkyLuminance() const {
     cieCurveExtractionProgramObject->setUniform("sunRadiance", _sunRadianceIntensity);
     cieCurveExtractionProgramObject->setUniform("ozoneLayerEnabled", _ozoneEnabled);
     cieCurveExtractionProgramObject->setUniform("oxygenAbsLayerEnabled", _oxygenEnabled);
-    cieCurveExtractionProgramObject->setUniform("HO", _ozoneHeightScale);
-    cieCurveExtractionProgramObject->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
+    cieCurveExtractionProgramObject->setUniform("HO2", _oxygenHeightScale);
+    cieCurveExtractionProgramObject->setUniform("betaOzoneExtinction", _ozoneAbsCrossSection);
     cieCurveExtractionProgramObject->setUniform("SAMPLES_R", _r_samples);
     cieCurveExtractionProgramObject->setUniform("SAMPLES_MU", _mu_samples);
     cieCurveExtractionProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
     cieCurveExtractionProgramObject->setUniform("SAMPLES_NU", _nu_samples);
+    // Advance Mode Data
+    cieCurveExtractionProgramObject->setUniform("advancedModeEnabled", _advancedMode);
+    cieCurveExtractionProgramObject->setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    cieCurveExtractionProgramObject->setUniform("deltaPolarizability", _advModeData.deltaPolarizability);
+    cieCurveExtractionProgramObject->setUniform("jungeExponent", _advModeData.jungeExponent);
+    cieCurveExtractionProgramObject->setUniform("Kappa", _advModeData.Kappa);
+    cieCurveExtractionProgramObject->setUniform("lambdaArray", _advModeData.lambdaArray);
+    cieCurveExtractionProgramObject->setUniform("mean_radius_particle_mie", _advModeData.meanRadiusParticleMie);
+    cieCurveExtractionProgramObject->setUniform("n_complex_mie", _advModeData.nComplexMie);
+    cieCurveExtractionProgramObject->setUniform("n_complex_rayleigh", _advModeData.nComplexRayleigh);
+    cieCurveExtractionProgramObject->setUniform("N_mie", _advModeData.NMie);
+    cieCurveExtractionProgramObject->setUniform("N_rayleigh", _advModeData.NRayleigh);
+    cieCurveExtractionProgramObject->setUniform("N_rayleigh_abs_molecule", _advModeData.NRayleighAbsMolecule);
+    cieCurveExtractionProgramObject->setUniform("n_real_mie", _advModeData.nRealMie);
+    cieCurveExtractionProgramObject->setUniform("n_real_rayleigh", _advModeData.nRealRayleigh);
+    cieCurveExtractionProgramObject->setUniform("radius_abs_molecule_rayleigh", _advModeData.radiusAbsMoleculeRayleigh);
+    cieCurveExtractionProgramObject->setUniform("turbidity", _advModeData.turbidity);
+    cieCurveExtractionProgramObject->setUniform("g1", _advModeData.g1);
+    cieCurveExtractionProgramObject->setUniform("g2", _advModeData.g2);
+    cieCurveExtractionProgramObject->setUniform("alpha", _advModeData.alpha);
 
     ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
     transmittanceTableTextureUnit.activate();
@@ -1453,8 +1514,29 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
     shaderProg->setUniform("SAMPLES_NU", _nu_samples);
     shaderProg->setUniform("ozoneLayerEnabled", _ozoneEnabled);
     shaderProg->setUniform("oxygenAbsLayerEnabled", _oxygenEnabled);
-    shaderProg->setUniform("HO", _ozoneHeightScale);
-    shaderProg->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
+    shaderProg->setUniform("HO2", _oxygenHeightScale);
+    shaderProg->setUniform("sigmaOxygenAbsCrossSection", _oxygenAbsCrossSection);
+    shaderProg->setUniform("sigmaOzoneAbsCrossSecion", _ozoneAbsCrossSection);
+    // Advance Mode Data
+    shaderProg->setUniform("advancedModeEnabled", _advancedMode);
+    shaderProg->setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    shaderProg->setUniform("deltaPolarizability", _advModeData.deltaPolarizability);
+    shaderProg->setUniform("jungeExponent", _advModeData.jungeExponent);
+    shaderProg->setUniform("Kappa", _advModeData.Kappa);
+    shaderProg->setUniform("lambdaArray", _advModeData.lambdaArray);
+    shaderProg->setUniform("mean_radius_particle_mie", _advModeData.meanRadiusParticleMie);
+    shaderProg->setUniform("n_complex_mie", _advModeData.nComplexMie);
+    shaderProg->setUniform("n_complex_rayleigh", _advModeData.nComplexRayleigh);
+    shaderProg->setUniform("N_mie", _advModeData.NMie);
+    shaderProg->setUniform("N_rayleigh", _advModeData.NRayleigh);
+    shaderProg->setUniform("N_rayleigh_abs_molecule", _advModeData.NRayleighAbsMolecule);
+    shaderProg->setUniform("n_real_mie", _advModeData.nRealMie);
+    shaderProg->setUniform("n_real_rayleigh", _advModeData.nRealRayleigh);
+    shaderProg->setUniform("radius_abs_molecule_rayleigh", _advModeData.radiusAbsMoleculeRayleigh);
+    shaderProg->setUniform("turbidity", _advModeData.turbidity);
+    shaderProg->setUniform("g1", _advModeData.g1);
+    shaderProg->setUniform("g2", _advModeData.g2);
+    shaderProg->setUniform("alpha", _advModeData.alpha);
 }
 
 void AtmosphereDeferredcaster::checkFrameBufferState(
@@ -1532,23 +1614,35 @@ void AtmosphereDeferredcaster::step3DTexture(
                                 std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
                                                                                 int layer,
                                                                        bool doCalculation)
-{
+{   // We must do the calculations for d0/dh and d0/dH in CPU because 
+    // it is the only way to access the correct layer to access the 4D texture.
+    // Each layer is a sample going from 0 to _r_samples.
     // See OpenGL redbook 8th Edition page 556 for Layered Rendering
     if (doCalculation) {
-        float earth2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
-        float atm2 = _atmosphereRadius * _atmosphereRadius;
-        float diff = atm2 - earth2;
-        float ri = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
+        // See Bruneton paper for the meaning of the constants
+        float Rg2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
+        float Rt2 = _atmosphereRadius * _atmosphereRadius;
+        float H2  = Rt2 - Rg2;
+        
+        float ri   = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
         float ri_2 = ri * ri;
+        
         float epsilon =
             (layer == 0) ?
             0.01f :
             (layer == (_r_samples - 1)) ? -0.001f : 0.0f;
-        float r = sqrtf(earth2 + ri_2 * diff) + epsilon;
+        
+        float r     = sqrtf(Rg2 + ri_2 * H2) + epsilon;
+        
+        // dh when the ray touches the ground
         float dminG = r - _atmospherePlanetRadius;
+        
+        // dh when the ray doesn't touch the ground and touches the top of atm
         float dminT = _atmosphereRadius - r;
-        float dh = sqrtf(r * r - earth2);
-        float dH = dh + sqrtf(diff);
+        
+        float rho   = sqrtf(r * r - Rg2);
+        float dh    = rho;
+        float dH    = rho + sqrtf(H2);
 
         shaderProg->setUniform("r", r);
         shaderProg->setUniform("dhdH", dminT, dH, dminG, dh);
@@ -1616,8 +1710,10 @@ void AtmosphereDeferredcaster::saveTextureToTxTFile(GLenum color_buffer_attachme
 
     txtFile.open(fileName.c_str(), std::fstream::out);
     if (txtFile.is_open()) {
-        float* pixels = new float[width * height * 3];
-        for (int t = 0; t < width * height * 3; ++t)
+        int maxSize = width * height * 3;
+        float* pixels = new float[maxSize];
+        
+        for (int t = 0; t < maxSize; ++t)
             pixels[t] = 255.0;
 
         if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {

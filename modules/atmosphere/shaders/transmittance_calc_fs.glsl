@@ -133,13 +133,15 @@ void main(void) {
 
   unmappingRAndMu(r, muSun);
   
-  vec3 opDepth = betaMieExtinction * opticalDepth(r, muSun, HM, hidrostaticApproximation) +
-                 betaRayleigh * opticalDepth(r, muSun, HR, hidrostaticApproximation);
+  vec3 opDepth = (extinctionCoefficientMie(lambdaArray) 
+                  * opticalDepth(r, muSun, HM, hidrostaticApproximation)) 
+                + (extinctionCoefficientRayleigh(lambdaArray) 
+                  * opticalDepth(r, muSun, HR, hidrostaticApproximation));
   
   // Oxygen absorption enabled
   if (oxygenAbsLayerEnabled) {
-    //opDepth += (vec3(7.398e-30, 3.4e-29, 1.337e-29) * 0.2046 * 2.687e25 * opticalDepth(r, muSun, HR, hidrostaticApproximation));
-    opDepth += vec3(4.164e-5, 1.914e-4, 7.525e-5) * opticalDepth(r, muSun, HR, hidrostaticApproximation);
+    //opDepth += (vec3(7.398e-30, 0.9e-30, 1.337e-29) * 0.2046 * 2.687e25 * opticalDepth(r, muSun, HR, hidrostaticApproximation));
+    opDepth += vec3(4.165e-5, 5.067e-5, 7.527e-5) * opticalDepth(r, muSun, HO2, hidrostaticApproximation);
   }
   
   if (ozoneLayerEnabled) {

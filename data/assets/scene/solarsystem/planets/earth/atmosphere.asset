@@ -24,6 +24,11 @@ local Atmosphere = {
                 -- Coefficients are given in 1/cm
                 --Scattering = { 5.8E-3, 13.5E-3, 33.1E-3 },
                 --Scattering = { 4.6208E-3, 10.7971E-3, 26.36E-3 },
+                -- Measured (550nm) and corrected terms:
+                --Scattering = { 5.1679E-3, 12.228E-3, 30.5437E-3 },
+                -- Measured Bulchotz:
+                -- Scattering = { 5.146E-3, 11.49E-3, 29.7E-3 },
+                -- My calculations:
                 Scattering = { 5.1768505E-3, 12.2588522E-3, 30.5963867E-3 },
                 -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
               },
@@ -32,9 +37,15 @@ local Atmosphere = {
             },
             Ozone = {
               Coefficients = {
-                -- Absorption coefficients (in 1/cm)
-                Extinction = {2.44E-3, 5.91E-3, 2.425E-4}
-                --Extinction = {2.055E-3, 4.979E-3, 0.2136E-3}
+                -- Cross-sections for wavelengths (680, 550, 440)nm
+                Absorption = {1.368209E-21, 3.314053E-21, 1.360173E-22}
+              },
+              H_O = 8.0,
+            },
+            Oxygen = {
+              Coefficients = {
+                -- Cross-sections for wavelengths (680, 550, 440)nm
+                Absorption = {4.164E-5, 5.06E-5, 7.525E-5}
               },
               H_O = 8.0,
             },
