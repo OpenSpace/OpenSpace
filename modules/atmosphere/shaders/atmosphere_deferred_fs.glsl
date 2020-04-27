@@ -306,8 +306,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // through the atmosphere. If this ray hits something inside the atmosphere,
     // we will subtract the attenuated scattering light from that path in the
     // current path.
-    vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);
-      
+    vec4 inscatterRadiance  = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);    
+
     // After removing the initial path from camera pos to top of atmosphere (for an
     // observer in the space) we test if the light ray is hitting the atmosphere
     vec3  x0     = fragPosObj;
@@ -409,10 +409,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // the horizon. When this happens, we avoid the Mie scattering contribution.
     inscatterRadiance.w *= smoothstep(0.0f, 0.02f, muSun);
     vec3 betaRayleighScatteringCoeff = scatteringCoefficientRayleigh(lambdaArray);
-    vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
-      (betaRayleighScatteringCoeff.r / betaRayleighScatteringCoeff);
-      
-    radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie * miePhase, 0.0f);    
+    //vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
+    //  (betaRayleighScatteringCoeff.r / betaRayleighScatteringCoeff);
+    vec4 inscatterMie =  max(texture4D(inscatterMieTexture, r, mu, muSun, nu), 0.0);  
+    
+    radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie.rgb * miePhase, 0.0f);    
     
     // Finally we add the Lsun (all calculations are done with no Lsun so
     // we can change it on the fly with no precomputations)

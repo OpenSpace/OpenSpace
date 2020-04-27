@@ -717,7 +717,7 @@ void AtmosphereDeferredcaster::unloadComputationPrograms() {
 
 void AtmosphereDeferredcaster::createComputationTextures() {
     if (!_atmosphereCalculated) {
-        //============== Transmittance =================
+        //============== Transmittance T =================
         ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
         transmittanceTableTextureUnit.activate();
         glGenTextures(1, &_transmittanceTableTexture);
@@ -731,7 +731,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _transmittance_table_width,
             _transmittance_table_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
-        //============== Irradiance =================
+        //============== Irradiance E =================
         ghoul::opengl::TextureUnit irradianceTableTextureUnit;
         irradianceTableTextureUnit.activate();
         glGenTextures(1, &_irradianceTableTexture);
@@ -744,7 +744,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _irradiance_table_width,
             _irradiance_table_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
-        //============== InScattering =================
+        //============== InScattering S =================
         ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
         inScatteringTableTextureUnit.activate();
         glGenTextures(1, &_inScatteringTableTexture);
@@ -771,6 +771,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _mu_s_samples * _nu_samples,
             _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
 
+        //============== Single Mie InScattering S =================
         ghoul::opengl::TextureUnit inScatteringMieTableTextureUnit;
         inScatteringMieTableTextureUnit.activate();
         glGenTextures(1, &_inScatteringMieTableTexture);
@@ -1249,14 +1250,14 @@ void AtmosphereDeferredcaster::executeCalculations()
 
         // line 11 in algorithm 4.1
         glBindFramebuffer(GL_FRAMEBUFFER, multiRenderFBO);
-        glDrawBuffers(3, threeBuffers);
+        glDrawBuffers(2, threeBuffers);
         glFramebufferTexture(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT0,
             _inScatteringTableTexture,
             0
         );
-        glFramebufferTexture(
+        /*glFramebufferTexture(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT1,
             _inScatteringRayleighTableTexture,
@@ -1267,9 +1268,9 @@ void AtmosphereDeferredcaster::executeCalculations()
             GL_COLOR_ATTACHMENT2,
             _inScatteringMieTableTexture,
             0
-        );
+        );*/
         checkFrameBufferState("_inScatteringTableTexture");
-        glDrawBuffers(3, threeBuffers);
+        glDrawBuffers(1, threeBuffers);
         glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
         _deltaSSupTermsProgramObject->activate();
         deltaSRayleighTableTextureUnit.activate();

@@ -33,8 +33,8 @@ out vec4 renderTargetMie;
 uniform int layer;
 
 uniform sampler3D deltaSTexture;
-uniform sampler3D deltaSRayleighTexture;
-uniform sampler3D deltaSMieTexture;
+//uniform sampler3D deltaSRayleighTexture;
+//uniform sampler3D deltaSMieTexture;
 
 void main(void) {
     float x = gl_FragCoord.x - 0.5f;
@@ -46,6 +46,6 @@ void main(void) {
     // See Bruneton and Neyret paper, "Angular Precision" paragraph to understanding why we are
     // dividing the S[L*] by the Rayleigh phase function.
     renderTarget1        = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhaseFunction(nu), 0.0f);
-    renderTargetRayleigh = vec4(texture(deltaSRayleighTexture, uvw).rgb / rayleighPhaseFunction(nu), 0.0f);
-    renderTargetMie      = vec4(texture(deltaSMieTexture, uvw).rgb / miePhaseFunction(nu), 0.0f);
+    //renderTargetRayleigh = vec4(texture(deltaSRayleighTexture, uvw).rgb / rayleighPhaseFunction(nu), 0.0f);
+    //renderTargetMie      = vec4(texture(deltaSMieTexture, uvw).rgb / miePhaseFunction(nu), 0.0f);
  }
