@@ -160,6 +160,8 @@ private:
     properties::FloatProperty _stereoInterpolationTime;
     properties::FloatProperty _followRotationInterpolationTime;
 
+    properties::BoolProperty _invertMouseButtons;
+
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
     WebsocketCameraStates _websocketStates;

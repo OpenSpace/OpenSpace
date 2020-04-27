@@ -185,6 +185,14 @@ namespace {
             "The interpolation time when toggling following focus node rotation."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
+        "InvertMouseButtons",
+        "Invert left and right mouse buttons",
+        "If this value is 'false', the left mouse button causes the camera to rotate "
+        "around the object and the right mouse button causes the zooming motion. If this "
+        "value is 'true', these two functionalities are reversed."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo
         UseAdaptiveStereoscopicDepthInfo = {
             "UseAdaptiveStereoscopicDepth",
@@ -249,6 +257,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
     , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
+    , _invertMouseButtons(InvertMouseButtons, false)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
@@ -380,6 +389,10 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetInterpolationTime);
     addProperty(_stereoInterpolationTime);
     addProperty(_followRotationInterpolationTime);
+    _invertMouseButtons.onChange(
+        [this]() { _mouseStates.setInvertMouseButton(_invertMouseButtons); }
+    );
+    addProperty(_invertMouseButtons);
 
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
