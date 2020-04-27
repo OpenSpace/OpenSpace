@@ -124,8 +124,7 @@ private:
     void createComputationTextures();
     void deleteComputationTextures();
     void deleteUnusedComputationTextures();
-    void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
-        GLsizei vertexSize);
+    void executeCalculations();
     void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) const;
     void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
         int layer, bool doCalculation = true);
@@ -171,24 +170,28 @@ private:
         dSgctProjectionToModelTransformMatrix,
         dSGCTViewToWorldMatrix, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
-        inscatterTexture) _uniformCache2;
+        inscatterTexture, inscatterRayleighTexture, inscatterMieTexture) _uniformCache2;
     UniformCache(useOnlyAdvancedMie, deltaPolarizability, n_real_rayleigh, n_complex_rayleigh,
         n_real_mie, n_complex_mie, lambdaArray, N_rayleigh, N_mie,
         N_rayleigh_abs_molecule, radius_abs_molecule_rayleigh, mean_radius_particle_mie,
         turbidity, jungeExponent, Kappa, g1, g2, alpha) _uniformCacheAdvMode;
 
-    GLuint _transmittanceTableTexture  = 0;
-    GLuint _irradianceTableTexture     = 0;
-    GLuint _inScatteringTableTexture   = 0;
-    GLuint _deltaETableTexture         = 0;
-    GLuint _deltaSRayleighTableTexture = 0;
-    GLuint _deltaSMieTableTexture      = 0;
-    GLuint _deltaJTableTexture         = 0;
-    GLuint _atmosphereTexture          = 0;
+    GLuint _transmittanceTableTexture        = 0;
+    GLuint _irradianceTableTexture           = 0;
+    GLuint _inScatteringTableTexture         = 0;
+    GLuint _inScatteringRayleighTableTexture = 0;
+    GLuint _inScatteringMieTableTexture      = 0;
+    GLuint _deltaETableTexture               = 0;
+    GLuint _deltaSRayleighTableTexture       = 0;
+    GLuint _deltaSMieTableTexture            = 0;
+    GLuint _deltaJTableTexture               = 0;
+    GLuint _atmosphereTexture                = 0;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
+    ghoul::opengl::TextureUnit _inScatteringRayleighTableTextureUnit;
+    ghoul::opengl::TextureUnit _inScatteringMieTableTextureUnit;
 
     // Atmosphere Data
     bool _atmosphereCalculated            = false;

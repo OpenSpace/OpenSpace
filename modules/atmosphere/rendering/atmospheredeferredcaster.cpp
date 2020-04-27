@@ -95,11 +95,11 @@ namespace {
         "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU", "advancedModeEnabled"
     };
 
-    constexpr const std::array<const char*, 10> UniformNames2 = {
+    constexpr const std::array<const char*, 12> UniformNames2 = {
         "dInverseModelTransformMatrix", "dModelTransformMatrix",
         "dSgctProjectionToModelTransformMatrix", "dSGCTViewToWorldMatrix", "dCamPosObj",
         "sunDirectionObj", "hardShadows", "transmittanceTexture", "irradianceTexture",
-        "inscatterTexture"
+        "inscatterTexture", "inscatterRayleighTexture", "inscatterMieTexture"
     };
 
     constexpr const std::array<const char*, 18> UniformCacheAdvMode = {
@@ -143,6 +143,8 @@ void AtmosphereDeferredcaster::deinitialize() {
     glDeleteTextures(1, &_transmittanceTableTexture);
     glDeleteTextures(1, &_irradianceTableTexture);
     glDeleteTextures(1, &_inScatteringTableTexture);
+    glDeleteTextures(1, &_inScatteringRayleighTableTexture);
+    glDeleteTextures(1, &_inScatteringMieTableTexture);
     glDeleteTextures(1, &_deltaETableTexture);
     glDeleteTextures(1, &_deltaSRayleighTableTexture);
     glDeleteTextures(1, &_deltaSMieTableTexture);
@@ -404,6 +406,14 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
     _inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
     program.setUniform(_uniformCache2.inscatterTexture, _inScatteringTableTextureUnit);
+
+    _inScatteringRayleighTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, _inScatteringRayleighTableTexture);
+    program.setUniform(_uniformCache2.inscatterRayleighTexture, _inScatteringRayleighTableTextureUnit);
+
+    _inScatteringMieTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, _inScatteringMieTableTexture);
+    program.setUniform(_uniformCache2.inscatterMieTexture, _inScatteringMieTableTextureUnit);
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData&,
@@ -414,6 +424,8 @@ void AtmosphereDeferredcaster::postRaycast(const RenderData&,
     _transmittanceTableTextureUnit.deactivate();
     _irradianceTableTextureUnit.deactivate();
     _inScatteringTableTextureUnit.deactivate();
+    _inScatteringRayleighTableTextureUnit.deactivate();
+    _inScatteringMieTableTextureUnit.deactivate();
 }
 
 std::string AtmosphereDeferredcaster::deferredcastPath() const {
@@ -745,6 +757,32 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _mu_s_samples * _nu_samples,
             _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
+
+        ghoul::opengl::TextureUnit inScatteringRayleighTableTextureUnit;
+        inScatteringRayleighTableTextureUnit.activate();
+        glGenTextures(1, &_inScatteringRayleighTableTexture);
+        glBindTexture(GL_TEXTURE_3D, _inScatteringRayleighTableTexture);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _mu_s_samples * _nu_samples,
+            _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
+
+        ghoul::opengl::TextureUnit inScatteringMieTableTextureUnit;
+        inScatteringMieTableTextureUnit.activate();
+        glGenTextures(1, &_inScatteringMieTableTexture);
+        glBindTexture(GL_TEXTURE_3D, _inScatteringMieTableTexture);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _mu_s_samples * _nu_samples,
+            _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
     }
 
     //============== Delta E =================
@@ -808,6 +846,8 @@ void AtmosphereDeferredcaster::deleteComputationTextures() {
     glDeleteTextures(1, &_transmittanceTableTexture);
     glDeleteTextures(1, &_irradianceTableTexture);
     glDeleteTextures(1, &_inScatteringTableTexture);
+    glDeleteTextures(1, &_inScatteringRayleighTableTexture);
+    glDeleteTextures(1, &_inScatteringMieTableTexture);
     glDeleteTextures(1, &_deltaETableTexture);
     glDeleteTextures(1, &_deltaSRayleighTableTexture);
     glDeleteTextures(1, &_deltaSMieTableTexture);
@@ -821,9 +861,7 @@ void AtmosphereDeferredcaster::deleteUnusedComputationTextures() {
     glDeleteTextures(1, &_deltaJTableTexture);
 }
 
-void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
-                                                   GLenum drawBuffers[1],
-                                                   GLsizei vertexSize)
+void AtmosphereDeferredcaster::executeCalculations()
 {
     ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit irradianceTableTextureUnit;
@@ -852,7 +890,18 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
+    // Creates the FBO for the calculations
+    GLuint calcFBO;
+    glGenFramebuffers(1, &calcFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
 
+    // Prepare for rendering/calculations
+    GLuint quadCalcVAO;
+    GLuint quadCalcVBO;
+    GLsizei vertexSize = 6;
+    createRenderQuad(&quadCalcVAO, &quadCalcVBO, 1.0f);
 
     // Temp for testing Ozone new perfil
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject2 = ghoul::opengl::ProgramObject::Build(
@@ -988,13 +1037,35 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     _deltaEProgramObject->deactivate();
 
     // line 5 in algorithm 4.1
+    GLuint multiRenderFBO;
+    glGenFramebuffers(1, &multiRenderFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, multiRenderFBO);
+    GLenum threeBuffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, threeBuffers);
+    GLuint multiQuadCalcVAO;
+    GLuint multiQuadCalcVBO;
+    createRenderQuad(&multiQuadCalcVAO, &multiQuadCalcVBO, 1.0f);
+
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         _inScatteringTableTexture,
         0
     );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        _inScatteringRayleighTableTexture,
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT2,
+        _inScatteringMieTableTexture,
+        0
+    );
     checkFrameBufferState("_inScatteringTableTexture");
+    
     glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
     _deltaSProgramObject->activate();
     deltaSRayleighTableTextureUnit.activate();
@@ -1007,13 +1078,16 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(_deltaSProgramObject, layer, false);
-        renderQuadForCalc(quadCalcVAO, vertexSize);
+        renderQuadForCalc(multiQuadCalcVAO, vertexSize);
     }
     if (_saveCalculationTextures) {
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("S_texture.ppm"),
             _mu_s_samples * _nu_samples, _mu_samples);
     }
     _deltaSProgramObject->deactivate();
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+    glDrawBuffers(1, drawBuffers);
 
     // loop in line 6 in algorithm 4.1
     for (int scatteringOrder = 2; scatteringOrder <= 4; ++scatteringOrder) {
@@ -1174,13 +1248,28 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         _irradianceFinalProgramObject->deactivate();
 
         // line 11 in algorithm 4.1
+        glBindFramebuffer(GL_FRAMEBUFFER, multiRenderFBO);
+        glDrawBuffers(3, threeBuffers);
         glFramebufferTexture(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT0,
             _inScatteringTableTexture,
             0
         );
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT1,
+            _inScatteringRayleighTableTexture,
+            0
+        );
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT2,
+            _inScatteringMieTableTexture,
+            0
+        );
         checkFrameBufferState("_inScatteringTableTexture");
+        glDrawBuffers(3, threeBuffers);
         glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
         _deltaSSupTermsProgramObject->activate();
         deltaSRayleighTableTextureUnit.activate();
@@ -1192,7 +1281,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         loadAtmosphereDataIntoShaderProgram(_deltaSSupTermsProgramObject);
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(_deltaSSupTermsProgramObject, layer, false);
-            renderQuadForCalc(quadCalcVAO, vertexSize);
+            renderQuadForCalc(multiQuadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
@@ -1201,8 +1290,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
                 _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaSSupTermsProgramObject->deactivate();
-
         glDisable(GL_BLEND);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+        glDrawBuffers(1, drawBuffers);
     }
 
     // Restores OpenGL blending state
@@ -1212,6 +1303,13 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
 
     glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
     glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+
+    glDeleteBuffers(1, &quadCalcVBO);
+    glDeleteBuffers(1, &multiQuadCalcVBO);
+    glDeleteVertexArrays(1, &quadCalcVAO);
+    glDeleteVertexArrays(1, &multiQuadCalcVAO);
+    glDeleteFramebuffers(1, &calcFBO);
+    glDeleteFramebuffers(1, &multiRenderFBO);
 }
 
 void AtmosphereDeferredcaster::saveSkyLuminance() const {
@@ -1352,6 +1450,20 @@ void AtmosphereDeferredcaster::saveSkyLuminance() const {
     cieCurveExtractionProgramObject->setUniform(
         "inscatterTexture", inScatteringTableTextureUnit
     );
+
+    ghoul::opengl::TextureUnit inScatteringRayleighTableTextureUnit;
+    inScatteringRayleighTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, _inScatteringRayleighTableTexture);
+    cieCurveExtractionProgramObject->setUniform(
+        "inscatterRayleighTexture", inScatteringRayleighTableTextureUnit
+    );
+
+    ghoul::opengl::TextureUnit inScatteringMieTableTextureUnit;
+    inScatteringMieTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, _inScatteringMieTableTexture);
+    cieCurveExtractionProgramObject->setUniform(
+        "inscatterMieTexture", inScatteringMieTableTextureUnit
+    );
     
     std::array<GLfloat, 9> sunZenithArray = { 0.f, 10.f, 20.f, 30.f, 40.f, 50.f, 60.f, 70.f, 80.f };
     for (const auto& sunZenith : sunZenithArray) {
@@ -1418,25 +1530,13 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
 
-    // Creates the FBO for the calculations
-    GLuint calcFBO;
-    glGenFramebuffers(1, &calcFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
-
-    // Prepare for rendering/calculations
-    GLuint quadCalcVAO;
-    GLuint quadCalcVBO;
-    createRenderQuad(&quadCalcVAO, &quadCalcVBO, 1.0f);
-
     // Starting Calculations...
     LDEBUG("Starting precalculations for scattering effects...");
 
     //==========================================================
     //=================== Execute Calculations =================
     //==========================================================
-    executeCalculations(quadCalcVAO, drawBuffers, 6);
+    executeCalculations();
 
     deleteUnusedComputationTextures();
 
@@ -1448,9 +1548,6 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
         m_viewport[2],
         m_viewport[3]
     );
-    glDeleteBuffers(1, &quadCalcVBO);
-    glDeleteVertexArrays(1, &quadCalcVAO);
-    glDeleteFramebuffers(1, &calcFBO);
 
     LDEBUG("Ended precalculations for Atmosphere effects...");
 
@@ -1543,7 +1640,7 @@ void AtmosphereDeferredcaster::checkFrameBufferState(
                                                     const std::string& codePosition) const
 {
     if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Framework not built. " + codePosition);
+        LERROR("=== Framebuffer not built: " + codePosition + " ===");
         GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         switch (fbErr) {
             case GL_FRAMEBUFFER_UNDEFINED:

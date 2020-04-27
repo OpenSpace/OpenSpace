@@ -72,6 +72,8 @@ uniform int cullAtmosphere;
 
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
+uniform sampler3D inscatterRayleighTexture;
+uniform sampler3D inscatterMieTexture;
 uniform sampler2D mainPositionTexture;
 uniform sampler2D mainNormalTexture;
 uniform sampler2D mainColorTexture;
