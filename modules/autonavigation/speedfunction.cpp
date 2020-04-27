@@ -1,0 +1,88 @@
+/*****************************************************************************************
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014-2019                                                               *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
+
+#include <modules/autonavigation/speedfunction.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/easing.h>
+
+namespace {
+    constexpr const char* _loggerCat = "SpeedFunction";
+} // namespace
+
+namespace openspace::autonavigation {
+
+SpeedFunction::~SpeedFunction() {}
+
+/*
+* Get speed at time value in the range [0, duration], scaled according to the constraint
+* in eq. 14 in Eberly 2007
+* (https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf)
+* OBS! If integrated over the duration for the path it shall match the total length.
+*/
+double SpeedFunction::scaledValue(double time, double duration, double pathLength) const {
+    ghoul_assert(time >= 0 && time <= duration, "Time out of range [0, duration]");
+    double t = std::clamp(time / duration, 0.0, 1.0);
+    return (pathLength * this->value(t)) / (duration * _integratedSum);
+}
+
+void SpeedFunction::initIntegratedSum() {
+    // apply duration constraint (eq. 14 in Eberly)
+    double speedSum = 0.0;
+    int steps = 100;
+    double h = 1.0 / steps;
+    for (double t = 0.0; t <= 1.0; t += h) {
+        double midpointSpeed = 0.5 * (value(t + 0.5*h) + value(t - 0.5*h));
+        speedSum += h * midpointSpeed;
+    }
+    _integratedSum = speedSum;
+}
+
+CubicDampenedSpeed::CubicDampenedSpeed() {
+    initIntegratedSum();
+}
+
+double CubicDampenedSpeed::value(double t) const {
+    ghoul_assert(t >= 0.0 && t <= 1.0, "Variable t out of range [0,1]");
+
+    const double tPeak = 0.5;
+    double speed = 1.0;
+
+    // accelerate
+    if (t <= tPeak) {
+        double tScaled = t / tPeak;
+        speed = ghoul::cubicEaseInOut(tScaled);
+    }
+    // deaccelerate
+    else if (t < 1.0) {
+        double tScaled = (t - tPeak) / (1.0 - tPeak);
+        speed = 1.0 - ghoul::cubicEaseInOut(tScaled);
+    }
+
+    // avoid zero speed
+    speed += 0.001;
+    return speed;
+}
+
+} // namespace openspace::autonavigation

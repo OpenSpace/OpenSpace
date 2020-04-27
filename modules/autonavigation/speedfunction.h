@@ -22,58 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
-#define __OPENSPACE_MODULE___PATHSEGMENT___H__
-
-#include <modules/autonavigation/pathcurves.h>
-#include <modules/autonavigation/speedfunction.h>
-#include <modules/autonavigation/waypoint.h>
-#include <ghoul/glm.h>
-#include <vector>
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___SPEEDFUNCTION___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___SPEEDFUNCTION___H__
 
 namespace openspace::autonavigation {
 
-class PathSegment {
+// The speed function describing the shape of the speed curve. Values in [0,1].
+class SpeedFunction {
 public:
-    PathSegment(Waypoint start, Waypoint end, CurveType type, 
-                std::optional<double> duration);
-    ~PathSegment() = default;
+    SpeedFunction() = default;
+    virtual ~SpeedFunction();
 
-    // Mutators
-    void setStart(Waypoint wp);
+    double scaledValue(double time, double duration, double pathLength) const;
 
-    // Accessors
-    const Waypoint start() const;
-    const Waypoint end() const;
-    const double duration() const;
-    const double pathLength() const;
+    virtual double value(double t) const = 0;
 
-    const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
+protected:
+    // must be called by each subclass after initialization
+    void initIntegratedSum();
 
-    CameraPose traversePath(double dt);
-    std::string getCurrentAnchor() const;
-    bool hasReachedEnd() const;
-
-    double speedAtTime(double time) const;
-    CameraPose interpolatedPose(double u) const; 
-
-private: 
-    void initCurve();
-
-    Waypoint _start;
-    Waypoint _end;
-    double _duration;
-    CurveType _curveType; 
-
-    std::unique_ptr<SpeedFunction> _speedFunction;
-    std::unique_ptr<RotationInterpolator> _rotationInterpolator;
-    std::unique_ptr<PathCurve> _curve;
-
-    // Playback variables
-    double _traveledDistance = 0.0; 
-    double _progressedTime = 0.0; // Time since playback started
+    // store the sum of the function over the duration of the segment, 
+    // so we don't need to recompue it every time we access the speed 
+    double _integratedSum = 0.0;
 };
+
+class CubicDampenedSpeed : public SpeedFunction {
+public:
+    CubicDampenedSpeed();
+    double value(double t) const override;
+}; 
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___PATHSEGMENT___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___SPEEDFUNCTION___H__

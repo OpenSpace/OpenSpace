@@ -24,13 +24,10 @@
 
 #include <modules/autonavigation/pathsegment.h>
 
-#include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathcurves.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/util/camera.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/easing.h>
 
 namespace {
     constexpr const char* _loggerCat = "PathSegment";
@@ -38,29 +35,28 @@ namespace {
 
 namespace openspace::autonavigation {
 
-PathSegment::PathSegment(
-    Waypoint start, Waypoint end, CurveType type)
+PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type, 
+						 std::optional<double> duration = std::nullopt)
     : _start(start), _end(end), _curveType(type)
 {
     initCurve();
 
-    // TODO: compute default duration based on curve length 
-    // Also, when compensatng for simulation time later we need to make a guess for 
-    // the duration, based on the current position of the target. 
-    _duration = 5;
-
-    _speedFunction = SpeedFunction(_duration);
+    // TODO: handle duration better
+    if (duration.has_value()) {
+        _duration = duration.value();
+    }
+    else {
+        // TODO: compute default duration based on curve length 
+        // Also, when compensatng for simulation time later we need to make a guess for 
+        // the duration, based on the current position of the target. 
+        _duration = 5;
+    }
 }
 
 void PathSegment::setStart(Waypoint cs) {
     _start = std::move(cs);
     initCurve();
     // TODO later: maybe recompute duration as well...
-}
-
-void PathSegment::setDuration(double d) {
-    _duration = d;
-    _speedFunction = SpeedFunction(_duration);
 }
 
 const Waypoint PathSegment::start() const { return _start; }
@@ -111,76 +107,47 @@ bool PathSegment::hasReachedEnd() const {
     return (_traveledDistance / pathLength()) >= 1.0;
 }
 
-/*
- * Get speed at time value in the range [0, duration]
- * OBS! If integrated over the curve it must match the total length or the curve.
- * Thus, we scale according to the constraint in eq. 14 in Eberly 2007
- * (https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf)
- */
 double PathSegment::speedAtTime(double time) const {
-    ghoul_assert(time >= 0 && time <= _duration, "Time out of range [0, duration]");
-    double t = std::clamp(time / _duration, 0.0, 1.0);
-    return (pathLength() * _speedFunction.value(t)) / _speedFunction.integratedSum;
+    return _speedFunction->scaledValue(time, _duration, pathLength());
 }
 
 CameraPose PathSegment::interpolatedPose(double u) const {
     CameraPose cs;
     cs.position = _curve->positionAt(u);
-    cs.rotation = _curve->rotationAt(u);
+    cs.rotation = _rotationInterpolator->interpolate(u);
     return cs;
 }
 
-// Initialise the curve, based on the start, end state and curve type
 void PathSegment::initCurve() {
     _curve.reset();
 
-    switch (_curveType) {
+    switch (_curveType) 
+    {
     case CurveType::Bezier3:
-        _curve = std::make_shared<Bezier3Curve>(_start, _end);
+        _curve = std::make_unique<Bezier3Curve>(_start, _end);
+        _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+            _start.rotation(),
+            _end.rotation(),
+            _start.node()->worldPosition(),
+            _end.node()->worldPosition(),
+            _curve.get()
+        );
+        _speedFunction = std::make_unique<CubicDampenedSpeed>(); 
         break;
+
     case CurveType::Linear:
-        _curve = std::make_shared<LinearCurve>(_start, _end);
+        _curve = std::make_unique<LinearCurve>(_start, _end);
+        _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+            _start.rotation(), 
+            _end.rotation()
+        );
+        _speedFunction = std::make_unique<CubicDampenedSpeed>();
         break;
+
     default:
         LERROR("Could not create curve. Type does not exist!");
         return;
     }
-}
-
-PathSegment::SpeedFunction::SpeedFunction(double duration) {
-    // apply duration constraint (eq. 14 in Eberly)
-    double speedSum = 0.0;
-    int steps = 100;
-    double dt = duration / steps;
-    const double h = 1.0 / steps;
-    for (double t = 0.0; t <= 1.0; t += h) {
-        double midpointSpeed = 0.5 * (value(t + 0.5*h) + value(t - 0.5*h));
-        speedSum += dt * midpointSpeed;
-    }
-
-    integratedSum = speedSum;
-}
-
-double PathSegment::SpeedFunction::value(double t) const {
-    ghoul_assert(t >= 0.0 && t <= 1.0, "Variable t out of range [0,1]");
-
-    const double tPeak = 0.5;
-    double speed = 1.0;
-
-    // accelerate
-    if (t <= tPeak) {
-        double tScaled = t / tPeak;
-        speed = ghoul::cubicEaseInOut(tScaled);
-    }
-    // deaccelerate
-    else if (t < 1.0) {
-        double tScaled = (t - tPeak) / (1.0 - tPeak);
-        speed = 1.0 - ghoul::cubicEaseInOut(tScaled);
-    }
-
-    // avoid zero speed
-    speed += 0.001;
-    return speed;
 }
 
 } // namespace openspace::autonavigation

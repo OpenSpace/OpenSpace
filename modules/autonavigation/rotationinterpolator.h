@@ -25,36 +25,52 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 
-#include <modules/autonavigation/waypoint.h>
+#include <ghoul/glm.h>
 
 namespace openspace::autonavigation {
-
-enum RotationMethod {
-    Slerp,
-    PiecewiseSlerp,
-    Fixed,
-    LookAt
-};
 
 class PathCurve;
 
 class RotationInterpolator {
 public:
     RotationInterpolator() = default;
-    RotationInterpolator(const Waypoint& start, const Waypoint& end, 
-        PathCurve* curve, RotationMethod method);
+    RotationInterpolator(glm::dquat start, glm::dquat end);
 
-    glm::dquat rotationAt(double u);
+    virtual glm::dquat interpolate(double u) = 0;
+
+protected:
+    glm::dquat _start;
+    glm::dquat _end;
+};
+
+class EasedSlerpInterpolator : public RotationInterpolator {
+public:
+    EasedSlerpInterpolator(glm::dquat start, glm::dquat end);
+    glm::dquat interpolate(double u);
+};
+
+class LookAtInterpolator : public RotationInterpolator {
+public:
+    LookAtInterpolator(glm::dquat start, glm::dquat end, glm::dvec3 startLookAtPos,
+        glm::dvec3 endLookAtPos, PathCurve* path);
+    glm::dquat interpolate(double u);
 
 private:
-    Waypoint _start;
-    Waypoint _end;
-    PathCurve* _curve = nullptr;
-    RotationMethod _method;
+    glm::dvec3 _startLookAtPos;
+    glm::dvec3 _endLookAtPos;
+    PathCurve* _path = nullptr;
+};
 
-    glm::dquat easedSlerp(double u);
-    glm::dquat lookAtInterpolator(double u); // for debug
-    glm::dquat piecewiseSlerp(double u);
+class PiecewiseLookAtInterpolator : public RotationInterpolator {
+public:
+    PiecewiseLookAtInterpolator(glm::dquat start, glm::dquat end,
+        glm::dvec3 startTargetPos, glm::dvec3 endTargetPos, PathCurve* path);
+    glm::dquat interpolate(double u);
+
+private:
+    glm::dvec3 _startTargetPos;
+    glm::dvec3 _endTargetPos;
+    PathCurve* _path = nullptr;
 };
 
 } // namespace openspace::autonavigation
