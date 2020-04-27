@@ -32,6 +32,12 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
+ //JCC: Temp property to save the fps to a file
+#include <fstream>
+#include <iostream>
+#include <thread>
+#include <chrono>
+
 namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
@@ -178,12 +184,47 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
     };
 }
 
+//JCC: Temp property to save the fps to a file
+DashboardItemFramerate::~DashboardItemFramerate()
+{
+    _runThread = false; // bad, but is just for collecting the data
+
+    std::string fpsFileS("fpsData.txt"), deltaTimeFileS("deltaTimeData.txt"), marksFileS("marksData.txt");
+    std::fstream fpsFile, deltaTimeFile, marksFile;
+    
+    fpsFile.open(fpsFileS.c_str(), std::fstream::out);
+    deltaTimeFile.open(deltaTimeFileS.c_str(), std::fstream::out);
+    marksFile.open(marksFileS.c_str(), std::fstream::out);
+
+    if (fpsFile.is_open() && deltaTimeFile.is_open() && marksFile.is_open()) {
+        
+        std::cout << "\nWriting FPS to file...";
+        for (int i = 0; i < _currentFrameRecording; ++i) {
+            fpsFile << _fpsRecordings[i] << std::endl;
+            deltaTimeFile << _deltaTRecordings[i] << std::endl;
+        }
+        
+        for (int j = 0; j < _numberMarkedItems; ++j) {
+            marksFile << _markRecordings[j] << std::endl;
+        }
+
+        fpsFile.close();
+        deltaTimeFile.close();
+        marksFile.close();
+
+        std::cout << "end!\n";
+    }
+}
+
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clearCache(ClearCacheInfo)
+    //JCC: Temp property to save the fps to a file
+    , _enableFPSRecording({"EnableFPSRecording", "Enable FPS Recording", ""}, false)
+    , _markTimeRecording({"MarkPointInterest", "Mark Point of Interest", ""}, false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -261,7 +302,31 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     });
     addProperty(_clearCache);
 
+    //JCC: Temp property to save the fps to a file
+    addProperty(_enableFPSRecording);
+    addProperty(_markTimeRecording);
+    _runThread = true;
+    _dataCollectingThread = std::thread([this] { this->threadFunction(); });
+    _dataCollectingThread.detach();
+
     _font = global::fontManager.font(_fontName, _fontSize);
+}
+
+//JCC: Temp property to save the fps to a file
+void DashboardItemFramerate::threadFunction() {
+    while (_runThread)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        //std::cout << "One Second!" << std::endl;
+        if (_enableFPSRecording) {
+            float avgDeltaTime = openspace::global::windowDelegate.averageDeltaTime();
+            _fpsRecordings[_currentFrameRecording] = 1.f / avgDeltaTime;
+            _deltaTRecordings[_currentFrameRecording++] = avgDeltaTime * 1000.f;
+        }
+        if (_markTimeRecording) {
+            _markRecordings[_numberMarkedItems++] = _currentFrameRecording;
+        }
+    }
 }
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
