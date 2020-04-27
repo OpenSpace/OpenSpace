@@ -126,6 +126,11 @@ void PathSegment::initCurve() {
     {
     case CurveType::AvoidCollision:
         _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
+        _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+            _start.rotation(),
+            _end.rotation()
+            );
+        _speedFunction = std::make_unique<CubicDampenedSpeed>();
         break;
 
     case CurveType::Bezier3:

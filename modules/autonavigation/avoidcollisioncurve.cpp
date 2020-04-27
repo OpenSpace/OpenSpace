@@ -50,9 +50,6 @@ namespace {
 namespace openspace::autonavigation {
 
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
-    // default rotation interpolation
-    _rotationInterpolator = RotationInterpolator{ start, end, this, Slerp };
-
     _points.push_back(start.position());
 
     // Add a point to first go straight out if starting close to planet
@@ -73,9 +70,8 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     //TODO: determine if its best to compare to end orientation or position 
     glm::dvec3 startToEnd = end.position() - start.position();
     double cosStartAngle = glm::dot(normalize(-startViewDir), normalize(startToEnd));
-
     if (cosStartAngle > 0.7) {
-        glm::dquat middleRotation = this->rotationAt(0.5); // undefined behaviour for other types than Slerp!
+        glm::dquat middleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5); // OBS! Rotation method is not necessarily slerp
         glm::dvec3 middleViewDir = glm::normalize(middleRotation * glm::dvec3(0.0, 0.0, -1.0));
         double distance = 0.4 * glm::length(startToEnd);
 
