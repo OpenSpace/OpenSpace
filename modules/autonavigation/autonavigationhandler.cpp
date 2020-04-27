@@ -69,7 +69,7 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo ApplyStopBehaviorWhenIdleInfo = {
-        "ApplyStopBehaviorWhenIdleInfo",
+        "ApplyStopBehaviorWhenIdle",
         "Apply Stop Behavior When Idle",
         "If enabled, the camera is controlled using the default stop behavior even when no path is playing."
     };
