@@ -189,30 +189,32 @@ DashboardItemFramerate::~DashboardItemFramerate()
 {
     _runThread = false; // bad, but is just for collecting the data
 
-    std::string fpsFileS("fpsData.txt"), deltaTimeFileS("deltaTimeData.txt"), marksFileS("marksData.txt");
-    std::fstream fpsFile, deltaTimeFile, marksFile;
-    
-    fpsFile.open(fpsFileS.c_str(), std::fstream::out);
-    deltaTimeFile.open(deltaTimeFileS.c_str(), std::fstream::out);
-    marksFile.open(marksFileS.c_str(), std::fstream::out);
+    if (_fpsRecordings[0] != -1 && _deltaTRecordings[0] != -1) {
+        std::string fpsFileS("fpsData.txt"), deltaTimeFileS("deltaTimeData.txt"), marksFileS("marksData.txt");
+        std::fstream fpsFile, deltaTimeFile, marksFile;
 
-    if (fpsFile.is_open() && deltaTimeFile.is_open() && marksFile.is_open()) {
-        
-        std::cout << "\nWriting FPS to file...";
-        for (int i = 0; i < _currentFrameRecording; ++i) {
-            fpsFile << _fpsRecordings[i] << std::endl;
-            deltaTimeFile << _deltaTRecordings[i] << std::endl;
+        fpsFile.open(fpsFileS.c_str(), std::fstream::out);
+        deltaTimeFile.open(deltaTimeFileS.c_str(), std::fstream::out);
+        marksFile.open(marksFileS.c_str(), std::fstream::out);
+
+        if (fpsFile.is_open() && deltaTimeFile.is_open() && marksFile.is_open()) {
+
+            std::cout << "\nWriting FPS to file...";
+            for (int i = 0; i < _currentFrameRecording; ++i) {
+                fpsFile << _fpsRecordings[i] << std::endl;
+                deltaTimeFile << _deltaTRecordings[i] << std::endl;
+            }
+
+            for (int j = 0; j < _numberMarkedItems; ++j) {
+                marksFile << _markRecordings[j] << std::endl;
+            }
+
+            fpsFile.close();
+            deltaTimeFile.close();
+            marksFile.close();
+
+            std::cout << "end!\n";
         }
-        
-        for (int j = 0; j < _numberMarkedItems; ++j) {
-            marksFile << _markRecordings[j] << std::endl;
-        }
-
-        fpsFile.close();
-        deltaTimeFile.close();
-        marksFile.close();
-
-        std::cout << "end!\n";
     }
 }
 

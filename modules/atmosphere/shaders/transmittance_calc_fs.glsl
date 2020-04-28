@@ -140,8 +140,8 @@ void main(void) {
   
   // Oxygen absorption enabled
   if (oxygenAbsLayerEnabled) {
-    //opDepth += (vec3(7.398e-30, 0.9e-30, 1.337e-29) * 0.2046 * 2.687e25 * opticalDepth(r, muSun, HR, hidrostaticApproximation));
-    opDepth += vec3(4.165e-5, 5.067e-5, 7.527e-5) * opticalDepth(r, muSun, HO2, hidrostaticApproximation);
+    opDepth += vec3(7.398e-30, 0.9e-30, 1.337e-29) * 5.7e24 * opticalDepth(r, muSun, HO2, hidrostaticApproximation);
+    //opDepth += vec3(4.165e-5, 5.067e-5, 7.527e-5) * opticalDepth(r, muSun, HO2, hidrostaticApproximation);
   }
   
   if (ozoneLayerEnabled) {

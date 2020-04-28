@@ -407,11 +407,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // Hermite interpolation between two values
     // This step is done because imprecision problems happen when the Sun is slightly below
     // the horizon. When this happens, we avoid the Mie scattering contribution.
-    inscatterRadiance.w *= smoothstep(0.0f, 0.02f, muSun);
+    //inscatterRadiance.w *= smoothstep(0.0f, 0.02f, muSun);
     vec3 betaRayleighScatteringCoeff = scatteringCoefficientRayleigh(lambdaArray);
     //vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
     //  (betaRayleighScatteringCoeff.r / betaRayleighScatteringCoeff);
-    vec4 inscatterMie =  max(texture4D(inscatterMieTexture, r, mu, muSun, nu), 0.0);  
+    vec4 inscatterMie =  max(texture4D(inscatterMieTexture, r, mu, muSun, nu), 0.0) * smoothstep(0.0f, 0.02f, muSun);  
     
     radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie.rgb * miePhase, 0.0f);    
     

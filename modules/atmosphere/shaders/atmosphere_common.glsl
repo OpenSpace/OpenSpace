@@ -585,7 +585,7 @@ vec3 DHG_MiePhaseFunction(const float mu) {
   vec3 d1Powered = vec3(pow(denom1.r, exponent), pow(denom1.g, exponent), pow(denom1.b, exponent));
   vec3 d2Powered = vec3(pow(denom2.r, exponent), pow(denom2.g, exponent), pow(denom2.b, exponent));
   
-  return (alpha * ((vec3(1.f) + g1SQRD)/d1Powered) + (vec3(1.f) - alpha) * ((vec3(1.f) + g2SQRD)/d2Powered)) 
+  return (alpha * ((vec3(1.f) - g1SQRD)/d1Powered) + (vec3(1.f) - alpha) * ((vec3(1.f) - g2SQRD)/d2Powered)) 
     * INV_M_PI * 0.25f;
 }
 
@@ -593,22 +593,22 @@ vec3 DHG_MiePhaseFunction(const float mu) {
 // scattering cosine angle mu --
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 vec3 miePhaseFunction(const float mu) {
-  if (advancedModeEnabled) {
-    return DHG_MiePhaseFunction(mu);
-  } else {
-    // return (3.0f / (8.0f * M_PI)) * 
-    //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
-    //      ( (2.0f + mieG * mieG) *
-    //        pow(1.0f + mieG * mieG - 2.0f * mieG * mu, 3.0f/2.0f) ) );
-    // return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG * mieG) *
-    //   pow(1.0f + (mieG * mieG) - 2.0f * mieG * mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
+    if (advancedModeEnabled) {
+      return DHG_MiePhaseFunction(mu);
+    } else {
+      // return (3.0f / (8.0f * M_PI)) * 
+      //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
+      //      ( (2.0f + mieG * mieG) *
+      //        pow(1.0f + mieG * mieG - 2.0f * mieG * mu, 3.0f/2.0f) ) );
+      // return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG * mieG) *
+      //   pow(1.0f + (mieG * mieG) - 2.0f * mieG * mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
 
-    float mieG2 = mieG * mieG;
-    float cornette =  0.1193662072 * (1.0f - mieG2) *
-      pow(1.0f + mieG2 - 2.0f * mieG * mu, -1.5f) * (1.0f + mu * mu) / (2.0f + mieG2);
+      float mieG2 = mieG * mieG;
+      float cornette =  0.1193662072 * (1.0f - mieG2) *
+        pow(1.0f + mieG2 - 2.0f * mieG * mu, -1.5f) * (1.0f + mu * mu) / (2.0f + mieG2);
 
-    return vec3(cornette);
-  }
+      return vec3(cornette);
+    }
 }
 
 // -- Calculates Rayleigh Scattering Coefficients given the real part of the refractive index
@@ -633,11 +633,13 @@ vec3 scatteringCoefficientRayleigh(const vec3 lambda) {
 // lambda := wavelength of the incident light (680, 550, 440) nm in our case
 vec3 absorptionCoefficientRayleight(const vec3 lambda) {
   // n = m + ki => n^2 = (m^2 - k^2) + (2mk)i
-  vec3 k2 = 2.f * (n_real_rayleigh * n_complex_mie);
-  float r3 = radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh;
-  float mTokm = 1000.f;
-  return mTokm * (8.f * M_PI * M_PI * N_rayleigh_abs_molecule * r3) 
-    * ( ( (k2 - vec3(1.f)) / (k2 + vec3(2.f)) ) / lambda);
+  // vec3 k2 = 2.f * (n_real_rayleigh * n_complex_mie);
+  // float r3 = radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh;
+  // float mTokm = 1000.f;
+  // return mTokm * (8.f * M_PI * M_PI * N_rayleigh_abs_molecule * r3) 
+  //   * ( ( (k2 - vec3(1.f)) / (k2 + vec3(2.f)) ) / lambda);
+
+  return vec3(0.0);
 }
 
 vec3 extinctionCoefficientRayleigh(const vec3 lambda) {
@@ -651,21 +653,21 @@ vec3 extinctionCoefficientRayleigh(const vec3 lambda) {
 // -- Calculates Mie Scattering Coefficients given the wavelength of the incident light --.
 // lambda := wavelength of the incident light (680, 550, 440) nm in our case
 vec3 scatteringCoefficientMie(const vec3 lambda) {
-  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+  if (advancedModeEnabled) {
     vec3 tmp = (2.f * M_PI / lambda);
     vec3 lambdaJunge = vec3(
       pow(tmp.x, jungeExponent - 2.f), 
       pow(tmp.y, jungeExponent - 2.f), 
       pow(tmp.z, jungeExponent - 2.f)
       );
-    return 0.434f * (0.65f * turbidity - 0.65f) * pow(10.f, -16.f) * M_PI * Kappa * lambdaJunge * 1e3;
+    return 0.434f * (0.65f * turbidity - 0.65f) * 1E-16 * M_PI * Kappa * lambdaJunge * 1e3;
   } else {
     return betaMieScattering;
   }
 }
 
 vec3 mieExtinctionEfficiency(const vec3 lambda) {
-  if (advancedModeEnabled && !useOnlyAdvancedMie) {
+  if (advancedModeEnabled) {
     vec3 rho = 4.f * M_PI * mean_radius_particle_mie * (n_real_mie - vec3(1.f)) / lambda;
     vec3 tanBeta = n_complex_mie / (n_real_mie - vec3(1.f));
     vec3 beta = atan(tanBeta);

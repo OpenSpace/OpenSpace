@@ -40,7 +40,7 @@ local Atmosphere = {
                 -- Cross-sections for wavelengths (680, 550, 440)nm
                 Absorption = {1.368209E-21, 3.314053E-21, 1.360173E-22}
               },
-              H_O = 8.0,
+              H_O = 9.0,
             },
             Oxygen = {
               Coefficients = {

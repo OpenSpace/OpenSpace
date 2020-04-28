@@ -209,6 +209,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache.SAMPLES_MU, _mu_samples);
             program.setUniform(_uniformCache.SAMPLES_MU_S, _mu_s_samples);
             program.setUniform(_uniformCache.SAMPLES_NU, _nu_samples);
+            program.setUniform(_uniformCache.advancedModeEnabled, _advancedMode);
+
             // Advanced Mode Parameters
             program.setUniform(_uniformCacheAdvMode.deltaPolarizability, _advModeData.deltaPolarizability);
             program.setUniform(_uniformCacheAdvMode.useOnlyAdvancedMie, _advModeData.useOnlyAdvancedMie);

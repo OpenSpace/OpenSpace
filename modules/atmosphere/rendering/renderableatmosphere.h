@@ -143,7 +143,6 @@ private:
     bool _sunFollowingCameraEnabled       = false;
     bool _shadowEnabled                   = false;
     bool _hardShadows                     = false;
-    bool _enableAdvancedMode              = false;
     
     float _atmosphereRadius               = 0.f;
     float _atmospherePlanetRadius         = 0.f;

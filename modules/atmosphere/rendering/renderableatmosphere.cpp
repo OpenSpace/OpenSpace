@@ -221,7 +221,7 @@ namespace {
         "Enable/Disables hard shadows through the atmosphere"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AdvancedModelInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AdvancedModeInfo = {
         "AdvancedMode",
         "Enable/Disable atmosphere advanced mode",
         ""
@@ -289,7 +289,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NMieInfo = {
         "NMie",
-        "N Mie x10^10",
+        "N Mie x10^8",
         ""
     };
 
@@ -376,7 +376,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         glm::vec3(1.368209f, 3.314053f, 13.60173f),
         glm::vec3(0.01f),
         glm::vec3(100.f))
-    , _oxygenHeightScaleP(OxygenHeightScaleInfo, 8.0f, 0.1f, 20.0f)
+    , _oxygenHeightScaleP(OxygenHeightScaleInfo, 9.0f, 0.1f, 20.0f)
     , _oxygenAbsorptionCrossSectionP(
         OxygenAbsCrossSectionInfo,
         glm::vec3(4.164f, 5.06f, 7.525f),
@@ -403,7 +403,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunIntensityP(SunIntensityInfo, 50.0f, 0.1f, 1000.0f)
     , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
-    , _enableAdvancedModeP(AdvancedModelInfo, false)
+    , _enableAdvancedModeP(AdvancedModeInfo, false)
     , _useOnlyAdvancedMieP(UseOnlyAdvancedMieInfo, false)
     , _nRealRayleighP(
         RayleighRealRefractIndexInfo,
@@ -469,7 +469,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         NRayleighAbsInfo,
         1.f,
         0.f,
-        1000.f)
+        10000.f)
     , _radiusAbsMoleculeRayleighP(
         RayleighRadiusAbsParticleInfo,
         0.5f,
@@ -644,9 +644,13 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
+        if (atmosphereDictionary.hasKey(AdvancedModeInfo.identifier)) {
+            _enableAdvancedModeP = true;
+        }
+
+        // ---- Rayleigh Scattering -----
         ghoul::Dictionary rayleighDictionary;
         success = atmosphereDictionary.getValue(keyRayleigh, rayleighDictionary);
-
         if (success) {
             // Not using right now.
             glm::vec3 rayleighWavelengths = glm::vec3(0.f);
@@ -679,6 +683,30 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                     "Disabling atmosphere effects for this planet."
                 );
             }
+
+            if (rayleighDictionary.hasKey(RayleighRealRefractIndexInfo.identifier)) {
+                _nRealRayleighP = rayleighDictionary.value<glm::vec3>(RayleighRealRefractIndexInfo.identifier);
+            }
+
+            if (rayleighDictionary.hasKey(RayleighComplexRefractIndexInfo.identifier)) {
+                _nComplexRayleighP = rayleighDictionary.value<glm::vec3>(RayleighComplexRefractIndexInfo.identifier);
+            }
+
+            if (rayleighDictionary.hasKey(PolarizabilityInfo.identifier)) {
+               _deltaPolarizabilityP = rayleighDictionary.value<float>(PolarizabilityInfo.identifier);
+            }
+
+            if (rayleighDictionary.hasKey(NRayleighInfo.identifier)) {
+               _NRayleighP = rayleighDictionary.value<float>(NRayleighInfo.identifier);
+            }
+            
+            if (rayleighDictionary.hasKey(NRayleighAbsInfo.identifier)) {
+                _NRayleighAbsMoleculeP = rayleighDictionary.value<float>(NRayleighAbsInfo.identifier);
+            }
+
+            if (rayleighDictionary.hasKey(RayleighRadiusAbsParticleInfo.identifier)) {
+                _radiusAbsMoleculeRayleighP = rayleighDictionary.value<float>(RayleighRadiusAbsParticleInfo.identifier);
+            }
         }
         else {
             errorReadingAtmosphereData = true;
@@ -689,6 +717,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
+        // ---- Ozone Scattering -----
         ghoul::Dictionary ozoneDictionary;
         success = atmosphereDictionary.getValue(keyOzone, ozoneDictionary);
         if (success) {
@@ -705,6 +734,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _ozoneLayerEnabled = false;
         }
 
+        // ---- Oxygen Absorption -----
         ghoul::Dictionary oxygenDictionary;
         success = atmosphereDictionary.getValue(keyOxygen, oxygenDictionary);
         if (success) {
@@ -727,6 +757,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _oxygenAbsEnabled = false;
         }
 
+        // ---- Mie Scattering -----
         ghoul::Dictionary mieDictionary;
         success = atmosphereDictionary.getValue(keyMie, mieDictionary);
         if (success) {
@@ -767,6 +798,46 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                     "No Mie Phase Constant value specified for Atmosphere Effects. "
                     "Disabling atmosphere effects for this planet."
                 );
+            }
+
+            if (mieDictionary.hasKey(MieRealRefractIndexInfo.identifier)) {
+                _nRealMieP = mieDictionary.value<glm::vec3>(MieRealRefractIndexInfo.identifier);
+            }
+
+            if (mieDictionary.hasKey(MieComplexRefractIndexInfo.identifier)) {
+                _nComplexMieP = mieDictionary.value<glm::vec3>(MieComplexRefractIndexInfo.identifier);
+            }
+
+            if (mieDictionary.hasKey(KappaInfo.identifier)) {
+                _KappaP = mieDictionary.value<glm::vec3>(KappaInfo.identifier);
+            }
+
+            if (mieDictionary.hasKey(NMieInfo.identifier)) {
+                _NMieP = mieDictionary.value<float>(NMieInfo.identifier);
+            }
+
+            if (mieDictionary.hasKey(MieMeanRadiusParticleInfo.identifier)) {
+                _meanRadiusParticleMieP = mieDictionary.value<float>(MieMeanRadiusParticleInfo.identifier);
+            }
+
+            if (mieDictionary.hasKey(TurbidityInfo.identifier)) {
+                _turbidityP = mieDictionary.value<float>(TurbidityInfo.identifier);
+            }
+
+            if (mieDictionary.hasKey(JungeExponentInfo.identifier)) {
+                _jungeExponentP = mieDictionary.value<float>(JungeExponentInfo.identifier);
+            }
+
+            if (mieDictionary.hasKey(G1Info.identifier)) {
+                _g1P = mieDictionary.value<glm::vec3>(G1Info.identifier);
+            }
+
+            if (mieDictionary.hasKey(G2Info.identifier)) {
+                _g2P = mieDictionary.value<glm::vec3>(G2Info.identifier);
+            }
+
+            if (mieDictionary.hasKey(AlphaInfo.identifier)) {
+                _alphaP = mieDictionary.value<glm::vec3>(AlphaInfo.identifier);
             }
         }
         else {
@@ -1065,11 +1136,6 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _sunFollowingCameraEnabled  = _sunFollowingCameraEnabledP;
     _hardShadows                = _hardShadowsEnabledP;
 
-    if (_enableAdvancedMode != _enableAdvancedModeP) {
-        executeComputation = true;
-        _enableAdvancedMode = _enableAdvancedModeP;
-    }
-
     if (_deferredcaster) {
         setDeferredCasterParameters(executeComputation);
     }
@@ -1128,9 +1194,9 @@ void RenderableAtmosphere::setDeferredCasterParameters(const bool executePreCalc
     advModeData.nComplexRayleigh          = _nComplexRayleighP;
     advModeData.nRealMie                  = _nRealMieP;
     advModeData.nRealRayleigh             = _nRealRayleighP;
-    advModeData.NMie                      = _NMieP * 1e10f;
+    advModeData.NMie                      = _NMieP * 1e8f;
     advModeData.NRayleigh                 = _NRayleighP * 1e25f;
-    advModeData.NRayleighAbsMolecule      = _NRayleighAbsMoleculeP * 1e25f;
+    advModeData.NRayleighAbsMolecule      = _NRayleighAbsMoleculeP * 1e16f;
     advModeData.radiusAbsMoleculeRayleigh = _radiusAbsMoleculeRayleighP * pow(10.f, -10);
     advModeData.turbidity                 = _turbidityP;
     advModeData.g1                        = _g1P;
