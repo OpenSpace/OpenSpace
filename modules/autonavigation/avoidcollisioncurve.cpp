@@ -50,15 +50,20 @@ namespace {
 namespace openspace::autonavigation {
 
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
-    _points.push_back(start.position());
-
-    // Add a point to first go straight out if starting close to planet
     double thresholdFactor = 3.0;
+
     glm::dvec3 startNodePos = start.node()->worldPosition();
+    glm::dvec3 endNodePos = end.node()->worldPosition();
     double startNodeRadius = start.nodeDetails.validBoundingSphere;
     glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
     glm::dvec3 startViewDir = glm::normalize(start.rotation() * glm::dvec3(0.0, 0.0, -1.0));
 
+    // Add control points for a catmull-rom spline, first and last will no be intersected
+    // TODO: test other first and last control points, ex positive or negative view dir
+    _points.push_back(startNodePos);
+    _points.push_back(start.position());
+
+    // Add an extra point to first go backwards if starting close to planet
     if (glm::length(startNodeToStartPos) < thresholdFactor * startNodeRadius) {
         double distance = startNodeRadius;
 
@@ -83,13 +88,14 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // TODO: Calculate nice end pose if not defined
 
     _points.push_back(end.position());
+    _points.push_back(endNodePos);
 
     std::vector<SceneGraphNode*> relevantNodes = findRelevantNodes();
 
     // Create extra points to avoid collision
     removeCollisions(relevantNodes);
 
-    int nrSegments = _points.size() - 1;
+    int nrSegments = _points.size() - 3;
 
     // default values for the curve parameter - equally spaced
     for (double t = 0.0; t <= 1.0; t += 1.0 / (double)nrSegments) {
@@ -103,7 +109,25 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
 // Interpolate a list of control points and knot times
 glm::dvec3 AvoidCollisionCurve::positionAt(double u) {
-    return interpolatePoints(u);
+    if (u < 0.000001)
+        return _points[1];
+    if (u > 0.999999)
+        return *(_points.end() - 2);
+
+    //distribute t by segment arc lenghts
+
+    // compute current segment, by first finding iterator to the first value that is larger than t 
+    std::vector<double>::iterator segmentEndIt =
+        std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
+    unsigned int idx = (segmentEndIt - 1) - _parameterIntervals.begin();
+
+    double segmentStart = _parameterIntervals[idx];
+    double segmentDuration = (_parameterIntervals[idx + 1] - _parameterIntervals[idx]);
+    double uSegment = (u - segmentStart) / segmentDuration;
+
+    return interpolation::catmullRom(uSegment, _points[idx], _points[idx + 1], _points[idx + 2], _points[idx + 3], 1.0);
+
+   // return interpolatePoints(u);
 }
 
 std::vector<SceneGraphNode*> AvoidCollisionCurve::findRelevantNodes() {
@@ -131,7 +155,7 @@ std::vector<SceneGraphNode*> AvoidCollisionCurve::findRelevantNodes() {
 }
 
 void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevantNodes, int step) {
-    int nrSegments = _points.size() - 1;
+    int nrSegments = _points.size() - 3;
     int maxSteps = 10;
 
     // TODO: handle better / present warning if early out
@@ -139,8 +163,8 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
 
     // go through all segments and check for collisions
     for (int i = 0; i < nrSegments; ++i) {
-        const glm::dvec3 lineStart = _points[i];
-        const glm::dvec3 lineEnd = _points[i + 1];
+        const glm::dvec3 lineStart = _points[i + 1];
+        const glm::dvec3 lineEnd = _points[i + 2];
 
         for (SceneGraphNode* node : relevantNodes) {
             // do collision check in relative coordinates, to avoid huge numbers 
@@ -174,7 +198,7 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
 
                 double distance = 3.0 * radius;
                 glm::dvec3 extraKnot = pointWorld - distance * glm::normalize(orthogonal);
-                _points.insert(_points.begin() + i + 1, extraKnot);
+                _points.insert(_points.begin() + i + 2, extraKnot);
 
                 // TODO: maybe make this more efficient, and make sure that we have a base case. 
                 removeCollisions(relevantNodes, ++step);
@@ -187,100 +211,10 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
 // compute curve parameter intervals based on relative arc length
 void AvoidCollisionCurve::initParameterIntervals() {
     std::vector<double> newIntervals;
-    int nrSegments = _points.size() - 1;
+    int nrSegments = _points.size() - 3;
     for (double t = 0.0; t <= 1.0; t += 1.0 / (double)nrSegments) {
         newIntervals.push_back(arcLength(t) / _length);
     }
     _parameterIntervals.swap(newIntervals);
-}
-
-// Catmull-Rom inspired interpolation of the curve points
-glm::dvec3 AvoidCollisionCurve::interpolatePoints(double u)
-{
-    ghoul_assert(_points.size() == _parameterIntervals.size(), 
-        "Must have equal number of points and times!");
-    ghoul_assert(_points.size() > 2, "Minimum of two control points needed for interpolation!");
-
-    size_t nrSegments = _points.size() - 1;
-    const glm::dvec3 start = _points.front();
-    const glm::dvec3 end = _points.back();
-
-    if (u <= 0.0) return _points.front();
-    if (u >= 1.0) return _points.back();
-
-    if (nrSegments == 1) {
-        return roundedSpline(u, start, start, end, end);
-    }
-
-    // compute current segment index
-    std::vector<double>::const_iterator segmentEndIt =
-        std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
-    unsigned int idx = (segmentEndIt - 1) - _parameterIntervals.begin();
-
-    double segmentStart = _parameterIntervals[idx];
-    double segmentDuration = (_parameterIntervals[idx + 1] - _parameterIntervals[idx]);
-    double tScaled = (u - segmentStart) / segmentDuration;
-
-    glm::dvec3 first = (idx == 0) ? start : _points[idx - 1];
-    glm::dvec3 last = (idx == (nrSegments - 1)) ? end : _points[idx + 2];
-
-    return roundedSpline(tScaled, first, _points[idx], _points[idx + 1], last);
-}
-
-glm::dvec3 AvoidCollisionCurve::roundedSpline(double t, const glm::dvec3 &a, 
-              const glm::dvec3 &b, const glm::dvec3 &c, const glm::dvec3 &d)
-{
-    ghoul_assert(t >= 0 && t <= 1.0, "Interpolation variable out of range [0, 1]");
-
-    if (t <= 0.0) return b;
-    if (t >= 1.0) return c;
-
-    auto isNormalizable = [](const glm::dvec3 v) {
-        return !(abs(glm::length(v)) < Epsilon);
-    };
-
-    // find velocities at b and c
-    glm::dvec3 cb = c - b;
-    glm::dvec3 bc = -cb;
-
-    if (!isNormalizable(cb)) {
-        return b;
-    }
-
-    glm::dvec3 ab = a - b;
-
-    // a and b are the same point
-    if (!isNormalizable(ab)) {
-        ab = bc;
-    }
-
-    glm::dvec3 bVelocity = glm::normalize(cb) - glm::normalize(ab);
-    bVelocity = isNormalizable(bVelocity) ?
-        glm::normalize(bVelocity) : glm::dvec3(0.0, 1.0, 0.0);
-
-    glm::dvec3 dc = d - c;
-
-    // d and c are the same point
-    if (!isNormalizable(dc)) {
-        dc = cb;
-    }
-
-    glm::dvec3 cVelocity = glm::normalize(dc) - glm::normalize(bc);
-    cVelocity = isNormalizable(cVelocity) ?
-        glm::normalize(cVelocity) : glm::dvec3(0.0, 1.0, 0.0);
-
-    double cbDistance = glm::length(cb);
-    double tangetLength = cbDistance;
-
-    // Distances in space can be extremely large, so we dont want the tangents to always have the full length. 
-    const double tangentlengthThreshold = 1E10; // TODO: What's a good threshold?? ALSO make global
-    if (tangetLength > tangentlengthThreshold)
-        tangetLength = tangentlengthThreshold;
-
-    // the resulting curve gets much better and more predictable when using a genric 
-    // hermite curve compared to the Catmull Rom implementation
-    return interpolation::hermite(t, b, c, bVelocity * tangetLength, cVelocity * tangetLength);
-
-    //return interpolation::catmullRom(t, b - bVelocity * cbDistance, b, c, c + cVelocity * cbDistance);
 }
 } // namespace openspace::autonavigation
