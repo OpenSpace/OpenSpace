@@ -63,6 +63,20 @@ private:
     PathCurve* _path = nullptr;
 };
 
+// Interpolates a look at position for the camera, and takes the start and end rotation
+// into account
+class LookAtInterpolator : public RotationInterpolator {
+public:
+    LookAtInterpolator(glm::dquat start, glm::dquat end, glm::dvec3 startLookAtPos,
+        glm::dvec3 endLookAtPos, PathCurve* path);
+    glm::dquat interpolate(double u);
+
+private:
+    glm::dvec3 _startLookAtPos;
+    glm::dvec3 _endLookAtPos;
+    PathCurve* _path = nullptr;
+};
+
 } // namespace openspace::autonavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
