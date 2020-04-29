@@ -48,7 +48,7 @@ glm::dquat EasedSlerpInterpolator::interpolate(double u) {
     return glm::slerp(_start, _end, uScaled);
 }
 
-LookAtInterpolator::LookAtInterpolator(glm::dquat start, glm::dquat end, 
+LookAtRotator::LookAtRotator(glm::dquat start, glm::dquat end, 
                                        glm::dvec3 startLookAtPos, 
                                        glm::dvec3 endLookAtPos, 
                                        PathCurve* path)
@@ -58,7 +58,7 @@ LookAtInterpolator::LookAtInterpolator(glm::dquat start, glm::dquat end,
     _path(path)
 {}
 
-glm::dquat LookAtInterpolator::interpolate(double u) {
+glm::dquat LookAtRotator::interpolate(double u) {
     double tStart = 0.15;
     double tEnd = 0.7;
     double uNew = helpers::shiftAndScale(u, tStart, tEnd);

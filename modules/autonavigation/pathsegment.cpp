@@ -129,7 +129,7 @@ void PathSegment::initCurve() {
     {
     case CurveType::Bezier3:
         _curve = std::make_unique<Bezier3Curve>(_start, _end);
-        _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+        _rotationInterpolator = std::make_unique<LookAtRotator>(
             _start.rotation(),
             _end.rotation(),
             _start.node()->worldPosition(),
