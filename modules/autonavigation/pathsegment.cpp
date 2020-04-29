@@ -74,6 +74,10 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
 }
 
 CameraPose PathSegment::traversePath(double dt) {
+    if (!_curve || !_rotationInterpolator || !_speedFunction) {
+        LERROR("Cannot traverse path. Curvec type has not been properly defined.");
+    }
+
     // compute displacement along the path during this frame
     double displacement = 0.0;
     int steps = 2; // TODO: should possibly increase with larger risk of error
