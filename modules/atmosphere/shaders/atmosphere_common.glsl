@@ -655,12 +655,13 @@ vec3 extinctionCoefficientRayleigh(const vec3 lambda) {
 vec3 scatteringCoefficientMie(const vec3 lambda) {
   if (advancedModeEnabled) {
     vec3 tmp = (2.f * M_PI / lambda);
+    float exponent = jungeExponent - 2.f;
     vec3 lambdaJunge = vec3(
-      pow(tmp.x, jungeExponent - 2.f), 
-      pow(tmp.y, jungeExponent - 2.f), 
-      pow(tmp.z, jungeExponent - 2.f)
+      pow(tmp.x, exponent), 
+      pow(tmp.y, exponent), 
+      pow(tmp.z, exponent)
       );
-    return 0.434f * (0.65f * turbidity - 0.65f) * 1E-16 * M_PI * Kappa * lambdaJunge * 1e3;
+    return 0.434f * (0.65f * turbidity - 0.65f) * 1E-16 * M_PI * Kappa * lambdaJunge;
   } else {
     return betaMieScattering;
   }
@@ -671,13 +672,12 @@ vec3 mieExtinctionEfficiency(const vec3 lambda) {
     vec3 rho = 4.f * M_PI * mean_radius_particle_mie * (n_real_mie - vec3(1.f)) / lambda;
     vec3 tanBeta = n_complex_mie / (n_real_mie - vec3(1.f));
     vec3 beta = atan(tanBeta);
-    vec3 rhoTanBeta = rho * tanBeta;
-    vec3 expRhoTanBeta = exp(-rhoTanBeta);
+    vec3 expRhoTanBeta = exp(-rho * tanBeta);
     vec3 cosBetaOverRho = cos(beta) / rho;
     vec3 cosBetaOverRho2 = cosBetaOverRho * cosBetaOverRho;
     return 2.f - 4.f * expRhoTanBeta * cosBetaOverRho * sin(rho - beta)
-      + 4.f * expRhoTanBeta * cosBetaOverRho2 * cos(rho - 2.f * beta)
-      + 4.f * expRhoTanBeta * cosBetaOverRho2 * cos(2.f * beta);
+          - 4.f * expRhoTanBeta * cosBetaOverRho2 * cos(rho - 2.f * beta)
+          + 4.f * cosBetaOverRho2 * cos(2.f * beta);
   } else {
     return betaMieExtinction;
   }
@@ -686,7 +686,7 @@ vec3 mieExtinctionEfficiency(const vec3 lambda) {
 // -- Calculates the Mie Absorption Coefficients for dust (of particles with same radius size and type) --
 vec3 extinctionCoefficientMie(const vec3 lambda) {
   if (advancedModeEnabled) {
-    return mieExtinctionEfficiency(lambda) * N_mie * M_PI * (mean_radius_particle_mie * mean_radius_particle_mie) * 1e3;
+    return mieExtinctionEfficiency(lambda) * N_mie * M_PI * (mean_radius_particle_mie * mean_radius_particle_mie);
   } else {
     return betaMieExtinction;
   }
