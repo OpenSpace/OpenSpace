@@ -74,7 +74,7 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
 
 CameraPose PathSegment::traversePath(double dt) {
     if (!_curve || !_rotationInterpolator || !_speedFunction) {
-        LERROR("Cannot traverse path. Curve type has not been properly defined.");
+        // TODO: handle better (abort path somehow)
         return _start.pose;
     }
 
@@ -151,6 +151,11 @@ void PathSegment::initCurve() {
 
     default:
         LERROR("Could not create curve. Type does not exist!");
+        return;
+    }
+
+    if (!_curve || !_rotationInterpolator || !_speedFunction) {
+        LERROR("Curve type has not been properly initialized.");
         return;
     }
 }
