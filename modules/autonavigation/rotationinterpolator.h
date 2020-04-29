@@ -49,6 +49,8 @@ public:
     glm::dquat interpolate(double u);
 };
 
+// Look at start node until tStart, then turn to look at end node from tEnd.
+// OBS! Does not care about actual end and start value!! I.e. Not an interpolation!
 class LookAtInterpolator : public RotationInterpolator {
 public:
     LookAtInterpolator(glm::dquat start, glm::dquat end, glm::dvec3 startLookAtPos,
@@ -58,18 +60,6 @@ public:
 private:
     glm::dvec3 _startLookAtPos;
     glm::dvec3 _endLookAtPos;
-    PathCurve* _path = nullptr;
-};
-
-class PiecewiseLookAtInterpolator : public RotationInterpolator {
-public:
-    PiecewiseLookAtInterpolator(glm::dquat start, glm::dquat end,
-        glm::dvec3 startTargetPos, glm::dvec3 endTargetPos, PathCurve* path);
-    glm::dquat interpolate(double u);
-
-private:
-    glm::dvec3 _startTargetPos;
-    glm::dvec3 _endTargetPos;
     PathCurve* _path = nullptr;
 };
 
