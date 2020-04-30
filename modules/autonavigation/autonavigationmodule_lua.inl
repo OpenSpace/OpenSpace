@@ -194,7 +194,7 @@ namespace openspace::autonavigation::luascriptfunctions {
 
         lua_newtable(L);
         for (int i = 0; i < points.size(); ++i) {
-            ghoul::lua::push(L, i);
+            ghoul::lua::push(L, i+1);
             pushVector(L, points[i]);
             lua_rawset(L, -3);
         }
@@ -227,7 +227,7 @@ namespace openspace::autonavigation::luascriptfunctions {
 
         lua_newtable(L);
         for (int i = 0; i < points.size(); ++i) {
-            ghoul::lua::push(L, i);
+            ghoul::lua::push(L, i+1);
             pushVector(L, points[i]);
             lua_rawset(L, -3);
         }

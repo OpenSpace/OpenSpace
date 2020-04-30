@@ -69,6 +69,9 @@ std::vector<documentation::Documentation> AutoNavigationModule::documentations()
 scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "autonavigation";
+    res.scripts = {
+        absPath("${MODULE_AUTONAVIGATION}/scripts/rendering.lua")
+    };
     res.functions = {
         {
             "continuePath",
