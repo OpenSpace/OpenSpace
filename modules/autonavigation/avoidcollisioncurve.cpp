@@ -25,6 +25,7 @@
 #include <modules/autonavigation/avoidcollisioncurve.h>
 
 #include <modules/autonavigation/helperfunctions.h>
+#include <modules/autonavigation/waypoint.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -125,9 +126,14 @@ glm::dvec3 AvoidCollisionCurve::positionAt(double u) {
     double segmentDuration = (_parameterIntervals[idx + 1] - _parameterIntervals[idx]);
     double uSegment = (u - segmentStart) / segmentDuration;
 
-    return interpolation::catmullRom(uSegment, _points[idx], _points[idx + 1], _points[idx + 2], _points[idx + 3], 1.0);
-
-   // return interpolatePoints(u);
+    return interpolation::catmullRom(
+        uSegment, 
+        _points[idx], 
+        _points[idx + 1], 
+        _points[idx + 2], 
+        _points[idx + 3], 
+        1.0
+    );
 }
 
 std::vector<SceneGraphNode*> AvoidCollisionCurve::findRelevantNodes() {

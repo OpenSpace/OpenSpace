@@ -29,6 +29,8 @@
 
 namespace openspace::autonavigation {
 
+struct WayPoint;
+
 class AvoidCollisionCurve : public PathCurve {
 public:
     AvoidCollisionCurve(const Waypoint& start, const Waypoint& end);
@@ -40,9 +42,6 @@ private:
     std::vector<SceneGraphNode*> findRelevantNodes();
     void removeCollisions(std::vector<SceneGraphNode*>& relevantNodes, int step = 0);
     void initParameterIntervals();
-    glm::dvec3 interpolatePoints(double u);
-    glm::dvec3 roundedSpline(double u, const glm::dvec3 &a, const glm::dvec3 &b,
-                                       const glm::dvec3 &c, const glm::dvec3 &d);
 };
 
 } // namespace openspace::autonavigation
