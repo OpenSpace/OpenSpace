@@ -125,9 +125,15 @@ namespace {
 
 
     //Planetary View
+    constexpr openspace::properties::Property::PropertyInfo EnableAllPlanetsInfo = {
+        "EnableAllPlanetsInfo",
+        "All",
+        "Play all sonifications for all the planets or turn it off. Only works if the sun is NOT in focus."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "EnabledInfo",
-        "Enable all",
+        "All",
         "Play all sonifications for the planet or turn it off. Only works if the sun is NOT in focus."
     };
 
@@ -231,6 +237,8 @@ SonificationModule::SonificationModule()
     }
 
     //Add onChange for the properties
+    _everythingEnabled.onChange([this]() { onEverythingChanged(_everythingEnabled.value()); });
+
     //Solar
     _solarProperty.allEnabled.onChange([this]() { onSolarAllEnabledChanged(_solarProperty.allEnabled.value()); });
     _solarProperty.mercuryEnabled.onChange([this]() { onSolarMercuryEnabledChanged(_solarProperty.mercuryEnabled.value()); });
@@ -247,6 +255,8 @@ SonificationModule::SonificationModule()
     _compareProperty.secondPlanet.onChange([this]() { onSecondCompareChanged(_compareProperty.secondPlanet.option()); });
 
     //Planetary View
+    _planetsProperty.allEnabled.onChange([this]() { onAllEnabledChanged(_planetsProperty.allEnabled.value()); });
+
     //Mercury
     _planetsProperty.mercuryProperty.enabled.onChange([this]() { onMercuryEnabledChanged(_planetsProperty.mercuryProperty.enabled.value()); } );
     _planetsProperty.mercuryProperty.sizeDayEnabled.onChange([this]() { onMercurySizeDayChanged(_planetsProperty.mercuryProperty.sizeDayEnabled.value()); } );
@@ -310,11 +320,35 @@ SonificationModule::SonificationModule()
     _planetsProperty.neptuneProperty.moonsEnabled.onChange([this]() { onNeptuneMoonsChanged(_planetsProperty.neptuneProperty.moonsEnabled.value()); });
 
     //Add the properties
+    addProperty(_everythingEnabled);
     addPropertySubOwner(_planetsProperty);
     addPropertySubOwner(_solarProperty);
     addPropertySubOwner(_compareProperty);
 }
 
+//Turn on/off everything
+void SonificationModule::onEverythingChanged(bool value) {
+
+    if (_GUIState == SonificationModule::Solar) {
+        //Set all the solar settings
+        setAllSolarProperties(value);
+
+        _compareProperty.firstPlanet.setValue(0);
+        _compareProperty.secondPlanet.setValue(0);
+    }
+    else {
+        //Set all the planetary settings
+        std::vector<properties::PropertyOwner*> planetOwners = _planetsProperty.propertySubOwners();
+
+        for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin(); owner < planetOwners.end(); ++owner) {
+            std::vector<properties::Property*> planetProperties = (*owner)->properties();
+
+            for (std::vector<properties::Property*>::iterator i = planetProperties.begin(); i < planetProperties.end(); ++i) {
+                (*i)->set(value);
+            }
+        }
+    }
+}
 
 //Solar View
 void SonificationModule::onSolarAllEnabledChanged(bool value) {
@@ -550,10 +584,7 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
     }
 
     if (_GUIState == SonificationModule::GUIMode::Solar) {
-        std::vector<properties::Property*> solarProperties = _solarProperty.properties();
-        for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
-            (*i)->set(false);
-        }
+        setAllSolarProperties(false);
 
         _GUIState = SonificationModule::GUIMode::Compare;
     }
@@ -597,10 +628,7 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
     }
 
     if (_GUIState == SonificationModule::GUIMode::Solar) {
-        std::vector<properties::Property*> solarProperties = _solarProperty.properties();
-        for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
-            (*i)->set(false);
-        }
+        setAllSolarProperties(false);
 
         _GUIState = SonificationModule::GUIMode::Compare;
     }
@@ -639,6 +667,16 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
 
 
 //Planetart View
+void SonificationModule::onAllEnabledChanged(bool value) {
+    if (_GUIState != SonificationModule::Planetary && value) {
+        _planetsProperty.allEnabled = false;
+        return;
+    }
+
+    //Set all the planetary settings
+    setAllPlanetaryProperties(value);
+}
+
 //Mercury
 void SonificationModule::onMercuryEnabledChanged(bool value) {
     if (_GUIState != SonificationModule::Planetary && value) {
@@ -1286,6 +1324,7 @@ SonificationModule::PlanetHeadProperty::PlanetHeadProperty(
     properties::PropertyOwner::PropertyOwnerInfo uranusInfo,
     properties::PropertyOwner::PropertyOwnerInfo neptuneInfo)
         : properties::PropertyOwner(planetHeadInfo),
+    allEnabled(EnableAllPlanetsInfo, false),
     mercuryProperty(SonificationModule::PlanetProperty(mercuryInfo)),
     venusProperty(SonificationModule::PlanetProperty(venusInfo)),
     earthProperty(SonificationModule::PlanetProperty(earthInfo)),
@@ -1295,6 +1334,7 @@ SonificationModule::PlanetHeadProperty::PlanetHeadProperty(
     uranusProperty(SonificationModule::PlanetProperty(uranusInfo)),
     neptuneProperty(SonificationModule::PlanetProperty(neptuneInfo))
 {
+    addProperty(allEnabled);
     addPropertySubOwner(mercuryProperty);
     addPropertySubOwner(venusProperty);
     addPropertySubOwner(earthProperty);
@@ -1305,6 +1345,25 @@ SonificationModule::PlanetHeadProperty::PlanetHeadProperty(
     addPropertySubOwner(neptuneProperty);
 }
 
+void SonificationModule::setAllSolarProperties(bool value) {
+    std::vector<properties::Property*> solarProperties = _solarProperty.properties();
+
+    for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
+        (*i)->set(value);
+    }
+}
+
+void SonificationModule::setAllPlanetaryProperties(bool value) {
+    std::vector<properties::PropertyOwner*> planetOwners = _planetsProperty.propertySubOwners();
+
+    for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin(); owner < planetOwners.end(); ++owner) {
+        std::vector<properties::Property*> planetProperties = (*owner)->properties();
+
+        for (std::vector<properties::Property*>::iterator i = planetProperties.begin(); i < planetProperties.end(); ++i) {
+            (*i)->set(value);
+        }
+    }
+}
 
 //Extract the data from the given identifier
 //NOTE: The identifier must start with capital letter,
@@ -1460,26 +1519,26 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                         //If focus is on the sun, switch sonification view
                         if (focusNode->identifier().compare("Sun") == 0) {
                             _GUIState = SonificationModule::GUIMode::Solar;
-                            std::vector<properties::PropertyOwner*> planetOwners = _planetsProperty.propertySubOwners();
 
-                            for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin(); owner < planetOwners.end(); ++owner) {
-                                std::vector<properties::Property*> planetProperties = (*owner)->properties();
+                            //Clear the planetary settings
+                            setAllPlanetaryProperties(false);
 
-                                for (std::vector<properties::Property*>::iterator i = planetProperties.begin(); i < planetProperties.end(); ++i) {
-                                    (*i)->set(false);
-                                }
+                            if (_everythingEnabled.value()) {
+                                setAllSolarProperties(true);
                             }
                         }
                         else {
                             _GUIState = SonificationModule::GUIMode::Planetary;
-                            std::vector<properties::Property*> solarProperties = _solarProperty.properties();
 
-                            for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
-                                (*i)->set(false);
-                            }
+                            //Clear the solar settings
+                            setAllSolarProperties(false);
 
                             _compareProperty.firstPlanet.setValue(0);
                             _compareProperty.secondPlanet.setValue(0);
+
+                            if (_everythingEnabled.value()) {
+                                setAllPlanetaryProperties(true);
+                            }
                         }
                     }
 

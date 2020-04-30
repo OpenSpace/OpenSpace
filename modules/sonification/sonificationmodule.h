@@ -70,8 +70,12 @@ protected:
 private:
     //Main function for _thread
     void threadMain(std::atomic<bool>& isRunning);
+    void setAllSolarProperties(bool value);
+    void setAllPlanetaryProperties(bool value);
 
     //On change methods for each property
+    void onEverythingChanged(bool value);
+
     //Solar
     void onSolarAllEnabledChanged(bool value);
     void onSolarMercuryEnabledChanged(bool value);
@@ -88,6 +92,8 @@ private:
     void onSecondCompareChanged(properties::OptionProperty::Option value);
 
     //Planetary
+    void onAllEnabledChanged(bool value);
+
     //Mercury
     void onMercuryEnabledChanged(bool value);
     void onMercurySizeDayChanged(bool value);
@@ -221,7 +227,8 @@ private:
     };
 
     struct PlanetHeadProperty : properties::PropertyOwner {
-        PlanetHeadProperty(properties::PropertyOwner::PropertyOwnerInfo planetHeadInfo,
+        PlanetHeadProperty(
+            properties::PropertyOwner::PropertyOwnerInfo planetHeadInfo,
             properties::PropertyOwner::PropertyOwnerInfo inMercuryInfo,
             properties::PropertyOwner::PropertyOwnerInfo inVenusInfo,
             properties::PropertyOwner::PropertyOwnerInfo inEarthInfo,
@@ -231,6 +238,7 @@ private:
             properties::PropertyOwner::PropertyOwnerInfo inUranusInfo,
             properties::PropertyOwner::PropertyOwnerInfo inNeptuneInfo);
 
+        properties::BoolProperty allEnabled;
         PlanetProperty mercuryProperty;
         PlanetProperty venusProperty;
         PlanetProperty earthProperty;
@@ -239,6 +247,12 @@ private:
         PlanetProperty saturnProperty;
         PlanetProperty uranusProperty;
         PlanetProperty neptuneProperty;
+    };
+
+    const openspace::properties::Property::PropertyInfo _EverythingInfo = {
+        "EverythingInfo",
+        "Enable all",
+        "Enable all the planet and solar sonifications, NOT the compare sonifications"
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo _PlanetsInfo = {
@@ -324,6 +338,7 @@ private:
     };
 
     CompareProperty _compareProperty = CompareProperty();
+    properties::BoolProperty _everythingEnabled = properties::BoolProperty(_EverythingInfo, false);
 };
 
 } // namespace openspace
