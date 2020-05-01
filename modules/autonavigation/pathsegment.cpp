@@ -25,6 +25,8 @@
 #include <modules/autonavigation/pathsegment.h>
 
 #include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/rotationinterpolator.h>
+#include <modules/autonavigation/speedfunction.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>

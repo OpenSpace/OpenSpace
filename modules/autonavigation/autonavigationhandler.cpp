@@ -26,7 +26,6 @@
 
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/instruction.h>
-#include <modules/autonavigation/pathcurves.h>
 #include <modules/autonavigation/pathspecification.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>

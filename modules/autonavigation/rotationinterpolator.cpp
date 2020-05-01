@@ -22,9 +22,10 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/rotationinterpolator.h>
 
 #include <modules/autonavigation/helperfunctions.h>
+#include <modules/autonavigation/pathcurves.h>
 #include <modules/autonavigation/waypoint.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
@@ -98,12 +99,12 @@ glm::dquat LookAtInterpolator::interpolate(double u) {
         glm::dvec3 startViewPos = startPosition + startViewDist * startViewDir;
         double uNew = u / u1;
         uNew = ghoul::cubicEaseInOut(uNew);
-        lookAtPos = interpolation::linear(uNew, startViewPos, _startLookAtPos);
+        lookAtPos = ghoul::interpolateLinear(uNew, startViewPos, _startLookAtPos);
     }
     else if (u <= u2) {
         double uNew = (u - u1) / (u2 - u1);
         uNew = ghoul::cubicEaseInOut(uNew);
-        lookAtPos = interpolation::linear(uNew, _startLookAtPos, _endLookAtPos);
+        lookAtPos = ghoul::interpolateLinear(uNew, _startLookAtPos, _endLookAtPos);
     }
     else if (u2 < u) {
         glm::dvec3 endViewDir = glm::normalize(_end * glm::dvec3(0.0, 0.0, -1.0));
@@ -111,7 +112,7 @@ glm::dquat LookAtInterpolator::interpolate(double u) {
         glm::dvec3 endViewPos = endPosition + endViewDist * endViewDir;
         double uNew = (u - u2) / (1.0 - u2);
         uNew = ghoul::cubicEaseInOut(uNew);
-        lookAtPos = interpolation::linear(uNew, _endLookAtPos, endViewPos);
+        lookAtPos = ghoul::interpolateLinear(uNew, _endLookAtPos, endViewPos);
     }
 
     // handle up vector
