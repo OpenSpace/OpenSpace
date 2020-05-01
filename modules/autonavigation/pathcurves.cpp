@@ -166,13 +166,9 @@ Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
 // Interpolate a list of control points and knot times
 glm::dvec3 Bezier3Curve::positionAt(double u) {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
-
-    size_t nrPoints = _points.size();
-    size_t nrTimes = _parameterIntervals.size();
-
-    ghoul_assert(nrPoints > 4, "Minimum of four control points needed for interpolation!");
-    ghoul_assert((nrPoints - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
-    ghoul_assert(_nrSegments == (nrTimes - 1), "Number of interval times must match number of intervals");
+    ghoul_assert(_points.size() > 4, "Minimum of four control points needed for interpolation!");
+    ghoul_assert((_points.size() - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
+    ghoul_assert(_nrSegments == (_parameterIntervals.size() - 1), "Number of interval times must match number of intervals");
 
     if (abs(u) < Epsilon)
         return _points.front();
@@ -183,16 +179,16 @@ glm::dvec3 Bezier3Curve::positionAt(double u) {
     // compute current segment, by first finding iterator to the first value that is larger than s 
     std::vector<double>::iterator segmentEndIt = 
         std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
-    unsigned int segmentIdx = (segmentEndIt - 1) - _parameterIntervals.begin();
+    unsigned int segmentIdx = (unsigned int)((segmentEndIt - 1) - _parameterIntervals.begin());
 
     double segmentStart = _parameterIntervals[segmentIdx];
-    double segmentDuration = (_parameterIntervals[segmentIdx + 1] - _parameterIntervals[segmentIdx]);
-    double sScaled = (u - segmentStart) / segmentDuration;
+    double segmentDuration = (_parameterIntervals[segmentIdx + 1] - segmentStart);
+    double uScaled = (u - segmentStart) / segmentDuration;
 
     unsigned int idx = segmentIdx * 3;
 
     // Interpolate using De Casteljau's algorithm
-    return interpolation::cubicBezier(sScaled, _points[idx], _points[idx + 1],
+    return interpolation::cubicBezier(uScaled, _points[idx], _points[idx + 1],
         _points[idx + 2], _points[idx + 3]);
 }
 
@@ -202,7 +198,7 @@ void Bezier3Curve::initParameterIntervals() {
     double dt = 1.0 / _nrSegments;
 
     newIntervals.push_back(0.0);
-    for (int i = 1; i < _nrSegments; i++) {
+    for (unsigned int i = 1; i < _nrSegments; i++) {
         newIntervals.push_back(arcLength(dt * i) / _length);
     }
     newIntervals.push_back(1.0);
