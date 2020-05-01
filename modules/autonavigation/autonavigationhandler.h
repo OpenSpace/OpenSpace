@@ -27,11 +27,8 @@
 
 #include <modules/autonavigation/atnodenavigator.h>
 #include <modules/autonavigation/pathsegment.h>
-#include <openspace/interaction/interpolator.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/glm.h>
 
 namespace openspace {
