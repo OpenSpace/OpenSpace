@@ -6,9 +6,11 @@ openspace.autonavigation.documentation = {
     },
     {
         Name = "renderPath",
-        Arguments = "int",
+        Arguments = "int, [bool]",
         Documentation = "Render the currently active path, using linear segments. " .. 
-            "The argurment is the number of samples per path segment."
+            "The first argurment is the number of samples per path segment. " ..
+            "The optional second argument can be used to render the points of " ..
+            "the path as spheres, if set to true."
     },
     {
         Name = "removeControlPoints",
@@ -29,12 +31,15 @@ openspace.autonavigation.removeRenderedPath = function ()
     end
 end
 
-openspace.autonavigation.renderPath = function (nrLinesPerSegment)
+openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints)
     local path_identifier = "Camera_Path"
     local label_point = "Point"; 
     local label_line = "Line"; 
     local lineColor = {1.0, 1.0, 0.0}
     local lineWidth = 4
+    local sphereTexture = "${DATA}/test3.jpg" -- TODO: better texture
+    local sphereRadius = 1000000 
+    local sphereSegments = 50
 
     if openspace.hasSceneGraphNode(path_identifier) then
         openspace.removeSceneGraphNode(path_identifier) 
@@ -61,9 +66,20 @@ openspace.autonavigation.renderPath = function (nrLinesPerSegment)
             }, 
             Parent = path_identifier
         }
+
+        if renderPoints then 
+            node.Renderable = {
+                Type = "RenderableSphere",
+                Enabled = true,
+                Segments = sphereSegments,
+                Size = sphereRadius,
+                Texture = sphereTexture,
+                Opacity = 1
+            }
+        end
+
         openspace.addSceneGraphNode(node)
     end
-    -- TODO: add option to render the points as well?
 
     -- lines between points
     for i = 1,(nrPoints-1) do
@@ -94,7 +110,7 @@ end
 openspace.autonavigation.renderControlPoints = function ()
     local base_identifier = "Path_Control_Points"
     local label_point = "ControlPoint"
-    local sphereTexture = "${DATA}/test2.jpg"
+    local sphereTexture = "${DATA}/test2.jpg" -- TODO: better texture
     local sphereRadius = 1000000 -- TODO: optional input?
     local sphereSegments = 50
 
