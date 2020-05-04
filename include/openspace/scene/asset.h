@@ -51,6 +51,15 @@ public:
     using StateChangeCallback = std::function<void(State)>;
     using CallbackHandle = size_t;
 
+    struct MetaInformation {
+        std::string name;
+        std::string version;
+        std::string description;
+        std::string author;
+        std::string url;
+        std::string license;
+    };
+
     /**
      * Root asset constructor
      */
@@ -136,6 +145,8 @@ public:
 
     std::string resolveLocalResource(std::string resourceName) const;
 
+    void setMetaInformation(MetaInformation metaInformation);
+
 private:
     void setState(State state);
 
@@ -156,6 +167,8 @@ private:
 
     // Absolute path to asset file
     std::string _assetPath;
+
+    MetaInformation _metaInformation;
 
     // Required assets
     std::vector<std::shared_ptr<Asset>> _requiredAssets;

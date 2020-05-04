@@ -157,7 +157,7 @@ public:
     /**
      * Notify listeners about asset state change
      */
-    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state);
+    void assetStateChanged(Asset* asset, Asset::State state);
 
     /**
      * Notify listeners about new requests

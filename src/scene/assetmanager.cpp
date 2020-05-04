@@ -82,7 +82,7 @@ bool AssetManager::update() {
     return false;
 }
 
-void AssetManager::assetStateChanged(std::shared_ptr<Asset>, Asset::State) {
+void AssetManager::assetStateChanged(Asset*, Asset::State) {
     // Potential todo: notify user about asset stage change
     //LINFO(asset->id() << " changed state to " << static_cast<int>(state));
 }

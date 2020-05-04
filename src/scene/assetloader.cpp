@@ -33,6 +33,7 @@
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/defer.h>
 
 #include "assetloader_lua.inl"
@@ -53,6 +54,14 @@ namespace {
 
     constexpr const char* DirectoryConstantName = "directory";
     constexpr const char* FilePathConstantName = "filePath";
+
+    constexpr const char* MetaInformationKey = "meta";
+    constexpr const char* MetaInformationName = "Name";
+    constexpr const char* MetaInformationVersion = "Version";
+    constexpr const char* MetaInformationDescription = "Description";
+    constexpr const char* MetaInformationAuthor = "Author";
+    constexpr const char* MetaInformationURL = "URL";
+    constexpr const char* MetaInformationLicense = "License";
 
     constexpr const char* ExportsTableName = "_exports";
     constexpr const char* AssetTableName = "_asset";
@@ -276,6 +285,35 @@ bool AssetLoader::loadAsset(Asset* asset) {
         );
         lua_settop(*_luaState, top);
         return false;
+    }
+
+    // Extract meta information from the asset file if it was provided
+    // 1. Load the asset table
+    lua_getglobal(*_luaState, AssetGlobalVariableName);
+    ghoul_assert(lua_istable(*_luaState, -1), "Expected 'asset' table");
+    lua_getfield(*_luaState, -1, MetaInformationKey);
+    if (!lua_isnil(*_luaState, -1)) {
+        // The 'meta' object exist;  quick sanity check that it is a table
+        if (!lua_istable(*_luaState, -1)) {
+            LWARNING(fmt::format(
+                "When loading asset '{}', encountered a '{}' entry that was not a table",
+                asset->assetFilePath(), MetaInformationKey
+            ));
+        }
+        else {
+            // The 'meta' object exists and it is a table
+            ghoul::Dictionary metaDict;
+            ghoul::lua::luaDictionaryFromState(*_luaState, metaDict);
+
+            Asset::MetaInformation meta;
+            metaDict.getValue(MetaInformationName, meta.name);
+            metaDict.getValue(MetaInformationVersion, meta.version);
+            metaDict.getValue(MetaInformationDescription, meta.description);
+            metaDict.getValue(MetaInformationAuthor, meta.author);
+            metaDict.getValue(MetaInformationURL, meta.url);
+            metaDict.getValue(MetaInformationLicense, meta.license);
+            asset->setMetaInformation(std::move(meta));
+        }
     }
 
     lua_settop(*_luaState, top);
@@ -784,23 +822,19 @@ void AssetLoader::removeAssetListener(AssetListener* listener) {
     ));
 }
 
-void AssetLoader::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
+void AssetLoader::assetStateChanged(Asset* asset, Asset::State state) {
     for (AssetListener* listener : _assetListeners) {
         listener->assetStateChanged(asset, state);
     }
 }
 
-void AssetLoader::assetRequested(Asset* parent,
-                                 std::shared_ptr<Asset> child)
-{
+void AssetLoader::assetRequested(Asset* parent, std::shared_ptr<Asset> child) {
     for (AssetListener* listener : _assetListeners) {
         listener->assetRequested(parent, child);
     }
 }
 
-void AssetLoader::assetUnrequested(Asset* parent,
-                                   std::shared_ptr<Asset> child)
-{
+void AssetLoader::assetUnrequested(Asset* parent, std::shared_ptr<Asset> child) {
     for (AssetListener* listener : _assetListeners) {
         listener->assetUnrequested(parent, child);
     }

@@ -87,6 +87,10 @@ std::string Asset::resolveLocalResource(std::string resourceName) const {
     return dir + ghoul::filesystem::FileSystem::PathSeparator + std::move(resourceName);
 }
 
+void Asset::setMetaInformation(MetaInformation metaInformation) {
+    _metaInformation = std::move(metaInformation);
+}
+
 Asset::State Asset::state() const {
     return _state;
 }
@@ -105,8 +109,7 @@ void Asset::setState(Asset::State state) {
     }
     _state = state;
 
-    std::shared_ptr<Asset> thisAsset = shared_from_this();
-    _loader->assetStateChanged(thisAsset, state);
+    _loader->assetStateChanged(this, state);
 
     for (const std::weak_ptr<Asset>& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {

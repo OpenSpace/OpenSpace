@@ -77,7 +77,7 @@ documentation::Documentation SyncAssetTask::documentation() {
 class RequestListener : public AssetListener {
 public:
     virtual ~RequestListener() = default;
-    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override {
+    void assetStateChanged(Asset* asset, Asset::State state) override {
         if (state == Asset::State::LoadingFailed) {
             LERROR(fmt::format("Failed to load asset: {}", asset->id()));
         }

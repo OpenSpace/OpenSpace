@@ -32,7 +32,7 @@ namespace openspace {
 class AssetListener {
 public:
     virtual ~AssetListener() = default;
-    virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
+    virtual void assetStateChanged(Asset* asset, Asset::State state) = 0;
     virtual void assetRequested(Asset* parent,
         std::shared_ptr<Asset> child) = 0;
 

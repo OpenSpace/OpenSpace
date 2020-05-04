@@ -61,7 +61,7 @@ public:
     void removeAll();
     std::shared_ptr<Asset> rootAsset();
 
-    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override;
+    void assetStateChanged(Asset* asset, Asset::State state) override;
     void assetRequested(Asset* parent,
         std::shared_ptr<Asset> child) override;
     void assetUnrequested(Asset* parent,
