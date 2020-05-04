@@ -28,6 +28,7 @@
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/synchronizationwatcher.h>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -146,6 +147,7 @@ public:
     std::string resolveLocalResource(std::string resourceName) const;
 
     void setMetaInformation(MetaInformation metaInformation);
+    std::optional<MetaInformation> metaInformation() const;
 
 private:
     void setState(State state);
@@ -168,7 +170,7 @@ private:
     // Absolute path to asset file
     std::string _assetPath;
 
-    MetaInformation _metaInformation;
+    std::optional<MetaInformation> _metaInformation;
 
     // Required assets
     std::vector<std::shared_ptr<Asset>> _requiredAssets;

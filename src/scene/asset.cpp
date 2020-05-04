@@ -91,6 +91,10 @@ void Asset::setMetaInformation(MetaInformation metaInformation) {
     _metaInformation = std::move(metaInformation);
 }
 
+std::optional<Asset::MetaInformation> Asset::metaInformation() const {
+    return _metaInformation;
+}
+
 Asset::State Asset::state() const {
     return _state;
 }

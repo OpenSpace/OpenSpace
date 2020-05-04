@@ -1,1 +1,1 @@
-asset.request('./satellites_interesting')
+asset.require('./satellites_interesting')

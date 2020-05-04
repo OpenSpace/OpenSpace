@@ -1035,7 +1035,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         _documentationJson += "{\"name\":\"Scene License Information\",";
         _documentationJson += "\"identifier\":\"sceneLicense";
         _documentationJson += "\",\"data\":";
-        _documentationJson += _scene->generateSceneLicenseDocumentationJson();
+        _documentationJson += SceneLicenseWriter().generateJson();
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Properties\",";
         _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
@@ -1050,8 +1050,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         DocEng.addHandlebarTemplates(global::keybindingManager.templatesToRegister());
         //TODO this is in efficaiant, here i am just instaning the class to get
         //at a member variable which is staticly defined. How do i just get that
-        const std::vector<SceneLicense> licenses;
-        SceneLicenseWriter writer(licenses);
+        SceneLicenseWriter writer;
         DocEng.addHandlebarTemplates(writer.templatesToRegister());
         DocEng.addHandlebarTemplates(global::rootPropertyOwner.templatesToRegister());
 
