@@ -1,0 +1,87 @@
+--sun_earth_2012.asset
+local assetHelper = asset.require('util/asset_helper')
+
+local transforms = asset.require('../heliosphere/mas/bastille_day/transforms')
+
+-- Specifying transfer functions
+local transferFunctions = asset.syncedResource({
+    Name = "Fieldlines Transfer Functions",
+    Type = "HttpSynchronization",
+    Identifier = "sun_earth_event-fieldlines-transferfunctions",
+    Version = 1
+})
+
+
+-- Specifying transfer functions
+local fieldlineData  = asset.syncedResource({
+    Name = "Fieldlines Data",
+    Type = "HttpSynchronization",
+    Identifier = "sun_earth_event-fieldlines-data",
+    Version = 1
+})
+
+local pfssTransitionColorTable = transferFunctions .. "/pfss_transition.txt";
+local pfssTopologyColorTable = transferFunctions .. "/pfss_topology.txt";
+local pfssBsignColorTable = transferFunctions .. "/pfss_bsign.txt";
+
+PFSSPaths = {
+    SolarSoft = fieldlineData .. "/pfss/leilas_solar_soft_july_12_2012/"
+}
+
+local PFSS = {
+    Identifier = "FL_PFSS",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = PFSSPaths.SolarSoft,
+        InputFileType = "osfls",
+        -- StartStateOffset = 515,
+        -- StateStepSize = 100,
+        -- MaxNumStates = 55,
+        ColorTablePaths = {
+            --pfssTransitionColorTable,
+            pfssTopologyColorTable,
+            pfssBsignColorTable,
+        },
+        ColorTableMinMax = {
+            --{0, 1},
+            { 0, 2 },
+            { -1, 1 },
+        },
+        ExtraMinMaxLimits = {
+            --{-1, 1},
+            { 0, 2 },
+            { -1, 1 },
+        },
+        DefaultColor = { 0.3861, 1.0, 0.92174, 0.18644},
+        RadialDomainLimits = { 0, 50 },
+        CartesianDomainLimits = {
+            { -50, 50 },
+            { -50, 50 },
+            { -50, 50 }
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines PFSS",
+        Path = "/Solar System/Heliosphere"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+	PFSS
+})
+
+asset.onInitialize(function ()
+    -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Color.uniform", { 0.35, 0.51, 0.875, 0.22 })
+    -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.color", { 1, 0.9, 1, 0.74 })
+    -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSize", 5)
+    -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSpacing", 250)
+    -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.speed", 75.0)
+    -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.reversed", true)
+end)
+
+asset.onDeinitialize(function ()
+
+end)

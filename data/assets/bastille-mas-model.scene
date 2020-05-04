@@ -1,0 +1,112 @@
+asset.require('./base')
+
+local assetHelper = asset.require('util/asset_helper')
+local propertyHelper = asset.require('util/property_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+asset.require('util/default_dashboard')
+asset.require('spice/base')
+
+assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
+
+openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled", false)
+
+-- Namespaced global lua state
+textureList = {
+    Options = {
+        TexIndex = 1
+    },
+    SunTextures = {
+        asset.require('./scene/solarsystem/sun/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_20G_offset.png",
+        asset.require('./scene/solarsystem/sun/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_100G_offset.png",
+        asset.require('./scene/solarsystem/sun/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_1000G_offset.png",
+        asset.require('./scene/solarsystem/sun/bastille_day_sun_textures').TexturesPath .. "/black.png",
+        asset.require('./scene/solarsystem/sun/sun_textures').TexturesPath .. "/sun.jpg",
+    }
+}
+
+local Keybindings = {
+	{
+	    Key = "Shift+s",
+	    Command = 
+	        propertyHelper.invert('Scene.MAS_MHD_Fieldlines.Renderable.Enabled') ..
+	        propertyHelper.invert('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram.Enabled') ..
+	        propertyHelper.invert('Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled') ..
+	        propertyHelper.invert('Scene.MAS_MHD_density.Renderable.Enabled') ..
+	        propertyHelper.invert('Scene.SunGlare.Renderable.Enabled'),
+	    Documentation = "Resets the s ubscene for showing the Sun volume rendering + fieldlines",
+	    Name = "Reset MHD back",
+	    GuiPath = "/CCMC/MHD",
+	    Local = false
+	},
+	{
+        Key = "F8",
+        Command = propertyHelper.invert('Scene.SunGlare.Renderable.Enabled'),
+        Documentation = "Toggle sun glare",
+        Local = false
+    },
+    {
+        Key = "F9",
+        Command = propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
+        Documentation = "Toggle sun",
+        Local = false
+    },
+    {
+        Key = "i",
+        Command = [[
+            if (textureList.Options.TexIndex == nil) then 
+                textureList.Options.TexIndex = 1 
+            end; 
+
+            textureList.Options.TexIndex = textureList.Options.TexIndex + 1
+            if (textureList.Options.TexIndex > #textureList.SunTextures) then
+                textureList.Options.TexIndex = 1 
+            end;
+
+            openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram.tileProvider.FilePath', textureList.SunTextures[textureList.Options.TexIndex]);
+        ]],
+        Documentation = "Display next sun texture in list of textures",
+        Local = false
+    },
+}
+
+local sunAsset = asset.require('scene/solarsystem/sun/sun');
+
+asset.onInitialize(function ()
+    openspace.time.setTime("2000 JUL 14 09:33:37.100")
+
+    sceneHelper.bindKeys(Keybindings)
+    
+    openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false)
+	
+	openspace.markInterestingNodes({
+        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+    });
+	
+	openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "Scene.*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    );
+
+	openspace.navigation.setNavigationState({
+        Anchor = sunAsset.Sun.Identifier,
+        ReferenceFrame = "Root",
+        Position = { -15016171000, 30814181000, -4218126500}
+    })
+
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeInterestingNodes({
+        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+    })
+
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+end)

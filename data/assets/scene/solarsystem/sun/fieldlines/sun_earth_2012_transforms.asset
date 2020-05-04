@@ -1,0 +1,55 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+local kernels = asset.syncedResource({
+    Name = "Fieldlines Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "sun_earth_event-fieldlines-kernels",
+    Version = 1
+})
+
+
+local HNMKernel = kernels .. "/HNM.tf"
+local GSMKernel = kernels .. "/GSM.ti"
+
+local HNMReferenceFrame = {
+    Identifier = "HNMReferenceFrame",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "HEEQ180",
+            DestinationFrame = "GALACTIC",
+            Kernels = HNMKernel
+        }
+    },
+    GUI = {
+        Name = "HNM Reference Frame"
+    }
+}
+
+local GSMReferenceFrame = {
+    Identifier = "GSMReferenceFrame",
+    Parent = earthTransforms.EarthBarycenter.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "GSM",
+            DestinationFrame = "GALACTIC",
+            Kernels = GSMKernel
+        }
+    },
+    GUI = {
+        Name = "GSM Reference Frame"
+    }
+}
+
+
+local objects = { 
+	HNMReferenceFrame, 
+	GSMReferenceFrame 
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)

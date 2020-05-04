@@ -1,0 +1,179 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+asset.require('util/default_dashboard')
+asset.require('spice/base')
+
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- asset.require('scene/solarsystem/planets')
+-- asset.require('scene/digitaluniverse/stars')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+-- asset.request('customization/globebrowsing')
+
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+-- local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas_mhd')
+asset.require('scene/solarsystem/model/mas/mas_mhd')
+
+-- Namespaced global lua state
+MasScene = {
+    Options = {
+        TexIndex = 1
+    },
+    SunTextures = {
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_20G_offset.png",
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_100G_offset.png",
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_1000G_offset.png",
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/black.png",
+        asset.require('./scene/solarsystem/sun/sun_textures').TexturesPath .. "/sun.jpg",
+    }
+}
+
+-- This causes crash because the renderable is not removed properly before the next frame
+local toggleMas = function ()
+    return 
+        -- "openspace.removeSceneGraphNode('Mas_MHD');" ..
+        "openspace.assset.remove('Mas_MHD');" ..
+        "openspace.asset.add('Mas_MHD');"
+end
+
+local setup = function ()
+    return
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.aBlendingEnabled', false);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.particleSize', 7);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.particleSpacing', 59);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.speed', 19);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Color.uniform', {0.575, 0, 0.75, 1});" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.color', {1, 0, 0.65, 1});" ..
+        "openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[1]);"
+end
+
+local Keybindings = {
+    {
+        Key = "F5",
+        Command = "openspace.time.setTime('2000 JUL 14 08:33:37.100');",
+        Documentation = "Jumps to first of the MAS-fieldline timesteps",
+        Local = true
+    },
+    {
+        Key = "F6",
+        Command = "openspace.time.setTime('2000 JUL 14 10:11:50.100');",
+        Documentation = "Set time close to when bastille eruption starts",
+        Local = false
+    },
+    {
+        Key = "F7",
+        Command = "openspace.time.setTime('2012 JUL 01 00:07:00.000');",
+        Documentation = "Jumps to first of the Enlil-fieldline timesteps",
+        Local = true
+    },
+    {
+        Key = "F8",
+        Command = propertyHelper.invert('Scene.SunGlare.Renderable.Enabled'),
+        Documentation = "Toggle sun glare",
+        Local = false
+    },
+    {
+        Key = "F9",
+        Command = propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
+        Documentation = "Toggle sun",
+        Local = false
+    },
+    {
+        Key = "F10",
+        Command = setup(),
+        Documentation = "Setup scene property values after initialization",
+        Local = false
+    },
+    {
+        Key = "i",
+        Command = [[
+            if (MasScene.Options.TexIndex == nil) then 
+                MasScene.Options.TexIndex = 1 
+            end; 
+
+            MasScene.Options.TexIndex = MasScene.Options.TexIndex + 1
+            if (MasScene.Options.TexIndex > #MasScene.SunTextures) then
+                MasScene.Options.TexIndex = 1 
+            end;
+
+            openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[MasScene.Options.TexIndex]);
+        ]],
+        Documentation = "Display next sun texture in list of textures",
+        Local = false
+    },
+    {
+        Key = "t",
+        Command = propertyHelper.invert('Scene.Mas_MHD_temperature.renderable.Enabled'),
+        Documentation = "Toggle mas temperature asset on/off",
+        Local = true
+    },
+    {
+        Key = "d",
+        Command = propertyHelper.invert('Scene.Mas_MHD_rho.renderable.Enabled'),
+        Documentation = "Toggle mas rho asset on/off",
+        Local = true
+    },
+}
+
+-- FIELDLINES --
+
+-- We need to specify paths to the prepared fieldline files before requesting the BATSRUS, ENLIL, and PFSS fieldline assets:
+-- local FieldLineBasePath = "E:/FieldlineBinaries/"
+-- ENLILPaths = {
+--     EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
+--     EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
+--     Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
+--     Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
+--     Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
+--     StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
+-- }
+-- asset.require('./fieldlines/enlil')
+asset.require('./fieldlines/mas')
+
+asset.onInitialize(function ()
+    -- openspace.time.setTime("2017 JUN 01 00:00:00")
+    openspace.time.setTime("2000 JUL 14 08:33:37.100")
+
+    -- openspace.time.setTime(openspace.time.currentWallTime())
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);
+
+    openspace.setDefaultGuiSorting()
+
+    openspace.markInterestingNodes({
+        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+    })
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "Scene.*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.navigation.setCameraState({
+        Focus = sunAsset.Sun.Identifier,
+        Position = {-92160702466.762482, 188131804731.671265, -27180258494.341042},
+        Rotation = {0.655461, -0.629141, -0.410504, -0.077712},
+    })
+
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeInterestingNodes({
+        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+    })
+
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+end)

@@ -1,0 +1,40 @@
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local densityDirectory = asset.syncedResource({
+    Name = "Bastille Day MAS Density",
+    Type = "HttpSynchronization",
+    Identifier = "bastille_day_mas_density",
+    Version = 1
+})
+
+local sunRadius = 6.957E8
+
+local densityVolume = {
+        Identifier = "MAS_MHD_density",
+        Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+        Renderable = {
+            Type = "RenderableTimeVaryingVolume",
+            StepSize = 0.004,
+            Opacity = 0.3,
+            TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
+            SourceDirectory = densityDirectory,
+            LowerValueBound = 0,
+            UpperValueBound = 1,
+            GridType = "Spherical",
+            SecondsBefore = 24*60*60,
+            SecondsAfter = 24*60*60
+        },
+        Transform = {
+            Scale = {
+                Type = "StaticScale",
+                Scale = sunRadius
+            }
+	},
+    GUI = {
+        Name = "MAS Density",
+        Path = "/Solar System/Heliosphere"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { densityVolume })

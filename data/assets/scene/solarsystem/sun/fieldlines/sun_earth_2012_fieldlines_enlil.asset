@@ -1,0 +1,283 @@
+--sun_earth_2012.asset
+local assetHelper = asset.require('util/asset_helper')
+
+local transforms = asset.require('../heliosphere/mas/bastille_day/transforms')
+
+-- Specifying transfer functions
+local transferFunctions = asset.syncedResource({
+    Name = "Fieldlines Transfer Functions",
+    Type = "HttpSynchronization",
+    Identifier = "sun_earth_event-fieldlines-transferfunctions",
+    Version = 1
+})
+
+-- Specifying transfer functions
+local fieldlineData  = asset.syncedResource({
+    Name = "Fieldlines Data",
+    Type = "HttpSynchronization",
+    Identifier = "sun_earth_event-fieldlines-data",
+    Version = 1
+})
+
+local enlilVelocityColorTable = transferFunctions .. "/kroyw.txt"
+local enlilDensityColorTable = transferFunctions .. "/enlil_density.txt"
+
+ENLILPaths = {
+    EqPlane011AU1 = fieldlineData .. "/enlil/july2012/downsampled40/011AU_eq_plane_1/",
+    EqPlane011AU2 = fieldlineData .. "/enlil/july2012/downsampled40/011AU_eq_plane_2/",
+    Lat4011AU1 = fieldlineData .. "/enlil/july2012/downsampled40/011AU_lat4_1/",
+    Lat4011AU2 = fieldlineData .. "/enlil/july2012/downsampled40/011AU_lat4_2/",
+    Earth = fieldlineData .. "/enlil/july2012/downsampled40/earth/",
+    StereoA = fieldlineData .. "/enlil/july2012/downsampled40/stereoa/"
+}
+
+
+local ENLILSliceEqPlane11AU1 = {
+    Identifier = "FL_ENLIL_slice_eqPlane_011AU_1",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.EqPlane011AU1,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5}
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Equatorial Plane 0.11 AU 1",
+        Path = "/Solar System/Heliosphere"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILSliceEqPlane11AU2 = {
+    Identifier = "FL_ENLIL_slice_eqPlane_011AU_2",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.EqPlane011AU2,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5 }
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Equatorial Plane 0.11 AU 2",
+        Path = "/Solar System/Heliosphere"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILSliceLat411AU1 = {
+    Identifier = "FL_ENLIL_slice_lat4_011AU_1",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.Lat4011AU1,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5 }
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Latitude 4 0.11 AU 1",
+        Path = "/Solar System/Heliosphere"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILSliceLat411AU2 = {
+    Identifier = "FL_ENLIL_slice_lat4_011AU_2",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.Lat4011AU2,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5}
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Latitude 4 0.11 AU 2",
+        Path = "/Solar System/Heliosphere"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILEarth = {
+    Identifier = "FL_ENLIL_earth",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.Earth,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 1.0, 1.0, 1.0, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5 }
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Earth",
+        Path = "/Solar System/Heliosphere"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILStereoA = {
+    Identifier = "FL_ENLIL_stereoa",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.StereoA,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 1.0, 1.0, 1.0, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5}
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL STEREO A",
+        Path = "/Solar System/Heliosphere"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+	ENLILSliceEqPlane11AU1, 
+	ENLILSliceEqPlane11AU2, 
+	ENLILSliceLat411AU1, 
+	ENLILSliceLat411AU2, 
+	ENLILEarth, 
+	ENLILStereoA
+})
+
+asset.onInitialize(function ()
+    -- openspace.setPropertyValue("Scene.FL_ENLIL*.Renderable.Color.colorMethod", 1)
+    -- openspace.setPropertyValue("Scene.FL_ENLIL*.Renderable.Color.colorQuantityMax", "225000")
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.color", { 1, 1, 1, 1.0 })
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.particleSize", 5)
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.particleSpacing", 25)
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.speed", 25.0)
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_earth.Renderable.Flow.reversed", true)
+end)
+
+asset.onDeinitialize(function ()
+
+end)
