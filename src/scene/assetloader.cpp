@@ -96,7 +96,7 @@ AssetLoader::AssetLoader(ghoul::lua::LuaState* luaState,
     , _assetRootDirectory(std::move(assetRootDirectory))
     , _luaState(luaState)
 {
-    setCurrentAsset(_rootAsset);
+    setCurrentAsset(_rootAsset.get());
 
     // Create _assets table.
     lua_newtable(*_luaState);
@@ -250,9 +250,9 @@ void AssetLoader::tearDownAssetLuaTable(Asset* asset) {
     lua_settop(*_luaState, top);
 }
 
-bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
+bool AssetLoader::loadAsset(Asset* asset) {
     int top = lua_gettop(*_luaState);
-    std::shared_ptr<Asset> parentAsset = _currentAsset;
+    Asset* parentAsset = _currentAsset;
 
     setCurrentAsset(asset);
     defer {
@@ -446,14 +446,14 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
 
 std::shared_ptr<Asset> AssetLoader::require(const std::string& identifier) {
     std::shared_ptr<Asset> asset = getAsset(identifier);
-    std::shared_ptr<Asset> dependant = _currentAsset;
+    Asset* dependant = _currentAsset;
     dependant->require(asset);
     return asset;
 }
 
 std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
     std::shared_ptr<Asset> asset = getAsset(identifier);
-    std::shared_ptr<Asset> parent = _currentAsset;
+    Asset* parent = _currentAsset;
     parent->request(asset);
     assetRequested(parent, asset);
     return asset;
@@ -461,7 +461,7 @@ std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
 
 void AssetLoader::unrequest(const std::string& identifier) {
     std::shared_ptr<Asset> asset = has(identifier);
-    std::shared_ptr<Asset> parent = _currentAsset;
+    Asset* parent = _currentAsset;
     parent->unrequest(asset.get());
     assetUnrequested(parent, asset);
 }
@@ -476,13 +476,13 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
 }
 
 std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
-    setCurrentAsset(_rootAsset);
+    setCurrentAsset(_rootAsset.get());
     return request(identifier);
 }
 
 
 void AssetLoader::remove(const std::string& identifier) {
-    setCurrentAsset(_rootAsset);
+    setCurrentAsset(_rootAsset.get());
     unrequest(identifier);
 }
 
@@ -608,13 +608,13 @@ int AssetLoader::syncedResourceLua(Asset* asset) {
     return 1;
 }
 
-void AssetLoader::setCurrentAsset(std::shared_ptr<Asset> asset) {
+void AssetLoader::setCurrentAsset(Asset* asset) {
     int top = lua_gettop(*_luaState);
 
     _currentAsset = asset;
     // Set `asset` lua global to point to the current asset table
 
-    if (asset == _rootAsset) {
+    if (asset == _rootAsset.get()) {
         lua_pushnil(*_luaState);
         lua_setglobal(*_luaState, AssetGlobalVariableName);
         lua_settop(*_luaState, top);
@@ -790,7 +790,7 @@ void AssetLoader::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State s
     }
 }
 
-void AssetLoader::assetRequested(std::shared_ptr<Asset> parent,
+void AssetLoader::assetRequested(Asset* parent,
                                  std::shared_ptr<Asset> child)
 {
     for (AssetListener* listener : _assetListeners) {
@@ -798,7 +798,7 @@ void AssetLoader::assetRequested(std::shared_ptr<Asset> parent,
     }
 }
 
-void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent,
+void AssetLoader::assetUnrequested(Asset* parent,
                                    std::shared_ptr<Asset> child)
 {
     for (AssetListener* listener : _assetListeners) {

@@ -110,7 +110,7 @@ public:
     /**
      * Load an asset
      */
-    bool loadAsset(std::shared_ptr<Asset> asset);
+    bool loadAsset(Asset* asset);
 
     /**
      * Unload an asset
@@ -162,12 +162,12 @@ public:
     /**
      * Notify listeners about new requests
      */
-    void assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
+    void assetRequested(Asset* parent, std::shared_ptr<Asset> child);
 
     /**
      * Notify listeners about removed requests
      */
-    void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
+    void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child);
 
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
@@ -180,7 +180,7 @@ private:
     std::shared_ptr<Asset> getAsset(const std::string& name);
     ghoul::filesystem::Directory currentDirectory() const;
 
-    void setCurrentAsset(std::shared_ptr<Asset> asset);
+    void setCurrentAsset(Asset* asset);
     void addLuaDependencyTable(Asset* dependant, Asset* dependency);
 
     // Lua functions
@@ -209,7 +209,7 @@ private:
 
     // Member variables
     std::shared_ptr<Asset> _rootAsset;
-    std::shared_ptr<Asset> _currentAsset;
+    Asset* _currentAsset = nullptr;
     std::unordered_map<std::string, std::weak_ptr<Asset>> _trackedAssets;
     SynchronizationWatcher* _synchronizationWatcher;
     std::string _assetRootDirectory;

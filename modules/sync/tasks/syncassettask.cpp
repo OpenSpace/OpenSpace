@@ -85,8 +85,8 @@ public:
             LERROR(fmt::format("Failed to sync asset: {}", asset->id()));
         }
     }
-    void assetRequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
-    void assetUnrequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
+    void assetRequested(Asset*, std::shared_ptr<Asset>) override {};
+    void assetUnrequested(Asset*, std::shared_ptr<Asset>) override {};
 };
 
 SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {

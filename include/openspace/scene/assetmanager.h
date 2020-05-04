@@ -62,9 +62,9 @@ public:
     std::shared_ptr<Asset> rootAsset();
 
     void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override;
-    void assetRequested(std::shared_ptr<Asset> parent,
+    void assetRequested(Asset* parent,
         std::shared_ptr<Asset> child) override;
-    void assetUnrequested(std::shared_ptr<Asset> parent,
+    void assetUnrequested(Asset* parent,
         std::shared_ptr<Asset> child) override;
 
     bool update();

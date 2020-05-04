@@ -87,12 +87,12 @@ void AssetManager::assetStateChanged(std::shared_ptr<Asset>, Asset::State) {
     //LINFO(asset->id() << " changed state to " << static_cast<int>(state));
 }
 
-void AssetManager::assetRequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) {
+void AssetManager::assetRequested(Asset*, std::shared_ptr<Asset>) {
     // Potential todo: notify user about asset request
     //LINFO(parent->id() << " requested " << child->id());
 }
 
-void AssetManager::assetUnrequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) {
+void AssetManager::assetUnrequested(Asset*, std::shared_ptr<Asset>) {
     // Potential todo: notify user about asset unrequest
     //LINFO(parent->id() << " unrequested " << child->id());
 }

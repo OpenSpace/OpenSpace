@@ -464,7 +464,7 @@ bool Asset::load() {
         return true;
     }
 
-    const bool loaded = loader()->loadAsset(shared_from_this());
+    const bool loaded = loader()->loadAsset(this);
     setState(loaded ? State::Loaded : State::LoadingFailed);
     return loaded;
 }
