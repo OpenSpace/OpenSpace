@@ -63,7 +63,7 @@ bool AssetManager::update() {
         const std::string& path = c.first;
         const bool add = c.second;
         if (add) {
-            std::shared_ptr<Asset> asset = _assetLoader->add(path);
+            _assetLoader->add(path);
         }
     }
     // Remove assets

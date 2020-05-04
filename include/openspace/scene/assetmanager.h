@@ -41,12 +41,10 @@ class SynchronizationWatcher;
 
 /**
  * Interface for managing assets.
- * The asset manager interface is only concerned with "top level" assets,
- * i.e. assets that are loaded using setTargetAssetState, and not their dependencies.
- * However, an asset is not considered synchronized before all its deps are
- * synchronized.
- * Also, setting a target state of an asset to Unloaded will only unload an asset
- * from the system if it is not a dependency of a loaded asset.
+ * The asset manager interface is only concerned with "top level" assets, and not their
+ * dependencies. However, an asset is not considered synchronized before all its deps are
+ * synchronized. Also, setting a target state of an asset to Unloaded will only unload an
+ * asset from the system if it is not a dependency of a loaded asset.
  */
 
 class AssetManager : AssetListener {

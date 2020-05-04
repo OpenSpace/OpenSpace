@@ -134,7 +134,7 @@ public:
     bool isRequested() const;
     bool shouldBeInitialized() const;
 
-    std::string resolveLocalResource(std::string resourceName);
+    std::string resolveLocalResource(std::string resourceName) const;
 
 private:
     void setState(State state);

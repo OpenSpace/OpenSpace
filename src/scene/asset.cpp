@@ -34,7 +34,7 @@
 #include <unordered_set>
 
 namespace {
-    const constexpr char* _loggerCat = "Asset";
+    constexpr const char* _loggerCat = "Asset";
 
     float syncProgress(const std::vector<std::shared_ptr<const openspace::Asset>>& assets)
     {
@@ -62,7 +62,7 @@ namespace {
         }
         return static_cast<float>(nSyncedBytes) / static_cast<float>(nTotalBytes);
     }
-}
+} // namespace
 
 namespace openspace {
 
@@ -74,9 +74,7 @@ Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher)
     , _assetName("Root Asset")
 {}
 
-Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher,
-             std::string assetPath
-)
+Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher, std::string assetPath)
     : _state(State::Unloaded)
     , _loader(loader)
     , _synchronizationWatcher(watcher)
@@ -84,10 +82,9 @@ Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher,
     , _assetPath(std::move(assetPath))
 {}
 
-std::string Asset::resolveLocalResource(std::string resourceName) {
-    std::string assetDir = assetDirectory();
-    return assetDir + ghoul::filesystem::FileSystem::PathSeparator +
-           std::move(resourceName);
+std::string Asset::resolveLocalResource(std::string resourceName) const {
+    std::string dir = assetDirectory();
+    return dir + ghoul::filesystem::FileSystem::PathSeparator + std::move(resourceName);
 }
 
 Asset::State Asset::state() const {
@@ -127,18 +124,17 @@ void Asset::setState(Asset::State state) {
 void Asset::requiredAssetChangedState(Asset::State childState) {
     if (!isLoaded()) {
         // Prohibit state change to SyncResolved if additional requirements
-        // may still be added.
+        // may still be added
         return;
     }
     if (isInitialized()) {
-        // Do not do anything if this asset was already initialized.
-        // This may happen if there are multiple requirement paths from
-        // this asset to the same child, which causes this method to be
-        // called more than once.
+        // Do not do anything if this asset was already initialized. This may happen if
+        // there are multiple requirement paths from this asset to the same child, which
+        // causes this method to be called more than once
         return;
     }
-    if (state() == State::InitializationFailed) {
-        // Do not do anything if the asset failed to initialize.
+    if (_state == State::InitializationFailed) {
+        // Do not do anything if the asset failed to initialize
         return;
     }
     if (childState == State::SyncResolved) {
@@ -153,14 +149,10 @@ void Asset::requiredAssetChangedState(Asset::State childState) {
 
 void Asset::requestedAssetChangedState(Asset* child, Asset::State childState) {
     if (child->hasInitializedParent()) {
-        if (childState == State::Loaded &&
-            child->state() == State::Loaded)
-        {
+        if (childState == State::Loaded && child->state() == State::Loaded) {
             child->startSynchronizations();
         }
-        if (childState == State::SyncResolved &&
-            child->state() == State::SyncResolved)
-        {
+        if (childState == State::SyncResolved && child->state() == State::SyncResolved) {
             child->initialize();
         }
     }
@@ -212,14 +204,12 @@ bool Asset::isSyncResolveReady() {
     std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
 
     auto unsynchronizedAsset = std::find_if(
-        requiredAssets.begin(),
-        requiredAssets.end(),
-        [](std::shared_ptr<Asset>& a) {
-            return !a->isSynchronized();
-        }
+        requiredAssets.cbegin(),
+        requiredAssets.cend(),
+        [](const std::shared_ptr<Asset>& a) { return !a->isSynchronized(); }
     );
 
-    if (unsynchronizedAsset != requiredAssets.end()) {
+    if (unsynchronizedAsset != requiredAssets.cend()) {
         // Not considered resolved if there is one or more unresolved children
         return false;
     }
@@ -228,15 +218,13 @@ bool Asset::isSyncResolveReady() {
         ownSynchronizations();
 
     auto unresolvedOwnSynchronization = std::find_if(
-        syncs.begin(),
-        syncs.end(),
-        [](const std::shared_ptr<ResourceSynchronization>& s) {
-            return !s->isResolved();
-        }
+        syncs.cbegin(),
+        syncs.cend(),
+        [](const std::shared_ptr<ResourceSynchronization>& s) { return !s->isResolved(); }
     );
 
     // To be considered resolved, all own synchronizations need to be resolved
-    return unresolvedOwnSynchronization == syncs.end();
+    return unresolvedOwnSynchronization == syncs.cend();
 }
 
 const std::vector<std::shared_ptr<ResourceSynchronization>>&
@@ -274,28 +262,22 @@ std::vector<std::shared_ptr<const Asset>> Asset::requiredSubTreeAssets() const {
 }
 
 bool Asset::isLoaded() const {
-    State s = state();
-    return s != State::Unloaded && s != State::LoadingFailed;
+    return _state != State::Unloaded && _state != State::LoadingFailed;
 }
 
 bool Asset::isSynchronized() const {
-    State s = state();
-    return s == State::SyncResolved ||
-           s == State::Initialized ||
-           s == State::InitializationFailed;
+    return _state == State::SyncResolved || _state == State::Initialized ||
+           _state == State::InitializationFailed;
 }
 
 bool Asset::isSyncingOrResolved() const {
-    State s = state();
-    return s == State::Synchronizing ||
-           s == State::SyncResolved ||
-           s == State::Initialized ||
-           s == State::InitializationFailed;
+    return _state == State::Synchronizing || _state == State::SyncResolved ||
+           _state == State::Initialized || _state == State::InitializationFailed;
 }
 
 bool Asset::hasLoadedParent() {
     {
-        std::vector<std::weak_ptr<Asset>>::iterator it = _requiringAssets.begin();
+        auto it = _requiringAssets.begin();
         while (it != _requiringAssets.end()) {
             std::shared_ptr<Asset> parent = it->lock();
             if (!parent) {
@@ -309,7 +291,7 @@ bool Asset::hasLoadedParent() {
         }
     }
     {
-        std::vector<std::weak_ptr<Asset>>::iterator it = _requestingAssets.begin();
+        auto it = _requestingAssets.begin();
         while (it != _requestingAssets.end()) {
             std::shared_ptr<Asset> parent = it->lock();
             if (!parent) {
@@ -371,8 +353,7 @@ bool Asset::hasInitializedParent() const {
 }
 
 bool Asset::isInitialized() const {
-    State s = state();
-    return s == State::Initialized;
+    return _state == State::Initialized;
 }
 
 bool Asset::startSynchronizations() {
@@ -386,27 +367,27 @@ bool Asset::startSynchronizations() {
 
     // Do not attempt to resync if this is already done
     if (isSyncingOrResolved()) {
-        return state() != State::SyncResolved;
+        return _state != State::SyncResolved;
     }
 
     setState(State::Synchronizing);
 
     bool childFailed = false;
 
-    // Start synchronization of all children first.
+    // Start synchronization of all children first
     for (const std::shared_ptr<Asset>& child : requiredAssets()) {
         if (!child->startSynchronizations()) {
             childFailed = true;
         }
     }
 
-    // Now synchronize its own synchronizations.
+    // Now synchronize its own synchronizations
     for (const std::shared_ptr<ResourceSynchronization>& s : ownSynchronizations()) {
         if (!s->isResolved()) {
             s->start();
         }
     }
-    // If all syncs are resolved (or no syncs exist), mark as resolved.
+    // If all syncs are resolved (or no syncs exist), mark as resolved
     if (!isInitialized() && isSyncResolveReady()) {
         setState(State::SyncResolved);
     }
@@ -414,13 +395,15 @@ bool Asset::startSynchronizations() {
 }
 
 bool Asset::cancelAllSynchronizations() {
-    bool cancelledAnySync = false;
-    for (const std::shared_ptr<Asset>& child : childAssets()) {
-        const bool cancelled = child->cancelAllSynchronizations();
-        if (cancelled) {
-            cancelledAnySync = true;
+    const std::vector<std::shared_ptr<Asset>>& children = childAssets();
+    bool cancelledAnySync = std::any_of(
+        children.cbegin(),
+        children.cend(),
+        [](const std::shared_ptr<Asset>& child) {
+            return child->cancelAllSynchronizations();
         }
-    }
+    );
+
     for (const std::shared_ptr<ResourceSynchronization>& s : ownSynchronizations()) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
@@ -438,13 +421,16 @@ bool Asset::cancelUnwantedSynchronizations() {
     if (hasSyncingOrResolvedParent()) {
         return false;
     }
-    bool cancelledAnySync = false;
-    for (const std::shared_ptr<Asset>& child : childAssets()) {
-        bool cancelled = child->cancelUnwantedSynchronizations();
-        if (cancelled) {
-            cancelledAnySync = true;
+
+    const std::vector<std::shared_ptr<Asset>>& children = childAssets();
+    bool cancelledAnySync = std::any_of(
+        children.begin(),
+        children.end(),
+        [](const std::shared_ptr<Asset>& child) {
+            return child->cancelUnwantedSynchronizations();
         }
-    }
+    );
+
     for (const std::shared_ptr<ResourceSynchronization>& s : ownSynchronizations()) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
@@ -478,7 +464,7 @@ bool Asset::load() {
         return true;
     }
 
-    bool loaded = loader()->loadAsset(shared_from_this());
+    const bool loaded = loader()->loadAsset(shared_from_this());
     setState(loaded ? State::Loaded : State::LoadingFailed);
     return loaded;
 }
@@ -537,12 +523,12 @@ bool Asset::initialize() {
             "Failed to initialize asset {}; {}: {}", id(), e.component, e.message
         ));
         // TODO: rollback;
-        setState(Asset::State::InitializationFailed);
+        setState(State::InitializationFailed);
         return false;
     }
 
     // 4. Update state
-    setState(Asset::State::Initialized);
+    setState(State::Initialized);
 
     // 5. Call dependency lua onInitialize of this and requirements
     for (const std::shared_ptr<Asset>& child : _requiredAssets) {
@@ -552,13 +538,10 @@ bool Asset::initialize() {
         catch (const ghoul::lua::LuaRuntimeException& e) {
             LERROR(fmt::format(
                 "Failed to initialize required asset {} of {}; {}: {}",
-                child->id(),
-                id(),
-                e.component,
-                e.message
+                child->id(), id(), e.component, e.message
             ));
             // TODO: rollback;
-            setState(Asset::State::InitializationFailed);
+            setState(State::InitializationFailed);
             return false;
         }
     }
@@ -572,10 +555,7 @@ bool Asset::initialize() {
             catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
                     "Failed to initialize requested asset {} of {}; {}: {}",
-                    child->id(),
-                    id(),
-                    e.component,
-                    e.message
+                    child->id(), id(), e.component, e.message
                 ));
                 // TODO: rollback;
             }
@@ -592,10 +572,7 @@ bool Asset::initialize() {
             catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
                     "Failed to initialize required asset {} of {}; {}: {}",
-                    id(),
-                    p->id(),
-                    e.component,
-                    e.message
+                    id(), p->id(), e.component, e.message
                 ));
                 // TODO: rollback;
             }
@@ -709,13 +686,11 @@ AssetLoader* Asset::loader() const {
 
 bool Asset::requires(const Asset* asset) const {
     const auto it = std::find_if(
-        _requiredAssets.begin(),
-        _requiredAssets.end(),
-        [asset](std::shared_ptr<Asset> dep) {
-            return dep.get() == asset;
-        }
+        _requiredAssets.cbegin(),
+        _requiredAssets.cend(),
+        [asset](const std::shared_ptr<Asset> dep) { return dep.get() == asset; }
     );
-    return it != _requiredAssets.end();
+    return it != _requiredAssets.cend();
 }
 
 void Asset::require(std::shared_ptr<Asset> child) {
@@ -723,12 +698,12 @@ void Asset::require(std::shared_ptr<Asset> child) {
         throw ghoul::RuntimeError("Cannot require child asset when already loaded");
     }
 
-    const auto it = std::find(_requiredAssets.begin(), _requiredAssets.end(), child);
-
-    if (it != _requiredAssets.end()) {
+    const auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), child);
+    if (it != _requiredAssets.cend()) {
         // Do nothing if the requirement already exists.
         return;
     }
+
     _requiredAssets.push_back(child);
     child->_requiringAssets.push_back(shared_from_this());
 
@@ -761,12 +736,12 @@ void Asset::unrequire(Asset* child) {
     }
 
     const auto childIt = std::find_if(
-        _requiredAssets.begin(),
-        _requiredAssets.end(),
+        _requiredAssets.cbegin(),
+        _requiredAssets.cend(),
         [child](const std::shared_ptr<Asset>& asset) { return asset.get() == child; }
     );
 
-    if (childIt == _requiredAssets.end()) {
+    if (childIt == _requiredAssets.cend()) {
         // Do nothing if the request node not exist.
         return;
     }
@@ -774,14 +749,11 @@ void Asset::unrequire(Asset* child) {
     _requiredAssets.erase(childIt);
 
     const auto parentIt = std::find_if(
-        child->_requiringAssets.begin(),
-        child->_requiringAssets.end(),
-        [this](std::weak_ptr<Asset> a) {
-            return a.lock().get() == this;
-        }
+        child->_requiringAssets.cbegin(),
+        child->_requiringAssets.cend(),
+        [this](const std::weak_ptr<Asset> a) { return a.lock().get() == this; }
     );
-
-    if (parentIt == child->_requiringAssets.end()) {
+    if (parentIt == child->_requiringAssets.cend()) {
         return;
     }
 
@@ -793,12 +765,12 @@ void Asset::unrequire(Asset* child) {
 }
 
 void Asset::request(std::shared_ptr<Asset> child) {
-    const auto it = std::find(_requestedAssets.begin(), _requestedAssets.end(), child);
-
-    if (it != _requestedAssets.end()) {
+    const auto it = std::find(_requestedAssets.cbegin(), _requestedAssets.cend(), child);
+    if (it != _requestedAssets.cend()) {
         // Do nothing if the request already exists.
         return;
     }
+
     _requestedAssets.push_back(child);
     child->_requestingAssets.push_back(shared_from_this());
 
@@ -817,12 +789,11 @@ void Asset::request(std::shared_ptr<Asset> child) {
 
 void Asset::unrequest(Asset* child) {
     const auto childIt = std::find_if(
-        _requestedAssets.begin(),
-        _requestedAssets.end(),
+        _requestedAssets.cbegin(),
+        _requestedAssets.cend(),
         [child](const std::shared_ptr<Asset>& asset) { return asset.get() == child; }
     );
-
-    if (childIt == _requestedAssets.end()) {
+    if (childIt == _requestedAssets.cend()) {
         // Do nothing if the request node not exist.
         return;
     }
@@ -830,14 +801,11 @@ void Asset::unrequest(Asset* child) {
     _requestedAssets.erase(childIt);
 
     const auto parentIt = std::find_if(
-        child->_requestingAssets.begin(),
-        child->_requestingAssets.end(),
-        [this](std::weak_ptr<Asset> a) {
-            return a.lock().get() == this;
-        }
+        child->_requestingAssets.cbegin(),
+        child->_requestingAssets.cend(),
+        [this](const std::weak_ptr<Asset> a) { return a.lock().get() == this; }
     );
-
-    if (parentIt == child->_requestingAssets.end()) {
+    if (parentIt == child->_requestingAssets.cend()) {
         return;
     }
 
@@ -850,13 +818,11 @@ void Asset::unrequest(Asset* child) {
 
 bool Asset::requests(Asset* asset) const {
     const auto it = std::find_if(
-        _requestedAssets.begin(),
-        _requestedAssets.end(),
-        [asset](const std::shared_ptr<Asset>& dep) {
-           return dep.get() == asset;
-        }
+        _requestedAssets.cbegin(),
+        _requestedAssets.cend(),
+        [asset](const std::shared_ptr<Asset>& dep) { return dep.get() == asset; }
     );
-    return it != _requiredAssets.end();
+    return it != _requiredAssets.cend();
 }
 
 const std::vector<std::shared_ptr<Asset>>& Asset::requiredAssets() const {
@@ -867,8 +833,7 @@ std::vector<std::shared_ptr<Asset>> Asset::requiringAssets() const {
     std::vector<std::shared_ptr<Asset>> assets;
     assets.reserve(_requiringAssets.size());
     for (const std::weak_ptr<Asset>& a : _requiringAssets) {
-        std::shared_ptr<Asset> shared = a.lock();
-        if (shared) {
+        if (std::shared_ptr<Asset> shared = a.lock(); shared) {
             assets.push_back(shared);
         }
     }
@@ -920,13 +885,11 @@ bool Asset::isRequested() const {
 bool Asset::shouldBeInitialized() const {
     std::vector<std::shared_ptr<Asset>> parents = parentAssets();
     const auto initializedAsset = std::find_if(
-        parents.begin(),
-        parents.end(),
-        [](const std::shared_ptr<Asset>& a) {
-            return a->state() == State::Initialized;
-        }
+        parents.cbegin(),
+        parents.cend(),
+        [](const std::shared_ptr<Asset>& a) { return a->state() == State::Initialized; }
     );
-    return initializedAsset != parents.end();
+    return initializedAsset != parents.cend();
 }
 
 } // namespace openspace

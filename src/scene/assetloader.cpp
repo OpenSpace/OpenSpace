@@ -35,7 +35,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/defer.h>
 
-
 #include "assetloader_lua.inl"
 
 namespace {
@@ -85,7 +84,7 @@ namespace {
         }
         return PathType::RelativeToAssetRoot;
     }
-}
+} // namespace
 
 namespace openspace {
 
@@ -270,7 +269,8 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
 
     try {
         ghoul::lua::runScriptFile(*_luaState, asset->assetFilePath());
-    } catch (const ghoul::lua::LuaRuntimeException& e) {
+    }
+    catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(
             "Could not load asset '{}': {}", asset->assetFilePath(), e.message)
         );
@@ -293,14 +293,18 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDeinitializationFunctionRefs[asset].clear();
 
-    for (const auto& it : _onDependencyInitializationFunctionRefs[asset]) {
+    for (const std::pair<const Asset*, std::vector<int>>& it :
+         _onDependencyInitializationFunctionRefs[asset])
+    {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
     }
     _onDependencyInitializationFunctionRefs.erase(asset);
 
-    for (const auto& it : _onDependencyDeinitializationFunctionRefs[asset]) {
+    for (const std::pair<Asset*, std::vector<int>>& it :
+         _onDependencyDeinitializationFunctionRefs[asset])
+    {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
@@ -374,9 +378,9 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     return ghoul::filesystem::File(FileSys.absPath(fullAssetPath));
 }
 
-std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
+std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
     ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, std::move(name));
+    std::string path = generateAssetPath(directory, name);
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path);
@@ -765,13 +769,9 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
 }
 
 void AssetLoader::addAssetListener(AssetListener* listener) {
-    auto it = std::find(
-        _assetListeners.begin(),
-        _assetListeners.end(),
-        listener
-    );
+    const auto it = std::find(_assetListeners.cbegin(), _assetListeners.cend(), listener);
 
-    if (it == _assetListeners.end()) {
+    if (it == _assetListeners.cend()) {
         _assetListeners.push_back(listener);
     }
 }

@@ -177,7 +177,7 @@ private:
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
 
-    std::shared_ptr<Asset> getAsset(std::string name);
+    std::shared_ptr<Asset> getAsset(const std::string& name);
     ghoul::filesystem::Directory currentDirectory() const;
 
     void setCurrentAsset(std::shared_ptr<Asset> asset);
