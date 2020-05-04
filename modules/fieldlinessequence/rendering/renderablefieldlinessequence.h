@@ -192,6 +192,9 @@ private:
     // Index of the extra quantity to use for masking
     properties::OptionProperty _pMaskingQuantity;
 
+    /// Line width for the line rendering part
+    properties::FloatProperty _pLineWidth;
+
 // Button which sets camera focus to parent node of the renderable
     properties::TriggerProperty _pFocusOnOriginBtn;
     // Button which executes a time jump to start of sequence

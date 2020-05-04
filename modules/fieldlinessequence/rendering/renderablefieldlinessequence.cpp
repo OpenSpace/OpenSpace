@@ -76,11 +76,15 @@ namespace {
     constexpr const char* KeyColorTablePaths = "ColorTablePaths";
     // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     constexpr const char* KeyColorTableRanges = "ColorTableRanges";
+    // [BOOL] Enables Flow
+    constexpr const char* KeyFlowEnabled = "FlowEnabled";
     // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     constexpr const char* KeyMaskingRanges = "MaskingRanges";
     // [STRING] Value should be path to folder where states are saved (JSON/CDF input
     // => osfls output & oslfs input => JSON output)
     constexpr const char* KeyOutputFolder = "OutputFolder";
+    //[INT] Line Width should have a range
+    constexpr const char* KeyLineWidth = "LineWidth";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
@@ -203,6 +207,12 @@ namespace {
         "Quantity used for Masking",
         "Quantity used for masking."
     };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "lineWidth",
+        "Line Width",
+        "This value specifies the line width of the field lines if the " 
+        "selected rendering method includes lines."
+    };
     constexpr openspace::properties::Property::PropertyInfo OriginButtonInfo = {
         "focusCameraOnParent",
         "Focus Camera",
@@ -250,7 +260,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pColorTablePath(ColorTablePathInfo)
     , _pColorUniform(
         ColorUniformInfo,
-        glm::vec4(0.75f, 0.5f, 0.f, 0.5f),
+        glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -263,11 +273,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pDomainR(DomainRInfo)
     , _pFlowColor(
         FlowColorInfo,
-        glm::vec4(0.8f, 0.7f, 0.f, 0.6f),
+        glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _pFlowEnabled(FlowEnabledInfo, true)
+    , _pFlowEnabled(FlowEnabledInfo, false)
     , _pFlowGroup({ "Flow" })
     , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
     , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
@@ -278,6 +288,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pMaskingMin(MaskingMinInfo)
     , _pMaskingMax(MaskingMaxInfo)
     , _pMaskingQuantity(MaskingQuantityInfo, OptionProperty::DisplayType::Dropdown)
+    , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _pFocusOnOriginBtn(OriginButtonInfo)
     , _pJumpToStartBtn(TimeJumpButtonInfo)
 {
@@ -467,6 +478,16 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
 {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
+    bool flowEnabledValue;
+    if (_dictionary->getValue(KeyFlowEnabled, flowEnabledValue)) {
+        _pFlowEnabled = flowEnabledValue;
+    }
+
+    float lineWidthValue;
+    if (_dictionary->getValue(KeyLineWidth, lineWidthValue)) {
+        _pLineWidth = lineWidthValue;
+    }
+    
     if (_dictionary->getValue(KeyOutputFolder, outputFolderPath)) {
         ghoul::filesystem::Directory outputFolder(outputFolderPath);
         if (FileSys.directoryExists(outputFolder)) {
@@ -631,6 +652,7 @@ void RenderableFieldlinesSequence::setupProperties() {
     if (hasExtras) {
         addProperty(_pMaskingEnabled);
     }
+    addProperty(_pLineWidth);
     addProperty(_pFocusOnOriginBtn);
     addProperty(_pJumpToStartBtn);
 
@@ -662,6 +684,7 @@ void RenderableFieldlinesSequence::setupProperties() {
         _pMaskingGroup.addProperty(_pMaskingMin);
         _pMaskingGroup.addProperty(_pMaskingMax);
         _pMaskingGroup.addProperty(_pMaskingQuantity);
+        
 
         // --------------------- Add Options to OptionProperties --------------------- //
         _pColorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -1116,6 +1139,13 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         }
 
         glBindVertexArray(_vertexArrayObject);
+       /* #ifdef __APPLE__
+                glLineWidth(1.f);
+        #else
+                glLineWidth(ceil((2.f * 1.f + _pLineWidth) * std::sqrt(2.f)));
+        #endif*/
+        glLineWidth(_pLineWidth);
+
         glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
             _states[_activeStateIndex].lineStart().data(),
