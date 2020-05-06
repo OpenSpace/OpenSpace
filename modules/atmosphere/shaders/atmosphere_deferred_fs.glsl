@@ -72,7 +72,6 @@ uniform int cullAtmosphere;
 
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
-uniform sampler3D inscatterRayleighTexture;
 uniform sampler3D inscatterMieTexture;
 uniform sampler2D mainPositionTexture;
 uniform sampler2D mainNormalTexture;
@@ -266,7 +265,7 @@ void dCalculateRayRenderableGlobe(out dRay ray,
 /* 
  * Calculates the light scattering in the view direction comming from other 
  * light rays scattered in the atmosphere.
- * Following the paper:  S[L]|x - T(x,xs) * S[L]|xs
+ * Following the paper:  S[L](x, v, s) - T(x, xs) * S[L](xs, v, s)
  * The view direction here is the ray: x + tv, s is the sun direction,
  * r and mu the position and zenith cosine angle as in the paper.
  * Arguments:
@@ -306,7 +305,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // through the atmosphere. If this ray hits something inside the atmosphere,
     // we will subtract the attenuated scattering light from that path in the
     // current path.
-    vec4 inscatterRadiance  = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);    
+    vec4 inscatterRadiance    = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);
+    vec4 inscatterMieRadiance = max(texture4D(inscatterMieTexture, r, mu, muSun, nu), 0.0);
 
     // After removing the initial path from camera pos to top of atmosphere (for an
     // observer in the space) we test if the light ray is hitting the atmosphere
@@ -334,6 +334,9 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // the unsused contribution to the final radiance.
         vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * inscatterFromSurface, 0.0);
+
+        vec4 inscatterMieFromSurface = texture4D(inscatterMieTexture, r0, mu0, muSun0, nu);
+        inscatterMieRadiance = max(inscatterMieRadiance - attenuation.rgbr * inscatterMieFromSurface, 0.0);    
 
         // We set the irradianceFactor to 1.0 so the reflected irradiance will be considered
         // when calculating the reflected light on the ground.
@@ -380,8 +383,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         
         vec4 inScatterAboveX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
-        // Attention for the attenuation.r value applied to the S_Mie
-        vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0f);
+        vec4 inScatterAbove   = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0f);
+
+        vec4 inScatterMieAboveX  = texture4D(inscatterMieTexture, r, mu, muSun, nu);
+        vec4 inScatterMieAboveXs = texture4D(inscatterMieTexture, r0, mu0, muSun0, nu);
+        vec4 inScatterMieAbove   = max(inScatterMieAboveX - attenuation.rgbr * inScatterMieAboveXs, 0.0f);
 
         // Below Horizon
         mu  = muHorizon + INTERPOLATION_EPS;
@@ -393,11 +399,15 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         
         vec4 inScatterBelowX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
-        // Attention for the attenuation.r value applied to the S_Mie
-        vec4 inScatterBelow = max(inScatterBelowX - attenuation.rgbr * inScatterBelowXs, 0.0);
+        vec4 inScatterBelow   = max(inScatterBelowX - attenuation.rgbr * inScatterBelowXs, 0.0);
+
+        vec4 inScatterMieBelowX  = texture4D(inscatterMieTexture, r, mu, muSun, nu);
+        vec4 inScatterMieBelowXs = texture4D(inscatterMieTexture, r0, mu0, muSun0, nu);
+        vec4 inScatterMieBelow   = max(inScatterMieBelowX - attenuation.rgbr * inScatterMieBelowXs, 0.0);
 
         // Interpolate between above and below inScattering radiance
-        inscatterRadiance = mix(inScatterAbove, inScatterBelow, interpolationValue);
+        inscatterRadiance    = mix(inScatterAbove, inScatterBelow, interpolationValue);
+        inscatterMieRadiance = mix(inScatterMieAbove, inScatterMieBelow, interpolationValue);
     }      
 
     // The w component of inscatterRadiance has stored the Cm,r value (Cm = Sm[L0])
@@ -408,12 +418,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // This step is done because imprecision problems happen when the Sun is slightly below
     // the horizon. When this happens, we avoid the Mie scattering contribution.
     //inscatterRadiance.w *= smoothstep(0.0f, 0.02f, muSun);
-    vec3 betaRayleighScatteringCoeff = scatteringCoefficientRayleigh(lambdaArray);
-    //vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
-    //  (betaRayleighScatteringCoeff.r / betaRayleighScatteringCoeff);
-    vec4 inscatterMie =  max(texture4D(inscatterMieTexture, r, mu, muSun, nu), 0.0) * smoothstep(0.0f, 0.02f, muSun);  
     
-    radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie.rgb * miePhase, 0.0f);    
+    radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMieRadiance.rgb * miePhase, 0.0f);    
     
     // Finally we add the Lsun (all calculations are done with no Lsun so
     // we can change it on the fly with no precomputations)
@@ -425,7 +431,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     }
     else {
         //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
-        return spaceColor.rgb + finalScatteringRadiance;
+        return spaceColor.rgb * attenuation.rgb + finalScatteringRadiance;
     }    
 }
 
@@ -582,12 +588,13 @@ void main() {
             // =======================
 
             // Normal is stored in SGCT View Space and transformed to the current object space
-            vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, texCoord);
-            dvec4 normalViewSpace = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
+            vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, texCoord);            
+            dvec4 normalViewSpace  = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
             dvec4 normalWorldSpace = dSGCTViewToWorldMatrix * normalViewSpace;
-            vec4 normal = vec4(dInverseModelTransformMatrix * normalWorldSpace);
+            vec4 normal            = vec4(dInverseModelTransformMatrix * normalWorldSpace);
+            
             normal.xyz = normalize(normal.xyz);
-            normal.w = normalViewSpaceAndWaterReflectance.w;
+            normal.w   = normalViewSpaceAndWaterReflectance.w;
 
             // Data in the mainPositionTexture are written in view space (view plus camera rig)
             vec4 position = texture(mainPositionTexture, texCoord);
@@ -610,15 +617,18 @@ void main() {
             float dC = float(length(cameraPositionInObject.xyz));
             float x1 = 1e8;
             if (dC > x1) {
-                pixelDepth     += 1000.0;
-                float alpha     = 1000.0;
-                float beta      = 1000000.0;
-                float x2        = 1e9; 
-                float diffGreek = beta - alpha;
-                float diffDist  = x2 - x1;
-                float varA      = diffGreek/diffDist;
-                float varB      = (alpha - varA * x1);
-                pixelDepth     += double(varA * dC + varB); 
+                // adding some delta depth to improve accuracy for huge distances
+                pixelDepth += 1000.0;
+                
+                float alpha         = 1000.0;
+                float beta          = 1000000.0;
+                float x2            = 1e9;
+                float diffGreek     = beta - alpha;
+                float diffDist      = x2 - x1;
+                float varA          = diffGreek/diffDist;
+                float varB          = (alpha - varA * x1);
+
+                pixelDepth += double(varA * dC + varB);
             }
 
             // All calculations are done in Km:
@@ -638,9 +648,9 @@ void main() {
                 // If the observer is already inside the atm, offset = 0.0
                 // and no changes at all.
                 vec3  x  = vec3(ray.origin.xyz + t * ray.direction.xyz);
-                float r  = 0.0f;//length(x);
+                float r  = 0.0f;                                          //length(x);
                 vec3  v  = vec3(ray.direction.xyz);
-                float mu = 0.0f;//dot(x, v) / r;
+                float mu = 0.0f;                                          //dot(x, v) / r;
                 vec3  s  = vec3(sunDirectionObj);
                 float tF = float(maxLength - t);
 
@@ -651,6 +661,7 @@ void main() {
                 
                 dvec4 onATMPos           = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
                 vec4 eclipseShadowATM    = calcShadow(shadowDataArray, onATMPos.xyz, false);            
+                
                 float sunIntensityInscatter = sunRadiance * eclipseShadowATM.x;
 
                 float irradianceFactor = 0.0;
@@ -665,10 +676,10 @@ void main() {
                 vec3 sunColorV = vec3(0.0);                                                
                 if (groundHit) {
                     vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
-                    float sunIntensityGround = sunRadiance * eclipseShadowPlanet.x;
-                    groundColorV = groundColor(x, tF, v, s, r, mu, attenuation,
-                                                color, normal.xyz, irradianceFactor, 
-                                                normal.a, sunIntensityGround);
+                    float sunIntensityGround   = sunRadiance * eclipseShadowPlanet.x;
+                    
+                    groundColorV = groundColor(x, tF, v, s, r, mu, attenuation, color, normal.xyz, 
+                                                           irradianceFactor, normal.a, sunIntensityGround);
                 }
                 else {
                     // In order to get better performance, we are not tracing

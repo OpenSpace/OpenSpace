@@ -182,7 +182,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
         if (!isAtmosphereInFrustum(
             MV,
             tPlanetPosWorld,
-            (_atmosphereRadius + ATM_EPS)*KM_TO_M)
+            (static_cast<double>(_atmosphereRadius) + ATM_EPS)*KM_TO_M)
             )
         {
             program.setUniform(_uniformCache.cullAtmosphere, 1);
@@ -403,19 +403,31 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
     _irradianceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
-    program.setUniform(_uniformCache2.irradianceTexture, _irradianceTableTextureUnit);
+    program.setUniform(
+        _uniformCache2.irradianceTexture, 
+        _irradianceTableTextureUnit
+    );
 
     _inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-    program.setUniform(_uniformCache2.inscatterTexture, _inScatteringTableTextureUnit);
+    program.setUniform(
+        _uniformCache2.inscatterTexture, 
+        _inScatteringTableTextureUnit
+    );
 
-    _inScatteringRayleighTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, _inScatteringRayleighTableTexture);
-    program.setUniform(_uniformCache2.inscatterRayleighTexture, _inScatteringRayleighTableTextureUnit);
+    /*_inScatteringMieTableTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_3D, _inScatteringMieTableTexture);
+    program.setUniform(
+        _uniformCache2.inscatterMieTexture, 
+        _inScatteringMieTableTextureUnit
+    );*/
 
     _inScatteringMieTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, _inScatteringMieTableTexture);
-    program.setUniform(_uniformCache2.inscatterMieTexture, _inScatteringMieTableTextureUnit);
+    glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
+    program.setUniform(
+        _uniformCache2.inscatterMieTexture,
+        _inScatteringMieTableTextureUnit
+    );
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData&,
@@ -774,7 +786,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
             _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
 
         //============== Single Mie InScattering S =================
-        ghoul::opengl::TextureUnit inScatteringMieTableTextureUnit;
+        /*ghoul::opengl::TextureUnit inScatteringMieTableTextureUnit;
         inScatteringMieTableTextureUnit.activate();
         glGenTextures(1, &_inScatteringMieTableTexture);
         glBindTexture(GL_TEXTURE_3D, _inScatteringMieTableTexture);
@@ -785,6 +797,19 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _mu_s_samples * _nu_samples,
+            _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);*/
+
+        ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
+        deltaSMieTableTextureUnit.activate();
+        glGenTextures(1, &_deltaSMieTableTexture);
+        glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _mu_s_samples * _nu_samples,
             _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
     }
 
@@ -815,7 +840,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _mu_s_samples * _nu_samples,
         _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
 
-    ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
+    /*ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
     deltaSMieTableTextureUnit.activate();
     glGenTextures(1, &_deltaSMieTableTexture);
     glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
@@ -826,7 +851,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _mu_s_samples * _nu_samples,
-        _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
+        _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);*/
 
     //============== Delta J (Radiance Scattered) =================
     ghoul::opengl::TextureUnit deltaJTableTextureUnit;
@@ -860,7 +885,7 @@ void AtmosphereDeferredcaster::deleteComputationTextures() {
 void AtmosphereDeferredcaster::deleteUnusedComputationTextures() {
     glDeleteTextures(1, &_deltaETableTexture);
     glDeleteTextures(1, &_deltaSRayleighTableTexture);
-    glDeleteTextures(1, &_deltaSMieTableTexture);
+    //glDeleteTextures(1, &_deltaSMieTableTexture);
     glDeleteTextures(1, &_deltaJTableTexture);
 }
 
@@ -905,14 +930,6 @@ void AtmosphereDeferredcaster::executeCalculations()
     GLuint quadCalcVBO;
     GLsizei vertexSize = 6;
     createRenderQuad(&quadCalcVAO, &quadCalcVBO, 1.0f);
-
-    // Temp for testing Ozone new perfil
-    std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject2 = ghoul::opengl::ProgramObject::Build(
-            "transmittanceCalcProgram2",
-            absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_vs.glsl"),
-            absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl")
-    );
-    
     
     // ===========================================================
     // See Precomputed Atmosphere Scattering from Bruneton et al. paper, algorithm 4.1:
@@ -924,13 +941,15 @@ void AtmosphereDeferredcaster::executeCalculations()
         0
     );
     checkFrameBufferState("_transmittanceTableTexture");
+    
     glViewport(0, 0, _transmittance_table_width, _transmittance_table_height);
-    _transmittanceProgramObject2->activate();
-    loadAtmosphereDataIntoShaderProgram(_transmittanceProgramObject2);
-    //glClear(GL_COLOR_BUFFER_BIT);
+    
+    _transmittanceProgramObject->activate();
+    loadAtmosphereDataIntoShaderProgram(_transmittanceProgramObject);
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     glClearBufferfv(GL_COLOR, 0, black);
     renderQuadForCalc(quadCalcVAO, vertexSize);
+    
     if (_saveCalculationTextures) {
         saveTextureToPPMFile(
             GL_COLOR_ATTACHMENT0,
@@ -939,12 +958,19 @@ void AtmosphereDeferredcaster::executeCalculations()
             _transmittance_table_height
         );
     }
-    _transmittanceProgramObject2->deactivate();
+    _transmittanceProgramObject->deactivate();
 
     // line 2 in algorithm 4.1
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaETableTexture, 0);
+    glFramebufferTexture(
+        GL_FRAMEBUFFER, 
+        GL_COLOR_ATTACHMENT0, 
+        _deltaETableTexture, 
+        0
+    );
     checkFrameBufferState("_deltaETableTexture");
+    
     glViewport(0, 0, _delta_e_table_width, _delta_e_table_height);
+    
     _irradianceProgramObject->activate();
     transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
@@ -955,6 +981,7 @@ void AtmosphereDeferredcaster::executeCalculations()
     loadAtmosphereDataIntoShaderProgram(_irradianceProgramObject);
     glClear(GL_COLOR_BUFFER_BIT);
     renderQuadForCalc(quadCalcVAO, vertexSize);
+    
     if (_saveCalculationTextures) {
         saveTextureToPPMFile(
             GL_COLOR_ATTACHMENT0,
@@ -966,6 +993,14 @@ void AtmosphereDeferredcaster::executeCalculations()
     _irradianceProgramObject->deactivate();
 
     // line 3 in algorithm 4.1
+    GLuint multiRenderFBO;
+    glGenFramebuffers(1, &multiRenderFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, multiRenderFBO);
+    
+    GLuint multiQuadCalcVAO;
+    GLuint multiQuadCalcVBO;
+    createRenderQuad(&multiQuadCalcVAO, &multiQuadCalcVBO, 1.0f);
+    
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -980,8 +1015,11 @@ void AtmosphereDeferredcaster::executeCalculations()
     );
     GLenum colorBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, colorBuffers);
+    
     checkFrameBufferState("_deltaSRay and _deltaSMie TableTexture");
+    
     glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
+    
     _inScatteringProgramObject->activate();
     transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
@@ -991,9 +1029,10 @@ void AtmosphereDeferredcaster::executeCalculations()
     );
     loadAtmosphereDataIntoShaderProgram(_inScatteringProgramObject);
     glClear(GL_COLOR_BUFFER_BIT);
+    
     for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(_inScatteringProgramObject, layer);
-        renderQuadForCalc(quadCalcVAO, vertexSize);
+        renderQuadForCalc(multiQuadCalcVAO, vertexSize);
     }
     if (_saveCalculationTextures) {
         saveTextureToPPMFile(
@@ -1009,10 +1048,10 @@ void AtmosphereDeferredcaster::executeCalculations()
             _mu_samples
         );
     }
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
-    glDrawBuffers(1, drawBuffers);
-
     _inScatteringProgramObject->deactivate();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+    glDrawBuffers(1, drawBuffers);
 
     // line 4 in algorithm 4.1
     glFramebufferTexture(
@@ -1022,17 +1061,18 @@ void AtmosphereDeferredcaster::executeCalculations()
         0
     );
     checkFrameBufferState("_irradianceTableTexture");
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
+    
     glViewport(0, 0, _delta_e_table_width, _delta_e_table_height);
+    
     _deltaEProgramObject->activate();
-    //_deltaEProgramObject->setUniform("line", 4);
-    deltaETableTextureUnit.activate();
+    /*deltaETableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
-    _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
+    _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);*/
     loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);
     glClear(GL_COLOR_BUFFER_BIT);
+    
     renderQuadForCalc(quadCalcVAO, vertexSize);
+    
     if (_saveCalculationTextures) {
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("irradiance_texture.ppm"),
             _delta_e_table_width, _delta_e_table_height);
@@ -1040,57 +1080,38 @@ void AtmosphereDeferredcaster::executeCalculations()
     _deltaEProgramObject->deactivate();
 
     // line 5 in algorithm 4.1
-    GLuint multiRenderFBO;
-    glGenFramebuffers(1, &multiRenderFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, multiRenderFBO);
-    GLenum threeBuffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers(3, threeBuffers);
-    GLuint multiQuadCalcVAO;
-    GLuint multiQuadCalcVBO;
-    createRenderQuad(&multiQuadCalcVAO, &multiQuadCalcVBO, 1.0f);
-
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         _inScatteringTableTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT1,
-        _inScatteringRayleighTableTexture,
-        0
-    );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT2,
-        _inScatteringMieTableTexture,
-        0
-    );
     checkFrameBufferState("_inScatteringTableTexture");
-    
+
     glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
+
     _deltaSProgramObject->activate();
+
     deltaSRayleighTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
-    deltaSMieTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
     _deltaSProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
-    _deltaSProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
+    
+    //deltaSMieTableTextureUnit.activate();
+    //glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
+    //_deltaSProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
+
     loadAtmosphereDataIntoShaderProgram(_deltaSProgramObject);
     glClear(GL_COLOR_BUFFER_BIT);
+    
     for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(_deltaSProgramObject, layer, false);
-        renderQuadForCalc(multiQuadCalcVAO, vertexSize);
+        renderQuadForCalc(quadCalcVAO, vertexSize);
     }
     if (_saveCalculationTextures) {
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("S_texture.ppm"),
             _mu_s_samples * _nu_samples, _mu_samples);
     }
     _deltaSProgramObject->deactivate();
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
-    glDrawBuffers(1, drawBuffers);
 
     // loop in line 6 in algorithm 4.1
     for (int scatteringOrder = 2; scatteringOrder <= 4; ++scatteringOrder) {
@@ -1102,33 +1123,49 @@ void AtmosphereDeferredcaster::executeCalculations()
             0
         );
         checkFrameBufferState("_deltaJTableTexture");
+        
         glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         _deltaJProgramObject->activate();
+        
         if (scatteringOrder == 2) {
             _deltaJProgramObject->setUniform("firstIteraction", 1);
         }
         else {
             _deltaJProgramObject->setUniform("firstIteraction", 0);
         }
+        
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
         _deltaJProgramObject->setUniform(
             "transmittanceTexture",
             transmittanceTableTextureUnit
         );
+        
         deltaETableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
-        _deltaJProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
+        _deltaJProgramObject->setUniform(
+            "deltaETexture", 
+            deltaETableTextureUnit
+        );
+        
         deltaSRayleighTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
         _deltaJProgramObject->setUniform(
             "deltaSRTexture",
             deltaSRayleighTableTextureUnit
         );
+
         deltaSMieTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
-        _deltaJProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
+        _deltaJProgramObject->setUniform(
+            "deltaSMTexture", 
+            deltaSMieTableTextureUnit
+        );
+        
         loadAtmosphereDataIntoShaderProgram(_deltaJProgramObject);
+        
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(_deltaJProgramObject, layer);
             renderQuadForCalc(quadCalcVAO, vertexSize);
@@ -1148,34 +1185,43 @@ void AtmosphereDeferredcaster::executeCalculations()
             0
         );
         checkFrameBufferState("_deltaETableTexture");
+        
         glViewport(0, 0, _delta_e_table_width, _delta_e_table_height);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         _irradianceSupTermsProgramObject->activate();
+        
         if (scatteringOrder == 2) {
             _irradianceSupTermsProgramObject->setUniform("firstIteraction", 1);
         }
         else {
             _irradianceSupTermsProgramObject->setUniform("firstIteraction", 0);
         }
+        
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
         _irradianceSupTermsProgramObject->setUniform(
             "transmittanceTexture",
             transmittanceTableTextureUnit
         );
+        
         deltaSRayleighTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
         _irradianceSupTermsProgramObject->setUniform(
             "deltaSRTexture",
             deltaSRayleighTableTextureUnit
         );
+        
         deltaSMieTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
         _irradianceSupTermsProgramObject->setUniform(
             "deltaSMTexture",
             deltaSMieTableTextureUnit
         );
+        
         loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
+        
         if (_saveCalculationTextures) {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
                 fmt::format("deltaE_texture-scattering_order-{}.ppm", scatteringOrder),
@@ -1191,21 +1237,28 @@ void AtmosphereDeferredcaster::executeCalculations()
             0
         );
         checkFrameBufferState("_deltaSRayleighTableTexture");
+        
         glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         _inScatteringSupTermsProgramObject->activate();
+        
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
         _inScatteringSupTermsProgramObject->setUniform(
             "transmittanceTexture",
             transmittanceTableTextureUnit
         );
+        
         deltaJTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);
         _inScatteringSupTermsProgramObject->setUniform(
             "deltaJTexture",
             deltaJTableTextureUnit
         );
+        
         loadAtmosphereDataIntoShaderProgram(_inScatteringSupTermsProgramObject);
+        
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(_inScatteringSupTermsProgramObject, layer);
             renderQuadForCalc(quadCalcVAO, vertexSize);
@@ -1220,11 +1273,11 @@ void AtmosphereDeferredcaster::executeCalculations()
         }
         _inScatteringSupTermsProgramObject->deactivate();
 
+        // line 10 in algorithm 4.1
         glEnable(GL_BLEND);
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
 
-        // line 10 in algorithm 4.1
         glFramebufferTexture(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT0,
@@ -1232,16 +1285,21 @@ void AtmosphereDeferredcaster::executeCalculations()
             0
         );
         checkFrameBufferState("_irradianceTableTexture");
+        
         glViewport(0, 0, _delta_e_table_width, _delta_e_table_height);
+        
         _irradianceFinalProgramObject->activate();
+        
         deltaETableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
         _irradianceFinalProgramObject->setUniform(
             "deltaETexture",
             deltaETableTextureUnit
         );
+        
         loadAtmosphereDataIntoShaderProgram(_irradianceFinalProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
+        
         if (_saveCalculationTextures) {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
                 fmt::format("irradianceTable_order-{}.ppm",
@@ -1251,40 +1309,30 @@ void AtmosphereDeferredcaster::executeCalculations()
         _irradianceFinalProgramObject->deactivate();
 
         // line 11 in algorithm 4.1
-        glBindFramebuffer(GL_FRAMEBUFFER, multiRenderFBO);
-        glDrawBuffers(2, threeBuffers);
         glFramebufferTexture(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT0,
             _inScatteringTableTexture,
             0
         );
-        /*glFramebufferTexture(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT1,
-            _inScatteringRayleighTableTexture,
-            0
-        );
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT2,
-            _inScatteringMieTableTexture,
-            0
-        );*/
         checkFrameBufferState("_inScatteringTableTexture");
-        glDrawBuffers(1, threeBuffers);
+        
         glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
+        
         _deltaSSupTermsProgramObject->activate();
+        
         deltaSRayleighTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
         _deltaSSupTermsProgramObject->setUniform(
             "deltaSTexture",
             deltaSRayleighTableTextureUnit
         );
+        
         loadAtmosphereDataIntoShaderProgram(_deltaSSupTermsProgramObject);
+        
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(_deltaSSupTermsProgramObject, layer, false);
-            renderQuadForCalc(multiQuadCalcVAO, vertexSize);
+            renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
@@ -1293,10 +1341,9 @@ void AtmosphereDeferredcaster::executeCalculations()
                 _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaSSupTermsProgramObject->deactivate();
-        glDisable(GL_BLEND);
         
-        glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
-        glDrawBuffers(1, drawBuffers);
+        // Disable Blending again
+        glDisable(GL_BLEND);
     }
 
     // Restores OpenGL blending state

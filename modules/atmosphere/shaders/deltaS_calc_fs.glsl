@@ -27,28 +27,19 @@
 #include "atmosphere_common.glsl"
 
 out vec4 renderTarget1;
-out vec4 renderTargetRayeligh;
-out vec4 renderTargetMie;
 
 uniform int layer;
 
 uniform sampler3D deltaSRTexture;
-uniform sampler3D deltaSMTexture;
 
 void main(void) {
   // First we convert the window's fragment coordinate to
   // texel coordinates
-  vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5f) /
-    vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
+  vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5f) / 
+      vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
   
+  // S_R[L_0] (S_M[L_0] is used in real-time to preserve the angular precision)
   vec4 rayleighInscattering0 = texture(deltaSRTexture, rst);
-  vec4 mieInscattering0      = texture(deltaSMTexture, rst);
   
-  // JCC: This need to change. We can't save only the red component of Mie Scattering.
-  // We are using only the red component of the Mie scattering
-  // See the Precomputed Atmosphere Scattering paper for details about
-  // the angular precision. 
-  renderTarget1        = vec4(rayleighInscattering0.rgb, mieInscattering0.r);
-  renderTargetRayeligh = rayleighInscattering0;
-  renderTargetMie      = mieInscattering0;
+  renderTarget1 = vec4(rayleighInscattering0.rgb, 0);
 }

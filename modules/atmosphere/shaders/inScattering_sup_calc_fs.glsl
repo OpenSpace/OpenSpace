@@ -74,6 +74,6 @@ void main(void) {
   // to mapped coordinates
   unmappingMuMuSunNu(r, dhdH, mu, muSunun, nu);
   
-  // Write to texture deltaSR 
+  // Write to texture deltaS 
   renderTarget1 = vec4(inscatter(r, mu, muSunun, nu), 1.0);
 }

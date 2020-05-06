@@ -42,6 +42,8 @@ uniform float sunZenith;
 
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
+uniform sampler3D inscatterRayleighTexture;
+uniform sampler3D inscatterMieTexture;
 
 /*
  * Calculates the light scattering in the view direction comming from

@@ -36,15 +36,15 @@ uniform vec4 dhdH;
 void integrand(const float r, const float mu, const float muSun, const float nu, 
                 const float y, out vec3 S_R, out vec3 S_M) {
   // The integral's integrand is the single inscattering radiance:
-  // S[L0] = P_M*S_M[L0] + P_R*S_R[L0]
-  // where S_M[L0] = T*(betaMScattering * exp(-h/H_M))*L0 and
-  // S_R[L0] = T*(betaRScattering * exp(-h/H_R))*L0.
+  // S[L0] = p_M * S_M[L0] + p_R * S_R[L0] where:
+  // S_M[L0] = T * (betaMScattering * exp(-h/H_M)) * L0 and
+  // S_R[L0] = T * (betaRScattering * exp(-h/H_R)) * L0.
   // T = transmittance.
   // One must remember that because the occlusion on L0, the integrand
   // here will be equal to 0 in that cases.
   // Also it is important to remember that the phase function for the
   // Rayleigh and Mie scattering are added during the rendering time
-  // to increase the angular precision
+  // to increase the angular precision (see Bruneton paper)
   S_R = vec3(0.0);
   S_M = vec3(0.0);
   
@@ -64,7 +64,7 @@ void integrand(const float r, const float mu, const float muSun, const float nu,
     // in direction of the sun (muSun_i) and the transmittance from the observer
     // at x (r) to y (ri).
     vec3 transmittanceY = transmittance(r, mu, y) * transmittanceLUT(ri, muSun_i);
-    // exp(-h/H)*T(x,v)
+    // exp(-h/H) * T(x,v)
     S_R = exp( -(ri - Rg) / HR ) * transmittanceY;
     S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
     // The L0 (sun radiance) is added in real-time.
@@ -120,13 +120,11 @@ void main(void) {
   // whole solid angle (4pi), we need only to consider
   // the Sun position (cosine of sun pos = muSun).
   // Then, following the paper notation:
-  // S[L] = P_R*S_R[L0] + P_M*S_M[L0] + S[L*]
+  // S[L] = p_R * S_R[L0] + p_M * S_M[L0] + S[L_*]
   // For single inscattering only:
-  // S[L0] = P_R*S_R[L0] + P_M*S_M[L0]
-  // In order to save memory, we just store the red component
-  // of S_M[L0], and later we use the proportionality rule
-  // to calcule the other components.
+  // S[L0] = p_R * S_R[L0] + p_M * S_M[L0]
   inscatter(r, mu, muSun, nu, S_R, S_M);
+  
   renderTarget1 = vec4(S_R, 1.0);
   renderTarget2 = vec4(S_M, 1.0);
 }

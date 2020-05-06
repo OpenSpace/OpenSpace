@@ -13,9 +13,15 @@ local Atmosphere = {
             -- Paper values
             --PlanetRadius = 3389.5,
             
-            AtmosphereRadius = 6450.7,
-            PlanetRadius    = 6367.0,
-
+            AtmosphereRadius = 6451.137,
+            PlanetRadius     = 6368.137,
+            -- Real Radius: 6378.137
+            --PlanetRadius    = 6378.137,
+            
+            -- AtmosphereRadius = 3463.17495,
+            --PlanetRadius    = 3396.19,
+            --PlanetRadius = 3393.0,
+            
             PlanetAverageGroundReflectance = 0.1,
             GroundRadianceEmittion = 0.37,
             SunIntensity = 13.1,
@@ -27,13 +33,13 @@ local Atmosphere = {
                     -- Wavelengths are given in 10^-9m
                     Wavelengths = { 680, 550, 440 },
                     -- Reflection coefficients are given in cm^-1
-                    --Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 }
+                    Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 }
                     -- In Rayleigh scattering, the coefficients of 
                     -- absorption and scattering are the same.
                     -- Paper Values:
                     --Scattering = { 0.5E-3, 2.32E-3, 5.58E-3 }
                     -- Paper Values CO2 (calculated using lambda 680, 550, 440 nm and n(lambda) = 1.00044661, 1.00045019, 1.00045558):
-                    Scattering = { 1.287149E-3, 3.055976E-3, 7.640644E-3 }
+                    --Scattering = { 1.287149E-3, 3.055976E-3, 7.640644E-3 }
                 },
                 -- Thichkness of atmosphere if its density were uniform, in Km
                 H_R = 8.0,
@@ -45,7 +51,7 @@ local Atmosphere = {
                 -- N Rayleigh x10^25,
                 NRayleigh = 0.02779,
                 -- N Rayliegh Absorption x 10^16 m
-                NRayleighAbs = 0.1,
+                NRayleighAbs = 0.0,
                 -- Rayleigh Absorption Particle Radius x10-10 m
                 RayleighAbsParticleRadius = 0.0,
             },
@@ -60,8 +66,8 @@ local Atmosphere = {
                     Extinction = { 53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979 }
                 },
                 -- Mie Height scale (atmosphere thickness for constant density) in Km
-                --H_M = 3.09526,
-                H_M = 11.1,
+                --H_M = 11.1,
+                H_M = 42.01,
                 -- Mie Phase Function Value (G e [-1.0, 1.0]. 
                 -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
                 G = 0.85,
@@ -69,17 +75,17 @@ local Atmosphere = {
                 -- Advanced Parameters
                 MieRealRefract = {1.52, 1.52, 1.52},
                 MieComplexRefract = {0.001, 0.006, 0.013},
-                Kappa = {0.001, 0.0092, 0.01},
+                Kappa = {0.31, 0.16, 0.07},
                 -- N Mie x10^6
-                NMie = 0.1,
+                NMie = 0.02,
                 -- Mie Mean Particle Radius x10^-6 m
                 MieMeanParticleRadius = 1.6,
                 -- 2 to 10
-                Turbidity = 2.0,
+                Turbidity = 1.6,
                 -- 2 to 6
                 JungeExponent = 4.0,
-                G1 = {0.889, 0.889, 0.889},
-                G2 = {0.094, 0.094, 0.094},
+                G1    = {0.889, 0.53, 0.71},
+                G2    = {0.094, 0.094, 0.094},
                 Alpha = {0.743, 0.743, 0.743}
             },
             Image = {

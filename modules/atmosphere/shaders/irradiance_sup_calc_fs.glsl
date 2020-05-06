@@ -29,13 +29,11 @@
 out vec4 renderTableColor;
 
 uniform int firstIteraction;
-//uniform float firstIteraction;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
 const float stepPhi = (2.0f * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / (2.0f * float(IRRADIANCE_INTEGRAL_SAMPLES));
 
-//uniform sampler2D transmittanceTexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
@@ -59,12 +57,12 @@ void main(void) {
     float phi = (float(iphi) + 0.5f) * stepPhi;
     for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES; ++itheta) {
       float theta = (float(itheta) + 0.5f) * stepTheta;
-      // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
+      // spherical coordinates: dSolidOmega = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
-      float dw    = stepTheta * stepPhi * sin(theta);
-      // w = (cos(phi) * sin(theta) * rho, sin(phi) * sin(theta) * rho, cos(theta) * rho)
-      vec3  w     = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
-      float nu    = dot(s, w);
+      float dSolidOmega = stepTheta * stepPhi * sin(theta);
+      // solidOmega = (cos(phi) * sin(theta) * rho, sin(phi) * sin(theta) * rho, cos(theta) * rho)
+      vec3  solidOmega  = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+      float nu          = dot(s, solidOmega);
 
       // The first iteraction is different from the others, that's because in the first
       // iteraction all the light arriving are coming from the initial pre-computed
@@ -74,17 +72,17 @@ void main(void) {
       if (firstIteraction == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
         vec3 phaseMie  = miePhaseFunction(nu);
-        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb;
-        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nu).rgb;
-        // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
-        irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * w.z * dw;
+        vec3 singleRay = texture4D(deltaSRTexture, r, solidOmega.z, muSun, nu).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, solidOmega.z, muSun, nu).rgb;
+        // solidOmega.z is the cosine(theta) = mu for vec(solidOmega) and also vec(solidOmega) dot vec(n(xo))
+        irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * solidOmega.z * dSolidOmega;
       }
       else {
         // On line 10 of the algorithm, the texture table deltaE is updated, so when we are not in the first
         // iteraction, we are getting the updated result of deltaE (not the single irradiance light but the
         // accumulated (higher order) irradiance light.
-        // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
-        irradianceE += texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb * w.z * dw;
+        // solidOmega.z is the cosine(theta) = mu for vec(solidOmega) and also vec(solidOmega) dot vec(n(xo))
+        irradianceE += texture4D(deltaSRTexture, r, solidOmega.z, muSun, nu).rgb * solidOmega.z * dSolidOmega;
       }
     }
   }

@@ -134,31 +134,31 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
     }
     //for ( int phi_i = 0; phi_i < 2*INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i ) {
     for ( int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i ) {
-      float phi   = (float(phi_i) + 0.5) * stepPhi;
-      // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
+      float phi = (float(phi_i) + 0.5) * stepPhi;
+      // spherical coordinates: dOmega = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
-      float dw    = stepTheta * stepPhi * sin(theta);
-      // w = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
-      float sinPhi   = sin(phi);
-      float sinTheta = sin(theta);
-      float cosPhi   = cos(phi);
-      vec3  w        = vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosineTheta);
+      float dOmega = stepTheta * stepPhi * sin(theta);
+      // solidOmega = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
+      float sinPhi     = sin(phi);
+      float sinTheta   = sin(theta);
+      float cosPhi     = cos(phi);
+      vec3  solidOmega = vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosineTheta);
 
       // We calculate the Rayleigh and Mie phase function for the new scattering angle:
-      // cos(angle between vec(v) and vec(w)), ||v|| = ||w|| = 1
-      float nuWV            = dot(v, w);
+      // cos(angle between vec(v) and vec(solidOmega)), ||v|| = ||w|| = 1
+      float nuWV            = dot(v, solidOmega);
       float phaseRayleighWV = rayleighPhaseFunction(nuWV);
       vec3 phaseMieWV       = miePhaseFunction(nuWV);
       
-      vec3 groundNormal     = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
+      vec3 groundNormal     = (vec3(0.0, 0.0, r) + distanceToGround * solidOmega) / Rg;
       vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), Rg);
 
       // We finally calculate the radiance from the reflected ray from ground (0.0 if not reflected)
       vec3 radianceJ1 = groundTransmittance * groundReflectance * groundIrradiance;
 
       // We calculate the Rayleigh and Mie phase function for the new scattering angle:
-      // cos(angle between vec(s) and vec(w)), ||s|| = ||w|| = 1
-      float nuSW = dot(s, w);
+      // cos(angle between vec(s) and vec(solidOmega)), ||s|| = ||w|| = 1
+      float nuSW = dot(s, solidOmega);
       // The first iteraction is different from the others, that's because in the first
       // iteraction all the light InScattered are coming from the initial pre-computed
       // single InScattered light. We stored these values in the deltaS textures (Ray and Mie),
@@ -168,8 +168,8 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         vec3 phaseMieSW  = miePhaseFunction(nuSW);
         // We can now access the values for the single InScattering in the textures deltaS textures.
-        vec3  singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
-        vec3  singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW).rgb;
+        vec3  singleRay = texture4D(deltaSRTexture, r, solidOmega.z, muSun, nuSW).rgb;
+        vec3  singleMie = texture4D(deltaSMTexture, r, solidOmega.z, muSun, nuSW).rgb;
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
@@ -178,8 +178,8 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
         // On line 9 of the algorithm, the texture table deltaSR is updated, so when we are not in the first
         // iteraction, we are getting the updated result of deltaSR (not the single inscattered light but the
         // accumulated (higher order) inscattered light.
-        // w.z is the cosine(theta) = mu for vec(w)
-        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
+        // solidOmega.z is the cosine(theta) = mu for vec(solidOmega)
+        radianceJ1 += texture4D(deltaSRTexture, r, solidOmega.z, muSun, nuSW).rgb;
       }
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the Atmosphere and Ocean from
@@ -188,7 +188,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
         (
           scatteringCoefficientRayleigh(lambdaArray) * exp(-(r - Rg) / HR) * phaseRayleighWV 
           + scatteringCoefficientMie(lambdaArray) * exp(-(r - Rg) / HM) * phaseMieWV
-        ) * dw;        
+        ) * dOmega;        
     }
   }
 }
