@@ -762,12 +762,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     std::vector<std::shared_ptr<const Asset>> allAssets =
         _assetManager->rootAsset()->subTreeAssets();
 
-    std::unordered_set<std::shared_ptr<ResourceSynchronization>> resourceSyncs;
+    std::unordered_set<ResourceSynchronization*> resourceSyncs;
     for (const std::shared_ptr<const Asset>& a : allAssets) {
-        std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-            a->ownSynchronizations();
+        std::vector<ResourceSynchronization*> syncs = a->ownSynchronizations();
 
-        for (const std::shared_ptr<ResourceSynchronization>& s : syncs) {
+        for (ResourceSynchronization* s : syncs) {
             ZoneScopedN("Update resource synchronization")
 
             if (s->state() == ResourceSynchronization::State::Syncing) {

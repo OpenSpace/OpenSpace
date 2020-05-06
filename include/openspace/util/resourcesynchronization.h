@@ -68,9 +68,9 @@ public:
 
     State state() const;
     const std::string& name() const;
-    bool isResolved();
-    bool isRejected();
-    bool isSyncing();
+    bool isResolved() const;
+    bool isRejected() const;
+    bool isSyncing() const;
     CallbackHandle addStateChangeCallback(StateChangeCallback cb);
     void removeStateChangeCallback(CallbackHandle id);
 

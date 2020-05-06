@@ -53,12 +53,6 @@ public:
         ResourceSynchronization::StateChangeCallback callback;
     };
 
-    /*using SyncStateChangeCallback =
-        std::function<void(
-            std::shared_ptr<ResourceSynchronization>,
-            ResourceSynchronization::State
-        )>;*/
-
     WatchHandle watchSynchronization(
         std::shared_ptr<ResourceSynchronization> synchronization,
         ResourceSynchronization::StateChangeCallback callback

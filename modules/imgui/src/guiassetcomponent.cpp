@@ -107,7 +107,7 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
     const std::vector<std::shared_ptr<Asset>>& requested = asset.requestedAssets();
     const std::vector<std::shared_ptr<Asset>>& required = asset.requiredAssets();
 
-    const std::vector<std::shared_ptr<ResourceSynchronization>>& resourceSyncs =
+    const std::vector<ResourceSynchronization*>& resourceSyncs =
         asset.ownSynchronizations();
 
     if (requested.empty() && required.empty() && resourceSyncs.empty()) {
@@ -126,7 +126,7 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
         }
 
         if (!resourceSyncs.empty() && ImGui::TreeNode("Resource Synchronizations")) {
-            for (const std::shared_ptr<ResourceSynchronization>& sync : resourceSyncs) {
+            for (ResourceSynchronization* sync : resourceSyncs) {
                 std::string resourceText = sync->directory() +
                     " " + syncStateToString(sync->state());
                 if (sync->state() == ResourceSynchronization::State::Syncing) {

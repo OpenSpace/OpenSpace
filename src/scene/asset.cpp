@@ -33,19 +33,19 @@
 #include <algorithm>
 #include <unordered_set>
 
+namespace openspace {
+
 namespace {
     constexpr const char* _loggerCat = "Asset";
 
-    float syncProgress(const std::vector<std::shared_ptr<const openspace::Asset>>& assets)
-    {
+    float syncProgress(const std::vector<std::shared_ptr<const Asset>>& assets) {
         size_t nTotalBytes = 0;
         size_t nSyncedBytes = 0;
 
-        for (const std::shared_ptr<const openspace::Asset>& a : assets) {
-            const std::vector<std::shared_ptr<openspace::ResourceSynchronization>>& s =
-                a->ownSynchronizations();
+        for (const std::shared_ptr<const Asset>& a : assets) {
+            const std::vector<ResourceSynchronization*>& s = a->ownSynchronizations();
 
-            for (const std::shared_ptr<openspace::ResourceSynchronization>& sync : s) {
+            for (ResourceSynchronization* sync : s) {
                 if (sync->nTotalBytesIsKnown()) {
                     nTotalBytes += sync->nTotalBytes();
                     nSyncedBytes += sync->nSynchronizedBytes();
@@ -64,7 +64,6 @@ namespace {
     }
 } // namespace
 
-namespace openspace {
 
 Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher)
     : _state(State::SyncResolved)
@@ -221,23 +220,28 @@ bool Asset::isSyncResolveReady() {
         return false;
     }
 
-    const std::vector<std::shared_ptr<ResourceSynchronization>>& syncs =
-        ownSynchronizations();
+    const std::vector<ResourceSynchronization*>& syncs = ownSynchronizations();
 
     auto unresolvedOwnSynchronization = std::find_if(
         syncs.cbegin(),
         syncs.cend(),
-        [](const std::shared_ptr<ResourceSynchronization>& s) { return !s->isResolved(); }
+        [](ResourceSynchronization* s) { return !s->isResolved(); }
     );
 
     // To be considered resolved, all own synchronizations need to be resolved
     return unresolvedOwnSynchronization == syncs.cend();
 }
 
-const std::vector<std::shared_ptr<ResourceSynchronization>>&
-Asset::ownSynchronizations() const
-{
-    return _synchronizations;
+std::vector<ResourceSynchronization*> Asset::ownSynchronizations() const {
+    std::vector<ResourceSynchronization*> res;
+    res.reserve(_synchronizations.size());
+    std::transform(
+        _synchronizations.begin(), _synchronizations.end(),
+        std::back_inserter(res),
+        std::mem_fn(&std::shared_ptr<ResourceSynchronization>::get)
+    );
+
+    return res;
 }
 
 std::vector<std::shared_ptr<const Asset>> Asset::subTreeAssets() const {
@@ -389,7 +393,7 @@ bool Asset::startSynchronizations() {
     }
 
     // Now synchronize its own synchronizations
-    for (const std::shared_ptr<ResourceSynchronization>& s : ownSynchronizations()) {
+    for (ResourceSynchronization* s : ownSynchronizations()) {
         if (!s->isResolved()) {
             s->start();
         }
@@ -411,7 +415,7 @@ bool Asset::cancelAllSynchronizations() {
         }
     );
 
-    for (const std::shared_ptr<ResourceSynchronization>& s : ownSynchronizations()) {
+    for (ResourceSynchronization* s : ownSynchronizations()) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
             s->cancel();
@@ -438,7 +442,7 @@ bool Asset::cancelUnwantedSynchronizations() {
         }
     );
 
-    for (const std::shared_ptr<ResourceSynchronization>& s : ownSynchronizations()) {
+    for (ResourceSynchronization* s : ownSynchronizations()) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
             s->cancel();

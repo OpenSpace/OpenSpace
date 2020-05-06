@@ -81,8 +81,7 @@ public:
 
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
-    const std::vector<std::shared_ptr<ResourceSynchronization>>&
-        ownSynchronizations() const;
+    std::vector<ResourceSynchronization*> ownSynchronizations() const;
 
     void syncStateChanged(ResourceSynchronization* sync,
         ResourceSynchronization::State state);
