@@ -214,7 +214,7 @@ private:
     // State change listeners
     std::vector<AssetListener*> _assetListeners;
 
-    // References to lua values
+    // References to Lua values
     std::unordered_map<Asset*, std::vector<int>> _onInitializationFunctionRefs;
     std::unordered_map<Asset*, std::vector<int>> _onDeinitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>

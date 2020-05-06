@@ -39,14 +39,14 @@ namespace {
         using State = openspace::Asset::State;
 
         switch (state) {
-        case State::Loaded: return "Loaded";
-        case State::LoadingFailed: return "LoadingFailed";
-        case State::Synchronizing: return "Synchronizing";
-        case State::SyncRejected: return "SyncRejected";
-        case State::SyncResolved: return "SyncResolved";
-        case State::Initialized: return "Initialized";
-        case State::InitializationFailed: return "InitializationFailed";
-        default: return "Unknown";
+            case State::Loaded: return "Loaded";
+            case State::LoadingFailed: return "LoadingFailed";
+            case State::Synchronizing: return "Synchronizing";
+            case State::SyncRejected: return "SyncRejected";
+            case State::SyncResolved: return "SyncResolved";
+            case State::Initialized: return "Initialized";
+            case State::InitializationFailed: return "InitializationFailed";
+            default: return "Unknown";
         }
     }
 
@@ -54,21 +54,20 @@ namespace {
         using State = openspace::ResourceSynchronization::State;
 
         switch (state) {
-        case State::Unsynced: return "Unsynced";
-        case State::Syncing: return "Syncing";
-        case State::Resolved: return "Resolved";
-        case State::Rejected: return "Rejected";
-        default: return "Unknown";
+            case State::Unsynced: return "Unsynced";
+            case State::Syncing: return "Syncing";
+            case State::Resolved: return "Resolved";
+            case State::Rejected: return "Rejected";
+            default: return "Unknown";
         }
     }
-}
+} // namespace
 
 namespace openspace::gui {
 
 GuiAssetComponent::GuiAssetComponent()
     : GuiComponent("Assets")
 {}
-
 
 void GuiAssetComponent::render() {
     bool e = _isEnabled;
