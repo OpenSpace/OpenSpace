@@ -1,33 +1,33 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost" externalControlPort="20500">
-    <Settings>
-        <Display swapInterval="0" />
-    </Settings>
-    <Node address="localhost" port="20401">
-        <Window fullScreen="true" monitor="1" name="OpenSpace">
-            <Stereo type="none" />
-            <Size x="1920" y="1080" />
-            <Pos x="0" y="0" />
-            <Viewport tracked="true">
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-                <PlanarProjection>
-                    <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
-                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
-                </PlanarProjection>
-            </Viewport>
-        </Window>
-        <Window fullScreen="false" border="false" name="GUI" tags="GUI">
-            <Stereo type="none" />
-            <Size x="1920" y="1080" />
-            <Pos x="0" y="0" />
-            <Viewport>
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-            </Viewport>
-        </Window>       
-    </Node>
-    <User eyeSeparation="0.065">
-        <Pos x="0.0" y="0.0" z="0.0" />
-    </User>
+  <Settings>
+    <Display swapInterval="0" />
+  </Settings>
+  <Node address="localhost" port="20401">
+    <Window fullScreen="true" monitor="1" name="OpenSpace">
+      <Stereo type="none" />
+      <Size x="1920" y="1080" />
+      <Pos x="0" y="0" />
+      <Viewport tracked="true">
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <PlanarProjection>
+          <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
+          <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+        </PlanarProjection>
+      </Viewport>
+    </Window>
+    <Window fullScreen="false" border="false" name="GUI" tags="GUI">
+      <Stereo type="none" />
+      <Size x="1920" y="1080" />
+      <Pos x="0" y="0" />
+      <Viewport>
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+      </Viewport>
+    </Window>
+  </Node>
+  <User eyeSeparation="0.065">
+    <Pos x="0.0" y="0.0" z="0.0" />
+  </User>
 </Cluster>

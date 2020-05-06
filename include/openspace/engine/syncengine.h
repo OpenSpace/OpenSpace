@@ -53,13 +53,13 @@ public:
      * Encodes all added Syncables in the injected <code>SyncBuffer</code>.
      * This method is only called on the SGCT master node
      */
-    std::vector<char> encodeSyncables();
+    std::vector<std::byte> encodeSyncables();
 
     /**
      * Decodes the <code>SyncBuffer</code> into the added Syncables.
      * This method is only called on the SGCT slave nodes
      */
-    void decodeSyncables(std::vector<char> data);
+    void decodeSyncables(std::vector<std::byte> data);
 
     /**
      * Invokes the presync method of all added Syncables

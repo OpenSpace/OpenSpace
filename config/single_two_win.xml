@@ -1,32 +1,32 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="127.0.0.1">
-    <Node address="127.0.0.1" port="20401">
-        <Window fullScreen="false" border="true">
-            <Pos x="10" y="100" />
-            <Size x="1280" y="720" />
-            <Viewport tracked="true">
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-                <PlanarProjection>
-                    <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
-                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
-                </PlanarProjection>
-            </Viewport>
-        </Window>
-        <Window fullScreen="false" border="true">
-            <Pos x="340" y="100" />
-            <Size x="1280" y="720" />
-            <Viewport>
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-                <PlanarProjection>
-                    <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
-                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
-                </PlanarProjection>
-            </Viewport>
-        </Window>
-    </Node>
-    <User eyeSeparation="0.065">
-        <Pos x="0.0" y="0.0" z="4.0" />
-    </User>
+  <Node address="127.0.0.1" port="20401">
+    <Window fullScreen="false" border="true">
+      <Pos x="10" y="100" />
+      <Size x="1280" y="720" />
+      <Viewport tracked="true">
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <PlanarProjection>
+          <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
+          <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+        </PlanarProjection>
+      </Viewport>
+    </Window>
+    <Window fullScreen="false" border="true">
+      <Pos x="340" y="100" />
+      <Size x="1280" y="720" />
+      <Viewport>
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <PlanarProjection>
+          <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
+          <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+        </PlanarProjection>
+      </Viewport>
+    </Window>
+  </Node>
+  <User eyeSeparation="0.065">
+    <Pos x="0.0" y="0.0" z="4.0" />
+  </User>
 </Cluster>

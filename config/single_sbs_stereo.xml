@@ -1,30 +1,30 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
-	<Node address="localhost" port="20401">
-		<Window fullScreen="false">
-			<Stereo type="none" />
-			<Pos x="200" y="300" />
-			<!-- 16:9 aspect ratio -->
-			<Size x="1280" y="360" />
-			<Viewport eye="left">
-				<Pos x="0.0" y="0.0" />
-				<Size x="0.5" y="1.0" />
-				<PlanarProjection>
-                    <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
-                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
-                </PlanarProjection>
-			</Viewport>
-			<Viewport eye="right">
-				<Pos x="0.5" y="0.0" />
-				<Size x="0.5" y="1.0" />
-				<PlanarProjection>
-                    <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
-                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
-                </PlanarProjection>
-			</Viewport>
-		</Window>
-	</Node>
-	<User eyeSeparation="0.06">
-		<Pos x="0.0" y="0.0" z="0.0" />
-	</User>
+  <Node address="localhost" port="20401">
+    <Window fullScreen="false">
+      <Stereo type="none" />
+      <Pos x="200" y="300" />
+      <!-- 16:9 aspect ratio -->
+      <Size x="1280" y="360" />
+      <Viewport eye="left">
+        <Pos x="0.0" y="0.0" />
+        <Size x="0.5" y="1.0" />
+        <PlanarProjection>
+          <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
+          <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+        </PlanarProjection>
+      </Viewport>
+      <Viewport eye="right">
+        <Pos x="0.5" y="0.0" />
+        <Size x="0.5" y="1.0" />
+        <PlanarProjection>
+          <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
+          <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+        </PlanarProjection>
+      </Viewport>
+    </Window>
+  </Node>
+  <User eyeSeparation="0.06">
+    <Pos x="0.0" y="0.0" z="0.0" />
+  </User>
 </Cluster>
