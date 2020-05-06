@@ -243,7 +243,7 @@ namespace {
             return backupValue;
         }
         return tmp;
-    }
+    }   
 } // namespace
 
 namespace openspace {

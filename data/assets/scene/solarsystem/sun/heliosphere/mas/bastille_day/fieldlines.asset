@@ -1,3 +1,12 @@
+asset.info = {
+    Name = "Fieldlines Bastille Day",
+    Version = "1.0",
+    Description = [[ Magnetic fieldlines for the bastille day CME event ]],
+    Author = "OpenSpace Team",
+    URL = "",
+    License = ""
+}
+
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 

@@ -1,3 +1,12 @@
+asset.info = {
+    Name = "Volume Rendering Bastille Day",
+    Version = "1.0",
+    Description = [[ Volumetric rendering for the bastille day CME event ]],
+    Author = "OpenSpace Team",
+    URL = "",
+    License = ""
+}
+
 local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 

@@ -2,6 +2,14 @@
 -- Sun-to-Earth MHD Simulation of the 2000 July 14 Bastille Day Eruption. 
 -- ApJ, 
 -- 856:75.
+asset.info = {
+    Name = "PREDSCI MAS Bastille Day Textures",
+    Version = "1.0",
+    Description = [[ Magnetograms of the sun ]],
+    Author = "OpenSpace Team",
+    URL = "https://ui.adsabs.harvard.edu/abs/2018ApJ...856...75T/abstract",
+    License = ""
+}
 
 local TexturesPath = asset.syncedResource({
     Name = "PREDSCI MAS Bastille Day Textures",
