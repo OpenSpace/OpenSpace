@@ -102,8 +102,7 @@ std::string stringFromTestProfileFormat(testProfileFormat& tpf) {
 ProfileFile makeProfileFromString(std::string s) {
     std::istringstream iss(s);
 
-    ProfileFile pf;
-    pf.readLines([&iss](std::string& line) {
+    ProfileFile pf([&iss](std::string& line) {
         if (getline(iss, line))
             return true;
         else

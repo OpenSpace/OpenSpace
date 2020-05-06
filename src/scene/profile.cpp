@@ -59,19 +59,37 @@ namespace {
 namespace openspace {
 
 void Profile::saveCurrentSettingsToProfile(std::string filename) {
-    if (! global::configuration.usingProfile) {
+    ProfileFile pf = collateBaseWithChanges();
+    pf.writeToFile(filename);
+}
+
+std::string Profile::saveCurrentSettingsToProfile_string() {
+    ProfileFile pf = collateBaseWithChanges();
+    return pf.writeToString();
+}
+
+bool Profile::usingProfile() {
+    return global::configuration.usingProfile;
+}
+
+std::string Profile::initialProfile() {
+    return global::configuration.profile;
+}
+
+ProfileFile Profile::collateBaseWithChanges() {
+    if (! usingProfile()) {
         std::string errorMessage = "Program was not started using a profile, "
             "so cannot use this save-current-settings feature.";
         LERROR(errorMessage);
     }
-    std::string initProfile = global::configuration.profile;
-    ProfileFile pf;
-    pf.readFromFile(initProfile);
+    std::string initProfile = initialProfile();
+    ProfileFile pf(initProfile);
     std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(pf);
     addAssetsToProfileFile(ass, pf);
     modifyPropertiesToReflectChanges(pf);
     addCurrentTimeToProfileFile(pf);
     addCurrentCameraToProfileFile(pf);
+    return pf;
 }
 
 std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFile& pf) {
@@ -82,35 +100,41 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFi
     assetDetails.base = a;
     assetDetails.changed = global::openSpaceEngine.listOfAllAssetEvents();
 
-    for (AssetEvent event : assetDetails.changed) {
-        if (event.eventType == AssetEventType::require) {
-            handleChangedRequire(assetDetails.base, event.name);
-        }
-        else if (event.eventType == AssetEventType::request) {
-            handleChangedRequest(assetDetails.base, event.name);
+    for (unsigned int i = 0; i < assetDetails.changed.size(); i++) {
+        AssetEvent event = assetDetails.changed[i];
+
+        if (event.eventType == AssetEventType::add) {
+            handleChangedAdd(assetDetails.base, i, assetDetails.changed, event.name);
         }
         else if (event.eventType == AssetEventType::remove) {
-            handleChangedRemove(assetDetails.base, event.name);
+            handleChangedRemove(assetDetails.base, i, assetDetails.changed, event.name);
         }
     }
     return assetDetails.base;
 }
 
-void Profile::handleChangedRequire(std::vector<AssetEvent>& base, std::string asset) {
+void Profile::handleChangedAdd(std::vector<AssetEvent>& base, unsigned int changedIdx,
+                               std::vector<AssetEvent>& changed, std::string asset)
+{
+    bool addThisAsset = true;
+    //Check base profile to see if has already been added there
     for (auto b : base) {
-        if (b.name == asset && b.eventType == AssetEventType::request) {
-            base.push_back({asset, AssetEventType::require});
+        if (b.name == asset ) {
+            if (   b.eventType == AssetEventType::require
+                || b.eventType == AssetEventType::request)
+            {
+                addThisAsset = false;
+                break;
+            }
         }
     }
-}
 
-void Profile::handleChangedRequest(std::vector<AssetEvent>& base, std::string asset) {
-    bool addThisAsset = true;
-    std::vector<AssetEvent>::iterator f;
-    f = find_if(base.begin(), base.end(), [asset](AssetEvent ae)
-        { return (ae.name == asset); } );
-    if (f != base.end()) {
-        addThisAsset = false;
+    //Check changed asset commands only prior to this one to see if already added
+    for (unsigned int i = 0; i < changedIdx; i++) {
+        if (changed[i].name == asset) {
+            addThisAsset = false;
+            break;
+        }
     }
 
     if (addThisAsset) {
@@ -119,10 +143,24 @@ void Profile::handleChangedRequest(std::vector<AssetEvent>& base, std::string as
     }
 }
 
-void Profile::handleChangedRemove(std::vector<AssetEvent>& base, std::string asset) {
-    std::vector<AssetEvent>::iterator f;
-    f = remove_if(base.begin(), base.end(), [asset](AssetEvent ae)
-        { return (ae.name == asset); } );
+void Profile::handleChangedRemove(std::vector<AssetEvent>& base, unsigned int changedIdx,
+                                  std::vector<AssetEvent>& changed, std::string asset)
+{
+    //Blank-out any base profile entries where this asset was required/requested
+    for (unsigned int i = 0; i < base.size(); i++) {
+        if (base[i].name == asset) {
+            base[i].name = "";
+            base[i].eventType = AssetEventType::ignore;
+        }
+    }
+
+    //Blank-out any changes profile entries where this asset was required/requested
+    for (unsigned int i = 0; i < changedIdx; i++) {
+        if (changed[i].name == asset) {
+            changed[i].name = "";
+            changed[i].eventType = AssetEventType::ignore;
+        }
+    }
 }
 
 void Profile::addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, ProfileFile& pf)
@@ -152,7 +190,7 @@ void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile&
         if (elements[1] == AssetEventTypeString.at(AssetEventType::require)) {
             a.eventType = AssetEventType::require;
         }
-        else if (elements[1] == AssetEventTypeString.at(AssetEventType::require)) {
+        else if (elements[1] == AssetEventTypeString.at(AssetEventType::request)) {
             a.eventType = AssetEventType::request;
         }
         else if (elements[1] == "") {
@@ -168,48 +206,66 @@ void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile&
 }
 
 void Profile::modifyPropertiesToReflectChanges(ProfileFile& pf) {
-    std::vector<openspace::properties::Property*> changedProps
-        = getNodesThatHaveChangedProperties(pf);
-    std::string newLine;
+    std::vector<std::string> formatted = getChangedPropertiesFormatted();
 
-    for (auto prop : changedProps) {
-        newLine = "setPropertyValueSingle\t";
-        newLine += prop->identifier() + "\t";
-        newLine += prop->getStringValue() + "\n";
-        pf.addPropertyLine(newLine);
+    for (std::string line: formatted) {
+        pf.addPropertyLine(line);
     }
 }
 
-std::vector<openspace::properties::Property*> Profile::getNodesThatHaveChangedProperties(
-                                                                          ProfileFile& pf)
+std::vector<std::string> Profile::getChangedPropertiesFormatted() {
+    std::vector<openspace::properties::Property*> changedProps
+        = getChangedProperties();
+    std::vector<std::string> formattedLines;
+
+    for (auto prop : changedProps) {
+        std::string newLine = "setPropertyValueSingle\t";
+        newLine += prop->identifier() + "\t";
+        newLine += prop->getStringValue() + "\n";
+        formattedLines.push_back(newLine);
+    }
+    return formattedLines;
+}
+
+std::vector<openspace::properties::Property*> Profile::getChangedProperties()
 {
     ZoneScoped
 
-    std::vector<SceneGraphNode*> nodes =
-            global::renderEngine.scene()->allSceneGraphNodes();
+    std::vector<SceneGraphNode*> nodes
+        = global::renderEngine.scene()->allSceneGraphNodes();
     std::vector<openspace::properties::Property*> changedProps;
 
     for (auto n : nodes) {
-        std::vector<openspace::properties::Property*> props = n->properties();
-         for (auto p : props) {
-             if (p->hasChanged()) {
-                 changedProps.push_back(p);
-             }
-         }
+        if (n != nullptr) {
+            std::vector<openspace::properties::Property*> props = n->properties();
+            for (auto p : props) {
+                if (p->hasChanged()) {
+                    changedProps.push_back(p);
+                }
+            }
+        }
     }
     return changedProps;
 }
 
+std::string Profile::getCurrentTimeUTC() {
+    return global::timeManager.time().UTC();
+}
+
 void Profile::addCurrentTimeToProfileFile(ProfileFile& pf) {
-    std::string t = global::timeManager.time().UTC();
+    std::string t = getCurrentTimeUTC();
     std::string update = "absolute\t" + t + "\n";
     pf.updateTime(update);
+}
+
+interaction::NavigationHandler::NavigationState Profile::getCurrentCameraState() {
+    return global::navigationHandler.navigationState();
 }
 
 void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) {
     std::string update = "setNavigationState\t";
     interaction::NavigationHandler::NavigationState nav;
-    nav = global::navigationHandler.navigationState();
+    nav = getCurrentCameraState();
     update += nav.anchor + "\t";
     update += nav.aim + "\t";
     update += nav.referenceFrame + "\t";
@@ -233,9 +289,9 @@ void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) {
 void Profile::convertToSceneFile(const std::string inProfilePath,
                                  const std::string outFilePath)
 {
-    ProfileFile pf;
+    ZoneScoped
 
-    pf.readFromFile(inProfilePath);
+    ProfileFile pf(inProfilePath);
 
     std::ofstream outFile;
     try {
@@ -261,6 +317,8 @@ void Profile::convertToSceneFile(const std::string inProfilePath,
 }
 
 std::string Profile::convertToScene(ProfileFile& pf) {
+    ZoneScoped
+
     std::string result;
 
     result += convertToScene_modules(pf) + "\n";

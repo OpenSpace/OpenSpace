@@ -41,8 +41,7 @@ TEST_CASE("profileFile: Simple read and verify", "[profileFile]") {
     std::string testFull_string = stringFromTestProfileFormat(test);
     std::istringstream iss(testFull_string);
 
-    ProfileFile pf;
-    pf.readLines([&iss](std::string& line) {
+    ProfileFile pf([&iss](std::string& line) {
         if (getline(iss, line))
             return true;
         else
@@ -85,9 +84,9 @@ TEST_CASE("profileFile: Unrecognized header", "[profileFile]") {
     std::string testFull_string = stringFromTestProfileFormat(test);
     std::istringstream iss(testFull_string);
 
-    ProfileFile pf;
+    ProfileFile pf("default.profile");
     REQUIRE_THROWS_WITH(
-        pf.readLines([&iss](std::string& line) {
+        pf.readIn([&iss](std::string& line) {
             if (getline(iss, line))
                 return true;
             else
@@ -106,9 +105,9 @@ TEST_CASE("profileFile: Bad number of fields", "[profileFile]") {
     testFull_string = stringFromTestProfileFormat(test);
     {
         std::istringstream iss(testFull_string);
-        ProfileFile pf;
+        ProfileFile pf("default.profile");
         REQUIRE_THROWS_WITH(
-            pf.readLines([&iss](std::string& line) {
+            pf.readIn([&iss](std::string& line) {
                 if (getline(iss, line))
                     return true;
                 else
@@ -124,9 +123,9 @@ TEST_CASE("profileFile: Bad number of fields", "[profileFile]") {
     testFull_string = stringFromTestProfileFormat(test);
     {
         std::istringstream iss(testFull_string);
-        ProfileFile pf;
+        ProfileFile pf("default.profile");
         REQUIRE_THROWS_WITH(
-            pf.readLines([&iss](std::string& line) {
+            pf.readIn([&iss](std::string& line) {
                 if (getline(iss, line))
                     return true;
                 else
@@ -145,9 +144,9 @@ TEST_CASE("profileFile: Too many lines in time entry", "[profileFile]") {
     testFull_string = stringFromTestProfileFormat(test);
     {
         std::istringstream iss(testFull_string);
-        ProfileFile pf;
+        ProfileFile pf("default.profile");
         REQUIRE_THROWS_WITH(
-            pf.readLines([&iss](std::string& line) {
+            pf.readIn([&iss](std::string& line) {
                 if (getline(iss, line))
                     return true;
                 else
@@ -167,9 +166,9 @@ TEST_CASE("profileFile: Required field missing", "[profileFile]") {
     testFull_string = stringFromTestProfileFormat(test);
     {
         std::istringstream iss(testFull_string);
-        ProfileFile pf;
+        ProfileFile pf("default.profile");
         REQUIRE_THROWS_WITH(
-            pf.readLines([&iss](std::string& line) {
+            pf.readIn([&iss](std::string& line) {
                 if (getline(iss, line))
                     return true;
                 else
@@ -185,9 +184,9 @@ TEST_CASE("profileFile: Required field missing", "[profileFile]") {
     testFull_string = stringFromTestProfileFormat(test);
     {
         std::istringstream iss(testFull_string);
-        ProfileFile pf;
+        ProfileFile pf("default.profile");
         REQUIRE_THROWS_WITH(
-            pf.readLines([&iss](std::string& line) {
+            pf.readIn([&iss](std::string& line) {
                 if (getline(iss, line))
                     return true;
                 else
@@ -203,8 +202,7 @@ TEST_CASE("profileFile: Write test", "[profileFile]") {
     testProfileFormat test = buildTestProfile1();
     std::string testFull_string = stringFromTestProfileFormat(test);
     std::istringstream iss(testFull_string);
-    ProfileFile pf;
-    pf.readLines([&iss](std::string& line) {
+    ProfileFile pf([&iss](std::string& line) {
         if (getline(iss, line))
             return true;
         else

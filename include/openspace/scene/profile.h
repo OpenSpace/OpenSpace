@@ -27,6 +27,7 @@
 
 #include <openspace/scene/profilefile.h>
 
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicense.h>
 #include <ghoul/misc/easing.h>
@@ -47,19 +48,25 @@ namespace scripting { struct LuaLibrary; }
 class Profile {
 public:
     enum class AssetEventType {
+        add,
         require,
         request,
-        remove
+        remove,
+        ignore
     };
     const std::map<AssetEventType, std::string> AssetEventTypeString {
+        {AssetEventType::add, "add"},
         {AssetEventType::require, "required"},
         {AssetEventType::request, "requested"},
         {AssetEventType::remove,  "removed"},
+        {AssetEventType::ignore,  "ignored"},
     };
     struct AssetEvent {
         std::string name;
         AssetEventType eventType;
     };
+
+    virtual ~Profile() {};
 
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
@@ -67,6 +74,12 @@ public:
      * \param filename The filename of the new profile to be saved
      */
     void saveCurrentSettingsToProfile(std::string filename);
+
+    /**
+     * Saves all current settings, similar to saveCurrentSettingsToProfile() except the
+     * output is a string without writing to a file.
+     */
+    std::string saveCurrentSettingsToProfile_string();
 
     /**
      * Reads in a .profile file, converts it to scene/asset equivalent syntax, and
@@ -99,6 +112,9 @@ private:
         std::vector<AssetEvent> changed;
     };
 
+    virtual bool usingProfile();
+    virtual std::string initialProfile();
+    ProfileFile collateBaseWithChanges();
     std::string convertToScene_assets(ProfileFile& pf);
     std::string convertToScene_modules(ProfileFile& pf);
     std::string convertToScene_properties(ProfileFile& pf);
@@ -109,13 +125,16 @@ private:
 
     std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileFile& pf);
     void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf);
-    void handleChangedRequire(std::vector<AssetEvent>& base, std::string asset);
-    void handleChangedRequest(std::vector<AssetEvent>& base, std::string asset);
-    void handleChangedRemove(std::vector<AssetEvent>& base, std::string asset);
+    void handleChangedAdd(std::vector<AssetEvent>& base, unsigned int changedIdx,
+        std::vector<AssetEvent>& changed, std::string asset);
+    void handleChangedRemove(std::vector<AssetEvent>& base, unsigned int changedIdx,
+        std::vector<AssetEvent>& changed, std::string asset);
     void addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, ProfileFile& pf);
     void modifyPropertiesToReflectChanges(ProfileFile& pf);
-    std::vector<openspace::properties::Property*> getNodesThatHaveChangedProperties(
-        ProfileFile& pf);
+    virtual std::vector<openspace::properties::Property*> getChangedProperties();
+    virtual std::vector<std::string> getChangedPropertiesFormatted();
+    virtual std::string getCurrentTimeUTC();
+    virtual interaction::NavigationHandler::NavigationState getCurrentCameraState();
     void addCurrentTimeToProfileFile(ProfileFile& pf);
     void addCurrentCameraToProfileFile(ProfileFile& pf);
 };

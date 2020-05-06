@@ -95,24 +95,46 @@ public:
     using Lines = std::vector<std::string>;
 
     /**
+     * Constructs object by reading the contents of a profile file and populates vector
+     * containers for all sections. This only pulls individual line entries into their
+     * proper sections; it does not parse the tab-delimited fields of each line.
+     * \param filename The profile file to read
+     */
+    ProfileFile(std::string filename);
+
+    /**
+     * Constructor with alternative method of populating the object by reading the lines
+     * from a profile file. This is mainly intended for testing purposes, but it can be
+     * used to provide the profile file contents from another source (the function
+     * readFromFile() provides its own ifstream source).
+     * \param reader A std::function object that accepts a string reference which will
+     *               be populated with a single line of content. This function returns
+     *               true if a single line was read successfully, or false if not to
+     *               indicate that the end of the content has been reached.
+     */
+    ProfileFile(std::function<bool(std::string&)> reader);
+
+    /**
      * Reads the contents of a profile file and populates vector containers for all
      * sections. This only pulls individual line entries into their proper sections;
      * it does not parse the tab-delimited fields of each line.
+     * This will reset contents of the object.
      * \param filename The profile file to read
      */
-    void readFromFile(std::string filename);
+    void readIn(std::string filename);
 
     /**
      * Alternative function for reading the lines from a profile file. This is mainly
      * intended for testing purposes, but it can be used to provide the profile file
      * contents from another source (the function readFromFile() provides its own
      * ifstream source).
+     * This will reset contents of the object.
      * \param reader A std::function object that accepts a string reference which will
      *               be populated with a single line of content. This function returns
      *               true if a single line was read successfully, or false if not to
      *               indicate that the end of the content has been reached.
      */
-    void readLines(std::function<bool(std::string&)> reader);
+    void readIn(std::function<bool(std::string&)> reader);
 
     /**
      * Returns the string contents of this object converted to scene/asset

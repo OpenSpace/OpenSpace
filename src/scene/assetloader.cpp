@@ -444,7 +444,6 @@ std::shared_ptr<Asset> AssetLoader::require(const std::string& identifier) {
     std::shared_ptr<Asset> asset = getAsset(identifier);
     std::shared_ptr<Asset> dependant = _currentAsset;
     dependant->require(asset);
-    addToProfileTracking(asset->assetFilePath(), Profile::AssetEventType::require);
     return asset;
 }
 
@@ -453,7 +452,6 @@ std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
     std::shared_ptr<Asset> parent = _currentAsset;
     parent->request(asset);
     assetRequested(parent, asset);
-    addToProfileTracking(asset->assetFilePath(), Profile::AssetEventType::request);
     return asset;
 }
 
@@ -480,7 +478,7 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
 
 std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
-
+    addToProfileTracking(identifier, Profile::AssetEventType::add);
     return request(identifier);
 }
 

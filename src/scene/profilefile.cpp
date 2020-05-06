@@ -43,7 +43,15 @@ namespace {
 
 namespace openspace {
 
-void ProfileFile::readFromFile(std::string filename) {
+ProfileFile::ProfileFile(std::string filename) {
+    readIn(filename);
+}
+
+ProfileFile::ProfileFile(std::function<bool(std::string&)> reader) {
+    readIn(reader);
+}
+
+void ProfileFile::readIn(std::string filename) {
     clearAllFields();
     std::ifstream inFile;
 
@@ -56,7 +64,7 @@ void ProfileFile::readFromFile(std::string filename) {
     }
 
     try {
-        readLines([&inFile] (std::string& line) {
+        readIn([&inFile] (std::string& line) {
             if (getline(inFile, line))
                 return true;
             else
@@ -77,7 +85,8 @@ void ProfileFile::readFromFile(std::string filename) {
     }
 }
 
-void ProfileFile::readLines(std::function<bool(std::string&)> reader) {
+void ProfileFile::readIn(std::function<bool(std::string&)> reader) {
+    clearAllFields();
     std::string line;
     bool insideSection = false;
     _lineNum = 1;
@@ -295,7 +304,6 @@ void ProfileFile::parseModule(std::string line) {
 
 void ProfileFile::parseAsset(std::string line) {
     std::vector<std::string> fields;
-
     if (splitByTab(line, fields) != assetFieldsExpected) {
         throw ghoul::RuntimeError(errorString(std::to_string(assetFieldsExpected) +
             " fields required in an Asset entry"), "profileFile");
