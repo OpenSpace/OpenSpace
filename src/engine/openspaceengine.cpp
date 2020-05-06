@@ -341,17 +341,9 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w =
-        std::make_unique<SynchronizationWatcher>();
-    SynchronizationWatcher* rawWatcher = w.get();
-
     global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(
-            global::scriptEngine.luaState(),
-            rawWatcher,
-            FileSys.absPath("${ASSETS}")
-        ),
-        std::move(w)
+        global::scriptEngine.luaState(),
+        FileSys.absPath("${ASSETS}")
     );
 
     global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
@@ -760,7 +752,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _loadingScreen->postMessage("Synchronizing assets");
 
     std::vector<std::shared_ptr<const Asset>> allAssets =
-        _assetManager->rootAsset()->subTreeAssets();
+        _assetManager->rootAsset().subTreeAssets();
 
     std::unordered_set<ResourceSynchronization*> resourceSyncs;
     for (const std::shared_ptr<const Asset>& a : allAssets) {

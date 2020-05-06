@@ -79,7 +79,7 @@ void GuiAssetComponent::render() {
 
     std::string rootPath;
 
-    for (const std::shared_ptr<Asset>& a : assetManager.rootAsset()->childAssets()) {
+    for (const std::shared_ptr<Asset>& a : assetManager.rootAsset().childAssets()) {
         renderTree(*a, rootPath);
     }
 

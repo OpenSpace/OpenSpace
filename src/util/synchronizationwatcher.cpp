@@ -32,7 +32,7 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
                                  std::shared_ptr<ResourceSynchronization> synchronization,
                                     ResourceSynchronization::StateChangeCallback callback)
 {
-    std::lock_guard<std::mutex> guard(_mutex);
+    std::lock_guard guard(_mutex);
 
     WatchHandle watchHandle = nextWatchHandle++;
 
@@ -51,7 +51,7 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
 }
 
 void SynchronizationWatcher::unwatchSynchronization(WatchHandle watchHandle) {
-    std::lock_guard<std::mutex> guard(_mutex);
+    std::lock_guard guard(_mutex);
 
     const auto it = _watchedSyncs.find(watchHandle);
     if (it == _watchedSyncs.end()) {
@@ -79,7 +79,7 @@ void SynchronizationWatcher::unwatchSynchronization(WatchHandle watchHandle) {
 void SynchronizationWatcher::notify() {
     std::vector<NotificationData> notifications;
     {
-        std::lock_guard<std::mutex> guard(_mutex);
+        std::lock_guard guard(_mutex);
         notifications = _pendingNotifications;
         _pendingNotifications.clear();
     }

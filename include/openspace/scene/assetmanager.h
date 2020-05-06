@@ -27,9 +27,12 @@
 
 #include <openspace/scene/assetlistener.h>
 
+#include <openspace/scene/assetloader.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/luastate.h>
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace openspace {
 
@@ -46,11 +49,9 @@ class SynchronizationWatcher;
  * synchronized. Also, setting a target state of an asset to Unloaded will only unload an
  * asset from the system if it is not a dependency of a loaded asset.
  */
-
 class AssetManager : AssetListener {
 public:
-    AssetManager(std::unique_ptr<AssetLoader> loader,
-        std::unique_ptr<SynchronizationWatcher> syncWatcher);
+    AssetManager(ghoul::lua::LuaState* state, std::string assetRootDirectory);
 
     virtual ~AssetManager() = default;
 
@@ -59,11 +60,12 @@ public:
     void add(const std::string& path);
     void remove(const std::string& path);
     void removeAll();
-    std::shared_ptr<Asset> rootAsset();
+    const Asset& rootAsset() const;
+    Asset& rootAsset();
 
-    void assetStateChanged(Asset* asset, Asset::State state);
-    void assetRequested(Asset* parent, std::shared_ptr<Asset> child);
-    void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child);
+    void assetStateChanged(Asset* asset, Asset::State state) override;
+    void assetRequested(Asset* parent, std::shared_ptr<Asset> child) override;
+    void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child) override;
 
     bool update();
     scripting::LuaLibrary luaLibrary();
@@ -73,8 +75,8 @@ private:
     std::mutex _pendingInitializationsMutex;
     std::vector<std::shared_ptr<Asset>> _pendingInitializations;
 
-    std::unique_ptr<SynchronizationWatcher> _synchronizationWatcher;
-    std::unique_ptr<AssetLoader> _assetLoader;
+    SynchronizationWatcher _synchronizationWatcher;
+    AssetLoader _assetLoader;
 };
 
 } // namespace openspace

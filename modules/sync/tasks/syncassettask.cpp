@@ -110,10 +110,10 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
     AssetLoader loader(&luaState, &watcher, "${ASSETS}");
 
     loader.add(_asset);
-    loader.rootAsset()->startSynchronizations();
+    loader.rootAsset().startSynchronizations();
 
     std::vector<std::shared_ptr<const Asset>> allAssets =
-        loader.rootAsset()->subTreeAssets();
+        loader.rootAsset().subTreeAssets();
 
     while (true) {
         bool inProgress = false;
@@ -126,7 +126,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
                 inProgress = true;
             }
         }
-        progressCallback(loader.rootAsset()->requestedSynchronizationProgress());
+        progressCallback(loader.rootAsset().requestedSynchronizationProgress());
         std::this_thread::sleep_for(ProgressPollInterval);
         watcher.notify();
         if (!inProgress) {

@@ -55,9 +55,9 @@ int exportAsset(lua_State* state);
 } // namespace assetloader
 
 class Asset;
+class AssetListener;
 class ResourceSynchronization;
 class SynchronizationWatcher;
-class AssetListener;
 
 class AssetLoader {
 public:
@@ -92,10 +92,11 @@ public:
      */
     std::shared_ptr<Asset> has(const std::string& identifier) const;
 
-    /**
-     * Return the root asset
-     */
-    std::shared_ptr<Asset> rootAsset() const;
+    /// Return the root asset
+    const Asset& rootAsset() const;
+
+    /// Return the root asset
+    Asset& rootAsset();
 
     /**
      * Return the asset root directory
@@ -190,7 +191,7 @@ private:
     int syncedResourceLua(Asset* asset);
     int exportAssetLua(Asset* asset);
 
-    // Friend c closures (callable from lua, and maps to lua functions above)
+    // Friend C closures (callable from Lua, and maps to Lua functions above)
     friend int assetloader::onInitialize(lua_State* state);
     friend int assetloader::onDeinitialize(lua_State* state);
     friend int assetloader::onInitializeDependency(lua_State* state);

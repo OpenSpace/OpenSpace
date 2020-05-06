@@ -107,7 +107,7 @@ AssetLoader::AssetLoader(ghoul::lua::LuaState* luaState,
 {
     setCurrentAsset(_rootAsset.get());
 
-    // Create _assets table.
+    // Create _assets table
     lua_newtable(*_luaState);
     _assetsTableRef = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
 }
@@ -397,16 +397,16 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
             fullAssetPath, fullScenePath, prefix + assetPath, fullAssetPath
         ));
 
-        return ghoul::filesystem::File(FileSys.absPath(fullAssetPath));
+        return FileSys.absPath(fullAssetPath);
     }
 
     if (fullScenePathExists) {
-        return ghoul::filesystem::File(FileSys.absPath(fullScenePath));
+        return FileSys.absPath(fullScenePath);
     }
 
     // We don't check whether the file exists here as the error will be more
     // comprehensively logged by Lua either way
-    return ghoul::filesystem::File(FileSys.absPath(fullAssetPath));
+    return FileSys.absPath(fullAssetPath);
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
@@ -523,8 +523,12 @@ std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
     return it->second.lock();
 }
 
-std::shared_ptr<Asset> AssetLoader::rootAsset() const {
-    return _rootAsset;
+const Asset& AssetLoader::rootAsset() const {
+    return *_rootAsset;
+}
+
+Asset& AssetLoader::rootAsset() {
+    return *_rootAsset;
 }
 
 const std::string& AssetLoader::assetRootDirectory() const {
