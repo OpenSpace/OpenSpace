@@ -29,7 +29,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/assetlistener.h>
 #include <openspace/scene/assetloader.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
@@ -74,21 +73,6 @@ documentation::Documentation SyncAssetTask::documentation() {
     };
 }
 
-class RequestListener : public AssetListener {
-public:
-    virtual ~RequestListener() = default;
-    void assetStateChanged(Asset* asset, Asset::State state) override {
-        if (state == Asset::State::LoadingFailed) {
-            LERROR(fmt::format("Failed to load asset: {}", asset->id()));
-        }
-        if (state == Asset::State::SyncRejected) {
-            LERROR(fmt::format("Failed to sync asset: {}", asset->id()));
-        }
-    }
-    void assetRequested(Asset*, std::shared_ptr<Asset>) override {};
-    void assetUnrequested(Asset*, std::shared_ptr<Asset>) override {};
-};
-
 SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(
         documentation(),
@@ -124,9 +108,6 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
     scriptEngine.initializeLuaState(luaState);
 
     AssetLoader loader(&luaState, &watcher, "${ASSETS}");
-
-    RequestListener listener;
-    loader.addAssetListener(&listener);
 
     loader.add(_asset);
     loader.rootAsset()->startSynchronizations();

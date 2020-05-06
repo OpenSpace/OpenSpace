@@ -69,7 +69,6 @@ public:
     void notify();
 
 private:
-    WatchHandle generateWatchHandle();
     std::mutex _mutex;
     std::unordered_map<WatchHandle, WatchData> _watchedSyncs;
     std::vector<NotificationData> _pendingNotifications;

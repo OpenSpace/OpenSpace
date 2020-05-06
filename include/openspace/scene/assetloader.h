@@ -87,15 +87,10 @@ public:
     void untrackAsset(Asset* asset);
 
     /**
-    * Return the asset identified by the identifier,
-    * if the asset is tracked. Otherwise return nullptr.
-    */
-    std::shared_ptr<Asset> has(const std::string& identifier) const;
-
-    /**
-     * Return the lua state
+     * Return the asset identified by the identifier,
+     * if the asset is tracked. Otherwise return nullptr.
      */
-    ghoul::lua::LuaState* luaState();
+    std::shared_ptr<Asset> has(const std::string& identifier) const;
 
     /**
      * Return the root asset
@@ -103,8 +98,8 @@ public:
     std::shared_ptr<Asset> rootAsset() const;
 
     /**
-    * Return the asset root directory
-    */
+     * Return the asset root directory
+     */
     const std::string& assetRootDirectory() const;
 
     /**

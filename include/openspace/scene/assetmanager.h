@@ -61,11 +61,9 @@ public:
     void removeAll();
     std::shared_ptr<Asset> rootAsset();
 
-    void assetStateChanged(Asset* asset, Asset::State state) override;
-    void assetRequested(Asset* parent,
-        std::shared_ptr<Asset> child) override;
-    void assetUnrequested(Asset* parent,
-        std::shared_ptr<Asset> child) override;
+    void assetStateChanged(Asset* asset, Asset::State state);
+    void assetRequested(Asset* parent, std::shared_ptr<Asset> child);
+    void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child);
 
     bool update();
     scripting::LuaLibrary luaLibrary();

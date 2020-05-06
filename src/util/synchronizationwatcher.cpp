@@ -34,19 +34,14 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    WatchHandle watchHandle = generateWatchHandle();
+    WatchHandle watchHandle = nextWatchHandle++;
 
     ResourceSynchronization::CallbackHandle cbh = synchronization->addStateChangeCallback(
         [this, synchronization, watchHandle, cb = std::move(callback)]
         (ResourceSynchronization::State state)
         {
             std::lock_guard<std::mutex> g(_mutex);
-            _pendingNotifications.push_back({
-                synchronization,
-                state,
-                watchHandle,
-                cb
-            });
+            _pendingNotifications.push_back({ synchronization, state, watchHandle, cb });
         }
     );
 
@@ -96,10 +91,6 @@ void SynchronizationWatcher::notify() {
         }
         n.callback(n.state);
     }
-}
-
-SynchronizationWatcher::WatchHandle SynchronizationWatcher::generateWatchHandle() {
-    return nextWatchHandle++;
 }
 
 } // namespace openspace
