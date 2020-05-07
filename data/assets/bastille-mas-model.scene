@@ -13,19 +13,18 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 textureIndex = 2;
 
 local Keybindings = {
--- the Shift+s key, might not reset as it is now because it simply 
--- inverts multiple things that can be inverted indivitually
---[[	{
+	{
 	    Key = "Shift+s",
 	    Command = 
-	        propertyHelper.invert('Scene.MAS_MHD_Fieldlines.Renderable.Enabled') ..
-	        propertyHelper.invert('Scene.MAS_MHD_density.Renderable.Enabled') ..
-	        propertyHelper.invert('Scene.SunGlare.Renderable.Enabled'),
+            "openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
+            "openspace.setPropertyValueSingle('Scene.Sun.Renderable.Enabled', false);" ..
+            "openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);" ..
+            "openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);"
 	    Documentation = "Resets the subscene for showing the Sun volume rendering + fieldlines",
 	    Name = "Reset MHD back",
 	    GuiPath = "/CCMC/MHD",
 	    Local = false
-	},--]]
+	},
     {
         Key = "F6",
         Command = propertyHelper.invert('Scene.MAS_MHD_density.Renderable.Enabled'),

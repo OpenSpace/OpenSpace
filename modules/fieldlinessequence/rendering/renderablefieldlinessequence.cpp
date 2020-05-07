@@ -684,7 +684,6 @@ void RenderableFieldlinesSequence::setupProperties() {
         _pMaskingGroup.addProperty(_pMaskingMin);
         _pMaskingGroup.addProperty(_pMaskingMax);
         _pMaskingGroup.addProperty(_pMaskingQuantity);
-        
 
         // --------------------- Add Options to OptionProperties --------------------- //
         _pColorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -1139,11 +1138,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         }
 
         glBindVertexArray(_vertexArrayObject);
-       /* #ifdef __APPLE__
-                glLineWidth(1.f);
-        #else
-                glLineWidth(ceil((2.f * 1.f + _pLineWidth) * std::sqrt(2.f)));
-        #endif*/
         glLineWidth(_pLineWidth);
 
         glMultiDrawArrays(
