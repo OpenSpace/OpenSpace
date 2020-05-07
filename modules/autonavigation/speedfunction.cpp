@@ -81,7 +81,7 @@ double CubicDampenedSpeed::value(double t) const {
     }
 
     // avoid zero speed
-    speed += 0.001;
+    speed += 0.001; // OBS! This value gets really big for large distances..
     return speed;
 }
 

@@ -42,34 +42,48 @@ public:
     virtual ~PathCurve() = 0;
 
     const double length() const;
-    double arcLength(double limit = 1.0);
+    glm::dvec3 positionAt(double relativeLength);
 
-    // u is interpolation parameter in [0,1] (relative length)
-    virtual glm::dvec3 positionAt(double u) = 0;
+    double approximatedCurveParameter(double s);
+
+    // compute curve parameter that matches the input arc length s
+    double curveParameter(double s);
+
+    virtual glm::dvec3 interpolate(double u) = 0;
 
     std::vector<glm::dvec3> getPoints(); // for debugging
 
 protected:
+    // to be called last in constructor of every new curve type
+    void initParameterIntervals();
+    void initLengths();
+
+    double approximatedDerivative(double u, double h);
+    double arcLength(double limit = 1.0);
+    double arcLength(double lowerLimit, double upperLimit);
+
     std::vector<glm::dvec3> _points; 
     double _length; // the total length of the curve (approximated)
+    unsigned int _nrSegments;
+
+    std::vector<double> _parameterIntervals;
+    std::vector<double> _lengths;
+    std::vector<double> _lengthSums;
+
+    int _nrParameterSamplesPerSegment = 100; 
+    std::map<double, double> _parameterPairs; // s (arc length), u (curve parameter)
 };
 
 class Bezier3Curve : public PathCurve {
 public:
     Bezier3Curve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 positionAt(double u);
-
-private:
-    void initParameterIntervals(); // TODO: Move this logic out to base class
-
-    std::vector<double> _parameterIntervals;
-    unsigned int _nrSegments;
+    glm::dvec3 interpolate(double u);
 };
 
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 positionAt(double u);
+    glm::dvec3 interpolate(double u);
 };
 
 } // namespace openspace::autonavigation

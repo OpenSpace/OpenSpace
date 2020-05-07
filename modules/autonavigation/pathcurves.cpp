@@ -43,35 +43,211 @@ const double PathCurve::length() const {
     return _length;
 }
 
-// Approximate the curve length using Simpson's rule
-double PathCurve::arcLength(double limit) {
-    const int n = 30; // resolution, must be even for Simpson's rule
-    const double h = limit / (double)n;
+glm::dvec3 PathCurve::positionAt(double relativeLength) {
+    double u = approximatedCurveParameter(relativeLength * _length); // TODO: only use relative length
+    //LINFO(fmt::format("Curve parameter: u = {}", u));
+    return interpolate(u);
+}
 
-    // Points to be multiplied by 1
-    double endPoints = glm::length(positionAt(0.0 + h) - positionAt(0.0)) + glm::length(positionAt(1.0) - positionAt(1.0 - h));
+double PathCurve::approximatedCurveParameter(double s) {
+    if (s <= Epsilon) return 0.0;
+    if (s >= _length) return 1.0;
 
-    // Points to be multiplied by 4
-    double times4 = 0.0;
-    for (int i = 1; i < n; i += 2) {
-        double t = h * i;
-        times4 += glm::length(positionAt(t + h) - positionAt(t));
+    std::map<double, double>::iterator itSample = _parameterPairs.upper_bound(s);
+    std::map<double, double>::iterator itPrevSample = std::prev(itSample, 1);
+
+    double sSample = itSample->first;
+    double sPrevSample = itPrevSample->first;
+    double uSample = itSample->second;
+    double uPrevSample = itPrevSample->second;
+
+    double slope = (uSample - uPrevSample) / (sSample - sPrevSample);
+
+    // linear fit (TODO: investigate higher order fits?)
+    return uPrevSample + slope * (s - sPrevSample);
+}
+
+// Input s is a length value, in the range [0, _length]
+// Returns curve parameter in range [0, 1]
+double PathCurve::curveParameter(double s) {
+    if (s <= Epsilon) return 0.0;
+    if (s >= _length) return 1.0; 
+
+    unsigned int segmentIndex;
+    for (segmentIndex = 1; segmentIndex < _nrSegments; ++segmentIndex) {
+        if (s <= _lengthSums[segmentIndex]) 
+            break;
     }
 
-    // Points to be multiplied by 2
-    double times2 = 0.0;
-    for (int i = 2; i < n; i += 2) {
-        double t = h * i;
-        times2 += glm::length(positionAt(t + h) - positionAt(t));
+    // initial guess for Newton's method
+    double segmentS = s - _lengthSums[segmentIndex - 1];
+    double segmentLength = _lengths[segmentIndex];
+
+    const double uMin = _parameterIntervals[segmentIndex - 1];
+    const double uMax = _parameterIntervals[segmentIndex];
+    double u = uMin + (uMax - uMin) * (segmentS / segmentLength);
+
+    const int nrIterations = 10; 
+
+    // initialize root boudning limits for bisection
+    double lower = uMin;
+    double upper = uMax;
+
+    for (int i = 0; i < nrIterations; ++i) {
+        double F = arcLength(uMin, u) - segmentS; 
+
+        const double tolerance = 0.01 * Epsilon * _length;
+        if (std::abs(F) <= tolerance) {
+            return u;
+        }
+
+        // generate a candidate for Newton's method        
+        double dfdu = approximatedDerivative(u, Epsilon); // > 0                            
+        double uCandidate = u - F / dfdu;
+
+        // Update root-bounding interval and test candidate
+        if (F > 0) {  // => candidate < u <= upper
+            upper = u;
+            if (uCandidate <= lower) {
+                // the candidate is outside [lower, upper] => use bisection 
+                u = (upper + lower) / 2.0;
+            }
+            else {
+                u = uCandidate;
+            }
+        }
+        else { // F < 0 => lower <= u < candidate 
+            lower = u;
+            if (uCandidate >= upper) {
+                // the candidate is outside [lower, upper] => use bisection 
+                u = (upper + lower) / 2.0;
+            }
+            else {
+                u = uCandidate;
+            }
+        }
     }
 
-    return (h / 3.0) * (endPoints + 4.0 * times4 + 2.0 *times2);
+    // TODO: write meaningful comment about how no root was found in the number of iterations
+    return u;
 }
 
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> PathCurve::getPoints() {
     return _points;
+}
+
+// TODO: move to base constructor
+void PathCurve::initParameterIntervals() {
+    _parameterIntervals.clear();
+    _parameterIntervals.reserve(_nrSegments + 1);
+
+    double delta = 1.0 / _nrSegments;
+
+    _parameterIntervals.push_back(0.0);
+    for (unsigned int i = 1; i < _nrSegments; i++) {
+        _parameterIntervals.push_back(delta * i);
+    }
+    _parameterIntervals.push_back(1.0);
+}
+
+void PathCurve::initLengths() {
+    _lengths.clear();
+    _lengths.reserve(_nrSegments + 1);
+    _lengthSums.clear();
+    _lengthSums.reserve(_nrSegments + 1);
+
+    _lengths.push_back(0.0);
+    _lengthSums.push_back(0.0);
+    for (unsigned int i = 1; i <= _nrSegments; i++) {
+        double u = _parameterIntervals[i];
+        double uPrev = _parameterIntervals[i - 1];
+        _lengths.push_back(arcLength(uPrev, u)); // OBS! Is this length computed well enough?
+        _lengthSums.push_back(_lengthSums[i - 1] + _lengths[i]);
+    }
+    _length = _lengthSums.back();
+
+    // Scale parameterIntervals to better match arc lengths
+    for (unsigned int i = 1; i <= _nrSegments; i++) {
+        _parameterIntervals[i] = _lengthSums[i] / _length;
+    }
+
+    // Prepare samples for arc length reparameterization
+    _parameterPairs.clear();
+    _parameterPairs[0.0] = 0.0;
+    double s = 0.0;
+
+    for (int i = 1; i <= _nrSegments; ++i) {
+        double segmentLength = _lengths[i];
+        // TODO: make nr of samples dependent on segment length somehow
+        double deltaLength = _lengths[i] / _nrParameterSamplesPerSegment;
+        double endLength = _lengthSums[i];
+        double startLength = _lengthSums[i-1];
+        s += deltaLength;
+        while (s < endLength) {
+            double sSegment = s - startLength;
+            double sSegmentEased = segmentLength * ghoul::cubicEaseInOut(sSegment / segmentLength);
+            double sEased = sSegmentEased + startLength;
+            double u = curveParameter(sEased);
+            _parameterPairs[sEased] = u;
+            s += deltaLength;
+        }
+        _parameterPairs[_lengthSums[i]] = _parameterIntervals[i];
+    }
+    _parameterPairs[_length] = 1.0;
+
+    //LINFO(fmt::format("number samples: {}", _parameterPairs.size()));
+    //LINFO(fmt::format("next to last value: {}", std::prev(_parameterPairs.end(), 2)->second));
+}
+
+double PathCurve::approximatedDerivative(double u, double h) {
+    if (u <= h) {
+        return (1.0 / h) * glm::length(interpolate(0.0 + h) - interpolate(0.0));
+    }
+    if (u >= 1.0 - h) {
+        return (1.0 / h) * glm::length(interpolate(1.0) - interpolate(1.0 - h));
+    }
+    return (0.5 / h) * glm::length(interpolate(u + h) - interpolate(u - h));
+}
+
+double PathCurve::arcLength(double limit) {
+    return arcLength(0.0, limit);
+}
+
+// Approximate the curve length using Simpson's rule
+double PathCurve::arcLength(double lowerLimit, double upperLimit) {
+    const int n = 50; // resolution, must be even for Simpson's rule
+    const double h = (upperLimit - lowerLimit) / (double)n;
+
+    auto arcLengthFunction = [&](double u, double h) {
+        const double stepScale = 0.001; // for higher precision in derivative
+        double d = approximatedDerivative(u, stepScale * h);
+        long double derivativeSquared = d * d;
+
+        // OBS! Sqrt is expensive! And the derivatives are really large, so might be 
+        // sufficient with just the derivative 
+        return std::sqrt(1 + derivativeSquared);
+    };
+
+    // Points to be multiplied by 1
+    double endPoints = arcLengthFunction(lowerLimit, h) + arcLengthFunction(upperLimit, h);
+
+    // Points to be multiplied by 4
+    double times4 = 0.0;
+    for (int i = 1; i < n; i += 2) {
+        double u = lowerLimit + h * i;
+        times4 += arcLengthFunction(u, h);
+    }
+
+    // Points to be multiplied by 2
+    double times2 = 0.0;
+    for (int i = 2; i < n; i += 2) {
+        double u = lowerLimit + h * i;
+        times2 += arcLengthFunction(u, h);
+    }
+
+    return (h / 3.0) * (endPoints + 4.0 * times4 + 2.0 * times2);
 }
 
 Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
@@ -153,18 +329,12 @@ Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
 
     _nrSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
 
-    // default values for the curve parameter - equally spaced
-    for (double t = 0.0; t <= 1.0; t += 1.0 / _nrSegments) {
-        _parameterIntervals.push_back(t);
-    }
-
-    _length = arcLength(1.0);
-
-    initParameterIntervals();
+   initParameterIntervals();
+   initLengths();
 }
 
 // Interpolate a list of control points and knot times
-glm::dvec3 Bezier3Curve::positionAt(double u) {
+glm::dvec3 Bezier3Curve::interpolate(double u) {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
     ghoul_assert(_points.size() > 4, "Minimum of four control points needed for interpolation!");
     ghoul_assert((_points.size() - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
@@ -192,27 +362,15 @@ glm::dvec3 Bezier3Curve::positionAt(double u) {
         _points[idx + 2], _points[idx + 3]);
 }
 
-// compute curve parameter intervals based on relative arc length
-void Bezier3Curve::initParameterIntervals() {
-    std::vector<double> newIntervals;
-    double dt = 1.0 / _nrSegments;
-
-    newIntervals.push_back(0.0);
-    for (unsigned int i = 1; i < _nrSegments; i++) {
-        newIntervals.push_back(arcLength(dt * i) / _length);
-    }
-    newIntervals.push_back(1.0);
-
-    _parameterIntervals.swap(newIntervals);
-}
-
 LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
     _points.push_back(start.position());
     _points.push_back(end.position());
     _length = glm::distance(end.position(), start.position());
+
+    // TODO: new method
 }
 
-glm::dvec3 LinearCurve::positionAt(double u) {
+glm::dvec3 LinearCurve::interpolate(double u) {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
     return interpolation::linear(u, _points[0], _points[1]);
 }
