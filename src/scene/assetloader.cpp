@@ -621,12 +621,12 @@ int AssetLoader::syncedResourceLua(Asset* asset) {
     ghoul::Dictionary d;
     ghoul::lua::luaDictionaryFromState(*_luaState, d);
 
-    std::shared_ptr<ResourceSynchronization> sync =
+    std::unique_ptr<ResourceSynchronization> sync =
         ResourceSynchronization::createFromDictionary(d);
 
     const std::string absolutePath = sync->directory();
 
-    asset->addSynchronization(sync);
+    asset->addSynchronization(std::move(sync));
 
     lua_settop(*_luaState, 0);
     lua_pushstring(*_luaState, absolutePath.c_str());

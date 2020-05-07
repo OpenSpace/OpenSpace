@@ -164,8 +164,10 @@ void Asset::requestedAssetChangedState(Asset* child, Asset::State childState) {
     }
 }
 
-void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization) {
-    _synchronizations.push_back(synchronization);
+void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization) {
+    std::shared_ptr<ResourceSynchronization> sync = std::move(synchronization);
+
+    _synchronizations.push_back(sync);
 
     // Set up callback for synchronization state change
     // The synchronization watcher will make sure that callbacks
@@ -173,9 +175,9 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
 
     SynchronizationWatcher::WatchHandle watch =
         _synchronizationWatcher->watchSynchronization(
-            synchronization,
-            [this, synchronization](ResourceSynchronization::State state) {
-                syncStateChanged(synchronization.get(), state);
+            sync,
+            [this, sync](ResourceSynchronization::State state) {
+                syncStateChanged(sync.get(), state);
             }
         );
     _syncWatches.push_back(watch);
@@ -199,7 +201,7 @@ void Asset::syncStateChanged(ResourceSynchronization* sync,
     }
     else if (state == ResourceSynchronization::State::Rejected) {
         LERROR(fmt::format(
-            "Failed to synchronize resource '{}'' in asset '{}'", sync->name(), id()
+            "Failed to synchronize resource '{}' in asset '{}'", sync->name(), id()
         ));
 
         setState(State::SyncRejected);
@@ -209,7 +211,7 @@ void Asset::syncStateChanged(ResourceSynchronization* sync,
 bool Asset::isSyncResolveReady() {
     std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
 
-    auto unsynchronizedAsset = std::find_if(
+    const auto unsynchronizedAsset = std::find_if(
         requiredAssets.cbegin(),
         requiredAssets.cend(),
         [](const std::shared_ptr<Asset>& a) { return !a->isSynchronized(); }
@@ -220,16 +222,14 @@ bool Asset::isSyncResolveReady() {
         return false;
     }
 
-    const std::vector<ResourceSynchronization*>& syncs = ownSynchronizations();
-
-    auto unresolvedOwnSynchronization = std::find_if(
-        syncs.cbegin(),
-        syncs.cend(),
-        [](ResourceSynchronization* s) { return !s->isResolved(); }
+    const auto unresolvedOwnSynchronization = std::find_if(
+        _synchronizations.cbegin(),
+        _synchronizations.cend(),
+        [](const std::shared_ptr<ResourceSynchronization>& s) { return !s->isResolved(); }
     );
 
     // To be considered resolved, all own synchronizations need to be resolved
-    return unresolvedOwnSynchronization == syncs.cend();
+    return unresolvedOwnSynchronization == _synchronizations.cend();
 }
 
 std::vector<ResourceSynchronization*> Asset::ownSynchronizations() const {
@@ -393,7 +393,7 @@ bool Asset::startSynchronizations() {
     }
 
     // Now synchronize its own synchronizations
-    for (ResourceSynchronization* s : ownSynchronizations()) {
+    for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
         if (!s->isResolved()) {
             s->start();
         }
@@ -415,7 +415,7 @@ bool Asset::cancelAllSynchronizations() {
         }
     );
 
-    for (ResourceSynchronization* s : ownSynchronizations()) {
+    for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
             s->cancel();
@@ -442,7 +442,7 @@ bool Asset::cancelUnwantedSynchronizations() {
         }
     );
 
-    for (ResourceSynchronization* s : ownSynchronizations()) {
+    for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
             s->cancel();

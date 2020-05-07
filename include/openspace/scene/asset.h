@@ -79,7 +79,7 @@ public:
     AssetLoader* loader() const;
     State state() const;
 
-    void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
+    void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
     std::vector<ResourceSynchronization*> ownSynchronizations() const;
 

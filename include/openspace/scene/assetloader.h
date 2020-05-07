@@ -54,7 +54,6 @@ int exportAsset(lua_State* state);
 
 } // namespace assetloader
 
-class Asset;
 class AssetListener;
 class ResourceSynchronization;
 class SynchronizationWatcher;
@@ -221,7 +220,7 @@ private:
         _onDependencyInitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyDeinitializationFunctionRefs;
-    int _assetsTableRef;
+    int _assetsTableRef = 0;
 };
 
 } // namespace openspace
