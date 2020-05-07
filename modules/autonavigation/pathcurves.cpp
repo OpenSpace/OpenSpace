@@ -170,10 +170,10 @@ glm::dvec3 Bezier3Curve::positionAt(double u) {
     ghoul_assert((_points.size() - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
     ghoul_assert(_nrSegments == (_parameterIntervals.size() - 1), "Number of interval times must match number of intervals");
 
-    if (abs(u) < Epsilon)
+    if (u <= Epsilon)
         return _points.front();
 
-    if (abs(1.0 - u) < Epsilon)
+    if (u >= 1.0 - Epsilon)
         return _points.back();
 
     // compute current segment, by first finding iterator to the first value that is larger than s 
