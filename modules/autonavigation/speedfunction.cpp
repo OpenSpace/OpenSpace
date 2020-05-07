@@ -67,7 +67,7 @@ double CubicDampenedSpeed::value(double t) const {
     ghoul_assert(t >= 0.0 && t <= 1.0, "Variable t out of range [0,1]");
 
     const double tPeak = 0.5;
-    double speed = 1.0;
+    double speed = 0.0;
 
     // accelerate
     if (t <= tPeak) {
@@ -75,7 +75,7 @@ double CubicDampenedSpeed::value(double t) const {
         speed = ghoul::cubicEaseInOut(tScaled);
     }
     // deaccelerate
-    else if (t < 1.0) {
+    else if (t <= 1.0) {
         double tScaled = (t - tPeak) / (1.0 - tPeak);
         speed = 1.0 - ghoul::cubicEaseInOut(tScaled);
     }
