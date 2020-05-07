@@ -307,6 +307,53 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
 
 // TODO: remove when not needed
 // Created for debugging
+std::vector<glm::dquat> AutoNavigationHandler::getCurveOrientations(int nPerSegment) {
+    std::vector<glm::dquat> orientations;
+
+    if (_pathSegments.empty()) {
+        LERROR("There is no current path to sample points from.");
+        return orientations;
+    }
+
+    const double du = 1.0 / nPerSegment;
+
+    for (std::unique_ptr<PathSegment>& p : _pathSegments) {
+        for (double u = 0.0; u < 1.0; u += du) {
+            glm::dquat orientation = p->interpolatedPose(u).rotation;
+            orientations.push_back(orientation);
+        }
+    }
+
+    return orientations;
+}
+
+
+// TODO: remove when not needed or combined into pose version
+// Created for debugging
+std::vector<glm::dvec3> AutoNavigationHandler::getCurveViewDirections(int nPerSegment) {
+    std::vector<glm::dvec3> viewDirections;
+
+    if (_pathSegments.empty()) {
+        LERROR("There is no current path to sample points from.");
+        return viewDirections;
+    }
+
+    const double du = 1.0 / nPerSegment;
+
+    for (std::unique_ptr<PathSegment>& p : _pathSegments) {
+        for (double u = 0.0; u < 1.0; u += du) {
+            glm::dquat orientation = p->interpolatedPose(u).rotation;
+            glm::dvec3 direction = glm::normalize(orientation * glm::dvec3(0.0, 0.0, -1.0));
+            viewDirections.push_back(direction);
+        }
+    }
+
+    return viewDirections;
+}
+
+
+// TODO: remove when not needed
+// Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
     std::vector<glm::dvec3> points;
 

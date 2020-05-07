@@ -6,11 +6,12 @@ openspace.autonavigation.documentation = {
     },
     {
         Name = "renderPath",
-        Arguments = "int, [bool]",
+        Arguments = "int, [bool], [bool]",
         Documentation = "Render the currently active path, using linear segments. " .. 
             "The first argurment is the number of samples per path segment. " ..
             "The optional second argument can be used to render the points of " ..
-            "the path as spheres, if set to true."
+            "the path as spheres, if set to true." ..
+            "The optional third argument will visualize camera orientation if set to true"
     },
     {
         Name = "removeControlPoints",
@@ -31,10 +32,11 @@ openspace.autonavigation.removeRenderedPath = function ()
     end
 end
 
-openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints)
+openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints, renderOrientations)
     local path_identifier = "Camera_Path"
     local label_point = "Point"; 
     local label_line = "Line"; 
+    local label_orientation = "Orientation"; 
     local lineColor = {1.0, 1.0, 0.0}
     local lineWidth = 4
     local sphereTexture = "${DATA}/test3.jpg" -- TODO: better texture
@@ -45,10 +47,16 @@ openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints)
         openspace.removeSceneGraphNode(path_identifier) 
     end
 
+    -- TODO: remove test
+    if renderableOrientations then
+        lineColor = {0.0, 1.0, 1.0}
+    end
+
     local path = { Identifier = path_identifier }
     openspace.addSceneGraphNode(path)
 
     local points = openspace.autonavigation.getPathPositions(nrLinesPerSegment)
+    local viewDirections = openspace.autonavigation.getPathViewDirections(nrLinesPerSegment)
     local nrPoints = 0
     for _ in pairs(points) do 
         nrPoints = nrPoints + 1 

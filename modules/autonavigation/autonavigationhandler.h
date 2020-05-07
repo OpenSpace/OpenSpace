@@ -61,6 +61,8 @@ public:
 
     // TODO: remove functions for debugging
     std::vector<glm::dvec3> getCurvePositions(int nPerSegment); //debug
+    std::vector<glm::dquat> getCurveOrientations(int nPerSegment); //debug
+    std::vector<glm::dvec3> getCurveViewDirections(int nPerSegment); //debug
     std::vector<glm::dvec3> getControlPoints(); //debug
 
 private:

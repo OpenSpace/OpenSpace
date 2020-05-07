@@ -116,6 +116,20 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             "FOR DEBUG. Sample positions along the path. The input argument is the number of samples per path segment. " 
         },
         {
+            "getPathOrientations",
+            &autonavigation::luascriptfunctions::getPathOrientations,
+            {},
+            "number",
+            "FOR DEBUG. Sample orientations along the path. The input argument is the number of samples per path segment. "
+        },
+         {
+            "getPathViewDirections",
+            &autonavigation::luascriptfunctions::getPathViewDirections,
+            {},
+            "number",
+            "FOR DEBUG. Sample view directions along the path. The input argument is the number of samples per path segment. "
+        },
+        {
             "getControlPoints",
             &autonavigation::luascriptfunctions::getControlPoints,
             {},

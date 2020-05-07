@@ -204,6 +204,80 @@ namespace openspace::autonavigation::luascriptfunctions {
     }
 
     // TODO: remove when not needed
+    // Created for debugging. Access info for rendereable path
+    int getPathOrientations(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathPositions");
+
+        const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
+
+        // Get sample positions from the current curve
+        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationHandler& handler = module->AutoNavigationHandler();
+        std::vector<glm::dquat> orientations = handler.getCurveOrientations(pointsPerSegment);
+
+        // Push the rotation to the Lua stack:
+        lua_settop(L, 0);
+        const auto pushVector = [](lua_State* L, const glm::dquat& v) {
+            lua_newtable(L);
+            ghoul::lua::push(L, 1, v.w);
+            lua_rawset(L, -4);
+            ghoul::lua::push(L, 2, v.x);
+            lua_rawset(L, -4);
+            ghoul::lua::push(L, 3, v.y);
+            lua_rawset(L, -4);
+            ghoul::lua::push(L, 4, v.z);
+            lua_rawset(L, -4);            
+        };
+
+        lua_newtable(L);
+        for (int i = 0; i < orientations.size(); ++i) {
+            ghoul::lua::push(L, i + 1);
+            pushVector(L, orientations[i]);
+            lua_rawset(L, -4);
+        }
+
+        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+        return 1;
+    }
+
+    // TODO: remove when not needed
+   // Created for debugging. Access info for rendereable path
+    int getPathViewDirections(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathViewDirections");
+
+        const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
+
+        // Get sample positions from the current curve
+        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationHandler& handler = module->AutoNavigationHandler();
+        std::vector<glm::dvec3> viewDirections = handler.getCurveViewDirections(pointsPerSegment);
+
+        // Push the rotation to the Lua stack:
+
+        // Push the points to the Lua stack:
+        lua_settop(L, 0);
+        const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
+            lua_newtable(L);
+            ghoul::lua::push(L, 1, v.x);
+            lua_rawset(L, -3);
+            ghoul::lua::push(L, 2, v.y);
+            lua_rawset(L, -3);
+            ghoul::lua::push(L, 3, v.z);
+            lua_rawset(L, -3);
+        };
+
+        lua_newtable(L);
+        for (int i = 0; i < viewDirections.size(); ++i) {
+            ghoul::lua::push(L, i + 1);
+            pushVector(L, viewDirections[i]);
+            lua_rawset(L, -3);
+        }
+
+        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+        return 1;
+    }
+
+    // TODO: remove when not needed
     // Created for debugging. Access info for rendering of control points
     int getControlPoints(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getControlPoints");
