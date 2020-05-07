@@ -6,7 +6,9 @@ scene/solarsystem/planets/earth/earth	required
 scene/solarsystem/planets/earth/satellites/satellites	required
 
 #Property
-setPropertyValue  {earth_satellites}.Renderable.Enabled false
+setPropertyValue	{earth_satellites}.Renderable.Enabled	false
+setPropertyValueSingle	Scene.Pluto.Renderable.Enabled	false
+setPropertyValueSingle	Scene.Charon.Renderable.Enabled	false
 
 #Time
 relative	-1d

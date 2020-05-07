@@ -814,7 +814,7 @@ void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent,
     }
 }
 
-const std::vector<Profile::AssetEvent>& AssetLoader::listOfAllAssetEvents() const {
+std::vector<Profile::AssetEvent>& AssetLoader::listOfAllAssetEvents() {
     return _profileAssets;
 }
 

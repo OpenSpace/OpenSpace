@@ -174,7 +174,7 @@ public:
      * Retrieve a reference to vector list of all assets events, including require,
      * request, and remove
      */
-    const std::vector<Profile::AssetEvent>& listOfAllAssetEvents() const;
+    std::vector<Profile::AssetEvent>& listOfAllAssetEvents();
 
     /**
      * Clear lists of all assets that have been either requested, required, or removed

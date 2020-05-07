@@ -76,6 +76,10 @@ std::string Profile::initialProfile() {
     return global::configuration.profile;
 }
 
+std::vector<Profile::AssetEvent> Profile::listOfAllAssetEvents() {
+    return global::openSpaceEngine.listOfAllAssetEvents();
+}
+
 ProfileFile Profile::collateBaseWithChanges() {
     if (! usingProfile()) {
         std::string errorMessage = "Program was not started using a profile, "
@@ -98,7 +102,7 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFi
     AllAssetDetails assetDetails;
 
     assetDetails.base = a;
-    assetDetails.changed = global::openSpaceEngine.listOfAllAssetEvents();
+    assetDetails.changed = listOfAllAssetEvents();
 
     for (unsigned int i = 0; i < assetDetails.changed.size(); i++) {
         AssetEvent event = assetDetails.changed[i];
@@ -167,8 +171,10 @@ void Profile::addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, Profile
 {
     pf.clearAssets();
     for (AssetEvent a : allAssets) {
-        std::string entry = a.name + "\t" + AssetEventTypeString.at(a.eventType);
-        pf.addAssetLine(entry);
+        if (a.eventType != AssetEventType::ignore) {
+            std::string entry = a.name + "\t" + AssetEventTypeString.at(a.eventType);
+            pf.addAssetLine(entry);
+        }
     }
 }
 
@@ -179,7 +185,7 @@ void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile&
     for (std::string line : pf.assets()) {
         pf.splitByTab(line, elements);
 
-        if (a.name.empty()) {
+        if (elements[0].empty()) {
             LERROR("Error in parsing asset file line '" + line
                 + "'. Asset name is needed (field 1/2).");
         }

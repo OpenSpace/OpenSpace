@@ -26,6 +26,7 @@
 #include "test_common.h"
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 
 #include <openspace/scene/assetloader.h>
 #include <openspace/scene/asset.h>
@@ -54,10 +55,11 @@ namespace {
 
 class Profile2 : public Profile {
 public:
-    std::string getCurrentTimeUTC() {
+    Profile2(AssetLoader& refAssetLoader) : _assLoader(refAssetLoader) {}
+    std::string getCurrentTimeUTC() override {
         return "2020-02-29T01:23:45.00";
     }
-    interaction::NavigationHandler::NavigationState getCurrentCameraState() {
+    interaction::NavigationHandler::NavigationState getCurrentCameraState() override {
         interaction::NavigationHandler::NavigationState n;
         n.anchor = "Earth";
         n.aim = "Sun";
@@ -71,25 +73,29 @@ public:
     void addPropertiesMarkedAsChanged(std::string formattedLine) {
         _scenegraphProps.push_back(formattedLine);
     }
-    std::vector<std::string> getChangedPropertiesFormatted() {
+    std::vector<std::string> getChangedPropertiesFormatted() override {
         std::vector<std::string> formattedLines;
         for (std::string s : _scenegraphProps) {
             formattedLines.push_back(s);
         }
         return formattedLines;
     }
-    bool usingProfile() {
+    bool usingProfile() override {
         return true;
     }
-    std::string initialProfile() {
+    std::string initialProfile() override {
         return _initProfile;
     }
     void setInitialProfile(std::string file) {
         _initProfile = file;
     }
+    std::vector<Profile::AssetEvent> listOfAllAssetEvents() override {
+        return _assLoader.listOfAllAssetEvents();
+    }
 private:
     std::vector<std::string> _scenegraphProps;
     std::string _initProfile;
+    AssetLoader& _assLoader;
 };
 
 static void addLineHeaderForFailureMessage(std::string& s, size_t lineNumber) {
@@ -151,7 +157,32 @@ TEST_CASE("profile: Verify conversion to scene", "[profile]") {
     REQUIRE(sr_standard.getNextLine(comparing) == false);
 }
 
-TEST_CASE("profile: Detect new required asset", "[profile]") {
+TEST_CASE("profile: Detect new properties", "[profile]") {
+    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    openspace::SynchronizationWatcher syncWatcher;
+    AssetLoader assetLoader(
+        state,
+        &syncWatcher,
+        FileSys.absolutePath("${TESTDIR}/profile/")
+    );
+
+    bool passed;
+    lua_pushlightuserdata(*state, &passed);
+    lua_pushcclosure(*state, &passTest, 1);
+    lua_setglobal(*state, "passTest");
+
+    Profile2 p(assetLoader);
+    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.addPropertiesMarkedAsChanged("initialized 1st\t123");
+    p.addPropertiesMarkedAsChanged("initialized 2nd\t3.14159");
+    p.addPropertiesMarkedAsChanged("initialized 3rd\ttested.");
+    p.addPropertiesMarkedAsChanged("initialized fourth\tfalse.");
+    std::string output = p.saveCurrentSettingsToProfile_string();
+    REQUIRE(output == detectChangedPropsResult_1);
+}
+
+TEST_CASE("profile: Detect new added assets", "[profile]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
     ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
     openspace::SynchronizationWatcher syncWatcher;
@@ -168,13 +199,155 @@ TEST_CASE("profile: Detect new required asset", "[profile]") {
 
     std::shared_ptr<openspace::Asset> asset = assetLoader.add("initialization");
     asset->initialize();
-    assetLoader.add("test1");
+    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test2");
+    asset2->initialize();
+    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("test3");
+    asset3->initialize();
 
-    Profile2 p;
+    Profile2 p(assetLoader);
     p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
-    p.addPropertiesMarkedAsChanged("initialized 1st\t123");
-    p.addPropertiesMarkedAsChanged("initialized 2nd\t3.14159");
-    p.addPropertiesMarkedAsChanged("initialized 3rd\ttested.");
     std::string output = p.saveCurrentSettingsToProfile_string();
-    std::cout << output << std::endl;
+    REQUIRE(output == detectChangedAssetsResult_1);
+}
+
+TEST_CASE("profile: Detect new added assets after reset", "[profile]") {
+    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    openspace::SynchronizationWatcher syncWatcher;
+    AssetLoader assetLoader(
+        state,
+        &syncWatcher,
+        FileSys.absolutePath("${TESTDIR}/profile/")
+    );
+
+    bool passed;
+    lua_pushlightuserdata(*state, &passed);
+    lua_pushcclosure(*state, &passTest, 1);
+    lua_setglobal(*state, "passTest");
+
+    std::shared_ptr<openspace::Asset> asset = assetLoader.add("initialization");
+    asset->initialize();
+    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test2");
+    asset2->initialize();
+    assetLoader.listOfAllAssetEvents_reset();
+    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("test3");
+    asset3->initialize();
+    std::shared_ptr<openspace::Asset> asset4 = assetLoader.add("test4");
+    asset4->initialize();
+
+    Profile2 p(assetLoader);
+    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    std::string output = p.saveCurrentSettingsToProfile_string();
+    REQUIRE(output == detectChangedAssetsResult_2);
+}
+
+TEST_CASE("profile: Detect repeat added assets from new", "[profile]") {
+    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    openspace::SynchronizationWatcher syncWatcher;
+    AssetLoader assetLoader(
+        state,
+        &syncWatcher,
+        FileSys.absolutePath("${TESTDIR}/profile/")
+    );
+
+    bool passed;
+    lua_pushlightuserdata(*state, &passed);
+    lua_pushcclosure(*state, &passTest, 1);
+    lua_setglobal(*state, "passTest");
+
+    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
+    asset->initialize();
+    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
+    asset2->initialize();
+    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("test2");
+    asset3->initialize();
+
+    Profile2 p(assetLoader);
+    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    std::string output = p.saveCurrentSettingsToProfile_string();
+    REQUIRE(output == detectChangedAssetsResult_3);
+}
+
+TEST_CASE("profile: Detect repeat added assets from base", "[profile]") {
+    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    openspace::SynchronizationWatcher syncWatcher;
+    AssetLoader assetLoader(
+        state,
+        &syncWatcher,
+        FileSys.absolutePath("${TESTDIR}/profile/")
+    );
+
+    bool passed;
+    lua_pushlightuserdata(*state, &passed);
+    lua_pushcclosure(*state, &passTest, 1);
+    lua_setglobal(*state, "passTest");
+
+    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
+    asset->initialize();
+    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
+    asset2->initialize();
+    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("scene/solarsystem/planets/earth/earth");
+    asset3->initialize();
+
+    Profile2 p(assetLoader);
+    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    std::string output = p.saveCurrentSettingsToProfile_string();
+    REQUIRE(output == detectChangedAssetsResult_4);
+}
+
+TEST_CASE("profile: Detect removed assets not already loaded", "[profile]") {
+    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    openspace::SynchronizationWatcher syncWatcher;
+    AssetLoader assetLoader(
+        state,
+        &syncWatcher,
+        FileSys.absolutePath("${TESTDIR}/profile/")
+    );
+
+    bool passed;
+    lua_pushlightuserdata(*state, &passed);
+    lua_pushcclosure(*state, &passTest, 1);
+    lua_setglobal(*state, "passTest");
+
+    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
+    asset->initialize();
+    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
+    asset2->initialize();
+    assetLoader.remove("test5");
+
+    Profile2 p(assetLoader);
+    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    std::string output = p.saveCurrentSettingsToProfile_string();
+    REQUIRE(output == detectChangedAssetsResult_4);
+}
+
+TEST_CASE("profile: Detect removed assets from already loaded", "[profile]") {
+    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    openspace::SynchronizationWatcher syncWatcher;
+    AssetLoader assetLoader(
+        state,
+        &syncWatcher,
+        FileSys.absolutePath("${TESTDIR}/profile/")
+    );
+
+    bool passed;
+    lua_pushlightuserdata(*state, &passed);
+    lua_pushcclosure(*state, &passTest, 1);
+    lua_setglobal(*state, "passTest");
+
+    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
+    asset->initialize();
+    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
+    asset2->initialize();
+    assetLoader.remove("scene/solarsystem/planets/earth/earth");
+    assetLoader.remove("scene/solarsystem/planets/earth/satellites/satellites");
+
+    Profile2 p(assetLoader);
+    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    std::string output = p.saveCurrentSettingsToProfile_string();
+    REQUIRE(output == detectChangedAssetsResult_5);
 }

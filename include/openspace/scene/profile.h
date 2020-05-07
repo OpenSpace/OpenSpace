@@ -114,6 +114,7 @@ private:
 
     virtual bool usingProfile();
     virtual std::string initialProfile();
+    virtual std::vector<AssetEvent> listOfAllAssetEvents();
     ProfileFile collateBaseWithChanges();
     std::string convertToScene_assets(ProfileFile& pf);
     std::string convertToScene_modules(ProfileFile& pf);
