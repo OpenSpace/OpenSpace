@@ -36,20 +36,18 @@ openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints,
     local path_identifier = "Camera_Path"
     local label_point = "Point"; 
     local label_line = "Line"; 
-    local label_orientation = "Orientation"; 
     local lineColor = {1.0, 1.0, 0.0}
     local lineWidth = 4
     local sphereTexture = "${DATA}/test3.jpg" -- TODO: better texture
     local sphereRadius = 1000000 
     local sphereSegments = 50
+    local label_orientation = "Orientation"
+    local orientationLineColor = {1.0, 0.0, 0.0}
+    local orientationLineWidth = 2
+    local orientationLineLength = 4.0 * sphereRadius
 
     if openspace.hasSceneGraphNode(path_identifier) then
         openspace.removeSceneGraphNode(path_identifier) 
-    end
-
-    -- TODO: remove test
-    if renderableOrientations then
-        lineColor = {0.0, 1.0, 1.0}
     end
 
     local path = { Identifier = path_identifier }
@@ -106,6 +104,48 @@ openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints,
         }
         openspace.addSceneGraphNode(node)
     end
+
+    -- lines for view direction
+    if renderOrientations then
+
+        for key, point in pairs(points) do
+            local viewPos = { 
+                tonumber(point[1]) + tonumber(viewDirections[key][1]) * orientationLineLength,
+                tonumber(point[2]) + tonumber(viewDirections[key][2]) * orientationLineLength,
+                tonumber(point[3]) + tonumber(viewDirections[key][3]) * orientationLineLength
+            }
+
+            local node = {
+                Identifier = label_orientation .. label_point .. key,
+                Transform = {
+                    Translation = {
+                        Type = "StaticTranslation",
+                        Position = viewPos
+                    }
+                }, 
+                Parent = path_identifier
+            }
+            openspace.addSceneGraphNode(node)
+        end
+
+        for i = 1,(nrPoints-1) do
+            local node = {
+                Identifier = label_orientation .. label_line .. i,
+                Renderable = {
+                    Enabled = true,
+                    Type = "RenderableNodeLine",
+                    StartNode = label_point .. i,
+                    EndNode = label_orientation .. label_point .. i,
+                    Color = orientationLineColor,
+                    LineWidth = orientationLineWidth,
+                    Opacity = 1
+                }, 
+                Parent = path_identifier
+            }
+            openspace.addSceneGraphNode(node)
+        end                                         
+    end
+
 end
 
 openspace.autonavigation.removeControlPoints = function () 
