@@ -129,15 +129,14 @@ public:
     void request(std::shared_ptr<Asset> child);
     void unrequest(Asset* child);
 
-    const std::vector<std::shared_ptr<Asset>>& requestedAssets() const;
-    std::vector<std::shared_ptr<Asset>> requestingAssets() const;
-    const std::vector<std::shared_ptr<Asset>>& requiredAssets() const;
-    std::vector<std::shared_ptr<Asset>> requiringAssets() const;
+    std::vector<Asset*> requestedAssets() const;
+    std::vector<Asset*> requestingAssets() const;
+    std::vector<Asset*> requiredAssets() const;
+    std::vector<Asset*> requiringAssets() const;
 
-    std::vector<std::shared_ptr<const Asset>> requiredSubTreeAssets() const;
-    std::vector<std::shared_ptr<const Asset>> subTreeAssets() const;
-    std::vector<std::shared_ptr<Asset>> childAssets() const;
-    std::vector<std::shared_ptr<Asset>> parentAssets() const;
+    std::vector<const Asset*> requiredSubTreeAssets() const;
+    std::vector<const Asset*> subTreeAssets() const;
+    std::vector<Asset*> childAssets() const;
 
     bool isRequired() const;
     bool isRequested() const;

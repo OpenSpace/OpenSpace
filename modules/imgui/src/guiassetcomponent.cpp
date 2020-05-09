@@ -78,7 +78,7 @@ void GuiAssetComponent::render() {
 
     std::string rootPath;
 
-    for (const std::shared_ptr<Asset>& a : assetManager.rootAsset().childAssets()) {
+    for (Asset* a : assetManager.rootAsset().childAssets()) {
         renderTree(*a, rootPath);
     }
 
@@ -103,8 +103,8 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
         assetText += " (" + std::to_string(prog) + "%)";
     }
 
-    const std::vector<std::shared_ptr<Asset>>& requested = asset.requestedAssets();
-    const std::vector<std::shared_ptr<Asset>>& required = asset.requiredAssets();
+    std::vector<Asset*> requested = asset.requestedAssets();
+    std::vector<Asset*> required = asset.requiredAssets();
 
     const std::vector<ResourceSynchronization*>& resourceSyncs =
         asset.ownSynchronizations();
@@ -113,12 +113,12 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
         ImGui::Text("%s", assetText.c_str());
     }
     else if (ImGui::TreeNode(assetPath.c_str(), "%s", assetText.c_str())) {
-        for (const std::shared_ptr<Asset>& child : required) {
+        for (const Asset* child : required) {
             renderTree(*child, assetDirectory);
         }
 
         if (!requested.empty() && ImGui::TreeNode("Requested assets")) {
-            for (const std::shared_ptr<Asset>& child : requested) {
+            for (const Asset* child : requested) {
                 renderTree(*child, assetDirectory);
             }
             ImGui::TreePop();

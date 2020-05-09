@@ -112,12 +112,11 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
     loader.add(_asset);
     loader.rootAsset().startSynchronizations();
 
-    std::vector<std::shared_ptr<const Asset>> allAssets =
-        loader.rootAsset().subTreeAssets();
+    std::vector<const Asset*> allAssets = loader.rootAsset().subTreeAssets();
 
     while (true) {
         bool inProgress = false;
-        for (const std::shared_ptr<const Asset>& asset : allAssets) {
+        for (const Asset* asset : allAssets) {
             Asset::State state = asset->state();
             if (state == Asset::State::Unloaded ||
                 state == Asset::State::Loaded ||

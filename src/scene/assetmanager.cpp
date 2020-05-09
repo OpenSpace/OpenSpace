@@ -105,10 +105,7 @@ void AssetManager::removeAll() {
     ZoneScoped
 
     _pendingStateChangeCommands.clear();
-    std::vector<std::shared_ptr<Asset>> allAssets =
-        _assetLoader.rootAsset().requestedAssets();
-
-    for (const std::shared_ptr<Asset>& a : allAssets) {
+    for (const Asset* a : _assetLoader.rootAsset().requestedAssets()) {
         _pendingStateChangeCommands[a->assetFilePath()] = false;
     }
 }

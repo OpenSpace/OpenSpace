@@ -48,10 +48,10 @@ std::string SceneLicenseWriter::generateJson() const {
     std::stringstream json;
     json << "[";
 
-    std::vector<std::shared_ptr<const Asset>> assets =
+    std::vector<const Asset*> assets =
         global::openSpaceEngine.assetManager().rootAsset().subTreeAssets();
 
-    for (const std::shared_ptr<const Asset>& asset : assets) {
+    for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
         
         if (!meta.has_value()) {
