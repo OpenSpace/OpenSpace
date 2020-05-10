@@ -38,6 +38,10 @@ public:
     ImGUIModule();
 
     gui::GUI gui;
+
+private:
+    glm::vec2 _mousePosition = glm::vec2(0.f);
+    uint32_t _mouseButtons = 0;
 };
 
 } // namespace openspace

@@ -120,6 +120,8 @@ private:
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
 
+    glm::vec2 _mousePosition;
+
     //grabs json from each module to pass to the documentation engine.
     std::string _documentationJson;
 
