@@ -43,7 +43,7 @@ namespace {
         size_t nSyncedBytes = 0;
 
         for (const Asset* a : assets) {
-            const std::vector<ResourceSynchronization*>& s = a->ownSynchronizations();
+            std::vector<ResourceSynchronization*> s = a->ownSynchronizations();
 
             for (ResourceSynchronization* sync : s) {
                 if (sync->nTotalBytesIsKnown()) {
@@ -80,11 +80,6 @@ Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher, std::string a
     , _hasAssetPath(true)
     , _assetPath(std::move(assetPath))
 {}
-
-std::string Asset::resolveLocalResource(std::string resourceName) const {
-    std::string dir = assetDirectory();
-    return dir + ghoul::filesystem::FileSystem::PathSeparator + std::move(resourceName);
-}
 
 void Asset::setMetaInformation(MetaInformation metaInformation) {
     _metaInformation = std::move(metaInformation);
@@ -264,8 +259,6 @@ std::vector<const Asset*> Asset::requiredSubTreeAssets() const {
     std::unordered_set<const Asset*> assets({ this });
     for (const std::shared_ptr<Asset>& dep : _requiredAssets) {
         std::vector<const Asset*> subTree = dep->requiredSubTreeAssets();
-
-
         std::copy(subTree.begin(), subTree.end(), std::inserter(assets, assets.end()));
     }
     std::vector<const Asset*> assetVector(assets.begin(), assets.end());
@@ -406,13 +399,11 @@ bool Asset::startSynchronizations() {
 }
 
 bool Asset::cancelAllSynchronizations() {
-    const std::vector<Asset*>& children = childAssets();
+    std::vector<Asset*> children = childAssets();
     bool cancelledAnySync = std::any_of(
         children.cbegin(),
         children.cend(),
-        [](Asset* child) {
-            return child->cancelAllSynchronizations();
-        }
+        std::mem_fn(&Asset::cancelAllSynchronizations)
     );
 
     for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
@@ -437,9 +428,7 @@ bool Asset::cancelUnwantedSynchronizations() {
     bool cancelledAnySync = std::any_of(
         children.begin(),
         children.end(),
-        [](Asset* child) {
-            return child->cancelUnwantedSynchronizations();
-        }
+        std::mem_fn(&Asset::cancelUnwantedSynchronizations)
     );
 
     for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
@@ -453,11 +442,6 @@ bool Asset::cancelUnwantedSynchronizations() {
         setState(State::Loaded);
     }
     return cancelledAnySync;
-}
-
-bool Asset::restartAllSynchronizations() {
-    cancelAllSynchronizations();
-    return startSynchronizations();
 }
 
 float Asset::requiredSynchronizationProgress() const {
@@ -887,31 +871,6 @@ std::vector<Asset*> Asset::childAssets() const {
         children.push_back(a.get());
     }
     return children;
-}
-
-bool Asset::isRequired() const {
-    return !_requiringAssets.empty();
-}
-
-bool Asset::isRequested() const {
-    return !_requestingAssets.empty();
-}
-
-bool Asset::shouldBeInitialized() const {
-    const bool requiring = std::all_of(
-        _requiringAssets.begin(), _requiringAssets.end(),
-        [](const std::weak_ptr<Asset>& asset) {
-            return asset.lock()->state() == State::Initialized;
-        }
-    );
-    const bool requesting = std::all_of(
-        _requestingAssets.begin(), _requestingAssets.end(),
-        [](const std::weak_ptr<Asset>& asset) {
-            return asset.lock()->isInitialized();
-        }
-    );
-
-    return requiring && requesting;
 }
 
 } // namespace openspace

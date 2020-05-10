@@ -49,9 +49,6 @@ public:
         InitializationFailed
     };
 
-    using StateChangeCallback = std::function<void(State)>;
-    using CallbackHandle = size_t;
-
     struct MetaInformation {
         std::string name;
         std::string version;
@@ -101,12 +98,6 @@ public:
      * its own synchronizations and required assets' synchronizations could start.
      */
     bool startSynchronizations();
-    bool hasSyncingOrResolvedParent() const;
-    bool isSynchronized() const;
-    bool isSyncingOrResolved() const;
-    bool cancelAllSynchronizations();
-    bool cancelUnwantedSynchronizations();
-    bool restartAllSynchronizations();
     float requiredSynchronizationProgress() const;
     float requestedSynchronizationProgress();
 
@@ -134,15 +125,8 @@ public:
     std::vector<Asset*> requiredAssets() const;
     std::vector<Asset*> requiringAssets() const;
 
-    std::vector<const Asset*> requiredSubTreeAssets() const;
     std::vector<const Asset*> subTreeAssets() const;
     std::vector<Asset*> childAssets() const;
-
-    bool isRequired() const;
-    bool isRequested() const;
-    bool shouldBeInitialized() const;
-
-    std::string resolveLocalResource(std::string resourceName) const;
 
     void setMetaInformation(MetaInformation metaInformation);
     std::optional<MetaInformation> metaInformation() const;
@@ -153,7 +137,14 @@ private:
     void requiredAssetChangedState(Asset::State childState);
     void requestedAssetChangedState(Asset* child, Asset::State childState);
 
+    bool isSynchronized() const;
+    bool isSyncingOrResolved() const;
     bool isSyncResolveReady();
+    bool hasSyncingOrResolvedParent() const;
+    bool cancelAllSynchronizations();
+    bool cancelUnwantedSynchronizations();
+
+    std::vector<const Asset*> requiredSubTreeAssets() const;
 
     std::atomic<State> _state;
     AssetLoader* _loader;

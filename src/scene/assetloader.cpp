@@ -472,12 +472,6 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
     return 0;
 }
 
-std::shared_ptr<Asset> AssetLoader::require(const std::string& identifier) {
-    std::shared_ptr<Asset> asset = getAsset(identifier);
-    _currentAsset->require(asset);
-    return asset;
-}
-
 std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
     std::shared_ptr<Asset> asset = getAsset(identifier);
     Asset* parent = _currentAsset;
@@ -603,13 +597,16 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
 int AssetLoader::localResourceLua(Asset* asset) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::localResourceLua");
 
-    std::string resourceName = ghoul::lua::value<std::string>(
+    std::string name = ghoul::lua::value<std::string>(
         *_luaState,
         1,
         ghoul::lua::PopValue::Yes
     );
-    const std::string resolved = asset->resolveLocalResource(resourceName);
-    lua_pushstring(*_luaState, resolved.c_str());
+
+    const std::string resolvedName =
+        asset->assetDirectory() + ghoul::filesystem::FileSystem::PathSeparator + name;
+
+    lua_pushstring(*_luaState, resolvedName.c_str());
 
     ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
     return 1;
@@ -662,7 +659,8 @@ int AssetLoader::requireLua(Asset* dependant) {
     std::string assetName = luaL_checkstring(*_luaState, 1);
     lua_settop(*_luaState, 0);
 
-    std::shared_ptr<Asset> dependency = require(assetName);
+    std::shared_ptr<Asset> dependency = getAsset(assetName);
+    _currentAsset->require(dependency);
 
     if (!dependency) {
         return ghoul::lua::luaError(

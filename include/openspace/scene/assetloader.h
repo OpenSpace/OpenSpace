@@ -49,7 +49,6 @@ int request(lua_State* state);
 int exists(lua_State* state);
 int localResource(lua_State* state);
 int syncedResource(lua_State* state);
-int noOperation(lua_State* state);
 int exportAsset(lua_State* state);
 
 } // namespace assetloader
@@ -165,7 +164,6 @@ public:
     void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child);
 
 private:
-    std::shared_ptr<Asset> require(const std::string& identifier);
     std::shared_ptr<Asset> request(const std::string& identifier);
     void unrequest(const std::string& identifier);
 
