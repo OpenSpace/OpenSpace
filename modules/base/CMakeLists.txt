@@ -62,6 +62,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/scale/nonuniformstaticscale.h
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.h
@@ -111,6 +112,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/scale/nonuniformstaticscale.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.cpp

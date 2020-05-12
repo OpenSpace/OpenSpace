@@ -22,47 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCALE___H__
-#define __OPENSPACE_CORE___SCALE___H__
+#ifndef __OPENSPACE_MODULE_BASE___NONUNIFORMSTATICSCALE___H__
+#define __OPENSPACE_MODULE_BASE___NONUNIFORMSTATICSCALE___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/scene/scale.h>
 
-#include <ghoul/glm.h>
-#include <memory>
-
-namespace ghoul { class Dictionary; }
+#include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
 
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
 
-class Scale : public properties::PropertyOwner {
+class NonUniformStaticScale : public Scale {
 public:
-    static std::unique_ptr<Scale> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
-
-    Scale();
-    virtual ~Scale() = default;
-
-    virtual bool initialize();
-
-    glm::dvec3 scaleValue() const;
-    virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
-    virtual void update(const UpdateData& data);
+    NonUniformStaticScale();
+    NonUniformStaticScale(const ghoul::Dictionary& dictionary);
+    glm::dvec3 scaleValue(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    void requireUpdate();
-
 private:
-    bool _needsUpdate = true;
-    double _cachedTime = -std::numeric_limits<double>::max();
-    glm::dvec3 _cachedScale = glm::dvec3(1.0);
+    properties::DVec3Property _scaleValue;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___SCALE___H__
+#endif // __OPENSPACE_MODULE_BASE___NONUNIFORMSTATICSCALE___H__

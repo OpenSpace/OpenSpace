@@ -79,7 +79,7 @@ bool Scale::initialize() {
     return true;
 }
 
-double Scale::scaleValue() const {
+glm::dvec3 Scale::scaleValue() const {
     return _cachedScale;
 }
 
