@@ -96,19 +96,16 @@ private:
     properties::FloatProperty _groundAverageReflectanceP;
     properties::FloatProperty _groundRadianceEmittionP;
     properties::FloatProperty _rayleighHeightScaleP;
-    properties::FloatProperty _rayleighScatteringCoeffXP;
-    properties::FloatProperty _rayleighScatteringCoeffYP;
-    properties::FloatProperty _rayleighScatteringCoeffZP;
+    properties::Vec3Property  _rayleighScatteringCoeffP;
     properties::BoolProperty  _ozoneEnabledP;
     properties::BoolProperty  _oxygenEnableP;
     properties::Vec3Property  _ozoneAbsorptionCrossSectionP;
     properties::FloatProperty _oxygenHeightScaleP;
     properties::Vec3Property  _oxygenAbsorptionCrossSectionP;
     properties::FloatProperty _mieHeightScaleP;
-    properties::FloatProperty _mieScatteringCoeffXP;
-    properties::FloatProperty _mieScatteringCoeffYP;
-    properties::FloatProperty _mieScatteringCoeffZP;
+    properties::Vec3Property  _mieScatteringCoeffP;
     properties::Vec3Property  _mieAbsorptionCoeffP;
+    properties::Vec3Property  _mieExtinctionCoeffP;
     properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
     properties::FloatProperty _mieAsymmetricFactorGP;
     properties::FloatProperty _sunIntensityP;
@@ -148,17 +145,9 @@ private:
     float _atmospherePlanetRadius         = 0.f;
     float _planetAverageGroundReflectance = 0.f;
     float _planetGroundRadianceEmittion   = 0.f;
-    float _rayleighHeightScale            = 0.f;
-    float _oxygenHeightScale              = 0.f;
-    float _mieHeightScale                 = 0.f;
-    float _miePhaseConstant               = 0.f;
     float _sunRadianceIntensity           = 5.f;
     float _mieScattExtPropCoefProp        = 1.f;
 
-    glm::vec3 _mieExtinctionCoeff      = glm::vec3(0.f);
-    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
-    glm::vec3 _ozoneExtinctionCoeff    = glm::vec3(0.f);
-    glm::vec3 _mieScatteringCoeff      = glm::dvec3(0.f);
 
     // Atmosphere Debug
     bool _saveCalculationsToTexture   = false;

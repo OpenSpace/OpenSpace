@@ -524,7 +524,7 @@ void AtmosphereDeferredcaster::setSunRadianceIntensity(float sunRadiance) {
     _sunRadianceIntensity = sunRadiance;
 }
 
-void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(glm::vec3& rayScattCoeff)
+void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(glm::vec3 rayScattCoeff)
 {
     _rayleighScatteringCoeff = std::move(rayScattCoeff);
 }
@@ -539,17 +539,17 @@ void AtmosphereDeferredcaster::setOxygenAbsCrossSections(glm::vec3 oxygenAbsCros
     _oxygenAbsCrossSection = std::move(oxygenAbsCrossSections);
 }
 
-void AtmosphereDeferredcaster::setMieScatteringCoefficients(glm::vec3& mieScattCoeff)
+void AtmosphereDeferredcaster::setMieScatteringCoefficients(glm::vec3 mieScattCoeff)
 {
     _mieScatteringCoeff = std::move(mieScattCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieAbsorptionCoefficients(glm::vec3& mieAbsorbCoeff)
+void AtmosphereDeferredcaster::setMieAbsorptionCoefficients(glm::vec3 mieAbsorbCoeff)
 {
     _mieAbsorptionCoeff = std::move(mieAbsorbCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieExtinctionCoefficients(glm::vec3& mieExtCoeff)
+void AtmosphereDeferredcaster::setMieExtinctionCoefficients(glm::vec3 mieExtCoeff)
 {
     _mieExtinctionCoeff = std::move(mieExtCoeff);
 }

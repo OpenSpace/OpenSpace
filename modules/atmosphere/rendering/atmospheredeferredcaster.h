@@ -102,12 +102,12 @@ public:
     void setMieHeightScale(float mieHeightScale);
     void setMiePhaseConstant(float miePhaseConstant);
     void setSunRadianceIntensity(float sunRadiance);
-    void setRayleighScatteringCoefficients(glm::vec3& rayScattCoeff);
+    void setRayleighScatteringCoefficients(glm::vec3 rayScattCoeff);
     void setOxygenAbsCrossSections(glm::vec3 oxygenAbsCrossSections);
     void setOzoneAbsCrossSections(glm::vec3 ozoneAbsCrossSections);
-    void setMieScatteringCoefficients(glm::vec3& mieScattCoeff);
-    void setMieAbsorptionCoefficients(glm::vec3& mieAbsorbCoeff);
-    void setMieExtinctionCoefficients(glm::vec3& mieExtCoeff);
+    void setMieScatteringCoefficients(glm::vec3 mieScattCoeff);
+    void setMieAbsorptionCoefficients(glm::vec3 mieAbsorbCoeff);
+    void setMieExtinctionCoefficients(glm::vec3 mieExtCoeff);
     void setEllipsoidRadii(glm::dvec3& radii);
     void setShadowConfigArray(std::vector<ShadowConfiguration>& shadowConfigArray);
     void setAdvancedModeParameters(const AdvancedATMModeData &advData);

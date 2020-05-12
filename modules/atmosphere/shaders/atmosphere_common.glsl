@@ -661,7 +661,6 @@ vec3 absorptionCoefficientRayleight(const vec3 lambda) {
   vec3 imgPart = ab_conjugate_complex / bb_conjugate;
 
   float r3 = radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh;
-  //float mTokm = 1000.f;
   
   return vec3(1.f) * ((8.f * M_PI * M_PI * N_rayleigh_abs_molecule * r3) / lambda) * imgPart;
 }

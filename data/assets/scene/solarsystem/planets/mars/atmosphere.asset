@@ -10,17 +10,9 @@ local Atmosphere = {
             -- Atmosphere and planet radius in Km
             --AtmosphereRadius = 3463.17495,
             --PlanetRadius = 3386.190,
-            -- Paper values
-            --PlanetRadius = 3389.5,
             
             AtmosphereRadius = 6451.137,
             PlanetRadius     = 6368.137,
-            -- Real Radius: 6378.137
-            --PlanetRadius    = 6378.137,
-            
-            -- AtmosphereRadius = 3463.17495,
-            --PlanetRadius    = 3396.19,
-            --PlanetRadius = 3393.0,
             
             PlanetAverageGroundReflectance = 0.1,
             GroundRadianceEmittion = 0.37,
@@ -49,7 +41,7 @@ local Atmosphere = {
                 RayleighComplexRefract = {0.0, 0.0, 0.0},
                 Polarizability = 0.09,
                 -- N Rayleigh x10^25,
-                NRayleigh = 0.02779,
+                NRayleigh = 277.90,
                 -- N Rayliegh Absorption x 10^16 m
                 NRayleighAbs = 0.0,
                 -- Rayleigh Absorption Particle Radius x10-10 m
