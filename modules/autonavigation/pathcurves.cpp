@@ -215,39 +215,32 @@ double PathCurve::arcLength(double limit) {
     return arcLength(0.0, limit);
 }
 
-// Approximate the curve length using Simpson's rule
+// Approximate the arc length using 5-point Gaussian quadrature
+// https://en.wikipedia.org/wiki/Gaussian_quadrature
 double PathCurve::arcLength(double lowerLimit, double upperLimit) {
-    const int n = 50; // resolution, must be even for Simpson's rule
-    const double h = (upperLimit - lowerLimit) / (double)n;
+    double a = lowerLimit;
+    double b = upperLimit;
 
-    auto arcLengthFunction = [&](double u, double h) {
-        const double stepScale = 0.001; // for higher precision in derivative
-        double d = approximatedDerivative(u, stepScale * h);
-        long double derivativeSquared = d * d;
-
-        // OBS! Sqrt is expensive! And the derivatives are really large, so might be 
-        // sufficient with just the derivative 
-        return std::sqrt(1 + derivativeSquared);
+    struct GaussLengendreCoefficient {
+        double abscissa; // xi
+        double weight;   // wi
     };
 
-    // Points to be multiplied by 1
-    double endPoints = arcLengthFunction(lowerLimit, h) + arcLengthFunction(upperLimit, h);
+    static constexpr GaussLengendreCoefficient coefficients[] =
+    {
+        { 0.0, 0.5688889 },
+        { -0.5384693, 0.47862867 },
+        { 0.5384693, 0.47862867 },
+        { -0.90617985, 0.23692688 },
+        { 0.90617985, 0.23692688 }
+    };
 
-    // Points to be multiplied by 4
-    double times4 = 0.0;
-    for (int i = 1; i < n; i += 2) {
-        double u = lowerLimit + h * i;
-        times4 += arcLengthFunction(u, h);
+    double length = 0.0;
+    for (auto coefficient : coefficients) {
+        double const t = 0.5 * ((b - a)*coefficient.abscissa + (b + a)); // change of interval to [a, b] from [-1, 1] (also 0.5 * (b - a) below)
+        length += approximatedDerivative(t) * coefficient.weight;
     }
-
-    // Points to be multiplied by 2
-    double times2 = 0.0;
-    for (int i = 2; i < n; i += 2) {
-        double u = lowerLimit + h * i;
-        times2 += arcLengthFunction(u, h);
-    }
-
-    return (h / 3.0) * (endPoints + 4.0 * times4 + 2.0 * times2);
+    return 0.5 * (b - a) * length;
 }
 
 Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
