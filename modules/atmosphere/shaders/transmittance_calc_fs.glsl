@@ -134,7 +134,7 @@ void main(void) {
   unmappingRAndMu(r, muSun);
   
   vec3 opDepth = (extinctionCoefficientMie(lambdaArray) 
-                  * opticalDepth(r, muSun, HM, hidrostaticApproximation)) 
+                  * opticalDepth(r, muSun, HM, hidrostaticApproximation))
                 + (extinctionCoefficientRayleigh(lambdaArray) 
                   * opticalDepth(r, muSun, HR, hidrostaticApproximation));
   

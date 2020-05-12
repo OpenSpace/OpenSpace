@@ -643,13 +643,27 @@ vec3 scatteringCoefficientRayleigh(const vec3 lambda) {
 // lambda := wavelength of the incident light (680, 550, 440) nm in our case
 vec3 absorptionCoefficientRayleight(const vec3 lambda) {
   // n = m + ki => n^2 = (m^2 - k^2) + (2mk)i
-  // vec3 k2 = 2.f * (n_real_rayleigh * n_complex_mie);
-  // float r3 = radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh;
-  // float mTokm = 1000.f;
-  // return mTokm * (8.f * M_PI * M_PI * N_rayleigh_abs_molecule * r3) 
-  //   * ( ( (k2 - vec3(1.f)) / (k2 + vec3(2.f)) ) / lambda);
+  // n^2 - 1 = (m^2 - k^2 - 1) + (2mk)i = a
+  // n^2 + 2 = (m^2 - k^2 + 2) + (2mk)i = b
+  // a/b = [a x b*]/[b x b*], where b* is the conjugate of b
+  vec3 n2_real    = (n_real_rayleigh * n_real_rayleigh) - (n_complex_rayleigh * n_complex_rayleigh);
+  vec3 n2_complex = (2.f * n_real_rayleigh * n_complex_rayleigh);
+  
+  vec3 a_real    = n2_real - vec3(1.f);
+  vec3 b_real    = n2_real + vec3(2.f);
+  vec3 a_complex = n2_complex;
+  vec3 b_complex = n2_complex;
+  vec3 b_complex_conjugate = -b_complex;
+  
+  //vec3 ab_conjugate_real    = (a_real * b_real) - (a_complex * b_complex_conjugate);
+  vec3 ab_conjugate_complex = (a_real * b_complex_conjugate + a_complex * b_real);
+  vec3 bb_conjugate = (b_real * b_real) + (b_complex * b_complex);
+  vec3 imgPart = ab_conjugate_complex / bb_conjugate;
 
-  return vec3(0.0);
+  float r3 = radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh * radius_abs_molecule_rayleigh;
+  //float mTokm = 1000.f;
+  
+  return vec3(1.f) * ((8.f * M_PI * M_PI * N_rayleigh_abs_molecule * r3) / lambda) * imgPart;
 }
 
 vec3 extinctionCoefficientRayleigh(const vec3 lambda) {
