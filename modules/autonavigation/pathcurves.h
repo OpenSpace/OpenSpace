@@ -54,21 +54,20 @@ public:
     std::vector<glm::dvec3> getPoints(); // for debugging
 
 protected:
-    // to be called last in constructor of every new curve type
+    // TODO: give a better name after experimental curve types have been added
     void initParameterIntervals();
-    void initLengths();
 
     double approximatedDerivative(double u, double h = 1E-7);
     double arcLength(double limit = 1.0);
     double arcLength(double lowerLimit, double upperLimit);
 
     std::vector<glm::dvec3> _points; 
-    double _length; // the total length of the curve (approximated)
     unsigned int _nrSegments;
 
     std::vector<double> _parameterIntervals;
     std::vector<double> _lengths;
     std::vector<double> _lengthSums;
+    double _totalLength;
 
     int _nrParameterSamplesPerSegment = 100; 
     std::map<double, double> _parameterPairs; // s (arc length), u (curve parameter)

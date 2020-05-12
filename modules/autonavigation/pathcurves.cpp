@@ -40,18 +40,17 @@ namespace openspace::autonavigation {
 PathCurve::~PathCurve() {}
 
 const double PathCurve::length() const {
-    return _length;
+    return _totalLength;
 }
 
 glm::dvec3 PathCurve::positionAt(double relativeLength) {
-    double u = approximatedCurveParameter(relativeLength * _length); // TODO: only use relative length
-    //LINFO(fmt::format("Curve parameter: u = {}", u));
+    double u = approximatedCurveParameter(relativeLength * _totalLength); // TODO: only use relative length?
     return interpolate(u);
 }
 
 double PathCurve::approximatedCurveParameter(double s) {
     if (s <= Epsilon) return 0.0;
-    if (s >= _length) return 1.0;
+    if (s >= _totalLength) return 1.0;
 
     std::map<double, double>::iterator itSample = _parameterPairs.upper_bound(s);
     std::map<double, double>::iterator itPrevSample = std::prev(itSample, 1);
@@ -71,7 +70,7 @@ double PathCurve::approximatedCurveParameter(double s) {
 // Returns curve parameter in range [0, 1]
 double PathCurve::curveParameter(double s) {
     if (s <= Epsilon) return 0.0;
-    if (s >= _length) return 1.0; 
+    if (s >= _totalLength) return 1.0; 
 
     unsigned int segmentIndex;
     for (segmentIndex = 1; segmentIndex < _nrSegments; ++segmentIndex) {
@@ -89,14 +88,14 @@ double PathCurve::curveParameter(double s) {
 
     const int nrIterations = 10; 
 
-    // initialize root boudning limits for bisection
+    // initialize root bounding limits for bisection
     double lower = uMin;
     double upper = uMax;
 
     for (int i = 0; i < nrIterations; ++i) {
         double F = arcLength(uMin, u) - segmentS; 
 
-        const double tolerance = 0.01 * Epsilon * _length;
+        const double tolerance = 0.01 * Epsilon * _totalLength;
         if (std::abs(F) <= tolerance) {
             return u;
         }
@@ -128,7 +127,8 @@ double PathCurve::curveParameter(double s) {
         }
     }
 
-    // TODO: write meaningful comment about how no root was found in the number of iterations
+    // No root was found based on the number of iterations and tolerance. However, it is
+    // safe to report the last computed u value, since it is within the segment interval
     return u;
 }
 
@@ -138,21 +138,20 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
     return _points;
 }
 
-// TODO: move to base constructor
 void PathCurve::initParameterIntervals() {
+    ghoul_assert(_nrSegments > 0, "Cannot have a curve with zero segments!");
     _parameterIntervals.clear();
     _parameterIntervals.reserve(_nrSegments + 1);
 
-    double delta = 1.0 / _nrSegments;
-
+    // compute initial values, to be able to compute lengths
+    double dt = 1.0 / _nrSegments;
     _parameterIntervals.push_back(0.0);
     for (unsigned int i = 1; i < _nrSegments; i++) {
-        _parameterIntervals.push_back(delta * i);
+        _parameterIntervals.push_back(dt * i);
     }
     _parameterIntervals.push_back(1.0);
-}
 
-void PathCurve::initLengths() {
+    // lengths
     _lengths.clear();
     _lengths.reserve(_nrSegments + 1);
     _lengthSums.clear();
@@ -166,18 +165,17 @@ void PathCurve::initLengths() {
         _lengths.push_back(arcLength(uPrev, u)); // OBS! Is this length computed well enough?
         _lengthSums.push_back(_lengthSums[i - 1] + _lengths[i]);
     }
-    _length = _lengthSums.back();
+    _totalLength = _lengthSums.back();
 
-    // Scale parameterIntervals to better match arc lengths
+    // scale parameterIntervals to better match arc lengths
     for (unsigned int i = 1; i <= _nrSegments; i++) {
-        _parameterIntervals[i] = _lengthSums[i] / _length;
+        _parameterIntervals[i] = _lengthSums[i] / _totalLength;
     }
 
-    // Prepare samples for arc length reparameterization
+    // prepare samples for arc length reparameterization
     _parameterPairs.clear();
     _parameterPairs[0.0] = 0.0;
     double s = 0.0;
-
     for (int i = 1; i <= _nrSegments; ++i) {
         double segmentLength = _lengths[i];
         // TODO: make nr of samples dependent on segment length somehow
@@ -195,8 +193,9 @@ void PathCurve::initLengths() {
         }
         _parameterPairs[_lengthSums[i]] = _parameterIntervals[i];
     }
-    _parameterPairs[_length] = 1.0;
+    _parameterPairs[_totalLength] = 1.0;
 
+    // TODO: remove when not needed
     //LINFO(fmt::format("number samples: {}", _parameterPairs.size()));
     //LINFO(fmt::format("next to last value: {}", std::prev(_parameterPairs.end(), 2)->second));
 }
@@ -323,7 +322,6 @@ Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
     _nrSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
 
    initParameterIntervals();
-   initLengths();
 }
 
 // Interpolate a list of control points and knot times
@@ -358,9 +356,8 @@ glm::dvec3 Bezier3Curve::interpolate(double u) {
 LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
     _points.push_back(start.position());
     _points.push_back(end.position());
-    _length = glm::distance(end.position(), start.position());
-
-    // TODO: new method
+    _nrSegments = 1;
+    initParameterIntervals();
 }
 
 glm::dvec3 LinearCurve::interpolate(double u) {
