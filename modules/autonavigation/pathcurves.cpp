@@ -98,7 +98,7 @@ double PathCurve::curveParameter(double s) {
     for (int i = 0; i < nrIterations; ++i) {
         double F = arcLength(uMin, u) - segmentS; 
 
-        const double tolerance = 0.01 * Epsilon * _totalLength;
+        const double tolerance = 0.1; // meters. Note that distances are very large
         if (std::abs(F) <= tolerance) {
             return u;
         }
