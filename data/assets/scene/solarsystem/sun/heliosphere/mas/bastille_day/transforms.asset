@@ -17,7 +17,9 @@ local HNMReferenceFrame = {
         }
     },
     GUI = {
-        Name = "HNM Reference Frame"
+        Name = "HNM Reference Frame",
+        Path = "/Solar System/Sun",
+        Hidden = true
     }
 }
 
@@ -33,7 +35,9 @@ local GSMReferenceFrame = {
         }
     },
     GUI = {
-        Name = "GSM Reference Frame"
+        Name = "GSM Reference Frame",
+        Path = "/Solar System/Sun",
+        Hidden = true
     }
 }
 

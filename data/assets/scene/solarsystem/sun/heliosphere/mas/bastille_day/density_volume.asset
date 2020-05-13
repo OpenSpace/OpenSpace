@@ -1,9 +1,9 @@
 asset.info = {
-    Name = "Volume Rendering Bastille Day",
+    Name = "Predictive Science Inc. Volume Rendering Bastille Day",
     Version = "1.0",
-    Description = [[ Volumetric rendering for the bastille day CME event ]],
-    Author = "OpenSpace Team",
-    URL = "",
+    Description = " Volumetric rendering for the bastille day CME event ",
+    Author = "Jonathan Grangien, Matthias Berg, Elon Olsson",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }
 

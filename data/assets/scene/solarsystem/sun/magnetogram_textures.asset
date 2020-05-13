@@ -1,5 +1,4 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
 local sun = asset.require('scene/solarsystem/sun/sun')
 
 -- synced directories
@@ -31,9 +30,5 @@ asset.onInitialize(function ()
             }
         )
     end
-
-end)
-
-asset.onDeinitialize(function ()
 
 end)

@@ -10,6 +10,7 @@ asset.require('scene/solarsystem/sun/magnetogram_textures')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 
 -- must be >0
+-- the textureIndex variable is used to select a texture from a list of textures 
 textureIndex = 2;
 
 local Keybindings = {
@@ -19,7 +20,7 @@ local Keybindings = {
             "openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
             "openspace.setPropertyValueSingle('Scene.Sun.Renderable.Enabled', false);" ..
             "openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);" ..
-            "openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);"
+            "openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);",
 	    Documentation = "Resets the subscene for showing the Sun volume rendering + fieldlines",
 	    Name = "Reset MHD back",
 	    GuiPath = "/CCMC/MHD",
@@ -90,22 +91,13 @@ asset.onInitialize(function ()
     local str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. textureIndex .. ".Enabled";
     openspace.setPropertyValueSingle(str, true)
     
+    openspace.setPropertyValueSingle('Scene.Sun.Renderable.Enabled', true)
     openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false)
 	
 	openspace.markInterestingNodes({
-        "Earth", "Sun1", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+        "Earth", "Sun", "Moon"
     });
 	
-	openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "Scene.*Trail.renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    );
-
 	openspace.navigation.setNavigationState({
         Anchor = sunAsset.Sun.Identifier,
         ReferenceFrame = "Root",
@@ -118,7 +110,7 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeInterestingNodes({
-        "Earth", "Sun1", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+        "Earth", "Sun", "Moon"
     })
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")

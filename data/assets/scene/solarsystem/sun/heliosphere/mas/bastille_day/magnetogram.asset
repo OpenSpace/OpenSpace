@@ -3,11 +3,11 @@
 -- ApJ, 
 -- 856:75.
 asset.info = {
-    Name = "PREDSCI MAS Bastille Day Textures",
+    Name = "Predictive Science Inc. MAS Bastille Day Textures",
     Version = "1.0",
-    Description = [[ Magnetograms of the sun ]],
-    Author = "OpenSpace Team",
-    URL = "https://ui.adsabs.harvard.edu/abs/2018ApJ...856...75T/abstract",
+    Description = " Magnetograms of the sun ",
+    Author = "Jonathan Grangien, Matthias Berg, Elon Olsson",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }
 
