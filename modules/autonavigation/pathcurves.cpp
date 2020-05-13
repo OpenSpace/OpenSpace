@@ -66,6 +66,9 @@ double PathCurve::approximatedCurveParameter(double s) {
     return uPrevSample + slope * (s - sPrevSample);
 }
 
+// Compute the curve parameter from an arc length value, using a combination of
+// Newton's method and bisection. Source:
+// https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf
 // Input s is a length value, in the range [0, _length]
 // Returns curve parameter in range [0, 1]
 double PathCurve::curveParameter(double s) {
@@ -86,7 +89,7 @@ double PathCurve::curveParameter(double s) {
     const double uMax = _parameterIntervals[segmentIndex];
     double u = uMin + (uMax - uMin) * (segmentS / segmentLength);
 
-    const int nrIterations = 10; 
+    const int nrIterations = 40; 
 
     // initialize root bounding limits for bisection
     double lower = uMin;
@@ -104,26 +107,14 @@ double PathCurve::curveParameter(double s) {
         double dfdu = approximatedDerivative(u, Epsilon); // > 0                            
         double uCandidate = u - F / dfdu;
 
-        // Update root-bounding interval and test candidate
+        // update root-bounding interval and test candidate
         if (F > 0) {  // => candidate < u <= upper
             upper = u;
-            if (uCandidate <= lower) {
-                // the candidate is outside [lower, upper] => use bisection 
-                u = (upper + lower) / 2.0;
-            }
-            else {
-                u = uCandidate;
-            }
+            u = (uCandidate <= lower) ? (upper + lower) / 2.0 : uCandidate;
         }
         else { // F < 0 => lower <= u < candidate 
             lower = u;
-            if (uCandidate >= upper) {
-                // the candidate is outside [lower, upper] => use bisection 
-                u = (upper + lower) / 2.0;
-            }
-            else {
-                u = uCandidate;
-            }
+            u = (uCandidate >= upper) ? (upper + lower) / 2.0 : uCandidate;
         }
     }
 
