@@ -14,8 +14,8 @@ local textures = asset.syncedResource({
 })
 
 -- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
--- local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
-local marsRadii = { 6378137.0, 6378137.0, 6378137.0 }
+local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
+-- local marsRadii = { 6378137.0, 6378137.0, 6378137.0 }
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
 

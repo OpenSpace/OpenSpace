@@ -8,11 +8,11 @@ local Atmosphere = {
         Type = "RenderableAtmosphere",
         Atmosphere = {
             -- Atmosphere and planet radius in Km
-            --AtmosphereRadius = 3463.17495,
-            --PlanetRadius = 3386.190,
+            AtmosphereRadius = 3463.17495,
+            PlanetRadius = 3386.190,
             
-            AtmosphereRadius = 6451.137,
-            PlanetRadius     = 6368.137,
+            --AtmosphereRadius = 6451.137,
+            --PlanetRadius     = 6368.137,
             
             PlanetAverageGroundReflectance = 0.1,
             GroundRadianceEmittion = 0.37,
