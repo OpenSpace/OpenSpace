@@ -85,6 +85,8 @@
 #endif // WIN32
 #include <cmath>
 
+//#define __EXTRACT_CIE_CURVES__
+
 
 namespace {
     constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
@@ -102,8 +104,9 @@ namespace {
         "inscatterTexture", "inscatterRayleighTexture", "inscatterMieTexture"
     };
 
-    constexpr const std::array<const char*, 18> UniformCacheAdvMode = {
-        "useOnlyAdvancedMie", "deltaPolarizability", "n_real_rayleigh", "n_complex_rayleigh",
+    constexpr const std::array<const char*, 20> UniformCacheAdvMode = {
+        "useOnlyAdvancedMie", "useCornettePhaseFunction", "usePenndorfPhaseFunction", 
+        "deltaPolarizability", "n_real_rayleigh", "n_complex_rayleigh",
         "n_real_mie", "n_complex_mie", "lambdaArray", "N_rayleigh, N_mie",
         "N_rayleigh_abs_molecule", "radius_abs_molecule_rayleigh", "mean_radius_particle_mie",
         "turbidity", "jungeExponent", "Kappa", "g1", "g2", "alpha"
@@ -214,6 +217,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             // Advanced Mode Parameters
             program.setUniform(_uniformCacheAdvMode.deltaPolarizability, _advModeData.deltaPolarizability);
             program.setUniform(_uniformCacheAdvMode.useOnlyAdvancedMie, _advModeData.useOnlyAdvancedMie);
+            program.setUniform(_uniformCacheAdvMode.useCornettePhaseFunction, _advModeData.useCornettePhaseFunction);
+            program.setUniform(_uniformCacheAdvMode.usePenndorfPhaseFunction, _advModeData.usePenndorfPhaseFunction);
             program.setUniform(_uniformCacheAdvMode.jungeExponent, _advModeData.jungeExponent);
             program.setUniform(_uniformCacheAdvMode.Kappa, _advModeData.Kappa);
             program.setUniform(_uniformCacheAdvMode.lambdaArray, _advModeData.lambdaArray);
@@ -1460,6 +1465,8 @@ void AtmosphereDeferredcaster::saveSkyLuminance() const {
     // Advance Mode Data
     cieCurveExtractionProgramObject->setUniform("advancedModeEnabled", _advancedMode);
     cieCurveExtractionProgramObject->setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    cieCurveExtractionProgramObject->setUniform("useCornettePhaseFunction", _advModeData.useCornettePhaseFunction);
+    cieCurveExtractionProgramObject->setUniform("usePenndorfPhaseFunction", _advModeData.usePenndorfPhaseFunction);
     cieCurveExtractionProgramObject->setUniform("deltaPolarizability", _advModeData.deltaPolarizability);
     cieCurveExtractionProgramObject->setUniform("jungeExponent", _advModeData.jungeExponent);
     cieCurveExtractionProgramObject->setUniform("Kappa", _advModeData.Kappa);
@@ -1601,8 +1608,10 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
 
     LDEBUG("Ended precalculations for Atmosphere effects...");
 
+#ifdef __EXTRACT_CIE_CURVES__
     // Just for the paper:
     saveSkyLuminance();
+#endif
 }
 
 void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) const {
@@ -1667,6 +1676,8 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
     // Advance Mode Data
     shaderProg->setUniform("advancedModeEnabled", _advancedMode);
     shaderProg->setUniform("useOnlyAdvancedMie", _advModeData.useOnlyAdvancedMie);
+    shaderProg->setUniform("useCornettePhaseFunction", _advModeData.useCornettePhaseFunction);
+    shaderProg->setUniform("usePenndorfPhaseFunction", _advModeData.usePenndorfPhaseFunction);
     shaderProg->setUniform("deltaPolarizability", _advModeData.deltaPolarizability);
     shaderProg->setUniform("jungeExponent", _advModeData.jungeExponent);
     shaderProg->setUniform("Kappa", _advModeData.Kappa);

@@ -66,6 +66,8 @@ public:
         float turbidity;
         float jungeExponent;
         bool useOnlyAdvancedMie;
+        bool useCornettePhaseFunction;
+        bool usePenndorfPhaseFunction;
     };
 
 public:
@@ -171,7 +173,8 @@ private:
         dSGCTViewToWorldMatrix, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture, inscatterRayleighTexture, inscatterMieTexture) _uniformCache2;
-    UniformCache(useOnlyAdvancedMie, deltaPolarizability, n_real_rayleigh, n_complex_rayleigh,
+    UniformCache(useOnlyAdvancedMie, useCornettePhaseFunction, usePenndorfPhaseFunction,
+        deltaPolarizability, n_real_rayleigh, n_complex_rayleigh,
         n_real_mie, n_complex_mie, lambdaArray, N_rayleigh, N_mie,
         N_rayleigh_abs_molecule, radius_abs_molecule_rayleigh, mean_radius_particle_mie,
         turbidity, jungeExponent, Kappa, g1, g2, alpha) _uniformCacheAdvMode;

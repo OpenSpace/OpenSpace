@@ -213,6 +213,18 @@ namespace {
         ""
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseCornettePhaseFunctionInfo = {
+        "UseCornettePhaseFunction",
+        "Use Cornette's phase function instead of DHG phase function",
+        ""
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UsePenndorfPhaseFunctionInfo = {
+        "UsePenndorfPhaseFunction",
+        "Use Penndorf's phase function approximation for Rayleigh's scattering",
+        ""
+    };
+
     openspace::properties::PropertyOwner::PropertyOwnerInfo AdvancedModeOwnerInfo = {
         "Advanced Mode Parameters",
         "Advanced Mode Parameters",
@@ -397,6 +409,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
     , _enableAdvancedModeP(AdvancedModeInfo, false)
     , _useOnlyAdvancedMieP(UseOnlyAdvancedMieInfo, false)
+    , _useCornettePhaseFunctionP(UseCornettePhaseFunctionInfo , false)
+    , _usePenndorfPhaseFunctionP(UsePenndorfPhaseFunctionInfo , false)
     , _nRealRayleighP(
         RayleighRealRefractIndexInfo,
         glm::vec3(1.00027598f, 1.00027783f, 1.00028276f),
@@ -699,6 +713,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             if (rayleighDictionary.hasKey(RayleighRadiusAbsParticleInfo.identifier)) {
                 _radiusAbsMoleculeRayleighP = rayleighDictionary.value<float>(RayleighRadiusAbsParticleInfo.identifier);
             }
+
+            if (rayleighDictionary.hasKey(UsePenndorfPhaseFunctionInfo.identifier)) {
+                _usePenndorfPhaseFunctionP = rayleighDictionary.value<bool>(UsePenndorfPhaseFunctionInfo.identifier);
+            }
         }
         else {
             errorReadingAtmosphereData = true;
@@ -842,6 +860,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             if (mieDictionary.hasKey(AlphaInfo.identifier)) {
                 _alphaP = mieDictionary.value<glm::vec3>(AlphaInfo.identifier);
             }
+
+            if (mieDictionary.hasKey(UseCornettePhaseFunctionInfo.identifier)) {
+                _useCornettePhaseFunctionP = mieDictionary.value<bool>(UseCornettePhaseFunctionInfo.identifier);
+            }
         }
         else {
             errorReadingAtmosphereData = true;
@@ -968,6 +990,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             addProperty(_enableAdvancedModeP);
 
             _useOnlyAdvancedMieP.onChange(updateAtmosphere);
+            _usePenndorfPhaseFunctionP.onChange(updateAtmosphere);
+            _useCornettePhaseFunctionP.onChange(updateAtmosphere);
             _nRealRayleighP.onChange(updateAtmosphere);
             _nComplexRayleighP.onChange(updateAtmosphere);
             _nRealMieP.onChange(updateAtmosphere);
@@ -987,6 +1011,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _alphaP.onChange(updateAtmosphere);
 
             _advancedModeOwner.addProperty(_useOnlyAdvancedMieP);
+            _advancedModeOwner.addProperty(_usePenndorfPhaseFunctionP);
+            _advancedModeOwner.addProperty(_useCornettePhaseFunctionP);
             _advancedModeOwner.addProperty(_nRealRayleighP);
             _advancedModeOwner.addProperty(_nComplexRayleighP);
             _advancedModeOwner.addProperty(_nRealMieP);
@@ -1139,6 +1165,8 @@ void RenderableAtmosphere::setDeferredCasterParameters(const bool executePreCalc
 
     AtmosphereDeferredcaster::AdvancedATMModeData advModeData;
     advModeData.useOnlyAdvancedMie        = _useOnlyAdvancedMieP;
+    advModeData.usePenndorfPhaseFunction  = _usePenndorfPhaseFunctionP;
+    advModeData.useCornettePhaseFunction  = _useCornettePhaseFunctionP;
     advModeData.deltaPolarizability       = _deltaPolarizabilityP;
     advModeData.jungeExponent             = _jungeExponentP;
     advModeData.Kappa                     = _KappaP;

@@ -33,8 +33,12 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
+//#define __PERFORMANCE_MEASUREMENTS__
+
+#ifdef __PERFORMANCE_MEASUREMENTS__
 //JCC: Temp property to save the fps to a file
 #include <thread>
+#endif
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::fontrendering { class Font; }
@@ -62,10 +66,10 @@ public:
     static documentation::Documentation Documentation();
 
     //JCC: Temp property to save the fps to a file
+#ifdef __PERFORMANCE_MEASUREMENTS__
     ~DashboardItemFramerate();
-
-    //JCC: Temp property to save the fps to a file
     void threadFunction();
+#endif
 
 private:
     properties::StringProperty _fontName;
@@ -74,6 +78,7 @@ private:
     properties::TriggerProperty _clearCache;
 
     //JCC: Temp property to save the fps to a file
+#ifdef __PERFORMANCE_MEASUREMENTS__
     properties::BoolProperty _enableFPSRecording;
     properties::BoolProperty _markTimeRecording;
     int   _markRecordings[100] = { -1 };
@@ -83,6 +88,7 @@ private:
     int _numberMarkedItems = 0;
     std::thread _dataCollectingThread;
     bool _runThread = false;
+#endif
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

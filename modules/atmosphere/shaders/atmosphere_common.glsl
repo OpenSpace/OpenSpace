@@ -114,6 +114,8 @@ float invRtMinusRg = 1.0f / RtMinusRg;
 
 uniform bool  advancedModeEnabled;
 uniform bool  useOnlyAdvancedMie;
+uniform bool  useCornettePhaseFunction;
+uniform bool  usePenndorfPhaseFunction;
 uniform float deltaPolarizability;
 uniform vec3  n_real_rayleigh;
 uniform vec3  n_complex_rayleigh;
@@ -561,13 +563,13 @@ vec3 transmittance(const float r, const float mu, const float d) {
 // scattering cosine angle mu --
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 float rayleighPhaseFunction(const float mu) {
-  // if (advancedModeEnabled && !useOnlyAdvancedMie) {
-  //   // Penndorf
-  //   return 0.7629f * (1.f + 0.932f * mu * mu) * INV_M_PI * 0.25f;
-  // } else {
+  if ((advancedModeEnabled && !useOnlyAdvancedMie) || usePenndorfPhaseFunction) {
+    // Penndorf
+    return 0.7629f * (1.f + 0.932f * mu * mu) * INV_M_PI * 0.25f;
+  } else {
     //return (3.0f / (16.0f * M_PI)) * (1.0f + mu * mu);
     return 0.0596831036 * (1.0f + mu * mu);
-  //}
+  }
 }
 
 // -- Calculates DHG Mie phase function given thescattering cosine angle mu --
@@ -576,34 +578,34 @@ float rayleighPhaseFunction(const float mu) {
 // g2 := backward scattering
 // alpha: = ratio between g1 and g2
 vec3 DHG_MiePhaseFunction(const float mu) {
-  // vec3 g1SQRD = g1 * g1;
-  // vec3 g2SQRD = g2 * g2;
-  // float exponent = 3.f/2f;
+  vec3 g1SQRD = g1 * g1;
+  vec3 g2SQRD = g2 * g2;
+  float exponent = 3.f/2f;
   
-  // vec3 denom1 = vec3(1.f) + g1SQRD - 2.f * g1 * mu;
-  // vec3 denom2 = vec3(1.f) + g2SQRD - 2.f * g2 * mu;
-  // vec3 d1Powered = vec3(pow(denom1.r, exponent), pow(denom1.g, exponent), pow(denom1.b, exponent));
-  // vec3 d2Powered = vec3(pow(denom2.r, exponent), pow(denom2.g, exponent), pow(denom2.b, exponent));
+  vec3 denom1 = vec3(1.f) + g1SQRD - 2.f * g1 * mu;
+  vec3 denom2 = vec3(1.f) + g2SQRD - 2.f * g2 * mu;
+  vec3 d1Powered = vec3(pow(denom1.r, exponent), pow(denom1.g, exponent), pow(denom1.b, exponent));
+  vec3 d2Powered = vec3(pow(denom2.r, exponent), pow(denom2.g, exponent), pow(denom2.b, exponent));
   
-  // return (alpha * ((vec3(1.f) - g1SQRD)/d1Powered) + (vec3(1.f) - alpha) * ((vec3(1.f) - g2SQRD)/d2Powered)) 
-  //   * INV_M_PI * 0.25f;
+  return (alpha * ((vec3(1.f) - g1SQRD)/d1Powered) + (vec3(1.f) - alpha) * ((vec3(1.f) - g2SQRD)/d2Powered)) 
+    * INV_M_PI * 0.25f;
 
-  vec3 mieG2 = g1 * g1;
-  float powerRed   = pow(1.0f + mieG2.r - 2.0f * g1.r * mu, -1.5f);
-  float powerGreen = pow(1.0f + mieG2.g - 2.0f * g1.g * mu, -1.5f);
-  float powerBlue  = pow(1.0f + mieG2.b - 2.0f * g1.b * mu, -1.5f);
+  // vec3 mieG2 = g1 * g1;
+  // float powerRed   = pow(1.0f + mieG2.r - 2.0f * g1.r * mu, -1.5f);
+  // float powerGreen = pow(1.0f + mieG2.g - 2.0f * g1.g * mu, -1.5f);
+  // float powerBlue  = pow(1.0f + mieG2.b - 2.0f * g1.b * mu, -1.5f);
 
-  vec3 cornette =  0.1193662072 * (vec3(1.0f) - mieG2) * 
-    vec3(powerRed, powerGreen, powerBlue) * (1.0f + mu * mu) / (vec3(2.0f) + mieG2);
+  // vec3 cornette =  0.1193662072 * (vec3(1.0f) - mieG2) * 
+  //   vec3(powerRed, powerGreen, powerBlue) * (1.0f + mu * mu) / (vec3(2.0f) + mieG2);
 
-  return vec3(cornette);
+  // return vec3(cornette);
 }
 
 // -- Calculates Mie phase function given the
 // scattering cosine angle mu --
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 vec3 miePhaseFunction(const float mu) {
-    if (advancedModeEnabled) {
+    if (advancedModeEnabled && !useCornettePhaseFunction) {
       return DHG_MiePhaseFunction(mu);
     } else {
       // return (3.0f / (8.0f * M_PI)) * 

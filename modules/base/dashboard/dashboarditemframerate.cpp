@@ -185,6 +185,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
 }
 
 //JCC: Temp property to save the fps to a file
+#ifdef __PERFORMANCE_MEASUREMENTS__
 DashboardItemFramerate::~DashboardItemFramerate()
 {
     _runThread = false; // bad, but is just for collecting the data
@@ -217,6 +218,7 @@ DashboardItemFramerate::~DashboardItemFramerate()
         }
     }
 }
+#endif
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
@@ -224,9 +226,10 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clearCache(ClearCacheInfo)
-    //JCC: Temp property to save the fps to a file
+#ifdef __PERFORMANCE_MEASUREMENTS__
     , _enableFPSRecording({"EnableFPSRecording", "Enable FPS Recording", ""}, false)
     , _markTimeRecording({"MarkPointInterest", "Mark Point of Interest", ""}, false)
+#endif
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -305,16 +308,19 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     addProperty(_clearCache);
 
     //JCC: Temp property to save the fps to a file
+#ifdef __PERFORMANCE_MEASUREMENTS__
     addProperty(_enableFPSRecording);
     addProperty(_markTimeRecording);
     _runThread = true;
     _dataCollectingThread = std::thread([this] { this->threadFunction(); });
     _dataCollectingThread.detach();
+#endif
 
     _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 //JCC: Temp property to save the fps to a file
+#ifdef __PERFORMANCE_MEASUREMENTS__
 void DashboardItemFramerate::threadFunction() {
     while (_runThread)
     {
@@ -330,6 +336,7 @@ void DashboardItemFramerate::threadFunction() {
         }
     }
 }
+#endif
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
     if (_shouldClearCache) {

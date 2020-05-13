@@ -115,6 +115,8 @@ private:
 
     // Advanced Mode Parameters
     properties::BoolProperty  _useOnlyAdvancedMieP;
+    properties::BoolProperty  _useCornettePhaseFunctionP;
+    properties::BoolProperty  _usePenndorfPhaseFunctionP;
     properties::Vec3Property  _nRealRayleighP;
     properties::Vec3Property  _nComplexRayleighP;
     properties::Vec3Property  _nRealMieP;
