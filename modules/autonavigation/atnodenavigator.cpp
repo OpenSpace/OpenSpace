@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/rotate_vector.hpp>

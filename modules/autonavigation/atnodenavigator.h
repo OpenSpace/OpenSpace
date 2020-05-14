@@ -25,7 +25,13 @@
 #ifndef __OPENSPACE_MODULE___ATNODENAVIGATOR___H__
 #define __OPENSPACE_MODULE___ATNODENAVIGATOR___H__
 
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+
+namespace openspace {
+    class Camera;
+    class SceneGraphNode;
+} // namespace openspace
 
 namespace openspace::autonavigation {
 

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
 #include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
 #include <modules/autonavigation/waypoint.h>
 #include <ghoul/glm.h>

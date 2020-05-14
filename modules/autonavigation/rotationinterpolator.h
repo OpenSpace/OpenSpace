@@ -51,6 +51,20 @@ public:
 
 // Look at start node until tStart, then turn to look at end node from tEnd.
 // OBS! Does not care about actual end and start value!! I.e. Not an interpolation!
+class LookAtRotator : public RotationInterpolator {
+public:
+    LookAtRotator(glm::dquat start, glm::dquat end, glm::dvec3 startLookAtPos,
+        glm::dvec3 endLookAtPos, PathCurve* path);
+    glm::dquat interpolate(double u);
+
+private:
+    glm::dvec3 _startLookAtPos;
+    glm::dvec3 _endLookAtPos;
+    PathCurve* _path = nullptr;
+};
+
+// Interpolates a look at position for the camera, and takes the start and end rotation
+// into account
 class LookAtInterpolator : public RotationInterpolator {
 public:
     LookAtInterpolator(glm::dquat start, glm::dquat end, glm::dvec3 startLookAtPos,

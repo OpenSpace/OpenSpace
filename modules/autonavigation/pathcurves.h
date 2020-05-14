@@ -25,13 +25,13 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
 
-#include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/waypoint.h>
 #include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace::autonavigation {
 
+// TODO: move to pathsegment.h instead
 enum CurveType {
     AvoidCollision,
     Bezier3,

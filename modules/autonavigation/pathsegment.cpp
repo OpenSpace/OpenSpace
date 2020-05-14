@@ -26,6 +26,8 @@
 
 #include <modules/autonavigation/avoidcollisioncurve.h>
 #include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/rotationinterpolator.h>
+#include <modules/autonavigation/speedfunction.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
@@ -47,10 +49,8 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
         _duration = duration.value();
     }
     else {
-        // TODO: compute default duration based on curve length 
-        // Also, when compensatng for simulation time later we need to make a guess for 
-        // the duration, based on the current position of the target. 
-        _duration = 5;
+        _duration = std::log(pathLength());
+        //LINFO(fmt::format("Default duration: {}", _duration));
     }
 }
 
@@ -75,7 +75,8 @@ const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
 
 CameraPose PathSegment::traversePath(double dt) {
     if (!_curve || !_rotationInterpolator || !_speedFunction) {
-        LERROR("Cannot traverse path. Curvec type has not been properly defined.");
+        // TODO: handle better (abort path somehow)
+        return _start.pose;
     }
 
     // compute displacement along the path during this frame
@@ -160,6 +161,11 @@ void PathSegment::initCurve() {
 
     default:
         LERROR("Could not create curve. Type does not exist!");
+        return;
+    }
+
+    if (!_curve || !_rotationInterpolator || !_speedFunction) {
+        LERROR("Curve type has not been properly initialized.");
         return;
     }
 }

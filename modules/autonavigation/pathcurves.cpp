@@ -176,7 +176,7 @@ void Bezier3Curve::initParameterIntervals() {
     double dt = 1.0 / _nrSegments;
 
     newIntervals.push_back(0.0);
-    for (int i = 1; i < _nrSegments; i++) {
+    for (unsigned int i = 1; i < _nrSegments; i++) {
         newIntervals.push_back(arcLength(dt * i) / _length);
     }
     newIntervals.push_back(1.0);

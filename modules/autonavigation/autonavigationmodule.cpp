@@ -69,6 +69,9 @@ std::vector<documentation::Documentation> AutoNavigationModule::documentations()
 scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "autonavigation";
+    res.scripts = {
+        absPath("${MODULE_AUTONAVIGATION}/scripts/rendering.lua")
+    };
     res.functions = {
         {
             "continuePath",
@@ -111,6 +114,20 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             {},
             "number",
             "FOR DEBUG. Sample positions along the path. The input argument is the number of samples per path segment. " 
+        },
+        {
+            "getPathOrientations",
+            &autonavigation::luascriptfunctions::getPathOrientations,
+            {},
+            "number",
+            "FOR DEBUG. Sample orientations along the path. The input argument is the number of samples per path segment. "
+        },
+         {
+            "getPathViewDirections",
+            &autonavigation::luascriptfunctions::getPathViewDirections,
+            {},
+            "number",
+            "FOR DEBUG. Sample view directions along the path. The input argument is the number of samples per path segment. "
         },
         {
             "getControlPoints",
