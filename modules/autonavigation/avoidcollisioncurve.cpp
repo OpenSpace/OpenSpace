@@ -56,7 +56,6 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     glm::dvec3 startNodePos = start.node()->worldPosition();
     glm::dvec3 endNodePos = end.node()->worldPosition();
     double startNodeRadius = start.nodeDetails.validBoundingSphere;
-    glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
     glm::dvec3 startViewDir = glm::normalize(start.rotation() * glm::dvec3(0.0, 0.0, -1.0));
 
     // Add control points for a catmull-rom spline, first and last will no be intersected
@@ -65,7 +64,8 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     _points.push_back(start.position());
 
     // Add an extra point to first go backwards if starting close to planet
-    if (glm::length(startNodeToStartPos) < thresholdFactor * startNodeRadius) {
+    double distanceToStartNode = glm::length(start.position() - startNodePos);
+    if (distanceToStartNode < thresholdFactor * startNodeRadius) {
         double distance = startNodeRadius;
 
         glm::dvec3 newPos = start.position() - distance * startViewDir;
@@ -110,12 +110,10 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
 // Interpolate a list of control points and knot times
 glm::dvec3 AvoidCollisionCurve::positionAt(double u) {
-    if (u < 0.000001)
+    if (u < Epsilon)
         return _points[1];
-    if (u > 0.999999)
+    if (u > (1.0 - Epsilon))
         return *(_points.end() - 2);
-
-    //distribute t by segment arc lenghts
 
     // compute current segment, by first finding iterator to the first value that is larger than t 
     std::vector<double>::iterator segmentEndIt =
@@ -142,7 +140,6 @@ std::vector<SceneGraphNode*> AvoidCollisionCurve::findRelevantNodes() {
         global::renderEngine.scene()->allSceneGraphNodes();
 
     auto isRelevant = [](const SceneGraphNode* node) {
-        // does the node match any of the relevant tags?
         const std::vector<std::string> tags = node->tags();
         auto result = std::find_first_of(RelevantTags.begin(), RelevantTags.end(), tags.begin(), tags.end());
 
@@ -181,15 +178,15 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
             // sphere to check for collision
             double bs = node->boundingSphere();
             double radius = bs; 
-            // TODO: add a buffer (i.e. sue a little larger sphere), when we have 
+            // TODO: add a buffer (i.e. use a little larger sphere), when we have 
             // behaviour for leaving a target. Don't want to pass too close to objects
             glm::dvec3 center = glm::dvec3(0.0, 0.0, 0.0);
-            glm::dvec3 point;
+            glm::dvec3 intersectionPoint;
 
-            bool collision = helpers::lineSphereIntersection(p1, p2, center, radius, point);
+            bool collision = helpers::lineSphereIntersection(p1, p2, center, radius, intersectionPoint);
 
             // convert back to world coordinates 
-            glm::dvec3 pointWorld = modelTransform * glm::dvec4(point, 1.0);
+            glm::dvec3 intersectionPointWorld = modelTransform * glm::dvec4(intersectionPoint, 1.0);
 
             if (collision) {
                 LINFO(fmt::format("Collision with node: {}!", node->identifier()));
@@ -198,12 +195,12 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
                 // collision point and add a new point
                 glm::dvec3 lineDir = glm::normalize(lineEnd - lineStart);
                 glm::dvec3 nodePos = node->worldPosition();
-                glm::dvec3 collisionPointToCenter = nodePos - pointWorld;
+                glm::dvec3 collisionPointToCenter = nodePos - intersectionPointWorld;
                 glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDir);
                 glm::dvec3 orthogonal = collisionPointToCenter - parallell;
 
-                double distance = 3.0 * radius;
-                glm::dvec3 extraKnot = pointWorld - distance * glm::normalize(orthogonal);
+                double avoidCollisionDistance = 3.0 * radius;
+                glm::dvec3 extraKnot = intersectionPointWorld - avoidCollisionDistance * glm::normalize(orthogonal);
                 _points.insert(_points.begin() + i + 2, extraKnot);
 
                 // TODO: maybe make this more efficient, and make sure that we have a base case. 

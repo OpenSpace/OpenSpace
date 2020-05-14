@@ -95,22 +95,16 @@ namespace openspace::autonavigation::interpolation {
     glm::dvec3 catmullRom(double t, const glm::dvec3& p0, const glm::dvec3& p1,
         const glm::dvec3& p2, const glm::dvec3& p3, double alpha)
     {
-        const double Epsilon = 1E-7;
         glm::dvec3 m01, m02, m23, m13;
 
         double t01 = pow(glm::distance(p0, p1), alpha);
         double t12 = pow(glm::distance(p1, p2), alpha);
         double t23 = pow(glm::distance(p2, p3), alpha);
 
-        // Prevent zero division
-        (t01 < Epsilon) ?
-            m01 = glm::dvec3{} : m01 = (p1 - p0) / t01;
-        (t23 < Epsilon) ?
-            m23 = glm::dvec3{} : m23 = (p3 - p2) / t23;
-        (t01 + t12 < Epsilon) ?
-            m02 = glm::dvec3{} : m02 = (p2 - p0) / (t01 + t12);
-        (t12 + t23 < Epsilon) ?
-            m13 = glm::dvec3{} : m13 = (p3 - p1) / (t12 + t23);
+        m01 = (t01 > Epsilon) ? (p1 - p0) / t01 : glm::dvec3{};
+        m23 = (t23 > Epsilon) ? (p3 - p2) / t23 : glm::dvec3{};
+        m02 = (t01 + t12 > Epsilon) ? (p2 - p0) / (t01 + t12) : glm::dvec3{};
+        m13 = (t12 + t23 > Epsilon) ? (p3 - p1) / (t12 + t23) : glm::dvec3{};
 
         glm::dvec3 m1 = p2 - p1 + t12 * (m01 - m02);
         glm::dvec3 m2 = p2 - p1 + t12 * (m23 - m13);
@@ -141,7 +135,6 @@ namespace openspace::autonavigation::interpolation {
 
     glm::dvec3 linear(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2) {
         ghoul_assert(t >= 0 && t <= 1.0, "Interpolation variable out of range [0, 1]");
-
         return cp1 * (1.0 - t) + cp2 * t;
     }
 
@@ -162,8 +155,7 @@ namespace openspace::autonavigation::interpolation {
         double const b0 = t3 - (2.0*t2) + t;
         double const b1 = t3 - t2;
 
-        glm::dvec3 result = (a0 * p1) + (a1 * p2) + (b0 * tangent1) + (b1 * tangent2);
-        return result;
+        return (a0 * p1) + (a1 * p2) + (b0 * tangent1) + (b1 * tangent2);
     }
 
     // uniform if tKnots are equally spaced, or else non uniform
