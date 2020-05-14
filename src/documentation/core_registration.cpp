@@ -83,6 +83,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(ParallelPeer::luaLibrary());
     engine.addLibrary(RenderEngine::luaLibrary());
     engine.addLibrary(SpiceManager::luaLibrary());
+    engine.addLibrary(Profile::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());

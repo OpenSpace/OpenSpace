@@ -306,14 +306,21 @@ void OpenSpaceEngine::initialize() {
         std::string outputAsset = outputScenePath + "/" + global::configuration.profile
             + ".asset";
 
-        global::profile.convertToSceneFile(inputProfile, outputAsset);
+        if (!FileSys.fileExists(inputProfile)) {
+            LERROR(fmt::format(
+                "Could not load profile '{}': File does not exist", inputProfile)
+            );
+        }
+        else {
+            global::profile.convertToSceneFile(inputProfile, outputAsset);
 
-        // Set asset name to that of the profile because a new scene file will be
-        // created with that name, and also because the profile name will override
-        // an asset name if both are provided.
-        global::configuration.asset =
-            absPath("${TEMPORARY}/") + global::configuration.profile;
-        global::configuration.usingProfile = true;
+            // Set asset name to that of the profile because a new scene file will be
+            // created with that name, and also because the profile name will override
+            // an asset name if both are provided.
+            global::configuration.asset =
+                absPath("${TEMPORARY}/") + global::configuration.profile;
+            global::configuration.usingProfile = true;
+        }
     }
 
     // Set up asset loader
@@ -1297,10 +1304,18 @@ void OpenSpaceEngine::resetPropertyChangeFlags() {
     std::vector<SceneGraphNode*> nodes =
             global::renderEngine.scene()->allSceneGraphNodes();
     for (auto n : nodes) {
-        std::vector<openspace::properties::Property*> props = n->properties();
-        for (auto p : props) {
-            p->resetToUnchanged();
-        }
+        resetPropertyChangeFlagsOfSubowners(n);
+    }
+}
+
+void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(
+                                                openspace::properties::PropertyOwner* po)
+{
+    for (auto subOwner : po->propertySubOwners()) {
+        resetPropertyChangeFlagsOfSubowners(subOwner);
+    }
+    for (auto p : po->properties()) {
+        p->resetToUnchanged();
     }
 }
 

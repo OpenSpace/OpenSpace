@@ -45,6 +45,8 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
+const std::string profileFormatVersion = "1.0";
+
 class Profile {
 public:
     enum class AssetEventType {
@@ -67,6 +69,10 @@ public:
     };
 
     virtual ~Profile() {};
+
+    const std::string formatVersion() {
+        return profileFormatVersion;
+    }
 
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
@@ -106,14 +112,17 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
+protected:
+    std::string _profileBaseDirectory = "${ASSETS}";
+
 private:
     struct AllAssetDetails {
         std::vector<AssetEvent> base;
         std::vector<AssetEvent> changed;
     };
-
     virtual bool usingProfile();
     virtual std::string initialProfile();
+    virtual std::string profileBaseDirectory();
     virtual std::vector<AssetEvent> listOfAllAssetEvents();
     ProfileFile collateBaseWithChanges();
     std::string convertToScene_assets(ProfileFile& pf);
@@ -124,15 +133,18 @@ private:
     std::string convertToScene_time(ProfileFile& pf);
     std::string convertToScene_camera(ProfileFile& pf);
 
+    void updateToCurrentFormatVersion(ProfileFile& pf);
     std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileFile& pf);
     void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf);
     void handleChangedAdd(std::vector<AssetEvent>& base, unsigned int changedIdx,
         std::vector<AssetEvent>& changed, std::string asset);
-    void handleChangedRemove(std::vector<AssetEvent>& base, unsigned int changedIdx,
-        std::vector<AssetEvent>& changed, std::string asset);
+    void handleChangedRemove(std::vector<AssetEvent>& base, std::string asset);
     void addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, ProfileFile& pf);
     void modifyPropertiesToReflectChanges(ProfileFile& pf);
     virtual std::vector<openspace::properties::Property*> getChangedProperties();
+    void checkForChangedProps(std::vector<openspace::properties::Property*>& changedList,
+        openspace::properties::PropertyOwner* po);
+    std::string getFullPropertyPath(openspace::properties::Property* prop);
     virtual std::vector<std::string> getChangedPropertiesFormatted();
     virtual std::string getCurrentTimeUTC();
     virtual interaction::NavigationHandler::NavigationState getCurrentCameraState();

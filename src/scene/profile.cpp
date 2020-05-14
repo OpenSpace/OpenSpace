@@ -40,6 +40,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
@@ -80,6 +81,10 @@ std::vector<Profile::AssetEvent> Profile::listOfAllAssetEvents() {
     return global::openSpaceEngine.listOfAllAssetEvents();
 }
 
+std::string Profile::profileBaseDirectory() {
+    return _profileBaseDirectory;
+}
+
 ProfileFile Profile::collateBaseWithChanges() {
     if (! usingProfile()) {
         std::string errorMessage = "Program was not started using a profile, "
@@ -87,13 +92,20 @@ ProfileFile Profile::collateBaseWithChanges() {
         LERROR(errorMessage);
     }
     std::string initProfile = initialProfile();
-    ProfileFile pf(initProfile);
+    std::string inputProfilePath = absPath(_profileBaseDirectory) + "/" + initProfile
+        + ".profile";
+    ProfileFile pf(inputProfilePath);
+    updateToCurrentFormatVersion(pf);
     std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(pf);
     addAssetsToProfileFile(ass, pf);
     modifyPropertiesToReflectChanges(pf);
     addCurrentTimeToProfileFile(pf);
     addCurrentCameraToProfileFile(pf);
     return pf;
+}
+
+void Profile::updateToCurrentFormatVersion(ProfileFile& pf) {
+    pf.setVersion(profileFormatVersion);
 }
 
 std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFile& pf) {
@@ -111,7 +123,7 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFi
             handleChangedAdd(assetDetails.base, i, assetDetails.changed, event.name);
         }
         else if (event.eventType == AssetEventType::remove) {
-            handleChangedRemove(assetDetails.base, i, assetDetails.changed, event.name);
+            handleChangedRemove(assetDetails.base, event.name);
         }
     }
     return assetDetails.base;
@@ -147,24 +159,9 @@ void Profile::handleChangedAdd(std::vector<AssetEvent>& base, unsigned int chang
     }
 }
 
-void Profile::handleChangedRemove(std::vector<AssetEvent>& base, unsigned int changedIdx,
-                                  std::vector<AssetEvent>& changed, std::string asset)
+void Profile::handleChangedRemove(std::vector<AssetEvent>& base, std::string asset)
 {
-    //Blank-out any base profile entries where this asset was required/requested
-    for (unsigned int i = 0; i < base.size(); i++) {
-        if (base[i].name == asset) {
-            base[i].name = "";
-            base[i].eventType = AssetEventType::ignore;
-        }
-    }
-
-    //Blank-out any changes profile entries where this asset was required/requested
-    for (unsigned int i = 0; i < changedIdx; i++) {
-        if (changed[i].name == asset) {
-            changed[i].name = "";
-            changed[i].eventType = AssetEventType::ignore;
-        }
-    }
+    base.push_back({asset, AssetEventType::remove});
 }
 
 void Profile::addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, ProfileFile& pf)
@@ -226,11 +223,42 @@ std::vector<std::string> Profile::getChangedPropertiesFormatted() {
 
     for (auto prop : changedProps) {
         std::string newLine = "setPropertyValueSingle\t";
-        newLine += prop->identifier() + "\t";
-        newLine += prop->getStringValue() + "\n";
+        newLine += getFullPropertyPath(prop) + "\t";
+        newLine += prop->getStringValue();
         formattedLines.push_back(newLine);
     }
     return formattedLines;
+}
+
+std::string recurseForFullName(openspace::properties::PropertyOwner* po) {
+    std::string path;
+    if (po != nullptr) {
+        std::string name = recurseForFullName(po->owner()) + po->identifier();
+        if (!name.empty()) {
+            path = name + ".";
+        }
+    }
+    return path;
+}
+
+std::string Profile::getFullPropertyPath(openspace::properties::Property* prop) {
+    return recurseForFullName(prop->owner()) + prop->identifier();
+}
+
+void Profile::checkForChangedProps(
+    std::vector<openspace::properties::Property*>& changedList,
+    openspace::properties::PropertyOwner* po)
+{
+    if (po != nullptr) {
+        for (auto subOwner : po->propertySubOwners()) {
+            checkForChangedProps(changedList, subOwner);
+        }
+        for (auto p : po->properties()) {
+            if (p->hasChanged()) {
+                changedList.push_back(p);
+            }
+        }
+    }
 }
 
 std::vector<openspace::properties::Property*> Profile::getChangedProperties()
@@ -242,25 +270,18 @@ std::vector<openspace::properties::Property*> Profile::getChangedProperties()
     std::vector<openspace::properties::Property*> changedProps;
 
     for (auto n : nodes) {
-        if (n != nullptr) {
-            std::vector<openspace::properties::Property*> props = n->properties();
-            for (auto p : props) {
-                if (p->hasChanged()) {
-                    changedProps.push_back(p);
-                }
-            }
-        }
+        checkForChangedProps(changedProps, n);
     }
     return changedProps;
 }
 
 std::string Profile::getCurrentTimeUTC() {
-    return global::timeManager.time().UTC();
+    return global::timeManager.time().ISO8601();
 }
 
 void Profile::addCurrentTimeToProfileFile(ProfileFile& pf) {
     std::string t = getCurrentTimeUTC();
-    std::string update = "absolute\t" + t + "\n";
+    std::string update = "absolute\t" + t;
     pf.updateTime(update);
 }
 
@@ -272,9 +293,9 @@ void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) {
     std::string update = "setNavigationState\t";
     interaction::NavigationHandler::NavigationState nav;
     nav = getCurrentCameraState();
-    update += nav.anchor + "\t";
-    update += nav.aim + "\t";
-    update += nav.referenceFrame + "\t";
+    update += "\"" + nav.anchor + "\"\t";
+    update += "\"" + nav.aim + "\"\t";
+    update += "\"" + nav.referenceFrame + "\"\t";
     update += std::to_string(nav.position.x) + ",";
     update += std::to_string(nav.position.y) + ",";
     update += std::to_string(nav.position.z) + "\t";
@@ -287,7 +308,7 @@ void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) {
     }
     update += "\t";
     update += std::to_string(nav.yaw) + "\t";
-    update += std::to_string(nav.pitch) + "\n";
+    update += std::to_string(nav.pitch);
 
     pf.updateCamera(update);
 }
@@ -304,21 +325,24 @@ void Profile::convertToSceneFile(const std::string inProfilePath,
         outFile.open(outFilePath, std::ofstream::out);
     }
     catch (std::ofstream::failure& e) {
-        LERROR("Exception opening profile file for write: " + outFilePath);
+        LERROR("Exception opening scene file for write: " + outFilePath
+            + " (" + e.what() + ")");
     }
 
     try {
         outFile << convertToScene(pf);
     }
     catch (std::ofstream::failure& e) {
-        LERROR("Data write error to file: " + outFilePath);
+        LERROR("Data write error to scene file: " + outFilePath
+            + " (" + e.what() + ")");
     }
 
     try {
         outFile.close();
     }
     catch (std::ofstream::failure& e) {
-        LERROR("Exception closing profile file after write: " + outFilePath);
+        LERROR("Exception closing scene file after write: " + outFilePath
+            + " (" + e.what() + ")");
     }
 }
 

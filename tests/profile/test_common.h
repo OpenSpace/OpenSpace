@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/exception.h>
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 using namespace openspace;
@@ -421,7 +422,7 @@ end)";
 
 const std::string detectChangedPropsResult_1 = "\
 #Version\n\
-1.0\n\
+" + profileFormatVersion + "\n\
 \n\
 #Module\n\
 \n\
@@ -443,10 +444,8 @@ initialized fourth\tfalse.\n\
 #Time\n\
 absolute\t2020-02-29T01:23:45.00\n\
 \n\
-\n\
 #Camera\n\
-setNavigationState\tEarth\tSun\troot\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
-\n\
+setNavigationState\t\"Earth\"\t\"Sun\"\t\"root\"\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
 \n\
 #MarkNodes\n\
 Earth\n\
@@ -457,7 +456,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_1 = "\
 #Version\n\
-1.0\n\
+" + profileFormatVersion + "\n\
 \n\
 #Module\n\
 \n\
@@ -478,10 +477,8 @@ setPropertyValueSingle\tScene.Charon.Renderable.Enabled\tfalse\n\
 #Time\n\
 absolute\t2020-02-29T01:23:45.00\n\
 \n\
-\n\
 #Camera\n\
-setNavigationState\tEarth\tSun\troot\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
-\n\
+setNavigationState\t\"Earth\"\t\"Sun\"\t\"root\"\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
 \n\
 #MarkNodes\n\
 Earth\n\
@@ -492,7 +489,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_2 = "\
 #Version\n\
-1.0\n\
+" + profileFormatVersion + "\n\
 \n\
 #Module\n\
 \n\
@@ -512,10 +509,8 @@ setPropertyValueSingle\tScene.Charon.Renderable.Enabled\tfalse\n\
 #Time\n\
 absolute\t2020-02-29T01:23:45.00\n\
 \n\
-\n\
 #Camera\n\
-setNavigationState\tEarth\tSun\troot\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
-\n\
+setNavigationState\t\"Earth\"\t\"Sun\"\t\"root\"\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
 \n\
 #MarkNodes\n\
 Earth\n\
@@ -526,7 +521,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_3 = "\
 #Version\n\
-1.0\n\
+" + profileFormatVersion + "\n\
 \n\
 #Module\n\
 \n\
@@ -546,10 +541,8 @@ setPropertyValueSingle\tScene.Charon.Renderable.Enabled\tfalse\n\
 #Time\n\
 absolute\t2020-02-29T01:23:45.00\n\
 \n\
-\n\
 #Camera\n\
-setNavigationState\tEarth\tSun\troot\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
-\n\
+setNavigationState\t\"Earth\"\t\"Sun\"\t\"root\"\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
 \n\
 #MarkNodes\n\
 Earth\n\
@@ -560,7 +553,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_4 = "\
 #Version\n\
-1.0\n\
+" + profileFormatVersion + "\n\
 \n\
 #Module\n\
 \n\
@@ -580,10 +573,8 @@ setPropertyValueSingle\tScene.Charon.Renderable.Enabled\tfalse\n\
 #Time\n\
 absolute\t2020-02-29T01:23:45.00\n\
 \n\
-\n\
 #Camera\n\
-setNavigationState\tEarth\tSun\troot\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
-\n\
+setNavigationState\t\"Earth\"\t\"Sun\"\t\"root\"\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
 \n\
 #MarkNodes\n\
 Earth\n\
@@ -594,13 +585,16 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_5 = "\
 #Version\n\
-1.0\n\
+" + profileFormatVersion + "\n\
 \n\
 #Module\n\
 \n\
 #Asset\n\
+scene/solarsystem/planets/earth/earth\trequired\n\
+scene/solarsystem/planets/earth/satellites/satellites\trequired\n\
 test2\trequested\n\
 test4\trequested\n\
+test5\tremoved\n\
 \n\
 #Property\n\
 setPropertyValue\t{earth_satellites}.Renderable.Enabled\tfalse\n\
@@ -612,10 +606,42 @@ setPropertyValueSingle\tScene.Charon.Renderable.Enabled\tfalse\n\
 #Time\n\
 absolute\t2020-02-29T01:23:45.00\n\
 \n\
+#Camera\n\
+setNavigationState\t\"Earth\"\t\"Sun\"\t\"root\"\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
+\n\
+#MarkNodes\n\
+Earth\n\
+Mars\n\
+Moon\n\
+Sun\n\
+";
+
+const std::string detectChangedAssetsResult_6 = "\
+#Version\n\
+" + profileFormatVersion + "\n\
+\n\
+#Module\n\
+\n\
+#Asset\n\
+scene/solarsystem/planets/earth/earth\trequired\n\
+scene/solarsystem/planets/earth/satellites/satellites\trequired\n\
+test2\trequested\n\
+test4\trequested\n\
+scene/solarsystem/planets/earth/earth\tremoved\n\
+scene/solarsystem/planets/earth/satellites/satellites\tremoved\n\
+\n\
+#Property\n\
+setPropertyValue\t{earth_satellites}.Renderable.Enabled\tfalse\n\
+setPropertyValueSingle\tScene.Pluto.Renderable.Enabled\tfalse\n\
+setPropertyValueSingle\tScene.Charon.Renderable.Enabled\tfalse\n\
+\n\
+#Keybinding\n\
+\n\
+#Time\n\
+absolute\t2020-02-29T01:23:45.00\n\
 \n\
 #Camera\n\
-setNavigationState\tEarth\tSun\troot\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
-\n\
+setNavigationState\t\"Earth\"\t\"Sun\"\t\"root\"\t-1.000000,-2.000000,-3.000000\t0.000000,0.000000,1.000000\t0.000000\t0.000000\n\
 \n\
 #MarkNodes\n\
 Earth\n\

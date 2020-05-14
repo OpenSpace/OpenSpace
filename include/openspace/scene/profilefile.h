@@ -211,10 +211,16 @@ public:
     void addMarkNodesLine(const std::string line);
 
     /**
-     * Returns the version number (profiles syntax version) string
+     * Returns the format version number (profiles syntax version) string
      * \return The version string
      */
     const std::string getVersion() const;
+
+    /**
+     * Sets the format version number (profiles syntax version) string
+     * \param The version string to set
+     */
+    void setVersion(std::string);
 
     /**
      * Returns the profile's time string. See updateTime comment header for notes on

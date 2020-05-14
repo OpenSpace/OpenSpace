@@ -56,11 +56,11 @@ void ProfileFile::readIn(std::string filename) {
     std::ifstream inFile;
 
     try {
-        inFile.open(filename, std::_Ios_Openmode::_S_in);
+        inFile.open(filename, std::ifstream::in);
     }
     catch (std::ifstream::failure& e) {
         throw ghoul::RuntimeError("Exception opening profile file for read: "
-            + filename, "profileFile");
+            + filename + " (" + e.what() + ")", "profileFile");
     }
 
     try {
@@ -72,16 +72,16 @@ void ProfileFile::readIn(std::string filename) {
         });
     }
     catch (std::ifstream::failure& e) {
-        throw ghoul::RuntimeError(errorString("Read error using getline"),
-            "profileFile");
+        throw ghoul::RuntimeError(errorString("Read error using getline in: "
+            + filename + " (" + e.what() + ")"), "profileFile");
     }
 
     try {
         inFile.close();
     }
     catch (std::ifstream::failure& e) {
-        throw ghoul::RuntimeError("Exception closing profile file after read: "
-            + filename, "profileFile");
+        throw ghoul::RuntimeError("Exception closing profile file after read in: "
+            + filename + " (" + e.what() + ")", "profileFile");
     }
 }
 
@@ -116,26 +116,51 @@ void ProfileFile::processIndividualLine(bool& insideSection, std::string line) {
 }
 
 void ProfileFile::writeToFile(const std::string filename) {
+    if (filename.find("/") != std::string::npos) {
+        LERROR("Profile filename must not contain path (/) elements");
+        return;
+    }
+    else if (filename.find(":") != std::string::npos) {
+        LERROR("Profile filename must not contain path (:) elements");
+        return;
+    }
+    else if (filename.find(".") != std::string::npos) {
+        LERROR("Only provide the filename to save without file extension");
+        return;
+    }
+    const std::string absFilename = absPath("${ASSETS}/" + filename + ".profile");
+
+    if (FileSys.fileExists(absFilename)) {
+        LERROR(fmt::format(
+            "Unable to save profile '{}'. File of same name already exists.",
+            absFilename.c_str()
+        ));
+        return;
+    }
+
     std::ofstream outFile;
     try {
-        outFile.open(filename, std::ofstream::out | std::ofstream::app);
+        outFile.open(absFilename, std::ofstream::out);
     }
     catch (std::ofstream::failure& e) {
-        LERROR("Exception opening profile file for write: " + filename);
+        LERROR("Exception opening profile file for write: "
+            + absFilename + " (" + e.what() + ")");
     }
 
     try {
         outFile << writeToString();
     }
     catch (std::ofstream::failure& e) {
-        LERROR("Data write error to file: " + filename);
+        LERROR("Data write error to file: "
+            + absFilename + " (" + e.what() + ")");
     }
 
     try {
         outFile.close();
     }
     catch (std::ofstream::failure& e) {
-        LERROR("Exception closing profile file after write: " + filename);
+        LERROR("Exception closing profile file after write: "
+            + absFilename + " (" + e.what() + ")");
     }
 }
 
@@ -167,6 +192,10 @@ std::string ProfileFile::writeToString() {
 
 const std::string ProfileFile::getVersion() const {
     return _version;
+}
+
+void ProfileFile::setVersion(std::string v) {
+    _version = v;
 }
 
 void ProfileFile::addAllElements(std::string& str, std::vector<std::string>& list) {

@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/exception.h>
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 using namespace openspace;

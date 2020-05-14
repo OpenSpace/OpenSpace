@@ -92,6 +92,9 @@ public:
     std::vector<Profile::AssetEvent> listOfAllAssetEvents() override {
         return _assLoader.listOfAllAssetEvents();
     }
+    void setProfileBaseDirectory(std::string dir) {
+        _profileBaseDirectory = dir;
+    }
 private:
     std::vector<std::string> _scenegraphProps;
     std::string _initProfile;
@@ -101,8 +104,6 @@ private:
 static void addLineHeaderForFailureMessage(std::string& s, size_t lineNumber) {
     s = "@line " + std::to_string(lineNumber) + ": '" + s + "'";
 }
-
-
 
 TEST_CASE("profile: Convert profileFile to asset", "[profile]") {
     testProfileFormat test = buildTestProfile1();
@@ -140,21 +141,24 @@ TEST_CASE("profile: Verify conversion to scene", "[profile]") {
     REQUIRE_NOTHROW(
         result = p.convertToScene(pf)
     );
+    
+    if (result != newHorizonsExpectedSceneOutput) {
+        std::string testing, comparing;
+        StringPerLineReader sr_result(result);
+        StringPerLineReader sr_standard(newHorizonsExpectedSceneOutput);
 
-    std::string testing, comparing;
-    StringPerLineReader sr_result(result);
-    StringPerLineReader sr_standard(newHorizonsExpectedSceneOutput);
-
-    size_t lineN = 1;
-    while (sr_result.getNextLine(testing)) {
-        sr_standard.getNextLine(comparing);
-        addLineHeaderForFailureMessage(testing, lineN);
-        addLineHeaderForFailureMessage(comparing, lineN);
-        REQUIRE(testing == comparing);
-        lineN++;
+        size_t lineN = 1;
+        while (sr_result.getNextLine(testing)) {
+            sr_standard.getNextLine(comparing);
+            addLineHeaderForFailureMessage(testing, lineN);
+            addLineHeaderForFailureMessage(comparing, lineN);
+            REQUIRE(testing == comparing);
+            lineN++;
+        }
+        //If this fails there are extra lines in the comparison string that weren't in result
+        REQUIRE(sr_standard.getNextLine(comparing) == false);
     }
-    //If this fails there are extra lines in the comparison string that weren't in result
-    REQUIRE(sr_standard.getNextLine(comparing) == false);
+    //REQUIRE(result == newHorizonsExpectedSceneOutput);
 }
 
 TEST_CASE("profile: Detect new properties", "[profile]") {
@@ -173,7 +177,8 @@ TEST_CASE("profile: Detect new properties", "[profile]") {
     lua_setglobal(*state, "passTest");
 
     Profile2 p(assetLoader);
-    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.setProfileBaseDirectory("${TESTDIR}/profile");
+    p.setInitialProfile("test2");
     p.addPropertiesMarkedAsChanged("initialized 1st\t123");
     p.addPropertiesMarkedAsChanged("initialized 2nd\t3.14159");
     p.addPropertiesMarkedAsChanged("initialized 3rd\ttested.");
@@ -205,7 +210,8 @@ TEST_CASE("profile: Detect new added assets", "[profile]") {
     asset3->initialize();
 
     Profile2 p(assetLoader);
-    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.setProfileBaseDirectory("${TESTDIR}/profile");
+    p.setInitialProfile("test2");
     std::string output = p.saveCurrentSettingsToProfile_string();
     REQUIRE(output == detectChangedAssetsResult_1);
 }
@@ -236,7 +242,8 @@ TEST_CASE("profile: Detect new added assets after reset", "[profile]") {
     asset4->initialize();
 
     Profile2 p(assetLoader);
-    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.setProfileBaseDirectory("${TESTDIR}/profile");
+    p.setInitialProfile("test2");
     std::string output = p.saveCurrentSettingsToProfile_string();
     REQUIRE(output == detectChangedAssetsResult_2);
 }
@@ -264,7 +271,8 @@ TEST_CASE("profile: Detect repeat added assets from new", "[profile]") {
     asset3->initialize();
 
     Profile2 p(assetLoader);
-    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.setProfileBaseDirectory("${TESTDIR}/profile");
+    p.setInitialProfile("test2");
     std::string output = p.saveCurrentSettingsToProfile_string();
     REQUIRE(output == detectChangedAssetsResult_3);
 }
@@ -292,7 +300,8 @@ TEST_CASE("profile: Detect repeat added assets from base", "[profile]") {
     asset3->initialize();
 
     Profile2 p(assetLoader);
-    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.setProfileBaseDirectory("${TESTDIR}/profile");
+    p.setInitialProfile("test2");
     std::string output = p.saveCurrentSettingsToProfile_string();
     REQUIRE(output == detectChangedAssetsResult_4);
 }
@@ -319,9 +328,10 @@ TEST_CASE("profile: Detect removed assets not already loaded", "[profile]") {
     assetLoader.remove("test5");
 
     Profile2 p(assetLoader);
-    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.setProfileBaseDirectory("${TESTDIR}/profile");
+    p.setInitialProfile("test2");
     std::string output = p.saveCurrentSettingsToProfile_string();
-    REQUIRE(output == detectChangedAssetsResult_4);
+    REQUIRE(output == detectChangedAssetsResult_5);
 }
 
 TEST_CASE("profile: Detect removed assets from already loaded", "[profile]") {
@@ -347,7 +357,8 @@ TEST_CASE("profile: Detect removed assets from already loaded", "[profile]") {
     assetLoader.remove("scene/solarsystem/planets/earth/satellites/satellites");
 
     Profile2 p(assetLoader);
-    p.setInitialProfile(FileSys.absolutePath("${TESTDIR}/profile/test2.profile"));
+    p.setProfileBaseDirectory("${TESTDIR}/profile");
+    p.setInitialProfile("test2");
     std::string output = p.saveCurrentSettingsToProfile_string();
-    REQUIRE(output == detectChangedAssetsResult_5);
+    REQUIRE(output == detectChangedAssetsResult_6);
 }
