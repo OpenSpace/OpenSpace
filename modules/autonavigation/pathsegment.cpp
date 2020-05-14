@@ -48,10 +48,8 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
         _duration = duration.value();
     }
     else {
-        // TODO: compute default duration based on curve length 
-        // Also, when compensatng for simulation time later we need to make a guess for 
-        // the duration, based on the current position of the target. 
-        _duration = 5;
+        _duration = std::log(pathLength());
+        //LINFO(fmt::format("Default duration: {}", _duration));
     }
 }
 
