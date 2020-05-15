@@ -57,14 +57,14 @@ public:
     //void write();
     //void read();
 
-    void setData(std::vector<char> data);
-    std::vector<char> data();
+    void setData(std::vector<std::byte> data);
+    std::vector<std::byte> data();
 
 private:
     size_t _n;
     size_t _encodeOffset = 0;
     size_t _decodeOffset = 0;
-    std::vector<char> _dataStream;
+    std::vector<std::byte> _dataStream;
 };
 
 } // namespace openspace

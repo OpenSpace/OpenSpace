@@ -1,0 +1,10 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'chiron-type_comet', 'sssb_data_chiron-type_comet')
+local object = sharedSssb.createSssbGroupObject('sssb_data_chiron-type_comet.csv', "Chiron-type Comets", filepath, { 0.9, 0.3, 0.1 })
+object.Renderable.Enabled = false
+object.Renderable.SegmentQuality = 10
+object.Renderable.TrailFade = 25
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

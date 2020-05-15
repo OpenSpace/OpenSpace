@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="127.0.0.1">
-  <Node ip="127.0.0.1" port="20401">
+  <Node address="127.0.0.1" port="20401">
     <Window fullscreen="false" name="Spherical Projection">
       <Stereo type="none" />
       <Pos x="0" y="100" />
@@ -27,7 +27,7 @@
         </FisheyeProjection>
       </Viewport>
     </Window>
-    <Window fullScreen="false" name="GUI" tags="GUI">
+    <Window fullscreen="false" name="GUI" tags="GUI">
         <Stereo type="none" />
         <Size x="1280" y="720" />
         <Res x="2048" y="2048" />

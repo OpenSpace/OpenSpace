@@ -69,7 +69,8 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
+    {
         "Downscale",
         "Downscale Factor Volume Rendering",
         "This value set the downscaling factor"

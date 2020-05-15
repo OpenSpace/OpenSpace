@@ -11,7 +11,8 @@ function downloadTLEFile(sceneAsset, url, name, filename)
         Name = "Satellite TLE Data (" .. name .. ")",
         Type = "UrlSynchronization",
         Identifier = "satellite_tle_data_" .. identifier,
-        Url = url
+        Url = url,
+        Override = true
     }
 
     if (filename ~= '')  then
@@ -81,7 +82,7 @@ function satellites(title, file, color, group)
        Renderable = {
             Type = "RenderableSatellites",
             Path = file,
-            Segments = 120,
+            SegmentQuality = 3,
             Color = color,
             Fade = 1.5
         },

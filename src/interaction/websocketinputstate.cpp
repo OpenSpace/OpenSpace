@@ -39,7 +39,9 @@ float WebsocketInputStates::axis(int axis) const {
         begin(),
         end(),
         0.f,
-        [axis](float value, const std::pair<const size_t, const WebsocketInputState *> state) {
+        [axis](float value,
+               const std::pair<const size_t, const WebsocketInputState *> state)
+        {
             if (state.second->isConnected) {
                 value += state.second->axes[axis];
             }
@@ -58,9 +60,10 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
     bool res = std::any_of(
         begin(),
         end(),
-        [button, action](const std::pair<const size_t, const WebsocketInputState *> state) {
+        [button, action](const std::pair<const size_t, const WebsocketInputState *> state)
+        {
             return state.second->isConnected ?
-                ( state.second->buttons[button] == action )
+                (state.second->buttons[button] == action)
                 : false;
         }
     );

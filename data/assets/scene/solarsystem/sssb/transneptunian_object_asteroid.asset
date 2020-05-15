@@ -1,0 +1,10 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'transneptunian_object_asteroid', 'sssb_data_transneptunian_object_asteroid')
+local object = sharedSssb.createSssbGroupObject('sssb_data_transneptunian_object_asteroid.csv', "Transneptunian Object Asteroids", filepath, { 0.9, 0.3, 0.1 })
+object.Renderable.Enabled = false
+object.Renderable.SegmentQuality = 8
+object.Renderable.TrailFade = 10
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

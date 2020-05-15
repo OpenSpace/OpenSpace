@@ -417,7 +417,10 @@ int saveLastChangeToProfile(lua_State* L) {
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
     if (!fileout) {
-        ghoul::lua::push(L, fmt::format("Could not open tmp profile '{}'", tempAssetPath));
+        ghoul::lua::push(
+            L,
+            fmt::format("Could not open tmp profile '{}'", tempAssetPath)
+        );
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
 

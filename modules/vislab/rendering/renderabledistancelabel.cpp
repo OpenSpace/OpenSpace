@@ -53,8 +53,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CustomUnitDescriptorInfo = {
         "CustomUnitDescriptor",
         "Custom Unit Descriptor",
-        "Property to define a custom unit descriptor to use to describe the distance value."
-        "Defaults to the units SI descriptor if not specified."
+        "Property to define a custom unit descriptor to use to describe the distance "
+        "value. Defaults to the units SI descriptor if not specified."
     };
 }
 
@@ -111,7 +111,8 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
         addProperty(_distanceUnit);
     }
     if (dictionary.hasKey(CustomUnitDescriptorInfo.identifier)) {
-        _customUnitDescriptor = dictionary.value<std::string>(CustomUnitDescriptorInfo.identifier);
+        _customUnitDescriptor =
+            dictionary.value<std::string>(CustomUnitDescriptorInfo.identifier);
         addProperty(_customUnitDescriptor);
     }
 }
@@ -144,7 +145,9 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         }
 
         // Get distance as string and remove fractional part
-        std::string distanceText = std::to_string(std::round(nodeline->distance() / scale));
+        std::string distanceText = std::to_string(
+            std::round(nodeline->distance() / scale)
+        );
         int pos = static_cast<int>(distanceText.find("."));
         std::string subStr = distanceText.substr(pos);
         distanceText.erase(pos, subStr.size());

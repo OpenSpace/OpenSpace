@@ -79,10 +79,10 @@ public:
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
-    
+
     WebsocketCameraStates& websocketStates();
     const WebsocketCameraStates& websocketStates() const;
-    
+
     ScriptCameraStates& scriptStates();
     const ScriptCameraStates& scriptStates() const;
 
@@ -159,6 +159,8 @@ private:
     properties::FloatProperty _retargetInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
     properties::FloatProperty _followRotationInterpolationTime;
+
+    properties::BoolProperty _invertMouseButtons;
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
@@ -246,19 +248,22 @@ private:
      * Translates the horizontal direction. If far from the anchor object, this will
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
-     * \returns a position vector adjusted in the horizontal direction.
+     *
+     * \return a position vector adjusted in the horizontal direction.
      */
     glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
     /**
-    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the focusLimit.
-    * The velocity of the zooming depend on distFromCameraToFocus and the final frame
-    * where the camera stops moving depends on the distance set in the variable focusLimit.
-    * The bool determines whether to move/fly towards the focus node or away from it.
-    * \returns a new position of the camera, closer to the focusLimit than the previous 
-    * position.
+    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the
+    * focusLimit. The velocity of the zooming depend on distFromCameraToFocus and the
+    * final frame where the camera stops moving depends on the distance set in the
+    * variable focusLimit. The bool determines whether to move/fly towards the focus node
+    * or away from it.
+    *
+    * \return a new position of the camera, closer to the focusLimit than the previous
+    *         position
     */
     glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
         double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
@@ -267,14 +272,16 @@ private:
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor
      * node defined by the differential anchorNodeRotationDiff.
-     * \returns a position updated with the rotation defined by anchorNodeRotationDiff
+     *
+     * \return a position updated with the rotation defined by anchorNodeRotationDiff
      */
     glm::dvec3 followAnchorNodeRotation(const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition, const glm::dquat& anchorNodeRotationDiff) const;
 
     /**
      * Updates the global rotation so that it points towards the anchor node.
-     * \returns a global rotation quaternion defining a rotation towards the anchor node.
+     *
+     * \return a global rotation quaternion defining a rotation towards the anchor node
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
         const glm::dquat& aimNodeRotationDiff,
@@ -290,7 +297,8 @@ private:
 
     /**
      * Rotates the camera around the out vector of the surface.
-     * \returns a quaternion adjusted to rotate around the out vector of the surface.
+     *
+     * \return a quaternion adjusted to rotate around the out vector of the surface
      */
     glm::dquat rotateHorizontally(double deltaTime,
         const glm::dquat& globalCameraRotation,
@@ -298,8 +306,9 @@ private:
 
     /**
      * Push the camera out to the surface of the object.
-     * \returns a position vector adjusted to be at least minHeightAboveGround meters
-     * above the actual surface of the object
+     *
+     * \return a position vector adjusted to be at least minHeightAboveGround meters
+     *         above the actual surface of the object
      */
     glm::dvec3 pushToSurface(double minHeightAboveGround,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,

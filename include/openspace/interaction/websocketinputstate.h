@@ -84,9 +84,9 @@ constexpr const int MaxWebsockets = 16;
 struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputState*> {
     /**
      * This function adds the contributions of all connected websockets for the provided
-     * \p axis. After adding each websockets contribution, the result is clamped to [-1,1].
-     * If a websocket does not possess a particular axis, it's does not contribute to the
-     * sum.
+     * \p axis. After adding each websockets contribution, the result is clamped to
+     * [-1,1]. If a websocket does not possess a particular axis, it's does not contribute
+     * to the sum.
      *
      * \param axis The numerical axis for which the values are added
      * \return The summed axis values of all connected websockets

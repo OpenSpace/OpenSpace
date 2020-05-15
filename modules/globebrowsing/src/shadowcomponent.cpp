@@ -55,7 +55,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "ShadowComponent";
-    
+
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save Depth Texture",
@@ -197,10 +197,10 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
 
 
     if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
-        glm::vec2 depthMapSize = 
+        glm::vec2 depthMapSize =
             _shadowMapDictionary.value<glm::vec2>(DepthMapSizeInfo.identifier);
-        _shadowDepthTextureWidth = depthMapSize.x;
-        _shadowDepthTextureHeight = depthMapSize.y;
+        _shadowDepthTextureWidth = static_cast<int>(depthMapSize.x);
+        _shadowDepthTextureHeight = static_cast<int>(depthMapSize.y);
         _dynamicDepthTextureRes = false;
     }
     else {
@@ -240,42 +240,42 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     // ===========================================
     // Builds light's ModelViewProjectionMatrix:
     // ===========================================
-        
+
     glm::dvec3 diffVector = glm::dvec3(_sunPosition) - data.modelTransform.translation;
     double originalLightDistance = glm::length(diffVector);
     glm::dvec3 lightDirection = glm::normalize(diffVector);
-        
+
     // Percentage of the original light source distance (to avoid artifacts)
-    //double multiplier = originalLightDistance * 
+    //double multiplier = originalLightDistance *
     //    (static_cast<double>(_distanceFraction)/1.0E5);
 
     double multiplier = originalLightDistance *
         (static_cast<double>(_distanceFraction) / 1E17);
-        
+
     // New light source position
-    //glm::dvec3 lightPosition = data.modelTransform.translation + 
+    //glm::dvec3 lightPosition = data.modelTransform.translation +
     //    (lightDirection * multiplier);
     glm::dvec3 lightPosition = data.modelTransform.translation +
         (diffVector * multiplier);
 
     //// Light Position
     //glm::dvec3 lightPosition = glm::dvec3(_sunPosition);
-       
+
     //=============== Manually Created Camera Matrix ===================
     //==================================================================
     // camera Z
     glm::dvec3 cameraZ = lightDirection;
-        
+
     // camera X
     glm::dvec3 upVector = glm::dvec3(0.0, 1.0, 0.0);
-    glm::dvec3 cameraX = glm::normalize(glm::cross(upVector, cameraZ)); 
-        
+    glm::dvec3 cameraX = glm::normalize(glm::cross(upVector, cameraZ));
+
     // camera Y
     glm::dvec3 cameraY = glm::cross(cameraZ, cameraX);
 
     // init 4x4 matrix
     glm::dmat4 cameraRotationMatrix(1.0);
-        
+
     double* matrix = glm::value_ptr(cameraRotationMatrix);
     matrix[0]  = cameraX.x;
     matrix[4]  = cameraX.y;
@@ -288,31 +288,31 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     matrix[10] = cameraZ.z;
 
     // set translation part
-    // We aren't setting the position here because it is set in 
+    // We aren't setting the position here because it is set in
     // the camera->setPosition()
     //matrix[12] = -glm::dot(cameraX, lightPosition);
     //matrix[13] = -glm::dot(cameraY, lightPosition);
     //matrix[14] = -glm::dot(cameraZ, lightPosition);
 
-       
+
     _lightCamera = std::move(std::unique_ptr<Camera>(new Camera(data.camera)));
     _lightCamera->setPositionVec3(lightPosition);
     _lightCamera->setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
     //=======================================================================
     //=======================================================================
-        
+
 
     //============= Light Matrix by Camera Matrices Composition =============
     //=======================================================================
     glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
-        
-    // The model transformation missing in the final shadow matrix is add when rendering each
-    // object (using its transformations provided by the RenderData structure)
-    _shadowData.shadowMatrix = 
-        _toTextureCoordsMatrix * lightProjectionMatrix * 
+
+    // The model transformation missing in the final shadow matrix is add when rendering
+    // each object (using its transformations provided by the RenderData structure)
+    _shadowData.shadowMatrix =
+        _toTextureCoordsMatrix * lightProjectionMatrix *
         _lightCamera->combinedViewMatrix();
 
-        
+
     // Saves current state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     glGetIntegerv(GL_VIEWPORT, _mViewport);
@@ -337,8 +337,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        
+
     //glEnable(GL_CULL_FACE);
     //checkGLError("begin() -- enabled cull face");
     //glCullFace(GL_FRONT);
@@ -372,7 +371,7 @@ void ShadowComponent::end() {
     };
     glDrawBuffers(3, drawBuffers);
     glViewport(_mViewport[0], _mViewport[1], _mViewport[2], _mViewport[3]);
-        
+
     if (_faceCulling) {
         glEnable(GL_CULL_FACE);
         glCullFace(_faceToCull);
@@ -399,9 +398,9 @@ void ShadowComponent::end() {
     }
 
     glClearColor(
-        _colorClearValue[0], 
-        _colorClearValue[1], 
-        _colorClearValue[2], 
+        _colorClearValue[0],
+        _colorClearValue[1],
+        _colorClearValue[2],
         _colorClearValue[3]
     );
     glClearDepth(_depthClearValue);
@@ -433,14 +432,14 @@ void ShadowComponent::end() {
 
         glBindVertexArray(_quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-            
+
         _renderDMProgram->deactivate();
     }
 }
 
 void ShadowComponent::update(const UpdateData&) {
     _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition();
-        
+
     glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
         (_shadowDepthTextureHeight != renderingResolution.y)))
@@ -454,7 +453,7 @@ void ShadowComponent::update(const UpdateData&) {
 void ShadowComponent::createDepthTexture() {
     glGenTextures(1, &_shadowDepthTexture);
     updateDepthTexture();
-        
+
     _shadowData.shadowDepthTexture = _shadowDepthTexture;
     //_shadowData.positionInLightSpaceTexture = _positionInLightSpaceTexture;
 }
@@ -462,13 +461,13 @@ void ShadowComponent::createDepthTexture() {
 void ShadowComponent::createShadowFBO() {
     // Saves current FBO first
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-   
+
     glGenFramebuffers(1, &_shadowFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
     glFramebufferTexture(
-        GL_FRAMEBUFFER, 
-        GL_DEPTH_ATTACHMENT, 
-        _shadowDepthTexture, 
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        _shadowDepthTexture,
         0
     );
 
@@ -478,7 +477,7 @@ void ShadowComponent::createShadowFBO() {
     //    _positionInLightSpaceTexture,
     //    0
     //);
-        
+
     //GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
     GLenum drawBuffers[] = { GL_NONE, GL_NONE, GL_NONE };
     glDrawBuffers(3, drawBuffers);
@@ -561,7 +560,7 @@ void ShadowComponent::saveDepthBuffer() {
     if (ppmFile.is_open()) {
 
         ppmFile << "P3" << std::endl;
-        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight 
+        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight
                 << std::endl;
         ppmFile << "255" << std::endl;
 
@@ -601,7 +600,7 @@ void ShadowComponent::saveDepthBuffer() {
     if (ppmFile.is_open()) {
 
         ppmFile << "P3" << std::endl;
-        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight 
+        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight
                 << std::endl;
         ppmFile << "255" << std::endl;
 

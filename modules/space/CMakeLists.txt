@@ -28,6 +28,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitalkepler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesmallbody.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
@@ -44,6 +45,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitalkepler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesmallbody.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp

@@ -88,8 +88,8 @@ public:
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
-    std::vector<char> encode();
-    void decode(std::vector<char> data);
+    std::vector<std::byte> encode();
+    void decode(std::vector<std::byte> data);
 
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
@@ -124,6 +124,8 @@ private:
 
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
+
+    glm::vec2 _mousePosition;
 
     //grabs json from each module to pass to the documentation engine.
     std::string _documentationJson;
