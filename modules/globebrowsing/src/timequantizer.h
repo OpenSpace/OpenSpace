@@ -65,7 +65,7 @@ public:
      *
      * \param checkTime An ISO8601 date/time string to clamp if falls outside of range
      *
-     * \returns clamped value of input parameter, will be equal to the start value if 
+     * \returns clamped value of input parameter, will be equal to the start value if
      *          less than start, equal to end if greater than end, or equal to input
      *          parameter if falls in-between
     */
@@ -227,7 +227,7 @@ public:
 
     /*
      * Increment operation for the date/time
-     * 
+     *
      * \param value integer value for number of units in an operation
      * \param unit single char that specifies the unit of increment. Allowable units are:
      *             (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
@@ -254,7 +254,7 @@ public:
      * \returns The number of decrements that were performed in order to get as close as
      *          possible to the target, where each decrement is defined by the value &
      *          unit (and approximated but not fixed by the resolution param)
-     */    
+     */
     int decrement(int value, char unit, double error, double resolution);
 
     /*

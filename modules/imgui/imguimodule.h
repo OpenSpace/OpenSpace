@@ -31,13 +31,6 @@
 
 namespace openspace {
 
-// This should be moved into the touch module ---abock
-struct Touch {
-    bool active;
-    glm::vec2 pos = glm::vec2(0.f);
-    uint32_t action = 0;
-};
-
 class ImGUIModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "ImGUI";
@@ -45,7 +38,10 @@ public:
     ImGUIModule();
 
     gui::GUI gui;
-    Touch touchInput = { false, glm::vec2(0), 0 };
+
+private:
+    glm::vec2 _mousePosition = glm::vec2(0.f);
+    uint32_t _mouseButtons = 0;
 };
 
 } // namespace openspace

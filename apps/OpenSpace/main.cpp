@@ -41,21 +41,34 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
-#include <sgct.h>
-#include <chrono>
-#include <ctime>
+//#include <ghoul/opengl/ghoul_gl.h>
+#include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#include <sgct/clustermanager.h>
+#include <sgct/commandline.h>
+#include <sgct/engine.h>
+#include <sgct/log.h>
+#include <sgct/projection/fisheye.h>
+#include <sgct/projection/nonlinearprojection.h>
+#include <sgct/screencapture.h>
+#include <sgct/settings.h>
+#include <sgct/user.h>
+#include <sgct/viewport.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
 #include <TracyOpenGL.hpp>
+#include <chrono>
+#include <ctime>
 
 #ifdef WIN32
 #include <openspace/openspace.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/fmt.h>
+#include <Windows.h>
 #include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
-#include <Windows.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
@@ -79,6 +92,7 @@ constexpr const bool EnableDetailedVtune = false;
 #endif // OPENSPACE_HAS_NVTOOLS
 
 using namespace openspace;
+using namespace sgct;
 
 namespace {
 
@@ -86,11 +100,15 @@ constexpr const char* _loggerCat = "main";
 constexpr const char* SpoutTag = "Spout";
 constexpr const char* OpenVRTag = "OpenVR";
 
-sgct::Engine* SgctEngine;
-sgct::SharedVector<char> _synchronizationBuffer;
+// @TODO (abock, 2020-04-09): These state variables should disappear
+const Window* currentWindow = nullptr;
+const BaseViewport* currentViewport = nullptr;
+Frustum::Mode currentFrustumMode;
+glm::mat4 currentModelViewProjectionMatrix;
+glm::mat4 currentModelMatrix;
 
 #ifdef OPENVR_SUPPORT
-sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
+Window* FirstOpenVRWindow = nullptr;
 #endif
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -144,6 +162,7 @@ std::vector<SpoutWindow> SpoutWindows;
 
 #endif // OPENSPACE_HAS_SPOUT
 
+}
 
 //
 //  MiniDump generation
@@ -215,54 +234,9 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 #endif // WIN32
 
 //
-//  Detect OpenGL version
-//
-std::pair<int, int> supportedOpenGLVersion() {
-    // Just create a window in order to retrieve the available OpenGL version before we
-    // create the real window
-    glfwInit();
-
-    // On OS X we need to explicitly set the version and specify that we are using CORE
-    // profile to be able to use glGetIntegerv(GL_MAJOR_VERSION, &major) and
-    // glGetIntegerv(GL_MINOR_VERSION, &minor) explicitly setting to OGL 3.3 CORE works
-    // since all Mac's now support at least 3.3
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#endif
-
-    glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-
-    // By creating an offscreen window, the user will not know that we created this window
-    GLFWwindow* offscreen = glfwCreateWindow(128, 128, "", nullptr, nullptr);
-    glfwMakeContextCurrent(offscreen);
-
-    // Get the OpenGL version
-    int major, minor;
-    glGetIntegerv(GL_MAJOR_VERSION, &major);
-    glGetIntegerv(GL_MINOR_VERSION, &minor);
-
-    // And get rid of the window again
-    glfwDestroyWindow(offscreen);
-    glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
-
-    return { major, minor };
-}
-
-//
-//  Context creation function
-//
-void mainContextCreationFunc(GLFWwindow* win) {
-    // @TODO (abock, 2020-02-10) Remove this after updating SGCT to 3.0
-    TracyGpuContext
-}
-
-//
 //  Init function
 //
-void mainInitFunc() {
+void mainInitFunc(GLFWwindow*) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -288,32 +262,33 @@ void mainInitFunc() {
         icons[0].width = x;
         icons[0].height = y;
 
-        const size_t nWindows = SgctEngine->getNumberOfWindows();
-        for (size_t i = 0; i < nWindows; ++i) {
-            const sgct::SGCTWindow* windowPtr = SgctEngine->getWindowPtr(i);
-            glfwSetWindowIcon(windowPtr->getWindowHandle(), 1, icons);
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            glfwSetWindowIcon(window->windowHandle(), 1, icons);
         }
 
         stbi_image_free(icons[0].pixels);
     }
 
-
+    currentWindow = Engine::instance().windows().front().get();
+    currentViewport = currentWindow->viewports().front().get();
 
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
     global::openSpaceEngine.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
 
 
+
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
-    for (size_t i = 0; i < SgctEngine->getNumberOfWindows(); ++i) {
-        if (SgctEngine->getWindowPtr(i)->checkIfTagExists(OpenVRTag)) {
+    for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+        if (window->hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
-            FirstOpenVRWindow = SgctEngine->getWindowPtr(i);
+            FirstOpenVRWindow = window.get();
 
             // If we have an OpenVRWindow, initialize OpenVR.
-            sgct::SGCTOpenVR::initialize(
-                SgctEngine->getNearClippingPlane(), SgctEngine->getFarClippingPlane()
+            sgct::OpenVR::initialize(
+                Engine::instance().nearClippingPlane(),
+                Engine::instance().farClippingPlane()
             );
 #else
             LWARNING("OpenVR was requested, but program was compiled without VR support");
@@ -323,11 +298,9 @@ void mainInitFunc() {
         }
     }
 
-    const size_t nWindows = SgctEngine->getNumberOfWindows();
-    for (size_t i = 0; i < nWindows; ++i) {
-        const sgct::SGCTWindow* windowPtr = SgctEngine->getWindowPtr(i);
-
-        if (!windowPtr->checkIfTagExists(SpoutTag)) {
+    for (size_t i = 0; i < Engine::instance().windows().size(); ++i) {
+        Window& window = *Engine::instance().windows()[i];
+        if (!window.hasTag(SpoutTag)) {
             continue;
         }
 
@@ -336,34 +309,34 @@ void mainInitFunc() {
 
         w.windowId = i;
 
-        const sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
-        const bool hasStereo = (sm != sgct::SGCTWindow::No_Stereo) &&
-                               (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
+        const Window::StereoMode sm = window.stereoMode();
+        const bool hasStereo = (sm != Window::StereoMode::NoStereo) &&
+                               (sm < Window::StereoMode::SideBySide);
 
         if (hasStereo) {
             SpoutWindow::SpoutData& left = w.leftOrMain;
             left.handle = GetSpout();
             left.initialized = left.handle->CreateSender(
-                (windowPtr->getName() + "_left").c_str(),
-                windowPtr->getXFramebufferResolution(),
-                windowPtr->getYFramebufferResolution()
+                (window.name() + "_left").c_str(),
+                window.framebufferResolution().x,
+                window.framebufferResolution().y
             );
 
             SpoutWindow::SpoutData& right = w.right;
             right.handle = GetSpout();
             right.initialized = right.handle->CreateSender(
-                (windowPtr->getName() + "_right").c_str(),
-                windowPtr->getXFramebufferResolution(),
-                windowPtr->getYFramebufferResolution()
+                (window.name() + "_right").c_str(),
+                window.framebufferResolution().x,
+                window.framebufferResolution().y
             );
         }
         else {
             SpoutWindow::SpoutData& main = w.leftOrMain;
             main.handle = GetSpout();
             main.initialized = main.handle->CreateSender(
-                windowPtr->getName().c_str(),
-                windowPtr->getXFramebufferResolution(),
-                windowPtr->getYFramebufferResolution()
+                window.name().c_str(),
+                window.framebufferResolution().x,
+                window.framebufferResolution().y
             );
         }
 
@@ -392,23 +365,8 @@ void mainInitFunc() {
         );
     }
 
-    for (size_t i = 0; i < nWindows; ++i) {
-        sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        const std::string screenshotNames = nWindows > 1 ?
-            fmt::format("OpenSpace_{}", i) :
-            "OpenSpace";
+    Settings::instance().setCapturePath(absPath(screenshotPath));
 
-        sgct_core::ScreenCapture* cpt0 = w->getScreenCapturePointer(0);
-        sgct_core::ScreenCapture* cpt1 = w->getScreenCapturePointer(1);
-
-        if (cpt0) {
-            cpt0->setPathAndFileName(absPath(screenshotPath), screenshotNames);
-        }
-
-        if (cpt1) {
-            cpt1->setPathAndFileName(absPath(screenshotPath), screenshotNames);
-        }
-    }
 
     LTRACE("main::mainInitFunc(end)");
 #ifdef OPENSPACE_HAS_VTUNE
@@ -421,10 +379,6 @@ void mainInitFunc() {
 
 
 void mainPreSyncFunc() {
-    // @TODO (abock, 2020-02-10) Remove this after merging SGCT version 3.0
-    FrameMark
-
-
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -439,7 +393,7 @@ void mainPreSyncFunc() {
     }
     catch (const ghoul::RuntimeError& e) {
         LFATALC(e.component, e.message);
-        sgct::Engine::instance()->terminate();
+        Engine::instance().terminate();
     }
 
     // Query joystick status
@@ -459,13 +413,13 @@ void mainPreSyncFunc() {
         if (!state.isConnected) {
             // Joystick was added
             state.isConnected = true;
-            state.name = sgct::Engine::getJoystickName(i);
+            state.name = glfwGetJoystickName(i);
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
         }
 
-        const float* axes = sgct::Engine::getJoystickAxes(i, &state.nAxes);
+        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
             LWARNING(fmt::format(
                 "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
@@ -476,10 +430,7 @@ void mainPreSyncFunc() {
         }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
-        const unsigned char* buttons = sgct::Engine::getJoystickButtons(
-            i,
-            &state.nButtons
-        );
+        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
 
         if (state.nButtons > JoystickInputState::MaxButtons) {
             LWARNING(fmt::format(
@@ -566,7 +517,7 @@ void mainPostSyncPreDrawFunc() {
 
 
 
-void mainRenderFunc() {
+void mainRenderFunc(const RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -579,10 +530,31 @@ void mainRenderFunc() {
 #endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::mainRenderFunc(begin)");
 
-    glm::mat4 viewMatrix = SgctEngine->getCurrentViewMatrix() *
-        glm::translate(glm::mat4(1.f), sgct::Engine::getDefaultUserPtr()->getPos());
+    currentWindow = &data.window;
+    currentViewport = &data.viewport;
+    currentFrustumMode = data.frustumMode;
 
-    glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
+    glm::vec3 pos;
+    std::memcpy(
+        glm::value_ptr(pos),
+        &Engine::instance().defaultUser().posMono().x,
+        sizeof(vec3)
+    );
+
+    glm::mat4 viewMatrix;
+    std::memcpy(
+        glm::value_ptr(viewMatrix),
+        data.viewMatrix.values,
+        sizeof(mat4)
+    );
+    viewMatrix = viewMatrix * glm::translate(glm::mat4(1.f), pos);
+
+    glm::mat4 projectionMatrix;
+    std::memcpy(
+        glm::value_ptr(projectionMatrix),
+        data.projectionMatrix.values,
+        sizeof(mat4)
+    );
 #ifdef OPENVR_SUPPORT
     bool currentWindowIsHMD = FirstOpenVRWindow == SgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
@@ -593,11 +565,15 @@ void mainRenderFunc() {
 #endif
 
     try {
-        global::openSpaceEngine.render(
-            SgctEngine->getModelMatrix(),
-            viewMatrix,
-            projectionMatrix
+        glm::mat4 modelMatrix;
+        std::memcpy(
+            glm::value_ptr(modelMatrix),
+            data.modelMatrix.values,
+            sizeof(mat4)
         );
+        currentModelMatrix = modelMatrix;
+        currentModelViewProjectionMatrix = modelMatrix * viewMatrix * projectionMatrix;
+        global::openSpaceEngine.render(modelMatrix, viewMatrix, projectionMatrix);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -616,7 +592,7 @@ void mainRenderFunc() {
 
 
 
-void mainDraw2DFunc() {
+void mainDraw2DFunc(const RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -625,6 +601,10 @@ void mainDraw2DFunc() {
     }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainDraw2DFunc(begin)");
+
+    currentWindow = &data.window;
+    currentViewport = &data.viewport;
+    currentFrustumMode = data.frustumMode;
 
     try {
         global::openSpaceEngine.drawOverlays();
@@ -661,7 +641,7 @@ void mainPostDrawFunc() {
 #ifdef OPENVR_SUPPORT
     if (FirstOpenVRWindow) {
         // Copy the first OpenVR window to the HMD
-        sgct::SGCTOpenVR::copyWindowToHMD(FirstOpenVRWindow);
+        sgct::OpenVR::copyWindowToHMD(FirstOpenVRWindow);
     }
 #endif // OPENVR_SUPPORT
 
@@ -669,26 +649,26 @@ void mainPostDrawFunc() {
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
-        sgct::SGCTWindow* window = SgctEngine->getWindowPtr(w.windowId);
+        sgct::Window& window = *Engine::instance().windows()[w.windowId];
         if (w.leftOrMain.initialized) {
-            const GLuint texId = window->getFrameBufferTexture(sgct::Engine::LeftEye);
+            const GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
                 GL_TEXTURE_2D,
-                window->getXFramebufferResolution(),
-                window->getYFramebufferResolution()
+                window.framebufferResolution().x,
+                window.framebufferResolution().y
             );
         }
 
         if (w.right.initialized) {
-            const GLuint texId = window->getFrameBufferTexture(sgct::Engine::RightEye);
+            const GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
             glBindTexture(GL_TEXTURE_2D, texId);
             w.right.handle->SendTexture(
                 texId,
                 GL_TEXTURE_2D,
-                window->getXFramebufferResolution(),
-                window->getYFramebufferResolution()
+                window.framebufferResolution().x,
+                window.framebufferResolution().y
             );
         }
     }
@@ -705,7 +685,9 @@ void mainPostDrawFunc() {
 
 
 
-void mainKeyboardCallback(int key, int, int action, int modifiers) {
+void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action action,
+                          int)
+{
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -715,7 +697,7 @@ void mainKeyboardCallback(int key, int, int action, int modifiers) {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainKeyboardCallback(begin)");
 
-    const Key k = Key(key);
+    const openspace::Key k = openspace::Key(key);
     const KeyModifier m = KeyModifier(modifiers);
     const KeyAction a = KeyAction(action);
     global::openSpaceEngine.keyboardCallback(k, m, a);
@@ -730,7 +712,9 @@ void mainKeyboardCallback(int key, int, int action, int modifiers) {
 
 
 
-void mainMouseButtonCallback(int key, int action, int modifiers) {
+void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
+                             sgct::Action action)
+{
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -740,9 +724,9 @@ void mainMouseButtonCallback(int key, int action, int modifiers) {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainMouseButtonCallback(begin)");
 
-    const MouseButton k = MouseButton(key);
-    const MouseAction a = MouseAction(action);
-    const KeyModifier m = KeyModifier(modifiers);
+    const openspace::MouseButton k = openspace::MouseButton(key);
+    const openspace::MouseAction a = openspace::MouseAction(action);
+    const openspace::KeyModifier m = openspace::KeyModifier(modifiers);
     global::openSpaceEngine.mouseButtonCallback(k, a, m);
 
     LTRACE("main::mainMouseButtonCallback(end)");
@@ -818,7 +802,7 @@ void mainCharCallback(unsigned int codepoint, int modifiers) {
 
 
 
-void mainEncodeFun() {
+std::vector<std::byte> mainEncodeFun() {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -828,9 +812,7 @@ void mainEncodeFun() {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainEncodeFun(begin)");
 
-    std::vector<char> data = global::openSpaceEngine.encode();
-    _synchronizationBuffer.setVal(std::move(data));
-    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
+    std::vector<std::byte> data = global::openSpaceEngine.encode();
 
     LTRACE("main::mainEncodeFun(end)");
 #ifdef OPENSPACE_HAS_VTUNE
@@ -838,11 +820,13 @@ void mainEncodeFun() {
         __itt_frame_end_v3(_vTune.encode, nullptr);
     }
 #endif // OPENSPACE_HAS_VTUNE
+
+    return data;
 }
 
 
 
-void mainDecodeFun() {
+void mainDecodeFun(const std::vector<std::byte>& data, unsigned int) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -852,9 +836,7 @@ void mainDecodeFun() {
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainDecodeFun(begin)");
 
-    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
-    std::vector<char> data = _synchronizationBuffer.getVal();
-    global::openSpaceEngine.decode(std::move(data));
+    global::openSpaceEngine.decode(data);
 
     LTRACE("main::mainDecodeFun(end)");
 #ifdef OPENSPACE_HAS_VTUNE
@@ -866,17 +848,24 @@ void mainDecodeFun() {
 
 
 
-void mainLogCallback(const char* msg) {
+void mainLogCallback(Log::Level level, const char* message) {
     ZoneScoped
 
-    std::string message = msg;
-    if (message.empty() || message == ".") {
-        // We don't want the empty '.' message that SGCT sends while it is waiting for
-        // connections from other network nodes
-        return;
-    }
+    std::string msg = message;
     // Remove the trailing \n that is passed along
-    LINFOC("SGCT", message.substr(0, message.size() - 1));
+    switch (level) {
+        case Log::Level::Debug:
+            LDEBUGC("SGCT", msg.substr(0, msg.size() - 1));
+            break;
+        case Log::Level::Info:
+            LINFOC("SGCT", msg.substr(0, msg.size() - 1));
+            break;
+        case Log::Level::Warning:
+            LWARNINGC("SGCT", msg.substr(0, msg.size() - 1));
+            break;
+        case Log::Level::Error:
+            LERRORC("SGCT", msg.substr(0, msg.size() - 1));
+            break;
 }
 
 } // namespace
@@ -884,140 +873,102 @@ void mainLogCallback(const char* msg) {
 
 void setSgctDelegateFunctions() {
     WindowDelegate& sgctDelegate = global::windowDelegate;
-    sgctDelegate.terminate = []() { sgct::Engine::instance()->terminate(); };
+    sgctDelegate.terminate = []() { Engine::instance().terminate(); };
     sgctDelegate.setBarrier = [](bool enabled) {
         ZoneScoped
 
-        sgct::SGCTWindow::setBarrier(enabled);
+        sgct::Window::setBarrier(enabled);
     };
     sgctDelegate.setSynchronization = [](bool enabled) {
         ZoneScoped
 
-        sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
-    };
-    sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
-        ZoneScoped
-
-        size_t n = sgct::Engine::instance()->getNumberOfWindows();
-        for (size_t i = 0; i < n; ++i) {
-            glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            GLFWwindow* w = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
-            glfwSwapBuffers(w);
-        }
+        sgct::ClusterManager::instance().setUseIgnoreSync(enabled);
     };
     sgctDelegate.windowHasResized = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
+        return currentWindow->isWindowResized();
     };
     sgctDelegate.averageDeltaTime = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getAvgDt();
-    };
-    sgctDelegate.deltaTimeStandardDeviation = []() {
-        ZoneScoped
-
-        return sgct::Engine::instance()->getDtStandardDeviation();
+        return Engine::instance().statistics().avgDt(
+            Engine::instance().currentFrameNumber()
+        );
     };
     sgctDelegate.minDeltaTime = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getMinDt();
+        return Engine::instance().statistics().minDt();
     };
     sgctDelegate.maxDeltaTime = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getMaxDt();
+        return Engine::instance().statistics().maxDt();
     };
     sgctDelegate.deltaTime = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getDt();
+        return Engine::instance().statistics().dt();
     };
     sgctDelegate.applicationTime = []() {
         ZoneScoped
 
         return sgct::Engine::getTime();
     };
-    sgctDelegate.mousePosition = []() {
-        ZoneScoped
-
-        int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
-        double posX, posY;
-        sgct::Engine::getMousePos(id, &posX, &posY);
-        return glm::vec2(posX, posY);
-    };
-    sgctDelegate.mouseButtons = [](int maxNumber) {
-        ZoneScoped
-
-        int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
-        uint32_t result = 0;
-        for (int i = 0; i < maxNumber; ++i) {
-            bool button = (sgct::Engine::getMouseButton(id, i) != 0);
-            if (button) {
-                result |= (1 << i);
-            }
-        }
-        return result;
-    };
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped
 
-        return glm::ivec2(
-            sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
-            sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
+        return glm::ivec2(currentWindow->resolution().x, currentWindow->resolution().y);
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped
 
-        auto window = sgct::Engine::instance()->getCurrentWindowPtr();
-        if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
-            sgct_core::Viewport* viewport =
-                sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
-            return glm::ivec2(window->getXResolution()*viewport->getXSize(), window->getYResolution()*viewport->getYSize());
+        if (currentWindow->viewports().size() > 1) {
+            const Viewport& viewport = *currentWindow->viewports().front();
+            return glm::ivec2(
+                currentWindow->resolution().x * viewport.size().x,
+                currentWindow->resolution().y * viewport.size().y
+            );
         }
-        switch (window->getStereoMode()) {
-            case sgct::SGCTWindow::Side_By_Side_Stereo:
-            case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
-                return glm::ivec2(window->getXResolution() / 2, window->getYResolution());
-            case sgct::SGCTWindow::Top_Bottom_Stereo:
-            case sgct::SGCTWindow::Top_Bottom_Inverted_Stereo:
-                return glm::ivec2(window->getXResolution(), window->getYResolution() / 2);
+        switch (currentWindow->stereoMode()) {
+            case Window::StereoMode::SideBySide:
+            case Window::StereoMode::SideBySideInverted:
+                return glm::ivec2(
+                    currentWindow->resolution().x / 2,
+                    currentWindow->resolution().y
+                );
+            case Window::StereoMode::TopBottom:
+            case Window::StereoMode::TopBottomInverted:
+                return glm::ivec2(
+                    currentWindow->resolution().x,
+                    currentWindow->resolution().y / 2
+                );
             default:
-                return glm::ivec2(window->getXResolution(), window->getYResolution());
+                return glm::ivec2(
+                    currentWindow->resolution().x,
+                    currentWindow->resolution().y
+                );
         }
-    };
-    sgctDelegate.currentWindowResolution = []() {
-        ZoneScoped
-
-        int x, y;
-        auto window = sgct::Engine::instance()->getCurrentWindowPtr();
-        window->getFinalFBODimensions(x, y);
-        return glm::ivec2(x, y);
     };
     sgctDelegate.currentDrawBufferResolution = []() {
         ZoneScoped
 
-        sgct_core::Viewport* viewport =
-            sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+        Viewport* viewport = currentWindow->viewports().front().get();
         if (viewport != nullptr) {
-            if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
-                int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
+            if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
+                int res = viewport->nonLinearProjection()->cubemapResolution();
                 return glm::ivec2(res, res);
             }
-            else if (sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfViewports() > 1) {
-                int x, y;
-                auto window = sgct::Engine::instance()->getCurrentWindowPtr();
-                window->getFinalFBODimensions(x, y);
-                return glm::ivec2(x*viewport->getXSize(), y*viewport->getYSize());
+            else if (currentWindow->viewports().size() > 1) {
+                // @TODO (abock, 2020-04-09) This should probably be based on the current
+                // viewport?
+                ivec2 dim = currentWindow->finalFBODimensions();
+                return glm::ivec2(dim.x * viewport->size().x, dim.y * viewport->size().y);
             }
             else {
-                int x, y;
-                auto window = sgct::Engine::instance()->getCurrentWindowPtr();
-                window->getFinalFBODimensions(x, y);
-                return glm::ivec2(x, y);
+                ivec2 dim = currentWindow->finalFBODimensions();
+                return glm::ivec2(dim.x, dim.y);
             }
         }
         return glm::ivec2(-1, -1);
@@ -1025,35 +976,23 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentViewportSize = []() {
         ZoneScoped
 
-        sgct_core::Viewport* viewport =
-            sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
-        if (viewport != nullptr) {
-            int x = 0;
-            int y = 0;
-            sgct::Engine::instance()->getCurrentViewportSize(x, y);
-            return glm::ivec2(x, y);
+        if (currentViewport != nullptr) {
+            vec2 size = currentViewport->size();
+            return glm::ivec2(size.x, size.y);
         }
         return glm::ivec2(-1, -1);
     };
     sgctDelegate.dpiScaling = []() {
         ZoneScoped
 
-        return glm::vec2(
-            sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
-            sgct::Engine::instance()->getCurrentWindowPtr()->getYScale()
-        );
-    };
-    sgctDelegate.currentNumberOfAaSamples = []() {
-        ZoneScoped
-
-        return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
+        vec2 scale = currentWindow->scale();
+        return glm::vec2(scale.x, scale.y);
     };
     sgctDelegate.hasGuiWindow = []() {
         ZoneScoped
 
-        auto engine = sgct::Engine::instance();
-        for (size_t i = 0; i < engine->getNumberOfWindows(); ++i) {
-            if (engine->getWindowPtr(i)->checkIfTagExists("GUI")) {
+        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+            if (window->hasTag("GUI")) {
                 return true;
             }
         }
@@ -1062,77 +1001,36 @@ void setSgctDelegateFunctions() {
     sgctDelegate.isGuiWindow = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->checkIfTagExists("GUI");
+        return currentWindow->hasTag("GUI");
     };
     sgctDelegate.isMaster = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->isMaster();
-    };
-    sgctDelegate.isUsingSwapGroups = []() {
-        ZoneScoped
-
-        return sgct::SGCTWindow::isUsingSwapGroups();
-    };
-    sgctDelegate.isSwapGroupMaster = []() {
-        ZoneScoped
-
-        return sgct::SGCTWindow::isSwapGroupMaster();
-    };
-    sgctDelegate.viewProjectionMatrix = []() {
-        ZoneScoped
-
-        return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
+        return Engine::instance().isMaster();
     };
     sgctDelegate.modelMatrix = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getModelMatrix();
+        return currentModelMatrix;
     };
     sgctDelegate.setNearFarClippingPlane = [](float nearPlane, float farPlane) {
         ZoneScoped
 
-        sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
-    };
-    sgctDelegate.setEyeSeparationDistance = [](float distance) {
-        ZoneScoped
-
-        sgct::Engine::instance()->setEyeSeparation(distance);
-    };
-    sgctDelegate.viewportPixelCoordinates = []() {
-        ZoneScoped
-
-        sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();
-        if (!window || !window->getCurrentViewport()) {
-            return glm::ivec4(0);
-        }
-        else {
-            const int* data = sgct::Engine::instance()->getCurrentViewportPixelCoords();
-            return glm::ivec4(data[0], data[2], data[1], data[3]);
-        }
-    };
-    sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
-        ZoneScoped
-
-        sgct::Engine::instance()->sendMessageToExternalControl(
-            message.data(),
-            static_cast<int>(message.size())
-        );
+        Engine::instance().setNearAndFarClippingPlanes(nearPlane, farPlane);
     };
     sgctDelegate.isFisheyeRendering = []() {
         ZoneScoped
 
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
-        return dynamic_cast<sgct_core::FisheyeProjection*>(
-            w->getViewport(0)->getNonLinearProjectionPtr()
+        return dynamic_cast<FisheyeProjection*>(
+            currentWindow->viewports().front()->nonLinearProjection()
         ) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
         ZoneScoped
 
-        sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
-        sgct::Engine::instance()->takeScreenshot();
-        return sgct::Engine::instance()->getScreenShotNumber();
+        Settings::instance().setCaptureFromBackBuffer(applyWarping);
+        Engine::instance().takeScreenshot();
+        return Engine::instance().screenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {
         ZoneScoped
@@ -1144,12 +1042,12 @@ void setSgctDelegateFunctions() {
     sgctDelegate.nWindows = []() {
         ZoneScoped
 
-        return static_cast<int>(sgct::Engine::instance()->getNumberOfWindows());
+        return static_cast<int>(Engine::instance().windows().size());
     };
     sgctDelegate.currentWindowId = []() {
         ZoneScoped
 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
+        return currentWindow->id();
     };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped
@@ -1160,23 +1058,22 @@ void setSgctDelegateFunctions() {
         ZoneScoped
 
         return static_cast<double>(
-            sgct::Engine::instance()->getWindowPtr(0)->getHorizFieldOfViewDegrees()
+            Engine::instance().windows().front()->horizFieldOfViewDegrees()
         );
     };
     sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
         ZoneScoped
 
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(0);
-        w->setHorizFieldOfView(hFovDeg);
+        Engine::instance().windows().front()->setHorizFieldOfView(hFovDeg);
     };
     #ifdef WIN32
     sgctDelegate.getNativeWindowHandle = [](size_t windowIndex) -> void* {
         ZoneScoped
 
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(windowIndex);
+        Window* w = Engine::instance().windows()[windowIndex].get();
         if (w) {
-                HWND hWnd = glfwGetWin32Window(w->getWindowHandle());
-                return reinterpret_cast<void*>(hWnd);
+            HWND hWnd = glfwGetWin32Window(w->windowHandle());
+            return reinterpret_cast<void*>(hWnd);
         }
         return nullptr;
     };
@@ -1184,19 +1081,17 @@ void setSgctDelegateFunctions() {
     sgctDelegate.frustumMode = []() {
         ZoneScoped
 
-        using FM = sgct_core::Frustum::FrustumMode;
-        switch (sgct::Engine::instance()->getCurrentFrustumMode()) {
-            case FM::MonoEye: return WindowDelegate::Frustum::Mono;
-            case FM::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
-            case FM::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+        switch (currentFrustumMode) {
+            default:
+            case Frustum::Mode::MonoEye: return WindowDelegate::Frustum::Mono;
+            case Frustum::Mode::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
+            case Frustum::Mode::StereoRightEye: return WindowDelegate::Frustum::RightEye;
         }
     };
-    sgctDelegate.swapGroupFrameNumber = []() {
+    sgctDelegate.swapGroupFrameNumber = []() -> uint64_t {
         ZoneScoped
 
-        unsigned int fn = 0;
-        sgct::Engine::instance()->getCurrentWindowPtr()->getSwapGroupFrameNumber(fn);
-        return static_cast<uint64_t>(fn);
+        return currentWindow->swapGroupFrameNumber();
     };
 }
 
@@ -1366,59 +1261,45 @@ int main(int argc, char** argv) {
     arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
 
     // Need to set this before the creation of the sgct::Engine
-    sgct::MessageHandler::instance()->setLogToConsole(false);
-    sgct::MessageHandler::instance()->setShowTime(false);
-    sgct::MessageHandler::instance()->setLogToCallback(true);
-    sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
+    
+    Log::instance().setLogToConsole(false);
+    Log::instance().setShowTime(false);
+    Log::instance().setLogCallback(mainLogCallback);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
 
     LDEBUG("Creating SGCT Engine");
-    SgctEngine = new sgct::Engine(arguments);
+    std::vector<std::string> arg(argv + 1, argv + argc);
+    Configuration config = parseArguments(arg);
+    config::Cluster cluster = loadCluster(windowConfiguration);
 
-    // Bind functions
-    SgctEngine->setContextCreationCallback(mainContextCreationFunc);
-    SgctEngine->setInitOGLFunction(mainInitFunc);
-    SgctEngine->setPreSyncFunction(mainPreSyncFunc);
-    SgctEngine->setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
-    SgctEngine->setDrawFunction(mainRenderFunc);
-    SgctEngine->setDraw2DFunction(mainDraw2DFunc);
-    SgctEngine->setPostDrawFunction(mainPostDrawFunc);
-    SgctEngine->setKeyboardCallbackFunction(mainKeyboardCallback);
-    SgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
-    SgctEngine->setMousePosCallbackFunction(mainMousePosCallback);
-    SgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
-    SgctEngine->setCharCallbackFunction(mainCharCallback);
+    Engine::Callbacks callbacks;
+    callbacks.initOpenGL = mainInitFunc;
+    callbacks.preSync = mainPreSyncFunc;
+    callbacks.postSyncPreDraw = mainPostSyncPreDrawFunc;
+    callbacks.draw = mainRenderFunc;
+    callbacks.draw2D = mainDraw2DFunc;
+    callbacks.postDraw = mainPostDrawFunc;
+    callbacks.keyboard = mainKeyboardCallback;
+    callbacks.mouseButton = mainMouseButtonCallback;
+    callbacks.mousePos = mainMousePosCallback;
+    callbacks.mouseScroll = mainMouseScrollCallback;
+    callbacks.character = mainCharCallback;
+    callbacks.encode = mainEncodeFun;
+    callbacks.decode = mainDecodeFun;
+    Log::instance().setNotifyLevel(Log::Level::Debug);
 
-    // Disable the immediate exit of the application when the ESC key is pressed
-    SgctEngine->setExitKey(SGCT_KEY_UNKNOWN);
-
-    sgct::MessageHandler::instance()->setNotifyLevel(sgct::MessageHandler::NOTIFY_ALL);
-
-    // Set encode and decode functions
-    // NOTE: starts synchronizing before init functions
-    sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
-    sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
-
-    // Try to open a window
-    LDEBUG("Initialize SGCT Engine");
-    std::map<std::pair<int, int>, sgct::Engine::RunMode> versionMapping = {
-        { { 3, 3 }, sgct::Engine::RunMode::OpenGL_3_3_Core_Profile },
-        { { 4, 0 }, sgct::Engine::RunMode::OpenGL_4_0_Core_Profile },
-        { { 4, 1 }, sgct::Engine::RunMode::OpenGL_4_1_Core_Profile },
-        { { 4, 2 }, sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
-        { { 4, 3 }, sgct::Engine::RunMode::OpenGL_4_3_Core_Profile },
-        { { 4, 4 }, sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
-        { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile },
-        { { 4, 6 }, sgct::Engine::RunMode::OpenGL_4_6_Core_Profile }
-    };
-
-
-    std::pair<int, int> version = supportedOpenGLVersion();
-    LINFO(fmt::format("Detected OpenGL version: {}.{}", version.first, version.second));
-    bool initSuccess = SgctEngine->init(versionMapping[version]);
+    try {
+        Engine::create(cluster, callbacks, config);
+    }
+    catch (...) {
+        Engine::destroy();
+        global::openSpaceEngine.deinitialize();
+        ghoul::deinitialize();
+        throw;
+    }
 
 #ifdef __APPLE__
     // Workaround for OpenGL bug that Apple introduced in 10.14 Mojave that prevents an
@@ -1431,9 +1312,8 @@ int main(int argc, char** argv) {
     // machine. If the loading screen shows up without doing anything to the window, it
     // is fixed. With the bug, the rendering stays gray even well after the main render
     // loop has started     -- 2018-10-28   abock
-    size_t n = sgct::Engine::instance()->getNumberOfWindows();
-    for (size_t i = 0; i < n; ++i) {
-        GLFWwindow* w = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
+    for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+        GLFWwindow* w = window->windowHandle();
         int x, y;
         glfwGetWindowPos(w, &x, &y);
         glfwSetWindowPos(w, x + 1, y + 1);
@@ -1448,53 +1328,39 @@ int main(int argc, char** argv) {
 
     // Do not print message if slaves are waiting for the master
     // Only timeout after 15 minutes
-    SgctEngine->setSyncParameters(false, 15.f * 60.f);
+    Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
-    auto cleanup = [&](bool isInitialized) {
-        if (isInitialized) {
-            global::openSpaceEngine.deinitializeGL();
-            global::openSpaceEngine.deinitialize();
-        }
+    LINFO("Starting rendering loop");
+    Engine::instance().render();
+    LINFO("Ending rendering loop");
 
-        // Clear function bindings to avoid crash after destroying the OpenSpace Engine
-        sgct::MessageHandler::instance()->setLogToCallback(false);
-        sgct::MessageHandler::instance()->setLogCallback(nullptr);
+    global::openSpaceEngine.deinitializeGL();
+    global::openSpaceEngine.deinitialize();
 
-        LDEBUG("Destroying SGCT Engine");
-        delete SgctEngine;
+    // Clear function bindings to avoid crash after destroying the OpenSpace Engine
+    Log::instance().setLogCallback(nullptr);
+
+    LDEBUG("Destroying SGCT Engine");
+    Engine::destroy();
 
 #ifdef OPENVR_SUPPORT
-        // Clean up OpenVR
-        sgct::SGCTOpenVR::shutdown();
+    // Clean up OpenVR
+    sgct::SGCTOpenVR::shutdown();
 #endif
 
 #ifdef OPENSPACE_HAS_SPOUT
-        for (SpoutWindow& w : SpoutWindows) {
-            if (w.leftOrMain.handle) {
-                w.leftOrMain.handle->ReleaseReceiver();
-                w.leftOrMain.handle->Release();
-            }
-            if (w.right.handle) {
-                w.right.handle->ReleaseReceiver();
-                w.right.handle->Release();
-            }
+    for (SpoutWindow& w : SpoutWindows) {
+        if (w.leftOrMain.handle) {
+            w.leftOrMain.handle->ReleaseReceiver();
+            w.leftOrMain.handle->Release();
         }
+        if (w.right.handle) {
+            w.right.handle->ReleaseReceiver();
+            w.right.handle->Release();
+        }
+    }
 #endif // OPENSPACE_HAS_SPOUT
 
-        ghoul::deinitialize();
-    };
-
-    if (!initSuccess) {
-        LFATAL("Initializing failed");
-        cleanup(false);
-        return EXIT_FAILURE;
-    }
-
-    LINFO("Starting rendering loop");
-    SgctEngine->render();
-    LINFO("Ending rendering loop");
-
-    cleanup(true);
-
+    ghoul::deinitialize();
     exit(EXIT_SUCCESS);
 }

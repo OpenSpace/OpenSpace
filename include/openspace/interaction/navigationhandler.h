@@ -135,7 +135,7 @@ public:
         WebsocketCameraStates::AxisInvert::No,
         WebsocketCameraStates::AxisNormalize shouldNormalize =
         WebsocketCameraStates::AxisNormalize::No);
-    
+
     NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 

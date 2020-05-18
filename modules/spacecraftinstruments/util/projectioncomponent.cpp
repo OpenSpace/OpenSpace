@@ -69,7 +69,8 @@ namespace {
     constexpr const char* sequenceTypePlaybook = "playbook";
     constexpr const char* sequenceTypeHybrid = "hybrid";
     constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
-    constexpr const char* sequenceTypeImageAndInstrumentTimes = "image-and-instrument-times";
+    constexpr const char* sequenceTypeImageAndInstrumentTimes =
+        "image-and-instrument-times";
 
     constexpr const char* placeholderFile = "${DATA}/placeholder.png";
 
@@ -381,7 +382,9 @@ void ProjectionComponent::initialize(const std::string& identifier,
                     )
             );
 
-            std::string timesSequenceSource = absPath(dictionary.value<std::string>(keyTimesSequenceDir));
+            std::string timesSequenceSource = absPath(
+                dictionary.value<std::string>(keyTimesSequenceDir)
+            );
             ghoul::Dictionary timesTranslationDictionary;
             dictionary.getValue(keyTimesTranslation, timesTranslationDictionary);
 

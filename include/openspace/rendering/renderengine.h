@@ -211,7 +211,7 @@ private:
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
-    
+
     properties::BoolProperty _enableFXAA;
 
     properties::BoolProperty _disableHDRPipeline;
@@ -221,13 +221,13 @@ private:
     properties::FloatProperty _hue;
     properties::FloatProperty _saturation;
     properties::FloatProperty _value;
-    
+
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
-    
+
     uint64_t _frameNumber = 0;
     unsigned int _latestScreenshotNumber = 0;
 

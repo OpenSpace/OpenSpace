@@ -54,8 +54,8 @@ documentation::Documentation StaticScale::Documentation() {
     };
 }
 
-double StaticScale::scaleValue(const UpdateData&) const {
-    return _scaleValue;
+glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {
+    return glm::dvec3(_scaleValue);
 }
 
 StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.f, 0.1f, 100.f) {

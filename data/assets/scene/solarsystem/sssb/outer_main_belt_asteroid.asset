@@ -1,0 +1,10 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'outer_main_belt_asteroid', 'sssb_data_outer_main_belt_asteroid')
+local object = sharedSssb.createSssbGroupObject('sssb_data_outer_main_belt_asteroid.csv', "Outer Main Asteroid Belt", filepath, { 0.9, 0.3, 0.1 })
+object.Renderable.Enabled = false
+object.Renderable.SegmentQuality = 1
+object.Renderable.TrailFade = 2
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

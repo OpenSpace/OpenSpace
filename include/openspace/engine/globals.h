@@ -122,7 +122,8 @@ static VersionChecker& versionChecker = detail::gVersionChecker();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static configuration::Configuration& configuration = detail::gConfiguration();
-static interaction::InteractionMonitor& interactionMonitor = detail::gInteractionMonitor();
+static interaction::InteractionMonitor& interactionMonitor =
+    detail::gInteractionMonitor();
 static interaction::JoystickInputStates& joystickInputStates =
     detail::gJoystickInputStates();
 static interaction::WebsocketInputStates& websocketInputStates =

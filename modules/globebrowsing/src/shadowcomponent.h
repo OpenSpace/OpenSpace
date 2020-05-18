@@ -70,7 +70,7 @@ public:
     RenderData begin(const RenderData& data);
     void end();
     void update(const UpdateData& data);
-        
+
     static documentation::Documentation Documentation();
 
     bool isEnabled() const;
@@ -101,13 +101,13 @@ private:
     properties::TriggerProperty _saveDepthTexture;
     properties::IntProperty _distanceFraction;
     properties::BoolProperty _enabled;
-        
+
     ghoul::Dictionary _shadowMapDictionary;
-        
+
     int _shadowDepthTextureHeight = 4096;
     int _shadowDepthTextureWidth = 4096;
     bool _dynamicDepthTextureRes = true;
-        
+
     GLuint _shadowDepthTexture = 0;
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;

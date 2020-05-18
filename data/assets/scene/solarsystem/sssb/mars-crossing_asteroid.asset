@@ -1,0 +1,10 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'mars-crossing_asteroid', 'sssb_data_mars-crossing_asteroid')
+local object = sharedSssb.createSssbGroupObject('sssb_data_mars-crossing_asteroid.csv', "Mars-crossing Asteroids", filepath, { 0.9, 0.3, 0.1 })
+object.Renderable.Enabled = false
+object.Renderable.SegmentQuality = 1
+object.Renderable.TrailFade = 13
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

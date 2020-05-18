@@ -59,6 +59,7 @@
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/rotation/timelinerotation.h>
 #include <modules/base/scale/luascale.h>
+#include <modules/base/scale/nonuniformstaticscale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/translation/timelinetranslation.h>
@@ -155,6 +156,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fScale, "Scale factory was not created");
 
     fScale->registerClass<LuaScale>("LuaScale");
+    fScale->registerClass<NonUniformStaticScale>("NonUniformStaticScale");
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
 

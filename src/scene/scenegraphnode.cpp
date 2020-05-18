@@ -469,14 +469,7 @@ void SceneGraphNode::update(const UpdateData& data) {
         newUpdateData.modelTransform.translation
     );
     glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(
-        glm::dmat4(1.0),
-        glm::dvec3(
-            newUpdateData.modelTransform.scale,
-            newUpdateData.modelTransform.scale,
-            newUpdateData.modelTransform.scale
-        )
-    );
+    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
 
     _modelTransformCached = translation * rotation * scaling;
     _inverseModelTransformCached = glm::inverse(_modelTransformCached);
@@ -707,7 +700,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     }
 
     glm::ivec2 res = global::windowDelegate.currentSubwindowSize();
-    
+
     // Get the radius of node
     double nodeRadius = static_cast<double>(this->boundingSphere());
 
@@ -788,7 +781,7 @@ const glm::dmat3& SceneGraphNode::rotationMatrix() const {
     return _transform.rotation->matrix();
 }
 
-double SceneGraphNode::scale() const {
+glm::dvec3 SceneGraphNode::scale() const {
     return _transform.scale->scaleValue();
 }
 
@@ -808,7 +801,7 @@ glm::dmat4 SceneGraphNode::inverseModelTransform() const {
     return _inverseModelTransformCached;
 }
 
-double SceneGraphNode::worldScale() const {
+glm::dvec3 SceneGraphNode::worldScale() const {
     return _worldScaleCached;
 }
 
@@ -825,7 +818,7 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     if (_parent) {
         const glm::dvec3 wp = _parent->worldPosition();
         const glm::dmat3 wrot = _parent->worldRotationMatrix();
-        const double ws = _parent->worldScale();
+        const glm::dvec3 ws = _parent->worldScale();
         const glm::dvec3 p = position();
 
         return wp + wrot * ws * p;
@@ -859,7 +852,7 @@ glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     }
 }
 
-double SceneGraphNode::calculateWorldScale() const {
+glm::dvec3 SceneGraphNode::calculateWorldScale() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
         return _parent->worldScale() * scale();

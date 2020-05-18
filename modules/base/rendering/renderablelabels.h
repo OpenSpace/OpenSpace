@@ -100,7 +100,7 @@ private:
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     float changedPerlinSmoothStepFunc(float x, float startX, float endX) const;
-    
+
     float linearSmoothStepFunc(float x, float startX, float endX, float sUnit,
         float eUnit) const;
 

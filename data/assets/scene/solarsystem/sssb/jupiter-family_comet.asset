@@ -1,0 +1,10 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'jupiter-family_comet', 'sssb_data_jupiter-family_comet')
+local object = sharedSssb.createSssbGroupObject('sssb_data_jupiter-family_comet.csv', "Jupiter-family Comets", filepath, { 0.9, 0.3, 0.1 })
+object.Renderable.Enabled = false
+object.Renderable.SegmentQuality = 10
+object.Renderable.TrailFade = 28
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

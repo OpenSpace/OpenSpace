@@ -110,6 +110,12 @@ namespace {
         "objects being rendered."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "If the DU mesh is of wire type, this value determines the width of the lines"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -216,6 +222,12 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 LabelMaxSizeInfo.description
             },
             {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LineWidthInfo.description
+            },
+            {
                 TransformationMatrixInfo.identifier,
                 new Matrix4x4Verifier<double>,
                 Optional::Yes,
@@ -242,6 +254,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _drawLabels(DrawLabelInfo, false)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
     , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
+    , _lineWidth(LineWidthInfo, 2.f, 0.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     documentation::testSpecificationAndThrow(
@@ -314,6 +327,13 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         );
     }
     addProperty(_scaleFactor);*/
+
+    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
+        );
+    }
+    addProperty(_lineWidth);
 
     if (dictionary.hasKey(DrawLabelInfo.identifier)) {
         _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
@@ -473,7 +493,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Solid:
                     break;
                 case Wire:
-                    glLineWidth(2.0);
+                    glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
                     glLineWidth(lineWidth);
                     break;

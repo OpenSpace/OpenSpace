@@ -122,13 +122,13 @@ public:
 
     glm::dvec3 position() const;
     const glm::dmat3& rotationMatrix() const;
-    double scale() const;
+    glm::dvec3 scale() const;
 
     glm::dvec3 worldPosition() const;
     const glm::dmat3& worldRotationMatrix() const;
     glm::dmat4 modelTransform() const;
     glm::dmat4 inverseModelTransform() const;
-    double worldScale() const;
+    glm::dvec3 worldScale() const;
     bool isTimeFrameActive(const Time& time) const;
 
     SceneGraphNode* parent() const;
@@ -152,7 +152,7 @@ public:
 private:
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
-    double calculateWorldScale() const;
+    glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
 
     std::atomic<State> _state = State::Loaded;
@@ -185,7 +185,7 @@ private:
     // Cached transform data
     glm::dvec3 _worldPositionCached = glm::dvec3(0.0);
     glm::dmat3 _worldRotationCached = glm::dmat3(1.0);
-    double _worldScaleCached = 1.0;
+    glm::dvec3 _worldScaleCached = glm::dvec3(1.0);
 
     float _fixedBoundingSphere = 0.f;
 
@@ -198,7 +198,7 @@ private:
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
-    
+
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)
     std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;

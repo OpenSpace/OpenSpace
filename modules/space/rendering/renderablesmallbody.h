@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
 #define __OPENSPACE_MODULE_SPACE___RENDERABLESMALLBODY___H__
 
+#include <modules/space/rendering/renderableorbitalkepler.h>
 #include <openspace/rendering/renderable.h>
 
 #include <modules/base/rendering/renderabletrail.h>
@@ -37,96 +38,29 @@
 
 namespace openspace {
 
-class RenderableSmallBody : public Renderable {
+static double importAngleValue(const std::string& angle);
+
+class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
     RenderableSmallBody(const ghoul::Dictionary& dictionary);
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-
     static documentation::Documentation Documentation();
-    /**
-        * Reads the provided file downloaded from the JPL Small Body Database and calls
-        * the KeplerTranslation::setKeplerElments method with the correct values.
-        * If \p filename is a valid JPL SBDB file but contains
-        * disallowed values (see KeplerTranslation::setKeplerElements), a
-        * KeplerTranslation::RangeError is thrown.
-        *
-        * \param filename The path to the file that contains the file.
-        *
-        * \throw ghoul::RuntimeError if the file does not exist or there is a
-        *        problem with its format.
-        * \pre The \p filename must exist
-        */
-    void readJplSbDb(const std::string& filename);
 
 private:
-    struct Vertex {
-        glm::vec3 position;
-        glm::vec3 color;
-        glm::vec2 texcoord;
-    };
+    void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
+        unsigned int& csvLine, std::ifstream& file);
+    void readDataFile(const std::string& filename);
+    void initializeFileReading();
+    void skipSingleLineInFile(std::ifstream& file);
 
-    struct KeplerParameters {
-        double inclination = 0.0;
-        double semiMajorAxis = 0.0;
-        double ascendingNode = 0.0;
-        double eccentricity = 0.0;
-        double argumentOfPeriapsis = 0.0;
-        double meanAnomaly = 0.0;
-        double meanMotion = 0.0;
-        double epoch = 0.0;
-        double period = 0.0;
-    };
-
-    /// The layout of the VBOs
-    struct TrailVBOLayout {
-        float x, y, z, time;
-        double epoch, period; 
-    };
-
-    KeplerTranslation _keplerTranslator;
-    std::vector<KeplerParameters> _sbData;
     std::vector<std::string> _sbNames;
-
-    /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
-    std::vector<TrailVBOLayout> _vertexBufferData;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
-
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
-    GLuint _indexBuffer;
-
-    //GLuint _vaoTest; // vertexArrayObject
-    //GLuint _vboTest; // vertextBufferObject
-    //GLuint _eboTest; // elementBufferObject/ indexBufferObject       
-
-    void updateBuffers();
-
-    ghoul::opengl::ProgramObject* _programObject;
-
-    properties::StringProperty _path;
-    properties::UIntProperty _nSegments;
-
-    RenderableTrail::Appearance _appearance;
-
-    glm::vec3 _position;
-
-    UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
-        numberOfSegments) _uniformCache;
-
-    const double convertAuToKm = 1.496e8;
-    const double convertDaysToSecs = 86400.;
 };
 
 static double importAngleValue(const std::string& angle);
+static std::string& formatObjectName(std::string& name);
 
 } // namespace openspace
 

@@ -643,7 +643,9 @@ int addInterestingTime(lua_State* L) {
     std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
     lua_pop(L, 2);
 
-    global::renderEngine.scene()->addInterestingTime({ std::move(name), std::move(time) });
+    global::renderEngine.scene()->addInterestingTime(
+        { std::move(name), std::move(time) }
+    );
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
