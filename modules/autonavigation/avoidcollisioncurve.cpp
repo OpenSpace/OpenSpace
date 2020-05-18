@@ -96,20 +96,13 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // Create extra points to avoid collision
     removeCollisions(relevantNodes);
 
-    int nrSegments = _points.size() - 3;
-
-    // default values for the curve parameter - equally spaced
-    for (double t = 0.0; t <= 1.0; t += 1.0 / (double)nrSegments) {
-        _parameterIntervals.push_back(t);
-    }
-
-    _length = arcLength(1.0);
+    _nrSegments = _points.size() - 3;
 
     initParameterIntervals();
 }
 
 // Interpolate a list of control points and knot times
-glm::dvec3 AvoidCollisionCurve::positionAt(double u) {
+glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
     if (u < Epsilon)
         return _points[1];
     if (u > (1.0 - Epsilon))
@@ -211,13 +204,4 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
     }
 }
 
-// compute curve parameter intervals based on relative arc length
-void AvoidCollisionCurve::initParameterIntervals() {
-    std::vector<double> newIntervals;
-    int nrSegments = _points.size() - 3;
-    for (double t = 0.0; t <= 1.0; t += 1.0 / (double)nrSegments) {
-        newIntervals.push_back(arcLength(t) / _length);
-    }
-    _parameterIntervals.swap(newIntervals);
-}
 } // namespace openspace::autonavigation

@@ -34,14 +34,11 @@ struct WayPoint;
 class AvoidCollisionCurve : public PathCurve {
 public:
     AvoidCollisionCurve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 positionAt(double u);
+    glm::dvec3 interpolate(double u);
 
 private:
-    std::vector<double> _parameterIntervals;
-
     std::vector<SceneGraphNode*> findRelevantNodes();
     void removeCollisions(std::vector<SceneGraphNode*>& relevantNodes, int step = 0);
-    void initParameterIntervals();
 };
 
 } // namespace openspace::autonavigation
