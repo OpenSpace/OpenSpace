@@ -475,11 +475,11 @@ std::string Profile::convertToScene_markNodes(ProfileFile& pf) {
 
     if (pf.markNodes().size() > 0) {
         result += "  openspace.markInterestingNodes({";
+        for (std::string m : pf.markNodes()) {
+            result += "\"" + m + "\", ";
+        }
+        result += "})\n";
     }
-    for (std::string m : pf.markNodes()) {
-        result += "\"" + m + "\", ";
-    }
-    result += "})\n";
     return result;
 }
 
