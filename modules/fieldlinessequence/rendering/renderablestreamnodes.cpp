@@ -24,6 +24,7 @@
 //including our own h file
 #include <modules/fieldlinessequence/rendering/renderablestreamnodes.h>
 
+//includes from fieldlinessequence, might not need all of them
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
@@ -36,15 +37,29 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+//test debugging tools more then logmanager
+#include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/visualstudiooutputlog.h>
+
+
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 #include <thread>
 #include <openspace/json.h>
 
+//this is a call to use the nlohmann json file
 using json = nlohmann::json;
+
 namespace {
+    //log category
     constexpr const char* _loggerCat = "RenderableStreamNodes";
+
+    //gl variables for shaders, probably needed some of them atleast
+    constexpr const GLuint VaPosition = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaColor    = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaMasking  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
+
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
    // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
@@ -81,18 +96,32 @@ namespace {
         "Color of particles."
     };
     constexpr openspace::properties::Property::PropertyInfo StreamsenabledInfo = {
-       "Streamsenabled",
+       "streamsEnabled",
        "Stream Direction",
        "Toggles the rendering of moving particles along the lines. Can, for example, "
        "illustrate magnetic flow."
     };
 
    enum class SourceFileType : int {
-       Cdf,
        Json = 0,
+       Cdf,
        Osfls,
        Invalid
    };
+
+   float stringToFloat(const std::string input, const float backupValue = 0.f) {
+       float tmp;
+       try {
+           tmp = std::stof(input);
+       }
+       catch (const std::invalid_argument& ia) {
+           LWARNING(fmt::format(
+               "Invalid argument: {}. '{}' is NOT a valid number", ia.what(), input
+               ));
+           return backupValue;
+       }
+       return tmp;
+   }
  } //namespace
 
 namespace openspace {
@@ -141,10 +170,17 @@ namespace openspace {
 
     // Setup shader program
     _shaderProgram = global::renderEngine.buildRenderProgram(
-        "FieldlinesSequence",
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
+        "Streamnodes",
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_fs.glsl")
     );
+    glGenVertexArrays(1, &_vertexArrayObject);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glGenBuffers(1, &_vertexColorBuffer);
+    glGenBuffers(1, &_vertexMaskingBuffer);
+
+    // Probably not needed, seems to be needed for additive blending
+    setRenderBin(Renderable::RenderBin::Overlay);
    }
 
 /**
@@ -153,8 +189,8 @@ namespace openspace {
  * Returns false if it fails to extract mandatory information!
  */
 bool RenderableStreamNodes::extractMandatoryInfoFromDictionary(
-                                                          SourceFileType& SourceFileType){
-
+                                                           SourceFileType& sourceFileType)
+{
     _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
@@ -165,51 +201,193 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary(
     else{
      // Verify that the input type is corrects
         if (inputFileTypeString == ValueInputFileTypeJson) {
-            //sourceFileType = SourceFileType::Json;
+            sourceFileType = SourceFileType::Json;
         }
         else {
             LERROR(fmt::format(
                 "{}: {} is not a recognized {}",
                 _identifier, inputFileTypeString, KeyInputFileType
             ));
-            //sourceFileType = SourceFileType::Invalid;
+            sourceFileType = SourceFileType::Invalid;
             return false;
         }
     }
+
+    std::string sourceFolderPath;
+    if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
+        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
+        return false;
+    }
+
+    // Ensure that the source folder exists and then extract
+    // the files with the same extension as <inputFileTypeString>
+    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
+    if (FileSys.directoryExists(sourceFolder)) {
+        // Extract all file paths from the provided folder
+        _sourceFiles = sourceFolder.readFiles(
+            ghoul::filesystem::Directory::Recursive::No,
+            ghoul::filesystem::Directory::Sort::Yes
+            );
+
+        // Ensure that there are available and valid source files left
+        if (_sourceFiles.empty()) {
+            LERROR(fmt::format(
+                "{}: {} contains no {} files",
+                _identifier, sourceFolderPath, inputFileTypeString
+                ));
+            return false;
+        }
+    }
+    else {
+        LERROR(fmt::format(
+            "{}: FieldlinesSequence {} is not a valid directory",
+            _identifier,
+            sourceFolderPath
+            ));
+        return false;
+    }
+    return true;
+}
+
+//void RenderableStreamNodes::extractOptionalInfoFromDictionary(
+  //  std::string& outputFolderPath)
+//{
+    // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
+   // bool streamsEnabled;
+    //if (_dictionary->getValue(KeyStreamsEnabled, streamsEnabledValue)) {
+        //_pStreamsEnabled = streamsEnabledValue;
+    //}
+//}
+
+bool RenderableStreamNodes::extractJsonInfoFromDictionary(fls::Model& model){
+    std::string modelStr;
+    if (_dictionary->getValue(KeyJsonSimulationModel, modelStr)) {
+        std::transform(
+            modelStr.begin(),
+            modelStr.end(),
+            modelStr.begin(),
+            [](char c) { return static_cast<char>(::tolower(c)); }
+        );
+        model = fls::stringToModel(modelStr);
+    }
+    else {
+        LERROR(fmt::format(
+            "{}: Must specify '{}'", _identifier, KeyJsonSimulationModel
+            ));
+        return false;
+    }
+
+    float scaleFactor;
+    if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
+        _scalingFactor = scaleFactor;
+    }
+    else {
+        LWARNING(fmt::format(
+            "{}: Does not provide scalingFactor. Assumes coordinates are in meters",
+            _identifier
+            ));
+    }
+    return true;
 }
 
 void RenderableStreamNodes::setupProperties() {
 
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
 
-
     addPropertySubOwner(_pStreamGroup);
     _pStreamGroup.addProperty(_pStreamColor);
     _pStreamGroup.addProperty(_pStreamsEnabled);
-
 }
-std::vector<std::string> RenderableStreamNodes::LoadJsonfile() { 
-   /* if (path.empty()) {
+
+
+void RenderableStreamNodes::deinitializeGL() {
+    if (_shaderProgram) {
+        global::renderEngine.removeRenderProgram(_shaderProgram.get());
+        _shaderProgram = nullptr;
+    }
+}
+
+bool RenderableStreamNodes::isReady() const {
+    return _shaderProgram != nullptr;
+}
+
+// Extract J2000 time from file names
+// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
+void RenderableStreamNodes::extractTriggerTimesFromFileNames() {
+    // number of  characters in filename (excluding '.osfls')
+    constexpr const int FilenameSize = 23;
+    // size(".osfls")
+    constexpr const int ExtSize = 6;
+
+    for (const std::string& filePath : _sourceFiles) {
+        const size_t strLength = filePath.size();
+        // Extract the filename from the path (without extension)
+        std::string timeString = filePath.substr(
+            strLength - FilenameSize - ExtSize,
+            FilenameSize - 1
+        );
+        // Ensure the separators are correct
+        timeString.replace(4, 1, "-");
+        timeString.replace(7, 1, "-");
+        timeString.replace(13, 1, ":");
+        timeString.replace(16, 1, ":");
+        timeString.replace(19, 1, ".");
+        const double triggerTime = Time::convertTime(timeString);
+        _startTimes.push_back(triggerTime);
+    }
+}
+void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
+    if (_activeTriggerTimeIndex != -1) {
+        _shaderProgram->activate();
+
+        // Calculate Model View MatrixProjection
+        const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
+        const glm::dmat4 modelMat =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            rotMat *
+            glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+        const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
+
+        _shaderProgram->setUniform("modelViewProjection",
+            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+
+        _shaderProgram->setUniform("lineColor", _pStreamColor);
+        // Flow/Particles
+        _shaderProgram->setUniform("usingParticles", _pStreamsEnabled);
+    }
+}
+
+void RenderableStreamNodes::update(const UpdateData& data) {
+    if (_shaderProgram->isDirty()) {
+        _shaderProgram->rebuildFromFile();
+    }
+}
+
+
+
+    std::vector<std::string> RenderableStreamNodes::LoadJsonfile() {
+        /*if (path.empty()) {
+            return std::vector<std::string>();
+        }
+        */
+        std::string data;
+        std::ifstream streamdata("data.json", std::ifstream::binary);
+        json jsonobj;
+        streamdata >> jsonobj;
+
+        //printDebug(jsonobj["stream0"]);
+        LDEBUG(jsonobj["stream0"]);
+        log(ghoul::logging::LogLevel::Debug, _loggerCat, jsonobj["stream0"]);
+        //for 
+        //LWARNING(fmt::format("Testar json", data));
+
+        //LWARNING(fmt::format("Testar json"));
+
         return std::vector<std::string>();
     }
-    */
-   /* std::string data;
-    std::ifstream streamdata("data.json", std::ifstream::binary);
-    streamdata >> data;
-    LWARNING(fmt::format("Testar json", data));
-    */
-    LWARNING(fmt::format("Testar json"));
-
-    return std::vector<std::string>();
-   
-
-}
 
 bool RenderableStreamNodes::loadJsonStatesIntoRAM(const std::string& outputFolder) {
     return true;
 }
-bool RenderableStreamNodes::extractJsonInfoFromDictionary(fls::Model& model)
-{
-    return false;
-}
+
 } // namespace openspace

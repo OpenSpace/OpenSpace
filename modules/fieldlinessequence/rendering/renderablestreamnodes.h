@@ -42,6 +42,7 @@ class RenderableStreamNodes : public Renderable {
 public :
      RenderableStreamNodes(const ghoul::Dictionary& dictionary);
 
+     //these two are needed for startup and close i think. 
      void initializeGL() override;
      void deinitializeGL() override;
 
@@ -56,7 +57,6 @@ private:
     enum class ColorMethod : int {
         Uniform = 0,
         ByQuantity
-
     };
  
     // ------------------------------------ STRINGS ------------------------------------//
@@ -67,6 +67,24 @@ private:
     // loaded from disk during runtime (using 'runtime-states')
     bool _loadingStatesDynamically  = false;
 
+    // --------------------------------- NUMERICALS ----------------------------------- //
+    // In setup it is used to scale JSON coordinates. During runtime it is used to scale
+    // domain limits.
+    float _scalingFactor = 1.f;
+    // Active index of _startTimes
+    int _activeTriggerTimeIndex = -1;
+
+
+
+    GLuint _vertexArrayObject = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+    // the lines
+    GLuint _vertexColorBuffer = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for masking
+    // out segments of the lines
+    GLuint _vertexMaskingBuffer = 0;
+    // OpenGL Vertex Buffer Object containing the vertex positions
+    GLuint _vertexPositionBuffer = 0;
     // ---------------------------------- Properties ---------------------------------- //
         properties::Vec4Property _pStreamColor;
         // Toggle flow [ON/OFF]
@@ -79,6 +97,10 @@ private:
     // initialization
     std::vector<std::string> _sourceFiles;
 
+    // ------------------------------------ VECTORS ----------------------------------- //
+     // Contains the _triggerTimes for all FieldlineStates in the sequence
+    std::vector<double> _startTimes;
+
     // ----------------------------------- POINTERS ------------------------------------//
     // The Lua-Modfile-Dictionary used during initialization
     std::unique_ptr<ghoul::Dictionary> _dictionary;
@@ -87,13 +109,14 @@ private:
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    bool extractJsonInfoFromDictionary(fls::Model& model);
 
-    bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);   
+    bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
     void extractOptionalInfoFromDictionary(std::string& outputFolderPath); 
     bool loadJsonStatesIntoRAM(const std::string& outputFolder);
     bool extractJsonInfoFromDictionary(fls::Model& model);
     //std::vector<std::string> LoadJsonfile(const std::string& filename);
     std::vector<std::string> LoadJsonfile();
     void setupProperties();
+    void extractTriggerTimesFromFileNames()
 
 
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
