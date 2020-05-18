@@ -34,6 +34,8 @@
 
 namespace {
     constexpr const char* _loggerCat = "PathSegment";
+
+    const double Epsilon = 1E-7;
 } // namespace
 
 namespace openspace::autonavigation {
@@ -85,18 +87,17 @@ CameraPose PathSegment::traversePath(double dt) {
     double h = dt / steps;
     for (int i = 0; i < steps; ++i) {
         double t = _progressedTime + i * h;
-        double speed = 0.5 * (speedAtTime(t - 0.5*h) + speedAtTime(t + 0.5*h)); // midpoint method
+        double speed = 0.5 * (speedAtTime(t - 0.01*h) + speedAtTime(t + 0.01*h)); // average
+        //LINFO(fmt::format("Speed = {}", speed));
         displacement += h * speed;
     }
 
     _traveledDistance += displacement;
-
     double relativeDisplacement = _traveledDistance / pathLength();
-    relativeDisplacement = std::max(0.0, std::min(relativeDisplacement, 1.0));
 
     // TEST: 
     //LINFO("-----------------------------------");
-    //LINFO(fmt::format("u = {}", relativeDisplacement));
+    //LINFO(fmt::format("relativeDisplacement = {}", relativeDisplacement));
     //LINFO(fmt::format("progressedTime = {}", _progressedTime));
 
     _progressedTime += dt;
