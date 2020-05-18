@@ -52,7 +52,7 @@ namespace {
     constexpr const char* _loggerCat = "RingsComponent";
 
     constexpr const std::array<const char*, 9> UniformNames = {
-        "modelViewProjectionMatrix", "textureOffset", "transparency", "_nightFactor", 
+        "modelViewProjectionMatrix", "textureOffset", "transparency", "_nightFactor",
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
         "zFightingPercentage"
     };
@@ -180,7 +180,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _ringsDictionary(dictionary)
 {
     using ghoul::filesystem::File;
-        
+
     if (dictionary.hasKey("Rings")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
@@ -188,7 +188,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
         // class-initializer list though
         dictionary.getValue("Rings", _ringsDictionary);
     }
-        
+
     documentation::testSpecificationAndThrow(
         Documentation(),
         _ringsDictionary,
@@ -310,20 +310,20 @@ void RingsComponent::draw(const RenderData& data,
     else if (renderPass == GeometryOnly) {
         _geometryOnlyShader->activate();
     }
-                
+
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    const glm::dmat4 modelViewProjectionTransform = 
-        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix() 
+    const glm::dmat4 modelViewProjectionTransform =
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
         * modelTransform;
 
     ghoul::opengl::TextureUnit ringTextureUnit;
     if (renderPass == GeometryAndShading) {
         _shader->setUniform(
-            _uniformCache.modelViewProjectionMatrix, 
+            _uniformCache.modelViewProjectionMatrix,
             modelViewProjectionTransform
         );
         _shader->setUniform(_uniformCache.textureOffset, _offset);
@@ -336,18 +336,18 @@ void RingsComponent::draw(const RenderData& data,
         _texture->bind();
         _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
 
-        // Adding the model transformation to the final shadow matrix so we have a 
-        // complete transformation from the model coordinates to the clip space of 
+        // Adding the model transformation to the final shadow matrix so we have a
+        // complete transformation from the model coordinates to the clip space of
         // the light position.
         _shader->setUniform(
-            _uniformCache.shadowMatrix, 
+            _uniformCache.shadowMatrix,
             shadowData.shadowMatrix * modelTransform
         );
 
         ghoul::opengl::TextureUnit shadowMapUnit;
         shadowMapUnit.activate();
         glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-        
+
         _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
     }
     else if (renderPass == GeometryOnly) {
@@ -386,8 +386,8 @@ void RingsComponent::update(const UpdateData& data) {
     if (_geometryOnlyShader->isDirty()) {
         _geometryOnlyShader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(
-            *_geometryOnlyShader, 
-            _geomUniformCache, 
+            *_geometryOnlyShader,
+            _geomUniformCache,
             GeomUniformNames
         );
     }

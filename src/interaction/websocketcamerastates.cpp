@@ -32,12 +32,13 @@
 
 namespace openspace::interaction {
 
-WebsocketCameraStates::WebsocketCameraStates(double sensitivity, double velocityScaleFactor)
+WebsocketCameraStates::WebsocketCameraStates(double sensitivity,
+                                             double velocityScaleFactor)
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
 {}
 
 void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
-                                                double deltaTime)
+                                                 double deltaTime)
 {
     std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
     std::pair<bool, double> zoom = { false, 0.0 };
@@ -115,7 +116,7 @@ void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
             }
         }
     }
-    
+
     if (globalRotation.first) {
         _globalRotationState.velocity.set(globalRotation.second, deltaTime);
     }
@@ -164,7 +165,8 @@ void WebsocketCameraStates::setAxisMapping(int axis, AxisType mapping,
     _axisMapping[axis].normalize = shouldNormalize;
 }
 
-WebsocketCameraStates::AxisInformation WebsocketCameraStates::axisMapping(int axis) const {
+WebsocketCameraStates::AxisInformation WebsocketCameraStates::axisMapping(int axis) const
+{
     return _axisMapping[axis];
 }
 

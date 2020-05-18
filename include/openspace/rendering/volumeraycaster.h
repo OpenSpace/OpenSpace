@@ -139,7 +139,7 @@ public:
 
 private:
     /**
-     * Maximum number of integration steps to be executed by the volume integrator. 
+     * Maximum number of integration steps to be executed by the volume integrator.
      */
     int _rayCastMaxSteps = 1000;
 

@@ -29,7 +29,6 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #endif
 
-#include <modules/imgui/imguimodule.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/touch/include/directinputsolver.h>
 #include <openspace/engine/globals.h>
@@ -115,6 +114,13 @@ namespace {
         "TapZoomFactor",
         "Scaling distance travelled on tap",
         "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PinchZoomFactorInfo = {
+        "PinchZoomFactor",
+        "Scaling distance travelled on pinch",
+        "This value is used to reduce the amount of pinching needed. A linear kind of "
+        "sensitivity that will alter the pinch-zoom speed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
@@ -205,12 +211,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiButtonSizeInfo = {
-        "GuiButtonSize",
-        "GUI button size in pixels",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
@@ -264,6 +264,7 @@ TouchInteraction::TouchInteraction()
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
     , _touchScreenSize(TouchScreenSizeInfo, 55.0f, 5.5f, 150.0f)
     , _tapZoomFactor(TapZoomFactorInfo, 0.2f, 0.f, 0.5f)
+    , _pinchZoomFactor(PinchZoomFactorInfo, 0.01f, 0.f, 0.2f)
     , _nodeRadiusThreshold(DirectManipulationInfo, 0.2f, 0.0f, 1.0f)
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
@@ -277,7 +278,12 @@ TouchInteraction::TouchInteraction()
         0.25f
     )
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
-    , _zoomOutLimit(ZoomOutLimitInfo, std::numeric_limits<double>::max(), 1000.0, std::numeric_limits<double>::max())
+    , _zoomOutLimit(
+        ZoomOutLimitInfo,
+        std::numeric_limits<double>::max(),
+        1000.0,
+        std::numeric_limits<double>::max()
+    )
     , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
@@ -285,12 +291,6 @@ TouchInteraction::TouchInteraction()
     , _panEnabled(PanModeInfo, false)
     , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
     , _slerpTime(SlerpTimeInfo, 3.f, 0.1f, 5.f)
-    , _guiButton(
-        GuiButtonSizeInfo,
-        glm::ivec2(32, 64),
-        glm::ivec2(8, 16),
-        glm::ivec2(128, 256)
-    )
     , _friction(
         FrictionInfo,
         glm::vec4(0.025f, 0.025f, 0.02f, 0.02f),
@@ -303,12 +303,9 @@ TouchInteraction::TouchInteraction()
         0.f,
         1.f
     )
-    , _ignoreGui( // @TODO Missing documentation
-        { "Ignore GUI", "Disable GUI touch interaction", "" },
-        false
-    )
+    , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
-    , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0 /*4.0*/, 2.75, glm::dvec2(0.08, 0.045) }
+    , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
@@ -320,6 +317,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_deceleratesPerSecond);
     addProperty(_touchScreenSize);
     addProperty(_tapZoomFactor);
+    addProperty(_pinchZoomFactor);
     addProperty(_nodeRadiusThreshold);
     addProperty(_rollAngleThreshold);
     addProperty(_orbitSpeedThreshold);
@@ -336,10 +334,8 @@ TouchInteraction::TouchInteraction()
     addProperty(_panEnabled);
     addProperty(_interpretPan);
     addProperty(_slerpTime);
-    addProperty(_guiButton);
     addProperty(_friction);
     addProperty(_pickingRadiusMinimum);
-    addProperty(_ignoreGui);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     addPropertySubOwner(_debugProperties);
@@ -401,69 +397,36 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
     }
 
     size_t numFingers = list.size();
-    if (!isGuiMode(pos, numFingers)) {
-        bool isTransitionBetweenModes = (_wasPrevModeDirectTouch != _directTouchMode);
-        if (isTransitionBetweenModes) {
-            _vel.orbit = glm::dvec2(0.0);
-            _vel.zoom = 0.0;
-            _vel.roll = 0.0;
-            _vel.pan = glm::dvec2(0.0);
-            resetAfterInput();
-        }
+    bool isTransitionBetweenModes = (_wasPrevModeDirectTouch != _directTouchMode);
+    if (isTransitionBetweenModes) {
+        _vel.orbit = glm::dvec2(0.0);
+        _vel.zoom = 0.0;
+        _vel.roll = 0.0;
+        _vel.pan = glm::dvec2(0.0);
+        resetAfterInput();
+    }
 
-        if (_directTouchMode && _selected.size() > 0 && numFingers == _selected.size()) {
+    if (_directTouchMode && _selected.size() > 0 && numFingers == _selected.size()) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-            _debugProperties.interactionMode = "Direct";
+        _debugProperties.interactionMode = "Direct";
 #endif
-            directControl(list);
-        }
-        if (_lmSuccess) {
-            findSelectedNode(list);
-        }
+        directControl(list);
+    }
+    if (_lmSuccess) {
+        findSelectedNode(list);
+    }
 
-        if (!_directTouchMode) {
+    if (!_directTouchMode) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-            _debugProperties.interactionMode = "Velocities";
+        _debugProperties.interactionMode = "Velocities";
 #endif
-            computeVelocities(list, lastProcessed);
-        }
-
-        _wasPrevModeDirectTouch = _directTouchMode;
-        // evaluates if current frame is in directTouchMode (will be used next frame)
-        _directTouchMode =
-            (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
-    }
-}
-
-bool TouchInteraction::isGuiMode(glm::dvec2 screenPosition, size_t numFingers) {
-    if (_ignoreGui) {
-        return false;
+        computeVelocities(list, lastProcessed);
     }
 
-    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
-    _guiON = module.gui.isEnabled();
-
-    if (_tap && numFingers == 1 &&
-        std::abs(screenPosition.x) < _guiButton.value().x &&
-        std::abs(screenPosition.y) < _guiButton.value().y)
-    {
-        // pressed invisible button
-        _guiON = !_guiON;
-        module.gui.setEnabled(_guiON);
-
-        LINFO(fmt::format(
-            "GUI mode is {}. Inside box by: ({}%, {}%)",
-            _guiON ? "activated" : "deactivated",
-            static_cast<int>(100 * (screenPosition.x / _guiButton.value().x)),
-            static_cast<int>(100 * (screenPosition.y / _guiButton.value().y))
-        ));
-    }
-    else if (_guiON) {
-        // emulate touch input as a mouse
-        module.touchInput = { _guiON, screenPosition, 1 };
-    }
-
-    return _guiON;
+    _wasPrevModeDirectTouch = _directTouchMode;
+    // evaluates if current frame is in directTouchMode (will be used next frame)
+    _directTouchMode =
+        (_currentRadius > _nodeRadiusThreshold && _selected.size() == numFingers);
 }
 
 void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) {
@@ -494,7 +457,7 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
                 _vel.pan = glm::dvec2(par.at(4), par.at(5));
             }
         }
-        step(1.0);
+        step(1.0, true);
 
         // Reset velocities after setting new camera state
         _lastVel = _vel;
@@ -506,11 +469,6 @@ void TouchInteraction::directControl(const std::vector<TouchInputHolder>& list) 
     else {
         // prevents touch to infinitely be active (due to windows bridge case where event
         // doesnt get consumed sometimes when LMA fails to converge)
-        Touch touch;
-        touch.active = true;
-        touch.pos = glm::dvec2(0.0);
-        touch.action = 1;
-        global::moduleEngine.module<ImGUIModule>()->touchInput = touch;
         resetAfterInput();
     }
 }
@@ -722,7 +680,8 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
             double res = 0.0;
 
             float lastAngle = lastPoint.angleToPos(_centroid.x, _centroid.y);
-            float currentAngle = inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
+            float currentAngle =
+                inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
             if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
                 res = currentAngle + (2.0 * glm::pi<float>() - lastAngle);
             }
@@ -777,6 +736,15 @@ int TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& 
             return ROLL;
         }
         else {
+            const bool sameInput0 = _pinchInputs[0].holdsInput(list[0].latestInput());
+            const bool sameInput1 = _pinchInputs[1].holdsInput(list[1].latestInput());
+            if (sameInput0 && sameInput1) {
+                _pinchInputs[0].tryAddInput(list[0].latestInput());
+                _pinchInputs[1].tryAddInput(list[1].latestInput());
+            } else {
+                _pinchInputs[0] = TouchInputHolder(list[0].latestInput());
+                _pinchInputs[1] = TouchInputHolder(list[1].latestInput());
+            }
             return PINCH;
         }
     }
@@ -816,6 +784,9 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 #endif
 
     const TouchInputHolder& inputHolder = list.at(0);
+    const glm::ivec2 windowSize = global::windowDelegate.currentWindowSize();
+    const float aspectRatio =
+        static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
     switch (action) {
         case ROT: { // add rotation velocity
             _vel.orbit += glm::dvec2(inputHolder.speedX() *
@@ -829,54 +800,29 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
         }
         case PINCH: {
              // add zooming velocity - dependant on distance difference between contact
-             // points this/last frame
-            double distance = std::accumulate(
-                list.begin(),
-                list.end(),
-                0.0,
-                [&](double d, const TouchInputHolder& c) {
-                    const glm::vec2 currPos = { c.latestInput().x, c.latestInput().y };
-                    return d + glm::distance(currPos, _centroid);
-                }
-            ) / list.size();
-            double lastDistance = std::accumulate(
-                lastProcessed.begin(),
-                lastProcessed.end(),
-                0.f,
-                [&](float d, const TouchInput& p) {
-                    const glm::vec2 lastPos = { p.x, p.y };
-                    return d + glm::distance(lastPos, _centroid);
-                }
-            ) / lastProcessed.size();
+             // points this/first frame
+            using namespace glm;
+            const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
+            const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
+            const dvec2 startVec0 = dvec2(startFinger0.x * aspectRatio, startFinger0.y);
+            const dvec2 startVec1 = dvec2(startFinger1.x * aspectRatio, startFinger1.y);
+            double distToCentroidStart = length(startVec0 - startVec1) / 2.0;
 
-            glm::dvec3 camPos = _camera->positionVec3();
-            glm::dvec3 centerPos = anchor->worldPosition();
-            glm::dvec3 currDistanceToFocusNode = camPos - centerPos;
+            const TouchInput& endFinger0 = _pinchInputs[0].latestInput();
+            const TouchInput& endFinger1 = _pinchInputs[1].latestInput();
+            const dvec2 endVec0 = dvec2(endFinger0.x * aspectRatio, endFinger0.y);
+            const dvec2 endVec1 = dvec2(endFinger1.x * aspectRatio, endFinger1.y);
+            double distToCentroidEnd = length(endVec0 - endVec1) / 2.0;
 
-            const double distanceFromFocusSurface =
-                length(currDistanceToFocusNode) - anchor->boundingSphere();
-            double zoomFactor = (distance - lastDistance);
+            double zoomFactor = distToCentroidEnd - distToCentroidStart;
 #ifdef TOUCH_DEBUG_PROPERTIES
             pinchConsecCt++;
             pinchConsecZoomFactor += zoomFactor;
 #endif
 
-            _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
-            if (distanceFromFocusSurface > 0.1) {
-                const double ratioOfDistanceToNodeVsSurface =
-                    length(currDistanceToFocusNode) / distanceFromFocusSurface;
-                if (ratioOfDistanceToNodeVsSurface > _zoomSensitivityDistanceThreshold) {
-                    zoomFactor *= pow(
-                        std::abs(distanceFromFocusSurface),
-                        static_cast<float>(_zoomSensitivityExponential)
-                    );
-                }
-            }
-            else {
-                zoomFactor = 1.0;
-            }
-            _vel.zoom = zoomFactor * _zoomSensitivityProportionalDist *
-                         std::max(_touchScreenSize.value() * 0.1, 1.0);
+            _constTimeDecayCoeff.zoom = 1.0;
+            _vel.zoom = zoomFactor * _pinchZoomFactor * _zoomSensitivityProportionalDist *
+                std::max(_touchScreenSize.value() * 0.1, 1.0);
             break;
         }
         case ROLL: {
@@ -917,7 +863,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case PAN: {
-             // add local rotation velocity
+            // add local rotation velocity
             _vel.pan += glm::dvec2(inputHolder.speedX() *
                         _sensitivity.pan.x, inputHolder.speedY() * _sensitivity.pan.y);
             double panVelocityAvg = glm::distance(_vel.pan.x, _vel.pan.y);
@@ -925,7 +871,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             break;
         }
         case PICK: {
-             // pick something in the scene as focus node
+            // pick something in the scene as focus node
             if (_pickingSelected) {
                 setFocusNode(_pickingSelected);
 
@@ -992,7 +938,7 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
 
 // Main update call, calculates the new orientation and position for the camera depending
 // on _vel and dt. Called every frame
-void TouchInteraction::step(double dt) {
+void TouchInteraction::step(double dt, bool directTouch) {
     using namespace glm;
 
     const SceneGraphNode* anchor =
@@ -1086,7 +1032,7 @@ void TouchInteraction::step(double dt) {
                     centerToActualSurfaceModelSpace;
                 const double nodeRadius = length(centerToActualSurface);
 
-                // Because of heightmaps we should make sure we do not go through the surface
+                // Because of heightmaps we need to ensure we don't go through the surface
                 if (_zoomInLimit.value() < nodeRadius) {
 #ifdef TOUCH_DEBUG_PROPERTIES
                     LINFO(fmt::format("{}: Zoom In limit should be larger than anchor "
@@ -1103,23 +1049,46 @@ void TouchInteraction::step(double dt) {
                     _loggerCat, _zoomOutLimit.value()
                ));
             }
+            const double currentPosDistance = length(centerToCamera);
 
             //Apply the velocity to update camera position
-            glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
-            const double newPosDistance = length(centerToCamera + zoomDistanceIncrement);
-            const double currentPosDistance = length(centerToCamera);
+            double zoomVelocity = _vel.zoom;
+            if (!directTouch) {
+                const double distanceFromSurface =
+                    length(currentPosDistance) - anchor->boundingSphere();
+                if (distanceFromSurface > 0.1) {
+                    const double ratioOfDistanceToNodeVsSurf =
+                        length(currentPosDistance) / distanceFromSurface;
+                    if (ratioOfDistanceToNodeVsSurf > _zoomSensitivityDistanceThreshold) {
+                        zoomVelocity *= pow(
+                            std::abs(distanceFromSurface),
+                            static_cast<float>(_zoomSensitivityExponential)
+                        );
+                    }
+                }
+                else {
+                    zoomVelocity = 1.0;
+                }
+            }
+
+            const glm::dvec3 zoomDistanceInc = directionToCenter * zoomVelocity * dt;
+            const double newPosDistance = length(centerToCamera + zoomDistanceInc);
 
             // Possible with other navigations performed outside touch interaction
             const bool currentPosViolatingZoomOutLimit =
-                (currentPosDistance >= _zoomOutLimit.value());
+                (currentPosDistance >= _zoomOutLimit);
             const bool willNewPositionViolateZoomOutLimit =
-                (newPosDistance >= _zoomOutLimit.value());
+                (newPosDistance >= _zoomOutLimit);
             bool willNewPositionViolateZoomInLimit =
                 (newPosDistance < zoomInBounds);
+            bool willNewPositionViolateDirection =
+                (currentPosDistance <= length(zoomDistanceInc));
 
-            if (!willNewPositionViolateZoomInLimit
-                && !willNewPositionViolateZoomOutLimit) {
-                camPos += zoomDistanceIncrement;
+            if (!willNewPositionViolateZoomInLimit &&
+                !willNewPositionViolateDirection &&
+                !willNewPositionViolateZoomOutLimit)
+            {
+                camPos += zoomDistanceInc;
             }
             else if (currentPosViolatingZoomOutLimit) {
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -1129,7 +1098,7 @@ void TouchInteraction::step(double dt) {
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
                 if (newPosDistance < currentPosDistance) {
-                    camPos += zoomDistanceIncrement;
+                    camPos += zoomDistanceInc;
                 }
             }
             else {
@@ -1204,30 +1173,19 @@ void TouchInteraction::resetAfterInput() {
             _vel.orbit = _lastVel.orbit * spinDelta;
         }
     }
-    // Reset emulated mouse values
-    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
-    if (_guiON) {
-        bool activeLastFrame = module.touchInput.action;
-        module.touchInput.active = false;
-        if (activeLastFrame) {
-            module.touchInput.active = true;
-            module.touchInput.action = 0;
-        }
-    }
-    else {
-        module.touchInput.active = false;
-        module.touchInput.action = 0;
-    }
 
     _lmSuccess = true;
-    // Ensure that _guiON is consistent with properties in OnScreenGUI and
-    _guiON = module.gui.isEnabled();
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0);
     _lastVel.zoom = 0.0;
     _lastVel.roll = 0.0;
     _lastVel.pan = glm::dvec2(0.0);
+
+    _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
+    _pinchInputs[0].clearInputs();
+    _pinchInputs[1].clearInputs();
+
     _selected.clear();
     _pickingSelected = nullptr;
 }
@@ -1240,6 +1198,7 @@ void TouchInteraction::resetToDefault() {
     _deceleratesPerSecond.set(240);
     _touchScreenSize.set(55.0f);
     _tapZoomFactor.set(0.2f);
+    _pinchZoomFactor.set(0.01f);
     _nodeRadiusThreshold.set(0.2f);
     _rollAngleThreshold.set(0.025f);
     _orbitSpeedThreshold.set(0.005f);
@@ -1249,7 +1208,6 @@ void TouchInteraction::resetToDefault() {
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
     _slerpTime.set(3.0f);
-    _guiButton.set(glm::ivec2(32, 64));
     _friction.set(glm::vec4(0.025, 0.025, 0.02, 0.02));
 }
 

@@ -1,0 +1,34 @@
+asset.require('./base')
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+asset.require('scene/solarsystem/sssb/amor_asteroid')
+asset.require('scene/solarsystem/sssb/apollo_asteroid')
+asset.require('scene/solarsystem/sssb/aten_asteroid')
+asset.require('scene/solarsystem/sssb/atira_asteroid')
+asset.require('scene/solarsystem/sssb/centaur_asteroid')
+asset.require('scene/solarsystem/sssb/chiron-type_comet')
+asset.require('scene/solarsystem/sssb/encke-type_comet')
+asset.require('scene/solarsystem/sssb/halley-type_comet')
+asset.require('scene/solarsystem/sssb/inner_main_belt_asteroid')
+asset.require('scene/solarsystem/sssb/jupiter_trojan_asteroid')
+asset.require('scene/solarsystem/sssb/jupiter-family_comet')
+asset.require('scene/solarsystem/sssb/main_belt_asteroid')
+asset.require('scene/solarsystem/sssb/mars-crossing_asteroid')
+asset.require('scene/solarsystem/sssb/outer_main_belt_asteroid')
+asset.require('scene/solarsystem/sssb/transneptunian_object_asteroid')
+asset.require('scene/solarsystem/sssb/pha')
+
+asset.onInitialize(function ()
+    local now = openspace.time.currentWallTime()
+    -- Jump back one day to be able to show complete weather data on Earth.
+    openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+
+    openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 2.7e12)
+
+    openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
+end)

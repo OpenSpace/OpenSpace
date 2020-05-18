@@ -73,32 +73,41 @@ float TouchInput::angleToPos(float otherX, float otherY) const {
 
 TouchInputHolder::TouchInputHolder(TouchInput input)
     : _inputs{ input }
+    , _firstInput(input)
     , _touchDeviceId(input.touchDeviceId)
     , _fingerId(input.fingerId)
 {}
 
 bool TouchInputHolder::tryAddInput(TouchInput input) {
+    if(_inputs.empty()) {
+        _inputs.emplace_front(input);
+        return true;
+    }
     constexpr const double ONE_MS = 0.001;
     const TouchInput& lastInput = latestInput();
     input.dx = input.x - lastInput.x;
     input.dy = input.y - lastInput.y;
 
-    const bool sameTimeAsLastInput = (input.timestamp - lastInput.timestamp) > ONE_MS;
-    bool wasInserted = false;
-    if (isMoving()) {
+    const bool sameTimeAsLastInput = (input.timestamp - lastInput.timestamp) < ONE_MS;
+    bool successful = false;
+    if (!sameTimeAsLastInput && isMoving()) {
         _inputs.emplace_front(input);
-        wasInserted = true;
+        successful = true;
     }
-    else if (sameTimeAsLastInput && input.isMoving()) {
+    else if (!sameTimeAsLastInput && input.isMoving()) {
         _inputs.emplace_front(input);
-        wasInserted = true;
+        successful = true;
+    }
+    else if (!sameTimeAsLastInput){
+        _inputs.front().timestamp = input.timestamp;
+        successful = true;
     }
 
     constexpr const int MaxInputs = 128;
     if (_inputs.size() > MaxInputs) {
         _inputs.pop_back();
     }
-    return wasInserted;
+    return successful;
 }
 
 void TouchInputHolder::clearInputs() {
@@ -142,8 +151,7 @@ bool TouchInputHolder::isMoving() const {
     if (_inputs.size() <= 1) {
         return false;
     }
-    const TouchInput& currentInput = _inputs[0];
-    return currentInput.dx != 0.f || currentInput.dy != 0.f;
+    return latestInput().isMoving();
 }
 
 float TouchInputHolder::gestureDistance() const {
@@ -172,6 +180,10 @@ double TouchInputHolder::gestureTime() const {
 
 size_t TouchInputHolder::numInputs() const {
     return _inputs.size();
+}
+
+const TouchInput& TouchInputHolder::firstInput() const {
+    return _firstInput;
 }
 
 const TouchInput& TouchInputHolder::latestInput() const {

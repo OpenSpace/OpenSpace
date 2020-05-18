@@ -344,7 +344,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     }
 
     auto render = [renderLines, renderPoints, p = _programObject, &data,
-                   &modelTransform, pointSize = _appearance.pointSize.value(), 
+                   &modelTransform, pointSize = _appearance.pointSize.value(),
                    c = _uniformCache, lw = _appearance.lineWidth]
                   (RenderInformation& info, int nVertices, int offset)
     {
@@ -366,14 +366,13 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
-        
         #ifndef __APPLE__
                 glm::ivec2 resolution = global::renderEngine.renderingResolution();
                 p->setUniform(c.resolution, resolution);
 
                 p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
         #endif
-        
+
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and
             // smaller ones
@@ -444,7 +443,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     );
 
     glm::dvec3 trailPosWorld = glm::dvec3(
-        modelTransform * _primaryRenderInformation._localTransform * 
+        modelTransform * _primaryRenderInformation._localTransform *
         glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
     const double distance = glm::distance(

@@ -424,7 +424,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _datavarSizeOption(SizeOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _datavarSizeOption(
+        SizeOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _fadeInDistance(
         FadeInDistancesInfo,
         glm::vec2(0.f),
@@ -548,7 +551,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
                 );
             }
         }
-        
+
         if (dictionary.hasKey(ExactColorMapInfo.identifier)) {
             _isColorMapExact = dictionary.value<bool>(ExactColorMapInfo.identifier);
         }
@@ -583,12 +586,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         _datavarSizeOption.onChange([&]() {
             _dataIsDirty = true;
-            _datavarSizeOptionString = _optionConversionSizeMap[_datavarSizeOption.value()];
-            });
+            _datavarSizeOptionString = _optionConversionSizeMap[_datavarSizeOption];
+        });
         addProperty(_datavarSizeOption);
 
         _hasDatavarSize = true;
-    }    
+    }
 
     if (dictionary.hasKey(PolygonSidesInfo.identifier)) {
         _polygonSides = static_cast<int>(
@@ -673,13 +676,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         addProperty(_correctionSizeFactor);
     }
-    
 
     if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
         _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
         addProperty(_pixelSizeControl);
     }
-    
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -1086,7 +1087,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 sizeof(float) * 9,
                 reinterpret_cast<void*>(sizeof(float) * 8)
             );
-        } 
+        }
         else if (_hasColorMapFile) {
             glEnableVertexAttribArray(positionAttrib);
             glVertexAttribPointer(
@@ -1607,10 +1608,11 @@ void RenderableBillboardsCloud::createDataSlice() {
     }
 
     // what datavar in use for the index color
-    int colorMapInUse = _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
-    
+    int colorMapInUse =
+        _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
+
     // what datavar in use for the size scaling (if present)
-    int sizeScalingInUse = _hasDatavarSize ? 
+    int sizeScalingInUse = _hasDatavarSize ?
         _variableDataPositionMap[_datavarSizeOptionString] : -1;
 
     auto addDatavarSizeScalling = [&](size_t i, int datavarInUse) {
@@ -1625,7 +1627,7 @@ void RenderableBillboardsCloud::createDataSlice() {
 
     float minColorIdx = std::numeric_limits<float>::max();
     float maxColorIdx = std::numeric_limits<float>::min();
-    
+
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
         float colorIdx = _fullData[i + 3 + colorMapInUse];
         maxColorIdx = colorIdx >= maxColorIdx ? colorIdx : maxColorIdx;
@@ -1671,7 +1673,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             }
             else {
                 float ncmap = static_cast<float>(_colorMapData.size());
-                float normalization = ((cmax != cmin) && (ncmap > 2)) ? 
+                float normalization = ((cmax != cmin) && (ncmap > 2)) ?
                                       (ncmap - 2) / (cmax - cmin) : 0;
                 colorIndex = (variableColor - cmin) * normalization + 1;
                 colorIndex = colorIndex < 0 ? 0 : colorIndex;

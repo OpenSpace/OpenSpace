@@ -373,7 +373,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
 
-    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.0);
+    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(

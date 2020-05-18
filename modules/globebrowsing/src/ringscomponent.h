@@ -54,18 +54,16 @@ public:
         GeometryOnly,
         GeometryAndShading
     };
-    
+
     RingsComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
     void deinitializeGL();
-      
+
     bool isReady() const;
 
-    void draw(
-        const RenderData& data, 
-        const RingsComponent::RenderPass renderPass, 
+    void draw(const RenderData& data, const RingsComponent::RenderPass renderPass,
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);
@@ -90,11 +88,11 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
-    UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
+    UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor,
         sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
     ) _uniformCache;
-    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture)  
-        _geomUniformCache;
+    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
+    ) _geomUniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 

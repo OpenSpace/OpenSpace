@@ -34,6 +34,11 @@ public:
     MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
     void updateStateFromInput(const InputState& inputState, double deltaTime) override;
+
+    void setInvertMouseButton(bool value);
+
+private:
+    bool _isMouseButtonInverted = false;
 };
 
 } // namespace openspace::interaction

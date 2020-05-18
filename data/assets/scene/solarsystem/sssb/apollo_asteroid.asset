@@ -1,0 +1,10 @@
+local assetHelper = asset.require('util/asset_helper')
+local sharedSssb = asset.require('./sssb_shared')
+
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'apollo_asteroid', 'sssb_data_apollo_asteroid')
+local object = sharedSssb.createSssbGroupObject('sssb_data_apollo_asteroid.csv', "Apollo Asteroids", filepath, { 0.9, 0.3, 0.1 })
+object.Renderable.Enabled = false
+object.Renderable.SegmentQuality = 6
+object.Renderable.TrailFade = 10
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

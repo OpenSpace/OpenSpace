@@ -394,7 +394,8 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
     return region;
 }
 
-RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile, size_t nRasters,
+RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile,
+                                         [[ maybe_unused ]] size_t nRasters,
                                          float noDataValue)
 {
     // This check was implicit before and just made explicit here

@@ -1441,8 +1441,10 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "enableTakeScreenShotDuringPlayback",
                 &luascriptfunctions::enableTakeScreenShotDuringPlayback,
                 {},
-                "int",
-                "Enables that rendered frames should be saved during playback."
+                "[int]",
+                "Enables that rendered frames should be saved during playback. The "
+                "parameter determines the number of frames that are exported per second "
+                "if this value is not provided, 60 frames per second will be exported."
             },
             {
                 "disableTakeScreenShotDuringPlayback",

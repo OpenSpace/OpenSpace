@@ -35,6 +35,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <array>
 #include <chrono>
 #include <memory>
 
@@ -79,16 +80,14 @@ public:
 
     /* Main function call
      * 1 Checks if doubleTap occured
-     * 2 Goes through the guiMode() function
-     * 3 Continues if GUI isn't on
-     * 4 If the node in focus is large enough and all contact points have selected it,
+     * 2 If the node in focus is large enough and all contact points have selected it,
      * calls directControl() function for direct-manipulation
-     * 5 Updates std::vector<SelectedBody> _selected (only if LMA successfully
+     * 3 Updates std::vector<SelectedBody> _selected (only if LMA successfully
      * converged, avoids interaction to snap on LMA fails)
-     * 6 If directControl() wasn't called this frame, interpret the incoming
+     * 4 If directControl() wasn't called this frame, interpret the incoming
      * list and decide what type of interaction this frame should do
-     * 7 Compute the new total velocities after interaction
-     * 8 Evaluate if directControl should be called next frame- true if all contact points
+     * 5 Compute the new total velocities after interaction
+     * 6 Evaluate if directControl should be called next frame- true if all contact points
      * select the same node and said node is larger than _nodeRadiusThreshold
     */
 
@@ -96,7 +95,7 @@ public:
         std::vector<TouchInput>& lastProcessed);
 
     // Calculates the new camera state with velocities and time since last frame
-    void step(double dt);
+    void step(double dt, bool directTouch = false);
 
     // Called each frame we have no new input, used to reset data
     void resetAfterInput();
@@ -114,11 +113,6 @@ public:
     void setCamera(Camera* camera);
 
 private:
-    /* Returns true if we have the GUI window open. If so, emulates the incoming touch
-     * input to a mouse such that we can interact with the GUI
-     */
-    bool isGuiMode(glm::dvec2 screenPosition, size_t numFingers);
-
     /* Function that calculates the new camera state such that it minimizes the L2 error
      * in screenspace
      * between contact points and surface coordinates projected to clip space using LMA
@@ -166,6 +160,7 @@ private:
     properties::IntProperty _deceleratesPerSecond;
     properties::FloatProperty _touchScreenSize;
     properties::FloatProperty _tapZoomFactor;
+    properties::FloatProperty _pinchZoomFactor;
     properties::FloatProperty _nodeRadiusThreshold;
     properties::FloatProperty _rollAngleThreshold;
     properties::FloatProperty _orbitSpeedThreshold;
@@ -181,10 +176,8 @@ private:
     properties::BoolProperty  _panEnabled;
     properties::FloatProperty _interpretPan;
     properties::FloatProperty _slerpTime;
-    properties::IVec2Property _guiButton;
     properties::Vec4Property _friction;
     properties::FloatProperty _pickingRadiusMinimum;
-    properties::BoolProperty _ignoreGui;
     properties::FloatProperty _constTimeDecay_secs;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -202,7 +195,7 @@ private:
     double pinchConsecZoomFactor = 0;
     //int stepVelUpdate = 0;
 #endif
-
+    std::array<TouchInputHolder, 2> _pinchInputs;
     // Class variables
     VelocityStates _vel;
     VelocityStates _lastVel;
@@ -220,7 +213,6 @@ private:
     bool _doubleTap = false;
     bool _zoomOutTap = false;
     bool _lmSuccess = true;
-    bool _guiON = false;
     std::vector<DirectInputSolver::SelectedBody> _selected;
     SceneGraphNode* _pickingSelected = nullptr;
     DirectInputSolver _solver;
@@ -242,4 +234,3 @@ private:
 } // openspace namespace
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCH_INTERACTION___H__
-

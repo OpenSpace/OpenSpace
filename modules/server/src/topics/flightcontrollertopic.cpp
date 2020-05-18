@@ -89,7 +89,8 @@ namespace {
 
     // Friction JSON Keys
     constexpr const char* FrictionEngagedKey = "engaged";
-    constexpr const char* FrictionPropertyUri = "NavigationHandler.OrbitalNavigator.Friction";
+    constexpr const char* FrictionPropertyUri =
+        "NavigationHandler.OrbitalNavigator.Friction";
     constexpr const char* FrictionRotationKey = "rotation";
     constexpr const char* FrictionZoomKey = "zoom";
     constexpr const char* FrictionRollKey = "roll";
@@ -179,7 +180,9 @@ bool FlightControllerTopic::isDone() const {
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
     auto it = CommandMap.find(json[TypeKey]);
     if (it == CommandMap.end()) {
-        LWARNING(fmt::format("Poorly formatted JSON command: no '{}' in payload", TypeKey));
+        LWARNING(
+            fmt::format("Poorly formatted JSON command: no '{}' in payload", TypeKey)
+        );
         return;
     }
 
@@ -213,7 +216,7 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
 
 void FlightControllerTopic::connect() {
     _isDone = false;
-    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _payload[TypeKey] = Connect;
     setFocusNodes();
     setInterestingTimes();
@@ -290,10 +293,12 @@ void FlightControllerTopic::updateView(const nlohmann::json& json) const {
 void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
     if (json[FocusKey].find(SceneNodeName) == json[FocusKey].end()) {
         const std::string j = json;
-        LWARNING(fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j));
+        LWARNING(
+            fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j)
+        );
         return;
     }
-    
+
     const std::string focus = json[FocusKey][SceneNodeName];
     const SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(focus);
     if (node) {
@@ -308,7 +313,9 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
 void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) const {
     if (json[RenderableKey].find(SceneNodeName) == json[RenderableKey].end()) {
         const std::string j = json;
-        LWARNING(fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j));
+        LWARNING(
+            fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j)
+        );
         return;
     }
 
@@ -369,7 +376,7 @@ void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
     setFriction(false);
     auto input = json[AutopilotInputKey][ValuesKey];
 
-    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _inputState.isConnected = true;
 
     for (auto it = input.begin(); it != input.end(); ++it) {
@@ -406,7 +413,7 @@ void FlightControllerTopic::handleAutopilot(const nlohmann::json &json) {
 }
 
 void FlightControllerTopic::processInputState(const nlohmann::json& json) {
-    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0.f);
     _inputState.isConnected = true;
 
     // Get "inputState" object from "payload"
@@ -426,7 +433,7 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
         _inputState.axes[std::distance(AxisIndexMap.begin(), mapIt)] = float(it.value());
     }
 }
-    
+
 void FlightControllerTopic::processLua(const nlohmann::json &json) {
     const std::string script = json[LuaScript];
     global::scriptEngine.queueScript(
@@ -434,5 +441,5 @@ void FlightControllerTopic::processLua(const nlohmann::json &json) {
         openspace::scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
-    
+
 } // namespace openspace

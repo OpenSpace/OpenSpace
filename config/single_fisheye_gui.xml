@@ -1,53 +1,53 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
 <!--    <Scene>
-        <Orientation yaw="0.0" pitch="-27.0" roll="0.0" />
-        <Offset x="0.0" y="0.0" z="0.0" />
-        <Scale value="1.0" />
-    </Scene> -->
-    <Node address="localhost" port="20401">
-        <Window fullScreen="false" name="OpenSpace">
-            <Stereo type="none" />
-            <!-- 16:9 aspect ratio -->
-            <Size x="1024" y="1024" />
-            <!-- Frame buffer resolution
-            <Res x="4096" y="4096" /> -->
-            <!--
-                quality options (cubemap size):
-                    - low (256)
-                    - medium (512)
-                    - high/1k (1024)
-                    - 2k (2048)
-                    - 4k (4096)
-                    - 8k (8192)
-                tilt specifies the dome tilt angle in degrees from the horizontal
-            -->
-            <Viewport name="fisheye">
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-                <FisheyeProjection fov="180" quality="1k"  tilt="27.0">
-                    <Background r="0.1" g="0.1" b="0.1" a="1.0" />
-                </FisheyeProjection>
-            </Viewport>
-        </Window>
-
-
-    <Window fullScreen="false" name="GUI" tags="GUI">
-        <Stereo type="none" />
-        <Size x="1024" y="1024" />
-        <Pos x="50" y="50" />
-        <Viewport>
-            <Pos x="0.0" y="0.0" />
-            <Size x="1.0" y="1.0" />
-            <PlanarProjection>
-                <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
-                <Orientation heading="0.0" pitch="0.0" roll="0.0" />
-            </PlanarProjection>
-        </Viewport>
+    <Orientation yaw="0.0" pitch="-27.0" roll="0.0" />
+    <Offset x="0.0" y="0.0" z="0.0" />
+    <Scale value="1.0" />
+  </Scene> -->
+  <Node address="localhost" port="20401">
+    <Window fullScreen="false" name="OpenSpace">
+      <Stereo type="none" />
+      <!-- 16:9 aspect ratio -->
+      <Size x="1024" y="1024" />
+      <!-- Frame buffer resolution
+      <Res x="4096" y="4096" /> -->
+      <!--
+        quality options (cubemap size):
+          - low (256)
+          - medium (512)
+          - high/1k (1024)
+          - 2k (2048)
+          - 4k (4096)
+          - 8k (8192)
+        tilt specifies the dome tilt angle in degrees from the horizontal
+      -->
+      <Viewport name="fisheye">
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <FisheyeProjection fov="180" quality="1k"  tilt="27.0">
+          <Background r="0.1" g="0.1" b="0.1" a="1.0" />
+        </FisheyeProjection>
+      </Viewport>
     </Window>
 
-    </Node>
-    <User eyeSeparation="0.06">
-        <Pos x="0.0" y="0.0" z="0.0" />
-    </User>
+
+  <Window fullScreen="false" name="GUI" tags="GUI">
+    <Stereo type="none" />
+    <Size x="1024" y="1024" />
+    <Pos x="50" y="50" />
+    <Viewport>
+      <Pos x="0.0" y="0.0" />
+      <Size x="1.0" y="1.0" />
+      <PlanarProjection>
+        <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
+        <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+      </PlanarProjection>
+    </Viewport>
+  </Window>
+
+  </Node>
+  <User eyeSeparation="0.06">
+    <Pos x="0.0" y="0.0" z="0.0" />
+  </User>
 </Cluster>

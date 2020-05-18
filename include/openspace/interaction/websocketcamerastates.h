@@ -106,7 +106,8 @@ private:
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::WebsocketCameraStates::AxisType& type);
+std::string to_string(
+    const openspace::interaction::WebsocketCameraStates::AxisType& type);
 
 template <>
 openspace::interaction::WebsocketCameraStates::AxisType

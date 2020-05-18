@@ -145,16 +145,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ApplyLinearFlightInfo = {
         "ApplyLinearFlight",
         "Apply Linear Flight",
-        "This property makes the camera move to the specified distance 'FlightDestinationDistance' while facing the anchor"
+        "This property makes the camera move to the specified distance "
+        "'FlightDestinationDistance' while facing the anchor"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlightDestinationDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FlightDestinationDistInfo = {
         "FlightDestinationDistance",
         "Flight Destination Distance",
         "The final distance we want to fly to, with regards to the anchor node."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlightDestinationFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FlightDestinationFactorInfo =
+    {
         "FlightDestinationFactor",
         "Flight Destination Factor",
         "The minimal distance factor that we need to reach to end linear flight."
@@ -181,6 +183,14 @@ namespace {
             "FollowRotationInterpolationTime",
             "Follow rotation interpolation time",
             "The interpolation time when toggling following focus node rotation."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
+        "InvertMouseButtons",
+        "Invert left and right mouse buttons",
+        "If this value is 'false', the left mouse button causes the camera to rotate "
+        "around the object and the right mouse button causes the zooming motion. If this "
+        "value is 'true', these two functionalities are reversed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -236,7 +246,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
-    , _flightDestinationDistance(FlightDestinationDistanceInfo, 2e8f, 0.0f, 1e10f)
+    , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -247,6 +257,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
     , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
+    , _invertMouseButtons(InvertMouseButtons, false)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
@@ -378,6 +389,10 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetInterpolationTime);
     addProperty(_stereoInterpolationTime);
     addProperty(_followRotationInterpolationTime);
+    _invertMouseButtons.onChange(
+        [this]() { _mouseStates.setInvertMouseButton(_invertMouseButtons); }
+    );
+    addProperty(_invertMouseButtons);
 
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
@@ -442,16 +457,17 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (_applyLinearFlight) {
         // Calculate a position handle based on the camera position in world space
         glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
-        // Use the boundingsphere to get an approximate distance to the surface of the node
+        // Use the boundingsphere to get an approximate distance to the node surface
         double nodeRadius = static_cast<double>(_anchorNode->boundingSphere());
-        double distFromCameraToFocus = glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
+        double distFromCameraToFocus =
+            glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
 
         // Make the approximation delta size depending on the flight distance
-        double arrivalThreshold = _flightDestinationDistance.value() * _flightDestinationFactor;
+        double arrivalThreshold = _flightDestinationDistance * _flightDestinationFactor;
 
-        // Fly towards the flight destination distance. When getting closer than arrivalThreshold terminate the flight
-        if (abs(distFromCameraToFocus - _flightDestinationDistance.value()) > arrivalThreshold) {
-
+        // Fly towards the flight destination distance. When getting closer than
+        // arrivalThreshold terminate the flight
+        if (abs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
@@ -460,7 +476,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             );
         }
         else {
-            _applyLinearFlight.setValue(false);
+            _applyLinearFlight = false;
         }
     }
 

@@ -626,8 +626,7 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
 }
 
 void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic3 geo3,
-                                        bool doResetCameraDirection)
+                                        globebrowsing::Geodetic3 geo3, bool)
 {
     using namespace globebrowsing;
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);

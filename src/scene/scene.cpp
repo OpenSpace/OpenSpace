@@ -346,7 +346,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         if (global::callback::webBrowserPerformanceHotfix) {
             (*global::callback::webBrowserPerformanceHotfix)();
         }
-        
+
         {
             ZoneScopedN("Get Error Hack")
 

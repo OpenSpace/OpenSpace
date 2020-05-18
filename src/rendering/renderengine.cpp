@@ -319,14 +319,13 @@ RenderEngine::RenderEngine()
     });
     addProperty(_disableHDRPipeline);
 
-    
     _hdrExposure.onChange([this]() {
         if (_renderer) {
             _renderer->setHDRExposure(_hdrExposure);
         }
     });
     addProperty(_hdrExposure);
-    
+
     _gamma.onChange([this]() {
         if (_renderer) {
             _renderer->setGamma(_gamma);
@@ -342,7 +341,7 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_hue);
-    
+
     _saturation.onChange([this]() {
         if (_renderer) {
             _renderer->setSaturation(_saturation);
@@ -350,7 +349,7 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_saturation);
-    
+
     _value.onChange([this]() {
         if (_renderer) {
             _renderer->setValue(_value);
@@ -518,7 +517,7 @@ void RenderEngine::updateScene() {
     const Time& integrateFromTime = global::timeManager.integrateFromTime();
 
     _scene->update({
-        { glm::dvec3(0.0), glm::dmat3(1.0), 1.0 },
+        { glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
         currentTime,
         integrateFromTime,
         _doPerformanceMeasurements
