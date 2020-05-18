@@ -44,26 +44,8 @@ const double PathCurve::length() const {
 }
 
 glm::dvec3 PathCurve::positionAt(double relativeLength) {
-    double u = approximatedCurveParameter(relativeLength * _totalLength); // TODO: only use relative length?
+    double u = curveParameter(relativeLength * _totalLength); // TODO: only use relative length?
     return interpolate(u);
-}
-
-double PathCurve::approximatedCurveParameter(double s) {
-    if (s <= Epsilon) return 0.0;
-    if (s >= _totalLength) return 1.0;
-
-    std::map<double, double>::iterator itSample = _parameterPairs.upper_bound(s);
-    std::map<double, double>::iterator itPrevSample = std::prev(itSample, 1);
-
-    double sSample = itSample->first;
-    double sPrevSample = itPrevSample->first;
-    double uSample = itSample->second;
-    double uPrevSample = itPrevSample->second;
-
-    double slope = (uSample - uPrevSample) / (sSample - sPrevSample);
-
-    // linear fit (TODO: investigate higher order fits?)
-    return uPrevSample + slope * (s - sPrevSample);
 }
 
 // Compute the curve parameter from an arc length value, using a combination of
@@ -162,33 +144,6 @@ void PathCurve::initParameterIntervals() {
     for (unsigned int i = 1; i <= _nrSegments; i++) {
         _parameterIntervals[i] = _lengthSums[i] / _totalLength;
     }
-
-    // prepare samples for arc length reparameterization
-    _parameterPairs.clear();
-    _parameterPairs[0.0] = 0.0;
-    double s = 0.0;
-    for (int i = 1; i <= _nrSegments; ++i) {
-        double segmentLength = _lengths[i];
-        // TODO: make nr of samples dependent on segment length somehow
-        double deltaLength = _lengths[i] / _nrParameterSamplesPerSegment;
-        double endLength = _lengthSums[i];
-        double startLength = _lengthSums[i-1];
-        s += deltaLength;
-        while (s < endLength) {
-            double sSegment = s - startLength;
-            double sSegmentEased = segmentLength * ghoul::cubicEaseInOut(sSegment / segmentLength);
-            double sEased = sSegmentEased + startLength;
-            double u = curveParameter(sEased);
-            _parameterPairs[sEased] = u;
-            s += deltaLength;
-        }
-        _parameterPairs[_lengthSums[i]] = _parameterIntervals[i];
-    }
-    _parameterPairs[_totalLength] = 1.0;
-
-    // TODO: remove when not needed
-    //LINFO(fmt::format("number samples: {}", _parameterPairs.size()));
-    //LINFO(fmt::format("next to last value: {}", std::prev(_parameterPairs.end(), 2)->second));
 }
 
 double PathCurve::approximatedDerivative(double u, double h) {

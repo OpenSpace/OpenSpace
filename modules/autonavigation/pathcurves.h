@@ -44,8 +44,6 @@ public:
     const double length() const;
     glm::dvec3 positionAt(double relativeLength);
 
-    double approximatedCurveParameter(double s);
-
     // compute curve parameter that matches the input arc length s
     double curveParameter(double s);
 
@@ -68,9 +66,6 @@ protected:
     std::vector<double> _lengths;
     std::vector<double> _lengthSums;
     double _totalLength;
-
-    int _nrParameterSamplesPerSegment = 100; 
-    std::map<double, double> _parameterPairs; // s (arc length), u (curve parameter)
 };
 
 class Bezier3Curve : public PathCurve {
