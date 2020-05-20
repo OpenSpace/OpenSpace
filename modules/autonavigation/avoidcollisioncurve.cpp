@@ -60,7 +60,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     // Add control points for a catmull-rom spline, first and last will no be intersected
     // TODO: test other first and last control points, ex positive or negative view dir
-    _points.push_back(startNodePos);
+    _points.push_back(start.position());
     _points.push_back(start.position());
 
     // Add an extra point to first go backwards if starting close to planet
@@ -89,7 +89,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // TODO: Calculate nice end pose if not defined
 
     _points.push_back(end.position());
-    _points.push_back(endNodePos);
+    _points.push_back(end.position());
 
     std::vector<SceneGraphNode*> relevantNodes = findRelevantNodes();
 
