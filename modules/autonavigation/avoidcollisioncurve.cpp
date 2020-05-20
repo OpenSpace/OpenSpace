@@ -53,10 +53,12 @@ namespace openspace::autonavigation {
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
     double thresholdFactor = 3.0;
 
-    glm::dvec3 startNodePos = start.node()->worldPosition();
-    glm::dvec3 endNodePos = end.node()->worldPosition();
+    glm::dvec3 startNodeCenter = start.node()->worldPosition();
+    glm::dvec3 endNodeCenter = end.node()->worldPosition();
     double startNodeRadius = start.nodeDetails.validBoundingSphere;
-    glm::dvec3 startViewDir = glm::normalize(start.rotation() * glm::dvec3(0.0, 0.0, -1.0));
+    glm::dvec3 startViewDirection = glm::normalize(
+        start.rotation() * glm::dvec3(0.0, 0.0, -1.0)
+    );
 
     // Add control points for a catmull-rom spline, first and last will no be intersected
     // TODO: test other first and last control points, ex positive or negative view dir
@@ -64,18 +66,18 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     _points.push_back(start.position());
 
     // Add an extra point to first go backwards if starting close to planet
-    double distanceToStartNode = glm::length(start.position() - startNodePos);
+    glm::dvec3 nodeCenterToStart = start.position() - startNodeCenter;
+    double distanceToStartNode = glm::length(nodeCenterToStart);
     if (distanceToStartNode < thresholdFactor * startNodeRadius) {
         double distance = startNodeRadius;
-
-        glm::dvec3 newPos = start.position() - distance * startViewDir;
+        glm::dvec3 newPos = start.position() + distance * glm::normalize(nodeCenterToStart);
         _points.push_back(newPos);
     }
 
     // Add point for moving out if the end state is in opposite direction
     //TODO: determine if its best to compare to end orientation or position 
     glm::dvec3 startToEnd = end.position() - start.position();
-    double cosStartAngle = glm::dot(normalize(-startViewDir), normalize(startToEnd));
+    double cosStartAngle = glm::dot(normalize(-startViewDirection), normalize(startToEnd));
     if (cosStartAngle > 0.7) {
         glm::dquat middleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5); // OBS! Rotation method is not necessarily slerp
         glm::dvec3 middleViewDir = glm::normalize(middleRotation * glm::dvec3(0.0, 0.0, -1.0));
