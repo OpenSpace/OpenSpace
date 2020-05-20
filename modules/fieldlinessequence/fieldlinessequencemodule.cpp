@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/rendering/renderablestreamnodes.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -61,6 +62,7 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(factory, "No renderable factory existed");
 
     factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+    factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
 }
 
 } // namespace openspace

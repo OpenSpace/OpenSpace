@@ -1,0 +1,69 @@
+asset.info = {
+    Name = "Predictive Science Inc. Stream nodes Bastille Day",
+    Version = "1.0",
+    Description = " Stream nodes for the bastille day CME event ",
+    Author = "Christian Adamsson, Emilie Ho",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}
+
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+
+-- local transferFunctions = asset.localResource("transferfunctions")
+-- local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
+-- local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
+
+ local streamnodesDirectory = asset.syncedResource({
+    Name = "Bastille Day Stream nodes",
+    Type = "HttpSynchronization",
+    Identifier = "bastille_day_streamnodes",
+   -- Identifier = "bastille_day_mas_fieldlines",
+    Version = 1
+})
+
+
+local sunRadius = 6.957E8
+
+-- Streamnodes from binaries
+local streamnodes = {
+    Identifier = "MAS_MHD_StreamNodes",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+	--transforms.asset, referens till suntransforms.solarsystemBarycenter.identifier
+    Renderable = {
+        Type = "RenderableStreamNodes",
+        SourceFolder = streamnodesDirectory,
+        -- StreamsEnabled = false,
+        -- LineWidth = 1.0;
+        -- AlphaBlendlingEnabled = false,
+        InputFileType = "json",
+        --ColorTablePaths = {
+        --    masDensityColorTable,
+        --    masVelocityColorTable,
+        --},
+        --ColorTableMinMax = {
+         --   { 0, 1000000 },
+         --   { 100, 2000 }
+        --},
+        LoadAtRuntime = true,
+        ScaleToMeters = 1.0,
+        SecondsBefore = 24*60*60,
+        SecondsAfter = 24*60*60,
+        --SimulationModel = "mas",
+      --  Color = {
+       --     Uniform = {0, 0.725, 0.75, 1}
+       -- }
+    },
+    GUI = {
+        Path = "/Solar System/Heliosphere",
+        Name = "Streamnodes"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = sunRadius
+        },
+    }
+} 
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { streamnodes })
