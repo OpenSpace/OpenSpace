@@ -42,6 +42,7 @@ namespace {
 
     const double CloseToNodeThresholdFactor = 3.0; 
     const double AvoidCollisionDistanceFactor = 3.0;
+    const double CollisionBufferSizeFactor = 1.0;
     const int MaxAvoidCollisionSteps = 10;
 
 } // namespace
@@ -147,10 +148,17 @@ void AvoidCollisionCurve::removeCollisions(int step) {
 
             // sphere to check for collision
             double radius = node->boundingSphere();
-            // TODO: add a buffer (i.e. use a little larger sphere), when we have 
-            // behaviour for leaving a target. Don't want to pass too close to objects
             glm::dvec3 center = glm::dvec3(0.0, 0.0, 0.0);
 
+            // add a buffer, so we don't pass too close to the node
+            // dont't add it if any point is inside the buffer
+            double buffer = CollisionBufferSizeFactor * node->boundingSphere();
+            bool p1IsInside = helpers::isPointInsideSphere(p1, center, radius + buffer);
+            bool p2IsInside = helpers::isPointInsideSphere(p2, center, radius + buffer);
+            if (!p1IsInside && !p2IsInside) {
+                radius += buffer;
+            }
+           
             glm::dvec3 intersectionPoint;
             bool collision = helpers::lineSphereIntersection(p1, p2, center, radius, intersectionPoint);
             glm::dvec3 intersectionPointWorld = modelTransform * glm::dvec4(intersectionPoint, 1.0);
@@ -181,7 +189,6 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 glm::dvec3 extraKnot = intersectionPointWorld - avoidCollisionDistance * glm::normalize(orthogonal);
                 _points.insert(_points.begin() + i + 2, extraKnot);
 
-                // TODO: maybe make this more efficient, and make sure that we have a base case. 
                 removeCollisions(++step);
                 break;
             }
