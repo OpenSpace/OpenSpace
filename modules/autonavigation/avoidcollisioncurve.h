@@ -37,8 +37,9 @@ public:
     glm::dvec3 interpolate(double u);
 
 private:
-    std::vector<SceneGraphNode*> findRelevantNodes();
-    void removeCollisions(std::vector<SceneGraphNode*>& relevantNodes, int step = 0);
+    void removeCollisions(int step = 0);
+
+    std::vector<SceneGraphNode*> _relevantNodes;
 };
 
 } // namespace openspace::autonavigation

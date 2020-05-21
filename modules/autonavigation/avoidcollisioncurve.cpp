@@ -24,12 +24,13 @@
 
 #include <modules/autonavigation/avoidcollisioncurve.h>
 
+#include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/waypoint.h>
 #include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
@@ -39,19 +40,17 @@ namespace {
     constexpr const char* _loggerCat = "AvoidCollisionCurve";
     const double Epsilon = 1E-7;
 
-    // TODO: move this list somewhere else
-    const std::vector<std::string> RelevantTags{
-        "planet_solarSystem",
-        "moon_solarSystem"
-        // TODO
-    };
+    const double CloseToNodeThresholdFactor = 3.0; 
+    const double AvoidCollisionDistanceFactor = 3.0;
+    const int MaxAvoidCollisionSteps = 10;
 
 } // namespace
 
 namespace openspace::autonavigation {
 
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
-    double thresholdFactor = 3.0;
+    AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+    _relevantNodes = module->AutoNavigationHandler().relevantNodes();
 
     glm::dvec3 startNodeCenter = start.node()->worldPosition();
     glm::dvec3 endNodeCenter = end.node()->worldPosition();
@@ -60,15 +59,14 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
         start.rotation() * glm::dvec3(0.0, 0.0, -1.0)
     );
 
-    // Add control points for a catmull-rom spline, first and last will no be intersected
-    // TODO: test other first and last control points, ex positive or negative view dir
+    // Add control points for a catmull-rom spline, first and last will not be intersected
     _points.push_back(start.position());
     _points.push_back(start.position());
 
     // Add an extra point to first go backwards if starting close to planet
     glm::dvec3 nodeCenterToStart = start.position() - startNodeCenter;
     double distanceToStartNode = glm::length(nodeCenterToStart);
-    if (distanceToStartNode < thresholdFactor * startNodeRadius) {
+    if (distanceToStartNode < CloseToNodeThresholdFactor * startNodeRadius) {
         double distance = startNodeRadius;
         glm::dvec3 newPos = start.position() + distance * glm::normalize(nodeCenterToStart);
         _points.push_back(newPos);
@@ -78,25 +76,23 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     //TODO: determine if its best to compare to end orientation or position 
     glm::dvec3 startToEnd = end.position() - start.position();
     double cosStartAngle = glm::dot(normalize(-startViewDirection), normalize(startToEnd));
-    if (cosStartAngle > 0.7) {
-        glm::dquat middleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5); // OBS! Rotation method is not necessarily slerp
+
+    // TODO: reduce magical numbers / create constants
+    bool targetInOppositeDirection = cosStartAngle > 0.7;
+    if (targetInOppositeDirection) {
+        glm::dquat middleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5); 
         glm::dvec3 middleViewDir = glm::normalize(middleRotation * glm::dvec3(0.0, 0.0, -1.0));
         double distance = 0.4 * glm::length(startToEnd);
 
-        glm::dvec3 newPos = start.position() + 0.2 * startToEnd - distance * middleViewDir;
-        _points.push_back(newPos);
+        glm::dvec3 newPosition = start.position() + 0.2 * startToEnd - distance * middleViewDir;
+        _points.push_back(newPosition);
     }
 
-    // TODO: Add a point to approach straigt towards a specific pose near planet
-    // TODO: Calculate nice end pose if not defined
-
     _points.push_back(end.position());
     _points.push_back(end.position());
 
-    std::vector<SceneGraphNode*> relevantNodes = findRelevantNodes();
-
-    // Create extra points to avoid collision
-    removeCollisions(relevantNodes);
+    // Create extra points to avoid collision 
+    removeCollisions();
 
     _nrSegments = _points.size() - 3;
 
@@ -129,68 +125,43 @@ glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
     );
 }
 
-std::vector<SceneGraphNode*> AvoidCollisionCurve::findRelevantNodes() {
-    // TODO: make more efficient
-    const std::vector<SceneGraphNode*>& allNodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
-
-    auto isRelevant = [](const SceneGraphNode* node) {
-        const std::vector<std::string> tags = node->tags();
-        auto result = std::find_first_of(RelevantTags.begin(), RelevantTags.end(), tags.begin(), tags.end());
-
-        // does not match any tags => not interesting
-        if (result == RelevantTags.end()) {
-            return false;
-        }
-
-        return node->renderable() && (node->boundingSphere() > 0.0);
-    };
-
-    std::vector<SceneGraphNode*> result{};
-    std::copy_if(allNodes.begin(), allNodes.end(), std::back_inserter(result), isRelevant);
-
-    return result;
-}
-
-void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevantNodes, int step) {
+// Try to reduce the risk of collision by approximating the curve with linear segments. 
+// If a collision happens, create a new point for the path to go through, in an attempt to
+// avoid that collision
+void AvoidCollisionCurve::removeCollisions(int step) {
     int nrSegments = _points.size() - 3;
-    int maxSteps = 5;
 
-    // TODO: handle better / present warning if early out
-    if (step > maxSteps) return;
+    if (step > MaxAvoidCollisionSteps) 
+        return; // TODO: handle better / present warning if early out
 
     // go through all segments and check for collisions
     for (int i = 0; i < nrSegments; ++i) {
         const glm::dvec3 lineStart = _points[i + 1];
         const glm::dvec3 lineEnd = _points[i + 2];
 
-        for (SceneGraphNode* node : relevantNodes) {
+        for (SceneGraphNode* node : _relevantNodes) {
             // do collision check in relative coordinates, to avoid huge numbers 
             const glm::dmat4 modelTransform = node->modelTransform();
             glm::dvec3 p1 = glm::inverse(modelTransform) * glm::dvec4(lineStart, 1.0);
             glm::dvec3 p2 = glm::inverse(modelTransform) * glm::dvec4(lineEnd, 1.0);
 
             // sphere to check for collision
-            double bs = node->boundingSphere();
-            double radius = bs; 
+            double radius = node->boundingSphere();
             // TODO: add a buffer (i.e. use a little larger sphere), when we have 
             // behaviour for leaving a target. Don't want to pass too close to objects
             glm::dvec3 center = glm::dvec3(0.0, 0.0, 0.0);
+
             glm::dvec3 intersectionPoint;
-
             bool collision = helpers::lineSphereIntersection(p1, p2, center, radius, intersectionPoint);
-
-            // convert back to world coordinates 
             glm::dvec3 intersectionPointWorld = modelTransform * glm::dvec4(intersectionPoint, 1.0);
 
             if (collision) {
-                LINFO(fmt::format("Collision with node: {}!", node->identifier()));
+                LINFO(fmt::format("Collision with node: {}!", node->identifier())); // TODO: remove
 
                 // before we response to the collision, make sure none of the points are inside the node
-                bool isStartPointInside = helpers::isPointInsideSphere(p1, center, radius);
-                bool isEndPointInside = helpers::isPointInsideSphere(p2, center, radius);
-                bool cannotResolveCollision = (isStartPointInside || isEndPointInside);
-                if (cannotResolveCollision) {
+                bool isStartInsideNode = helpers::isPointInsideSphere(p1, center, radius);
+                bool isEndInsideNode = helpers::isPointInsideSphere(p2, center, radius);
+                if (isStartInsideNode || isEndInsideNode) {
                     LWARNING(fmt::format(
                         "Something went wrong! At least one point in the path is inside node: {}", 
                         node->identifier()
@@ -206,12 +177,12 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
                 glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
                 glm::dvec3 orthogonal = collisionPointToCenter - parallell;
 
-                double avoidCollisionDistance = 3.0 * radius;
+                double avoidCollisionDistance = AvoidCollisionDistanceFactor * radius;
                 glm::dvec3 extraKnot = intersectionPointWorld - avoidCollisionDistance * glm::normalize(orthogonal);
                 _points.insert(_points.begin() + i + 2, extraKnot);
 
                 // TODO: maybe make this more efficient, and make sure that we have a base case. 
-                removeCollisions(relevantNodes, ++step);
+                removeCollisions(++step);
                 break;
             }
         }

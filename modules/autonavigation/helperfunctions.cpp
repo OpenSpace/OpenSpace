@@ -79,9 +79,6 @@ namespace openspace::autonavigation::helpers {
 
             if (t <= Epsilon || t >= abs(1.0 - Epsilon)) return false;
 
-            // TEST
-            LINFO("Collision!! at t = " + std::to_string(t));
-
             intersectionPoint = p1 + t * dp;
             return true;
         }
