@@ -42,6 +42,8 @@ namespace openspace::autonavigation::helpers {
     bool lineSphereIntersection(glm::dvec3 linePoint1, glm::dvec3 linePoint2,
         glm::dvec3 sphereCenter, double spehereRadius, glm::dvec3& intersectionPoint);
 
+    bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
+
 } // namespace
 
 namespace openspace::autonavigation::interpolation {

@@ -54,7 +54,7 @@ namespace openspace::autonavigation::helpers {
        p = p1 + mu2 (p2 - p1)
        Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
     */
-    bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 sc,  double r, 
+    bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 sc, double r, 
                                                          glm::dvec3& intersectionPoint)
     {   
         long double a, b, c;
@@ -85,6 +85,15 @@ namespace openspace::autonavigation::helpers {
             intersectionPoint = p1 + t * dp;
             return true;
         }
+    }
+
+    bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
+        glm::dvec3 v = c - p;
+        double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
+        if (squaredDistance <= r * r) {
+            return true;
+        }
+        return false;
     }
 
 } // helpers

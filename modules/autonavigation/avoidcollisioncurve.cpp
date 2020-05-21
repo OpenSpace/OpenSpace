@@ -154,7 +154,7 @@ std::vector<SceneGraphNode*> AvoidCollisionCurve::findRelevantNodes() {
 
 void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevantNodes, int step) {
     int nrSegments = _points.size() - 3;
-    int maxSteps = 10;
+    int maxSteps = 5;
 
     // TODO: handle better / present warning if early out
     if (step > maxSteps) return;
@@ -186,12 +186,24 @@ void AvoidCollisionCurve::removeCollisions(std::vector<SceneGraphNode*>& relevan
             if (collision) {
                 LINFO(fmt::format("Collision with node: {}!", node->identifier()));
 
+                // before we response to the collision, make sure none of the points are inside the node
+                bool isStartPointInside = helpers::isPointInsideSphere(p1, center, radius);
+                bool isEndPointInside = helpers::isPointInsideSphere(p2, center, radius);
+                bool cannotResolveCollision = (isStartPointInside || isEndPointInside);
+                if (cannotResolveCollision) {
+                    LWARNING(fmt::format(
+                        "Something went wrong! At least one point in the path is inside node: {}", 
+                        node->identifier()
+                    ));
+                    break;
+                }
+
                 // to avoid collision, take a step in an orhtogonal direction of the 
                 // collision point and add a new point
-                glm::dvec3 lineDir = glm::normalize(lineEnd - lineStart);
-                glm::dvec3 nodePos = node->worldPosition();
-                glm::dvec3 collisionPointToCenter = nodePos - intersectionPointWorld;
-                glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDir);
+                glm::dvec3 lineDirection = glm::normalize(lineEnd - lineStart);
+                glm::dvec3 nodeCenter = node->worldPosition();
+                glm::dvec3 collisionPointToCenter = nodeCenter - intersectionPointWorld;
+                glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
                 glm::dvec3 orthogonal = collisionPointToCenter - parallell;
 
                 double avoidCollisionDistance = 3.0 * radius;
