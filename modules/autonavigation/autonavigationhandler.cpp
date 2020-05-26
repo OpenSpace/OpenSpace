@@ -309,6 +309,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
             glm::dvec3 position = p->interpolatedPose(u).position;
             positions.push_back(position);
         }
+        positions.push_back(p->interpolatedPose(1.0).position);
     }
 
     return positions;
