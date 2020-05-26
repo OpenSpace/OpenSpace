@@ -75,8 +75,8 @@ private:
 
     void applyStopBehaviour(double deltaTime);
 
-    void addSegment(Waypoint& waypoint, const Instruction* ins);
-    void addStopDetails(const Waypoint& endWaypoint, const Instruction* ins);
+    void addSegment(Instruction* ins, int index);
+    void addStopDetails(const Instruction* ins);
 
     Waypoint computeDefaultWaypoint(const TargetNodeInstruction* ins);
 

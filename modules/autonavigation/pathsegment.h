@@ -37,7 +37,8 @@ namespace openspace::autonavigation {
 class PathSegment {
 public:
     PathSegment(Waypoint start, Waypoint end, CurveType type, 
-                std::optional<double> duration);
+        std::optional<double> duration = std::nullopt);
+
     ~PathSegment() = default;
 
     // Mutators

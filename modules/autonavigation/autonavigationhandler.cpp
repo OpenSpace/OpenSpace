@@ -217,28 +217,11 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
     for (int i = 0; i < nrInstructions; i++) {
         Instruction* instruction = spec.instruction(i);
         if (instruction) {
-            std::vector<Waypoint> waypoints = instruction->getWaypoints();
-
-            if (waypoints.size() == 0) {
-                TargetNodeInstruction* targetNodeIns = dynamic_cast<TargetNodeInstruction*>(instruction);
-                if (targetNodeIns) {
-                    // TODO: allow curves to compute default waypoint instead
-                    Waypoint wp = computeDefaultWaypoint(targetNodeIns);
-                    addSegment(wp, instruction);
-                }
-                else {
-                    LWARNING(fmt::format("No path segment was created from instruction {}. No waypoints could be created.", i));
-                    return;
-                }
-            }
-            else {
-                // TODO: allow for a list of waypoints
-                addSegment(waypoints[0], instruction);
-            }
+            addSegment(instruction, i);
 
             // Add info about stops between segments
             if (i < nrInstructions - 1) {
-                addStopDetails(lastWayPoint(), instruction);
+                addStopDetails(instruction);
             }
         }
     }
@@ -462,19 +445,41 @@ void AutoNavigationHandler::applyStopBehaviour(double deltaTime) {
     }
 }
 
-void AutoNavigationHandler::addSegment(Waypoint& waypoint, const Instruction* ins){
+void AutoNavigationHandler::addSegment(Instruction* ins, int index) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
+    std::vector<Waypoint> waypoints = ins->getWaypoints();
+    Waypoint waypointToAdd;
+
+    if (waypoints.size() == 0) {
+        TargetNodeInstruction* targetNodeIns = dynamic_cast<TargetNodeInstruction*>(ins);
+        if (targetNodeIns) {
+            // TODO: allow curves to compute default waypoint instead
+            waypointToAdd = computeDefaultWaypoint(targetNodeIns);
+        }
+        else {
+            LWARNING(fmt::format(
+                "No path segment was created from instruction {}. No waypoints could be created.",
+                index
+            ));
+            return;
+        }
+    }
+    else {
+        // TODO: allow for a list of waypoints
+        waypointToAdd = waypoints[0];
+    }
+
     _pathSegments.push_back(std::make_unique<PathSegment>(
         lastWayPoint(), 
-        waypoint, 
+        waypointToAdd,
         CurveType(curveType), 
         ins->duration
     ));
 }
 
-void AutoNavigationHandler::addStopDetails(const Waypoint& endWaypoint, const Instruction* ins) {
+void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
     StopDetails stopEntry;
     stopEntry.shouldStop = _stopAtTargetsPerDefault.value();
 
@@ -485,7 +490,7 @@ void AutoNavigationHandler::addStopDetails(const Waypoint& endWaypoint, const In
     if (stopEntry.shouldStop) {
         stopEntry.duration = ins->stopDuration;
 
-        std::string anchorIdentifier = endWaypoint.nodeDetails.identifier;
+        std::string anchorIdentifier = lastWayPoint().nodeDetails.identifier;
         stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value()); 
 
         if (ins->stopBehavior.has_value()) {

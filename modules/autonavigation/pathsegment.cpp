@@ -41,7 +41,7 @@ namespace {
 namespace openspace::autonavigation {
 
 PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type, 
-						 std::optional<double> duration = std::nullopt)
+						 std::optional<double> duration)
     : _start(start), _end(end), _curveType(type)
 {
     initCurve();
