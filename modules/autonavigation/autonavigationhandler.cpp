@@ -82,6 +82,14 @@ namespace {
         "List of tags for the nodes that are relevant for path creation, for example when avoiding collisions."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo DefaultPositionOffsetAngleInfo = {
+        "DefaultPositionOffsetAngle",
+        "Default Position Offset Angle",
+        "Used for creating a default position at a target node. The angle (in degrees) "
+        "specifies the deviation from the line connecting the target node and the sun, in "
+        "the direction of the camera position at the start of the path."
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -94,6 +102,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _defaultStopBehavior(DefaultStopBehaviorInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _relevantNodeTags(RelevantNodeTagsInfo)
+    , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.0f, -90.0f, 90.0f)
 {
     addPropertySubOwner(_atNodeNavigator);
 
@@ -123,6 +132,8 @@ AutoNavigationHandler::AutoNavigationHandler()
         "moon_solarSystem"
     };;
     addProperty(_relevantNodeTags);
+
+    addProperty(_defaultPositionOffsetAngle);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -562,13 +573,26 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
     }
 
     glm::dvec3 nodePos = targetNode->worldPosition();
-    glm::dvec3 stepDirection = glm::normalize(lastWayPoint().position() - nodePos);
 
-    // If the node is close to another node in the scene, make sure that the
-    // position is set to minimize risk of collision
+    glm::dvec3 stepDirection{};
     SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
+
     if (closeNode) {
+        // If the node is close to another node in the scene, make sure that the
+        // position is set to minimize risk of collision
         stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
+    } 
+    else {
+        // Go to a point that is being lit up by the sun, slightly offsetted from sun direction
+        glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
+        glm::dvec3 prevPos = lastWayPoint().position();
+        glm::dvec3 targetToPrev = prevPos - nodePos;
+        glm::dvec3 targetToSun = sunPos - nodePos;
+        glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
+        const double angle = (double)glm::radians((-1.0f)*_defaultPositionOffsetAngle);
+        glm::dquat offsetRotation = angleAxis(angle, axis);
+
+        stepDirection = glm::normalize(offsetRotation * targetToSun);
     }
 
     const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);

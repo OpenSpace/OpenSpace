@@ -113,6 +113,8 @@ private:
     properties::BoolProperty _applyStopBehaviorWhenIdle;
 
     properties::StringListProperty _relevantNodeTags;
+
+    properties::FloatProperty _defaultPositionOffsetAngle;
 };
 
 } // namespace openspace::autonavigation
