@@ -86,8 +86,9 @@ namespace openspace::autonavigation::helpers {
 
     bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
         glm::dvec3 v = c - p;
-        double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
-        if (squaredDistance <= r * r) {
+        long double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
+        long double squaredRadius = r * r;
+        if (squaredDistance <= squaredRadius) {
             return true;
         }
         return false;

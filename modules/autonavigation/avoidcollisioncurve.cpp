@@ -40,7 +40,7 @@ namespace {
     constexpr const char* _loggerCat = "AvoidCollisionCurve";
     const double Epsilon = 1E-7;
 
-    const double CloseToNodeThresholdFactor = 3.0; 
+    const double CloseToNodeThresholdFactor = 5.0; 
     const double AvoidCollisionDistanceFactor = 3.0;
     const double CollisionBufferSizeFactor = 1.0;
     const int MaxAvoidCollisionSteps = 10;
@@ -56,6 +56,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     glm::dvec3 startNodeCenter = start.node()->worldPosition();
     glm::dvec3 endNodeCenter = end.node()->worldPosition();
     double startNodeRadius = start.nodeDetails.validBoundingSphere;
+    double endNodeRadius = end.nodeDetails.validBoundingSphere;
     glm::dvec3 startViewDirection = glm::normalize(
         start.rotation() * glm::dvec3(0.0, 0.0, -1.0)
     );
@@ -65,28 +66,41 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     _points.push_back(start.position());
 
     // Add an extra point to first go backwards if starting close to planet
-    glm::dvec3 nodeCenterToStart = start.position() - startNodeCenter;
-    double distanceToStartNode = glm::length(nodeCenterToStart);
+    glm::dvec3 nodeToStart = start.position() - startNodeCenter;
+    double distanceToStartNode = glm::length(nodeToStart);
+
     if (distanceToStartNode < CloseToNodeThresholdFactor * startNodeRadius) {
         double distance = startNodeRadius;
-        glm::dvec3 newPos = start.position() + distance * glm::normalize(nodeCenterToStart);
+        glm::dvec3 newPos = start.position() + distance * glm::normalize(nodeToStart);
         _points.push_back(newPos);
     }
 
     // Add point for moving out if the end state is in opposite direction
     //TODO: determine if its best to compare to end orientation or position 
     glm::dvec3 startToEnd = end.position() - start.position();
-    double cosStartAngle = glm::dot(normalize(-startViewDirection), normalize(startToEnd));
+    double cosAngleToTarget = glm::dot(normalize(-startViewDirection), normalize(startToEnd));
+    bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
     // TODO: reduce magical numbers / create constants
-    bool targetInOppositeDirection = cosStartAngle > 0.7;
     if (targetInOppositeDirection) {
-        glm::dquat middleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5); 
-        glm::dvec3 middleViewDir = glm::normalize(middleRotation * glm::dvec3(0.0, 0.0, -1.0));
-        double distance = 0.4 * glm::length(startToEnd);
+        glm::dquat midleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5); 
+        glm::dvec3 middleViewDirection = midleRotation * glm::dvec3(0.0, 0.0, -1.0);
+        double stepOutdistance = 0.4 * glm::length(startToEnd);
 
-        glm::dvec3 newPosition = start.position() + 0.2 * startToEnd - distance * middleViewDir;
+        glm::dvec3 newPosition = start.position() + 0.2 * startToEnd - 
+                                 stepOutdistance * glm::normalize(middleViewDirection);
+
         _points.push_back(newPosition);
+    }
+
+    // Add an extra point to approach target 
+    glm::dvec3 nodeToEnd = end.position() - endNodeCenter;
+    double distanceToEndNode = glm::length(nodeToEnd);
+
+    if (distanceToEndNode < CloseToNodeThresholdFactor * endNodeRadius) {
+        double distance = endNodeRadius;
+        glm::dvec3 newPos = end.position() + distance * glm::normalize(nodeToEnd);
+        _points.push_back(newPos);
     }
 
     _points.push_back(end.position());
@@ -107,21 +121,20 @@ glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
     if (u > (1.0 - Epsilon))
         return *(_points.end() - 2);
 
-    // compute current segment, by first finding iterator to the first value that is larger than t 
     std::vector<double>::iterator segmentEndIt =
         std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
-    unsigned int idx = (segmentEndIt - 1) - _parameterIntervals.begin();
+    unsigned int index = (segmentEndIt - 1) - _parameterIntervals.begin();
 
-    double segmentStart = _parameterIntervals[idx];
-    double segmentDuration = (_parameterIntervals[idx + 1] - _parameterIntervals[idx]);
+    double segmentStart = _parameterIntervals[index];
+    double segmentDuration = (_parameterIntervals[index + 1] - _parameterIntervals[index]);
     double uSegment = (u - segmentStart) / segmentDuration;
 
     return interpolation::catmullRom(
         uSegment, 
-        _points[idx], 
-        _points[idx + 1], 
-        _points[idx + 2], 
-        _points[idx + 3], 
+        _points[index], 
+        _points[index + 1], 
+        _points[index + 2], 
+        _points[index + 3], 
         1.0
     );
 }
@@ -135,7 +148,6 @@ void AvoidCollisionCurve::removeCollisions(int step) {
     if (step > MaxAvoidCollisionSteps) 
         return; // TODO: handle better / present warning if early out
 
-    // go through all segments and check for collisions
     for (int i = 0; i < nrSegments; ++i) {
         const glm::dvec3 lineStart = _points[i + 1];
         const glm::dvec3 lineEnd = _points[i + 2];
@@ -159,19 +171,27 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 radius += buffer;
             }
            
-            glm::dvec3 intersectionPoint;
-            bool collision = helpers::lineSphereIntersection(p1, p2, center, radius, intersectionPoint);
-            glm::dvec3 intersectionPointWorld = modelTransform * glm::dvec4(intersectionPoint, 1.0);
+            glm::dvec3 intersectionPointModelCoords;
+            bool collision = helpers::lineSphereIntersection(
+                p1, 
+                p2, 
+                center, 
+                radius, 
+                intersectionPointModelCoords
+            );
 
             if (collision) {
-                LINFO(fmt::format("Collision with node: {}!", node->identifier())); // TODO: remove
+                //LINFO(fmt::format("Collision with node: {}!", node->identifier()));
+                glm::dvec3 collisionPoint = modelTransform *
+                    glm::dvec4(intersectionPointModelCoords, 1.0);
 
-                // before we response to the collision, make sure none of the points are inside the node
+                // before collision response, make sure none of the points are inside the node
                 bool isStartInsideNode = helpers::isPointInsideSphere(p1, center, radius);
                 bool isEndInsideNode = helpers::isPointInsideSphere(p2, center, radius);
                 if (isStartInsideNode || isEndInsideNode) {
                     LWARNING(fmt::format(
-                        "Something went wrong! At least one point in the path is inside node: {}", 
+                        "Something went wrong! "
+                        "At least one point in the path is inside node: {}",
                         node->identifier()
                     ));
                     break;
@@ -181,12 +201,13 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 // collision point and add a new point
                 glm::dvec3 lineDirection = glm::normalize(lineEnd - lineStart);
                 glm::dvec3 nodeCenter = node->worldPosition();
-                glm::dvec3 collisionPointToCenter = nodeCenter - intersectionPointWorld;
+                glm::dvec3 collisionPointToCenter = nodeCenter - collisionPoint;
                 glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
                 glm::dvec3 orthogonal = collisionPointToCenter - parallell;
 
                 double avoidCollisionDistance = AvoidCollisionDistanceFactor * radius;
-                glm::dvec3 extraKnot = intersectionPointWorld - avoidCollisionDistance * glm::normalize(orthogonal);
+                glm::dvec3 extraKnot = collisionPoint -
+                    avoidCollisionDistance * glm::normalize(orthogonal);
                 _points.insert(_points.begin() + i + 2, extraKnot);
 
                 removeCollisions(++step);
