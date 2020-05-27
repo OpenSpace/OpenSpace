@@ -524,6 +524,34 @@ void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
     _stops.push_back(stopEntry);
 }
 
+// Test if the node lies within a given proximity radius of any relevant node in the scene
+SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* node) {
+    glm::dvec3 nodePosition = node->worldPosition();
+    std::string nodeId = node->identifier();
+
+    const float proximityRadiusFactor = 3.0f;
+
+    for (SceneGraphNode* n : _relevantNodes) {
+        if (n->identifier() == nodeId)
+            continue;
+
+        float proximityRadius = proximityRadiusFactor * n->boundingSphere();
+        const glm::dmat4 invModelTransform = glm::inverse(n->modelTransform());
+        glm::dvec3 positionModelCoords = invModelTransform * glm::dvec4(nodePosition, 1.0);
+
+        bool isClose = helpers::isPointInsideSphere(
+            positionModelCoords, 
+            glm::dvec3(0.0, 0.0, 0.0), 
+            proximityRadius
+        );
+
+        if (isClose) 
+            return n;
+    }
+
+    return nullptr;
+}
+
 // OBS! The desired default waypoint may vary between curve types. 
 // TODO: let the curves compute the default positions instead
 Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstruction* ins) {
@@ -532,16 +560,25 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
         LERROR(fmt::format("Could not find target node '{}'", ins->nodeIdentifier));
         return Waypoint();
     }
+
     glm::dvec3 nodePos = targetNode->worldPosition();
-    glm::dvec3 nodeToPrev = lastWayPoint().position() - nodePos;
+    glm::dvec3 stepDirection = glm::normalize(lastWayPoint().position() - nodePos);
+
+    // If the node is close to another node in the scene, make sure that the
+    // position is set to minimize risk of collision
+    SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
+    if (closeNode) {
+        stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
+    }
 
     const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);
-    const double defaultHeight = 2 * radius;
+    const double defaultHeight = 2.0 * radius;
 
     bool hasHeight = ins->height.has_value();
     double height = hasHeight ? ins->height.value() : defaultHeight;
 
-    glm::dvec3 targetPos = nodePos + glm::normalize(nodeToPrev) * (radius + height);
+    glm::dvec3 targetPos = nodePos + stepDirection * (radius + height);
+
     glm::dquat targetRot = helpers::getLookAtQuaternion(
         targetPos,
         targetNode->worldPosition(),
