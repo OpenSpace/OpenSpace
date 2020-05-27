@@ -553,7 +553,7 @@ SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* 
 }
 
 // OBS! The desired default waypoint may vary between curve types. 
-// TODO: let the curves compute the default positions instead
+// TODO: let the curves update the default position if no exact position is required
 Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstruction* ins) {
     SceneGraphNode* targetNode = sceneGraphNode(ins->nodeIdentifier);
     if (!targetNode) {
