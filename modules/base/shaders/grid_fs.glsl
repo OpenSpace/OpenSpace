@@ -27,6 +27,7 @@
 
 in float vs_screenSpaceDepth;
 in vec4 vs_positionViewSpace;
+flat in double vs_double_depth;
 
 uniform vec4 gridColor;
 uniform float opacity;
@@ -34,9 +35,15 @@ uniform float opacity;
 Fragment getFragment() {
     Fragment frag;
     frag.color      = gridColor;
-    frag.color.a    *= opacity;
-    frag.depth      = vs_screenSpaceDepth;
+    frag.color.a   *= opacity;
+    // JCC: Temp solution for depth precision problems.
+    frag.depth      = float(vs_double_depth);
+    //frag.depth      = vs_screenSpaceDepth;
     frag.gPosition  = vs_positionViewSpace;
-    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+
+    // There is no normal here
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+
     return frag;
+
 }

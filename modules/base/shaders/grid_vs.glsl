@@ -30,16 +30,19 @@ layout(location = 0) in vec3 in_position;
 
 out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;
+flat out double vs_double_depth;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
+uniform dmat4 modelViewTransform;
+uniform dmat4 projectionTransform;
 
 void main() {
-    vec4 positionViewSpace = modelViewTransform * vec4(in_position, 1.0);
-    vec4 positionClipSpace = projectionTransform * positionViewSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
-    vs_screenSpaceDepth  = positionScreenSpace.w;
-    vs_positionViewSpace = positionViewSpace;
+    dvec4 positionViewSpace  = modelViewTransform * dvec4(in_position, 1.0);
+    dvec4 positionClipSpace  = projectionTransform * positionViewSpace;
+    vec4 positionScreenSpace = z_normalization(vec4(positionClipSpace));
+
+    vs_double_depth = positionClipSpace.w;
+    vs_screenSpaceDepth  = float(positionClipSpace.w);
+    vs_positionViewSpace = vec4(positionViewSpace);
     
     gl_Position = positionScreenSpace;
 }
