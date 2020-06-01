@@ -215,7 +215,6 @@ function (set_openspace_compile_settings project)
             "-Wuseless-cast"
             "-Wlogical-op"
             "-Wint-in-bool-context"
-
             "-Wno-write-strings"
             "-Wnon-virtual-dtor"
             "-Wold-style-cast"

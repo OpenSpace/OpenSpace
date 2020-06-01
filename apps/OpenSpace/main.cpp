@@ -43,8 +43,10 @@
 #include <ghoul/misc/boolean.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#endif
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
 #include <sgct/engine.h>
