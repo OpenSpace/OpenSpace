@@ -37,12 +37,19 @@
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
-
+#ifdef WIN32
     constexpr const std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase", "resolution", "lineWidth"
     };
+#else
+    constexpr const std::array<const char*, 12> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
+        "renderPhase"
+    };
+#endif
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -366,12 +373,12 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
-        #ifdef WIN32
-                glm::ivec2 resolution = global::renderEngine.renderingResolution();
+#ifdef WIN32
+        glm::ivec2 resolution = global::renderEngine.renderingResolution();
                 p->setUniform(c.resolution, resolution);
 
-                p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
-        #endif
+        p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+#endif
 
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and
