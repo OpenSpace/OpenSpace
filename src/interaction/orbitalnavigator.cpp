@@ -467,7 +467,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Fly towards the flight destination distance. When getting closer than
         // arrivalThreshold terminate the flight
-        if (abs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
+        if (fabs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,

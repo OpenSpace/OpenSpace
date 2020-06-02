@@ -249,14 +249,14 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-#ifdef __APPLE__
+#ifdef WIN32
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine.buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
+                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
             );
         }
     );
@@ -266,8 +266,8 @@ void RenderableTrail::initializeGL() {
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine.buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
             );
         }
     );
@@ -333,10 +333,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-#ifdef __APPLE__
-        glLineWidth(1.f);
-#else
+#ifdef WIN32
         glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+#else
+        glLineWidth(1.f);
 #endif
     }
     if (renderPoints) {
@@ -366,7 +366,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
-        #ifndef __APPLE__
+        #ifdef WIN32
                 glm::ivec2 resolution = global::renderEngine.renderingResolution();
                 p->setUniform(c.resolution, resolution);
 
