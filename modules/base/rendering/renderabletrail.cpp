@@ -34,20 +34,22 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
+#include <cmath>
+
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
-#ifdef WIN32
-    constexpr const std::array<const char*, 14> UniformNames = {
-        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
-        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase", "resolution", "lineWidth"
-    };
-#else
+#ifdef __APPLE__
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase"
+    };
+#else
+    constexpr const std::array<const char*, 14> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
+        "renderPhase", "resolution", "lineWidth"
     };
 #endif
 
@@ -256,14 +258,14 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-#ifdef WIN32
+#ifdef __APPLE__
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine.buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
             );
         }
     );
@@ -273,8 +275,8 @@ void RenderableTrail::initializeGL() {
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine.buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
+                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
             );
         }
     );
@@ -340,10 +342,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-#ifdef WIN32
-        glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+#ifdef __APPLE__
+        glLineWidth(1);
 #else
-        glLineWidth(1.f);
+        glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
 #endif
     }
     if (renderPoints) {
@@ -373,11 +375,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
-#ifdef WIN32
+#if !defined(__APPLE__)
         glm::ivec2 resolution = global::renderEngine.renderingResolution();
-                p->setUniform(c.resolution, resolution);
-
-        p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+        p->setUniform(c.resolution, resolution);
+        p->setUniform(c.lineWidth, std::ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
 #endif
 
         if (renderPoints) {
