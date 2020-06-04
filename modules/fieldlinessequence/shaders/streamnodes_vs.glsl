@@ -54,8 +54,7 @@ uniform vec2      domainLimR;
 
 // Streamnodes specific uniforms
 uniform int nodeSize;
-uniform vec4      streamColor;
-
+uniform vec4 streamColor;
 
 // Inputs
 // Should be provided in meters
@@ -90,7 +89,7 @@ bool isPartOfParticle(const double time, const int vertexId, const int particleS
 
 void main() {
 
-    vs_color = vec4(0);
+    vs_color = vec4(0.3, 1.0, 0.3, 1.0);
 
     vec4 position_in_meters = vec4(in_position, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;

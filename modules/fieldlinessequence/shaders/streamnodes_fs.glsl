@@ -27,12 +27,10 @@
 in vec4 vs_color;
 in float vs_depth;
 
-uniform bool usingAdditiveBlending;
-
 Fragment getFragment() {
-    if (vs_color.a == 0) {
-        discard;
-    }
+    //if (vs_color.a == 0) {
+    //    discard;
+    //}
 
     vec4 fragColor = vs_color;
 
@@ -41,16 +39,10 @@ Fragment getFragment() {
     frag.color = fragColor;
 
     // G-Buffer
-    frag.gPosition  = vec4(0.0);//vs_gPosition;
+    frag.gPosition = vec4(0.0); //vs_gPosition;
     // There is no normal here
     // TODO: Add the correct normal if necessary (JCC)
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
-
-
-    if (usingAdditiveBlending) {
-        frag.blend = BLEND_MODE_ADDITIVE;
-    }
 
     return frag;
 }

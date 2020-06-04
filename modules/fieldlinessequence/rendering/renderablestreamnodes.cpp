@@ -41,7 +41,6 @@
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 
-    
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
@@ -53,7 +52,7 @@ using json = nlohmann::json;
 
 namespace {
     //log category
-    constexpr const char* _loggerCat = "RenderableStreamNodes";
+    constexpr const char* _loggerCat = "renderableStreamNodes";
 
     //gl variables for shaders, probably needed some of them atleast
     constexpr const GLuint VaPosition = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
@@ -62,7 +61,7 @@ namespace {
 
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
-   // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
+    // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
    // [STRING] "cdf", "json" or "osfls"
     constexpr const char* KeyInputFileType = "InputFileType";
     // [STRING] should be path to folder containing the input files
@@ -81,6 +80,9 @@ namespace {
     constexpr const char* KeyJsonScalingFactor = "ScaleToMeters";
     // [BOOLEAN] If value False => Load in initializing step and store in RAM
     constexpr const char* KeyOslfsLoadAtRuntime = "LoadAtRuntime";
+
+    //[INT] Line Width should have a range
+    constexpr const char* KeyLineWidth = "LineWidth";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
@@ -102,9 +104,15 @@ namespace {
        "illustrate magnetic flow."
     };
     constexpr openspace::properties::Property::PropertyInfo NodeSizeInfo = {
-       "Node size",
+       "Nodesize",
        "Size of nodes",
        "Change the size of the nodes"
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+       "lineWidth2",
+       "Line Width2",
+       "This value2 specifies the line width of the field lines if the "
+       "selected rendering method includes lines."
     };
 
     enum class SourceFileType : int {
@@ -127,6 +135,42 @@ namespace {
         }
         return tmp;
     }
+    double stringToDouble(const std::string input, const float backupValue = 0.f) {
+        double tmp;
+
+        try {
+            tmp = std::stod(input);
+        }
+        catch (const std::invalid_argument& ia) {
+            LWARNING(fmt::format(
+                "Invalid argument: {}. '{}' is NOT a valid number", ia.what(), input
+                ));
+            return backupValue;
+        }
+        return tmp;
+    }
+    glm::dvec3 sphericalToCartesianCoord(glm::dvec3 position) {
+        glm::dvec3 cartesianPosition = glm::dvec3();
+        //LDEBUG("spherical R:" + std::to_string(position.x));
+
+        //ρsinφcosθ 
+        //prolly correct: 
+        cartesianPosition.x = position.x * sin(position.y) * cos(position.z);
+        //cartesianPosition.x = position.x * sin(position.z) * cos(position.y);
+        //ρsinφsinθ
+        // prolly correct: 
+        cartesianPosition.y = position.x * sin(position.y) * sin(position.z);
+        //cartesianPosition.y = position.x * sin(position.z) * sin(position.y);
+        //ρcosφ
+
+        //prolly correct: 
+        cartesianPosition.z = position.x * cos(position.y);
+        //cartesianPosition.z = position.x * cos(position.z);
+
+        //LDEBUG("cartesian position x: " + std::to_string(cartesianPosition.x));
+        //cartesian position x : 0.002175
+        return cartesianPosition;
+    }
 } //namespace
 
 namespace openspace {
@@ -141,6 +185,7 @@ namespace openspace {
         , _pStreamsEnabled(StreamsenabledInfo, true)
         , _pStreamGroup({ "Streams" })
         , _pNodeSize(NodeSizeInfo, 1)
+        , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
 
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -170,24 +215,32 @@ namespace openspace {
 
 
         // No need to store source paths in memory if they are already in RAM!
-        if (!_loadingStatesDynamically) {
-            _sourceFiles.clear();
-        }
+        //if (!_loadingStatesDynamically) {
+        //    _sourceFiles.clear();
+        //}
 
         setupProperties();
+
 
         // Setup shader program
         _shaderProgram = global::renderEngine.buildRenderProgram(
             "Streamnodes",
-            absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
-            absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_fs.glsl")
+            //absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
+            //absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_fs.glsl")
+            "C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/modules/fieldlinessequence/shaders/streamnodes_vs.glsl",
+            "C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/modules/fieldlinessequence/shaders/streamnodes_fs.glsl"
             );
+
+        _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
+        _uniformCache.usingParticles = _shaderProgram->uniformLocation("usingParticles");
+        _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
+
         glGenVertexArrays(1, &_vertexArrayObject);
         glGenBuffers(1, &_vertexPositionBuffer);
-        glGenBuffers(1, &_vertexColorBuffer);
+        //glGenBuffers(1, &_vertexColorBuffer);
 
         // Probably not needed, seems to be needed for additive blending
-        setRenderBin(Renderable::RenderBin::Overlay);
+        //setRenderBin(Renderable::RenderBin::Overlay);
     }
 
     /**
@@ -259,7 +312,7 @@ namespace openspace {
     //void RenderableStreamNodes::extractOptionalInfoFromDictionary(
       //  std::string& outputFolderPath)
     //{
-        // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
+    // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
        // bool streamsEnabled;
         //if (_dictionary->getValue(KeyStreamsEnabled, streamsEnabledValue)) {
             //_pStreamsEnabled = streamsEnabledValue;
@@ -283,7 +336,10 @@ namespace openspace {
                 ));
             return false;
         }
-
+        float lineWidthValue;
+        if (_dictionary->getValue(KeyLineWidth, lineWidthValue)) {
+            _pLineWidth = lineWidthValue;
+        }
         float scaleFactor;
         if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
             _scalingFactor = scaleFactor;
@@ -302,11 +358,13 @@ namespace openspace {
 
         // ----------------------------- Add Property Groups ----------------------------- //
         addPropertySubOwner(_pStreamGroup);
-        // ------------------------- Add Properties to the groups ------------------------- //
+        // ------------------------- Add Properties to the groups ------------------------ //
         _pStreamGroup.addProperty(_pStreamColor);
         _pStreamGroup.addProperty(_pNodeSize);
+        
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pStreamsEnabled);
+        addProperty(_pLineWidth);
     }
 
 
@@ -356,39 +414,117 @@ namespace openspace {
         }
     }
     void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
-        if (_activeTriggerTimeIndex != -1) {
-            _shaderProgram->activate();
+        //if (_activeTriggerTimeIndex != -1) {
+        _shaderProgram->activate();
 
-            // Calculate Model View MatrixProjection
-            const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
-            const glm::dmat4 modelMat =
-                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-                rotMat *
-                glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
-            const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
+        // Calculate Model View MatrixProjection
+        const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
+        const glm::dmat4 modelMat =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            rotMat *
+            glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+        const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
-            _shaderProgram->setUniform("modelViewProjection",
-                data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+        _shaderProgram->setUniform("modelViewProjection",
+            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
-            // Flow/Particles
-            _shaderProgram->setUniform("streamColor", _pStreamColor);
-            _shaderProgram->setUniform("usingParticles", _pStreamsEnabled);
-            _shaderProgram->setUniform("nodeSize", 1);
+        // Flow/Particles
+        _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
+        _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
+        _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
+        const std::vector<glm::vec3>& vertPos = _vertexPositions;
+       
+        // how do we set uniform the _fs? 
+        /*
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertPos.size() * sizeof(glm::vec3),
+            vertPos.data(),
+            GL_STATIC_DRAW
+            );
+        
+        //glMultiDrawArrays(
+        //    GL_LINE_STRIP, //_drawingOutputType,
+        //    vertPos.size(),
+        //    vertPos.data(),
+        //    static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
+        //    );
 
-            // how do we set uniform the _fs? 
-            _shaderProgram->setUniform("usingAdditiveBlending", false);
+        //glBindVertexArray(_vertexArrayObject);
+        glLineWidth(_pLineWidth);
+        //LDEBUG("testar linewidth: " + std::to_string(_pLineWidth));
 
-            glBindVertexArray(_vertexArrayObject);
-        }
+        //this vertexposition is gained by looking at states for fieldlines, but we have vertexpositions locally. 
+       
+        //LDEBUG("vertPos size:" + std::to_string(vertPos.size()));
+        //LDEBUG("vertPos data:" + std::to_string(vertPos.data()));
+        //not sure if this is useful for us.
+
+
+        //VaPosition = 0, type GLuint. 
+        glEnableVertexAttribArray(VaPosition);
+        glVertexAttribPointer(VaPosition, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+        //glDrawArrays(GL_POINTS, 0, 1);
+
+        //glBindBuffer(GL_ARRAY_BUFFER, 0);
+        */
+
+        glBindVertexArray(0);
+        _shaderProgram->deactivate();
+      //  }
+    }
+    inline void unbindGL() {
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 
     void RenderableStreamNodes::update(const UpdateData& data) {
         if (_shaderProgram->isDirty()) {
             _shaderProgram->rebuildFromFile();
         }
+        
+        //glBindVertexArray(_vertexArrayObject);
+
+        const std::vector<glm::vec3>& vertPos = _vertexPositions;
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertPos.size() * sizeof(glm::vec3),
+            vertPos.data(),
+            GL_STATIC_DRAW
+            );
+        
+        //should try and get multidrawarrays to work. We then need information where every line should start and end, and when we need to start from a new line. 
+
+       /* glMultiDrawArrays(
+                GL_LINE_STRIP, //_drawingOutputType,
+                linestart().data(),
+                vertPos.data(),
+                static_cast<GLsizei>(1000)
+                );
+                */
+        //Jonathan and Matthias code: 
+       /* glMultiDrawArrays(
+            GL_LINE_STRIP, //_drawingOutputType,
+            _states[_activeStateIndex].lineStart().data(),
+            _states[_activeStateIndex].lineCount().data(),
+            static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
+            );
+
+
+            */
+
+        //glEnableVertexAttribArray(VaPosition);
+        //glVertexAttribPointer(VaPosition, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+     
+        //LDEBUG("kommer vi in i update? ");
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //glDrawArrays(GL_POINTS, 0, 1);
+        //glBindVertexArray(0);
+
+        unbindGL();
+        
     }
-
-
 
     std::vector<std::string> RenderableStreamNodes::LoadJsonfile() {
         /*if (path.empty()) {
@@ -396,12 +532,8 @@ namespace openspace {
         }
         */
         //'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
-        std::string filename = "C:/Users/Viktor/Desktop/EmilieOpenSpace/OpenSpace/sync/http/bastille_day_streamnodes/1/newdata.json";
-        double d = 3.14;
-        std::ofstream(filename, std::ios::binary).write(reinterpret_cast<char*>(&d), sizeof d)
-            << 123 << "abc";
-
-        std::ifstream streamdata("C:/Users/Viktor/Desktop/EmilieOpenSpace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
+    
+        std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
 
         if (!streamdata.is_open())
         {
@@ -414,8 +546,8 @@ namespace openspace {
         log(ghoul::logging::LogLevel::Debug, _loggerCat, "testar json");
         //printDebug(jsonobj["stream0"]);
         //LDEBUG(jsonobj["stream0"]);
-        std::ofstream o("C:/Users/Viktor/Desktop/EmilieOpenSpace/OpenSpace/sync/http/bastille_day_streamnodes/1/newdata2.json");
-        o << jsonobj << std::endl;
+       // std::ofstream o("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/newdata2.json");
+        //o << jsonobj << std::endl;
 
         const char* sNode = "node0";
         const char* sStream = "stream0";
@@ -431,30 +563,69 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 4;
-        const int coordToMeters = 1;
-        for (int i = 0; i < numberofStreams; i++) {
-            for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin(); lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
-                LDEBUG("testar debuggen");
-                log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.key());
-                LDEBUG("Phi value: " + (*lineIter)["Phi"].get<std::string>());
-                LDEBUG("Theta value: " + (*lineIter)["Theta"].get<std::string>());
-                LDEBUG("R value: " + (*lineIter)["R"].get<std::string>());
-                LDEBUG("Flux value: " + (*lineIter)["Flux"].get<std::string>());
+        const int numberofStreams = 25;
+        constexpr const double AuToMeter = 149597870700;  // Astronomical Units
+        //constexpr const float ReToMeter = 6371000.f;       // Earth radius
+        //constexpr const float RsToMeter = 695700000.f;     // Sun radius
+        //const int coordToMeters = 1;
+        //we have to have coordToMeters * our coord. 
 
+        for (int i = 20; i < numberofStreams; i++) {
+            for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
+                lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
+                
+                //const size_t Nodesamount = 
+                //LDEBUG("testar debuggen");
+                //log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.key());
+                //LDEBUG("Phi value: " + (*lineIter)["Phi"].get<std::string>());
+                //LDEBUG("Theta value: " + (*lineIter)["Theta"].get<std::string>());
+                //LDEBUG("R value: " + (*lineIter)["R"].get<std::string>());
+                // LDEBUG("Flux value: " + (*lineIter)["Flux"].get<std::string>());
 
-                //_vertexPositions.push_back(
-                 //   coordToMeters * glm::vec3(
-                  //      variables[xIdx],
-                   //     variables[yIdx],
-                    //    variables[zIdx]
-                     //   )
-                    //);
+                 //probably needs some work with types, not loading in strings. 
+                std::string r = (*lineIter)["R"].get<std::string>();
+                std::string phi = (*lineIter)["Phi"].get<std::string>();
+                std::string theta = (*lineIter)["Theta"].get<std::string>();
 
-                //for (json::iterator lineIter2 = lineIter.begin(); lineIter2 != lineIter.end(); ++lineIter2) {
+                //LDEBUG("testar koordinater: " + r + "phi" + phi + "theta: " + theta);
+                double rvalue = stringToDouble(r);
+                double phivalue = stringToDouble(phi);
+                double thetavalue = stringToDouble(theta);
+                const double pi = 3.14159265359;
+                phivalue = phivalue * (180 / pi);
+                thetavalue = thetavalue * (180 / pi);
+
+                glm::dvec3 sphericalcoordinates =
+                    glm::dvec3(rvalue, phivalue, thetavalue);
+
+                //glm::dvec3 sphericalcoordinates =
+                //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),
+                  //      stringToDouble((*lineIter)["Phi"].get<std::string>()),
+                   //     stringToDouble((*lineIter)["Theta"].get<std::string>()));
+
+                //precision issue, right now rounding up at around 7th decimal. Probably 
+                //around conversion with string to Double.
+                //LDEBUG("R value after string to Float: " + std::to_string(stringToDouble
+                //((*lineIter)["R"].get<std::string>())));
+                sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
+                glm::dvec3 position = sphericalToCartesianCoord(sphericalcoordinates);
+                //position.x = position.x * AuToMeter;
+                //position.y = position.y * AuToMeter;
+                //position.z = position.z * AuToMeter;
+                _vertexPositions.push_back(
+                    position);
+                //   coordToMeters * glm::vec3(
+                  //     stringToFloat((*lineIter)["Phi"].get<std::string>(), 0.0f),
+                   //    ,
+
+                    //   )
+                   //);
 
             }
         }
+        LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
+
+
         //log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.value());
 
    // }
@@ -464,7 +635,7 @@ namespace openspace {
    //     LDEBUG(el.key());
    // }
 
-        log(ghoul::logging::LogLevel::Debug, _loggerCat, testtime);
+        LDEBUG("Time:" + testtime);
         //openspace::printDebug("testar json"):
         //for 
         //LWARNING(fmt::format("Testar json", data));
@@ -473,92 +644,7 @@ namespace openspace {
 
         return std::vector<std::string>();
     }
-    /*
-        bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
-            fls::Model Model, float coordToMeters)
-        {
 
-            // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
-            std::ifstream ifs(pathToJsonFile);
-
-            if (!ifs.is_open()) {
-                LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToJsonFile));
-                return false;
-            }
-
-            json jFile;
-            ifs >> jFile;
-            // -------------------------------------------------------------------------------- //
-
-            _model = Model;
-
-            const char* sData = "data";
-            const char* sTrace = "trace";
-
-
-            // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
-            {
-                const char* sTime = "time";
-                const json& jTmp = *(jFile.begin()); // First field line in the file
-                _triggerTime = Time::convertTime(jTmp[sTime]);
-
-                const char* sColumns = "columns";
-                const json::value_type& variableNameVec = jTmp[sTrace][sColumns];
-                const size_t nVariables = variableNameVec.size();
-                const size_t nPosComponents = 3; // x,y,z
-
-                if (nVariables < nPosComponents) {
-                    LERROR(
-                        pathToJsonFile + ": Each field '" + sColumns +
-                        "' must contain the variables: 'x', 'y' and 'z' (order is important)."
-                        );
-                    return false;
-                }
-
-                for (size_t i = nPosComponents; i < nVariables; ++i) {
-                    _extraQuantityNames.push_back(variableNameVec[i]);
-                }
-            }
-
-            const size_t nExtras = _extraQuantityNames.size();
-            _extraQuantities.resize(nExtras);
-
-            size_t lineStartIdx = 0;
-            // Loop through all fieldlines
-            for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); ++lineIter) {
-                // The 'data' field in the 'trace' variable contains all vertex positions and the
-                // extra quantities. Each element is an array related to one vertex point.
-                const std::vector<std::vector<float>>& jData = (*lineIter)[sTrace][sData];
-                const size_t nPoints = jData.size();
-
-                for (size_t j = 0; j < nPoints; ++j) {
-                    const std::vector<float>& variables = jData[j];
-
-                    // Expects the x, y and z variables to be stored first!
-                    const size_t xIdx = 0;
-                    const size_t yIdx = 1;
-                    const size_t zIdx = 2;
-                    _vertexPositions.push_back(
-                        coordToMeters * glm::vec3(
-                            variables[xIdx],
-                            variables[yIdx],
-                            variables[zIdx]
-                            )
-                        );
-
-                    // Add the extra quantites. Stored in the same array as the x,y,z variables.
-                    // Hence index of the first extra quantity = 3
-                    for (size_t xtraIdx = 3, k = 0; k < nExtras; ++k, ++xtraIdx) {
-                        _extraQuantities[k].push_back(variables[xtraIdx]);
-                    }
-                }
-                _lineCount.push_back(static_cast<GLsizei>(nPoints));
-                _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-                lineStartIdx += nPoints;
-            }
-            return true;
-        }
-        */
     bool RenderableStreamNodes::loadJsonStatesIntoRAM(const std::string& outputFolder) {
         return true;
     }

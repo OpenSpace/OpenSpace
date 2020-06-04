@@ -9,6 +9,7 @@ asset.info = {
 
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
+openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 
 -- local transferFunctions = asset.localResource("transferfunctions")
 -- local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
@@ -26,7 +27,7 @@ local transforms = asset.require('./transforms')
 local sunRadius = 6.957E8
 
 -- Streamnodes from binaries
-local streamnodes = {
+local Streamnodes = {
     Identifier = "MAS_MHD_StreamNodes",
     Parent = transforms.HNMReferenceFrame.Identifier,
 	--transforms.asset, referens till suntransforms.solarsystemBarycenter.identifier
@@ -66,4 +67,4 @@ local streamnodes = {
     }
 } 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { streamnodes })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Streamnodes })

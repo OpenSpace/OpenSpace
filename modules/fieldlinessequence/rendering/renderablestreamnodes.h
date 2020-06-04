@@ -34,91 +34,100 @@
 #include <openspace/rendering/transferfunction.h>
 #include <atomic>
 
+
+#include <modules/base/rendering/renderabletrail.h>
+
 namespace { enum class SourceFileType; }
 
 namespace openspace {
 
-class RenderableStreamNodes : public Renderable {
-public:
-    RenderableStreamNodes(const ghoul::Dictionary& dictionary);
+    class RenderableStreamNodes : public Renderable {
+    public:
+        RenderableStreamNodes(const ghoul::Dictionary& dictionary);
 
-    //these two are needed for startup and close i think. 
-    void initializeGL() override;
-    void deinitializeGL() override;
+        //these two are needed for startup and close i think. 
+        void initializeGL() override;
+        void deinitializeGL() override;
 
-    bool isReady() const override;
+        bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+        void render(const RenderData& data, RendererTasks& rendererTask) override;
+        void update(const UpdateData& data) override;
 
-private:
-    // ------------------------------------- ENUMS -------------------------------------//
-    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
-    enum class ColorMethod : int {
-        Uniform = 0,
-        ByQuantity
+    private:
+        // ------------------------------------- ENUMS -------------------------------------//
+        // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
+        enum class ColorMethod : int {
+            Uniform = 0,
+            ByQuantity
+        };
+
+        UniformCache(streamColor, usingParticles, nodeSize)
+            _uniformCache;
+
+        // ------------------------------------ STRINGS ------------------------------------//
+        std::string _identifier;    /// Name of the Nod
+
+    // ------------------------------------- FLAGS -------------------------------------//
+    // False => states are stored in RAM (using 'in-RAM-states'), True => states are
+    // loaded from disk during runtime (using 'runtime-states')
+        bool _loadingStatesDynamically = false;
+
+        // --------------------------------- NUMERICALS ----------------------------------- //
+        // In setup it is used to scale JSON coordinates. During runtime it is used to scale
+        // domain limits.
+        float _scalingFactor = 1.f;
+        // Active index of _startTimes
+        int _activeTriggerTimeIndex = -1;
+
+        GLuint _vertexArrayObject = 0;
+        // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+        // the lines
+        GLuint _vertexColorBuffer = 0;
+        // OpenGL Vertex Buffer Object containing the vertex positions
+        GLuint _vertexPositionBuffer = 0;
+        // ---------------------------------- Properties ---------------------------------- //
+        properties::Vec4Property _pStreamColor;
+        // Toggle flow [ON/OFF]
+        properties::BoolProperty _pStreamsEnabled;
+        // Group to hold the flow/particle properties
+        properties::PropertyOwner _pStreamGroup;
+        // Size of simulated node particles
+        properties::IntProperty _pNodeSize;
+
+        /// Line width for the line rendering part
+        properties::FloatProperty _pLineWidth;
+
+
+        // initialization
+        std::vector<std::string> _sourceFiles;
+
+        // ------------------------------------ VECTORS ----------------------------------- //
+            // Contains the _triggerTimes for all FieldlineStates in the sequence
+        std::vector<double> _startTimes;
+        // Contains vertexPositions
+        std::vector<glm::vec3> _vertexPositions;
+
+        // ----------------------------------- POINTERS ------------------------------------//
+        // The Lua-Modfile-Dictionary used during initialization
+        std::unique_ptr<ghoul::Dictionary> _dictionary;
+
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+
+        // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
+        bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
+        //void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
+        bool loadJsonStatesIntoRAM(const std::string& outputFolder);
+        bool extractJsonInfoFromDictionary(fls::Model& model);
+        //std::vector<std::string> LoadJsonfile(const std::string& filename);
+        std::vector<std::string> LoadJsonfile();
+        void setupProperties();
+        void extractTriggerTimesFromFileNames()
+
+
+            // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
+            ;
     };
-
-    // ------------------------------------ STRINGS ------------------------------------//
-    std::string _identifier;    /// Name of the Nod
-
-// ------------------------------------- FLAGS -------------------------------------//
-// False => states are stored in RAM (using 'in-RAM-states'), True => states are
-// loaded from disk during runtime (using 'runtime-states')
-    bool _loadingStatesDynamically = false;
-
-    // --------------------------------- NUMERICALS ----------------------------------- //
-    // In setup it is used to scale JSON coordinates. During runtime it is used to scale
-    // domain limits.
-    float _scalingFactor = 1.f;
-    // Active index of _startTimes
-    int _activeTriggerTimeIndex = -1;
-
-    GLuint _vertexArrayObject = 0;
-    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
-    // the lines
-    GLuint _vertexColorBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the vertex positions
-    GLuint _vertexPositionBuffer = 0;
-    // ---------------------------------- Properties ---------------------------------- //
-    properties::Vec4Property _pStreamColor;
-    // Toggle flow [ON/OFF]
-    properties::BoolProperty _pStreamsEnabled;
-    // Group to hold the flow/particle properties
-    properties::PropertyOwner _pStreamGroup;
-    // Size of simulated node particles
-    properties::IntProperty _pNodeSize;
-
-
-    // initialization
-    std::vector<std::string> _sourceFiles;
-
-    // ------------------------------------ VECTORS ----------------------------------- //
-        // Contains the _triggerTimes for all FieldlineStates in the sequence
-    std::vector<double> _startTimes;
-    // Contains vertexPositions
-    std::vector<glm::vec3> _vertexPositions;
-
-    // ----------------------------------- POINTERS ------------------------------------//
-    // The Lua-Modfile-Dictionary used during initialization
-    std::unique_ptr<ghoul::Dictionary> _dictionary;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
-
-    // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
-    bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
-    //void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
-    bool loadJsonStatesIntoRAM(const std::string& outputFolder);
-    bool extractJsonInfoFromDictionary(fls::Model& model);
-    //std::vector<std::string> LoadJsonfile(const std::string& filename);
-    std::vector<std::string> LoadJsonfile();
-    void setupProperties();
-    void extractTriggerTimesFromFileNames()
-
-
-    // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-        ;
-};
 
 
 
