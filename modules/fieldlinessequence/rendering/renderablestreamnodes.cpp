@@ -149,8 +149,9 @@ namespace {
         }
         return tmp;
     }
-    glm::dvec3 sphericalToCartesianCoord(glm::dvec3 position) {
-        glm::dvec3 cartesianPosition = glm::dvec3();
+    //changed everything from dvec3 to vec3
+    glm::vec3 sphericalToCartesianCoord(glm::vec3 position) {
+        glm::vec3 cartesianPosition = glm::vec3();
         //LDEBUG("spherical R:" + std::to_string(position.x));
 
         //ρsinφcosθ 
@@ -225,10 +226,8 @@ namespace openspace {
         // Setup shader program
         _shaderProgram = global::renderEngine.buildRenderProgram(
             "Streamnodes",
-            //absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
-            //absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_fs.glsl")
-            "C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/modules/fieldlinessequence/shaders/streamnodes_vs.glsl",
-            "C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/modules/fieldlinessequence/shaders/streamnodes_fs.glsl"
+            absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
+            absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_fs.glsl")
             );
 
         _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
@@ -433,17 +432,37 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
         _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
-       
+        glBindVertexArray(_vertexArrayObject);
+        glLineWidth(_pLineWidth);
+        //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
         // how do we set uniform the _fs? 
-        /*
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-        glBufferData(
+        
+        //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+       /* glBufferData(
             GL_ARRAY_BUFFER,
             vertPos.size() * sizeof(glm::vec3),
             vertPos.data(),
             GL_STATIC_DRAW
             );
+        */
+        /*
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertPos.size() * sizeof(glm::vec3),
+            vertPos.data(),
+            GL_STATIC_DRAW
+        );
+        */
         
+        glMultiDrawArrays(
+            GL_LINE_STRIP, //_drawingOutputType,
+            _lineStart.data(),
+            _lineCount.data(),
+            static_cast<GLsizei>(_lineStart.size())
+        );
+        
+
         //glMultiDrawArrays(
         //    GL_LINE_STRIP, //_drawingOutputType,
         //    vertPos.size(),
@@ -452,7 +471,7 @@ namespace openspace {
         //    );
 
         //glBindVertexArray(_vertexArrayObject);
-        glLineWidth(_pLineWidth);
+        //glLineWidth(_pLineWidth);
         //LDEBUG("testar linewidth: " + std::to_string(_pLineWidth));
 
         //this vertexposition is gained by looking at states for fieldlines, but we have vertexpositions locally. 
@@ -463,12 +482,12 @@ namespace openspace {
 
 
         //VaPosition = 0, type GLuint. 
-        glEnableVertexAttribArray(VaPosition);
-        glVertexAttribPointer(VaPosition, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+        //glEnableVertexAttribArray(VaPosition);
+        //glVertexAttribPointer(VaPosition, 3, GL_DOUBLE, GL_FALSE, 0, 0);
         //glDrawArrays(GL_POINTS, 0, 1);
 
         //glBindBuffer(GL_ARRAY_BUFFER, 0);
-        */
+        
 
         glBindVertexArray(0);
         _shaderProgram->deactivate();
@@ -485,7 +504,8 @@ namespace openspace {
         }
         
         //glBindVertexArray(_vertexArrayObject);
-
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBufferData(
             GL_ARRAY_BUFFER,
@@ -493,16 +513,35 @@ namespace openspace {
             vertPos.data(),
             GL_STATIC_DRAW
             );
+
+            
+       
         
+
+
+
+        /*
+        glMultiDrawArrays(
+            GL_LINE_STRIP, //_drawingOutputType,
+            _lineStart.data(),
+            _lineCount.data(),
+            static_cast<GLsizei>(_lineStart.size())
+        );
+        */
+        /*
         //should try and get multidrawarrays to work. We then need information where every line should start and end, and when we need to start from a new line. 
 
-       /* glMultiDrawArrays(
-                GL_LINE_STRIP, //_drawingOutputType,
-                linestart().data(),
-                vertPos.data(),
-                static_cast<GLsizei>(1000)
-                );
-                */
+        glBindVertexArray(_vertexArrayObject);
+        glLineWidth(_pLineWidth);
+    
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertPos.size() * sizeof(glm::vec3),
+            vertPos.data(),
+            GL_STATIC_DRAW
+        );
+        */
+       
         //Jonathan and Matthias code: 
        /* glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
@@ -514,15 +553,20 @@ namespace openspace {
 
             */
 
-        //glEnableVertexAttribArray(VaPosition);
-        //glVertexAttribPointer(VaPosition, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(VaPosition);
+        glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+        //glEnableVertexAttribArray(VaColor);
+        //glVertexAttribPointer(VaColor, 1, GL_FLOAT, GL_FALSE, 0, 0);
      
         //LDEBUG("kommer vi in i update? ");
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //glBindBuffer(GL_ARRAY_BUFFER, 0);
         //glDrawArrays(GL_POINTS, 0, 1);
         //glBindVertexArray(0);
 
         unbindGL();
+        //glBindVertexArray(0);
+        //_shaderProgram->deactivate();
         
     }
 
@@ -532,8 +576,10 @@ namespace openspace {
         }
         */
         //'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
-    
-        std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
+    //C:\Users\Chrad171\openspace\
+
+        std::ifstream streamdata("C:/Users/chrad171/openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
+       // std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
 
         if (!streamdata.is_open())
         {
@@ -563,14 +609,14 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 25;
+        const int numberofStreams = 10;
         constexpr const double AuToMeter = 149597870700;  // Astronomical Units
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
         //const int coordToMeters = 1;
         //we have to have coordToMeters * our coord. 
-
-        for (int i = 20; i < numberofStreams; i++) {
+        const size_t nPoints = 1500;
+        for (int i = 0; i < numberofStreams; i++) {
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                 lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
                 
@@ -588,15 +634,25 @@ namespace openspace {
                 std::string theta = (*lineIter)["Theta"].get<std::string>();
 
                 //LDEBUG("testar koordinater: " + r + "phi" + phi + "theta: " + theta);
+                
                 double rvalue = stringToDouble(r);
                 double phivalue = stringToDouble(phi);
                 double thetavalue = stringToDouble(theta);
                 const double pi = 3.14159265359;
                 phivalue = phivalue * (180 / pi);
                 thetavalue = thetavalue * (180 / pi);
+                
+               /* float rvalue = stringToFloat(r);
+                float phivalue = stringToFloat(phi);
+                float thetavalue = stringToFloat(theta);
+                const float pi = 3.14159265359f;
+                phivalue = phivalue * (180.0f / pi);
+                thetavalue = thetavalue * (180.0f / pi);
+                */
+               
 
-                glm::dvec3 sphericalcoordinates =
-                    glm::dvec3(rvalue, phivalue, thetavalue);
+                glm::vec3 sphericalcoordinates =
+                    glm::vec3(rvalue, phivalue, thetavalue);
 
                 //glm::dvec3 sphericalcoordinates =
                 //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),
@@ -608,7 +664,7 @@ namespace openspace {
                 //LDEBUG("R value after string to Float: " + std::to_string(stringToDouble
                 //((*lineIter)["R"].get<std::string>())));
                 sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
-                glm::dvec3 position = sphericalToCartesianCoord(sphericalcoordinates);
+                glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
                 //position.x = position.x * AuToMeter;
                 //position.y = position.y * AuToMeter;
                 //position.z = position.z * AuToMeter;
@@ -620,8 +676,11 @@ namespace openspace {
 
                     //   )
                    //);
-
+  
             }
+            _lineCount.push_back(static_cast<GLsizei>(nPoints));
+            _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+            lineStartIdx += nPoints;
         }
         LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
 
@@ -644,7 +703,13 @@ namespace openspace {
 
         return std::vector<std::string>();
     }
+    const std::vector<GLsizei>& RenderableStreamNodes::lineCount() const {
+        return _lineCount;
+    }
 
+    const std::vector<GLint>& RenderableStreamNodes::lineStart() const {
+        return _lineStart;
+    }
     bool RenderableStreamNodes::loadJsonStatesIntoRAM(const std::string& outputFolder) {
         return true;
     }

@@ -48,13 +48,20 @@ namespace openspace {
         //these two are needed for startup and close i think. 
         void initializeGL() override;
         void deinitializeGL() override;
+        const std::vector<GLsizei>& lineCount() const;
+        const std::vector<GLint>& lineStart() const;
 
         bool isReady() const override;
 
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
 
+        //const std::vector<GLsizei>& lineCount() const;
+        //const std::vector<GLint>& lineStart() const;
+
     private:
+        std::vector<GLsizei> _lineCount;
+        std::vector<GLint> _lineStart;
         // ------------------------------------- ENUMS -------------------------------------//
         // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
         enum class ColorMethod : int {
