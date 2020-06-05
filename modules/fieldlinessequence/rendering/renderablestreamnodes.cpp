@@ -609,12 +609,13 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 10;
-        constexpr const double AuToMeter = 149597870700;  // Astronomical Units
+        const int numberofStreams = 1;
+        constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
         //const int coordToMeters = 1;
         //we have to have coordToMeters * our coord. 
+        int counter = 0;
         const size_t nPoints = 1500;
         for (int i = 0; i < numberofStreams; i++) {
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
@@ -635,20 +636,24 @@ namespace openspace {
 
                 //LDEBUG("testar koordinater: " + r + "phi" + phi + "theta: " + theta);
                 
+                //------DOUBLE 
+                /*
                 double rvalue = stringToDouble(r);
                 double phivalue = stringToDouble(phi);
                 double thetavalue = stringToDouble(theta);
                 const double pi = 3.14159265359;
                 phivalue = phivalue * (180 / pi);
                 thetavalue = thetavalue * (180 / pi);
-                
-               /* float rvalue = stringToFloat(r);
+                rvalue = rvalue * AuToMeter;
+                */
+                //--------FLOAT
+                float rvalue = stringToFloat(r);
                 float phivalue = stringToFloat(phi);
                 float thetavalue = stringToFloat(theta);
                 const float pi = 3.14159265359f;
-                phivalue = phivalue * (180.0f / pi);
+                phivalue = phivalue * (180.f / pi);
                 thetavalue = thetavalue * (180.0f / pi);
-                */
+                rvalue = rvalue * AuToMeter;
                
 
                 glm::vec3 sphericalcoordinates =
@@ -663,13 +668,14 @@ namespace openspace {
                 //around conversion with string to Double.
                 //LDEBUG("R value after string to Float: " + std::to_string(stringToDouble
                 //((*lineIter)["R"].get<std::string>())));
-                sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
+                //sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
                 glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
                 //position.x = position.x * AuToMeter;
                 //position.y = position.y * AuToMeter;
                 //position.z = position.z * AuToMeter;
                 _vertexPositions.push_back(
                     position);
+                ++counter;
                 //   coordToMeters * glm::vec3(
                   //     stringToFloat((*lineIter)["Phi"].get<std::string>(), 0.0f),
                    //    ,
@@ -683,7 +689,7 @@ namespace openspace {
             lineStartIdx += nPoints;
         }
         LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
-
+        LDEBUG("counter for how many times we push back" + std::to_string(counter));
 
         //log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.value());
 
