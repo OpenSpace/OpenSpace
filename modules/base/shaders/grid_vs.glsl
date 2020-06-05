@@ -32,12 +32,16 @@ out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;
 
 uniform dmat4 modelViewTransform;
-uniform dmat4 projectionTransform;
+uniform dmat4 MVPTransform;
 
 void main() {
-    dvec4 positionViewSpace  = modelViewTransform * dvec4(in_position, 1.0);
-    dvec4 positionClipSpace  = projectionTransform * positionViewSpace;
-    vec4 positionScreenSpace = z_normalization(vec4(positionClipSpace));
+    dvec4 objPosDouble       = dvec4(in_position, 1.0);
+    dvec4 positionViewSpace  = modelViewTransform * objPosDouble;
+    dvec4 positionClipSpace  = MVPTransform * objPosDouble;
+    
+    positionClipSpace.z = 0.0;
+    
+    vec4 positionScreenSpace = vec4(positionClipSpace);
 
     vs_screenSpaceDepth  = float(positionClipSpace.w);
     vs_positionViewSpace = vec4(positionViewSpace);

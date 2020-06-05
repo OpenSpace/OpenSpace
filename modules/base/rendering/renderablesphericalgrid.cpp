@@ -215,7 +215,10 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
                                           modelTransform;
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("projectionTransform", glm::dmat4(data.camera.projectionMatrix()));
+    _gridProgram->setUniform(
+        "MVPTransform",
+        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
+    );
     
     _gridProgram->setUniform("gridColor", _gridColor);
 
