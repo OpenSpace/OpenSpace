@@ -30,7 +30,6 @@ layout(location = 0) in vec3 in_position;
 
 out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;
-flat out double vs_double_depth;
 
 uniform dmat4 modelViewTransform;
 uniform dmat4 projectionTransform;
@@ -40,7 +39,6 @@ void main() {
     dvec4 positionClipSpace  = projectionTransform * positionViewSpace;
     vec4 positionScreenSpace = z_normalization(vec4(positionClipSpace));
 
-    vs_double_depth = positionClipSpace.w;
     vs_screenSpaceDepth  = float(positionClipSpace.w);
     vs_positionViewSpace = vec4(positionViewSpace);
     
