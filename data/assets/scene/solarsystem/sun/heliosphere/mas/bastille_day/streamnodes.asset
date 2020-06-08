@@ -62,7 +62,7 @@ local Streamnodes = {
     Transform = {
         Scale = {
             Type = "StaticScale",
-            Scale = sunRadius
+            Scale = 1
         },
     }
 } 
