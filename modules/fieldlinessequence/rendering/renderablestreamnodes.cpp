@@ -455,11 +455,20 @@ namespace openspace {
         );
         */
         
-        glMultiDrawArrays(
+        /*glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
             _lineStart.data(),
             _lineCount.data(),
             static_cast<GLsizei>(_lineStart.size())
+        );*/
+
+        glPointSize(3);
+
+        GLint temp = 0;
+        glDrawArrays(
+            GL_POINTS,
+            temp,
+            static_cast<GLsizei>(_lineCount.size())
         );
         
 
@@ -513,13 +522,7 @@ namespace openspace {
             vertPos.data(),
             GL_STATIC_DRAW
             );
-
-            
-       
         
-
-
-
         /*
         glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
@@ -550,7 +553,6 @@ namespace openspace {
             static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
             );
 
-
             */
 
         glEnableVertexAttribArray(VaPosition);
@@ -578,7 +580,7 @@ namespace openspace {
         //'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
     //C:\Users\Chrad171\openspace\
 
-        std::ifstream streamdata("C:/Users/chrad171/openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
+        std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
        // std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
 
         if (!streamdata.is_open())
@@ -609,14 +611,15 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 1;
+        const int numberofStreams = 15;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
+        //static float AuToMeter = 1.49598e11f;
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
         //const int coordToMeters = 1;
         //we have to have coordToMeters * our coord. 
         int counter = 0;
-        const size_t nPoints = 1500;
+        const size_t nPoints = 1;
         for (int i = 0; i < numberofStreams; i++) {
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                 lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
@@ -654,7 +657,6 @@ namespace openspace {
                 phivalue = phivalue * (180.f / pi);
                 thetavalue = thetavalue * (180.0f / pi);
                 rvalue = rvalue * AuToMeter;
-               
 
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rvalue, phivalue, thetavalue);
@@ -682,11 +684,12 @@ namespace openspace {
 
                     //   )
                    //);
+                _lineCount.push_back(static_cast<GLsizei>(nPoints));
+                _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+                lineStartIdx += nPoints;
   
             }
-            _lineCount.push_back(static_cast<GLsizei>(nPoints));
-            _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-            lineStartIdx += nPoints;
+           
         }
         LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
         LDEBUG("counter for how many times we push back" + std::to_string(counter));
