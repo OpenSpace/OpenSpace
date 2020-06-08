@@ -34,17 +34,17 @@ end
 
 openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints, renderOrientations)
     local path_identifier = "Camera_Path"
-    local label_point = "Point"; 
-    local label_line = "Line"; 
+    local label_point = "Point"
+    local label_line = "Line"
     local lineColor = {1.0, 1.0, 0.0}
     local lineWidth = 4
-    local sphereTexture = "${DATA}/test3.jpg" -- TODO: better texture
-    local sphereRadius = 1000000 
+    local sphereTexture = "${MODULES}/autonavigation/textures/red.png" 
+    local sphereRadius = 2000000 
     local sphereSegments = 50
     local label_orientation = "Orientation"
     local orientationLineColor = {1.0, 0.0, 0.0}
     local orientationLineWidth = 2
-    local orientationLineLength = 4.0 * sphereRadius
+    local orientationLineLength = 30 * sphereRadius
 
     if openspace.hasSceneGraphNode(path_identifier) then
         openspace.removeSceneGraphNode(path_identifier) 
@@ -98,7 +98,7 @@ openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints,
                 EndNode = label_point .. (i+1),
                 Color = lineColor,
                 LineWidth = lineWidth,
-                Opacity = 1
+                Opacity = 0.5
             }, 
             Parent = path_identifier
         }
@@ -128,7 +128,7 @@ openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints,
             openspace.addSceneGraphNode(node)
         end
 
-        for i = 1,(nrPoints-1) do
+        for i = 1,nrPoints do
             local node = {
                 Identifier = label_orientation .. label_line .. i,
                 Renderable = {
@@ -158,8 +158,8 @@ end
 openspace.autonavigation.renderControlPoints = function ()
     local base_identifier = "Path_Control_Points"
     local label_point = "ControlPoint"
-    local sphereTexture = "${DATA}/test2.jpg" -- TODO: better texture
-    local sphereRadius = 1000000 -- TODO: optional input?
+    local sphereTexture = "${MODULES}/autonavigation/textures/yellow.png" 
+    local sphereRadius = 2100000 -- TODO: optional input? Not same the other one or interference appears
     local sphereSegments = 50
 
     if openspace.hasSceneGraphNode(base_identifier) then
