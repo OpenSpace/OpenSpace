@@ -46,9 +46,9 @@ protected:
     double _integratedSum = 0.0;
 };
 
-class CubicDampenedSpeed : public SpeedFunction {
+class SexticDampenedSpeed : public SpeedFunction {
 public:
-    CubicDampenedSpeed();
+    SexticDampenedSpeed();
     double value(double t) const override;
 }; 
 

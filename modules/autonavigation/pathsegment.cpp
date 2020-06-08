@@ -83,12 +83,11 @@ CameraPose PathSegment::traversePath(double dt) {
 
     // compute displacement along the path during this frame
     double displacement = 0.0;
-    int steps = 2; // TODO: should possibly increase with larger risk of error
+    int steps = 5; // TODO: make a property (larger value increases precision)
     double h = dt / steps;
     for (int i = 0; i < steps; ++i) {
         double t = _progressedTime + i * h;
         double speed = 0.5 * (speedAtTime(t - 0.01*h) + speedAtTime(t + 0.01*h)); // average
-        //LINFO(fmt::format("Speed = {}", speed));
         displacement += h * speed;
     }
 
@@ -136,7 +135,7 @@ void PathSegment::initCurve() {
             _start.rotation(),
             _end.rotation()
             );
-        _speedFunction = std::make_unique<CubicDampenedSpeed>();
+        _speedFunction = std::make_unique<SexticDampenedSpeed>();
         break;
 
     case CurveType::Bezier3:
@@ -148,7 +147,7 @@ void PathSegment::initCurve() {
             _end.node()->worldPosition(),
             _curve.get()
         );
-        _speedFunction = std::make_unique<CubicDampenedSpeed>(); 
+        _speedFunction = std::make_unique<SexticDampenedSpeed>(); 
         break;
 
     case CurveType::Linear:
@@ -157,7 +156,7 @@ void PathSegment::initCurve() {
             _start.rotation(), 
             _end.rotation()
         );
-        _speedFunction = std::make_unique<CubicDampenedSpeed>();
+        _speedFunction = std::make_unique<SexticDampenedSpeed>();
         break;
 
     default:
