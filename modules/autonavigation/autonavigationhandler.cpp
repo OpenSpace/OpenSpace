@@ -90,6 +90,13 @@ namespace {
         "the direction of the camera position at the start of the path."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo NumberSimulationStepsInfo = {
+        "NumberSimulationSteps",
+        "Number Simulation Steps",
+        "The number of steps used to simulate the camera motion, per frame. A larger number "
+        "increases the precision, at the cost of reduced efficiency."
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -103,6 +110,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _relevantNodeTags(RelevantNodeTagsInfo)
     , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.0f, -90.0f, 90.0f)
+    , _nrSimulationSteps(NumberSimulationStepsInfo, 5, 2 , 10)
 {
     addPropertySubOwner(_atNodeNavigator);
 
@@ -134,6 +142,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     addProperty(_relevantNodeTags);
 
     addProperty(_defaultPositionOffsetAngle);
+    addProperty(_nrSimulationSteps);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -153,6 +162,10 @@ bool AutoNavigationHandler::hasFinished() const {
 
 const std::vector<SceneGraphNode*>& AutoNavigationHandler::relevantNodes() const {
     return _relevantNodes;
+}
+
+int AutoNavigationHandler::nrSimulationStepsPerFrame() const {
+    return _nrSimulationSteps;
 }
 
 void AutoNavigationHandler::updateCamera(double deltaTime) {

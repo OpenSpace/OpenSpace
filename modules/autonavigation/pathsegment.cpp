@@ -24,11 +24,13 @@
 
 #include <modules/autonavigation/pathsegment.h>
 
+#include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/avoidcollisioncurve.h>
 #include <modules/autonavigation/pathcurves.h>
 #include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -81,11 +83,14 @@ CameraPose PathSegment::traversePath(double dt) {
         return _start.pose;
     }
 
+    AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    const int nrSteps = handler.nrSimulationStepsPerFrame(); 
+
     // compute displacement along the path during this frame
     double displacement = 0.0;
-    int steps = 5; // TODO: make a property (larger value increases precision)
-    double h = dt / steps;
-    for (int i = 0; i < steps; ++i) {
+    double h = dt / nrSteps;
+    for (int i = 0; i < nrSteps; ++i) {
         double t = _progressedTime + i * h;
         double speed = 0.5 * (speedAtTime(t - 0.01*h) + speedAtTime(t + 0.01*h)); // average
         displacement += h * speed;
