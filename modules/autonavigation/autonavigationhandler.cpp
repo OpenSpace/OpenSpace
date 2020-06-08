@@ -328,7 +328,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
 
     const double du = 1.0 / nPerSegment;
 
-    for (std::unique_ptr<PathSegment> &p : _pathSegments) {
+    for (std::unique_ptr<PathSegment>& p : _pathSegments) {
         for (double u = 0.0; u < 1.0; u += du) {
             glm::dvec3 position = p->interpolatedPose(u).position;
             positions.push_back(position);
@@ -352,10 +352,11 @@ std::vector<glm::dquat> AutoNavigationHandler::getCurveOrientations(int nPerSegm
     const double du = 1.0 / nPerSegment;
 
     for (std::unique_ptr<PathSegment>& p : _pathSegments) {
-        for (double u = 0.0; u < 1.0; u += du) {
+        for (double u = 0.0; u <= 1.0; u += du) {
             glm::dquat orientation = p->interpolatedPose(u).rotation;
             orientations.push_back(orientation);
         }
+        orientations.push_back(p->interpolatedPose(1.0).rotation);
     }
 
     return orientations;
@@ -379,12 +380,14 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurveViewDirections(int nPerSe
             glm::dquat orientation = p->interpolatedPose(u).rotation;
             glm::dvec3 direction = glm::normalize(orientation * glm::dvec3(0.0, 0.0, -1.0));
             viewDirections.push_back(direction);
-        }
+        } 
+        glm::dquat orientation = p->interpolatedPose(1.0).rotation;
+        glm::dvec3 direction = glm::normalize(orientation * glm::dvec3(0.0, 0.0, -1.0));
+        viewDirections.push_back(direction);
     }
 
     return viewDirections;
 }
-
 
 // TODO: remove when not needed
 // Created for debugging
