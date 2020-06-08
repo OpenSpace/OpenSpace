@@ -80,7 +80,7 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
             },
             {
                 GridColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 GridColorInfo.description
             },
@@ -107,9 +107,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
     , _gridColor(
         GridColorInfo,
-        glm::vec4(0.5f, 0.5, 0.5f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(0.5f, 0.5, 0.5f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
@@ -129,7 +129,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     addProperty(_gridMatrix);
 
     if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec4>(GridColorInfo.identifier);
+        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
     }
     _gridColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_gridColor);
@@ -233,6 +233,10 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     GLfloat currentLineWidth;
     glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
     GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
+    
+    GLenum currentDepthFunction;
+    glGetIntegerv(GL_DEPTH_FUNC, &currentDepthFunction);
+    glDepthFunc(GL_LEQUAL);
 
     GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
         blendDestRGB, blendSrcAlpha, blendSrcRGB;
@@ -268,6 +272,8 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     if (!isLineSmoothEnabled) {
         glDisable(GL_LINE_SMOOTH);
     }
+
+    glDepthFunc(currentDepthFunction);
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
