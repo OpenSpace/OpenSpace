@@ -100,7 +100,7 @@ namespace openspace {
         // Group to hold the flow/particle properties
         properties::PropertyOwner _pStreamGroup;
         // Size of simulated node particles
-        properties::IntProperty _pNodeSize;
+        properties::FloatProperty _pNodeSize;
 
         /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;

@@ -185,7 +185,7 @@ namespace openspace {
             glm::vec4(1.f))
         , _pStreamsEnabled(StreamsenabledInfo, true)
         , _pStreamGroup({ "Streams" })
-        , _pNodeSize(NodeSizeInfo, 1)
+        , _pNodeSize(NodeSizeInfo, 1.f, 1.f, 20.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
 
     {
@@ -462,8 +462,8 @@ namespace openspace {
             static_cast<GLsizei>(_lineStart.size())
         );*/
 
-        glPointSize(3);
-
+        glPointSize(_pNodeSize);
+        //glPointSize(3);
         GLint temp = 0;
         glDrawArrays(
             GL_POINTS,
@@ -580,8 +580,8 @@ namespace openspace {
         //'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
     //C:\Users\Chrad171\openspace\
 
-        std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
-       // std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint.json");
+        //std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
+        std::ifstream streamdata("C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
 
         if (!streamdata.is_open())
         {
