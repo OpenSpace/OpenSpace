@@ -68,16 +68,18 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     const std::string& startNode = start.nodeDetails.identifier;
     const std::string& endNode = end.nodeDetails.identifier;
 
+    // Zoom out
     if (startNode != endNode) {
-        // Zoom out
+        // TODO: set a smarter orthogonal direction 
         glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
-        glm::dvec3 orthogonal = normalize(startNodeToStartPos - parallell);
-        double dist = 0.5 * glm::length(startNodeToEndNode);
-        glm::dvec3 extraKnot = startNodePos + dist * normalize(parallell) + 3.0 * dist * orthogonal;
+        glm::dvec3 orthogonalDirction = normalize(startNodeToStartPos - parallell);
+        
+        glm::dvec3 extraKnot = startNodePos + 0.5 * startNodeToEndNode 
+            + 1.5 * glm::length(startNodeToEndNode) * orthogonalDirction;
 
-        _points.push_back(extraKnot - 0.3 * dist * normalize(parallell));
+        _points.push_back(extraKnot - 0.2 * startNodeToEndNode);
         _points.push_back(extraKnot);
-        _points.push_back(extraKnot + 0.3 * dist * normalize(parallell));
+        _points.push_back(extraKnot + 0.2 * startNodeToEndNode);
     }
 
     // closing in on end node
