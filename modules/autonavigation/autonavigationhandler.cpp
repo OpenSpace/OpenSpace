@@ -117,7 +117,8 @@ AutoNavigationHandler::AutoNavigationHandler()
     _defaultCurveOption.addOptions({
         { CurveType::AvoidCollision, "AvoidCollision" },
         { CurveType::Bezier3, "Bezier3" },
-        { CurveType::Linear, "Linear" }
+        { CurveType::Linear, "Linear" },
+        { CurveType::ZoomOutOverview, "ZoomOutOverview"} 
     });
     addProperty(_defaultCurveOption);
 

@@ -37,6 +37,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rotationinterpolator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/speedfunction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/zoomoutoverviewcurve.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -54,6 +55,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rotationinterpolator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/speedfunction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/zoomoutoverviewcurve.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

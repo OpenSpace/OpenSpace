@@ -29,6 +29,7 @@
 #include <modules/autonavigation/pathcurves.h>
 #include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
+#include <modules/autonavigation/zoomoutoverviewcurve.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -161,6 +162,18 @@ void PathSegment::initCurve() {
             _start.rotation(), 
             _end.rotation()
         );
+        _speedFunction = std::make_unique<SexticDampenedSpeed>();
+        break;
+
+    case CurveType::ZoomOutOverview:
+        _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
+        _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+            _start.rotation(),
+            _end.rotation(),
+            _start.node()->worldPosition(),
+            _end.node()->worldPosition(),
+            _curve.get()
+            );
         _speedFunction = std::make_unique<SexticDampenedSpeed>();
         break;
 
