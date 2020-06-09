@@ -53,15 +53,16 @@ uniform vec2      domainLimZ;
 uniform vec2      domainLimR;
 
 // Streamnodes specific uniforms
-uniform int nodeSize;
+uniform float nodeSize;
 uniform vec4 streamColor;
+uniform float thresholdRadius;
 
 // Inputs
 // Should be provided in meters
 layout(location = 0) in vec3 in_position;
 // The extra value used to color lines. Location must correspond to _VA_COLOR in 
 // renderablefieldlinessequence.h
-layout(location = 1) in float in_color_scalar;
+layout(location = 1) in float fluxValue;
 // The extra value used to mask out parts of lines. Location must correspond to 
 // _VA_MASKING in renderablefieldlinessequence.h
 //layout(location = 2)
@@ -77,7 +78,7 @@ out float vs_depth;
 
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
-    float lookUpVal = (in_color_scalar - colorTableRange.x) /
+    float lookUpVal = (fluxValue - colorTableRange.x) /
                             (colorTableRange.y - colorTableRange.x);
     return texture(colorTable, lookUpVal);
 }
@@ -91,7 +92,19 @@ bool isPartOfParticle(const double time, const int vertexId, const int particleS
 void main() {
 
     //vs_color = vec4(1.0, 0.3, 0.3, 1.0);
-    vs_color = streamColor;
+    vec4 temp = streamColor;
+    //vs_color = streamColor;
+
+    if(thresholdRadius > fluxValue){
+        //temp.x = 0.2 * streamColor.x;
+        //vs_color = temp;
+        vs_color = vec4(1.0, 0.3, 0.3, 1.0);
+    }
+    else{
+        //temp.y = 0.5 * streamColor.y;
+        //vs_color = temp;
+        vs_color = vec4(0.3, 1.0, 0.3, 1.0);
+    }
 
     vec4 position_in_meters = vec4(in_position, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;

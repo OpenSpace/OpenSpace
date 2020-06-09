@@ -69,7 +69,7 @@ namespace openspace {
             ByQuantity
         };
 
-        UniformCache(streamColor, usingParticles, nodeSize)
+        UniformCache(streamColor, usingParticles, nodeSize, thresholdRadius)
             _uniformCache;
 
         // ------------------------------------ STRINGS ------------------------------------//
@@ -94,6 +94,9 @@ namespace openspace {
         // OpenGL Vertex Buffer Object containing the vertex positions
         GLuint _vertexPositionBuffer = 0;
         // ---------------------------------- Properties ---------------------------------- //
+        // Group to hold the color properties
+        properties::PropertyOwner _pColorGroup;
+        // Uniform stream Color
         properties::Vec4Property _pStreamColor;
         // Toggle flow [ON/OFF]
         properties::BoolProperty _pStreamsEnabled;
@@ -101,9 +104,10 @@ namespace openspace {
         properties::PropertyOwner _pStreamGroup;
         // Size of simulated node particles
         properties::FloatProperty _pNodeSize;
-
         /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;
+        /// ///////////
+        properties::FloatProperty _pThresholdRadius;
 
 
         // initialization
@@ -114,6 +118,8 @@ namespace openspace {
         std::vector<double> _startTimes;
         // Contains vertexPositions
         std::vector<glm::vec3> _vertexPositions;
+
+        std::vector<float> _vertexColor;
 
         // ----------------------------------- POINTERS ------------------------------------//
         // The Lua-Modfile-Dictionary used during initialization
@@ -129,11 +135,11 @@ namespace openspace {
         //std::vector<std::string> LoadJsonfile(const std::string& filename);
         std::vector<std::string> LoadJsonfile();
         void setupProperties();
-        void extractTriggerTimesFromFileNames()
-
+        void extractTriggerTimesFromFileNames();
+        void updateVertexColorBuffer();
 
             // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-            ;
+            
     };
 
 

@@ -84,6 +84,9 @@ namespace {
     //[INT] Line Width should have a range
     constexpr const char* KeyLineWidth = "LineWidth";
 
+    //[INT] Threshold Radius should have a range
+    constexpr const char* KeyThresholdRadius = "ThresholdRadius";
+
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
     constexpr const char* ValueInputFileTypeJson = "json";
@@ -93,7 +96,7 @@ namespace {
     //properties::PropertyOwner _pStreamGroup;
     // Size of simulated flow particles
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
-        "color2",
+        "color",
         "Color",
         "Color of particles."
     };
@@ -104,16 +107,23 @@ namespace {
        "illustrate magnetic flow."
     };
     constexpr openspace::properties::Property::PropertyInfo NodeSizeInfo = {
-       "Nodesize",
+       "nodeSize",
        "Size of nodes",
        "Change the size of the nodes"
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-       "lineWidth2",
-       "Line Width2",
-       "This value2 specifies the line width of the field lines if the "
+       "lineWidth",
+       "Line Width",
+       "This value specifies the line width of the field lines if the "
        "selected rendering method includes lines."
     };
+    constexpr openspace::properties::Property::PropertyInfo ThresholdRadiusInfo = {
+       "thresholdRadius",
+       "Threshold Radius",
+       "This value specifies the threshold that will be changed with the radius "
+    };
+
+
 
     enum class SourceFileType : int {
         Json = 0,
@@ -179,14 +189,16 @@ namespace openspace {
     RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary)
 
         : Renderable(dictionary)
+        , _pColorGroup({ "Color" })
         , _pStreamColor(StreamColorInfo,
             glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
             glm::vec4(0.f),
             glm::vec4(1.f))
         , _pStreamsEnabled(StreamsenabledInfo, true)
         , _pStreamGroup({ "Streams" })
-        , _pNodeSize(NodeSizeInfo, 1.f, 1.f, 20.f)
+        , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+        , _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
 
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -233,10 +245,11 @@ namespace openspace {
         _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
         _uniformCache.usingParticles = _shaderProgram->uniformLocation("usingParticles");
         _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
+        _uniformCache.thresholdRadius = _shaderProgram->uniformLocation("thresholdRadius");
 
         glGenVertexArrays(1, &_vertexArrayObject);
         glGenBuffers(1, &_vertexPositionBuffer);
-        //glGenBuffers(1, &_vertexColorBuffer);
+        glGenBuffers(1, &_vertexColorBuffer);
 
         // Probably not needed, seems to be needed for additive blending
         //setRenderBin(Renderable::RenderBin::Overlay);
@@ -339,6 +352,10 @@ namespace openspace {
         if (_dictionary->getValue(KeyLineWidth, lineWidthValue)) {
             _pLineWidth = lineWidthValue;
         }
+        float thresholdRadiusValue;
+        if (_dictionary->getValue(KeyThresholdRadius, thresholdRadiusValue)) {
+            _pThresholdRadius = thresholdRadiusValue;
+        }
         float scaleFactor;
         if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
             _scalingFactor = scaleFactor;
@@ -354,16 +371,16 @@ namespace openspace {
 
     void RenderableStreamNodes::setupProperties() {
 
-
-        // ----------------------------- Add Property Groups ----------------------------- //
-        addPropertySubOwner(_pStreamGroup);
-        // ------------------------- Add Properties to the groups ------------------------ //
-        _pStreamGroup.addProperty(_pStreamColor);
-        _pStreamGroup.addProperty(_pNodeSize);
-        
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pStreamsEnabled);
         addProperty(_pLineWidth);
+        // ----------------------------- Add Property Groups ----------------------------- //
+        addPropertySubOwner(_pStreamGroup);
+        addPropertySubOwner(_pColorGroup);
+        // ------------------------- Add Properties to the groups ------------------------ //
+        _pColorGroup.addProperty(_pStreamColor);
+        _pStreamGroup.addProperty(_pNodeSize);
+        _pStreamGroup.addProperty(_pThresholdRadius);
     }
 
 
@@ -431,6 +448,8 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
         _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
+        _shaderProgram->setUniform(_uniformCache.thresholdRadius, 0);
+
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBindVertexArray(_vertexArrayObject);
         glLineWidth(_pLineWidth);
@@ -455,29 +474,22 @@ namespace openspace {
         );
         */
         
-        /*glMultiDrawArrays(
+        /* FOR LINES
+        glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
             _lineStart.data(),
             _lineCount.data(),
             static_cast<GLsizei>(_lineStart.size())
         );*/
 
-        glPointSize(_pNodeSize);
-        //glPointSize(3);
+         glPointSize(_pNodeSize);
+        
         GLint temp = 0;
         glDrawArrays(
             GL_POINTS,
             temp,
             static_cast<GLsizei>(_lineCount.size())
         );
-        
-
-        //glMultiDrawArrays(
-        //    GL_LINE_STRIP, //_drawingOutputType,
-        //    vertPos.size(),
-        //    vertPos.data(),
-        //    static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
-        //    );
 
         //glBindVertexArray(_vertexArrayObject);
         //glLineWidth(_pLineWidth);
@@ -522,15 +534,7 @@ namespace openspace {
             vertPos.data(),
             GL_STATIC_DRAW
             );
-        
-        /*
-        glMultiDrawArrays(
-            GL_LINE_STRIP, //_drawingOutputType,
-            _lineStart.data(),
-            _lineCount.data(),
-            static_cast<GLsizei>(_lineStart.size())
-        );
-        */
+   
         /*
         //should try and get multidrawarrays to work. We then need information where every line should start and end, and when we need to start from a new line. 
 
@@ -566,6 +570,9 @@ namespace openspace {
         //glDrawArrays(GL_POINTS, 0, 1);
         //glBindVertexArray(0);
 
+
+        updateVertexColorBuffer();
+
         unbindGL();
         //glBindVertexArray(0);
         //_shaderProgram->deactivate();
@@ -580,8 +587,8 @@ namespace openspace {
         //'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
     //C:\Users\Chrad171\openspace\
 
-        //std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
-        std::ifstream streamdata("C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
+        std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
+        //std::ifstream streamdata("C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
 
         if (!streamdata.is_open())
         {
@@ -613,13 +620,12 @@ namespace openspace {
         //Loop through all the nodes
         const int numberofStreams = 15;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
-        //static float AuToMeter = 1.49598e11f;
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
         //const int coordToMeters = 1;
         //we have to have coordToMeters * our coord. 
         int counter = 0;
-        const size_t nPoints = 1;
+        const size_t nPoints = 1999;
         for (int i = 0; i < numberofStreams; i++) {
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                 lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
@@ -636,6 +642,7 @@ namespace openspace {
                 std::string r = (*lineIter)["R"].get<std::string>();
                 std::string phi = (*lineIter)["Phi"].get<std::string>();
                 std::string theta = (*lineIter)["Theta"].get<std::string>();
+                std::string flux = (*lineIter)["Flux"].get<std::string>();
 
                 //LDEBUG("testar koordinater: " + r + "phi" + phi + "theta: " + theta);
                 
@@ -650,16 +657,17 @@ namespace openspace {
                 rvalue = rvalue * AuToMeter;
                 */
                 //--------FLOAT
-                float rvalue = stringToFloat(r);
-                float phivalue = stringToFloat(phi);
-                float thetavalue = stringToFloat(theta);
+                float rValue = stringToFloat(r);
+                float phiValue = stringToFloat(phi);
+                float thetaValue = stringToFloat(theta);
+                float fluxValue = stringToFloat(flux);
                 const float pi = 3.14159265359f;
-                phivalue = phivalue * (180.f / pi);
-                thetavalue = thetavalue * (180.0f / pi);
-                rvalue = rvalue * AuToMeter;
+                phiValue = phiValue * (180.f / pi);
+                thetaValue = thetaValue * (180.0f / pi);
+                rValue = rValue * AuToMeter;
 
                 glm::vec3 sphericalcoordinates =
-                    glm::vec3(rvalue, phivalue, thetavalue);
+                    glm::vec3(rValue, phiValue, thetaValue);
 
                 //glm::dvec3 sphericalcoordinates =
                 //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),
@@ -684,13 +692,28 @@ namespace openspace {
 
                     //   )
                    //);
+
                 _lineCount.push_back(static_cast<GLsizei>(nPoints));
                 _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
                 lineStartIdx += nPoints;
-  
+
+                //glm::vec4 red(1.0f, 0.3f, 0.3f, 0.5f);
+                //glm::vec4 blue(0.3f, 0.3f, 1.0f, 0.5f);
+                //float red = 0.1;
+                //float blue = 1;
+
+                /*if (fluxValue < _pThresholdRadius) {
+                    _vertexColor.push_back(red);
+                }
+                else {
+                    _vertexColor.push_back(blue);
+                }*/
+
+                _vertexColor.push_back(fluxValue);
+
             }
-           
         }
+
         LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
         LDEBUG("counter for how many times we push back" + std::to_string(counter));
 
@@ -712,6 +735,26 @@ namespace openspace {
 
         return std::vector<std::string>();
     }
+
+    void RenderableStreamNodes::updateVertexColorBuffer() {
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+
+        const std::vector<float>& vertColor = _vertexColor;
+
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                vertColor.size() * sizeof(glm::vec3),
+                vertColor.data(),
+                GL_STATIC_DRAW
+            );
+
+            glEnableVertexAttribArray(VaColor);
+            glVertexAttribPointer(VaColor, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+            unbindGL();
+    }
+
     const std::vector<GLsizei>& RenderableStreamNodes::lineCount() const {
         return _lineCount;
     }
