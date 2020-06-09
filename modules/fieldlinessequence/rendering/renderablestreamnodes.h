@@ -55,6 +55,7 @@ namespace openspace {
 
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
+        void updateActiveTriggerTimeIndex(double currentTime);
 
         //const std::vector<GLsizei>& lineCount() const;
         //const std::vector<GLint>& lineStart() const;
@@ -80,12 +81,28 @@ namespace openspace {
     // loaded from disk during runtime (using 'runtime-states')
         bool _loadingStatesDynamically = false;
 
+        // False => the previous frame's state should still be shown
+        bool _needsUpdate = false;
+        // Used for 'runtime-states'. True when finished loading a new state from disk on
+        // another thread.
+        std::atomic_bool _newStateIsReady = false;
+        bool _isLoadingStateFromDisk = false;
         // --------------------------------- NUMERICALS ----------------------------------- //
         // In setup it is used to scale JSON coordinates. During runtime it is used to scale
         // domain limits.
         float _scalingFactor = 1.f;
+
+        // Active index of _states. If(==-1)=>no state available for current time. Always the
+        // same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else
+        // always = 0
+        int _activeStateIndex = -1;
+        
         // Active index of _startTimes
         int _activeTriggerTimeIndex = -1;
+        // Estimated end of sequence.
+        double _sequenceEndTime;
+        // Number of states in the sequence
+        size_t _nStates = 0;
 
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
@@ -133,13 +150,14 @@ namespace openspace {
         bool loadJsonStatesIntoRAM(const std::string& outputFolder);
         bool extractJsonInfoFromDictionary(fls::Model& model);
         //std::vector<std::string> LoadJsonfile(const std::string& filename);
-        std::vector<std::string> LoadJsonfile();
+        std::vector<std::string> LoadJsonfile(std::string filepath);
         void setupProperties();
-        void extractTriggerTimesFromFileNames();
         void updateVertexColorBuffer();
+        void extractTriggerTimesFromFileNames();
+        void computeSequenceEndTime();
 
             // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-            
+  
     };
 
 

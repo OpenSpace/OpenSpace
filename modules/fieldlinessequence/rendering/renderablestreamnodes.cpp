@@ -206,7 +206,8 @@ namespace openspace {
 
     void RenderableStreamNodes::initializeGL() {
         // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
-        auto vec = LoadJsonfile();
+        //std::string filepath = "C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
+       
         //LDEBUG("testar json");
         //log(ghoul::logging::LogLevel::Debug, _loggerCat, "testar json");
         SourceFileType sourceFileType = SourceFileType::Invalid;
@@ -231,10 +232,13 @@ namespace openspace {
         //if (!_loadingStatesDynamically) {
         //    _sourceFiles.clear();
         //}
-
+        _nStates = 3;
         setupProperties();
 
-
+        extractTriggerTimesFromFileNames();
+        std::string filepath = _sourceFiles[0];
+        //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
+        std::vector<std::string> vec = LoadJsonfile(filepath);
         // Setup shader program
         _shaderProgram = global::renderEngine.buildRenderProgram(
             "Streamnodes",
@@ -407,12 +411,13 @@ namespace openspace {
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
     void RenderableStreamNodes::extractTriggerTimesFromFileNames() {
-        // number of  characters in filename (excluding '.osfls')
+        // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 23;
-        // size(".osfls")
-        constexpr const int ExtSize = 6;
+        // size(".json")
+        constexpr const int ExtSize = 5;
 
         for (const std::string& filePath : _sourceFiles) {
+            LDEBUG("filepath " + filePath);
             const size_t strLength = filePath.size();
             // Extract the filename from the path (without extension)
             std::string timeString = filePath.substr(
@@ -426,7 +431,26 @@ namespace openspace {
             timeString.replace(16, 1, ":");
             timeString.replace(19, 1, ".");
             const double triggerTime = Time::convertTime(timeString);
+            LDEBUG("timestring " + timeString);
             _startTimes.push_back(triggerTime);
+            
+        }
+
+    }
+    void RenderableStreamNodes::updateActiveTriggerTimeIndex(double currentTime) {
+        auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
+        if (iter != _startTimes.end()) {
+            if (iter != _startTimes.begin()) {
+                _activeTriggerTimeIndex = static_cast<int>(
+                    std::distance(_startTimes.begin(), iter)
+                    ) - 1;
+            }
+            else {
+                _activeTriggerTimeIndex = 0;
+            }
+        }
+        else {
+            _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
         }
     }
     void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
@@ -454,28 +478,8 @@ namespace openspace {
         glBindVertexArray(_vertexArrayObject);
         glLineWidth(_pLineWidth);
         //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
-        // how do we set uniform the _fs? 
         
-        //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-       /* glBufferData(
-            GL_ARRAY_BUFFER,
-            vertPos.size() * sizeof(glm::vec3),
-            vertPos.data(),
-            GL_STATIC_DRAW
-            );
-        */
-        /*
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vertPos.size() * sizeof(glm::vec3),
-            vertPos.data(),
-            GL_STATIC_DRAW
-        );
-        */
-        
-        /* FOR LINES
-        glMultiDrawArrays(
+        /*glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
             _lineStart.data(),
             _lineCount.data(),
@@ -490,40 +494,80 @@ namespace openspace {
             temp,
             static_cast<GLsizei>(_lineCount.size())
         );
-
-        //glBindVertexArray(_vertexArrayObject);
-        //glLineWidth(_pLineWidth);
-        //LDEBUG("testar linewidth: " + std::to_string(_pLineWidth));
-
-        //this vertexposition is gained by looking at states for fieldlines, but we have vertexpositions locally. 
-       
-        //LDEBUG("vertPos size:" + std::to_string(vertPos.size()));
-        //LDEBUG("vertPos data:" + std::to_string(vertPos.data()));
-        //not sure if this is useful for us.
-
-
-        //VaPosition = 0, type GLuint. 
-        //glEnableVertexAttribArray(VaPosition);
-        //glVertexAttribPointer(VaPosition, 3, GL_DOUBLE, GL_FALSE, 0, 0);
-        //glDrawArrays(GL_POINTS, 0, 1);
-
-        //glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
         
 
         glBindVertexArray(0);
         _shaderProgram->deactivate();
-      //  }
+     
     }
     inline void unbindGL() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
 
+    void RenderableStreamNodes::computeSequenceEndTime() {
+        if (_nStates > 1) {
+            const double lastTriggerTime = _startTimes[_nStates - 1];
+            const double sequenceDuration = lastTriggerTime - _startTimes[0];
+            const double averageStateDuration = sequenceDuration /
+                (static_cast<double>(_nStates) - 1.0);
+            //_sequenceEndTime = lastTriggerTime + averageStateDuration;
+            _sequenceEndTime = lastTriggerTime;
+        }
+        else {
+            // If there's just one state it should never disappear!
+            _sequenceEndTime = DBL_MAX;
+        }
+    }
     void RenderableStreamNodes::update(const UpdateData& data) {
         if (_shaderProgram->isDirty()) {
             _shaderProgram->rebuildFromFile();
         }
+        //Everything below is for updating depending on time.
+        /*
+        const double currentTime = data.time.j2000Seconds();
+        const bool isInInterval = (currentTime >= _startTimes[0]) &&
+            (currentTime < _sequenceEndTime);
+        //const bool isInInterval = true;
+        //check if current time in Openspace is within sequence interval
         
+        if (isInInterval) {
+            const size_t nextIdx = _activeTriggerTimeIndex + 1;
+            if (
+                // true => Previous frame was not within the sequence interval
+                _activeTriggerTimeIndex < 0 ||
+                // true => We stepped back to a time represented by another state
+                currentTime < _startTimes[_activeTriggerTimeIndex] ||
+                // true => We stepped forward to a time represented by another state
+                (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
+            {
+                updateActiveTriggerTimeIndex(currentTime);
+                //_activeTriggerTimeIndex++;
+                _needsUpdate = true;
+                _activeStateIndex = _activeTriggerTimeIndex;
+
+            }
+        }
+            else {
+                //not in interval => set everything to false
+                _activeTriggerTimeIndex = -1;
+                _needsUpdate = false;
+            }
+
+            if (_needsUpdate) {
+                if (!_isLoadingStateFromDisk) {
+                    _isLoadingStateFromDisk = true;
+                
+                std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
+                //auto vec = LoadJsonfile(filePath);
+                std::thread readBinaryThread([this, f = std::move(filePath)]{
+                     auto vec = LoadJsonfile(f);
+                    });
+                   readBinaryThread.detach();
+                }
+            }
+        */
         //glBindVertexArray(_vertexArrayObject);
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
@@ -534,62 +578,29 @@ namespace openspace {
             vertPos.data(),
             GL_STATIC_DRAW
             );
-   
-        /*
-        //should try and get multidrawarrays to work. We then need information where every line should start and end, and when we need to start from a new line. 
-
-        glBindVertexArray(_vertexArrayObject);
-        glLineWidth(_pLineWidth);
-    
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vertPos.size() * sizeof(glm::vec3),
-            vertPos.data(),
-            GL_STATIC_DRAW
-        );
-        */
+        
        
-        //Jonathan and Matthias code: 
-       /* glMultiDrawArrays(
-            GL_LINE_STRIP, //_drawingOutputType,
-            _states[_activeStateIndex].lineStart().data(),
-            _states[_activeStateIndex].lineCount().data(),
-            static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
-            );
-
-            */
-
         glEnableVertexAttribArray(VaPosition);
         glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-        //glEnableVertexAttribArray(VaColor);
-        //glVertexAttribPointer(VaColor, 1, GL_FLOAT, GL_FALSE, 0, 0);
-     
-        //LDEBUG("kommer vi in i update? ");
-        //glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //glDrawArrays(GL_POINTS, 0, 1);
-        //glBindVertexArray(0);
+        _needsUpdate = false;
+        _newStateIsReady = false;
 
 
         updateVertexColorBuffer();
 
         unbindGL();
-        //glBindVertexArray(0);
-        //_shaderProgram->deactivate();
         
     }
 
-    std::vector<std::string> RenderableStreamNodes::LoadJsonfile() {
-        /*if (path.empty()) {
-            return std::vector<std::string>();
-        }
-        */
+    std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepath) {
+       
         //'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
-    //C:\Users\Chrad171\openspace\
-
-        std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
+        //C:\Users\Chrad171\openspace\
+        
+        //std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
         //std::ifstream streamdata("C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
-
+        std::ifstream streamdata(filepath);
         if (!streamdata.is_open())
         {
             LDEBUG("did not read the data.json file");
@@ -597,13 +608,14 @@ namespace openspace {
         json jsonobj = json::parse(streamdata);
         //json jsonobj;
         //streamdata >> jsonobj;
-
-        log(ghoul::logging::LogLevel::Debug, _loggerCat, "testar json");
+        
+        
+        
         //printDebug(jsonobj["stream0"]);
         //LDEBUG(jsonobj["stream0"]);
        // std::ofstream o("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/newdata2.json");
         //o << jsonobj << std::endl;
-
+        LDEBUG("vi callade på loadJSONfile med  " + filepath);
         const char* sNode = "node0";
         const char* sStream = "stream0";
         const char* sData = "data";
@@ -624,6 +636,9 @@ namespace openspace {
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
         //const int coordToMeters = 1;
         //we have to have coordToMeters * our coord. 
+         _vertexPositions.clear();
+         _lineCount.clear();
+         _lineStart.clear();
         int counter = 0;
         const size_t nPoints = 1999;
         for (int i = 0; i < numberofStreams; i++) {
@@ -732,7 +747,8 @@ namespace openspace {
         //LWARNING(fmt::format("Testar json", data));
 
         //LWARNING(fmt::format("Testar json"));
-
+        _isLoadingStateFromDisk = false;
+        streamdata.close();
         return std::vector<std::string>();
     }
 
