@@ -60,6 +60,9 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     glm::dvec3 startViewDirection = glm::normalize(
         start.rotation() * glm::dvec3(0.0, 0.0, -1.0)
     );
+    glm::dvec3 endViewDirection = glm::normalize(
+        end.rotation() * glm::dvec3(0.0, 0.0, -1.0)
+    );
 
     // Add control points for a catmull-rom spline, first and last will not be intersected
     _points.push_back(start.position());
