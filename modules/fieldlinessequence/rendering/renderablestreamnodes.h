@@ -105,11 +105,13 @@ namespace openspace {
         size_t _nStates = 0;
 
         GLuint _vertexArrayObject = 0;
-        // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
-        // the lines
-        GLuint _vertexColorBuffer = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions
         GLuint _vertexPositionBuffer = 0;
+        // OpenGL Vertex Buffer Object containing the Flux values used for coloring
+        // the nodes
+        GLuint _vertexColorBuffer = 0;
+        // OpenGL Vertex Buffer Object containing the positions to filter the nodes
+        GLuint _vertexFilteringBuffer = 0;
         // ---------------------------------- Properties ---------------------------------- //
         // Group to hold the color properties
         properties::PropertyOwner _pColorGroup;
@@ -125,6 +127,8 @@ namespace openspace {
         properties::FloatProperty _pLineWidth;
         /// ///////////
         properties::FloatProperty _pThresholdRadius;
+        // Filtering nodes within a range
+        properties::FloatProperty _pFiltering;
 
 
         // initialization
@@ -135,8 +139,10 @@ namespace openspace {
         std::vector<double> _startTimes;
         // Contains vertexPositions
         std::vector<glm::vec3> _vertexPositions;
-
+        // Contains vertex flux values for color
         std::vector<float> _vertexColor;
+        // Contains vertexRedius
+        std::vector<float> _vertexRadius;
 
         // ----------------------------------- POINTERS ------------------------------------//
         // The Lua-Modfile-Dictionary used during initialization
@@ -153,6 +159,7 @@ namespace openspace {
         std::vector<std::string> LoadJsonfile(std::string filepath);
         void setupProperties();
         void updateVertexColorBuffer();
+        void updateVertexFilteringBuffer();
         void extractTriggerTimesFromFileNames();
         void computeSequenceEndTime();
 

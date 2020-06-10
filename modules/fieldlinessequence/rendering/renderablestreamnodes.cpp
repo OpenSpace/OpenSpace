@@ -57,7 +57,7 @@ namespace {
     //gl variables for shaders, probably needed some of them atleast
     constexpr const GLuint VaPosition = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaColor = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaMasking = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaFiltering = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
 
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
@@ -120,10 +120,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ThresholdRadiusInfo = {
        "thresholdRadius",
        "Threshold Radius",
-       "This value specifies the threshold that will be changed with the radius "
+       "This value specifies the threshold that will be changed with the radius."
     };
-
-
+    constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
+        "filtering",
+        "Filtering",
+        "Use filtering to show nodes within a given range."
+    };
 
     enum class SourceFileType : int {
         Json = 0,
@@ -198,8 +201,10 @@ namespace openspace {
         , _pStreamGroup({ "Streams" })
         , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
-        , _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
-
+        //, _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
+        , _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, 500000000.f, 400000000000.f)
+        , _pFiltering(FilteringInfo, 100000.f, 500000000.f, 400000000000.f)
+        
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -254,6 +259,7 @@ namespace openspace {
         glGenVertexArrays(1, &_vertexArrayObject);
         glGenBuffers(1, &_vertexPositionBuffer);
         glGenBuffers(1, &_vertexColorBuffer);
+        glGenBuffers(1, &_vertexFilteringBuffer);
 
         // Probably not needed, seems to be needed for additive blending
         //setRenderBin(Renderable::RenderBin::Overlay);
@@ -378,6 +384,7 @@ namespace openspace {
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pStreamsEnabled);
         addProperty(_pLineWidth);
+        addProperty(_pFiltering);
         // ----------------------------- Add Property Groups ----------------------------- //
         addPropertySubOwner(_pStreamGroup);
         addPropertySubOwner(_pColorGroup);
@@ -397,6 +404,9 @@ namespace openspace {
 
         glDeleteBuffers(1, &_vertexColorBuffer);
         _vertexColorBuffer = 0;
+
+        glDeleteBuffers(1, &_vertexFilteringBuffer);
+        _vertexFilteringBuffer = 0;
 
         if (_shaderProgram) {
             global::renderEngine.removeRenderProgram(_shaderProgram.get());
@@ -472,7 +482,7 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
         _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
-        _shaderProgram->setUniform(_uniformCache.thresholdRadius, 0);
+        _shaderProgram->setUniform(_uniformCache.thresholdRadius, _pThresholdRadius);
 
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBindVertexArray(_vertexArrayObject);
@@ -586,9 +596,8 @@ namespace openspace {
         _needsUpdate = false;
         _newStateIsReady = false;
 
-
         updateVertexColorBuffer();
-
+        updateVertexFilteringBuffer();
         unbindGL();
         
     }
@@ -651,7 +660,7 @@ namespace openspace {
                 //LDEBUG("Phi value: " + (*lineIter)["Phi"].get<std::string>());
                 //LDEBUG("Theta value: " + (*lineIter)["Theta"].get<std::string>());
                 //LDEBUG("R value: " + (*lineIter)["R"].get<std::string>());
-                // LDEBUG("Flux value: " + (*lineIter)["Flux"].get<std::string>());
+                //LDEBUG("Flux value: " + (*lineIter)["Flux"].get<std::string>());
 
                  //probably needs some work with types, not loading in strings. 
                 std::string r = (*lineIter)["R"].get<std::string>();
@@ -680,7 +689,7 @@ namespace openspace {
                 phiValue = phiValue * (180.f / pi);
                 thetaValue = thetaValue * (180.0f / pi);
                 rValue = rValue * AuToMeter;
-
+ 
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rValue, phiValue, thetaValue);
 
@@ -698,8 +707,8 @@ namespace openspace {
                 //position.x = position.x * AuToMeter;
                 //position.y = position.y * AuToMeter;
                 //position.z = position.z * AuToMeter;
-                _vertexPositions.push_back(
-                    position);
+                    _vertexPositions.push_back(
+                        position);
                 ++counter;
                 //   coordToMeters * glm::vec3(
                   //     stringToFloat((*lineIter)["Phi"].get<std::string>(), 0.0f),
@@ -717,14 +726,13 @@ namespace openspace {
                 //float red = 0.1;
                 //float blue = 1;
 
-                /*if (fluxValue < _pThresholdRadius) {
-                    _vertexColor.push_back(red);
-                }
-                else {
-                    _vertexColor.push_back(blue);
-                }*/
+                //if (rValue >= _pThresholdRadius) {
+                //    _vertexRadius.push_back(rValue);
+                //}
 
                 _vertexColor.push_back(fluxValue);
+                _vertexRadius.push_back(rValue);
+
 
             }
         }
@@ -769,6 +777,27 @@ namespace openspace {
             glVertexAttribPointer(VaColor, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
             unbindGL();
+    }
+
+    void RenderableStreamNodes::updateVertexFilteringBuffer() {
+            glBindVertexArray(_vertexArrayObject);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
+            //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+            const std::vector<float>& vertexRadius = _vertexRadius;
+
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                vertexRadius.size() * sizeof(glm::vec3),
+                vertexRadius.data(),
+                GL_STATIC_DRAW
+            );
+
+            glEnableVertexAttribArray(VaFiltering);
+            glVertexAttribPointer(VaFiltering, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+            unbindGL();
+
     }
 
     const std::vector<GLsizei>& RenderableStreamNodes::lineCount() const {

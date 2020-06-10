@@ -60,13 +60,16 @@ uniform float thresholdRadius;
 // Inputs
 // Should be provided in meters
 layout(location = 0) in vec3 in_position;
+
 // The extra value used to color lines. Location must correspond to _VA_COLOR in 
 // renderablefieldlinessequence.h
 layout(location = 1) in float fluxValue;
+
 // The extra value used to mask out parts of lines. Location must correspond to 
 // _VA_MASKING in renderablefieldlinessequence.h
-//layout(location = 2)
-//in float in_masking_scalar;
+layout(location = 2)
+in float rValue;
+
 
 // These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
 const int uniformColor     = 0;
@@ -95,21 +98,26 @@ void main() {
     vec4 temp = streamColor;
     //vs_color = streamColor;
 
-    if(thresholdRadius > fluxValue){
-        //temp.x = 0.2 * streamColor.x;
-        //vs_color = temp;
-        vs_color = vec4(1.0, 0.3, 0.3, 1.0);
+    const int largerFlux  = -2;
+
+    //if(thresholdRadius > fluxValue){
+    if(fluxValue > largerFlux){
+        temp.x = 0.8 * streamColor.x;
+        vs_color = temp;
+        vs_color = vec4(8.0, 0.3, 0.3, 1.0);
     }
     else{
-        //temp.y = 0.5 * streamColor.y;
-        //vs_color = temp;
-        vs_color = vec4(0.3, 1.0, 0.3, 1.0);
+         vs_color = vec4(0.3, 0.7, 0.3, 1.0);
     }
 
-    vec4 position_in_meters = vec4(in_position, 1);
-    vec4 positionClipSpace = modelViewProjection * position_in_meters;
-    //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
-    gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+    if(rValue > thresholdRadius){
+       vs_color = vec4(0);
+    }
 
-    vs_depth = gl_Position.w;
+        vec4 position_in_meters = vec4(in_position, 1);
+        vec4 positionClipSpace = modelViewProjection * position_in_meters;
+        //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+        gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+
+        vs_depth = gl_Position.w;
 }

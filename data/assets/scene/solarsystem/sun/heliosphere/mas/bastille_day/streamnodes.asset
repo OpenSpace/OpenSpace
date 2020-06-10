@@ -20,7 +20,7 @@ openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
     Type = "HttpSynchronization",
     Identifier = "bastille_day_streamnodes",
    -- Identifier = "bastille_day_mas_fieldlines",
-    Version = 1
+    Version = 2
 })
 
 
