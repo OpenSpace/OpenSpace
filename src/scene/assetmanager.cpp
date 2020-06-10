@@ -121,12 +121,12 @@ std::shared_ptr<Asset> AssetManager::rootAsset() {
     return _assetLoader->rootAsset();
 }
 
-const std::vector<Profile::AssetEvent>& AssetManager::listOfAllAssetEvents() const {
-    return _assetLoader->listOfAllAssetEvents();
+const std::vector<Profile::AssetEvent>& AssetManager::assetEvents() const {
+    return _assetLoader->assetEvents();
 }
 
-void AssetManager::listOfAllAssetEvents_reset() {
-    _assetLoader->listOfAllAssetEvents_reset();
+void AssetManager::resetAssetEvents() {
+    _assetLoader->resetAssetEvents();
 }
 
 scripting::LuaLibrary AssetManager::luaLibrary() {

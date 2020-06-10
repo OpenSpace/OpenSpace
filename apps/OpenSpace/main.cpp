@@ -517,7 +517,7 @@ void mainPostSyncPreDrawFunc() {
 
 
 
-void mainRenderFunc(const RenderData& data) {
+void mainRenderFunc(const sgct::RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -592,7 +592,7 @@ void mainRenderFunc(const RenderData& data) {
 
 
 
-void mainDraw2DFunc(const RenderData& data) {
+void mainDraw2DFunc(const sgct::RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -1295,9 +1295,9 @@ int main(int argc, char** argv) {
         Engine::create(cluster, callbacks, config);
     }
     catch (...) {
-        Engine::destroy();
         global::openSpaceEngine.deinitialize();
         ghoul::deinitialize();
+        Engine::destroy();
         throw;
     }
 

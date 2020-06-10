@@ -38,7 +38,6 @@ namespace {
     constexpr const char* _loggerCat = "ProfileFile";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
-
 } // namespace
 
 namespace openspace {
@@ -115,7 +114,7 @@ void ProfileFile::processIndividualLine(bool& insideSection, std::string line) {
     }
 }
 
-void ProfileFile::writeToFile(const std::string filename) {
+void ProfileFile::writeToFile(const std::string& filename) {
     if (filename.find("/") != std::string::npos) {
         LERROR("Profile filename must not contain path (/) elements");
         return;
@@ -195,11 +194,11 @@ const std::string ProfileFile::getVersion() const {
 }
 
 void ProfileFile::setVersion(std::string v) {
-    _version = v;
+    _version = std::move(v);
 }
 
 void ProfileFile::addAllElements(std::string& str, std::vector<std::string>& list) {
-    for (auto s : list) {
+    for (const std::string& s : list) {
         str += s + '\n';
     }
 }
@@ -487,26 +486,32 @@ size_t ProfileFile::splitByTab(std::string line, std::vector<std::string>& resul
     return result.size();
 }
 
-void ProfileFile::updateTime(const std::string line) {
-    _time = line;
+void ProfileFile::updateTime(std::string line) {
+    _time = std::move(line);
 }
-void ProfileFile::updateCamera(const std::string line) {
-    _camera = line;
+
+void ProfileFile::updateCamera(std::string line) {
+    _camera = std::move(line);
 }
-void ProfileFile::addModuleLine(const std::string line) {
-    _modules.push_back(line);
+
+void ProfileFile::addModuleLine(std::string line) {
+    _modules.push_back(std::move(line));
 }
-void ProfileFile::addAssetLine(const std::string line) {
-    _assets.push_back(line);
+
+void ProfileFile::addAssetLine(std::string line) {
+    _assets.push_back(std::move(line));
 }
-void ProfileFile::addPropertyLine(const std::string line) {
-    _properties.push_back(line);
+
+void ProfileFile::addPropertyLine(std::string line) {
+    _properties.push_back(std::move(line));
 }
-void ProfileFile::addKeybindingLine(const std::string line) {
-    _keybindings.push_back(line);
+
+void ProfileFile::addKeybindingLine(std::string line) {
+    _keybindings.push_back(std::move(line));
 }
-void ProfileFile::addMarkNodesLine(const std::string line) {
-    _markNodes.push_back(line);
+
+void ProfileFile::addMarkNodesLine(std::string line) {
+    _markNodes.push_back(std::move(line));
 }
 
 void ProfileFile::clearAssets() {

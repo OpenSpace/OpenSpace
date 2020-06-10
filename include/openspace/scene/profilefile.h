@@ -150,21 +150,21 @@ public:
      * form.
      * \param filename The filename to write to.
      */
-    void writeToFile(const std::string filename);
+    void writeToFile(const std::string& filename);
 
     /**
      * Updates the full string that defines the starting time. The format for this line
      * is defined by ProfileFile::parseTime and Profile::convertToAsset_time
      * \param line The time entry line to replace current time entry
      */
-    void updateTime(const std::string line);
+    void updateTime(std::string line);
 
     /**
      * Updates the full string that defines the starting camera position. The format for
      * this line is defined by ProfileFile::parseCamera & Profile::convertToAsset_camera
      * \param line The camera entry line to replace current camera entry
      */
-    void updateCamera(const std::string line);
+    void updateCamera(std::string line);
 
     /**
      * Adds a new module line to the list of module lines to be analyzed by the profile
@@ -172,14 +172,14 @@ public:
      * and Profile::convertToAsset_modules
      * \param line The module name to be added
      */
-    void addModuleLine(const std::string line);
+    void addModuleLine(std::string line);
 
     /**
      * Adds a new asset to the list of assets to be loaded at startup. The format for an
      * asset line is defined by ProfileFile::parseAsset & Profile::convertToAsset_assets
      * \param line The asset name to be added
      */
-    void addAssetLine(const std::string line);
+    void addAssetLine(std::string line);
 
     /**
      * Clears all asset entries
@@ -192,7 +192,7 @@ public:
      * ProfileFile::parseProperty and Profile::convertToAsset_properties
      * \param line The property set command to be added
      */
-    void addPropertyLine(const std::string line);
+    void addPropertyLine(std::string line);
 
     /**
      * Adds a new keybinding shortcut to the list of keybindings. The format for a
@@ -200,7 +200,7 @@ public:
      * Profile::convertToAsset_keybindings
      * \param line The keyboard shortcut line to be added
      */
-    void addKeybindingLine(const std::string line);
+    void addKeybindingLine(std::string line);
 
     /**
      * Adds a new scenegraph node name to be added to the list of those marked as
@@ -208,7 +208,7 @@ public:
      * ProfileFile::parseMarkNodes and Profile::convertToAsset_markNodes
      * \param line The scenegraph node to be added
      */
-    void addMarkNodesLine(const std::string line);
+    void addMarkNodesLine(std::string line);
 
     /**
      * Returns the format version number (profiles syntax version) string

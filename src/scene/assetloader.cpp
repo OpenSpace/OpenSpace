@@ -456,7 +456,7 @@ std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
 }
 
 void AssetLoader::addToProfileTracking(std::string asset, Profile::AssetEventType type) {
-    Profile::AssetEvent pa = {asset, type};
+    Profile::AssetEvent pa = { std::move(asset), type };
     _profileAssets.push_back(pa);
 }
 
@@ -478,7 +478,7 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
 
 std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
-    addToProfileTracking(identifier, Profile::AssetEventType::add);
+    addToProfileTracking(identifier, Profile::AssetEventType::Add);
     return request(identifier);
 }
 
@@ -486,8 +486,7 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
 void AssetLoader::remove(const std::string& identifier) {
     setCurrentAsset(_rootAsset);
     unrequest(identifier);
-    _profileAssetsRemoved.push_back(identifier);
-    addToProfileTracking(identifier, Profile::AssetEventType::remove);
+    addToProfileTracking(identifier, Profile::AssetEventType::Remove);
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
@@ -814,11 +813,11 @@ void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent,
     }
 }
 
-std::vector<Profile::AssetEvent>& AssetLoader::listOfAllAssetEvents() {
+const std::vector<Profile::AssetEvent>& AssetLoader::assetEvents() const {
     return _profileAssets;
 }
 
-void AssetLoader::listOfAllAssetEvents_reset() {
+void AssetLoader::resetAssetEvents() {
     _profileAssets.clear();
 }
 

@@ -312,12 +312,12 @@ void Property::notifyDeleteListeners() {
     }
 }
 
-bool Property::hasChanged() {
-    return valChanged;
+bool Property::hasChanged() const {
+    return _isValueDirty;
 }
 
 void Property::resetToUnchanged() {
-    valChanged = false;
+    _isValueDirty = false;
 }
 
 std::string Property::generateBaseJsonDescription() const {

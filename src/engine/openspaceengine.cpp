@@ -1286,11 +1286,11 @@ void OpenSpaceEngine::postDraw() {
 }
 
 void OpenSpaceEngine::resetAssetChangeTracking() {
-    global::openSpaceEngine._assetManager->listOfAllAssetEvents_reset();
+    global::openSpaceEngine._assetManager->resetAssetEvents();
 }
 
-std::vector<Profile::AssetEvent> OpenSpaceEngine::listOfAllAssetEvents() {
-    return global::openSpaceEngine._assetManager->listOfAllAssetEvents();
+std::vector<Profile::AssetEvent> OpenSpaceEngine::assetEvents() {
+    return global::openSpaceEngine._assetManager->assetEvents();
 }
 
 void OpenSpaceEngine::resetPropertyChangeFlags() {

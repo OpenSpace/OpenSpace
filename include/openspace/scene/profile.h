@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
-#include <openspace/scene/profilefile.h>
-
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/scene/profilefile.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicense.h>
 #include <ghoul/misc/easing.h>
@@ -45,24 +44,18 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-const std::string profileFormatVersion = "1.0";
-
 class Profile {
 public:
+    static constexpr const char* FormatVersion = "1.0";
+
     enum class AssetEventType {
-        add,
-        require,
-        request,
-        remove,
-        ignore
+        Add,
+        Require,
+        Request,
+        Remove,
+        Ignore
     };
-    const std::map<AssetEventType, std::string> AssetEventTypeString {
-        {AssetEventType::add, "add"},
-        {AssetEventType::require, "required"},
-        {AssetEventType::request, "requested"},
-        {AssetEventType::remove,  "removed"},
-        {AssetEventType::ignore,  "ignored"},
-    };
+
     struct AssetEvent {
         std::string name;
         AssetEventType eventType;
@@ -70,16 +63,12 @@ public:
 
     virtual ~Profile() {};
 
-    const std::string formatVersion() {
-        return profileFormatVersion;
-    }
-
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
      * \param filename The filename of the new profile to be saved
      */
-    void saveCurrentSettingsToProfile(std::string filename);
+    void saveCurrentSettingsToProfile(const std::string& filename);
 
     /**
      * Saves all current settings, similar to saveCurrentSettingsToProfile() except the
@@ -94,8 +83,8 @@ public:
      * \param outFilePath The output file path that will be written with the converted
      *                       contents (in an .asset file)
      */
-    void convertToSceneFile(const std::string inProfilePath,
-        const std::string outFilePath);
+    void convertToSceneFile(const std::string& inProfilePath,
+        const std::string& outFilePath);
 
     /**
      * Returns the string contents of a profileFile object converted to scene/asset
@@ -120,10 +109,10 @@ private:
         std::vector<AssetEvent> base;
         std::vector<AssetEvent> changed;
     };
-    virtual bool usingProfile();
-    virtual std::string initialProfile();
-    virtual std::string profileBaseDirectory();
-    virtual std::vector<AssetEvent> listOfAllAssetEvents();
+    virtual bool usingProfile() const;
+    virtual std::string initialProfile() const;
+    virtual std::string profileBaseDirectory() const;
+    virtual std::vector<AssetEvent> assetEvents() const;
     ProfileFile collateBaseWithChanges();
     std::string convertToScene_assets(ProfileFile& pf);
     std::string convertToScene_modules(ProfileFile& pf);
@@ -133,23 +122,16 @@ private:
     std::string convertToScene_time(ProfileFile& pf);
     std::string convertToScene_camera(ProfileFile& pf);
 
-    void updateToCurrentFormatVersion(ProfileFile& pf);
     std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileFile& pf);
     void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf);
-    void handleChangedAdd(std::vector<AssetEvent>& base, unsigned int changedIdx,
-        std::vector<AssetEvent>& changed, std::string asset);
-    void handleChangedRemove(std::vector<AssetEvent>& base, std::string asset);
-    void addAssetsToProfileFile(std::vector<AssetEvent>& allAssets, ProfileFile& pf);
+
     void modifyPropertiesToReflectChanges(ProfileFile& pf);
-    virtual std::vector<openspace::properties::Property*> getChangedProperties();
-    void checkForChangedProps(std::vector<openspace::properties::Property*>& changedList,
-        openspace::properties::PropertyOwner* po);
+    virtual std::vector<openspace::properties::Property*> changedProperties();
     std::string getFullPropertyPath(openspace::properties::Property* prop);
-    virtual std::vector<std::string> getChangedPropertiesFormatted();
-    virtual std::string getCurrentTimeUTC();
-    virtual interaction::NavigationHandler::NavigationState getCurrentCameraState();
-    void addCurrentTimeToProfileFile(ProfileFile& pf);
-    void addCurrentCameraToProfileFile(ProfileFile& pf);
+    virtual std::vector<std::string> changedPropertiesFormatted();
+    virtual std::string currentTimeUTC() const;
+    virtual interaction::NavigationHandler::NavigationState currentCameraState() const;
+    void addCurrentCameraToProfileFile(ProfileFile& pf) const;
 };
 
 } // namespace openspace

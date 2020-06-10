@@ -71,8 +71,8 @@ public:
         std::shared_ptr<Asset> child) override;
 
     bool update();
-    const std::vector<Profile::AssetEvent>& listOfAllAssetEvents() const;
-    void listOfAllAssetEvents_reset();
+    const std::vector<Profile::AssetEvent>& assetEvents() const;
+    void resetAssetEvents();
     scripting::LuaLibrary luaLibrary();
 
 private:

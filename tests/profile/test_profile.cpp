@@ -56,10 +56,10 @@ namespace {
 class Profile2 : public Profile {
 public:
     Profile2(AssetLoader& refAssetLoader) : _assLoader(refAssetLoader) {}
-    std::string getCurrentTimeUTC() override {
+    std::string currentTimeUTC() const override {
         return "2020-02-29T01:23:45.00";
     }
-    interaction::NavigationHandler::NavigationState getCurrentCameraState() override {
+    interaction::NavigationHandler::NavigationState currentCameraState() const override {
         interaction::NavigationHandler::NavigationState n;
         n.anchor = "Earth";
         n.aim = "Sun";
@@ -73,24 +73,24 @@ public:
     void addPropertiesMarkedAsChanged(std::string formattedLine) {
         _scenegraphProps.push_back(formattedLine);
     }
-    std::vector<std::string> getChangedPropertiesFormatted() override {
+    std::vector<std::string> changedPropertiesFormatted() override {
         std::vector<std::string> formattedLines;
         for (std::string s : _scenegraphProps) {
             formattedLines.push_back(s);
         }
         return formattedLines;
     }
-    bool usingProfile() override {
+    bool usingProfile() const override {
         return true;
     }
-    std::string initialProfile() override {
+    std::string initialProfile() const override {
         return _initProfile;
     }
     void setInitialProfile(std::string file) {
         _initProfile = file;
     }
-    std::vector<Profile::AssetEvent> listOfAllAssetEvents() override {
-        return _assLoader.listOfAllAssetEvents();
+    std::vector<Profile::AssetEvent> assetEvents() const override {
+        return _assLoader.assetEvents();
     }
     void setProfileBaseDirectory(std::string dir) {
         _profileBaseDirectory = dir;
@@ -235,7 +235,7 @@ TEST_CASE("profile: Detect new added assets after reset", "[profile]") {
     asset->initialize();
     std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test2");
     asset2->initialize();
-    assetLoader.listOfAllAssetEvents_reset();
+    assetLoader.resetAssetEvents();
     std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("test3");
     asset3->initialize();
     std::shared_ptr<openspace::Asset> asset4 = assetLoader.add("test4");

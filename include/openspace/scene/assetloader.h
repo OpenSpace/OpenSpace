@@ -174,12 +174,12 @@ public:
      * Retrieve a reference to vector list of all assets events, including require,
      * request, and remove
      */
-    std::vector<Profile::AssetEvent>& listOfAllAssetEvents();
+    const std::vector<Profile::AssetEvent>& assetEvents() const;
 
     /**
      * Clear lists of all assets that have been either requested, required, or removed
      */
-    void listOfAllAssetEvents_reset();
+    void resetAssetEvents();
 
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
@@ -241,9 +241,6 @@ private:
     int _assetsTableRef;
 
     std::vector<Profile::AssetEvent> _profileAssets;
-    std::vector<std::string> _profileAssetsRequired;
-    std::vector<std::string> _profileAssetsRequested;
-    std::vector<std::string> _profileAssetsRemoved;
 };
 
 } // namespace openspace

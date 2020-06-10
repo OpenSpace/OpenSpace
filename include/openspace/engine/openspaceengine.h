@@ -77,7 +77,7 @@ public:
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
-    std::vector<Profile::AssetEvent> listOfAllAssetEvents();
+    std::vector<Profile::AssetEvent> assetEvents();
     void resetAssetChangeTracking();
     void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);

@@ -500,7 +500,7 @@ public:
      *
      * \return true if the property has changed
      */
-    bool hasChanged();
+    bool hasChanged() const;
 
     /**
      * Reset the valChanged flag to an unchanged state, as if value has not been changed.
@@ -544,7 +544,7 @@ protected:
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
 
     /// Flag indicating that this property value has been changed after initialization
-    bool valChanged = false;
+    bool _isValueDirty = false;
 
 private:
     void notifyDeleteListeners();

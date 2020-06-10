@@ -422,7 +422,7 @@ end)";
 
 const std::string detectChangedPropsResult_1 = "\
 #Version\n\
-" + profileFormatVersion + "\n\
+" + std::string(Profile::FormatVersion) + "\n\
 \n\
 #Module\n\
 \n\
@@ -456,7 +456,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_1 = "\
 #Version\n\
-" + profileFormatVersion + "\n\
+" + std::string(Profile::FormatVersion) + "\n\
 \n\
 #Module\n\
 \n\
@@ -489,7 +489,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_2 = "\
 #Version\n\
-" + profileFormatVersion + "\n\
+" + std::string(Profile::FormatVersion) + "\n\
 \n\
 #Module\n\
 \n\
@@ -521,7 +521,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_3 = "\
 #Version\n\
-" + profileFormatVersion + "\n\
+" + std::string(Profile::FormatVersion) + "\n\
 \n\
 #Module\n\
 \n\
@@ -553,7 +553,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_4 = "\
 #Version\n\
-" + profileFormatVersion + "\n\
+" + std::string(Profile::FormatVersion) + "\n\
 \n\
 #Module\n\
 \n\
@@ -585,7 +585,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_5 = "\
 #Version\n\
-" + profileFormatVersion + "\n\
+" + std::string(Profile::FormatVersion) + "\n\
 \n\
 #Module\n\
 \n\
@@ -618,7 +618,7 @@ Sun\n\
 
 const std::string detectChangedAssetsResult_6 = "\
 #Version\n\
-" + profileFormatVersion + "\n\
+" + std::string(Profile::FormatVersion) + "\n\
 \n\
 #Module\n\
 \n\
