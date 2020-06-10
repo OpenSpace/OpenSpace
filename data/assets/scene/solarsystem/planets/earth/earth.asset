@@ -112,12 +112,12 @@ local Earth = {
                     )
                 },
                 {
-                    Name = "BMNH [Utah]",
+                    Name = "BMNG [Utah]",
                     Identifier = "BMNG_Utah",
                     FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms"
                 },
                 {
-                    Name = "BMNH [Sweden]",
+                    Name = "BMNG [Sweden]",
                     Identifier = "BMNG_Sweden",
                     FilePath = mapServiceConfigsPath .. "/LiU/Bmng.wms"
                 },

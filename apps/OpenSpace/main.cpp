@@ -49,6 +49,7 @@
 #define GLFW_INCLUDE_NONE
 #endif
 #include <GLFW/glfw3native.h>
+#endif
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
 #include <sgct/engine.h>
