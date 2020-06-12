@@ -16,10 +16,6 @@ local models = asset.syncedResource({
     Version = 2
 })
 
-local LightSources = assetHelper.getDefaultLightSources(
-    sunTransforms.SolarSystemBarycenter.Identifier)
-
-
 local initializeAndAddNodes = function()
 
   local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
@@ -62,8 +58,8 @@ local initializeAndAddNodes = function()
             YAxis = transforms.EarthInertial.Identifier
         }
       },
-       GUI = {
-          Name = "parentNode",
+      GUI = {
+          Name = "ISSparentNode",
           Path = "/Solar System/Planets/Earth/Satellites/ISS",
           Hidden = true,
       }
@@ -109,7 +105,6 @@ local initializeAndAddNodes = function()
       Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
-
 
   myNodes[#myNodes + 1] = issTrail
 
