@@ -1,23 +1,23 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
-    <Node address="localhost" port="20401">
-        <Window tags="OpenVR" fullScreen="false" name="OpenSpace">
-            <Stereo type="side_by_side" />
-            <!-- Res is equal to the Recommend target size -->
-            <Size x="1332" y="840" />
-            <Res x="3024" y="1680" />
-            <Viewport>
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-                <Projectionplane>
-					<!-- Lower left -->
-					<Pos x="-1.7156" y="-0.965" z="0.0" />
-					<!-- Upper left -->
-					<Pos x="-1.7156" y="0.965" z="0.0" />
-					<!-- Upper right -->
-					<Pos x="1.7156" y="0.965" z="0.0" />
-				</Projectionplane>
-            </Viewport>
-        </Window>
-    </Node>
+  <Node address="localhost" port="20401">
+    <Window tags="OpenVR" fullScreen="false" name="OpenSpace">
+      <Stereo type="side_by_side" />
+      <!-- Res is equal to the Recommend target size -->
+      <Size x="1332" y="840" />
+      <Res x="3024" y="1680" />
+      <Viewport>
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <Projectionplane>
+          <!-- Lower left -->
+          <Pos x="-1.7156" y="-0.965" z="0.0" />
+          <!-- Upper left -->
+          <Pos x="-1.7156" y="0.965" z="0.0" />
+          <!-- Upper right -->
+          <Pos x="1.7156" y="0.965" z="0.0" />
+        </Projectionplane>
+      </Viewport>
+    </Window>
+  </Node>
 </Cluster>

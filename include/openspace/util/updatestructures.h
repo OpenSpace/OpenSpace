@@ -38,7 +38,7 @@ struct InitializeData {};
 struct TransformData {
     glm::dvec3 translation = glm::dvec3(0.0);
     glm::dmat3 rotation = glm::dmat3(1.0);
-    double scale = 0.0;
+    glm::dvec3 scale = glm::dvec3(1.0);
 };
 
 struct UpdateData {

@@ -1,29 +1,19 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
-<!--     <Settings>
-        <Display swapInterval="0" />
-    </Settings>
- -->
-<!--    <Scene>
-        <Orientation yaw="0.0" pitch="-27.0" roll="0.0" />
-        <Offset x="0.0" y="0.0" z="0.0" />
-        <Scale value="1.0" />
-    </Scene>
--->
-    <Node address="localhost" port="20401">
-        <Window fullScreen="false" name="OpenSpace">
-            <Stereo type="none" />
-            <Size x="1024" y="1024" />
-            <Viewport name="Spout">
-                <Pos x="0.0" y="0.0" />
-                <Size x="1.0" y="1.0" />
-                <SpoutOutputProjection quality="1.5k">
-                    <Background r="0.1" g="0.1" b="0.1" a="1.0" />
-                </SpoutOutputProjection>
-            </Viewport>
-        </Window>
-    </Node>
-    <User eyeSeparation="0.06">
-        <Pos x="0.0" y="0.0" z="0.0" />
-    </User>
+  <Node address="localhost" port="20401">
+    <Window fullscreen="false" name="OpenSpace">
+      <Stereo type="none" />
+      <Size x="1024" y="1024" />
+      <Viewport name="Spout">
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <SpoutOutputProjection quality="1.5k">
+          <Background r="0.1" g="0.1" b="0.1" a="1.0" />
+        </SpoutOutputProjection>
+      </Viewport>
+    </Window>
+  </Node>
+  <User eyeSeparation="0.06">
+    <Pos x="0.0" y="0.0" z="0.0" />
+  </User>
 </Cluster>

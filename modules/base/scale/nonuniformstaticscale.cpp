@@ -22,47 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCALE___H__
-#define __OPENSPACE_CORE___SCALE___H__
+#include <modules/base/scale/nonuniformstaticscale.h>
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
-#include <ghoul/glm.h>
-#include <memory>
-
-namespace ghoul { class Dictionary; }
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+        "Scale",
+        "Scale",
+        "These values are used as scaling factors for the scene graph node that this "
+        "transformation is attached to relative to its parent."
+    };
+} // namespace
 
 namespace openspace {
 
-struct UpdateData;
+documentation::Documentation NonUniformStaticScale::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Static Scaling",
+        "base_scale_static",
+        {
+            {
+                ScaleInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::No,
+                ScaleInfo.description
+            }
+        }
+    };
+}
 
-namespace documentation { struct Documentation; }
+glm::dvec3 NonUniformStaticScale::scaleValue(const UpdateData&) const {
+    return _scaleValue;
+}
 
-class Scale : public properties::PropertyOwner {
-public:
-    static std::unique_ptr<Scale> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+NonUniformStaticScale::NonUniformStaticScale()
+    : _scaleValue(ScaleInfo, glm::dvec3(1.0), glm::dvec3(0.1), glm::dvec3(100.0))
+{
+    addProperty(_scaleValue);
 
-    Scale();
-    virtual ~Scale() = default;
+    _scaleValue.onChange([this]() {
+        requireUpdate();
+    });
+}
 
-    virtual bool initialize();
+NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)
+    : NonUniformStaticScale()
+{
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
 
-    glm::dvec3 scaleValue() const;
-    virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
-    virtual void update(const UpdateData& data);
+    _scaleValue = dictionary.value<glm::dvec3>(ScaleInfo.identifier);
+}
 
-    static documentation::Documentation Documentation();
-
-protected:
-    void requireUpdate();
-
-private:
-    bool _needsUpdate = true;
-    double _cachedTime = -std::numeric_limits<double>::max();
-    glm::dvec3 _cachedScale = glm::dvec3(1.0);
-};
-
-}  // namespace openspace
-
-#endif // __OPENSPACE_CORE___SCALE___H__
+} // namespace openspace

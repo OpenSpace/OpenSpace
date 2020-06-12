@@ -412,11 +412,6 @@ void OpenSpaceEngine::initializeGL() {
 
     rendering::helper::initialize();
 
-    // clear the screen so the user doesn't have to see old buffer contents left on the
-    // graphics card
-    LDEBUG("Clearing all Windows");
-    global::windowDelegate.clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
-
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
@@ -665,9 +660,9 @@ void OpenSpaceEngine::initializeGL() {
 
     global::moduleEngine.initializeGL();
 
+
     for (const std::function<void()>& func : global::callback::initializeGL) {
         ZoneScopedN("[Module] initializeGL")
-
         func();
     }
 
@@ -1367,10 +1362,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
 
     // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing
     if (action == MouseAction::Press) {
-        bool isConsumed = global::renderEngine.mouseActivationCallback(
-            global::windowDelegate.mousePosition()
-        );
-
+        bool isConsumed = global::renderEngine.mouseActivationCallback(_mousePosition);
         if (isConsumed) {
             return;
         }
@@ -1390,6 +1382,8 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 
     global::navigationHandler.mousePositionCallback(x, y);
     global::interactionMonitor.markInteraction();
+
+    _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
@@ -1441,14 +1435,14 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 }
 
 
-std::vector<char> OpenSpaceEngine::encode() {
+std::vector<std::byte> OpenSpaceEngine::encode() {
     ZoneScoped
 
-    std::vector<char> buffer = global::syncEngine.encodeSyncables();
+    std::vector<std::byte> buffer = global::syncEngine.encodeSyncables();
     return buffer;
 }
 
-void OpenSpaceEngine::decode(std::vector<char> data) {
+void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     ZoneScoped
 
     global::syncEngine.decodeSyncables(std::move(data));
@@ -1536,15 +1530,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Returns whether the current OpenSpace instance is the master node of a "
                 "cluster configuration. If this instance is not part of a cluster, this "
                 "function also returns 'true'."
-            },
-            {
-                "clusterId",
-                &luascriptfunctions::clusterId,
-                {},
-                "",
-                "Returns the zero-based identifier for this OpenSpace instance in a "
-                "cluster configuration. If this instance is not part of a cluster, this "
-                "identifier is always 0."
             }
         },
         {

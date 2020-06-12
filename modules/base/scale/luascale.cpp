@@ -43,7 +43,7 @@ namespace {
         "scaling factor for this transformation. The script needs to define a function "
         "'scale' that takes the current simulation time in seconds past the J2000 epoch "
         "as the first argument, the current wall time as milliseconds past the J2000 "
-        "epoch the second argument and computes the scaling factor."
+        "epoch the second argument and computes the three scaling factors."
     };
 } // namespace
 
@@ -86,7 +86,7 @@ LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
     _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
 }
 
-double LuaScale::scaleValue(const UpdateData& data) const {
+glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
@@ -97,7 +97,7 @@ double LuaScale::scaleValue(const UpdateData& data) const {
             "LuaScale",
             fmt::format("Script '{}' does not have a function 'scale'", _luaScriptFile)
         );
-        return 0.0;
+        return glm::dvec3(1.0);
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
@@ -120,7 +120,11 @@ double LuaScale::scaleValue(const UpdateData& data) const {
         );
     }
 
-    return luaL_checknumber(_state, -1);
+    const double x = luaL_checknumber(_state, -1);
+    const double y = luaL_checknumber(_state, -2);
+    const double z = luaL_checknumber(_state, -3);
+    lua_settop(_state, 0);
+    return glm::dvec3(x, y, z);
 }
 
 } // namespace openspace

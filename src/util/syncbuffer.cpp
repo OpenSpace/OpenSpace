@@ -79,11 +79,11 @@ void SyncBuffer::decode(std::string& s) {
     s = decode();
 }
 
-void SyncBuffer::setData(std::vector<char> data) {
+void SyncBuffer::setData(std::vector<std::byte> data) {
     _dataStream = std::move(data);
 }
 
-std::vector<char> SyncBuffer::data() {
+std::vector<std::byte> SyncBuffer::data() {
     _dataStream.resize(_encodeOffset);
 
     return _dataStream;
