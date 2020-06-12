@@ -193,7 +193,7 @@ local Apollo8MoonTrail = {
 
 local Apollo8EarthBarycenterTrail = {
     Identifier = "Apollo8EarthBarycenterTrail",
-    Parent = "EarthBarycenter",
+    Parent = "EarthCenter",
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
