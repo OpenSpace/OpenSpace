@@ -821,7 +821,7 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
         const glm::dvec3 ws = _parent->worldScale();
         const glm::dvec3 p = position();
 
-        return wp + wrot * ws * p;
+        return wp + wrot * (ws * p);
     }
     else {
         return position();
