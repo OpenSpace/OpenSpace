@@ -9,12 +9,23 @@ local filename = "ISS.txt"
 local nodes = {}
 local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
 
-local modelsLocation = asset.syncedResource({
+local textures = asset.syncedResource({
+    Name = "ISS Textures",
+    Type = "HttpSynchronization",
+    Identifier = "iss_textures",
+    Version = 1
+})
+
+local models = asset.syncedResource({
     Name = "ISS Models",
     Type = "HttpSynchronization",
     Identifier = "iss_model",
-    Version = 1
+    Version = 2
 })
+
+local LightSources = assetHelper.getDefaultLightSources(
+    sunTransforms.SolarSystemBarycenter.Identifier)
+
 
 local initializeAndAddNodes = function()
 
@@ -22,12 +33,8 @@ local initializeAndAddNodes = function()
   local period = satelliteHelper.getPeriodFromElement(lineElement)
   local path = tle .. "/" .. filename
 
--- TLE data is only relevant in EarthInertial frame which means the model
--- will inherit some irrelevant rotations from its parent. To get around that
--- we perform the reverse rotation back to EarthBarycenter frame after applying
--- the TLE translation
   local iss = {
-    Identifier = identifier,
+    Identifier = "ISS",
     Parent = transforms.EarthInertial.Identifier,
     Transform = {
       Translation = {
@@ -50,70 +57,704 @@ local initializeAndAddNodes = function()
     }
   }
 
-  local issModel = {
-    Identifier = identifier .. "_model",
+local parentNode = {
+   Identifier = "ISSparentNode",
     Parent = iss.Identifier,
     Transform = {
       Rotation = {
-        Type = "FixedRotation",
-        Attached = "ISS_model",
-        XAxis = { 1.0, 0.0, 0.0 },
-        XAxisOrthogonal = true,
-        ZAxis = transforms.EarthInertial.Identifier
+          Type = "FixedRotation",
+          Attached = "ISSparentNode",
+          XAxis = { 0.01, -1.0, 0.56 },
+          XAxisOrthogonal = true,
+          YAxis = transforms.EarthInertial.Identifier
       }
     },
-    Renderable = {
-      Type = "RenderableModel",
-      Geometry = {
-        Type = "MultiModelGeometry",
-        GeometryFile = modelsLocation .. "/iss.obj"
-      },
-      ColorTexture =  modelsLocation .. "/gray.png",
-      LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+     GUI = {
+        Name = "parentNode",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local zero = {
+    Identifier = "ISSzero",
+    Parent = parentNode.Identifier,
+    Transform = {
     },
-    Tag = { "earth_satellite", "ISS" },
-    GUI = {
-      Path = "/Solar System/Planets/Earth/Satellites/ISS"
-    }
-  }
-
-  local issTrail = {
-    Identifier = identifier .. "_trail",
-    Parent = transforms.EarthInertial.Identifier,
     Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-          Type = "TLETranslation",
-          Body = identifier,
-          Observer = transforms.EarthInertial.Identifier,
-          File = path,
-          LineNumber = 1
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/0.obj"
         },
-        Color = { 0.9, 0.6715, 0.0 },
-        Fade = 1.5,
-        Period = period,
-        Resolution = 320
-      },
-    Tag = { "earth_satellite", "ISS" },
-    GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+        ColorTexture = textures .. "/0.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "0",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
     }
-  }
+}
 
-  local myNodes = { iss, issModel, issTrail }
+local one = {
+    Identifier = "ISSone",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/1.obj"
+        },
+        ColorTexture = textures .. "/1.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "1",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+
+local two = {
+    Identifier = "ISStwo",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/2.obj"
+        },
+        ColorTexture = textures .. "/2.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "2",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local three = {
+    Identifier = "ISSthree",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/3.obj"
+        },
+        ColorTexture = textures .. "/3.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "3",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local four = {
+    Identifier = "ISSfour",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/4.obj"
+        },
+        ColorTexture = textures .. "/4.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "4",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local five = {
+    Identifier = "ISSfive",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/5.obj"
+        },
+        ColorTexture = textures .. "/5.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "5",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local six = {
+    Identifier = "ISSsix",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/6.obj"
+        },
+        ColorTexture = textures .. "/6.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "6",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+local seven = {
+    Identifier = "ISSseven",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/7.obj"
+        },
+        ColorTexture = textures .. "/7.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "7",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local eight = {
+    Identifier = "ISSeight",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/8.obj"
+        },
+        ColorTexture = textures .. "/8.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "8",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local ten = {
+    Identifier = "ISSten",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/10.obj"
+        },
+        ColorTexture = textures .. "/10.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "10",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local eleven = {
+    Identifier = "ISSeleven",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/11.obj"
+        },
+        ColorTexture = textures .. "/11.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "11",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local thirteen = {
+    Identifier = "ISSthirteen",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/13.obj"
+        },
+        ColorTexture = textures .. "/13.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "13",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local fourteen = {
+    Identifier = "ISSfourteen",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/14.obj"
+        },
+        ColorTexture = textures .. "/14.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "14",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local fifteen = {
+    Identifier = "ISSfifteen",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/15.obj"
+        },
+        ColorTexture = textures .. "/15.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "15",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local sixteen = {
+    Identifier = "ISSsixteen",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/16.obj"
+        },
+        ColorTexture = textures .. "/16.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "16",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local seventeen = {
+    Identifier = "ISSseventeen",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/17.obj"
+        },
+        ColorTexture = textures .. "/17.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "17",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local nineteen = {
+    Identifier = "ISSnineteen",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/19.obj"
+        },
+        ColorTexture = textures .. "/19.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "19",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local twentyone = {
+    Identifier = "ISStwentyone",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/21.obj"
+        },
+        ColorTexture = textures .. "/21.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "21",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local twentytwo = {
+    Identifier = "ISStwentytwo",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/22.obj"
+        },
+        ColorTexture = textures .. "/22.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "22",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local twentythree = {
+    Identifier = "ISStwentythree",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/23.obj"
+        },
+        ColorTexture = textures .. "/23.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "23",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local twentyfour = {
+    Identifier = "ISStwentyfour",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/24.obj"
+        },
+        ColorTexture = textures .. "/24.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "24",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local twentyfive = {
+    Identifier = "ISStwentyfive",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/25.obj"
+        },
+        ColorTexture = textures .. "/25.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "25",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local foilsilver = {
+    Identifier = "ISSfoilsilver",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/foilsilver.obj"
+        },
+        ColorTexture = textures .. "/foil.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "foilsilver",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local olive = {
+    Identifier = "ISSolive",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/olive.obj"
+        },
+        ColorTexture = textures .. "/olive.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "olive",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local basemetal = {
+    Identifier = "ISSbasemetal",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/basemetal.obj"
+        },
+        ColorTexture = textures .. "/basemetal.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "basemetal",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local white_20 = {
+    Identifier = "ISSwhite_20",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/white_20.obj"
+        },
+        ColorTexture = textures .. "/white_20.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "white_20",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local plasticblack = {
+    Identifier = "ISSplasticblack",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/plasticblack.obj"
+        },
+        ColorTexture = textures .. "/plasticblack.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "plasticblack",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local ecostresswhite = {
+    Identifier = "ISSecostresswhite",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/ecostresswhite.obj"
+        },
+        ColorTexture = textures .. "/ecostresswhite.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "ecostresswhite",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+local plain = {
+    Identifier = "ISSplain",
+    Parent = parentNode.Identifier,
+    Transform = {
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/plain.obj"
+        },
+        ColorTexture = textures .. "/white_20.png",
+        LightSources = LightSources
+    },
+     GUI = {
+        Name = "plain",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
+    }
+}
+
+
+local issTrail = {
+  Identifier = identifier .. "_trail",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+      Type = "RenderableTrailOrbit",
+      Translation = {
+        Type = "TLETranslation",
+        Body = identifier,
+        Observer = transforms.EarthInertial.Identifier,
+        File = path,
+        LineNumber = 1
+      },
+      Color = { 0.9, 0.6715, 0.0 },
+      Fade = 1.5,
+      Period = period,
+      Resolution = 320
+    },
+  Tag = { "earth_satellite", "ISS" },
+  GUI = {
+    Name = "ISS Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/ISS"
+  }
+}
+
+  local myNodes = { 
+    iss,
+    parentNode,
+    zero,
+    one,
+    two,
+    three,
+    four,
+    five,
+    six,
+    seven,
+    eight,
+    ten,
+    eleven,
+    thirteen, 
+    fourteen,
+    fifteen,
+    sixteen,
+    seventeen,
+    nineteen,
+    twentyone,
+    twentytwo,
+    twentythree,
+    twentyfour,
+    twentyfive,
+    foilsilver,
+    olive,
+    basemetal,
+    white_20,
+    plasticblack,
+    ecostresswhite,
+    plain, 
+    issTrail 
+  }
 
   for _, node in ipairs(myNodes) do
     openspace.addSceneGraphNode(node)
   end
 
   return myNodes
+
 end
 
 asset.onInitialize(function ()
   nodes = initializeAndAddNodes()
+  openspace.setPropertyValueSingle("Scene.parentNode.Rotation.yAxis-InvertObject", true)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(nodes[3].Identifier) -- Removing trail
-  openspace.removeSceneGraphNode(nodes[1].Identifier) -- Removing ISS and model recursively
-end)
