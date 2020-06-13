@@ -16,3 +16,13 @@ asset.onDeinitialize(function ()
     openspace.removeSceneGraphNode(n.Identifier);
   end
 end)
+
+
+asset.meta = {
+    Name = "Constellation Images",
+    Version = "1.0",
+    Description = "Artistic images depicting the constellations",
+    Author = "James Hedberg",
+    URL = "ccnyplanetarium.org"
+    License = ""
+}
