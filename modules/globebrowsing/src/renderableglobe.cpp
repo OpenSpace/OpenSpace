@@ -775,7 +775,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         try {
             // Before Shadows
             //renderChunks(data, rendererTask);
-            //_globeLabelsComponent.draw(data);
+            _globeLabelsComponent.draw(data);
 
             if (_hasShadows && _shadowComponent.isEnabled()) {
                 // Set matrices and other GL states
