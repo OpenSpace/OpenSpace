@@ -17,7 +17,6 @@ local models = asset.syncedResource({
 })
 
 local initializeAndAddNodes = function()
-
   local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
   local period = satelliteHelper.getPeriodFromElement(lineElement)
   local path = tle .. "/" .. filename
@@ -41,8 +40,7 @@ local initializeAndAddNodes = function()
     },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS",
-        Hiden = false
+        Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
 
@@ -70,16 +68,17 @@ local initializeAndAddNodes = function()
       "foilsilver", "olive", "basemetal", "white_20", "plasticblack", "ecostresswhite",
       "plain"}
 
-  local myNodes = {iss, parentNode}
+  local nodes = { iss, parentNode }
   for i, info in ipairs(list) do
-      myNodes[#myNodes + 1] = assetHelper.createModelPart(
-          parentNode.Identifier,
-          sunTransforms.SolarSystemBarycenter.Identifier,
-          models,
-          info,
-          info .. ".png",
-          true
-      )
+    n = assetHelper.createModelPart(
+      parentNode.Identifier,
+      sunTransforms.SolarSystemBarycenter.Identifier,
+      models,
+      info,
+      info .. ".png",
+      true
+    )
+    table.insert(nodes, n)
   end
 
   local issTrail = {
@@ -106,18 +105,14 @@ local initializeAndAddNodes = function()
     }
   }
 
-  myNodes[#myNodes + 1] = issTrail
-
-  for _, node in ipairs(myNodes) do
-    openspace.addSceneGraphNode(node)
-  end
-
-  return myNodes
-
+  table.insert(nodes, issTrail)
+  return nodes
 end
 
 asset.onInitialize(function ()
   nodes = initializeAndAddNodes()
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
   openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxis-InvertObject", true)
 end)
-
