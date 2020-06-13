@@ -23,6 +23,6 @@ asset.meta = {
     Version = "1.0",
     Description = "Artistic images depicting the constellations",
     Author = "James Hedberg",
-    URL = "ccnyplanetarium.org"
+    URL = "ccnyplanetarium.org",
     License = ""
 }
