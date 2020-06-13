@@ -1,0 +1,28 @@
+local constellation_helper = asset.require('./generate_constellations')
+
+local constellationsCSV = asset.localResource('constellation_data.csv')
+
+local nodes = {}
+
+asset.onInitialize(function ()
+  nodes = constellation_helper.createConstellations('Constellation Art', constellationsCSV)
+  for _, n in ipairs(nodes) do
+    openspace.addSceneGraphNode(n);
+  end
+end)
+
+asset.onDeinitialize(function ()
+  for _, n in ipairs(nodes) do
+    openspace.removeSceneGraphNode(n.Identifier);
+  end
+end)
+
+
+asset.meta = {
+    Name = "Constellation Images",
+    Version = "1.0",
+    Description = "Artistic images depicting the constellations",
+    Author = "James Hedberg",
+    URL = "ccnyplanetarium.org",
+    License = ""
+}
