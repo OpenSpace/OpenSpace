@@ -43,6 +43,12 @@ local deepSkyPoints = {
         --CorrectionSizeFactor = 10.45
         EnablePixelSizeControl = true
     },
+    Transform = {
+        Rotation = {
+        Type = "StaticRotation",
+            Rotation = { 0, 0, 3.14159265359 }
+        }
+    },
     GUI = {
         Name = "Deep Sky Objects Points",
         Path = "/Universe/Galaxies"
@@ -66,8 +72,43 @@ local deepSkyImages = {
         --FadeInDistances = {0.001, 0.05010},
         PlaneMinSize = 5.0
     },
+    Transform = {
+        Rotation = {
+        Type = "StaticRotation",
+            Rotation = {3.14159265359, 3.14159265359, 0 }
+        }
+    },
     GUI = {
         Name = "Deep Sky Objects Images",
+        Path = "/Universe/Galaxies"
+    }
+}
+
+local deepSkyImages2 = {
+    Identifier = "DeepSkyObjectsImages2",
+    Renderable = {
+        Type = "RenderablePlanesCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.99,
+        ScaleFactor = 1.0,
+        File = speck .. "/dso.speck",
+        TexturePath = textures,
+        Luminosity = "radius",
+        ScaleLuminosity = 0.001,
+        Unit = "Mpc",
+        -- Fade in value in the same unit as "Unit"
+        --FadeInDistances = {0.001, 0.05010},
+        PlaneMinSize = 5.0
+    },
+    Transform = {
+        Rotation = {
+        Type = "StaticRotation",
+            Rotation = {3.14159265359, 3.14159265359, 0 }
+        }
+    },
+    GUI = {
+        Name = "Deep Sky Objects Images2",
         Path = "/Universe/Galaxies"
     }
 }
