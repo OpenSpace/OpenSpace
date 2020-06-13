@@ -43,6 +43,12 @@ local deepSkyPoints = {
         --CorrectionSizeFactor = 10.45
         EnablePixelSizeControl = true
     },
+    Transform = {
+        Rotation = {
+        Type = "StaticRotation",
+            Rotation = { 0, 0, 3.14159265359 }
+        }
+    },
     GUI = {
         Name = "Deep Sky Objects Points",
         Path = "/Universe/Galaxies"
@@ -65,6 +71,12 @@ local deepSkyImages = {
         -- Fade in value in the same unit as "Unit"
         --FadeInDistances = {0.001, 0.05010},
         PlaneMinSize = 5.0
+    },
+    Transform = {
+        Rotation = {
+        Type = "StaticRotation",
+            Rotation = {3.14159265359, 3.14159265359, 0 }
+        }
     },
     GUI = {
         Name = "Deep Sky Objects Images",
