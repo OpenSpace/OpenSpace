@@ -9,8 +9,7 @@ local images = asset.syncedResource({
 })
 
 --function that reads the file
-
-local getConstellations = function (guiPath, constellationfile)
+local createConstellations = function (guiPath, constellationfile)
   local genConstellations = {};
   --skip the first line
   local notFirstLine = false;
@@ -26,7 +25,7 @@ local getConstellations = function (guiPath, constellationfile)
         -- describes the data
         local matchstring = '(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$'
         local group, abbreviation, name, x, y, z, scale, imageName, rotX, rotY, rotZ, centerStar = line:match(matchstring)
-        local magVec = math.sqrt(x*x+y*y+z*z)
+        local magVec = math.sqrt(x*x + y*y + z*z)
         local normx = x/magVec
         local normy = y/magVec
         local normz = z/magVec
@@ -40,11 +39,15 @@ local getConstellations = function (guiPath, constellationfile)
               Translation = {
                   Type = "StaticTranslation",
                   -- position is in parsecs from the SolarSystemBarycenter, so convert to meters
-                  Position = {normx*PARSEC_CONSTANT*distanceMultiplier, normy*PARSEC_CONSTANT*distanceMultiplier, normz*PARSEC_CONSTANT*distanceMultiplier}
+                  Position = {
+                    normx * PARSEC_CONSTANT * distanceMultiplier,
+                    normy * PARSEC_CONSTANT * distanceMultiplier,
+                    normz * PARSEC_CONSTANT * distanceMultiplier
+                  }
               },
               Rotation = {
                   Type = "StaticRotation",
-                  Rotation = {tonumber(rotX),tonumber(rotY),tonumber(rotZ)}
+                  Rotation = { tonumber(rotX), tonumber(rotY), tonumber(rotZ) }
               }
 
           },
@@ -63,12 +66,8 @@ local getConstellations = function (guiPath, constellationfile)
               Name = name .. ' Image',
               Path = '/Milky Way/' .. guiPath
           }
-
         }
-
         table.insert(genConstellations, aconstellation);
-
-
 
       else
         notFirstLine = true
@@ -77,4 +76,4 @@ local getConstellations = function (guiPath, constellationfile)
   return genConstellations
 end
 
-asset.export('getConstellations', getConstellations)
+asset.export('createConstellations', createConstellations)

@@ -1,53 +1,17 @@
-local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
-local constellationHelper = asset.require('./generate_constellations')
+local constellation_helper = asset.require('./generate_constellations')
 
 local constellationsCSV = asset.localResource('constellation_data.csv')
 
 local nodes = {}
 
-local Keybindings = {
-    {
-        Key = "c",
-        Name = "Show Constellation Art",
-        Command = "openspace.setPropertyValue('Scene.Constellation Art*.Renderable.Opacity',0);" ..
-        "openspace.setPropertyValue('Scene.Constellation Art*.Renderable.Enabled', true);" ..
-        "openspace.setPropertyValue('Scene.Constellation Art*.Renderable.Opacity', 0.1,2);", 
-        Documentation = "Enables and fades up constellation art work",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "shift+c",
-        Name = "Hide Constellation Art",
-        Command = "openspace.setPropertyValue('Scene.Constellation Art*.Renderable.Opacity', 0, 2);", 
-        Documentation = "Fades out constellation artwork",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "ctrl+c",
-        Name = "Disable Constellation Art",
-        Command = "openspace.setPropertyValue('Scene.Constellation Art*.Renderable.Enabled', false);", 
-        Documentation = "Disable constellation artwork",
-        GuiPath = "/Rendering",
-        Local = false
-    }   
-}
-
 asset.onInitialize(function ()
-
-  sceneHelper.bindKeys(Keybindings)
-  nodes = constellationHelper.getConstellations('Constellation Art', constellationsCSV)
-
+  nodes = constellation_helper.createConstellations('Constellation Art', constellationsCSV)
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
   end
 end)
 
 asset.onDeinitialize(function ()
-  sceneHelper.unbindKeys(Keybindings)
-
   for _, n in ipairs(nodes) do
     openspace.removeSceneGraphNode(n.Identifier);
   end
