@@ -19,14 +19,14 @@ local LightSources = {
     }
 }
 
-local models = asset.syncedResource({  
+local models = asset.syncedResource({
     Name = "Mars 2020 Kernels",
     Type = "HttpSynchronization",
     Identifier = "perseverance_models",
     Version = 1
 })
 
-local textures = asset.syncedResource({  
+local textures = asset.syncedResource({
     Name = "Mars 2020 Kernels",
     Type = "HttpSynchronization",
     Identifier = "perseverance_textures",
@@ -48,14 +48,14 @@ local PerseveranceModel = {
     Identifier = "PerseveranceModel",
     Parent = Perseverance.Identifier,
     GUI = {
-    	Name = "Perseverance Model",
+        Name = "Perseverance Model",
         Path = "/Solar System/Missions/Perseverance"
     }
 }
 
 -- Perseverance Model Instruments --
 local Body = {
-    Identifier = "body",
+    Identifier = "Perseverance_body",
     Parent = PerseveranceModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -76,7 +76,7 @@ local Body = {
 }
 
 local Body_detail = {
-    Identifier = "Body_detail",
+    Identifier = "Perseverance_Body_detail",
     Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -97,7 +97,7 @@ local Body_detail = {
 }
 
 local Body_staticParts_1 = {
-    Identifier = "Body_staticParts_1",
+    Identifier = "Perseverance_Body_staticParts_1",
     Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -117,7 +117,7 @@ local Body_staticParts_1 = {
 }
 
 local Body_staticParts_2 = {
-    Identifier = "Body_staticParts_2",
+    Identifier = "Perseverance_Body_staticParts_2",
     Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -137,7 +137,7 @@ local Body_staticParts_2 = {
 }
 
 local Body_staticParts_3 = {
-    Identifier = "Body_staticParts_3",
+    Identifier = "Perseverance_Body_staticParts_3",
     Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -157,7 +157,7 @@ local Body_staticParts_3 = {
 }
 
 local Body_staticParts_4 = {
-    Identifier = "Body_staticParts_4",
+    Identifier = "Perseverance_Body_staticParts_4",
     Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -177,7 +177,7 @@ local Body_staticParts_4 = {
 }
 
 local Body_staticParts_5 = {
-    Identifier = "Body_staticParts_5",
+    Identifier = "Perseverance_Body_staticParts_5",
     Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -198,7 +198,7 @@ local Body_staticParts_5 = {
 
 -- RA AZ
 local RA_Shoulder_AZ = {
-    Identifier = "RA_Shoulder_AZ",
+    Identifier = "Perseverance_RA_Shoulder_AZ",
     Parent = transforms.RA_Shoulder_AZ_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -218,7 +218,7 @@ local RA_Shoulder_AZ = {
 }
 
 local RA_Shoulder_AZ_detail_1 = {
-    Identifier = "RA_Shoulder_AZ_detail_1",
+    Identifier = "Perseverance_RA_Shoulder_AZ_detail_1",
     Parent = RA_Shoulder_AZ.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -238,7 +238,7 @@ local RA_Shoulder_AZ_detail_1 = {
 }
 
 local RA_Shoulder_AZ_detail_2 = {
-    Identifier = "RA_Shoulder_AZ_detail_2",
+    Identifier = "Perseverance_RA_Shoulder_AZ_detail_2",
     Parent = RA_Shoulder_AZ.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -259,7 +259,7 @@ local RA_Shoulder_AZ_detail_2 = {
 
 ---- RA EL
 local RA_Shoulder_EL_1 = {
-    Identifier = "RA_Shoulder_EL_1",
+    Identifier = "Perseverance_RA_Shoulder_EL_1",
     Parent = transforms.RA_Shoulder_EL_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -280,7 +280,7 @@ local RA_Shoulder_EL_1 = {
 
 
 local RA_Shoulder_EL_detail_1 = {
-    Identifier = "RA_Shoulder_EL_detail_1",
+    Identifier = "Perseverance_RA_Shoulder_EL_detail_1",
     Parent = RA_Shoulder_EL_1.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -300,7 +300,7 @@ local RA_Shoulder_EL_detail_1 = {
 }
 
 local RA_Shoulder_EL_detail_2 = {
-    Identifier = "RA_Shoulder_EL_detail_2",
+    Identifier = "Perseverance_RA_Shoulder_EL_detail_2",
     Parent = RA_Shoulder_EL_1.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -322,7 +322,7 @@ local RA_Shoulder_EL_detail_2 = {
 
 
 local RA_Shoulder_EL_2 = {
-    Identifier = "RA_Shoulder_EL_2",
+    Identifier = "Perseverance_RA_Shoulder_EL_2",
     Parent = RA_Shoulder_EL_1.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -343,7 +343,7 @@ local RA_Shoulder_EL_2 = {
 
 -- RA ELBOW
 local RA_Elbow_1 = {
-    Identifier = "RA_Elbow_1",
+    Identifier = "Perseverance_RA_Elbow_1",
     Parent = transforms.RA_Elbow_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -363,7 +363,7 @@ local RA_Elbow_1 = {
 }
 
 local RA_Elbow_detail_1 = {
-    Identifier = "RA_Elbow_detail_1",
+    Identifier = "Perseverance_RA_Elbow_detail_1",
     Parent = RA_Elbow_1.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -383,7 +383,7 @@ local RA_Elbow_detail_1 = {
 }
 
 local RA_Elbow_detail_2 = {
-    Identifier = "RA_Elbow_detail_2",
+    Identifier = "Perseverance_RA_Elbow_detail_2",
     Parent = RA_Elbow_1.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -404,7 +404,7 @@ local RA_Elbow_detail_2 = {
 
 
 local RA_Elbow_2 = {
-    Identifier = "RA_Elbow_2",
+    Identifier = "Perseverance_RA_Elbow_2",
     Parent = RA_Elbow_1.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -426,7 +426,7 @@ local RA_Elbow_2 = {
 
 -- RA WRIST
 local RA_Wrist = {
-    Identifier = "RA_Wrist",
+    Identifier = "Perseverance_RA_Wrist",
     Parent = transforms.RA_Wrist_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -446,7 +446,7 @@ local RA_Wrist = {
 }
 
 local RA_Wrist_details = {
-    Identifier = "RA_Wrist_details",
+    Identifier = "Perseverance_RA_Wrist_details",
     Parent = RA_Wrist.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -467,7 +467,7 @@ local RA_Wrist_details = {
 
 -- RA TURRET
 local RA_Turret = {
-    Identifier = "RA_Turret",
+    Identifier = "Perseverance_RA_Turret",
     Parent = transforms.RA_Turret_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -488,7 +488,7 @@ local RA_Turret = {
 
 
 local RA_Turret_details_1 = {
-    Identifier = "RA_Turret_details_1",
+    Identifier = "Perseverance_RA_Turret_details_1",
     Parent = RA_Turret.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -508,7 +508,7 @@ local RA_Turret_details_1 = {
 }
 
 local RA_Turret_details_2 = {
-    Identifier = "RA_Turret_details_2",
+    Identifier = "Perseverance_RA_Turret_details_2",
     Parent = RA_Turret.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -529,7 +529,7 @@ local RA_Turret_details_2 = {
 
 -- MastCam--
 local RSM_root = {
-    Identifier = "RSM_root",
+    Identifier = "Perseverance_RSM_root",
     Parent = transforms.RSM_ROOT_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -550,7 +550,7 @@ local RSM_root = {
 }
 
 local RSM_AZ = {
-    Identifier = "RSM_AZ",
+    Identifier = "Perseverance_RSM_AZ",
     Parent = transforms.RSM_AZ_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -570,7 +570,7 @@ local RSM_AZ = {
 }
 
 local RSM_EL = {
-    Identifier = "RSM_EL",
+    Identifier = "Perseverance_RSM_EL",
     Parent = transforms.RSM_EL_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -591,7 +591,7 @@ local RSM_EL = {
 
 ---- HGA ----
 local HGA_AZ = {
-    Identifier = "HGA_AZ",
+    Identifier = "Perseverance_HGA_AZ",
     Parent = transforms.HGA_AZ_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -611,7 +611,7 @@ local HGA_AZ = {
 }
 
 local HGA_EL = {
-    Identifier = "HGA_EL",
+    Identifier = "Perseverance_HGA_EL",
     Parent = transforms.HGA_EL_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -632,7 +632,7 @@ local HGA_EL = {
 
 ---- SAM & CHEMIN ----
 local SAM_Cover_1 = {
-    Identifier = "SAM_Cover_1",
+    Identifier = "Perseverance_SAM_Cover_1",
     Parent = transforms.SAM_Cover_1_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -652,7 +652,7 @@ local SAM_Cover_1 = {
 }
 
 local SAM_Cover_2 = {
-    Identifier = "SAM_Cover_2",
+    Identifier = "Perseverance_SAM_Cover_2",
     Parent = transforms.SAM_Cover_2_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -672,7 +672,7 @@ local SAM_Cover_2 = {
 }
 
 local CHEMIN_Bottom = {
-    Identifier = "CHEMIN_Bottom",
+    Identifier = "Perseverance_CHEMIN_Bottom",
     Parent = transforms.CHEMIN_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -693,7 +693,7 @@ local CHEMIN_Bottom = {
 
 -- Wheels --
 local Wheel_Base = {
-    Identifier = "Wheel_Base",
+    Identifier = "Perseverance_Wheel_Base",
     Parent = transforms.Wheel_base_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -712,7 +712,7 @@ local Wheel_Base = {
     }
 }
 local Wheel_Base_2 = {
-    Identifier = "Wheel_Base_2",
+    Identifier = "Perseverance_Wheel_Base_2",
     Parent = Wheel_Base.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -733,7 +733,7 @@ local Wheel_Base_2 = {
 
 -- LEFT SIDE -- 
 local Wheel_Leg_1_L = {
-    Identifier = "Wheel_Leg_1_L",
+    Identifier = "Perseverance_Wheel_Leg_1_L",
     Parent = transforms.Leg_1_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -753,7 +753,7 @@ local Wheel_Leg_1_L = {
 }
 
 local Wheel_Leg_1A_L_detail = {
-    Identifier = "Wheel_Leg_1A_L_detail",
+    Identifier = "Perseverance_Wheel_Leg_1A_L_detail",
     Parent = Wheel_Leg_1_L.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -773,7 +773,7 @@ local Wheel_Leg_1A_L_detail = {
 }
 
 local Wheel_Leg_1B_L_detail = {
-    Identifier = "Wheel_Leg_1B_L_detail",
+    Identifier = "Perseverance_Wheel_Leg_1B_L_detail",
     Parent = Wheel_Leg_1_L.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -793,7 +793,7 @@ local Wheel_Leg_1B_L_detail = {
 }
 
 local Wheel_Leg_2_L = {
-    Identifier = "Wheel_Leg_2_L",
+    Identifier = "Perseverance_Wheel_Leg_2_L",
     Parent = transforms.Leg_2_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -813,7 +813,7 @@ local Wheel_Leg_2_L = {
 }
 
 local Wheel_Wrist_F_L = {
-    Identifier = "Wheel_Wrist_F_L",
+    Identifier = "Perseverance_Wheel_Wrist_F_L",
     Parent = transforms.Wrist_F_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -833,7 +833,7 @@ local Wheel_Wrist_F_L = {
 }
 
 local Wheel_Wrist_hub_F_L = {
-    Identifier = "Wheel_Wrist_hub_F_L",
+    Identifier = "Perseverance_Wheel_Wrist_hub_F_L",
     Parent = Wheel_Wrist_F_L.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -853,7 +853,7 @@ local Wheel_Wrist_hub_F_L = {
 }
 
 local Wheel_F_L = {
-    Identifier = "Wheel_F_L",
+    Identifier = "Perseverance_Wheel_F_L",
     Parent = transforms.Wheel_F_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -873,7 +873,7 @@ local Wheel_F_L = {
 }
 
 local Wheel_C_L = {
-    Identifier = "Wheel_C_L",
+    Identifier = "Perseverance_Wheel_C_L",
     Parent = transforms.Wheel_C_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -893,7 +893,7 @@ local Wheel_C_L = {
 }
 
 local Wheel_Wrist_B_L = {
-    Identifier = "Wheel_Wrist_B_L",
+    Identifier = "Perseverance_Wheel_Wrist_B_L",
     Parent = transforms.Wrist_B_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -913,7 +913,7 @@ local Wheel_Wrist_B_L = {
 }
 
 local Wheel_Wrist_hub_B_L = {
-    Identifier = "Wheel_Wrist_hub_B_L",
+    Identifier = "Perseverance_Wheel_Wrist_hub_B_L",
     Parent = Wheel_Wrist_B_L.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -933,7 +933,7 @@ local Wheel_Wrist_hub_B_L = {
 }
 
 local Wheel_B_L = {
-    Identifier = "Wheel_B_L",
+    Identifier = "Perseverance_Wheel_B_L",
     Parent = transforms.Wheel_B_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -954,7 +954,7 @@ local Wheel_B_L = {
 
 -- RIGHT SIDE -- 
 local Wheel_Leg_1_R = {
-    Identifier = "Wheel_Leg_1_R",
+    Identifier = "Perseverance_Wheel_Leg_1_R",
     Parent = transforms.Leg_1_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -974,7 +974,7 @@ local Wheel_Leg_1_R = {
 }
 
 local Wheel_Leg_1A_R_detail = {
-    Identifier = "Wheel_Leg_1A_R_detail",
+    Identifier = "Perseverance_Wheel_Leg_1A_R_detail",
     Parent = Wheel_Leg_1_R.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -994,7 +994,7 @@ local Wheel_Leg_1A_R_detail = {
 }
 
 local Wheel_Leg_1B_R_detail = {
-    Identifier = "Wheel_Leg_1B_R_detail",
+    Identifier = "Perseverance_Wheel_Leg_1B_R_detail",
     Parent = Wheel_Leg_1_R.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1014,7 +1014,7 @@ local Wheel_Leg_1B_R_detail = {
 }
 
 local Wheel_Leg_2_R = {
-    Identifier = "Wheel_Leg_2_R",
+    Identifier = "Perseverance_Wheel_Leg_2_R",
     Parent = transforms.Leg_2_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1034,7 +1034,7 @@ local Wheel_Leg_2_R = {
 }
 
 local Wheel_Wrist_F_R = {
-    Identifier = "Wheel_Wrist_F_R",
+    Identifier = "Perseverance_Wheel_Wrist_F_R",
     Parent = transforms.Wrist_F_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1055,7 +1055,7 @@ local Wheel_Wrist_F_R = {
 }
 
 local Wheel_Wrist_hub_F_R = {
-    Identifier = "Wheel_Wrist_hub_F_R",
+    Identifier = "Perseverance_Wheel_Wrist_hub_F_R",
     Parent = Wheel_Wrist_F_R.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1074,9 +1074,8 @@ local Wheel_Wrist_hub_F_R = {
     }
 }
 
-
 local Wheel_F_R = {
-    Identifier = "Wheel_F_R",
+    Identifier = "Perseverance_Wheel_F_R",
     Parent = transforms.Wheel_F_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1095,9 +1094,8 @@ local Wheel_F_R = {
     }
 }
 
-
 local Wheel_C_R = {
-    Identifier = "Wheel_C_R",
+    Identifier = "Perseverance_Wheel_C_R",
     Parent = transforms.Wheel_C_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1117,7 +1115,7 @@ local Wheel_C_R = {
 }
 
 local Wheel_Wrist_B_R = {
-    Identifier = "Wheel_Wrist_B_R",
+    Identifier = "Perseverance_Wheel_Wrist_B_R",
     Parent = transforms.Wrist_B_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1137,7 +1135,7 @@ local Wheel_Wrist_B_R = {
 }
 
 local Wheel_Wrist_hub_B_R = {
-    Identifier = "Wheel_Wrist_hub_B_R",
+    Identifier = "Perseverance_Wheel_Wrist_hub_B_R",
     Parent = Wheel_Wrist_B_R.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1157,7 +1155,7 @@ local Wheel_Wrist_hub_B_R = {
 }
 
 local Wheel_B_R = {
-    Identifier = "Wheel_B_R",
+    Identifier = "Perseverance_Wheel_B_R",
     Parent = transforms.Wheel_B_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -1178,66 +1176,26 @@ local Wheel_B_R = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     Perseverance,
-    PerseveranceModel, 
-    Body,
-    Body_detail,
-    Body_staticParts_1,
-    Body_staticParts_2,
-    Body_staticParts_3,
-    Body_staticParts_4,
-    Body_staticParts_5,
-    
-    RA_Shoulder_AZ,
-    RA_Shoulder_AZ_detail_1,
-    RA_Shoulder_AZ_detail_2,
-    RA_Shoulder_EL_1,
-    RA_Shoulder_EL_detail_1,
-    RA_Shoulder_EL_detail_2,
-    RA_Shoulder_EL_2,
-    RA_Elbow_1,
-    RA_Elbow_detail_1,
-    RA_Elbow_detail_2,
-    RA_Elbow_2,
-    RA_Wrist,
-    RA_Wrist_details,
-    RA_Turret,
-    RA_Turret_details_1,
-    RA_Turret_details_2,
-    
-    RSM_root,
-    RSM_AZ,
-    RSM_EL,
-    
-    HGA_AZ,
-    HGA_EL,
-    
-    SAM_Cover_1,
-    SAM_Cover_2,
-    CHEMIN_Bottom,
+    PerseveranceModel,
 
-    Wheel_Base,
-    Wheel_Base_2,
-    Wheel_Leg_1_L,
-    Wheel_Leg_1A_L_detail,
-    Wheel_Leg_1B_L_detail,
-    Wheel_Leg_2_L,
-    Wheel_Wrist_F_L,
-    Wheel_Wrist_hub_F_L,
-    Wheel_F_L,
-    Wheel_C_L,
-    Wheel_Wrist_B_L,
-    Wheel_Wrist_hub_B_L,
-    Wheel_B_L,
-    Wheel_Leg_1_R,
-    Wheel_Leg_1A_R_detail,
-    Wheel_Leg_1B_R_detail,
-    Wheel_Leg_2_R,
-    Wheel_Wrist_F_R,
-    Wheel_Wrist_hub_F_R,
-    Wheel_F_R,
-    Wheel_C_R,
-    Wheel_Wrist_B_R,
-    Wheel_Wrist_hub_B_R,
+    Body, Body_detail, Body_staticParts_1, Body_staticParts_2, Body_staticParts_3,
+    Body_staticParts_4, Body_staticParts_5,
+
+    RA_Shoulder_AZ, RA_Shoulder_AZ_detail_1, RA_Shoulder_AZ_detail_2, RA_Shoulder_EL_1,
+    RA_Shoulder_EL_detail_1, RA_Shoulder_EL_detail_2, RA_Shoulder_EL_2, RA_Elbow_1,
+    RA_Elbow_detail_1, RA_Elbow_detail_2, RA_Elbow_2, RA_Wrist, RA_Wrist_details,
+    RA_Turret, RA_Turret_details_1, RA_Turret_details_2,
+
+    RSM_root, RSM_AZ, RSM_EL,
+
+    HGA_AZ, HGA_EL,
+
+    SAM_Cover_1, SAM_Cover_2, CHEMIN_Bottom,
+
+    Wheel_Base, Wheel_Base_2, Wheel_Leg_1_L, Wheel_Leg_1A_L_detail, Wheel_Leg_1B_L_detail,
+    Wheel_Leg_2_L, Wheel_Wrist_F_L, Wheel_Wrist_hub_F_L, Wheel_F_L, Wheel_C_L,
+    Wheel_Wrist_B_L, Wheel_Wrist_hub_B_L, Wheel_B_L, Wheel_Leg_1_R,
+    Wheel_Leg_1A_R_detail, Wheel_Leg_1B_R_detail, Wheel_Leg_2_R, Wheel_Wrist_F_R,
+    Wheel_Wrist_hub_F_R, Wheel_F_R, Wheel_C_R, Wheel_Wrist_B_R, Wheel_Wrist_hub_B_R,
     Wheel_B_R
-
 })

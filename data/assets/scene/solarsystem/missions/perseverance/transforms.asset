@@ -7,7 +7,7 @@ local trailAsset = asset.require('./trail')
 local MSL_Body = {
     Identifier = "MSL_Body",
     Parent =  trailAsset.PerseveranceNode.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
             Position = { 0, 0.0, 2.8 }
@@ -27,7 +27,7 @@ local MSL_Body = {
 local RA_Base_Location = {
     Identifier = "RA_Base_Location",
     Parent = MSL_Body.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
             Position = { 1.111, -0.4525, -0.106 }
@@ -39,15 +39,14 @@ local RA_Base_Location = {
     }
 }
 
-
 --AZ
 local RA_Shoulder_AZ_Location = {
     Identifier = "RA_Shoulder_AZ_Location",
     Parent = RA_Base_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, -0.08}
+            Position = { 0.0, 0.0, -0.08 }
         }
     },
     GUI = {
@@ -63,7 +62,7 @@ local RA_Shoulder_EL_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.17, 0.2, -0.005}
+            Position = { 0.17, 0.2, -0.005 }
         }
     },
     GUI = {
@@ -79,7 +78,7 @@ local RA_Elbow_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.83, -0.2, 0.0 }
+            Position = { 0.83, -0.2, 0.0 }
         }
     },
     GUI = {
@@ -95,7 +94,7 @@ local RA_Wrist_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.77, 0.13, 0.035}
+            Position = { 0.77, 0.13, 0.035 }
         }
     },
     GUI = {
@@ -111,7 +110,7 @@ local RA_Turret_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.04, -0.15}
+            Position = { 0.0, 0.04, -0.15 }
         }
     },
     GUI = {
@@ -133,7 +132,7 @@ local RSM_ROOT_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.7039, 0.5769, -0.563}
+            Position = { 0.7039, 0.5769, -0.563 }
         }
     },
     GUI = {
@@ -148,7 +147,7 @@ local RSM_AZ_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.008, 0.0}
+            Position = { 0.0, 0.008, 0.0 }
         }
     },
     GUI = {
@@ -173,7 +172,7 @@ local RSM_EL_Location = {
         Translation = {
             Type = "StaticTranslation",
             --Position = {0.0, 0.0, -0.664}
-            Position = {0.002, 0.007, -0.688}   
+            Position = { 0.002, 0.007, -0.688 }
         }
     },
     GUI = {
@@ -186,10 +185,10 @@ local RSM_EL_Location = {
 local HGA_AZ_Location = {
     Identifier = "HGA_AZ_Location",
     Parent = MSL_Body.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.46, -0.47, -0.55}
+            Position = { -0.46, -0.47, -0.55 }
         }
     },
     GUI = {
@@ -201,10 +200,10 @@ local HGA_AZ_Location = {
 local HGA_EL_Location = {
     Identifier = "HGA_EL_Location",
     Parent = HGA_AZ_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, -0.17}
+            Position = { 0.0, 0.0, -0.17 }
         }
     },
     GUI = {
@@ -255,10 +254,10 @@ local Wheel_base_Location = {
 local Leg_1_L_Location = {
     Identifier = "Leg_1_L_Location",
     Parent = Wheel_base_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.217, -0.812, -0.215}   --for the right side
+            Position = { 0.217, -0.812, -0.215 }   --for the right side
         }
     },
     GUI = {
@@ -270,10 +269,10 @@ local Leg_1_L_Location = {
 local Leg_2_L_Location = {
     Identifier = "Leg_2_L_Location",
     Parent = Leg_1_L_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.74, -0.00380, 0.223} --CORRECT, DONT CHANGE
+            Position = { -0.74, -0.00380, 0.223 } --CORRECT, DONT CHANGE
         }
     },
     GUI = {
@@ -285,10 +284,10 @@ local Leg_2_L_Location = {
 local Wrist_F_L_Location = {
     Identifier = "Wrist_F_L_Location",
     Parent = Leg_1_L_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.8839, -0.2659, 0.2} --CORRECT, DONT TOUCH
+            Position = { 0.8839, -0.2659, 0.2 } --CORRECT, DONT TOUCH
         }
     },
     GUI = {
@@ -300,10 +299,10 @@ local Wrist_F_L_Location = {
 local Wheel_F_L_Location = {
     Identifier = "Wheel_F_L_Location",
     Parent = Wrist_F_L_Location.Identifier,
-    Transform = { 
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, 0.426}
+            Position = { 0.0, 0.0, 0.426 }
         }
     },
     GUI = {
@@ -315,10 +314,10 @@ local Wheel_F_L_Location = {
 local Wheel_C_L_Location = {
     Identifier = "Wheel_C_L_Location",
     Parent = Leg_2_L_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.45, -0.4, 0.403}
+            Position = { 0.45, -0.4, 0.403 }
         }
     },
     GUI = {
@@ -326,15 +325,14 @@ local Wheel_C_L_Location = {
         Hidden = true
     }
 }
-
 
 local Wrist_B_L_Location = {
     Identifier = "Wrist_B_L_Location",
     Parent = Leg_2_L_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.627, -0.2635, -0.022} --CORRECT, DONT CHANGE
+            Position = { -0.627, -0.2635, -0.022 } --CORRECT, DONT CHANGE
         }
     },
     GUI = {
@@ -342,15 +340,14 @@ local Wrist_B_L_Location = {
         Hidden = true
     }
 }
-
 
 local Wheel_B_L_Location = {
     Identifier = "Wheel_B_L_Location",
     Parent = Wrist_B_L_Location.Identifier,
-    Transform = {  
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, -0.0, 0.426}
+            Position = { 0.0, -0.0, 0.426 }
         }
     },
     GUI = {
@@ -358,16 +355,15 @@ local Wheel_B_L_Location = {
         Hidden = true
     }
 }
-
 
 -- wheels, Right Side --
 local Leg_1_R_Location = {
     Identifier = "Leg_1_R_Location",
     Parent = Wheel_base_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.217, 0.812, -0.215}   --Check with caroline!!!
+            Position = { 0.217, 0.812, -0.215 }   --Check with caroline!!!
         }
     },
     GUI = {
@@ -379,11 +375,11 @@ local Leg_1_R_Location = {
 local Leg_2_R_Location = {
     Identifier = "Leg_2_R_Location",
     Parent = Leg_1_R_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
             --Position = {-0.74, 0.0, 0.24}
-            Position = {-0.74, 0.00380, 0.223} --want to use this one, once the center point is changed in maya
+            Position = { -0.74, 0.00380, 0.223 } --want to use this one, once the center point is changed in maya
 
         }
     },
@@ -396,10 +392,10 @@ local Leg_2_R_Location = {
 local Wrist_F_R_Location = {
     Identifier = "Wrist_F_R_Location",
     Parent = Leg_1_R_Location.Identifier,
-    Transform = {  
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.882, 0.259, 0.215}
+            Position = { 0.882, 0.259, 0.215 }
             --Position = {0.8839, 0.2659, 0.2} --position for the Wrist_F_L
         }
     },
@@ -412,10 +408,10 @@ local Wrist_F_R_Location = {
 local Wheel_F_R_Location = {
     Identifier = "Wheel_F_R_Location",
     Parent = Wrist_F_R_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, 0.426}
+            Position = { 0.0, 0.0, 0.426 }
         }
     },
     GUI = {
@@ -427,10 +423,10 @@ local Wheel_F_R_Location = {
 local Wheel_C_R_Location = {
     Identifier = "Wheel_C_R_Location",
     Parent = Leg_2_R_Location.Identifier,
-    Transform = {  
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.45, 0.4, 0.403}
+            Position = { 0.45, 0.4, 0.403 }
         }
     },
     GUI = {
@@ -442,10 +438,10 @@ local Wheel_C_R_Location = {
 local Wrist_B_R_Location = {
     Identifier = "Wrist_B_R_Location",
     Parent = Leg_2_R_Location.Identifier,
-    Transform = {   
+    Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.6208, 0.2759, -0.025}            
+            Position = { -0.6208, 0.2759, -0.025 }
         }
     },
     GUI = {
@@ -460,7 +456,7 @@ local Wheel_B_R_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, -0.0005, 0.426}
+            Position = { 0.0, -0.0005, 0.426 }
         }
     },
     GUI = {
