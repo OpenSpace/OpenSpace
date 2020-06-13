@@ -7,7 +7,6 @@ local perseveranceShortcuts = asset.require('scene/solarsystem/missions/persever
 local insightAsset = asset.require('scene/solarsystem/missions/insight/edl')
 local insightShortcuts = asset.require('scene/solarsystem/missions/insight/shortcuts')
 
-
 local insightEDLShortcuts = sceneHelper.extractShortcuts({"Insight Height Offset", 
 	"Enable HiRISE",
 	"Insight EDL Time",
@@ -22,7 +21,6 @@ local insightDisableShortcuts = sceneHelper.extractShortcuts({
 local PerseverenceLandedShortcuts = sceneHelper.extractShortcuts({
 	"Perseverance Height Offset", 
 	"Perseverance landed time", 
-	-- "Show Perseverance Trail", 
 	"Enable HiRISE"},
 	perseveranceShortcuts.Shortcuts)
 
@@ -47,7 +45,6 @@ local Keybindings = {
 }
 
 asset.onInitialize(function ()
-
     local now = openspace.time.currentWallTime()
     openspace.time.setTime(now)
 
@@ -55,8 +52,7 @@ asset.onInitialize(function ()
 
     openspace.globebrowsing.goToGeo("Mars", 58.5877, 16.1924, 8000000)
 
-    openspace.markInterestingNodes({ "Mars", insightAsset.Insight.Identifier })
-
+    openspace.markInterestingNodes({ "Mars", insightAsset.Insight.Identifier, "Perseverance" })
 end)
 
 asset.onDeinitialize(function ()

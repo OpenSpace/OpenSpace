@@ -1,29 +1,12 @@
 local assetHelper = asset.require('util/asset_helper')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
+local trailAsset = asset.require('./trail')
 
-
-local m2020_pos = {
-    Identifier = "m2020_pos",
-    Parent =  marsAsset.Mars.Identifier,
-    Transform = {   
-        Translation = {
-            Type = "GlobeTranslation",
-            Globe = "Mars",
-            Latitude = 18.3628,
-            Longitude = 77.5945,
-            UseHeightmap = true
-        },
-    },
-    GUI = {
-        Path = "/Solar System/Missions/Perseverance/Transforms",
-        Hidden = true,
-    }
-}
 
 local MSL_Body = {
     Identifier = "MSL_Body",
-    Parent =  m2020_pos.Identifier,
+    Parent =  trailAsset.PerseveranceNode.Identifier,
     Transform = {   
         Translation = {
             Type = "StaticTranslation",
@@ -31,7 +14,7 @@ local MSL_Body = {
         },
         Rotation = {
             Type = "StaticRotation",
-            Rotation = { -1.884960,0.000000,2.905970 }
+            Rotation = { -0.521593,0.648407,2.888407 }
         }
     },
     GUI = {
@@ -487,8 +470,6 @@ local Wheel_B_R_Location = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
-
-    m2020_pos,
     MSL_Body,
     RA_Base_Location,
     RA_Shoulder_AZ_Location,

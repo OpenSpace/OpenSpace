@@ -33,18 +33,15 @@ local textures = asset.syncedResource({
     Version = 1
 })
 
-
-
 -- Perseverance Model --
 local Perseverance = {
-    Identifier = "PerseveranceM",
+    Identifier = "Perseverance",
     Parent = transforms.MSL_Body.Identifier,
     GUI = {
-        Name = "Perseverance Position",
+        Name = "Perseverance",
         Path = "/Solar System/Missions/Perseverance"
     }
 }
-
 
 -- Perseverance Model --
 local PerseveranceModel = {

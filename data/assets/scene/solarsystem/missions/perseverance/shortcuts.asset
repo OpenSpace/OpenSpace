@@ -13,8 +13,8 @@ local PerseveranceNavigationSate = "{" ..
 
 local Shortcuts = {
     {
-        Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -469.300000);" .. 
-        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -470.800006);",
+        Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -1677.088867);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -1677.088867);",
         Documentation = "Enable height layer offset for Perseverance landing trail",
         Name = "Perseverance Height Offset",
         GuiPath = "/Missions/Insight",
