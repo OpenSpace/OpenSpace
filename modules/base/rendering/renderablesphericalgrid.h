@@ -31,7 +31,7 @@
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -63,7 +63,7 @@ protected:
     ghoul::opengl::ProgramObject* _gridProgram;
 
     properties::DMat4Property _gridMatrix;
-    properties::Vec4Property _gridColor;
+    properties::Vec3Property _gridColor;
     properties::IntProperty _segments;
     properties::FloatProperty _lineWidth;
 
