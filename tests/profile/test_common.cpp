@@ -100,19 +100,6 @@ std::string stringFromTestProfileFormat(testProfileFormat& tpf) {
     return fullProfile;
 }
 
-ProfileFile makeProfileFromString(std::string s) {
-    std::istringstream iss(s);
-
-    ProfileFile pf([&iss](std::string& line) {
-        if (getline(iss, line))
-            return true;
-        else
-            return false;
-    });
-
-    return pf;
-}
-
 StringPerLineReader::StringPerLineReader(std::string s) : _iss(s) {
 }
 

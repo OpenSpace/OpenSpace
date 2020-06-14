@@ -38,6 +38,15 @@ namespace {
     constexpr const char* _loggerCat = "ProfileFile";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
+
+    constexpr const char* headerVersion = "#Version";
+    constexpr const char* headerModule = "#Module";
+    constexpr const char* headerAsset = "#Asset";
+    constexpr const char* headerProperty = "#Property";
+    constexpr const char* headerKeybinding = "#Keybinding";
+    constexpr const char* headerTime = "#Time";
+    constexpr const char* headerCamera = "#Camera";
+    constexpr const char* headerMarkNodes = "#MarkNodes";
 } // namespace
 
 namespace openspace {
@@ -165,25 +174,25 @@ void ProfileFile::writeToFile(const std::string& filename) {
 
 std::string ProfileFile::writeToString() {
     std::string output;
-    output = header_Version + '\n';
+    output = headerVersion + '\n';
     output += _version + '\n' + '\n';
-    output += header_Module + '\n';
+    output += headerModule + '\n';
     addAllElements(output, _modules);
     output += '\n';
-    output += header_Asset + '\n';
+    output += headerAsset + '\n';
     addAllElements(output, _assets);
     output += '\n';
-    output += header_Property + '\n';
+    output += headerProperty + '\n';
     addAllElements(output, _properties);
     output += '\n';
-    output += header_Keybinding + '\n';
+    output += headerKeybinding + '\n';
     addAllElements(output, _keybindings);
     output += '\n';
-    output += header_Time + '\n';
+    output += headerTime + '\n';
     output += _time + '\n' + '\n';
-    output += header_Camera + '\n';
+    output += headerCamera + '\n';
     output += _camera + '\n' + '\n';
-    output += header_MarkNodes + '\n';
+    output += headerMarkNodes + '\n';
     addAllElements(output, _markNodes);
 
     return output;
@@ -233,28 +242,28 @@ bool ProfileFile::isBlank(std::string line) {
 bool ProfileFile::determineSection(std::string line) {
     bool foundSection = true;
 
-    if (line.compare(header_Version) == 0) {
+    if (line.compare(headerVersion) == 0) {
         parseCurrentSection = &ProfileFile::parseVersion;
     }
-    else if (line.compare(header_Module) == 0) {
+    else if (line.compare(headerModule) == 0) {
         parseCurrentSection = &ProfileFile::parseModule;
     }
-    else if (line.compare(header_Asset) == 0) {
+    else if (line.compare(headerAsset) == 0) {
         parseCurrentSection = &ProfileFile::parseAsset;
     }
-    else if (line.compare(header_Property) == 0) {
+    else if (line.compare(headerProperty) == 0) {
         parseCurrentSection = &ProfileFile::parseProperty;
     }
-    else if (line.compare(header_Keybinding) == 0) {
+    else if (line.compare(headerKeybinding) == 0) {
         parseCurrentSection = &ProfileFile::parseKeybinding;
     }
-    else if (line.compare(header_Time) == 0) {
+    else if (line.compare(headerTime) == 0) {
         parseCurrentSection = &ProfileFile::parseTime;
     }
-    else if (line.compare(header_Camera) == 0) {
+    else if (line.compare(headerCamera) == 0) {
         parseCurrentSection = &ProfileFile::parseCamera;
     }
-    else if (line.compare(header_MarkNodes) == 0) {
+    else if (line.compare(headerMarkNodes) == 0) {
         parseCurrentSection = &ProfileFile::parseMarkNodes;
     }
     else {

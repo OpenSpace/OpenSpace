@@ -81,15 +81,6 @@ const size_t cameraGeoFieldLatitude = 2;
 const size_t cameraGeoFieldLongitude = 3;
 const size_t cameraGeoFieldAltitude = 4;
 
-const std::string header_Version    = "#Version";
-const std::string header_Module     = "#Module";
-const std::string header_Asset      = "#Asset";
-const std::string header_Property   = "#Property";
-const std::string header_Keybinding = "#Keybinding";
-const std::string header_Time       = "#Time";
-const std::string header_Camera     = "#Camera";
-const std::string header_MarkNodes  = "#MarkNodes";
-
 class ProfileFile {
 public:
     using Lines = std::vector<std::string>;

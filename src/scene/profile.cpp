@@ -63,7 +63,7 @@ namespace {
         { Profile::AssetEventType::Require, "required" },
         { Profile::AssetEventType::Request, "requested" },
         { Profile::AssetEventType::Remove,  "removed" },
-        { Profile::AssetEventType::Ignore,  "ignored" },
+        { Profile::AssetEventType::Ignore,  "ignored" }
     };
 
     void handleChangedAdd(std::vector<Profile::AssetEvent>& base, unsigned int changedIdx,
