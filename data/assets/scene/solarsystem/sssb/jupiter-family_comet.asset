@@ -8,3 +8,13 @@ object.Renderable.SegmentQuality = 10
 object.Renderable.TrailFade = 28
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Jupiter Family Comets",
+    Version = "1.0",
+    Description = [[ Comets with a Tisserand's parameter with respect to Jupiter of between 2 and 3. ]],
+    Author = "JPL Small-Body Database hosted by California Institute of Technology",
+    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+}
