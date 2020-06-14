@@ -1,17 +1,16 @@
---a17_lem.asset
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local moonAsset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local asset_helper = asset.require('util/asset_helper')
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
 
 local model = asset.require('scene/solarsystem/missions/apollo/lem_model')
 
 local Apollo17Lem = {
     Identifier = "Apollo17Lem",
-    Parent = moonAsset.Moon.Identifier,
+    Parent = moon_asset.Moon.Identifier,
     Transform = {
         Translation = {
             Type = "GlobeTranslation",
-            Globe = moonAsset.Moon.Identifier,
+            Globe = moon_asset.Moon.Identifier,
             Longitude = -329.22833,
             Latitude = 20.19092,
             UseHeightmap = true
@@ -40,21 +39,14 @@ local Apollo17LemModel = {
             GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
         },
         SpecularIntensity = 0.0,
+        RotationVector = { 110.255219,171.229706,126.666664 },
         ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
-        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+        LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
     },
     GUI = {
-        Hidden = false,
         Name = "Apollo 17 Lem",
         Path = "/Solar System/Missions/Apollo/17"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Apollo17Lem,
-    Apollo17LemModel,
-})
-
-asset.onInitialize(function ()
-    openspace.setPropertyValueSingle('Scene.Apollo17LemModel.Renderable.RotationVector', { 110.255219,171.229706,126.666664 });
-end)
+asset_helper.registerSceneGraphNodesAndExport(asset, { Apollo17Lem, Apollo17LemModel })

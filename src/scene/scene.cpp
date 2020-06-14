@@ -146,10 +146,6 @@ void Scene::updateNodeRegistry() {
     _dirtyNodeRegistry = false;
 }
 
-void Scene::addSceneLicense(SceneLicense license) {
-    _licenses.push_back(std::move(license));
-}
-
 void Scene::sortTopologically() {
     _topologicallySortedNodes.insert(
         _topologicallySortedNodes.end(),
@@ -595,11 +591,6 @@ void Scene::addInterestingTime(InterestingTime time) {
 
 const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
     return _interestingTimes;
-}
-
-std::string Scene::generateSceneLicenseDocumentationJson() {
-    SceneLicenseWriter writer(_licenses);
-    return writer.generateJson();
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {

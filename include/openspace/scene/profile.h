@@ -28,7 +28,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/profilefile.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicense.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <mutex>

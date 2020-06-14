@@ -9,25 +9,20 @@ local filename = "ISS.txt"
 local nodes = {}
 local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
 
-local modelsLocation = asset.syncedResource({
+local models = asset.syncedResource({
     Name = "ISS Models",
     Type = "HttpSynchronization",
     Identifier = "iss_model",
-    Version = 1
+    Version = 2
 })
 
 local initializeAndAddNodes = function()
-
   local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
   local period = satelliteHelper.getPeriodFromElement(lineElement)
   local path = tle .. "/" .. filename
 
--- TLE data is only relevant in EarthInertial frame which means the model
--- will inherit some irrelevant rotations from its parent. To get around that
--- we perform the reverse rotation back to EarthBarycenter frame after applying
--- the TLE translation
   local iss = {
-    Identifier = identifier,
+    Identifier = "ISS",
     Parent = transforms.EarthInertial.Identifier,
     Transform = {
       Translation = {
@@ -45,37 +40,46 @@ local initializeAndAddNodes = function()
     },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS",
-        Hiden = true
+        Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
 
-  local issModel = {
-    Identifier = identifier .. "_model",
-    Parent = iss.Identifier,
-    Transform = {
-      Rotation = {
-        Type = "FixedRotation",
-        Attached = "ISS_model",
-        XAxis = { 1.0, 0.0, 0.0 },
-        XAxisOrthogonal = true,
-        ZAxis = transforms.EarthInertial.Identifier
-      }
-    },
-    Renderable = {
-      Type = "RenderableModel",
-      Geometry = {
-        Type = "MultiModelGeometry",
-        GeometryFile = modelsLocation .. "/iss.obj"
+  local parentNode = {
+     Identifier = "ISSparentNode",
+      Parent = iss.Identifier,
+      Transform = {
+        Rotation = {
+            Type = "FixedRotation",
+            Attached = "ISSparentNode",
+            XAxis = { 0.01, -1.0, 0.56 },
+            XAxisOrthogonal = true,
+            YAxis = transforms.EarthInertial.Identifier
+        }
       },
-      ColorTexture =  modelsLocation .. "/gray.png",
-      LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
-    },
-    Tag = { "earth_satellite", "ISS" },
-    GUI = {
-      Path = "/Solar System/Planets/Earth/Satellites/ISS"
-    }
+      GUI = {
+          Name = "ISSparentNode",
+          Path = "/Solar System/Planets/Earth/Satellites/ISS",
+          Hidden = true,
+      }
   }
+
+  local list = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "10", "11", 
+      "13", "14", "15", "16", "17", "19", "21", "22", "23", "24", "25",
+      "foilsilver", "olive", "basemetal", "white_20", "plasticblack", "ecostresswhite",
+      "plain"}
+
+  local nodes = { iss, parentNode }
+  for i, info in ipairs(list) do
+    n = assetHelper.createModelPart(
+      parentNode.Identifier,
+      sunTransforms.SolarSystemBarycenter.Identifier,
+      models,
+      info,
+      info .. ".png",
+      true
+    )
+    table.insert(nodes, n)
+  end
 
   local issTrail = {
     Identifier = identifier .. "_trail",
@@ -96,24 +100,19 @@ local initializeAndAddNodes = function()
       },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Satellites/ISS"
+      Name = "ISS Trail",
+      Path = "/Solar System/Planets/Earth/Satellites/ISS"
     }
   }
 
-  local myNodes = { iss, issModel, issTrail }
-
-  for _, node in ipairs(myNodes) do
-    openspace.addSceneGraphNode(node)
-  end
-
-  return myNodes
+  table.insert(nodes, issTrail)
+  return nodes
 end
 
 asset.onInitialize(function ()
   nodes = initializeAndAddNodes()
-end)
-
-asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(nodes[3].Identifier) -- Removing trail
-  openspace.removeSceneGraphNode(nodes[1].Identifier) -- Removing ISS and model recursively
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+  openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxis-InvertObject", true)
 end)

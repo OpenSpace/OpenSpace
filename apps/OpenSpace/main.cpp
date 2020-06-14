@@ -57,7 +57,6 @@
 #include <sgct/viewport.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <TracyOpenGL.hpp>
 #include <chrono>
 #include <ctime>
 
