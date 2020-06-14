@@ -2,7 +2,7 @@
 -- The insignias are invisible by default, but can be enabled using shown or hidden using
 -- the exported functions `showInsignias(interpolationDuration)` and `hideInsignias(interpolationDuration)`.
 
-local assetHelper = asset.require('util/asset_helper')
+local asset_helper = asset.require('util/asset_helper')
 
 local insigniasPath =  asset.syncedResource({
     Name = "Apollo Insignias",
@@ -18,37 +18,37 @@ local landingData = {
         Name = "Apollo 11",
         Name = "Apollo 11",
         Texture = "apollo11.png",
-        LunarModule = {0.67409, 23.47298, 0.0},
+        LunarModule = { 0.67409, 23.47298, 0.0 }
     },
     {
         Identifier = "Apollo12",
         Name = "Apollo 12",
         Texture = "apollo12.png",
-        LunarModule = {-3.01381, -23.41930, 0.0}    
+        LunarModule = { -3.01381, -23.41930, 0.0 }
     },
     {
         Identifier = "Apollo14",
         Name = "Apollo 14",
         Texture = "apollo14.png",
-        LunarModule = {-3.64544, -17.47139, 0.0}
+        LunarModule = { -3.64544, -17.47139, 0.0 }
     },
     {
         Identifier = "Apollo15",
         Name = "Apollo 15",
         Texture = "apollo15.png",
-        LunarModule = {26.13224, 3.63400, 0.0}
+        LunarModule = { 26.13224, 3.63400, 0.0 }
     },
     {
         Identifier = "Apollo16",
         Name = "Apollo 16",
         Texture = "apollo16.png",
-        LunarModule = {-8.97341, 15.49859, 0.0}
+        LunarModule = { -8.97341, 15.49859, 0.0 }
     },
     {
         Identifier = "Apollo17",
         Name = "Apollo 17",
         Texture = "apollo17.png",
-        LunarModule = {20.18809, 30.77475, 0.0}
+        LunarModule = { 20.18809, 30.77475, 0.0 }
     }
 }
 
@@ -117,4 +117,4 @@ asset.export('hideInsignias', function (interpolationDuration)
     openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, interpolationDuration)
 end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, nodes)
+asset_helper.registerSceneGraphNodesAndExport(asset, nodes)

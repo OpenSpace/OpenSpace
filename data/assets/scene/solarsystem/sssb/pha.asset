@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'pha', 'sssb_data_pha')
-local object = sharedSssb.createSssbGroupObject('sssb_data_pha.csv', "Potentially Hazardous Asteroids", filepath, { 0.75, 0.2, 0.2 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_pha.csv', "Potentially Hazardous Asteroids", filepath, { 0.98, 0.09, 0.06})
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 3
 object.Renderable.TrailFade = 17

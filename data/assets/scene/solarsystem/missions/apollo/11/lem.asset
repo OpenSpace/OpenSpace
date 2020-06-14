@@ -1,18 +1,18 @@
 -- a11_lem.asset
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local moonAsset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local asset_helper = asset.require('util/asset_helper')
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
 
-local model = asset.require('scene/solarsystem/missions/apollo/lem_model')
+local lem_model = asset.require('scene/solarsystem/missions/apollo/lem_model')
 
 
 local Apollo11Lem = {
     Identifier = "Apollo11Lem",
-    Parent = moonAsset.Moon.Identifier,
+    Parent = moon_asset.Moon.Identifier,
     Transform = {
         Translation = {
             Type = "GlobeTranslation",
-            Globe = moonAsset.Moon.Identifier,
+            Globe = moon_asset.Moon.Identifier,
             Longitude = -360+23.47306,
             Latitude = 0.67402,
             Altitude = -1927.65,
@@ -38,10 +38,11 @@ local Apollo11LemModel = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
+            GeometryFile = lem_model.modelFolder .. "/LM-2_ver2clean.obj"
         },
-        ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
-        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+        RotationVector = { 91.044090,171.229706,111.666664 },
+        ColorTexture = lem_model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
+        LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
     },
     GUI = {
         Hidden = false,
@@ -50,11 +51,4 @@ local Apollo11LemModel = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Apollo11Lem,
-    Apollo11LemModel
-})
-
-asset.onInitialize(function ()
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel.Renderable.RotationVector', { 91.044090,171.229706,111.666664} );
-end)
+asset_helper.registerSceneGraphNodesAndExport(asset, { Apollo11Lem, Apollo11LemModel })

@@ -80,7 +80,7 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
             },
             {
                 GridColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 GridColorInfo.description
             },
@@ -107,9 +107,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
     , _gridColor(
         GridColorInfo,
-        glm::vec4(0.5f, 0.5, 0.5f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(0.5f, 0.5, 0.5f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
@@ -129,7 +129,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     addProperty(_gridMatrix);
 
     if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec4>(GridColorInfo.identifier);
+        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
     }
     _gridColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_gridColor);
@@ -214,16 +214,29 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
                                           modelTransform;
 
-    _gridProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _gridProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
-
+    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
+    _gridProgram->setUniform(
+        "MVPTransform",
+        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
+    );
+    
     _gridProgram->setUniform("gridColor", _gridColor);
+
+    float adjustedLineWidth = 1.f;
+
+#ifndef __APPLE__
+    adjustedLineWidth = _lineWidth;
+#endif
 
     // Saves current state:
     GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
     GLfloat currentLineWidth;
     glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
+    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
+    
+    GLenum currentDepthFunction;
+    glGetIntegerv(GL_DEPTH_FUNC, &currentDepthFunction);
+    glDepthFunc(GL_LEQUAL);
 
     GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
         blendDestRGB, blendSrcAlpha, blendSrcRGB;
@@ -235,11 +248,11 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
     // Changes GL state:
-    glLineWidth(_lineWidth);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glLineWidth(adjustedLineWidth);
     glEnablei(GL_BLEND, 0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-
+    
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(_mode, _isize, GL_UNSIGNED_INT, nullptr);
@@ -251,12 +264,16 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     glLineWidth(currentLineWidth);
     glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
     glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+    
     if (!isBlendEnabled) {
         glDisablei(GL_BLEND, 0);
     }
+    
     if (!isLineSmoothEnabled) {
         glDisable(GL_LINE_SMOOTH);
     }
+
+    glDepthFunc(currentDepthFunction);
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
