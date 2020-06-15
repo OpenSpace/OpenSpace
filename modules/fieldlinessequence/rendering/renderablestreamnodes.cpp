@@ -202,7 +202,9 @@ namespace openspace {
         , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         //, _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
-        , _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
+        //, _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
+        , _pThresholdRadius(ThresholdRadiusInfo, 0.f, -10.f, 10.f)
+
         , _pFiltering(FilteringInfo, 100000.f, 500000000.f, 400000000000.f)
         
     {
@@ -237,10 +239,11 @@ namespace openspace {
         //if (!_loadingStatesDynamically) {
         //    _sourceFiles.clear();
         //}
-        _nStates = 3;
+        _nStates = 270;
         setupProperties();
 
         extractTriggerTimesFromFileNames();
+        computeSequenceEndTime();
         std::string filepath = _sourceFiles[0];
         //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
         std::vector<std::string> vec = LoadJsonfile(filepath);
@@ -487,7 +490,8 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
         _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
         _shaderProgram->setUniform(_uniformCache.thresholdRadius, _pThresholdRadius);
-
+        _shaderProgram->setUniform("colorMode", _pColorMode);
+        _shaderProgram->setUniform("filterRadius", _pFiltering);
 
         //if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
            //ghoul::opengl::TextureUnit textureUnit;
@@ -534,8 +538,8 @@ namespace openspace {
             const double sequenceDuration = lastTriggerTime - _startTimes[0];
             const double averageStateDuration = sequenceDuration /
                 (static_cast<double>(_nStates) - 1.0);
-            //_sequenceEndTime = lastTriggerTime + averageStateDuration;
-            _sequenceEndTime = lastTriggerTime;
+            _sequenceEndTime = lastTriggerTime + averageStateDuration;
+            //_sequenceEndTime = lastTriggerTime;
         }
         else {
             // If there's just one state it should never disappear!
@@ -547,7 +551,7 @@ namespace openspace {
             _shaderProgram->rebuildFromFile();
         }
         //Everything below is for updating depending on time.
-        /*
+        
         const double currentTime = data.time.j2000Seconds();
         const bool isInInterval = (currentTime >= _startTimes[0]) &&
             (currentTime < _sequenceEndTime);
@@ -558,7 +562,7 @@ namespace openspace {
             const size_t nextIdx = _activeTriggerTimeIndex + 1;
             if (
                 // true => Previous frame was not within the sequence interval
-                _activeTriggerTimeIndex < 0 ||
+                //_activeTriggerTimeIndex < 0 ||
                 // true => We stepped back to a time represented by another state
                 currentTime < _startTimes[_activeTriggerTimeIndex] ||
                 // true => We stepped forward to a time represented by another state
@@ -573,23 +577,23 @@ namespace openspace {
         }
             else {
                 //not in interval => set everything to false
+            //LDEBUG("not in interval");
                 _activeTriggerTimeIndex = -1;
                 _needsUpdate = false;
             }
 
             if (_needsUpdate) {
+                LDEBUG("needsupdate");
                 if (!_isLoadingStateFromDisk) {
                     _isLoadingStateFromDisk = true;
-                
+                    LDEBUG("triggertime: " + std::to_string(_activeTriggerTimeIndex));
                 std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
-                //auto vec = LoadJsonfile(filePath);
+               // auto vec = LoadJsonfile(filePath);
                 std::thread readBinaryThread([this, f = std::move(filePath)]{
                      auto vec = LoadJsonfile(f);
                     });
                    readBinaryThread.detach();
-                }
-            }
-        */       
+                    
         
         _needsUpdate = false;
         _newStateIsReady = false;
@@ -597,6 +601,8 @@ namespace openspace {
         updatePositionBuffer();
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();
+            }
+            }
         
     }
 
@@ -608,6 +614,7 @@ namespace openspace {
         //std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
         //std::ifstream streamdata("C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
         std::ifstream streamdata(filepath);
+        //std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/2/datawithoutprettyprint_newmethod.json");
         if (!streamdata.is_open())
         {
             LDEBUG("did not read the data.json file");
@@ -637,7 +644,7 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 384;
+        const int numberofStreams = 383;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
@@ -646,15 +653,34 @@ namespace openspace {
          _vertexPositions.clear();
          _lineCount.clear();
          _lineStart.clear();
+         _vertexRadius.clear();
+         _vertexColor.clear();
         int counter = 0;
-        const size_t nPoints = 1999;
-        for (int i = 0; i < numberofStreams; i++) {
+        
+        const size_t nPoints = 1;
+        for (int i = 37; i < numberofStreams; ++i) {
+            //i += 20;
+           /* if (i > 37 && i < 154) {
+                i = 154;
+            }
+            if (i > 154 && i < 210) {
+                i = 210;
+            }
+            if (i > 210) {
+                break;
+            }
+            */
+            
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                 lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
+              //  for (size_t k = 0; k < 1999; ++k) {
+               //     json::iterator lineIter = jsonobj["stream" + std::to_string(i)][std::to_string(k)].begin();
                 
+                //lineIter += 20;
                 //const size_t Nodesamount = 
                 //LDEBUG("testar debuggen");
                 //log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.key());
+                //LDEBUG("stream" + std::to_string(i));
                 //LDEBUG("Phi value: " + (*lineIter)["Phi"].get<std::string>());
                 //LDEBUG("Theta value: " + (*lineIter)["Theta"].get<std::string>());
                 //LDEBUG("R value: " + (*lineIter)["R"].get<std::string>());
@@ -667,7 +693,7 @@ namespace openspace {
                 std::string flux = (*lineIter)["Flux"].get<std::string>();
 
                 //LDEBUG("testar koordinater: " + r + "phi" + phi + "theta: " + theta);
-                
+                //LDEBUG("flux: " + r);
                 //------DOUBLE 
                 /*
                 double rvalue = stringToDouble(r);
@@ -678,21 +704,26 @@ namespace openspace {
                 thetavalue = thetavalue * (180 / pi);
                 rvalue = rvalue * AuToMeter;
                 */
-
+                //lineIter += 20;
                 //--------FLOAT
                 float rValue = stringToFloat(r);
                 float phiValue = stringToFloat(phi);
                 float thetaValue = stringToFloat(theta);
                 float fluxValue = stringToFloat(flux);
-                float ninetyDeToRad = 1.57079633;
+                float ninetyDeToRad = 1.57079633f * 2;
                 const float pi = 3.14159265359f;
                 //phiValue = phiValue * (180.f / pi);
                 //thetaValue = thetaValue + ninetyDeToRad; //(180.f / pi);
+                //phiValue = phiValue + ninetyDeToRad;
+                float rTimesFluxValue = rValue * rValue * fluxValue;
                 rValue = rValue * AuToMeter;
-                float rTimesFluxValue = rValue * fluxValue;
- 
+                
+                //if(rTimesFluxValue > 0)
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rValue, phiValue, thetaValue);
+
+                
+
 
                 //glm::dvec3 sphericalcoordinates =
                 //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),

@@ -56,6 +56,7 @@ uniform vec2      domainLimR;
 uniform float nodeSize;
 uniform vec4 streamColor;
 uniform float thresholdRadius;
+uniform float filterRadius;
 
 // Inputs
 // Should be provided in meters
@@ -97,12 +98,27 @@ void main() {
     //vs_color = streamColor;
 
     const float largerFlux  = -2;
-
-    if(rTimesFluxValue > largerFlux){
-        vs_color = vec4(0.9, 0.4, 0.95, 1.0);
+    if(rValue > filterRadius){
+    if(colorMode == 0){
+    vs_color = streamColor;
     }
     else{
-         vs_color = vec4(0.4, 0.0, 0.4, 1.0);
+    if(rTimesFluxValue > (thresholdRadius + 0.5)){
+        vs_color = vec4(0.4, 0.9, 0.2, 1.0);
+        
+    }
+    else if(rTimesFluxValue > thresholdRadius){
+        vs_color = vec4(0.9, 0.2, 0.2, 1.0);
+    }
+    else{
+        //vs_color = vec4(0.2, 0.5, 0.5, 0.5);
+        //vs_color = vec4(0);
+        vs_color = streamColor;
+    }
+    }
+    }
+    else{
+    vs_color = vec4(0);
     }
 
     //if (colorMethod == colorByFluxValue) {
