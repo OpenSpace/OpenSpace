@@ -589,28 +589,14 @@ namespace openspace {
                    readBinaryThread.detach();
                 }
             }
-        */
-        //glBindVertexArray(_vertexArrayObject);
-        glBindVertexArray(_vertexArrayObject);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-        const std::vector<glm::vec3>& vertPos = _vertexPositions;
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vertPos.size() * sizeof(glm::vec3),
-            vertPos.data(),
-            GL_STATIC_DRAW
-            );
+        */       
         
-       
-        glEnableVertexAttribArray(VaPosition);
-        glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
         _needsUpdate = false;
         _newStateIsReady = false;
 
-        //updateVertexColorBuffer();
-        //updateVertexFilteringBuffer();
-        unbindGL();
+        updatePositionBuffer();
+        updateVertexColorBuffer();
+        updateVertexFilteringBuffer();
         
     }
 
@@ -651,7 +637,7 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 150;
+        const int numberofStreams = 384;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
@@ -698,9 +684,10 @@ namespace openspace {
                 float phiValue = stringToFloat(phi);
                 float thetaValue = stringToFloat(theta);
                 float fluxValue = stringToFloat(flux);
+                float ninetyDeToRad = 1.57079633;
                 const float pi = 3.14159265359f;
                 //phiValue = phiValue * (180.f / pi);
-                //thetaValue = thetaValue + 1.57079633; //(180.f / pi);
+                //thetaValue = thetaValue + ninetyDeToRad; //(180.f / pi);
                 rValue = rValue * AuToMeter;
                 float rTimesFluxValue = rValue * fluxValue;
  
@@ -768,6 +755,25 @@ namespace openspace {
         return std::vector<std::string>();
     }
 
+    void RenderableStreamNodes::updatePositionBuffer() {
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+        const std::vector<glm::vec3>& vertPos = _vertexPositions;
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertPos.size() * sizeof(glm::vec3),
+            vertPos.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(VaPosition);
+        glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+    }
+
     void RenderableStreamNodes::updateVertexColorBuffer() {
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
@@ -776,7 +782,7 @@ namespace openspace {
 
             glBufferData(
                 GL_ARRAY_BUFFER,
-                vertColor.size() * sizeof(glm::vec3),
+                vertColor.size() * sizeof(float),
                 vertColor.data(),
                 GL_STATIC_DRAW
             );
@@ -790,13 +796,12 @@ namespace openspace {
     void RenderableStreamNodes::updateVertexFilteringBuffer() {
             glBindVertexArray(_vertexArrayObject);
             glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
-            //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
             const std::vector<float>& vertexRadius = _vertexRadius;
 
             glBufferData(
                 GL_ARRAY_BUFFER,
-                vertexRadius.size() * sizeof(glm::vec3),
+                vertexRadius.size() * sizeof(float),
                 vertexRadius.data(),
                 GL_STATIC_DRAW
             );
@@ -805,7 +810,6 @@ namespace openspace {
             glVertexAttribPointer(VaFiltering, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
             unbindGL();
-
     }
 
     const std::vector<GLsizei>& RenderableStreamNodes::lineCount() const {

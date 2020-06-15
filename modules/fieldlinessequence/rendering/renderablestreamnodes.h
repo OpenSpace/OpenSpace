@@ -159,6 +159,7 @@ namespace openspace {
         //std::vector<std::string> LoadJsonfile(const std::string& filename);
         std::vector<std::string> LoadJsonfile(std::string filepath);
         void setupProperties();
+        void updatePositionBuffer();
         void updateVertexColorBuffer();
         void updateVertexFilteringBuffer();
         void extractTriggerTimesFromFileNames();
