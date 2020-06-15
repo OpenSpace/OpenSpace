@@ -3,6 +3,7 @@ asset.require('./base')
 local assetHelper = asset.require('util/asset_helper')
 local propertyHelper = asset.require('util/property_helper')
 local sceneHelper = asset.require('util/scene_helper')
+asset.require('examples/debugcoordinateaxes')
 
 asset.require('util/default_dashboard')
 

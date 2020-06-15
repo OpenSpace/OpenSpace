@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,10 @@
 #include <ghoul/glm.h>
 #include <memory>
 #include <string>
+#include <vector>
+#include <modules/volume/rawvolume.h>
+ // #include <ghoul/misc/dictionary.h>
+#include <functional>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -49,43 +53,56 @@ namespace openspace::volume { template <typename T> class RawVolume; }
 
 namespace openspace::kameleonvolume {
 
-class KameleonVolumeReader {
-public:
-    KameleonVolumeReader(std::string path);
+    class KameleonVolumeReader {
+    public:
+        typedef const std::function<void(float)> callback_t;
 
-    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
-        const glm::uvec3& dimensions, const std::string& variable,
-        const glm::vec3& lowerDomainBound, const glm::vec3& upperDomainBound) const;
+        KameleonVolumeReader(const std::string& path);
 
-    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
-        const glm::uvec3& dimensions, const std::string& variable,
-        const glm::vec3& lowerBound, const glm::vec3& upperBound, float& minValue,
-        float& maxValue) const;
+        std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
+            const glm::uvec3& dimensions, const std::string& variable,
+            const glm::vec3& lowerDomainBound, const glm::vec3& upperDomainBound) const;
 
-    ghoul::Dictionary readMetaData() const;
+        std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
+            const glm::uvec3& dimensions,
+            const std::string& variable,
+            const glm::vec3& lowerBound,
+            const glm::vec3& upperBound,
+            const std::vector<std::string>& variableVector,
+            float& minValue,
+            float& maxValue,
+            bool factorRSquared,
+            float innerRadialLimit) const;
 
-    std::string time() const;
-    std::string simulationStart() const;
-    std::string simulationEnd() const;
-    std::string getVisUnit(const std::string& variable) const;
-    float elapsedTime() const;
+        ghoul::Dictionary readMetaData() const;
 
-    double minValue(const std::string& variable) const;
-    double maxValue(const std::string& variable) const;
+        std::string time() const;
+        std::string simulationStart() const;
+        std::string simulationEnd() const;
+        std::string getVisUnit(const std::string& variable) const;
+        float elapsedTime() const;
 
-    std::vector<std::string> variableNames() const;
-    std::vector<std::string> variableAttributeNames() const;
-    std::vector<std::string> globalAttributeNames() const;
-    std::array<std::string, 3> gridVariableNames() const;
+        double minValue(const std::string& variable) const;
+        double maxValue(const std::string& variable) const;
 
-private:
-    static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
-        const std::string& key, ccmc::Attribute& attr);
+        std::vector<std::string> variableNames() const;
+        std::vector<std::string> variableAttributeNames() const;
+        std::vector<std::string> globalAttributeNames() const;
+        std::array<std::string, 3> gridVariableNames() const;
 
-    std::string _path;
-    ccmc::Kameleon _kameleon;
-    std::unique_ptr<ccmc::Interpolator> _interpolator;
-};
+        void setReaderCallback(callback_t& cb);
+
+    private:
+        static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
+            const std::string& key, ccmc::Attribute& attr);
+
+        std::string _path;
+        ccmc::Kameleon _kameleon;
+        std::unique_ptr<ccmc::Interpolator> _interpolator;
+
+        callback_t* _readerCallback;
+        float _progress = 0.0f;
+    };
 
 } // namespace openspace::kameleonvolume
 

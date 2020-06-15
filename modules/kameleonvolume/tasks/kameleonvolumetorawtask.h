@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,30 +29,34 @@
 
 #include <ghoul/glm.h>
 #include <string>
+#include <vector>
 
 namespace openspace::kameleonvolume {
 
-class KameleonVolumeToRawTask : public Task {
-public:
-    KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
+    class KameleonVolumeToRawTask : public Task {
+    public:
+        KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
 
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
+        std::string description() override;
+        void perform(const Task::ProgressCallback& progressCallback) override;
 
-    static documentation::Documentation documentation();
+        static documentation::Documentation documentation();
 
-private:
-    std::string _inputPath;
-    std::string _rawVolumeOutputPath;
-    std::string _dictionaryOutputPath;
+    private:
+        std::string _inputPath;
+        std::string _rawVolumeOutputPath;
+        std::string _dictionaryOutputPath;
 
-    std::string _variable;
-    std::string _units;
-    glm::uvec3 _dimensions = glm::uvec3(0);
-    bool _autoDomainBounds = false;
-    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
-    glm::vec3 _upperDomainBound = glm::vec3(0.f);
-};
+        std::string _variable;
+        std::vector<std::string> _variableVector;
+        std::string _units;
+        glm::uvec3 _dimensions;
+        bool _autoDomainBounds = false;
+        glm::vec3 _lowerDomainBound;
+        glm::vec3 _upperDomainBound;
+        float _innerRadialLimit;
+        bool _factorRSquared = false;
+    };
 
 } // namespace openspace::kameleon
 

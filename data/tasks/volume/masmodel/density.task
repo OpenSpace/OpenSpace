@@ -1,0 +1,55 @@
+-- missing data between 
+-- http://data.openspaceproject.com/files/solarsystem/sun/bastille_day_event/bastille_day_mas_density/v1_v1/mas_merged_step_103.dictionary
+-- http://data.openspaceproject.com/files/solarsystem/sun/bastille_day_event/bastille_day_mas_density/v1_v1/mas_merged_step_103.rawvolume
+-- http://data.openspaceproject.com/files/solarsystem/sun/bastille_day_event/bastille_day_mas_density/v1_v1/mas_merged_step_109.dictionary
+-- http://data.openspaceproject.com/files/solarsystem/sun/bastille_day_event/bastille_day_mas_density/v1_v1/mas_merged_step_109.rawvolume
+
+-- local length = 1
+-- local tasks = {}
+
+-- for i=1,length do
+
+--    tasks = {   -- [#tasks+1]
+--        Type = "KameleonVolumeToRawTask",
+
+--        Dimensions = {100, 100, 128},
+--        LowerDomainBound = {1, -90, 0},
+--        UpperDomainBound = {15, 90, 360},
+--        Input = "C:/Users/eolsson/Downloads/mas_merged_step_" .. 60 .. ".cdf",
+--        RawVolumeOutput = "${DATA}/assets/examples/volume/generated/spherical/mas_merged_step_" .. 1 .. ".rawvolume",
+--        DictionaryOutput = "${DATA}/assets/examples/volume/generated/spherical/mas_merged_step_" .. 2 .. ".dictionary",
+
+--        Variable = "rho"
+        -- Time = "2000-07-14T08:33:37",    --08:33:37.105
+        -- VariableVector = "ur uphi utheta",
+        -- InnerRadialLimit = 1.75,
+        -- Variable = {},
+        -- FactorRSquared = {},
+
+        -- MinValue = {},
+        -- MaxValue = {},
+        -- VisUnit = {}
+--    }
+-- end 
+
+--return tasks
+
+
+local length = 1
+local tasks = {}
+
+for i=1,length do
+   tasks[#tasks+1] = {
+       Type = "KameleonVolumeToRawTask",
+       Input = "C:/Users/eolsson/Downloads/mas_merged_step_" .. 60 .. ".cdf",
+       Dimensions = {100, 100, 128},
+       VariableVector = "ur uphi utheta",
+       InnerRadialLimit = 1.75,
+       LowerDomainBound = {1, -90, 0},
+       UpperDomainBound = {15, 90, 360},
+       RawVolumeOutput = "C:/OpenSpace/newMatteTantan/OpenSpace/data/mas/bastille/u/mas_merged_step_" .. i .. ".rawvolume",
+       DictionaryOutput = "C:/OpenSpace/newMatteTantan/OpenSpace/data/mas/bastille/u/mas_merged_step_" .. i .. ".dictionary"
+   }
+end
+
+return tasks
