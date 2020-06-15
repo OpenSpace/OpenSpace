@@ -548,14 +548,14 @@ std::string Profile::convertToScene_camera(ProfileFile& pf) {
         result += "})\n";
     }
     else if (fields[cameraFieldType] == "goToGeo") {
-        result += "  openspace.globebrowsing.goToGeo({ ";
+        result += "  openspace.globebrowsing.goToGeo(";
         if (!fields[cameraGeoFieldAnchor].empty()) {
             result += fields[cameraGeoFieldAnchor] + ", ";
         }
         result += fields[cameraGeoFieldLatitude] + ", ";
-        result += fields[cameraGeoFieldLongitude] + ", ";
+        result += fields[cameraGeoFieldLongitude];
         if (!fields[cameraGeoFieldAltitude].empty()) {
-            result += fields[cameraGeoFieldAltitude] + ", ";
+            result += + ", " + fields[cameraGeoFieldAltitude];
         }
         result += ")\n";
     }

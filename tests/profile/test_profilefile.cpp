@@ -38,15 +38,14 @@ namespace {
 
 TEST_CASE("profileFile: Simple read and verify", "[profileFile]") {
     testProfileFormat test = buildTestProfile1();
-    std::string testFull_string = stringFromTestProfileFormat(test);
-    std::istringstream iss(testFull_string);
+    std::string testFile = absPath("${TEMPORARY}/profile-test-simple");
+    {
+        std::string testFull_string = stringFromTestProfileFormat(test);
+        std::ofstream f(testFile);
+        f << testFull_string;
+    }
 
-    ProfileFile pf([&iss](std::string& line) {
-        if (getline(iss, line))
-            return true;
-        else
-            return false;
-    });
+    ProfileFile pf(testFile);
 
     std::vector<std::string> tVect;
 
@@ -200,15 +199,14 @@ TEST_CASE("profileFile: Required field missing", "[profileFile]") {
 
 TEST_CASE("profileFile: Write test", "[profileFile]") {
     testProfileFormat test = buildTestProfile1();
+    std::string testFile = absPath("${TEMPORARY}/profile-test-write-test");
     std::string testFull_string = stringFromTestProfileFormat(test);
-    std::istringstream iss(testFull_string);
-    ProfileFile pf([&iss](std::string& line) {
-        if (getline(iss, line))
-            return true;
-        else
-            return false;
-        }
-    );
+    {
+        std::ofstream f(testFile);
+        f << testFull_string;
+    }
+
+    ProfileFile pf(testFile);
 
     std::string result = pf.writeToString();
     REQUIRE(testFull_string == result);

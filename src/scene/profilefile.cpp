@@ -56,10 +56,6 @@ ProfileFile::ProfileFile(std::string filename) {
     readIn(filename);
 }
 
-ProfileFile::ProfileFile(std::function<bool(std::string&)> reader) {
-    readIn(reader);
-}
-
 void ProfileFile::readIn(std::string filename) {
     clearAllFields();
     std::ifstream inFile;
