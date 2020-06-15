@@ -29,7 +29,7 @@ uniform vec4      lineColor;
 uniform mat4      modelViewProjection;
 
 // Uniforms needed to color by quantity
-uniform int       colorMethod;
+uniform int       colorMode;
 uniform sampler1D colorTable;
 uniform vec2      colorTableRange;
 
@@ -63,7 +63,7 @@ layout(location = 0) in vec3 in_position;
 
 // The extra value used to color lines. Location must correspond to _VA_COLOR in 
 // renderablefieldlinessequence.h
-layout(location = 1) in float fluxValue;
+layout(location = 1) in float rTimesFluxValue;
 
 // The extra value used to mask out parts of lines. Location must correspond to 
 // _VA_MASKING in renderablefieldlinessequence.h
@@ -71,9 +71,9 @@ layout(location = 2)
 in float rValue;
 
 
-// These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
+// These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
 const int uniformColor     = 0;
-const int colorByQuantity  = 1;
+const int colorByFluxValue  = 1;
 
 out vec4 vs_color;
 out float vs_depth;
@@ -81,7 +81,7 @@ out float vs_depth;
 
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
-    float lookUpVal = (fluxValue - colorTableRange.x) /
+    float lookUpVal = (rTimesFluxValue - colorTableRange.x) /
                             (colorTableRange.y - colorTableRange.x);
     return texture(colorTable, lookUpVal);
 }
@@ -94,25 +94,25 @@ bool isPartOfParticle(const double time, const int vertexId, const int particleS
 
 void main() {
 
-    //vs_color = vec4(1.0, 0.3, 0.3, 1.0);
-    vec4 temp = streamColor;
     //vs_color = streamColor;
 
-    const int largerFlux  = -2;
+    const float largerFlux  = -2;
 
-    //if(thresholdRadius > fluxValue){
-    if(fluxValue > largerFlux){
-        temp.x = 0.8 * streamColor.x;
-        vs_color = temp;
-        vs_color = vec4(8.0, 0.3, 0.3, 1.0);
+    if(rTimesFluxValue > largerFlux){
+        vs_color = vec4(0.9, 0.4, 0.95, 1.0);
     }
     else{
-         vs_color = vec4(0.3, 0.7, 0.3, 1.0);
+         vs_color = vec4(0.4, 0.0, 0.4, 1.0);
     }
 
-    if(rValue > thresholdRadius){
-       vs_color = vec4(0);
-    }
+    //if (colorMethod == colorByFluxValue) {
+    //    vec4 quantityColor = getTransferFunctionColor();
+    //    vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
+    //}
+
+    //if(rValue > thresholdRadius){
+    //  vs_color = vec4(0);
+    //}
 
         vec4 position_in_meters = vec4(in_position, 1);
         vec4 positionClipSpace = modelViewProjection * position_in_meters;

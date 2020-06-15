@@ -94,6 +94,12 @@ namespace {
 
 
     //properties::PropertyOwner _pStreamGroup;
+    constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
+        "colorMode",
+        "Color Mode",
+        "Color lines uniformly or using color tables based on specific values on nodes,"
+        "for examples flux values."
+    };
     // Size of simulated flow particles
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
         "color",
@@ -168,18 +174,11 @@ namespace {
         //LDEBUG("spherical R:" + std::to_string(position.x));
 
         //ρsinφcosθ 
-        //prolly correct: 
-        cartesianPosition.x = position.x * sin(position.y) * cos(position.z);
-        //cartesianPosition.x = position.x * sin(position.z) * cos(position.y);
+        cartesianPosition.x = position.x * sin(position.z) * cos(position.y);
         //ρsinφsinθ
-        // prolly correct: 
-        cartesianPosition.y = position.x * sin(position.y) * sin(position.z);
-        //cartesianPosition.y = position.x * sin(position.z) * sin(position.y);
+        cartesianPosition.y = position.x * sin(position.z) * sin(position.y);
         //ρcosφ
-
-        //prolly correct: 
-        cartesianPosition.z = position.x * cos(position.y);
-        //cartesianPosition.z = position.x * cos(position.z);
+        cartesianPosition.z = position.x * cos(position.z);
 
         //LDEBUG("cartesian position x: " + std::to_string(cartesianPosition.x));
         //cartesian position x : 0.002175
@@ -193,6 +192,7 @@ namespace openspace {
 
         : Renderable(dictionary)
         , _pColorGroup({ "Color" })
+        , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
         , _pStreamColor(StreamColorInfo,
             glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
             glm::vec4(0.f),
@@ -202,7 +202,7 @@ namespace openspace {
         , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         //, _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
-        , _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, 500000000.f, 400000000000.f)
+        , _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
         , _pFiltering(FilteringInfo, 100000.f, 500000000.f, 400000000000.f)
         
     {
@@ -389,11 +389,15 @@ namespace openspace {
         addPropertySubOwner(_pStreamGroup);
         addPropertySubOwner(_pColorGroup);
         // ------------------------- Add Properties to the groups ------------------------ //
+        _pColorGroup.addProperty(_pColorMode);
         _pColorGroup.addProperty(_pStreamColor);
         _pStreamGroup.addProperty(_pNodeSize);
         _pStreamGroup.addProperty(_pThresholdRadius);
-    }
 
+        // --------------------- Add Options to OptionProperties --------------------- //
+        _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+        _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
+    }
 
     void RenderableStreamNodes::deinitializeGL() {
         glDeleteVertexArrays(1, &_vertexArrayObject);
@@ -484,6 +488,16 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
         _shaderProgram->setUniform(_uniformCache.thresholdRadius, _pThresholdRadius);
 
+
+        //if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
+           //ghoul::opengl::TextureUnit textureUnit;
+            //textureUnit.activate();
+            //_transferFunction->bind(); // Calls update internally
+            //_shaderProgram->setUniform("colorTable", textureUnit);
+            //_shaderProgram->setUniform("colorTableRange",
+            //    _colorTableRanges[_pColorQuantity]);
+        //}
+
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBindVertexArray(_vertexArrayObject);
         glLineWidth(_pLineWidth);
@@ -504,8 +518,6 @@ namespace openspace {
             temp,
             static_cast<GLsizei>(_lineCount.size())
         );
-        
-        
 
         glBindVertexArray(0);
         _shaderProgram->deactivate();
@@ -596,8 +608,8 @@ namespace openspace {
         _needsUpdate = false;
         _newStateIsReady = false;
 
-        updateVertexColorBuffer();
-        updateVertexFilteringBuffer();
+        //updateVertexColorBuffer();
+        //updateVertexFilteringBuffer();
         unbindGL();
         
     }
@@ -639,7 +651,7 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 15;
+        const int numberofStreams = 150;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
@@ -680,15 +692,17 @@ namespace openspace {
                 thetavalue = thetavalue * (180 / pi);
                 rvalue = rvalue * AuToMeter;
                 */
+
                 //--------FLOAT
                 float rValue = stringToFloat(r);
                 float phiValue = stringToFloat(phi);
                 float thetaValue = stringToFloat(theta);
                 float fluxValue = stringToFloat(flux);
                 const float pi = 3.14159265359f;
-                phiValue = phiValue * (180.f / pi);
-                thetaValue = thetaValue * (180.0f / pi);
+                //phiValue = phiValue * (180.f / pi);
+                //thetaValue = thetaValue + 1.57079633; //(180.f / pi);
                 rValue = rValue * AuToMeter;
+                float rTimesFluxValue = rValue * fluxValue;
  
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rValue, phiValue, thetaValue);
@@ -704,6 +718,10 @@ namespace openspace {
                 //((*lineIter)["R"].get<std::string>())));
                 //sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
                 glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
+                //KOLLA OM DEN KONVERTATION FROM DEGREE
+                //Look in to convertion
+                //Roterar åt fel håll counter clockwise
+
                 //position.x = position.x * AuToMeter;
                 //position.y = position.y * AuToMeter;
                 //position.z = position.z * AuToMeter;
@@ -721,18 +739,8 @@ namespace openspace {
                 _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
                 lineStartIdx += nPoints;
 
-                //glm::vec4 red(1.0f, 0.3f, 0.3f, 0.5f);
-                //glm::vec4 blue(0.3f, 0.3f, 1.0f, 0.5f);
-                //float red = 0.1;
-                //float blue = 1;
-
-                //if (rValue >= _pThresholdRadius) {
-                //    _vertexRadius.push_back(rValue);
-                //}
-
-                _vertexColor.push_back(fluxValue);
+                _vertexColor.push_back(rTimesFluxValue);
                 _vertexRadius.push_back(rValue);
-
 
             }
         }

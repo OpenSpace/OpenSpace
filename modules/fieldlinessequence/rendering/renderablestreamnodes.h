@@ -67,7 +67,7 @@ namespace openspace {
         // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
         enum class ColorMethod : int {
             Uniform = 0,
-            ByQuantity
+            ByFluxValue
         };
 
         UniformCache(streamColor, usingParticles, nodeSize, thresholdRadius)
@@ -129,7 +129,8 @@ namespace openspace {
         properties::FloatProperty _pThresholdRadius;
         // Filtering nodes within a range
         properties::FloatProperty _pFiltering;
-
+        // Uniform/transfer function/topology? //////////////////////?
+        properties::OptionProperty _pColorMode;
 
         // initialization
         std::vector<std::string> _sourceFiles;
