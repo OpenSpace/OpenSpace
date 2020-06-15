@@ -262,17 +262,6 @@ public:
      */
     Lines markNodes() const;
 
-    /**
-     * Splits a tab-delimited line (of any type) into a vector with individual string
-     * entries.
-     * \param line The tab-delimited line from which to extract the fields
-     * \param result A vector of n strings that is populated by the split operation
-     * \return The number of fields that were extracted
-     */
-    size_t splitByTab(std::string line, std::vector<std::string>& result);
-
-
-
 private:
     std::string errorString(std::string message);
     void clearAllFields();

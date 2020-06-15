@@ -30,6 +30,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/misc.h>
 #include <string>
 #include <iomanip>
 #include <cctype>
@@ -308,13 +309,12 @@ ProfileFile::Lines ProfileFile::markNodes() const {
 }
 
 void ProfileFile::parseVersion(std::string line) {
-    std::vector<std::string> fields;
-
     if (++_numLinesVersion > versionLinesExpected) {
         throw ghoul::RuntimeError(errorString("Too many lines in Version section"),
             "profileFile");
     }
-    if (splitByTab(line, fields) > versionFieldsExpected) {
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
+    if (fields.size() > versionFieldsExpected) {
         throw ghoul::RuntimeError(errorString("No tabs allowed in Version entry"),
             "profileFile");
     }
@@ -324,9 +324,9 @@ void ProfileFile::parseVersion(std::string line) {
 }
 
 void ProfileFile::parseModule(std::string line) {
-    std::vector<std::string> fields;
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
-    if (splitByTab(line, fields) != moduleFieldsExpected) {
+    if (fields.size() != moduleFieldsExpected) {
         throw ghoul::RuntimeError(errorString(std::to_string(moduleFieldsExpected) +
             " fields required in a Module entry"), "profileFile");
     }
@@ -340,8 +340,8 @@ void ProfileFile::parseModule(std::string line) {
 }
 
 void ProfileFile::parseAsset(std::string line) {
-    std::vector<std::string> fields;
-    if (splitByTab(line, fields) != assetFieldsExpected) {
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
+    if (fields.size() != assetFieldsExpected) {
         throw ghoul::RuntimeError(errorString(std::to_string(assetFieldsExpected) +
             " fields required in an Asset entry"), "profileFile");
     }
@@ -354,9 +354,9 @@ void ProfileFile::parseAsset(std::string line) {
 }
 
 void ProfileFile::parseProperty(std::string line) {
-    std::vector<std::string> fields;
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
-    if (splitByTab(line, fields) != propertyFieldsExpected) {
+    if (fields.size() != propertyFieldsExpected) {
         throw ghoul::RuntimeError(errorString(std::to_string(propertyFieldsExpected) +
             " fields required in Property entry"), "profileFile");
     }
@@ -370,9 +370,9 @@ void ProfileFile::parseProperty(std::string line) {
 }
 
 void ProfileFile::parseKeybinding(std::string line) {
-    std::vector<std::string> fields;
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
-    if (splitByTab(line, fields) != keybindingFieldsExpected) {
+    if (fields.size() != keybindingFieldsExpected) {
         throw ghoul::RuntimeError(errorString(std::to_string(keybindingFieldsExpected)
             + " fields required in Keybinding entry"), "profileFile");
     }
@@ -389,13 +389,13 @@ void ProfileFile::parseKeybinding(std::string line) {
 }
 
 void ProfileFile::parseTime(std::string line) {
-    std::vector<std::string> fields;
-
     if (++_numLinesTime > timeLinesExpected) {
         throw ghoul::RuntimeError(errorString("Too many lines in time section"),
             "profileFile");
     }
-    if (splitByTab(line, fields) != timeFieldsExpected) {
+
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
+    if (fields.size() != timeFieldsExpected) {
         throw ghoul::RuntimeError(errorString(std::to_string(timeFieldsExpected) +
             " fields required in Time entry"), "profileFile");
     }
@@ -408,14 +408,14 @@ void ProfileFile::parseTime(std::string line) {
 }
 
 void ProfileFile::parseCamera(std::string line) {
-    std::vector<std::string> fields;
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
     if (++_numLinesCamera > cameraLinesExpected) {
         throw ghoul::RuntimeError(errorString("Too many lines in camera section"),
             "profileFile");
     }
-    size_t nFields = splitByTab(line, fields);
-    if (nFields == cameraNavigationFieldsExpected) {
+    
+    if (fields.size() == cameraNavigationFieldsExpected) {
         std::vector<std::string> standard = {
             "Type of camera set (setNavigationState)",
             "setNavigationState Anchor",
@@ -429,7 +429,7 @@ void ProfileFile::parseCamera(std::string line) {
         verifyRequiredFields("Camera navigation", fields, standard,
             cameraNavigationFieldsExpected);
     }
-    else if (nFields == cameraGeoFieldsExpected) {
+    else if (fields.size() == cameraGeoFieldsExpected) {
         std::vector<std::string> standard = {
             "Type of camera set (goToGeo)",
             "",
@@ -450,9 +450,9 @@ void ProfileFile::parseCamera(std::string line) {
 }
 
 void ProfileFile::parseMarkNodes(std::string line) {
-    std::vector<std::string> fields;
+    std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
-    if (splitByTab(line, fields) != markNodesFieldsExpected) {
+    if (fields.size() != markNodesFieldsExpected) {
         throw ghoul::RuntimeError(errorString(std::to_string(markNodesFieldsExpected) +
             " field required in an Mark Nodes entry"), "profileFile");
     }
@@ -477,22 +477,6 @@ void ProfileFile::verifyRequiredFields(std::string sectionName,
             throw ghoul::RuntimeError(errorString(errMsg), "profileFile");
         }
     }
-}
-
-size_t ProfileFile::splitByTab(std::string line, std::vector<std::string>& result) {
-    std::istringstream iss(line);
-    std::string tmp;
-    result.clear();
-    while (getline(iss, tmp, '\t')) {
-        result.push_back(tmp);
-    }
-    //Insert additional empty fields only for the case of tab delimiters at end of
-    // string without populated field(s)
-    size_t nTabs = std::count(line.begin(), line.end(), '\t');
-    for (size_t i = 0; i < (nTabs - result.size() + 1); ++i) {
-        result.push_back("");
-    }
-    return result.size();
 }
 
 void ProfileFile::updateTime(std::string line) {

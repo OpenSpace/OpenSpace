@@ -40,11 +40,12 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
 #include <string>
 #include <stack>
 #include <optional>
@@ -220,11 +221,10 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFi
 }
 
 void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf) {
-    std::vector<std::string> elements;
     AssetEvent a;
 
     for (std::string line : pf.assets()) {
-        pf.splitByTab(line, elements);
+        std::vector<std::string> elements = ghoul::tokenizeString(line, '\t');
 
         if (elements[0].empty()) {
             LERROR(fmt::format(
@@ -380,10 +380,9 @@ std::string Profile::convertToScene(ProfileFile& pf) {
 
 std::string Profile::convertToScene_modules(ProfileFile& pf) {
     std::string result;
-    std::vector<std::string> fields;
 
     for (std::string m : pf.modules()) {
-        pf.splitByTab(m, fields);
+        std::vector<std::string> fields = ghoul::tokenizeString(m, '\t');
         if (!fields[moduleFieldLoaded].empty() && !fields[moduleFieldNotLoaded].empty()) {
             result += fmt::format(
                 "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
@@ -408,7 +407,6 @@ std::string Profile::convertToScene_modules(ProfileFile& pf) {
 
 std::string Profile::convertToScene_assets(ProfileFile& pf) {
     std::string result;
-    std::vector<std::string> fields;
     std::string assetR;
 
     result += "asset.require(\"base\");\n";
@@ -418,8 +416,7 @@ std::string Profile::convertToScene_assets(ProfileFile& pf) {
     result += "local renderableHelper = asset.require(\"util/renderable_helper\")\n";
 
     for (size_t i = 0; i < pf.assets().size(); ++i) {
-        std::string a = pf.assets()[i];
-        pf.splitByTab(a, fields);
+        std::vector<std::string> fields = ghoul::tokenizeString(pf.assets()[i], '\t');
 
         if (fields[assetFieldReqd] == "required") {
             assetR = "require";
@@ -444,11 +441,9 @@ std::string Profile::convertToScene_assets(ProfileFile& pf) {
 
 std::string Profile::convertToScene_properties(ProfileFile& pf) {
     std::string result;
-    std::vector<std::string> fields;
 
     for (size_t i = 0; i < pf.properties().size(); ++i) {
-        std::string p = pf.properties()[i];
-        pf.splitByTab(p, fields);
+        std::vector<std::string> fields = ghoul::tokenizeString(pf.properties()[i], '\t');
 
         if (fields[propertyFieldType] != "setPropertyValue"
             && fields[propertyFieldType] != "setPropertyValueSingle")
@@ -472,13 +467,10 @@ std::string Profile::convertToScene_properties(ProfileFile& pf) {
 
 std::string Profile::convertToScene_keybindings(ProfileFile& pf) {
     std::string result;
-    std::vector<std::string> fields;
-    std::string assetR;
 
     result += "local Keybindings = {\n";
     for (size_t i = 0; i < pf.keybindings().size(); ++i) {
-        std::string k = pf.keybindings()[i];
-        pf.splitByTab(k, fields);
+        std::vector<std::string> fields = ghoul::tokenizeString(pf.keybindings()[i], '\t');
 
         result += "  {\n";
         result += fmt::format("    {} = \"{}\",\n", "Key", fields[0]);
@@ -508,11 +500,8 @@ std::string Profile::convertToScene_markNodes(ProfileFile& pf) {
 
 std::string Profile::convertToScene_time(ProfileFile& pf) {
     std::string result;
-    std::vector<std::string> fields;
-    std::string assetR;
 
-    pf.splitByTab(pf.time(), fields);
-
+    std::vector<std::string> fields = ghoul::tokenizeString(pf.time(), '\t');
     if (fields[timeFieldType] == "absolute") {
         result += fmt::format("  openspace.time.setTime(\"{}\")\n", fields[timeFieldSet]);
     }
@@ -535,11 +524,8 @@ std::string Profile::convertToScene_time(ProfileFile& pf) {
 
 std::string Profile::convertToScene_camera(ProfileFile& pf) {
     std::string result;
-    std::vector<std::string> fields;
-    std::string assetR;
 
-    pf.splitByTab(pf.camera(), fields);
-
+    std::vector<std::string> fields = ghoul::tokenizeString(pf.camera(), '\t');
     if (fields[cameraFieldType] == "setNavigationState") {
         result += "  openspace.navigation.setNavigationState({";
         result += fmt::format("Anchor = {}, ", fields[cameraNavigationFieldAnchor]);
