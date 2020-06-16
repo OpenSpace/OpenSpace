@@ -39,7 +39,7 @@ openspace.gaia.addClippingBox = function (name, size, position)
         },
         Renderable = {
             Type = "RenderableBoxGrid",
-            GridColor = { 0.6, 0.5, 0.7, 1.0 },
+            GridColor = { 0.6, 0.5, 0.7 },
             LineWidth = 2.0,
             Size = { size[1] * kilo_parsec_in_meter, size[2] * kilo_parsec_in_meter, size[3] * kilo_parsec_in_meter}
         },
@@ -76,11 +76,16 @@ openspace.gaia.addClippingSphere = function (name, radius)
 
     local grid = {
         Identifier = grid_identifier,
+        Transform = {
+            Scale = {
+                Type = "StaticScale",
+                Scale = radius * kilo_parsec_in_meter 
+            }
+        },
         Renderable = {
             Type = "RenderableSphericalGrid",
-            GridColor = { 0.6, 0.5, 0.7, 1.0 },
+            GridColor = { 0.6, 0.5, 0.7 },
             LineWidth = 1.0,
-            Radius = radius * kilo_parsec_in_meter
         },
         GUI = {
             Name = "Filtering Sphere",
