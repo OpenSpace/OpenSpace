@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIA___GAIAMODULE___H__
-#define __OPENSPACE_MODULE_GAIA___GAIAMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -31,12 +31,12 @@
 
 namespace openspace {
 
-class GaiaModule : public OpenSpaceModule {
+class SoftwareIntegrationModule : public OpenSpaceModule {
 public:
-    constexpr static const char* Name = "Gaia";
+    constexpr static const char* Name = "SoftwareIntegration";
 
-    GaiaModule();
-    virtual ~GaiaModule() = default;
+    SoftwareIntegrationModule();
+    virtual ~SoftwareIntegrationModule() = default;
 
     std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;
@@ -47,4 +47,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GAIA___GAIAMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__

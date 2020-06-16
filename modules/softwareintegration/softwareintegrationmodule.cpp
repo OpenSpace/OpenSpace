@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaia/gaiamodule.h>
+#include <modules/softwareintegration/softwareintegrationmodule.h>
 
-#include <modules/gaia/tasks/constructoctreetask.h>
-#include <modules/gaia/rendering/renderablegaiastars.h>
-#include <modules/gaia/tasks/readfitstask.h>
-#include <modules/gaia/tasks/readspecktask.h>
+#include <modules/softwareintegration/tasks/constructoctreetask.h>
+//#include <modules/gaia/rendering/renderablegaiastars.h>
+#include <modules/softwareintegration/tasks/readfitstask.h>
+#include <modules/softwareintegration/tasks/readspecktask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
@@ -37,12 +37,12 @@
 
 namespace openspace {
 
-GaiaModule::GaiaModule() : OpenSpaceModule(Name) {}
+    SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
 
-void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
+void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
+    //fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
     auto fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fRenderable, "No task factory existed");
@@ -51,20 +51,20 @@ void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
 }
 
-std::vector<documentation::Documentation> GaiaModule::documentations() const {
+std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
     return {
-        RenderableGaiaStars::Documentation(),
+        //RenderableGaiaStars::Documentation(),
         ReadFitsTask::Documentation(),
         ReadSpeckTask::Documentation(),
         ConstructOctreeTask::Documentation(),
     };
 }
 
-scripting::LuaLibrary GaiaModule::luaLibrary() const {
+scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
     scripting::LuaLibrary res;
-    res.name = "gaia";
+    res.name = "softwareintegration";
     res.scripts = {
-        absPath("${MODULE_GAIA}/scripts/filtering.lua")
+        absPath("${MODULE_SOFTWAREINTEGRATION}/scripts/filtering.lua")
     };
     return res;
 }
