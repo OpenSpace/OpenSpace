@@ -76,8 +76,8 @@ namespace openspace {
 documentation::Documentation RenderableBoxGrid::Documentation() {
     using namespace documentation;
     return {
-        "RenderableSphericalGrid",
-        "base_renderable_sphericalgrid",
+        "RenderableBoxGrid",
+        "base_renderable_boxgrid",
         {
             {
                 GridMatrixInfo.identifier,

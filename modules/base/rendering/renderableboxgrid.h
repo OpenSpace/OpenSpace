@@ -31,7 +31,6 @@
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::opengl {
