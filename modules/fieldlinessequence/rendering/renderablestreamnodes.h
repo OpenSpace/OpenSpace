@@ -79,7 +79,7 @@ namespace openspace {
     // ------------------------------------- FLAGS -------------------------------------//
     // False => states are stored in RAM (using 'in-RAM-states'), True => states are
     // loaded from disk during runtime (using 'runtime-states')
-        bool _loadingStatesDynamically = false;
+        bool _loadingStatesDynamically = true;
 
         // False => the previous frame's state should still be shown
         bool _needsUpdate = false;
@@ -147,6 +147,8 @@ namespace openspace {
         // Contains vertexRedius
         std::vector<float> _vertexRadius;
 
+        std::vector<std::vector<glm::vec3>> _states;
+
         // ----------------------------------- POINTERS ------------------------------------//
         // The Lua-Modfile-Dictionary used during initialization
         std::unique_ptr<ghoul::Dictionary> _dictionary;
@@ -166,6 +168,8 @@ namespace openspace {
         void updateVertexFilteringBuffer();
         void extractTriggerTimesFromFileNames();
         void computeSequenceEndTime();
+
+        bool LoadfilesintoRam();
 
             // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
   

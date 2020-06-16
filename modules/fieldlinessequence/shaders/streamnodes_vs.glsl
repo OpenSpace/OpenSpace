@@ -99,8 +99,8 @@ void main() {
     //vs_color = streamColor;
 
     const float largerFlux  = -2;
-    //if(rValue > filterRadius && rValue filterUpper){
-    if(rValue > filterRadius){
+    if((rValue > filterRadius) && (rValue < filterUpper)){
+    //if(rValue > filterRadius){
     if(colorMode == 0){
     vs_color = streamColor;
     }

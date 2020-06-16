@@ -130,12 +130,12 @@ namespace {
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
         "filtering",
-        "Filtering",
+        "FilteringLower",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
         "filtering2",
-        "Filtering",
+        "FilteringUpper",
         "Use filtering to show nodes within a given range."
     };
 
@@ -210,8 +210,9 @@ namespace openspace {
         //, _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
         , _pThresholdRadius(ThresholdRadiusInfo, 0.f, -10.f, 10.f)
 
-        , _pFiltering(FilteringInfo, 100000.f, 500000000.f, 400000000000.f)
-        , _pFilteringUpper(FilteringUpperInfo, 500000000.f, 100000.f, 400000000000.f)
+        , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
+        , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
+       
         
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -247,7 +248,9 @@ namespace openspace {
         //}
         _nStates = 270;
         setupProperties();
-
+        if(!_loadingStatesDynamically){
+        LoadfilesintoRam();
+        }
         extractTriggerTimesFromFileNames();
         computeSequenceEndTime();
         std::string filepath = _sourceFiles[0];
@@ -274,6 +277,176 @@ namespace openspace {
         //setRenderBin(Renderable::RenderBin::Overlay);
     }
 
+    bool RenderableStreamNodes::LoadfilesintoRam() {
+        size_t filesnumbers = 10;
+        for (size_t j = 0; j < filesnumbers; ++j) {
+            
+            std::ifstream streamdata(_sourceFiles[j]);
+            //std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/2/datawithoutprettyprint_newmethod.json");
+            if (!streamdata.is_open())
+            {
+                LDEBUG("did not read the data.json file");
+            }
+            json jsonobj = json::parse(streamdata);
+            //json jsonobj;
+            //streamdata >> jsonobj;
+
+
+
+            //printDebug(jsonobj["stream0"]);
+            //LDEBUG(jsonobj["stream0"]);
+           // std::ofstream o("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/newdata2.json");
+            //o << jsonobj << std::endl;
+            //LDEBUG("vi callade på loadJSONfile med  " + filepath);
+            const char* sNode = "node0";
+            const char* sStream = "stream0";
+            const char* sData = "data";
+
+            const json& jTmp = *(jsonobj.begin()); // First node in the file
+            const char* sTime = "time";
+            //double testtime = jTmp[sTime];
+            std::string testtime = jsonobj["time"];
+            //double testtime = Time::now();
+            //const json::value_type& variableNameVec = jTmp[sStream][sNode][sData];
+            //const size_t nVariables = variableNameVec.size();
+
+            size_t lineStartIdx = 0;
+            //Loop through all the nodes
+            const int numberofStreams = 200;
+            constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
+            //constexpr const float ReToMeter = 6371000.f;       // Earth radius
+            //constexpr const float RsToMeter = 695700000.f;     // Sun radius
+            //const int coordToMeters = 1;
+            //we have to have coordToMeters * our coord. 
+            _vertexPositions.clear();
+            _lineCount.clear();
+            _lineStart.clear();
+            _vertexRadius.clear();
+            _vertexColor.clear();
+            int counter = 0;
+
+            const size_t nPoints = 1;
+            for (int i = 100; i < numberofStreams; ++i) {
+                //i += 20;
+               /* if (i > 37 && i < 154) {
+                    i = 154;
+                }
+                if (i > 154 && i < 210) {
+                    i = 210;
+                }
+                if (i > 210) {
+                    break;
+                }
+                */
+
+                for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
+                    lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
+                    //  for (size_t k = 0; k < 1999; ++k) {
+                     //     json::iterator lineIter = jsonobj["stream" + std::to_string(i)][std::to_string(k)].begin();
+
+                      //lineIter += 20;
+                      //const size_t Nodesamount = 
+                      //LDEBUG("testar debuggen");
+                      //log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.key());
+                      //LDEBUG("stream" + std::to_string(i));
+                      //LDEBUG("Phi value: " + (*lineIter)["Phi"].get<std::string>());
+                      //LDEBUG("Theta value: " + (*lineIter)["Theta"].get<std::string>());
+                      //LDEBUG("R value: " + (*lineIter)["R"].get<std::string>());
+                      //LDEBUG("Flux value: " + (*lineIter)["Flux"].get<std::string>());
+
+                       //probably needs some work with types, not loading in strings. 
+                    std::string r = (*lineIter)["R"].get<std::string>();
+                    std::string phi = (*lineIter)["Phi"].get<std::string>();
+                    std::string theta = (*lineIter)["Theta"].get<std::string>();
+                    std::string flux = (*lineIter)["Flux"].get<std::string>();
+
+                    //LDEBUG("testar koordinater: " + r + "phi" + phi + "theta: " + theta);
+                    //LDEBUG("flux: " + r);
+                    //------DOUBLE 
+                    /*
+                    double rvalue = stringToDouble(r);
+                    double phivalue = stringToDouble(phi);
+                    double thetavalue = stringToDouble(theta);
+                    const double pi = 3.14159265359;
+                    phivalue = phivalue * (180 / pi);
+                    thetavalue = thetavalue * (180 / pi);
+                    rvalue = rvalue * AuToMeter;
+                    */
+                    //lineIter += 20;
+                    //--------FLOAT
+                    float rValue = stringToFloat(r);
+                    float phiValue = stringToFloat(phi);
+                    float thetaValue = stringToFloat(theta);
+                    float fluxValue = stringToFloat(flux);
+                    float ninetyDeToRad = 1.57079633f * 2;
+                    const float pi = 3.14159265359f;
+                    //phiValue = phiValue * (180.f / pi);
+                    //thetaValue = thetaValue + ninetyDeToRad; //(180.f / pi);
+                    //phiValue = phiValue + ninetyDeToRad;
+                    float rTimesFluxValue = rValue * rValue * fluxValue;
+                    rValue = rValue * AuToMeter;
+
+                    //if(rTimesFluxValue > 0)
+                    glm::vec3 sphericalcoordinates =
+                        glm::vec3(rValue, phiValue, thetaValue);
+
+
+
+
+                    //glm::dvec3 sphericalcoordinates =
+                    //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),
+                      //      stringToDouble((*lineIter)["Phi"].get<std::string>()),
+                       //     stringToDouble((*lineIter)["Theta"].get<std::string>()));
+
+                    //precision issue, right now rounding up at around 7th decimal. Probably 
+                    //around conversion with string to Double.
+                    //LDEBUG("R value after string to Float: " + std::to_string(stringToDouble
+                    //((*lineIter)["R"].get<std::string>())));
+                    //sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
+                    glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
+                    //KOLLA OM DEN KONVERTATION FROM DEGREE
+                    //Look in to convertion
+                    //Roterar åt fel håll counter clockwise
+
+                    //position.x = position.x * AuToMeter;
+                    //position.y = position.y * AuToMeter;
+                    //position.z = position.z * AuToMeter;
+                    _vertexPositions.push_back(
+                        position);
+                    ++counter;
+                    //   coordToMeters * glm::vec3(
+                      //     stringToFloat((*lineIter)["Phi"].get<std::string>(), 0.0f),
+                       //    ,
+
+                        //   )
+                       //);
+
+                    _lineCount.push_back(static_cast<GLsizei>(nPoints));
+                    _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+                    lineStartIdx += nPoints;
+
+                    _vertexColor.push_back(rTimesFluxValue);
+                    _vertexRadius.push_back(rValue);
+
+                    int skipcounter = 0;
+                    int nodeskipn = 20;
+                    while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end()) {
+                        ++lineIter;
+                        ++skipcounter;
+                    }
+
+                }
+            }
+
+            LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
+            LDEBUG("counter for how many times we push back" + std::to_string(counter));
+
+            _states.push_back(_vertexPositions);
+            LDEBUG("_states size: " + std::to_string(_states.size()));
+        }
+
+        
+    }
     /**
      * Extracts the general information (from the lua modfile) that is mandatory for the class
      * to function; such as the file type and the location of the source files.
@@ -499,7 +672,7 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.thresholdRadius, _pThresholdRadius);
         _shaderProgram->setUniform("colorMode", _pColorMode);
         _shaderProgram->setUniform("filterRadius", _pFiltering);
-        //_shaderProgram->setUniform("filterUpper", _pFilteringUpper);
+        _shaderProgram->setUniform("filterUpper", _pFilteringUpper);
 
         //if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
            //ghoul::opengl::TextureUnit textureUnit;
@@ -591,7 +764,8 @@ namespace openspace {
             }
 
             if (_needsUpdate) {
-                LDEBUG("needsupdate");
+                //LDEBUG("needsupdate");
+                if(_loadingStatesDynamically){
                 if (!_isLoadingStateFromDisk) {
                     _isLoadingStateFromDisk = true;
                     LDEBUG("triggertime: " + std::to_string(_activeTriggerTimeIndex));
@@ -601,7 +775,7 @@ namespace openspace {
                      auto vec = LoadJsonfile(f);
                     });
                    readBinaryThread.detach();
-                    
+                }
         
         _needsUpdate = false;
         _newStateIsReady = false;
@@ -610,6 +784,15 @@ namespace openspace {
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();
             }
+                //needs fix, right now it stops cuz it cant find the states.
+                else if(!_states[_activeTriggerTimeIndex].empty()){
+                    _vertexPositions = _states[_activeTriggerTimeIndex];
+                    _needsUpdate = false;
+                    _newStateIsReady = false;
+                    updatePositionBuffer();
+                    updateVertexColorBuffer();
+                    updateVertexFilteringBuffer();
+                }
             }
         
     }
@@ -652,7 +835,7 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 100;
+        const int numberofStreams = 383;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
@@ -767,6 +950,14 @@ namespace openspace {
 
                 _vertexColor.push_back(rTimesFluxValue);
                 _vertexRadius.push_back(rValue);
+
+
+                int skipcounter = 0;
+                int nodeskipn = 30;
+                while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
+                    ++lineIter;
+                    ++skipcounter;
+                }
 
             }
         }

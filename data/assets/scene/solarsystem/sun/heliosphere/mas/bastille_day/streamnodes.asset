@@ -10,6 +10,9 @@ asset.info = {
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
+openspace.setPropertyValueSingle("Scene.NeptuneTrail.Renderable.Enabled", false)
+openspace.setPropertyValueSingle("Scene.UranusTrail.Renderable.Enabled", false)
+openspace.setPropertyValueSingle("Scene.SaturnTrail.Renderable.Enabled", false)
 
 -- local transferFunctions = asset.localResource("transferfunctions")
 -- local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
