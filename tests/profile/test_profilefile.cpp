@@ -49,7 +49,7 @@ TEST_CASE("profileFile: Simple read and verify", "[profileFile]") {
 
     std::vector<std::string> tVect;
 
-    REQUIRE(pf.getVersion() == test.tsv[1]);
+    REQUIRE(pf.version() == test.tsv[1]);
     REQUIRE(pf.time() == test.tst[1]);
     REQUIRE(pf.camera() == test.tsc[1]);
     tVect = pf.modules();

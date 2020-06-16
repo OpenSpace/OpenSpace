@@ -478,7 +478,7 @@ std::string Profile::convertToScene_keybindings(ProfileFile& pf) {
         result += fmt::format("    {} = \"{}\",\n", "Name", fields[2]);
         result += fmt::format("    {} = \"{}\",\n", "GuiPath", fields[3]);
         result += fmt::format("    {} = \"{}\",\n", "Local", fields[4]);
-        result += fmt::format("    {} = \"{}\"\n", "Command", fields[5]);
+        result += fmt::format("    {} = {}\n", "Command", fields[5]);
         result += "  },\n";
     }
     result += "}\n";

@@ -25,12 +25,13 @@
 #include <openspace/scene/profilefile.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/fmt.h>
 #include <string>
 #include <iomanip>
 #include <cctype>
@@ -48,6 +49,15 @@ namespace {
     constexpr const char* headerTime = "#Time";
     constexpr const char* headerCamera = "#Camera";
     constexpr const char* headerMarkNodes = "#MarkNodes";
+
+    struct ProfileError : public ghoul::RuntimeError {
+        explicit ProfileError(unsigned int lineNum, std::string msg)
+            : ghoul::RuntimeError(
+                fmt::format("Error @ line {}: {}", lineNum, std::move(msg)),
+                "profileFile"
+            )
+        {}
+    };
 } // namespace
 
 namespace openspace {
@@ -58,53 +68,38 @@ ProfileFile::ProfileFile(std::string filename) {
 
 void ProfileFile::readIn(std::string filename) {
     clearAllFields();
+    _lineNum = 1;
     std::ifstream inFile;
 
     try {
         inFile.open(filename, std::ifstream::in);
     }
     catch (std::ifstream::failure& e) {
-        throw ghoul::RuntimeError("Exception opening profile file for read: "
-            + filename + " (" + e.what() + ")", "profileFile");
+        throw ghoul::RuntimeError(fmt::format(
+            "Exception opening profile file for read: {} ({})", filename, e.what()),
+            "profileFile"
+        );
     }
 
     try {
-        readIn([&inFile] (std::string& line) {
-            if (getline(inFile, line))
-                return true;
-            else
-                return false;
-        });
+        std::string line;
+        bool insideSection = false;
+        while (std::getline(inFile, line)) {
+            processIndividualLine(insideSection, line);
+            _lineNum++;
+        }
     }
     catch (std::ifstream::failure& e) {
-        throw ghoul::RuntimeError(errorString("Read error using getline in: "
-            + filename + " (" + e.what() + ")"), "profileFile");
-    }
-
-    try {
-        inFile.close();
-    }
-    catch (std::ifstream::failure& e) {
-        throw ghoul::RuntimeError("Exception closing profile file after read in: "
-            + filename + " (" + e.what() + ")", "profileFile");
-    }
-}
-
-void ProfileFile::readIn(std::function<bool(std::string&)> reader) {
-    clearAllFields();
-    std::string line;
-    bool insideSection = false;
-    _lineNum = 1;
-
-    while (reader(line)) {
-        processIndividualLine(insideSection, line);
-        _lineNum++;
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Read error using getline in: {} ({})", filename, e.what()
+        ));
     }
 }
 
 void ProfileFile::processIndividualLine(bool& insideSection, std::string line) {
     if (insideSection) {
-        if (isBlank(line)) {
+        if (std::all_of(line.begin(), line.end(), ::isspace)) {
             insideSection = false;
         }
         else {
@@ -144,12 +139,14 @@ void ProfileFile::writeToFile(const std::string& filename) {
     }
 
     std::ofstream outFile;
+    // @TODO (abock, 2020-06-15) Replace with non-throwing stream
     try {
         outFile.open(absFilename, std::ofstream::out);
     }
     catch (std::ofstream::failure& e) {
-        LERROR("Exception opening profile file for write: "
-            + absFilename + " (" + e.what() + ")");
+        LERROR(fmt::format(
+            "Exception opening profile file for write: {} ({})", absFilename, e.what()
+        ));
     }
 
     try {
@@ -160,13 +157,7 @@ void ProfileFile::writeToFile(const std::string& filename) {
             + absFilename + " (" + e.what() + ")");
     }
 
-    try {
-        outFile.close();
-    }
-    catch (std::ofstream::failure& e) {
-        LERROR("Exception closing profile file after write: "
-            + absFilename + " (" + e.what() + ")");
-    }
+    outFile.close();
 }
 
 std::string ProfileFile::writeToString() {
@@ -174,39 +165,33 @@ std::string ProfileFile::writeToString() {
     output = headerVersion + '\n';
     output += _version + '\n' + '\n';
     output += headerModule + '\n';
-    addAllElements(output, _modules);
+    output += ghoul::join(_modules, "\n");
     output += '\n';
     output += headerAsset + '\n';
-    addAllElements(output, _assets);
+    output += ghoul::join(_assets, "\n");
     output += '\n';
     output += headerProperty + '\n';
-    addAllElements(output, _properties);
+    output += ghoul::join(_properties, "\n");
     output += '\n';
     output += headerKeybinding + '\n';
-    addAllElements(output, _keybindings);
+    output += ghoul::join(_keybindings, "\n");
     output += '\n';
     output += headerTime + '\n';
     output += _time + '\n' + '\n';
     output += headerCamera + '\n';
     output += _camera + '\n' + '\n';
     output += headerMarkNodes + '\n';
-    addAllElements(output, _markNodes);
+    output += ghoul::join(_markNodes, "\n");
 
     return output;
 }
 
-const std::string ProfileFile::getVersion() const {
+const std::string& ProfileFile::version() const {
     return _version;
 }
 
 void ProfileFile::setVersion(std::string v) {
     _version = std::move(v);
-}
-
-void ProfileFile::addAllElements(std::string& str, std::vector<std::string>& list) {
-    for (const std::string& s : list) {
-        str += s + '\n';
-    }
 }
 
 void ProfileFile::clearAllFields() {
@@ -222,18 +207,6 @@ void ProfileFile::clearAllFields() {
     _properties.clear();
     _keybindings.clear();
     _markNodes.clear();
-}
-
-bool ProfileFile::isBlank(std::string line) {
-    char* c = const_cast<char*>(line.c_str());
-    int nonBlanks = 0;
-    while (*c) {
-        if (!isspace(*c)) {
-            nonBlanks++;
-        }
-        c++;
-    }
-    return (nonBlanks == 0);
 }
 
 bool ProfileFile::determineSection(std::string line) {
@@ -264,16 +237,13 @@ bool ProfileFile::determineSection(std::string line) {
         parseCurrentSection = &ProfileFile::parseMarkNodes;
     }
     else {
-        throw ghoul::RuntimeError(errorString("Invalid section header '" + line + "'"),
-            "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Invalid section header '{}'", line)
+        );
         foundSection = false;
     }
     return foundSection;
-}
-
-std::string ProfileFile::errorString(std::string message) {
-    std::string e = "Error @ line " + std::to_string(_lineNum) + ": ";
-    return e + message;
 }
 
 std::string ProfileFile::time() const {
@@ -306,13 +276,11 @@ ProfileFile::Lines ProfileFile::markNodes() const {
 
 void ProfileFile::parseVersion(std::string line) {
     if (++_numLinesVersion > versionLinesExpected) {
-        throw ghoul::RuntimeError(errorString("Too many lines in Version section"),
-            "profileFile");
+        throw ProfileError(_lineNum, "Too many lines in Version section");
     }
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
     if (fields.size() > versionFieldsExpected) {
-        throw ghoul::RuntimeError(errorString("No tabs allowed in Version entry"),
-            "profileFile");
+        throw ProfileError(_lineNum, "No tabs allowed in Version entry");
     }
     else {
         _version = line;
@@ -323,8 +291,10 @@ void ProfileFile::parseModule(std::string line) {
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
     if (fields.size() != moduleFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(moduleFieldsExpected) +
-            " fields required in a Module entry"), "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format("{} fields required in a Module entry", moduleFieldsExpected)
+        );
     }
     std::vector<std::string> standard = {
         "module name",
@@ -338,8 +308,10 @@ void ProfileFile::parseModule(std::string line) {
 void ProfileFile::parseAsset(std::string line) {
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
     if (fields.size() != assetFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(assetFieldsExpected) +
-            " fields required in an Asset entry"), "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format("{} fields required in an Asset entry", assetFieldsExpected)
+        );
     }
     std::vector<std::string> standard = {
         "asset name",
@@ -353,8 +325,10 @@ void ProfileFile::parseProperty(std::string line) {
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
     if (fields.size() != propertyFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(propertyFieldsExpected) +
-            " fields required in Property entry"), "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format("{} fields required in Property entry", propertyFieldsExpected)
+        );
     }
     std::vector<std::string> standard = {
         "set command",
@@ -369,8 +343,10 @@ void ProfileFile::parseKeybinding(std::string line) {
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
     if (fields.size() != keybindingFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(keybindingFieldsExpected)
-            + " fields required in Keybinding entry"), "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format("{} fields required in Keybinding entry", keybindingFieldsExpected)
+        );
     }
     std::vector<std::string> standard = {
         "key",
@@ -386,14 +362,15 @@ void ProfileFile::parseKeybinding(std::string line) {
 
 void ProfileFile::parseTime(std::string line) {
     if (++_numLinesTime > timeLinesExpected) {
-        throw ghoul::RuntimeError(errorString("Too many lines in time section"),
-            "profileFile");
+        throw ProfileError(_lineNum, "Too many lines in Time section");
     }
 
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
     if (fields.size() != timeFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(timeFieldsExpected) +
-            " fields required in Time entry"), "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format("{} fields required in Time entry", timeFieldsExpected)
+        );
     }
     std::vector<std::string> standard = {
         "time set type",
@@ -407,8 +384,7 @@ void ProfileFile::parseCamera(std::string line) {
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
     if (++_numLinesCamera > cameraLinesExpected) {
-        throw ghoul::RuntimeError(errorString("Too many lines in camera section"),
-            "profileFile");
+        throw ProfileError(_lineNum, "Too many lines in Camera section");
     }
     
     if (fields.size() == cameraNavigationFieldsExpected) {
@@ -437,10 +413,13 @@ void ProfileFile::parseCamera(std::string line) {
             cameraGeoFieldsExpected);
     }
     else {
-        throw ghoul::RuntimeError(errorString(std::to_string(
-            cameraNavigationFieldsExpected) + " or " + std::to_string(
-            cameraGeoFieldsExpected) + " fields required in Camera entry"),
-            "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format(
+                "{} or {} fields required in Camera entry",
+                cameraNavigationFieldsExpected, cameraGeoFieldsExpected
+            )
+        );
     }
     _camera = line;
 }
@@ -449,12 +428,12 @@ void ProfileFile::parseMarkNodes(std::string line) {
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
 
     if (fields.size() != markNodesFieldsExpected) {
-        throw ghoul::RuntimeError(errorString(std::to_string(markNodesFieldsExpected) +
-            " field required in an Mark Nodes entry"), "profileFile");
+        throw ProfileError(
+            _lineNum,
+            fmt::format("{} field required in a Mark Nodes entry", markNodesFieldsExpected)
+        );
     }
-    std::vector<std::string> standard = {
-        "Mark Interesting Node name"
-    };
+    std::vector<std::string> standard = { "Mark Interesting Node name" };
     verifyRequiredFields("Mark Interesting Nodes", fields, standard,
         markNodesFieldsExpected);
     _markNodes.push_back(line);
@@ -470,7 +449,7 @@ void ProfileFile::verifyRequiredFields(std::string sectionName,
             std::string errMsg = sectionName + " " + standard[i];
             errMsg += "(arg " + std::to_string(i) + "/";
             errMsg += std::to_string(nFields) + ") is required";
-            throw ghoul::RuntimeError(errorString(errMsg), "profileFile");
+            throw ProfileError(_lineNum, std::move(errMsg));
         }
     }
 }

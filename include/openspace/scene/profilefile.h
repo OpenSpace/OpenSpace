@@ -94,28 +94,6 @@ public:
     ProfileFile(std::string filename);
 
     /**
-     * Reads the contents of a profile file and populates vector containers for all
-     * sections. This only pulls individual line entries into their proper sections;
-     * it does not parse the tab-delimited fields of each line.
-     * This will reset contents of the object.
-     * \param filename The profile file to read
-     */
-    void readIn(std::string filename);
-
-    /**
-     * Alternative function for reading the lines from a profile file. This is mainly
-     * intended for testing purposes, but it can be used to provide the profile file
-     * contents from another source (the function readFromFile() provides its own
-     * ifstream source).
-     * This will reset contents of the object.
-     * \param reader A std::function object that accepts a string reference which will
-     *               be populated with a single line of content. This function returns
-     *               true if a single line was read successfully, or false if not to
-     *               indicate that the end of the content has been reached.
-     */
-    void readIn(std::function<bool(std::string&)> reader);
-
-    /**
      * Returns the string contents of this object converted to scene/asset
      * equivalent syntax, with all section headers and contents of each listed on an
      * individual line.
@@ -193,7 +171,7 @@ public:
      * Returns the format version number (profiles syntax version) string
      * \return The version string
      */
-    const std::string getVersion() const;
+    const std::string& version() const;
 
     /**
      * Sets the format version number (profiles syntax version) string
@@ -251,9 +229,17 @@ public:
     Lines markNodes() const;
 
 private:
-    std::string errorString(std::string message);
+
+    /**
+     * Reads the contents of a profile file and populates vector containers for all
+     * sections. This only pulls individual line entries into their proper sections;
+     * it does not parse the tab-delimited fields of each line.
+     * This will reset contents of the object.
+     * \param filename The profile file to read
+     */
+    void readIn(std::string filename);
+
     void clearAllFields();
-    bool isBlank(std::string line);
     void verifyRequiredFields(std::string sectionName, std::vector<std::string> fields,
                               std::vector<std::string> standard, unsigned int nFields);
     void processIndividualLine(bool& insideSection, std::string line);
@@ -267,7 +253,6 @@ private:
     void parseTime(std::string line);
     void parseCamera(std::string line);
     void parseMarkNodes(std::string line);
-    void addAllElements(std::string& str, std::vector<std::string>& list);
 
     size_t _lineNum = 1;
     size_t _numLinesVersion = 0;
