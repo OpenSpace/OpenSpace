@@ -1,0 +1,93 @@
+local asset_helper = asset.require('util/asset_helper')
+local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local kernels = asset.require('./kernels').kernels
+local csm = asset.require('../apollo_csm')
+
+local apolloSpiceId = "-908"
+
+local Apollo8 = {
+    Identifier = "Apollo8",
+    Parent = earth_transforms.EarthBarycenter.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "1968 DEC 21",
+        End = "1968 DEC 28"
+    },
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = apolloSpiceId,
+            Observer = "EARTH BARYCENTER",
+            Frame = "GALACTIC",
+            Kernels = kernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "A8_EARTHRISE",
+            DestinationFrame = "GALACTIC",
+            TimeFrame = {
+                -- The orientation of Apollo 8 is only available during the few minutes
+                -- when the Earthrise picture was taken.
+                Type = "TimeFrameInterval",
+                Start = "1968 DEC 24 16:37:19",
+                End = "1968 DEC 24 16:40:15"
+            }
+        }
+    },
+    GUI = {
+        Name = "Apollo 8",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+local Apollo8Model = {
+    Identifier = "Apollo8Model",
+    Parent = Apollo8.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "1968 DEC 22",
+        End = "1968 DEC 28"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            -- The scale of the model is in cm; OpenSpace is in m
+            Scale = 0.01
+        },
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {0.0, 0.0, -3.1415 / 2}
+        }
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Model",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+-- The pivot node is used for navigation inside the spacecraft
+local Apollo8Pivot = {
+    Identifier = "Apollo8Pivot",
+    Parent = Apollo8.Identifier,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 0, 2.5, 0 }
+        },
+    },
+    GUI = {
+        Name = "Apollo 8 Pivot",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+local model_part = csm.createCsmModel(Apollo8Model.Identifier)
+
+local list = { Apollo8, Apollo8Model, Apollo8Pivot }
+for k,v in pairs(model_part) do
+    v.GUI.Path = "/Solar System/Missions/Apollo/8/Model"
+    table.insert(list, v)
+end
+
+asset_helper.registerSceneGraphNodesAndExport(asset, list)

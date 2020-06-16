@@ -49,15 +49,13 @@ int request(lua_State* state);
 int exists(lua_State* state);
 int localResource(lua_State* state);
 int syncedResource(lua_State* state);
-int noOperation(lua_State* state);
 int exportAsset(lua_State* state);
 
 } // namespace assetloader
 
-class Asset;
+class AssetListener;
 class ResourceSynchronization;
 class SynchronizationWatcher;
-class AssetListener;
 
 class AssetLoader {
 public:
@@ -87,30 +85,26 @@ public:
     void untrackAsset(Asset* asset);
 
     /**
-    * Return the asset identified by the identifier,
-    * if the asset is tracked. Otherwise return nullptr.
-    */
+     * Return the asset identified by the identifier,
+     * if the asset is tracked. Otherwise return nullptr.
+     */
     std::shared_ptr<Asset> has(const std::string& identifier) const;
 
-    /**
-     * Return the lua state
-     */
-    ghoul::lua::LuaState* luaState();
+    /// Return the root asset
+    const Asset& rootAsset() const;
+
+    /// Return the root asset
+    Asset& rootAsset();
 
     /**
-     * Return the root asset
+     * Return the asset root directory
      */
-    std::shared_ptr<Asset> rootAsset() const;
-
-    /**
-    * Return the asset root directory
-    */
     const std::string& assetRootDirectory() const;
 
     /**
      * Load an asset
      */
-    bool loadAsset(std::shared_ptr<Asset> asset);
+    bool loadAsset(Asset* asset);
 
     /**
      * Unload an asset
@@ -157,30 +151,29 @@ public:
     /**
      * Notify listeners about asset state change
      */
-    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state);
+    void assetStateChanged(Asset* asset, Asset::State state);
 
     /**
      * Notify listeners about new requests
      */
-    void assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
+    void assetRequested(Asset* parent, std::shared_ptr<Asset> child);
 
     /**
      * Notify listeners about removed requests
      */
-    void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
+    void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child);
 
 private:
-    std::shared_ptr<Asset> require(const std::string& identifier);
     std::shared_ptr<Asset> request(const std::string& identifier);
     void unrequest(const std::string& identifier);
 
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
 
-    std::shared_ptr<Asset> getAsset(std::string name);
+    std::shared_ptr<Asset> getAsset(const std::string& name);
     ghoul::filesystem::Directory currentDirectory() const;
 
-    void setCurrentAsset(std::shared_ptr<Asset> asset);
+    void setCurrentAsset(Asset* asset);
     void addLuaDependencyTable(Asset* dependant, Asset* dependency);
 
     // Lua functions
@@ -195,7 +188,7 @@ private:
     int syncedResourceLua(Asset* asset);
     int exportAssetLua(Asset* asset);
 
-    // Friend c closures (callable from lua, and maps to lua functions above)
+    // Friend C closures (callable from Lua, and maps to Lua functions above)
     friend int assetloader::onInitialize(lua_State* state);
     friend int assetloader::onDeinitialize(lua_State* state);
     friend int assetloader::onInitializeDependency(lua_State* state);
@@ -209,7 +202,7 @@ private:
 
     // Member variables
     std::shared_ptr<Asset> _rootAsset;
-    std::shared_ptr<Asset> _currentAsset;
+    Asset* _currentAsset = nullptr;
     std::unordered_map<std::string, std::weak_ptr<Asset>> _trackedAssets;
     SynchronizationWatcher* _synchronizationWatcher;
     std::string _assetRootDirectory;
@@ -218,14 +211,14 @@ private:
     // State change listeners
     std::vector<AssetListener*> _assetListeners;
 
-    // References to lua values
+    // References to Lua values
     std::unordered_map<Asset*, std::vector<int>> _onInitializationFunctionRefs;
     std::unordered_map<Asset*, std::vector<int>> _onDeinitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyInitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyDeinitializationFunctionRefs;
-    int _assetsTableRef;
+    int _assetsTableRef = 0;
 };
 
 } // namespace openspace

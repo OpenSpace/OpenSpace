@@ -31,15 +31,10 @@
 
 namespace openspace {
 
-struct SceneLicense;
-
 class SceneLicenseWriter : public DocumentationGenerator {
 public:
-    SceneLicenseWriter(std::vector<SceneLicense> licenses);
+    SceneLicenseWriter();
     std::string generateJson() const override;
-
-private:
-    const std::vector<SceneLicense>& _licenses;
 };
 
 } // namespace openspace

@@ -2,9 +2,19 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'mars-crossing_asteroid', 'sssb_data_mars-crossing_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_mars-crossing_asteroid.csv', "Mars-crossing Asteroids", filepath, { 0.9, 0.3, 0.1 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_mars-crossing_asteroid.csv', "Mars-crossing Asteroids", filepath, { 0.814, 0.305, 0.220 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 1
 object.Renderable.TrailFade = 13
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Mars-Crossing Asteroids",
+    Version = "1.0",
+    Description = [[ Asteroids that cross the orbit of Mars, with a semi-major axis of less than 3.2 au, and a perihelion distance of between 1.3 and 1.666 au. ]],
+    Author = "JPL Small-Body Database hosted by California Institute of Technology",
+    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+}

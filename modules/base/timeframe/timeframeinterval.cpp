@@ -124,9 +124,11 @@ TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     addProperty(_hasEnd);
     addProperty(_end);
 
-    documentation::testSpecificationAndThrow(Documentation(),
-                                             dictionary,
-                                             "TimeFrameInterval");
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "TimeFrameInterval"
+    );
 
     if (dictionary.hasValue<std::string>(StartInfo.identifier)) {
         _start = SpiceManager::ref().ephemerisTimeFromDate(

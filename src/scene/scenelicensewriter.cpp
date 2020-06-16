@@ -24,13 +24,17 @@
 
 #include <openspace/scene/scenelicensewriter.h>
 
-#include <openspace/scene/scenelicense.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/asset.h>
+#include <openspace/scene/assetmanager.h>
+
 #include <ghoul/fmt.h>
 #include <sstream>
 
 namespace openspace {
 
-SceneLicenseWriter::SceneLicenseWriter(std::vector<SceneLicense> licenses)
+SceneLicenseWriter::SceneLicenseWriter()
     : DocumentationGenerator(
         "Scene Licenses",
         "sceneLicense",
@@ -38,24 +42,49 @@ SceneLicenseWriter::SceneLicenseWriter(std::vector<SceneLicense> licenses)
             { "sceneLicenseTemplate",  "${WEB}/documentation/scenelicense.hbs" }
         }
     )
-    , _licenses(std::move(licenses))
 {}
 
 std::string SceneLicenseWriter::generateJson() const {
     std::stringstream json;
     json << "[";
-    for (const SceneLicense& license : _licenses) {
+
+    std::vector<const Asset*> assets =
+        global::openSpaceEngine.assetManager().rootAsset().subTreeAssets();
+
+    int metaTotal = 0;
+    for (const Asset* asset : assets) {
+        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
+        if (!meta.has_value()) {
+            continue;
+        }
+        metaTotal++;
+    }
+
+    int metaCount = 0;
+    for (const Asset* asset : assets) {
+        std::optional<Asset::MetaInformation> meta = asset->metaInformation();
+        
+        if (!meta.has_value()) {
+            continue;
+        }
+
         constexpr const char* replStr = R"("{}": "{}", )";
         constexpr const char* replStr2 = R"("{}": "{}")";
         json << "{";
-        json << fmt::format(replStr, "module", escapedJson(license.module));
-        json << fmt::format(replStr, "name", escapedJson(license.name));
-        json << fmt::format(replStr, "attribution", escapedJson(license.attribution));
-        json << fmt::format(replStr, "url", escapedJson(license.url));
-        json << fmt::format(replStr2, "licenseText", escapedJson(license.licenseText));
+        //json << fmt::format(replStr, "module", escapedJson(license.module));
+        json << fmt::format(replStr, "name", escapedJson(meta->name));
+        json << fmt::format(replStr, "version", escapedJson(meta->version));
+        json << fmt::format(replStr, "description", escapedJson(meta->description));
+        //json << fmt::format(replStr, "attribution", escapedJson(license.attribution));
+        json << fmt::format(replStr, "author", escapedJson(meta->author));
+        json << fmt::format(replStr, "url", escapedJson(meta->url));
+        //json << fmt::format(replStr2, "licenseText", escapedJson(license.licenseText));
+        json << fmt::format(replStr, "license", escapedJson(meta->license));
+        json << fmt::format(replStr2, "path", escapedJson(asset->assetFilePath()));
         json << "}";
 
-        if (&license != &(_licenses.back())) {
+        metaCount++;
+        if (metaCount != metaTotal) {
             json << ",";
         }
     }

@@ -3,7 +3,7 @@
 
 #Asset
 scene/solarsystem/planets/earth/moon/moon	required
-scene/solarsystem/missions/apollo/apollo8	required
+scene/solarsystem/missions/apollo/8/apollo8	required
 scene/solarsystem/planets/earth/earth	required
 
 #Property
