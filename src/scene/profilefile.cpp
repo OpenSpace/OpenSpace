@@ -63,10 +63,6 @@ namespace {
 namespace openspace {
 
 ProfileFile::ProfileFile(std::string filename) {
-    readIn(filename);
-}
-
-void ProfileFile::readIn(std::string filename) {
     clearAllFields();
     _lineNum = 1;
     std::ifstream inFile;
@@ -93,7 +89,7 @@ void ProfileFile::readIn(std::string filename) {
         throw ProfileError(
             _lineNum,
             fmt::format("Read error using getline in: {} ({})", filename, e.what()
-        ));
+            ));
     }
 }
 

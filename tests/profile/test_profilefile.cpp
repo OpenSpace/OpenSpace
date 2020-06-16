@@ -77,123 +77,121 @@ TEST_CASE("profileFile: Simple read and verify", "[profileFile]") {
 }
 
 TEST_CASE("profileFile: Unrecognized header", "[profileFile]") {
+    std::string testFilePath = absPath("${TEMPORARY}/test-profile-unrec-header.profile");
     testProfileFormat test = buildTestProfile1();
-
     test.tsa[0] = "#Azzet";
     std::string testFull_string = stringFromTestProfileFormat(test);
-    std::istringstream iss(testFull_string);
+    {
+        std::ofstream testFile(testFilePath);
+        testFile << testFull_string;
+    }
 
-    ProfileFile pf("default.profile");
     REQUIRE_THROWS_WITH(
-        pf.readIn([&iss](std::string& line) {
-            if (getline(iss, line))
-                return true;
-            else
-                return false;
-            }
-        ),
-        Catch::Matchers::Contains ( "Invalid section header" )
-            && Catch::Matchers::Contains( "#Azzet" )
+        ProfileFile(testFilePath),
+        Catch::Matchers::Contains("Invalid section header") &&
+        Catch::Matchers::Contains("#Azzet")
     );
 }
 
 TEST_CASE("profileFile: Bad number of fields", "[profileFile]") {
-    testProfileFormat test = buildTestProfile1();
-    std::string testFull_string;
-    test.tsm[1] = "globebrowsing\t\t\t";
-    testFull_string = stringFromTestProfileFormat(test);
     {
-        std::istringstream iss(testFull_string);
-        ProfileFile pf("default.profile");
+        std::string testFilePath = absPath(
+            "${TEMPORARY}/test-profile-bad-n-fields-1.profile"
+        );
+        testProfileFormat test = buildTestProfile1();
+        test.tsm[1] = "globebrowsing\t\t\t";
+        std::string testFull_string = stringFromTestProfileFormat(test);
+        {
+            std::ofstream testFile(testFilePath);
+            testFile << testFull_string;
+        }
         REQUIRE_THROWS_WITH(
-            pf.readIn([&iss](std::string& line) {
-                if (getline(iss, line))
-                    return true;
-                else
-                    return false;
-                }
-            ),
-            Catch::Matchers::Contains ("fields required in a Module entry")
+            ProfileFile(testFilePath),
+            Catch::Matchers::Contains("fields required in a Module entry")
         );
     }
-
-    test.tsm[1] = "globebrowsing\t\t";
-    test.tsc[1] = "setNavigationState\t\"NewHorizons\"\t\"Root\"\t-6.572656E1, -7.239404E1, -2.111890E1\t0.102164, -0.362945, 0.926193\t\t";
-    testFull_string = stringFromTestProfileFormat(test);
+    
     {
-        std::istringstream iss(testFull_string);
-        ProfileFile pf("default.profile");
+        std::string testFilePath = absPath(
+            "${TEMPORARY}/test-profile-bad-n-fields-2.profile"
+        );
+
+        testProfileFormat test = buildTestProfile1();
+        test.tsm[1] = "globebrowsing\t\t";
+        test.tsc[1] = "setNavigationState\t\"NewHorizons\"\t\"Root\"\t-6.572656E1, -7.239404E1, -2.111890E1\t0.102164, -0.362945, 0.926193\t\t";
+        std::string testFull_string = stringFromTestProfileFormat(test);
+
+        {
+            std::ofstream testFile(testFilePath);
+            testFile << testFull_string;
+        }
         REQUIRE_THROWS_WITH(
-            pf.readIn([&iss](std::string& line) {
-                if (getline(iss, line))
-                    return true;
-                else
-                    return false;
-                }
-            ),
-            Catch::Matchers::Contains ("fields required in Camera entry")
+            ProfileFile(testFilePath),
+            Catch::Matchers::Contains("fields required in Camera entry")
         );
     }
 }
 
 TEST_CASE("profileFile: Too many lines in time entry", "[profileFile]") {
     testProfileFormat test = buildTestProfile1();
-    std::string testFull_string;
     test.tst.push_back("relative\t\"-1 day\"");
-    testFull_string = stringFromTestProfileFormat(test);
+    std::string testFull_string = stringFromTestProfileFormat(test);
+    std::string testFilePath = absPath(
+        "${TEMPORARY}/test-profile-too-many-lines-time.profile"
+    );
+    
     {
-        std::istringstream iss(testFull_string);
-        ProfileFile pf("default.profile");
+        std::ofstream testFile(testFilePath);
+        testFile << testFull_string;
+    }
+    {
         REQUIRE_THROWS_WITH(
-            pf.readIn([&iss](std::string& line) {
-                if (getline(iss, line))
-                    return true;
-                else
-                    return false;
-                }
-            ),
-            Catch::Matchers::Contains ("Too many lines in time section")
+            ProfileFile(testFilePath),
+            Catch::Matchers::Contains("Too many lines in time section")
         );
     }
 }
 
 TEST_CASE("profileFile: Required field missing", "[profileFile]") {
-    testProfileFormat test = buildTestProfile1();
-    std::string testFull_string;
-    test.tsc[1] = "setNavigationState\t\"NewHorizons\"\ttest\t\"Root\"\t\t0.102164, -0.362945, 0.926193\t\t";
-
-    testFull_string = stringFromTestProfileFormat(test);
     {
-        std::istringstream iss(testFull_string);
-        ProfileFile pf("default.profile");
-        REQUIRE_THROWS_WITH(
-            pf.readIn([&iss](std::string& line) {
-                if (getline(iss, line))
-                    return true;
-                else
-                    return false;
-                }
-            ),
-            Catch::Matchers::Contains ("Camera navigation setNavigationState position vector(arg 4/8) is required")
+        testProfileFormat test = buildTestProfile1();
+        test.tsc[1] = "setNavigationState\t\"NewHorizons\"\ttest\t\"Root\"\t\t0.102164, -0.362945, 0.926193\t\t";
+        std::string testFull_string = stringFromTestProfileFormat(test);
+        std::string testFilePath = absPath(
+            "${TEMPORARY}/test-profile-required-field-missing-1.profile"
         );
+        {
+            std::ofstream testFile(testFilePath);
+            testFile << testFull_string;
+        }
+
+        {
+            REQUIRE_THROWS_WITH(
+                ProfileFile(testFilePath),
+                Catch::Matchers::Contains("Camera navigation setNavigationState position vector(arg 4/8) is required")
+            );
+        }
     }
 
-    test.tsc[1] = "setNavigationState\t\"NewHorizons\"\t\t\"Root\"\t1, 2, 3\t0.102164, -0.362945, 0.926193\t\t";
-    test.tsk[3] = "F10\tSets the time to the orbital B event.\tSet orbital B event time\t/Missions/Osiris Rex\t\t\"openspace.printInfo('Set time: Orbital B'); openspace.time.setTime('2019-APR-08 10:35:27.186')\"";
-    testFull_string = stringFromTestProfileFormat(test);
     {
-        std::istringstream iss(testFull_string);
-        ProfileFile pf("default.profile");
-        REQUIRE_THROWS_WITH(
-            pf.readIn([&iss](std::string& line) {
-                if (getline(iss, line))
-                    return true;
-                else
-                    return false;
-                }
-            ),
-            Catch::Matchers::Contains ("Keybinding local(T/F)(arg 4/6) is required")
+        testProfileFormat test = buildTestProfile1();
+        test.tsc[1] = "setNavigationState\t\"NewHorizons\"\t\t\"Root\"\t1, 2, 3\t0.102164, -0.362945, 0.926193\t\t";
+        test.tsk[3] = "F10\tSets the time to the orbital B event.\tSet orbital B event time\t/Missions/Osiris Rex\t\t\"openspace.printInfo('Set time: Orbital B'); openspace.time.setTime('2019-APR-08 10:35:27.186')\"";
+        std::string testFull_string = stringFromTestProfileFormat(test);
+        std::string testFilePath = absPath(
+            "${TEMPORARY}/test-profile-required-field-missing-2.profile"
         );
+        {
+            std::ofstream testFile(testFilePath);
+            testFile << testFull_string;
+        }
+        {
+            ProfileFile pf("default.profile");
+            REQUIRE_THROWS_WITH(
+                ProfileFile(testFilePath),
+                Catch::Matchers::Contains("Keybinding local(T/F)(arg 4/6) is required")
+            );
+        }
     }
 }
 

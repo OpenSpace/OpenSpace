@@ -229,16 +229,6 @@ public:
     Lines markNodes() const;
 
 private:
-
-    /**
-     * Reads the contents of a profile file and populates vector containers for all
-     * sections. This only pulls individual line entries into their proper sections;
-     * it does not parse the tab-delimited fields of each line.
-     * This will reset contents of the object.
-     * \param filename The profile file to read
-     */
-    void readIn(std::string filename);
-
     void clearAllFields();
     void verifyRequiredFields(std::string sectionName, std::vector<std::string> fields,
                               std::vector<std::string> standard, unsigned int nFields);

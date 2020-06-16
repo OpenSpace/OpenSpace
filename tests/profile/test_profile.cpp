@@ -108,17 +108,13 @@ static void addLineHeaderForFailureMessage(std::string& s, size_t lineNumber) {
 TEST_CASE("profile: Convert profileFile to asset", "[profile]") {
     testProfileFormat test = buildTestProfile1();
     std::string testFull_string = stringFromTestProfileFormat(test);
+    std::string testFilePath = absPath("${TEMPORARY}/test-profile-convert.profile");
+    {
+        std::ofstream testFile(testFilePath);
+        testFile << testFull_string;
+    }
 
-    std::istringstream iss(testFull_string);
-    ProfileFile pf("default.profile");
-    pf.readIn([&iss](std::string& line) {
-        if (getline(iss, line))
-            return true;
-        else
-            return false;
-        }
-    );
-
+    ProfileFile pf(testFilePath);
     Profile p;
     REQUIRE_NOTHROW(
         p.convertToScene(pf)
@@ -127,15 +123,7 @@ TEST_CASE("profile: Convert profileFile to asset", "[profile]") {
 
 TEST_CASE("profile: Verify conversion to scene", "[profile]") {
     std::istringstream iss(newHorizonsProfileInput);
-    ProfileFile pf("default.profile");
-    pf.readIn([&iss](std::string& line) {
-        if (getline(iss, line))
-            return true;
-        else
-            return false;
-        }
-    );
-
+    ProfileFile pf(newHorizonsProfileInput);
     Profile p;
     std::string result;
     REQUIRE_NOTHROW(
