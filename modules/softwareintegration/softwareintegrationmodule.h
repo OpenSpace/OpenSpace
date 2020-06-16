@@ -22,18 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GALAXY___GALAXYMODULE___H__
-#define __OPENSPACE_MODULE_GALAXY___GALAXYMODULE___H__
+#ifndef __OPENSPACE_MODULE_GAIA___GAIAMODULE___H__
+#define __OPENSPACE_MODULE_GAIA___GAIAMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace openspace {
 
-class GalaxyModule : public OpenSpaceModule {
+class GaiaModule : public OpenSpaceModule {
 public:
-    constexpr static const char* Name = "Galaxy";
+    constexpr static const char* Name = "Gaia";
 
-    GalaxyModule();
+    GaiaModule();
+    virtual ~GaiaModule() = default;
+
+    std::vector<documentation::Documentation> documentations() const override;
+    scripting::LuaLibrary luaLibrary() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -41,4 +47,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GALAXY___GALAXYMODULE___H__
+#endif // __OPENSPACE_MODULE_GAIA___GAIAMODULE___H__

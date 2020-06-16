@@ -22,29 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include "floatoperations.glsl"
+#ifndef __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
+#define __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
 
-uniform sampler2D psfTexture;
+namespace openspace::gaia {
 
-in vec4 vs_position;
-in vec2 psfCoords;
-flat in vec3 ge_color;
-flat in float ge_screenSpaceDepth;
+enum RenderOption {
+    Static = 0,
+    Color = 1,
+    Motion = 2
+};
 
-Fragment getFragment() {
-    Fragment frag;
+enum FileReaderOption {
+    Fits = 0,
+    Speck = 1,
+    BinaryRaw = 2,
+    BinaryOctree = 3,
+    StreamOctree = 4
+};
 
-    vec4 textureColor = texture(psfTexture, 0.5*psfCoords + 0.5);
-    vec4 fullColor = vec4(ge_color*textureColor.a, textureColor.a);
-    if (fullColor.a == 0) {
-        discard;
-    }
-    frag.color = fullColor;
+enum ShaderOption {
+    Point_SSBO = 0,
+    Point_VBO = 1,
+    Billboard_SSBO = 2,
+    Billboard_VBO = 3,
+    Billboard_SSBO_noFBO = 4
+};
 
-    frag.depth = ge_screenSpaceDepth;
-    frag.gPosition = vs_position;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+} // namespace openspace::gaiamission
 
-    return frag;
-}
+#endif // __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__

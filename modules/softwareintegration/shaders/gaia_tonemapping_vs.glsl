@@ -24,20 +24,11 @@
 
 #version __CONTEXT__
 
-layout(location = 0) in vec4 vertPosition;
+in vec3 in_position;
 
-out vec3 modelPosition;
-out vec4 viewPosition;
-
-uniform mat4 projectionTransform;
-uniform mat4 modelViewTransform;
-
+out vec2 uv;
 
 void main() {
-    modelPosition = vertPosition.xyz;
-    viewPosition = modelViewTransform*vertPosition;
-
-    // project the position to view space
-    gl_Position = projectionTransform * viewPosition;
-    gl_Position.z = 0.0;
+    uv = (in_position.xy + 1.0) / 2.0;
+    gl_Position = vec4(in_position, 1.0);
 }

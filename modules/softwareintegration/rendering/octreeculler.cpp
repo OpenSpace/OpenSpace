@@ -22,25 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "floatoperations.glsl"
-#include "fragment.glsl"
+#include <modules/gaia/rendering/octreeculler.h>
 
-in vec3 modelPosition;
-in vec4 viewPosition;
+#include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 
-Fragment getFragment() {
-    Fragment frag;
-    //Early ray termination on black parts of the data
-    /*vec3 normalizedPos = (modelPosition*2.0)-1.0;
-    if (abs(modelPosition.x) > 0.9 || abs(modelPosition.y) > 0.9) {
-      frag.color = vec4(0.0, 0.0, 0.0, 1.0);
+namespace openspace {
+
+namespace {
+    bool intersects(const globebrowsing::AABB3& bb, const globebrowsing::AABB3& o) {
+        return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
+            && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
+            && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
     }
-    else {*/
-      vec3 pos = modelPosition + 0.5;
-      //vec3 posClamp = clamp(pos, vec3(0.0), vec3(1.0));
-      frag.color = vec4(pos, 1.0);
-    //}
 
-    frag.depth = safeLength(viewPosition);
-    return frag;
+    void expand(globebrowsing::AABB3& bb, const glm::vec3& p) {
+        bb.min = glm::min(bb.min, p);
+        bb.max = glm::max(bb.max, p);
+    }
+} // namespace
+
+OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
+    : _viewFrustum(std::move(viewFrustum))
+{}
+
+bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners,
+                             const glm::dmat4& mvp)
+{
+    createNodeBounds(corners, mvp);
+    return intersects(_viewFrustum, _nodeBounds);
 }
+
+glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
+                                            const glm::dmat4& mvp,
+                                            const glm::vec2& screenSize)
+{
+
+    createNodeBounds(corners, mvp);
+
+    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
+    glm::vec3 size = (_nodeBounds.max - _nodeBounds.min) / 2.f;
+    size = glm::abs(size);
+    return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
+}
+
+void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
+                                    const glm::dmat4& mvp)
+{
+    // Create a bounding box in clipping space from node boundaries.
+    _nodeBounds = globebrowsing::AABB3();
+
+    for (size_t i = 0; i < 8; ++i) {
+        glm::dvec4 cornerClippingSpace = mvp * corners[i];
+        glm::dvec4 ndc = (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+        expand(_nodeBounds, glm::dvec3(ndc));
+    }
+}
+
+} // namespace openspace

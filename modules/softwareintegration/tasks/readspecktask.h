@@ -22,74 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__
-#define __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__
+#ifndef __OPENSPACE_MODULE_GAIA___READSPECKTASK___H__
+#define __OPENSPACE_MODULE_GAIA___READSPECKTASK___H__
 
-#include <openspace/rendering/volumeraycaster.h>
+#include <openspace/util/task.h>
 
-#include <openspace/util/boxgeometry.h>
-#include <ghoul/glm.h>
 #include <string>
-#include <memory>
-
-namespace ghoul::opengl {
-    class Texture;
-    class TextureUnit;
-    class ProgramObject;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
-struct RenderData;
-struct RaycastData;
+namespace documentation { struct Documentation; }
 
-class GalaxyRaycaster : public VolumeRaycaster {
+class ReadSpeckTask : public Task {
 public:
-    GalaxyRaycaster(ghoul::opengl::Texture& texture);
+    ReadSpeckTask(const ghoul::Dictionary& dictionary);
+    virtual ~ReadSpeckTask() = default;
 
-    virtual ~GalaxyRaycaster() = default;
-    void initialize();
-
-    void renderEntryPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    void renderExitPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    void preRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    bool isCameraInside(const RenderData& data,
-        glm::vec3& localPosition) override;
-
-    std::string boundsVertexShaderPath() const override;
-    std::string boundsFragmentShaderPath() const override;
-    std::string raycasterPath() const override;
-    std::string helperPath() const override;
-
-    void setAspect(const glm::vec3& aspect);
-    void setModelTransform(glm::mat4 transform);
-    void setTime(double time);
-    void setStepSize(float stepSize);
-    void setOpacityCoefficient(float opacityCoefficient);
-    void setAbsorptionMultiplier(float absorptionMultiply);
-    void setEmissionMultiplier(float emissionMultiply);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& onProgress) override;
+    static documentation::Documentation Documentation();
 
 private:
-    glm::dmat4 modelViewTransform(const RenderData& data);
-
-    BoxGeometry _boundingBox;
-    float _stepSize = 0.f;
-    glm::mat4 _modelTransform = glm::mat4(1.f);
-    glm::vec3 _aspect = glm::vec3(0.f);
-    double _time = 0.0;
-    float _opacityCoefficient = 0.f;
-    float _absorptionMultiply = 0.f;
-    float _emissionMultiply = 0.f;
-    ghoul::opengl::Texture& _texture;
-    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
-
-}; // GalaxyRaycaster
+    std::string _inFilePath;
+    std::string _outFilePath;
+};
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__
+#endif // __OPENSPACE_MODULE_GAIA___READSPECKTASK___H__

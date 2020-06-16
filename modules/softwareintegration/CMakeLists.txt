@@ -25,38 +25,47 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.h  
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywayconversiontask.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywaypointsconversiontask.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/gaiamodule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfilejob.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readspecktask.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/constructoctreetask.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gaiaoptions.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.cpp  
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywayconversiontask.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywaypointsconversiontask.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/gaiamodule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfilejob.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readspecktask.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/constructoctreetask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/galaxyraycast.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_ge.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/raycasterbounds_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/raycasterbounds_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_vbo_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_ssbo_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_nofbo_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_ge.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_ge.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_tonemapping_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_tonemapping_point_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_tonemapping_billboard_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-  "Galaxy"
-  galaxy
+  "Gaia"
+  gaia
   STATIC
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

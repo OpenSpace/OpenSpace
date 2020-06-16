@@ -22,76 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
+#version __CONTEXT__
 
-#include <openspace/documentation/documentation.h>
+#include "floatoperations.glsl"
 
-#include <fstream>
-#include <iostream>
-#include <vector>
+const float EPS = 1e-5;
 
-namespace openspace {
+layout(points) in;
+in vec2 vs_brightness[];
+in vec4 vs_gPosition[];
+in float vs_starDistFromSun[];
+in float vs_cameraDistFromSun[];
 
-/*MilkywayPointsConversionTask::MilkywayPointsConversionTask(
-    const std::string& inFilename,
-    const std::string& outFilename)
-    : _inFilename(inFilename)
-    , _outFilename(outFilename) {}*/
+layout(points, max_vertices = 1) out;
+out vec2 ge_brightness;
+out vec4 ge_gPosition;
+out float ge_starDistFromSun;
+out float ge_cameraDistFromSun;
+out float ge_observedDist;
 
-MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
+uniform dmat4 view;
+uniform float viewScaling;
+uniform float cutOffThreshold;
 
-std::string MilkywayPointsConversionTask::description() {
-    return std::string();
-}
+void main() {
 
-void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progressCallback)
-{
-    std::ifstream in(_inFilename, std::ios::in);
-    std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
+    ge_brightness = vs_brightness[0];
+    ge_starDistFromSun = vs_starDistFromSun[0];
+    ge_cameraDistFromSun = vs_cameraDistFromSun[0];
 
-    std::string format;
-    int64_t nPoints;
-    in >> format >> nPoints;
+    vec4 viewPosition = vec4(view * vs_gPosition[0]);
 
-    size_t nFloats = nPoints * 7;
+    ge_observedDist = safeLength(viewPosition / viewScaling);
+    float distThreshold = cutOffThreshold - log(ge_observedDist) / log(4.0);
 
-    std::vector<float> pointData(nFloats);
+    vec4 position = gl_in[0].gl_Position;
 
-    float x;
-    float y;
-    float z;
-    float r;
-    float g;
-    float b;
-    float a;
-
-    for (int64_t i = 0; i < nPoints; ++i) {
-        in >> x >> y >> z >> r >> g >> b >> a;
-        if (in.good()) {
-            pointData[i * 7 + 0] = x;
-            pointData[i * 7 + 1] = y;
-            pointData[i * 7 + 2] = z;
-            pointData[i * 7 + 3] = r;
-            pointData[i * 7 + 4] = g;
-            pointData[i * 7 + 5] = b;
-            pointData[i * 7 + 6] = a;
-            progressCallback(static_cast<float>(i + 1) / nPoints);
-        }
-        else {
-            std::cout << "Failed to convert point data.";
-            return;
-        }
+    // Discard geometry if star has no position (but wasn't a nullArray).
+    // Or if observed distance is above threshold set by cutOffThreshold.
+    // By discarding in gs instead of fs we save computations for when nothing is visible.
+    if (length(position) < EPS || distThreshold <= 0) {
+        return;
     }
 
-    out.write(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
-    out.write(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
+    //gl_PointSize = 1.0;
+    gl_Position = position;
+    gl_Position.z = 0.0;
+    ge_gPosition = viewPosition;
 
-    in.close();
-    out.close();
+    EmitVertex();
+
+    EndPrimitive();
 }
-
-documentation::Documentation MilkywayPointsConversionTask::documentation() {
-    return documentation::Documentation();
-}
-
-} // namespace openspace

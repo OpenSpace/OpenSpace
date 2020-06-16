@@ -22,37 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_GAIA___READFITSTASK___H__
+#define __OPENSPACE_MODULE_GAIA___READFITSTASK___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/util/task.h>
+#include <openspace/util/threadpool.h>
+#include <openspace/util/concurrentjobmanager.h>
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_color;
+namespace openspace {
 
-out vec4 vs_position;
-out vec3 vs_color;
-out float vs_screenSpaceDepth;
-out float vs_starBrightness;
+namespace documentation { struct Documentation; }
 
-uniform dmat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
-uniform dvec3 eyePosition;
+class ReadFitsTask : public Task {
+public:
+    ReadFitsTask(const ghoul::Dictionary& dictionary);
+    virtual ~ReadFitsTask() = default;
 
-const double PARSEC = 3.08567756E16;
+    std::string description() override;
+    void perform(const Task::ProgressCallback& onProgress) override;
+    static documentation::Documentation Documentation();
 
-void main() {
-	  vs_position = vec4(in_position, 1.0);
-		dvec4 dpos = dvec4(vs_position);
+private:
+    const size_t MAX_SIZE_BEFORE_WRITE = 48000000; // ~183MB -> 2M stars with 24 values
+    //const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 0,5 stars with 18 values
 
-		double distanceToStar = length((dpos.xyz - eyePosition));
-		vs_starBrightness = clamp(float(8000*PARSEC/distanceToStar), 0.0, 1.0);
+    /**
+     *  Reads a single FITS file and stores ordered star data in one binary file.
+     */
+    void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
 
-		dpos.xyz *= 8.0;
-		dpos = modelMatrix * dpos;
-		dpos /= PARSEC;
+    /**
+     * Reads all FITS files in a folder with multiple threads and stores ordered star
+     * data into 8 binary files.
+     */
+    void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
 
-		vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
-		vs_color = in_color;
-		vs_screenSpaceDepth = positionScreenSpace.w;
-		gl_Position = positionScreenSpace;
-}
+    /**
+     * Writes \param data to octant [\param index] file.
+     * \param isFirstWrite defines if this is the first write to specified octant, if so
+     * the file is created, otherwise the accumulated data is appended to the end of the
+     * file.
+     */
+    int writeOctantToFile(const std::vector<float>& data, int index,
+        std::vector<bool>& isFirstWrite, int nValuesPerStar);
+
+    std::string _inFileOrFolderPath;
+    std::string _outFileOrFolderPath;
+    bool _singleFileProcess = false;
+    size_t _threadsToUse = 1;
+    int _firstRow = 0;
+    int _lastRow = 0;
+    std::vector<std::string> _allColumnNames;
+    std::vector<std::string> _filterColumnNames;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GAIA___READFITSTASK___H__

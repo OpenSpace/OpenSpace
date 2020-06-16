@@ -22,29 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/galaxy/galaxymodule.h>
+#include <modules/gaia/gaiamodule.h>
 
-#include <modules/galaxy/rendering/renderablegalaxy.h>
-#include <modules/galaxy/tasks/milkywayconversiontask.h>
-#include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
+#include <modules/gaia/tasks/constructoctreetask.h>
+#include <modules/gaia/rendering/renderablegaiastars.h>
+#include <modules/gaia/tasks/readfitstask.h>
+#include <modules/gaia/tasks/readspecktask.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
+GaiaModule::GaiaModule() : OpenSpaceModule(Name) {}
 
-void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
+void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableGalaxy>("RenderableGalaxy");
+    fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
     auto fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fRenderable, "No task factory existed");
-    fTask->registerClass<MilkywayConversionTask>("MilkywayConversionTask");
-    fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
+    fTask->registerClass<ReadFitsTask>("ReadFitsTask");
+    fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
+    fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
+}
+
+std::vector<documentation::Documentation> GaiaModule::documentations() const {
+    return {
+        RenderableGaiaStars::Documentation(),
+        ReadFitsTask::Documentation(),
+        ReadSpeckTask::Documentation(),
+        ConstructOctreeTask::Documentation(),
+    };
+}
+
+scripting::LuaLibrary GaiaModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "gaia";
+    res.scripts = {
+        absPath("${MODULE_GAIA}/scripts/filtering.lua")
+    };
+    return res;
 }
 
 } // namespace openspace

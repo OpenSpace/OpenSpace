@@ -22,38 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__
-#define __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__
+#ifndef __OPENSPACE_MODULE_GAIA___OCTREECULLER___H__
+#define __OPENSPACE_MODULE_GAIA___OCTREECULLER___H__
 
-#include <openspace/util/task.h>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <vector>
 
-#include <string>
+// TODO: Move /geometry/* to libOpenSpace so as not to depend on globebrowsing.
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
- * Converts ascii based point data
- * int64_t n
- * (float x, float y, float z, float r, float g, float b) * n
- * to a binary (floating point) representation with the same layout.
+ * Culls all octree nodes that are completely outside the view frustum.
+ *
+ * The frustum culling uses a 2D axis aligned bounding box for the OctreeNode in
+ * screen space.
  */
-class MilkywayPointsConversionTask : public Task {
+
+class OctreeCuller {
 public:
-    MilkywayPointsConversionTask(const ghoul::Dictionary& dictionary);
-    virtual ~MilkywayPointsConversionTask() = default;
 
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
+    /**
+     * \param viewFrustum is the view space in normalized device coordinates space.
+     *                    Hence it is an axis aligned bounding box and not a real frustum.
+     */
+    OctreeCuller(globebrowsing::AABB3 viewFrustum);
 
-    static documentation::Documentation documentation();
+    ~OctreeCuller() = default;
+
+    /**
+     * \return true if any part of the node is visible in the current view.
+     */
+    bool isVisible(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
+
+    /**
+     * \return the size [in pixels] of the node in clipping space.
+     */
+    glm::vec2 getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
+        const glm::dmat4& mvp, const glm::vec2& screenSize);
 
 private:
-    std::string _inFilename;
-    std::string _outFilename;
+    /**
+     * Creates an axis-aligned bounding box containing all \p corners in clipping space.
+     */
+    void createNodeBounds(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
+
+    const globebrowsing::AABB3 _viewFrustum;
+    globebrowsing::AABB3 _nodeBounds;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__
+#endif // __OPENSPACE_MODULE_GAIA___OCTREECULLER___H__
