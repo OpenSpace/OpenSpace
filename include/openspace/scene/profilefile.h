@@ -29,7 +29,11 @@
 #include <istream>
 #include <fstream>
 #include <functional>
+#include <optional>
+#include <variant>
 #include <vector>
+
+#include <ghoul/systemcapabilities/version.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }
@@ -83,6 +87,90 @@ const size_t cameraGeoFieldAltitude = 4;
 
 class ProfileFile {
 public:
+    struct ProfileStruct {
+        // Version
+        struct Version {
+            int major = 0;
+            int minor = 0;
+            int patch = 0;
+        };
+        Version version;
+
+        struct Module {
+            std::string name;
+            std::string loadedInstruction;
+            std::string notLoadedInstruction;
+        };
+        std::vector<Module> modules;
+
+        struct Asset {
+            enum class Type {
+                Require,
+                Request
+            };
+
+            std::string path;
+            Type type;
+        };
+        std::vector<Asset> assets;
+
+        struct Property {
+            enum class SetType {
+                SetPropertyValue,
+                SetPropertyValueSingle
+            };
+
+            SetType setType;
+            std::string name;
+            std::string value;
+        };
+        std::vector<Property> properties;
+
+        struct Keybinding {
+            std::string key; // @TODO (abock, 2020-06-16) change to key+action
+            std::string documentation;
+            std::string name;
+            std::string guiPath;
+            bool isLocal;
+            std::string script;
+        };
+        std::vector<Keybinding> keybindings;
+
+        struct Time {
+            enum class Type {
+                Absolute,
+                Relative
+            };
+
+            Type type;
+            std::string time;
+        };
+        Time time;
+
+        struct CameraNavState {
+            std::string anchor;
+            std::string aim;
+            std::string referenceFrame;
+            std::string position;
+            std::string up;
+            std::string yaw;
+            std::string pitch;
+        };
+        struct CameraGoToGeo {
+            std::string anchor;
+            double latitude;
+            double longitude;
+            std::optional<double> altitude;
+        };
+        std::variant<CameraNavState, CameraGoToGeo> camera;
+
+        std::vector<std::string> markNodes;
+    };
+
+    ProfileStruct profile;
+
+
+
     using Lines = std::vector<std::string>;
 
     /**
@@ -233,7 +321,7 @@ private:
     void verifyRequiredFields(std::string sectionName, std::vector<std::string> fields,
                               std::vector<std::string> standard, unsigned int nFields);
     void processIndividualLine(bool& insideSection, std::string line);
-    bool determineSection(std::string line);
+    void determineSection(std::string line);
     void (ProfileFile::* parseCurrentSection)(std::string);
     void parseVersion(std::string line);
     void parseModule(std::string line);
@@ -246,8 +334,8 @@ private:
 
     size_t _lineNum = 1;
     size_t _numLinesVersion = 0;
-    size_t _numLinesTime    = 0;
-    size_t _numLinesCamera  = 0;
+    size_t _numLinesTime = 0;
+    size_t _numLinesCamera = 0;
 
     std::string _version;
     std::string _time;

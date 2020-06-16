@@ -89,7 +89,7 @@ ProfileFile::ProfileFile(std::string filename) {
         throw ProfileError(
             _lineNum,
             fmt::format("Read error using getline in: {} ({})", filename, e.what()
-            ));
+        ));
     }
 }
 
@@ -105,9 +105,8 @@ void ProfileFile::processIndividualLine(bool& insideSection, std::string line) {
         }
     }
     else if (line.substr(0, 1) == "#") {
-        if (determineSection(line)) {
-            insideSection = true;
-        }
+        determineSection(line);
+        insideSection = true;
     }
 }
 
@@ -203,33 +202,33 @@ void ProfileFile::clearAllFields() {
     _properties.clear();
     _keybindings.clear();
     _markNodes.clear();
+
+    profile = ProfileStruct();
 }
 
-bool ProfileFile::determineSection(std::string line) {
-    bool foundSection = true;
-
-    if (line.compare(headerVersion) == 0) {
+void ProfileFile::determineSection(std::string line) {
+    if (line == headerVersion) {
         parseCurrentSection = &ProfileFile::parseVersion;
     }
-    else if (line.compare(headerModule) == 0) {
+    else if (line == headerModule) {
         parseCurrentSection = &ProfileFile::parseModule;
     }
-    else if (line.compare(headerAsset) == 0) {
+    else if (line == headerAsset) {
         parseCurrentSection = &ProfileFile::parseAsset;
     }
-    else if (line.compare(headerProperty) == 0) {
+    else if (line == headerProperty) {
         parseCurrentSection = &ProfileFile::parseProperty;
     }
-    else if (line.compare(headerKeybinding) == 0) {
+    else if (line == headerKeybinding) {
         parseCurrentSection = &ProfileFile::parseKeybinding;
     }
-    else if (line.compare(headerTime) == 0) {
+    else if (line == headerTime) {
         parseCurrentSection = &ProfileFile::parseTime;
     }
-    else if (line.compare(headerCamera) == 0) {
+    else if (line == headerCamera) {
         parseCurrentSection = &ProfileFile::parseCamera;
     }
-    else if (line.compare(headerMarkNodes) == 0) {
+    else if (line == headerMarkNodes) {
         parseCurrentSection = &ProfileFile::parseMarkNodes;
     }
     else {
@@ -237,9 +236,7 @@ bool ProfileFile::determineSection(std::string line) {
             _lineNum,
             fmt::format("Invalid section header '{}'", line)
         );
-        foundSection = false;
     }
-    return foundSection;
 }
 
 std::string ProfileFile::time() const {
@@ -278,9 +275,29 @@ void ProfileFile::parseVersion(std::string line) {
     if (fields.size() > versionFieldsExpected) {
         throw ProfileError(_lineNum, "No tabs allowed in Version entry");
     }
-    else {
-        _version = line;
+    _version = line;
+
+    //
+    // New
+    //
+    std::vector<std::string> parts = ghoul::tokenizeString(line, '.');
+    if (parts.empty() || parts.size() > 3) {
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 1-3 version components, got {}", parts.size())
+        );
     }
+
+    ProfileStruct::Version version;
+
+    version.major = std::stoi(parts[0]);
+    if (parts.size() > 1) {
+        version.minor = std::stoi(parts[1]);
+    }
+    if (parts.size() > 2) {
+        version.patch = std::stoi(parts[2]);
+    }
+    profile.version = std::move(version);
 }
 
 void ProfileFile::parseModule(std::string line) {
@@ -299,6 +316,22 @@ void ProfileFile::parseModule(std::string line) {
     };
     verifyRequiredFields("Module", fields, standard, moduleFieldsExpected);
     _modules.push_back(line);
+
+
+    //
+    // New
+    //
+    if (fields.size() != 3) {
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 3 fields in a Module entry, got {}", fields.size())
+        );
+    }
+    ProfileStruct::Module m;
+    m.name = fields[0];
+    m.loadedInstruction = fields[1];
+    m.notLoadedInstruction = fields[2];
+    profile.modules.push_back(std::move(m));
 }
 
 void ProfileFile::parseAsset(std::string line) {
@@ -315,6 +348,33 @@ void ProfileFile::parseAsset(std::string line) {
     };
     verifyRequiredFields("Asset", fields, standard, assetFieldsExpected);
     _assets.push_back(line);
+
+
+    //
+    // New
+    //
+    if (fields.size() != 2) {
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 2 fields in an Asset entry, got {}", fields.size())
+        );
+    }
+
+    ProfileStruct::Asset a;
+    a.path = fields[0];
+    a.type = [&](const std::string& type) -> ProfileStruct::Asset::Type {
+        if (type == "required") {
+            return ProfileStruct::Asset::Type::Require;
+        }
+        if (type == "request") {
+            return ProfileStruct::Asset::Type::Request;
+        }
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected asset type 'required' or 'request', got {}", type)
+        );
+    }(fields[1]);
+    profile.assets.push_back(std::move(a));
 }
 
 void ProfileFile::parseProperty(std::string line) {
@@ -333,6 +393,37 @@ void ProfileFile::parseProperty(std::string line) {
     };
     verifyRequiredFields("Property", fields, standard, propertyFieldsExpected);
     _properties.push_back(line);
+
+
+    //
+    // New
+    //
+    if (fields.size() != 3) {
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 3 fields in Property entry, got {}", fields.size())
+        );
+    }
+    ProfileStruct::Property p;
+    p.setType = [&](const std::string& type) -> ProfileStruct::Property::SetType {
+        if (type == "setPropertyValue") {
+            return ProfileStruct::Property::SetType::SetPropertyValue;
+        }
+        if (type == "setPropertyValueSingle") {
+            return ProfileStruct::Property::SetType::SetPropertyValueSingle;
+        }
+        throw ProfileError(
+            _lineNum,
+            fmt::format(
+                "Expected property set type 'setPropertyValue' or "
+                "'setPropertyValueSingle', got {}",
+                type
+            )
+        );
+    }(fields[0]);
+    p.name = fields[1];
+    p.value = fields[2];
+    profile.properties.push_back(std::move(p));
 }
 
 void ProfileFile::parseKeybinding(std::string line) {
@@ -354,6 +445,36 @@ void ProfileFile::parseKeybinding(std::string line) {
     };
     verifyRequiredFields("Keybinding", fields, standard, keybindingFieldsExpected);
     _keybindings.push_back(line);
+
+    
+    //
+    // New
+    //
+    if (fields.size() != 6) {
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 6 fields in Keybinding entry, got {}", fields.size())
+        );
+    }
+    ProfileStruct::Keybinding kb;
+    kb.key = fields[0];
+    kb.documentation = fields[1];
+    kb.name = fields[2];
+    kb.guiPath = fields[3];
+    kb.isLocal = [&](const std::string& local) -> bool {
+        if (local == "false") {
+            return false;
+        }
+        if (local == "true") {
+            return true;
+        }
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 'false' or 'true' for the local path, got {}", local)
+        );
+    }(fields[4]);
+    kb.script = fields[5];
+    profile.keybindings.push_back(std::move(kb));
 }
 
 void ProfileFile::parseTime(std::string line) {
@@ -374,6 +495,32 @@ void ProfileFile::parseTime(std::string line) {
     };
     verifyRequiredFields("Time", fields, standard, timeFieldsExpected);
     _time = line;
+
+
+    //
+    // New
+    //
+    if (fields.size() != 2) {
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 2 fields in Time entry, got {}", fields.size())
+        );
+    }
+    ProfileStruct::Time time;
+    time.type = [&](const std::string& type) -> ProfileStruct::Time::Type {
+        if (type == "absolute") {
+            return ProfileStruct::Time::Type::Absolute;
+        }
+        if (type == "relative") {
+            return ProfileStruct::Time::Type::Relative;
+        }
+        throw ProfileError(
+            _lineNum,
+            fmt::format("Expected 'absolute' or 'relative' for the type, got {}", type)
+        );
+    }(fields[0]);
+    time.time = fields[1];
+    profile.time = std::move(time);
 }
 
 void ProfileFile::parseCamera(std::string line) {
@@ -418,6 +565,61 @@ void ProfileFile::parseCamera(std::string line) {
         );
     }
     _camera = line;
+
+
+    //
+    // New
+    //
+    if (fields.empty()) {
+        throw ProfileError(_lineNum, "No values specified for Camera location");
+    }
+    if (fields[0] == "setNavigationState") {
+        if (fields.size() != 8) {
+            throw ProfileError(
+                _lineNum,
+                fmt::format(
+                    "Expected 8 fields in the Camera entry, got {}", fields.size()
+                )
+            );
+        }
+
+        ProfileStruct::CameraNavState camera;
+        camera.anchor = fields[1];
+        camera.aim = fields[2];
+        camera.referenceFrame = fields[3];
+        camera.position = fields[4];
+        camera.up = fields[5];
+        camera.yaw = fields[6];
+        camera.pitch = fields[7];
+        profile.camera = std::move(camera);
+        return;
+    }
+    if (fields[0] == "goToGeo") {
+        if (fields.size() != 5) {
+            throw ProfileError(
+                _lineNum,
+                fmt::format(
+                    "Expected 5 fields in the Camera entry, got {}", fields.size()
+                )
+            );
+        }
+
+        ProfileStruct::CameraGoToGeo camera;
+        camera.anchor = fields[1];
+        camera.latitude = std::stod(fields[2]);
+        camera.longitude = std::stod(fields[3]);
+        if (!fields[4].empty()) {
+            camera.altitude = std::stod(fields[4]);
+        }
+        profile.camera = std::move(camera);
+        return;
+    }
+    throw ProfileError(
+        _lineNum,
+        fmt::format(
+            "Expected 'setNavigationState' or 'goToGeo' for the type, got {}", fields[0]
+        )
+    );
 }
 
 void ProfileFile::parseMarkNodes(std::string line) {
@@ -433,6 +635,12 @@ void ProfileFile::parseMarkNodes(std::string line) {
     verifyRequiredFields("Mark Interesting Nodes", fields, standard,
         markNodesFieldsExpected);
     _markNodes.push_back(line);
+
+
+    //
+    // New
+    //
+    profile.markNodes.push_back(line);
 }
 
 void ProfileFile::verifyRequiredFields(std::string sectionName,
