@@ -57,6 +57,7 @@ uniform float nodeSize;
 uniform vec4 streamColor;
 uniform float thresholdRadius;
 uniform float filterRadius;
+uniform float filterUpper;
 
 // Inputs
 // Should be provided in meters
@@ -98,6 +99,7 @@ void main() {
     //vs_color = streamColor;
 
     const float largerFlux  = -2;
+    //if(rValue > filterRadius && rValue filterUpper){
     if(rValue > filterRadius){
     if(colorMode == 0){
     vs_color = streamColor;

@@ -133,6 +133,11 @@ namespace {
         "Filtering",
         "Use filtering to show nodes within a given range."
     };
+    constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
+        "filtering2",
+        "Filtering",
+        "Use filtering to show nodes within a given range."
+    };
 
     enum class SourceFileType : int {
         Json = 0,
@@ -206,6 +211,7 @@ namespace openspace {
         , _pThresholdRadius(ThresholdRadiusInfo, 0.f, -10.f, 10.f)
 
         , _pFiltering(FilteringInfo, 100000.f, 500000000.f, 400000000000.f)
+        , _pFilteringUpper(FilteringUpperInfo, 500000000.f, 100000.f, 400000000000.f)
         
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -388,6 +394,7 @@ namespace openspace {
         addProperty(_pStreamsEnabled);
         addProperty(_pLineWidth);
         addProperty(_pFiltering);
+        addProperty(_pFilteringUpper);
         // ----------------------------- Add Property Groups ----------------------------- //
         addPropertySubOwner(_pStreamGroup);
         addPropertySubOwner(_pColorGroup);
@@ -492,6 +499,7 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.thresholdRadius, _pThresholdRadius);
         _shaderProgram->setUniform("colorMode", _pColorMode);
         _shaderProgram->setUniform("filterRadius", _pFiltering);
+        //_shaderProgram->setUniform("filterUpper", _pFilteringUpper);
 
         //if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
            //ghoul::opengl::TextureUnit textureUnit;
@@ -644,7 +652,7 @@ namespace openspace {
 
         size_t lineStartIdx = 0;
         //Loop through all the nodes
-        const int numberofStreams = 383;
+        const int numberofStreams = 100;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
         //constexpr const float ReToMeter = 6371000.f;       // Earth radius
         //constexpr const float RsToMeter = 695700000.f;     // Sun radius
@@ -658,7 +666,7 @@ namespace openspace {
         int counter = 0;
         
         const size_t nPoints = 1;
-        for (int i = 37; i < numberofStreams; ++i) {
+        for (int i = 0; i < numberofStreams; ++i) {
             //i += 20;
            /* if (i > 37 && i < 154) {
                 i = 154;

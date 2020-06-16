@@ -129,6 +129,8 @@ namespace openspace {
         properties::FloatProperty _pThresholdRadius;
         // Filtering nodes within a range
         properties::FloatProperty _pFiltering;
+        // Filtering nodes with a upper range
+        properties::FloatProperty _pFilteringUpper;
         // Uniform/transfer function/topology? //////////////////////?
         properties::OptionProperty _pColorMode;
 
