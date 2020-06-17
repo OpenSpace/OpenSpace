@@ -83,8 +83,7 @@ out float vs_depth;
 
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
-    float lookUpVal = (rTimesFluxValue - colorTableRange.x) /
-                            (colorTableRange.y - colorTableRange.x);
+    float lookUpVal = rTimesFluxValue;
     return texture(colorTable, lookUpVal);
 }
 
@@ -98,36 +97,19 @@ void main() {
 
     //vs_color = streamColor;
 
-    const float largerFlux  = -2;
-    if((rValue > filterRadius) && (rValue < filterUpper)){
-    //if(rValue > filterRadius){
-    if(colorMode == 0){
-    vs_color = streamColor;
-    }
-    else{
-    if(rTimesFluxValue > (thresholdRadius + 0.5)){
-        vs_color = vec4(0.4, 0.9, 0.2, 1.0);
-        
-    }
-    else if(rTimesFluxValue > thresholdRadius){
-        vs_color = vec4(0.9, 0.2, 0.2, 1.0);
-    }
-    else{
-        //vs_color = vec4(0.2, 0.5, 0.5, 0.5);
-        //vs_color = vec4(0);
+    //if(rValue > filterRadius && rValue filterUpper){
+    if(rValue > filterRadius){
+        if(colorMode == 0){
         vs_color = streamColor;
-    }
-    }
-    }
-    else{
-    vs_color = vec4(0);
-    }
-
-    //if (colorMethod == colorByFluxValue) {
-    //    vec4 quantityColor = getTransferFunctionColor();
-    //    vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
-    //}
-
+        }
+        else if (colorMode == 1){
+            vec4 quantityColor = getTransferFunctionColor();
+            vs_color = vec4(quantityColor.xyz, 1);
+        }
+         else{
+            vs_color = vec4(0);
+        }
+        }
     //if(rValue > thresholdRadius){
     //  vs_color = vec4(0);
     //}

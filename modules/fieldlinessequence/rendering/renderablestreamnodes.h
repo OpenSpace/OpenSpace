@@ -116,8 +116,18 @@ namespace openspace {
         // ---------------------------------- Properties ---------------------------------- //
         // Group to hold the color properties
         properties::PropertyOwner _pColorGroup;
+        // Uniform/transfer function/topology? //////////////////////?
+        properties::OptionProperty _pColorMode;
         // Uniform stream Color
         properties::Vec4Property _pStreamColor;
+        // Index of the flux value to color lines by
+        //properties::OptionProperty _pColorFlux;
+        // Color table/transfer function min
+        properties::StringProperty _pColorFluxMin;
+        // Color table/transfer function max
+        properties::StringProperty _pColorFluxMax;
+        // Color table/transfer function for "By Flux value" coloring
+        properties::StringProperty _pColorTablePath;
         // Toggle flow [ON/OFF]
         properties::BoolProperty _pStreamsEnabled;
         // Group to hold the flow/particle properties
@@ -132,14 +142,16 @@ namespace openspace {
         properties::FloatProperty _pFiltering;
         // Filtering nodes with a upper range
         properties::FloatProperty _pFilteringUpper;
-        // Uniform/transfer function/topology? //////////////////////?
-        properties::OptionProperty _pColorMode;
 
         // initialization
         std::vector<std::string> _sourceFiles;
 
         // ------------------------------------ VECTORS ----------------------------------- //
-            // Contains the _triggerTimes for all FieldlineStates in the sequence
+        // Paths to color tables. One for each 'extraQuantity'
+        std::vector<std::string> _colorTablePaths;
+        // Values represents min & max values represented in the color table
+        std::vector<glm::vec2> _colorTableRanges;
+        // Contains the _triggerTimes for all FieldlineStates in the sequence
         std::vector<double> _startTimes;
         // Contains vertexPositions
         std::vector<glm::vec3> _vertexPositions;
@@ -156,12 +168,16 @@ namespace openspace {
         std::unique_ptr<ghoul::Dictionary> _dictionary;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+        // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
+        std::unique_ptr<TransferFunction> _transferFunction;
 
         // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
         bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
         //void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
+        void definePropertyCallbackFunctions();
         bool loadJsonStatesIntoRAM(const std::string& outputFolder);
         bool extractJsonInfoFromDictionary(fls::Model& model);
+        void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
         //std::vector<std::string> LoadJsonfile(const std::string& filename);
         std::vector<std::string> LoadJsonfile(std::string filepath);
         void setupProperties();

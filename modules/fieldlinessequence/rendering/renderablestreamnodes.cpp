@@ -55,9 +55,9 @@ namespace {
     constexpr const char* _loggerCat = "renderableStreamNodes";
 
     //gl variables for shaders, probably needed some of them atleast
-    constexpr const GLuint VaPosition = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaColor = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaFiltering = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaPosition   = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaColor      = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaFiltering  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
 
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
@@ -86,6 +86,11 @@ namespace {
 
     //[INT] Threshold Radius should have a range
     constexpr const char* KeyThresholdRadius = "ThresholdRadius";
+    // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
+    // [STRING ARRAY] Values should be paths to .txt files
+    constexpr const char* KeyColorTablePaths = "ColorTablePaths";
+    // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    constexpr const char* KeyColorTableRanges = "ColorTableRanges";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
@@ -99,6 +104,26 @@ namespace {
         "Color Mode",
         "Color lines uniformly or using color tables based on specific values on nodes,"
         "for examples flux values."
+    };
+    constexpr openspace::properties::Property::PropertyInfo ColorFluxInfo = {
+        "colorFlux",
+        "Flux value to Color By",
+        "Flux values used to color lines if the 'By Flux value' color method is selected."
+    };
+    constexpr openspace::properties::Property::PropertyInfo ColorFluxMinInfo = {
+        "colorFluxMin",
+        "ColorTable Min Value",
+        "Value to map to the lowest end of the color table."
+    };
+    constexpr openspace::properties::Property::PropertyInfo ColorFluxMaxInfo = {
+        "colorFluxMax",
+        "ColorTable Max Value",
+        "Value to map to the highest end of the color table."
+    };
+    constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
+        "colorTablePath",
+        "Path to Color Table",
+        "Color Table/Transfer Function to use for 'By Quantity' coloring."
     };
     // Size of simulated flow particles
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
@@ -198,6 +223,10 @@ namespace openspace {
         : Renderable(dictionary)
         , _pColorGroup({ "Color" })
         , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
+        //, _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
+        , _pColorFluxMin(ColorFluxMinInfo)
+        , _pColorFluxMax(ColorFluxMaxInfo)
+        , _pColorTablePath(ColorTablePathInfo)
         , _pStreamColor(StreamColorInfo,
             glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
             glm::vec4(0.f),
@@ -218,6 +247,12 @@ namespace openspace {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
 
+    void RenderableStreamNodes::definePropertyCallbackFunctions() {
+            _pColorTablePath = _colorTablePaths[0];
+            _transferFunction->setPath(_pColorTablePath);
+            _colorTablePaths[0] = _pColorTablePath;    
+    }
+
     void RenderableStreamNodes::initializeGL() {
         // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
         //std::string filepath = "C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
@@ -229,6 +264,11 @@ namespace openspace {
             return;
         }
 
+        // Set a default color table, just in case the (optional) user defined paths are
+        // corrupt or not provided!
+        _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
+        _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
+
         // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
         std::string outputFolderPath;
         //extractOptionalInfoFromDictionary(outputFolderPath);
@@ -238,6 +278,21 @@ namespace openspace {
         if (!loadJsonStatesIntoRAM(outputFolderPath)) {
             return;
         }
+    
+        ghoul::Dictionary colorTablesPathsDictionary;
+        if (_dictionary->getValue(KeyColorTablePaths, colorTablesPathsDictionary)) {
+            const size_t nProvidedPaths = colorTablesPathsDictionary.size();
+            LDEBUG("Number of provided Paths: " + std::to_string(nProvidedPaths));
+            if (nProvidedPaths > 0) {
+                // Clear the default! It is already specified in the transferFunction
+                _colorTablePaths.clear();
+                for (size_t i = 1; i <= nProvidedPaths; ++i) {
+                    _colorTablePaths.push_back(
+                        colorTablesPathsDictionary.value<std::string>(std::to_string(i)));
+                }
+            }
+        }
+
         // dictionary is no longer needed as everything is extracted
         _dictionary.reset();
 
@@ -427,6 +482,8 @@ namespace openspace {
             }
         }
 
+        _colorTableRanges.push_back(glm::vec2(0, 1));
+
         std::string sourceFolderPath;
         if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
             LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
@@ -463,15 +520,15 @@ namespace openspace {
         return true;
     }
 
-    //void RenderableStreamNodes::extractOptionalInfoFromDictionary(
-      //  std::string& outputFolderPath)
-    //{
+    void RenderableStreamNodes::extractOptionalInfoFromDictionary(
+        std::string& outputFolderPath)
+    {
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
        // bool streamsEnabled;
         //if (_dictionary->getValue(KeyStreamsEnabled, streamsEnabledValue)) {
             //_pStreamsEnabled = streamsEnabledValue;
         //}
-    //}
+    }
 
     bool RenderableStreamNodes::extractJsonInfoFromDictionary(fls::Model& model) {
         std::string modelStr;
@@ -523,6 +580,10 @@ namespace openspace {
         addPropertySubOwner(_pColorGroup);
         // ------------------------- Add Properties to the groups ------------------------ //
         _pColorGroup.addProperty(_pColorMode);
+        //_pColorGroup.addProperty(_pColorFlux);
+        _pColorGroup.addProperty(_pColorFluxMin);
+        _pColorGroup.addProperty(_pColorFluxMax);
+        _pColorGroup.addProperty(_pColorTablePath);
         _pColorGroup.addProperty(_pStreamColor);
         _pStreamGroup.addProperty(_pNodeSize);
         _pStreamGroup.addProperty(_pThresholdRadius);
@@ -530,6 +591,11 @@ namespace openspace {
         // --------------------- Add Options to OptionProperties --------------------- //
         _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
         _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
+
+        definePropertyCallbackFunctions();
+
+        // Set defaults
+        _pColorTablePath = _colorTablePaths[0];
     }
 
     void RenderableStreamNodes::deinitializeGL() {
@@ -590,7 +656,7 @@ namespace openspace {
             const double triggerTime = Time::convertTime(timeString);
             LDEBUG("timestring " + timeString);
             _startTimes.push_back(triggerTime);
-            
+
         }
 
     }
@@ -634,14 +700,14 @@ namespace openspace {
         _shaderProgram->setUniform("filterRadius", _pFiltering);
         _shaderProgram->setUniform("filterUpper", _pFilteringUpper);
 
-        //if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
-           //ghoul::opengl::TextureUnit textureUnit;
-            //textureUnit.activate();
-            //_transferFunction->bind(); // Calls update internally
-            //_shaderProgram->setUniform("colorTable", textureUnit);
+        if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
+            ghoul::opengl::TextureUnit textureUnit;
+            textureUnit.activate();
+            _transferFunction->bind(); // Calls update internally
+            _shaderProgram->setUniform("colorTable", textureUnit);
             //_shaderProgram->setUniform("colorTableRange",
-            //    _colorTableRanges[_pColorQuantity]);
-        //}
+            //_colorTableRanges[0]);
+        }
 
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBindVertexArray(_vertexArrayObject);
@@ -882,9 +948,6 @@ namespace openspace {
                 //if(rTimesFluxValue > 0)
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rValue, phiValue, thetaValue);
-
-                
-
 
                 //glm::dvec3 sphericalcoordinates =
                 //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),

@@ -14,9 +14,10 @@ openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 --openspace.setPropertyValueSingle("Scene.UranusTrail.Renderable.Enabled", false)
 --openspace.setPropertyValueSingle("Scene.SaturnTrail.Renderable.Enabled", false)
 
--- local transferFunctions = asset.localResource("transferfunctions")
+local transferFunctions = asset.localResource("transferfunctions")
 -- local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
 -- local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
+local streamnodeDensityColorTable = transferFunctions .. "/stream_nodes.txt"
 
  local streamnodesDirectory = asset.syncedResource({
     Name = "Bastille Day Stream nodes",
@@ -41,10 +42,11 @@ local Streamnodes = {
         -- LineWidth = 1.0;
         -- AlphaBlendlingEnabled = false,
         InputFileType = "json",
-        --ColorTablePaths = {
+        ColorTablePaths = {
+	streamnodeDensityColorTable,
         --    masDensityColorTable,
         --    masVelocityColorTable,
-        --},
+        },
         --ColorTableMinMax = {
          --   { 0, 1000000 },
          --   { 100, 2000 }
