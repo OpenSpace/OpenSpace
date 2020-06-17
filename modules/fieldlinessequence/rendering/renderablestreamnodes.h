@@ -79,7 +79,7 @@ namespace openspace {
     // ------------------------------------- FLAGS -------------------------------------//
     // False => states are stored in RAM (using 'in-RAM-states'), True => states are
     // loaded from disk during runtime (using 'runtime-states')
-        bool _loadingStatesDynamically = true;
+        bool _loadingStatesDynamically = false;
 
         // False => the previous frame's state should still be shown
         bool _needsUpdate = false;
@@ -103,7 +103,7 @@ namespace openspace {
         // Estimated end of sequence.
         double _sequenceEndTime;
         // Number of states in the sequence
-        size_t _nStates = 0;
+        size_t _nStates = 200;
 
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions

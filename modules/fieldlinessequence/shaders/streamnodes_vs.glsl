@@ -100,8 +100,8 @@ void main() {
 
     //vs_color = streamColor;
 
-    //if(rValue > filterRadius && rValue filterUpper){
-    if(rValue > filterRadius){
+    if(rValue > filterRadius && rValue < filterUpper){
+    //if(rValue > filterRadius){
         if(colorMode == 0){
         vs_color = streamColor;
         }
@@ -112,6 +112,9 @@ void main() {
          else{
             vs_color = vec4(0);
         }
+        }
+        else{
+         vs_color = vec4(0);
         }
     //if(rValue > thresholdRadius){
     //  vs_color = vec4(0);

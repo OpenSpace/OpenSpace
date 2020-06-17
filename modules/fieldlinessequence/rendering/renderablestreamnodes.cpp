@@ -301,7 +301,7 @@ namespace openspace {
         //if (!_loadingStatesDynamically) {
         //    _sourceFiles.clear();
         //}
-        _nStates = 274;
+        //_nStates = 20;
         setupProperties();
        
         extractTriggerTimesFromFileNames();
@@ -400,7 +400,8 @@ namespace openspace {
                     float ninetyDeToRad = 1.57079633f * 2;
                     const float pi = 3.14159265359f;
                   
-                    float rTimesFluxValue = rValue * rValue * fluxValue;
+                    //float rTimesFluxValue = rValue * rValue * fluxValue;
+                    float rTimesFluxValue = rValue * fluxValue;
                     rValue = rValue * AuToMeter;
 
                     //if(thetaValue > 1.4 && thetaValue < 1.6){
