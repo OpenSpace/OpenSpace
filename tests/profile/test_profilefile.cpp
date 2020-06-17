@@ -206,6 +206,6 @@ TEST_CASE("profileFile: Write test", "[profileFile]") {
 
     ProfileFile pf(testFile);
 
-    std::string result = pf.writeToString();
+    std::string result = serialize(pf.profile);
     REQUIRE(testFull_string == result);
 }

@@ -43,10 +43,8 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-const size_t versionLinesExpected = 1;
 const size_t timeLinesExpected = 1;
 const size_t cameraLinesExpected = 1;
-const size_t versionFieldsExpected = 1;
 const size_t moduleFieldsExpected = 3;
 const size_t assetFieldsExpected = 2;
 const size_t propertyFieldsExpected = 3;
@@ -85,91 +83,95 @@ const size_t cameraGeoFieldLatitude = 2;
 const size_t cameraGeoFieldLongitude = 3;
 const size_t cameraGeoFieldAltitude = 4;
 
+struct ProfileStruct {
+    // Version
+    struct Version {
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+    };
+    Version version;
+
+    struct Module {
+        std::string name;
+        std::string loadedInstruction;
+        std::string notLoadedInstruction;
+    };
+    std::vector<Module> modules;
+
+    struct Asset {
+        enum class Type {
+            Require,
+            Request
+        };
+
+        std::string path;
+        Type type;
+    };
+    std::vector<Asset> assets;
+
+    struct Property {
+        enum class SetType {
+            SetPropertyValue,
+            SetPropertyValueSingle
+        };
+
+        SetType setType;
+        std::string name;
+        std::string value;
+    };
+    std::vector<Property> properties;
+
+    struct Keybinding {
+        std::string key; // @TODO (abock, 2020-06-16) change to key+action
+        std::string documentation;
+        std::string name;
+        std::string guiPath;
+        bool isLocal;
+        std::string script;
+    };
+    std::vector<Keybinding> keybindings;
+
+    struct Time {
+        enum class Type {
+            Absolute,
+            Relative
+        };
+
+        Type type;
+        std::string time;
+    };
+    Time time;
+
+    struct CameraNavState {
+        static constexpr const char* Type = "setNavigationState";
+
+        std::string anchor;
+        std::string aim;
+        std::string referenceFrame;
+        std::string position;
+        std::string up;
+        std::string yaw;
+        std::string pitch;
+    };
+    struct CameraGoToGeo {
+        static constexpr const char* Type = "goToGeo";
+
+        std::string anchor;
+        double latitude;
+        double longitude;
+        std::optional<double> altitude;
+    };
+    std::variant<CameraNavState, CameraGoToGeo> camera;
+
+    std::vector<std::string> markNodes;
+};
+
+std::string serialize(const ProfileStruct& ps);
+
 class ProfileFile {
 public:
-    struct ProfileStruct {
-        // Version
-        struct Version {
-            int major = 0;
-            int minor = 0;
-            int patch = 0;
-        };
-        Version version;
-
-        struct Module {
-            std::string name;
-            std::string loadedInstruction;
-            std::string notLoadedInstruction;
-        };
-        std::vector<Module> modules;
-
-        struct Asset {
-            enum class Type {
-                Require,
-                Request
-            };
-
-            std::string path;
-            Type type;
-        };
-        std::vector<Asset> assets;
-
-        struct Property {
-            enum class SetType {
-                SetPropertyValue,
-                SetPropertyValueSingle
-            };
-
-            SetType setType;
-            std::string name;
-            std::string value;
-        };
-        std::vector<Property> properties;
-
-        struct Keybinding {
-            std::string key; // @TODO (abock, 2020-06-16) change to key+action
-            std::string documentation;
-            std::string name;
-            std::string guiPath;
-            bool isLocal;
-            std::string script;
-        };
-        std::vector<Keybinding> keybindings;
-
-        struct Time {
-            enum class Type {
-                Absolute,
-                Relative
-            };
-
-            Type type;
-            std::string time;
-        };
-        Time time;
-
-        struct CameraNavState {
-            std::string anchor;
-            std::string aim;
-            std::string referenceFrame;
-            std::string position;
-            std::string up;
-            std::string yaw;
-            std::string pitch;
-        };
-        struct CameraGoToGeo {
-            std::string anchor;
-            double latitude;
-            double longitude;
-            std::optional<double> altitude;
-        };
-        std::variant<CameraNavState, CameraGoToGeo> camera;
-
-        std::vector<std::string> markNodes;
-    };
-
     ProfileStruct profile;
-
-
 
     using Lines = std::vector<std::string>;
 
@@ -182,20 +184,12 @@ public:
     ProfileFile(std::string filename);
 
     /**
-     * Returns the string contents of this object converted to scene/asset
-     * equivalent syntax, with all section headers and contents of each listed on an
-     * individual line.
-     * \return The full contents of the profile file in string format.
-     */
-    std::string writeToString();
-
-    /**
      * Writes the formatted contents of this object to a file.
      * This function calls writeToString() in order to get everything in formatted
      * form.
      * \param filename The filename to write to.
      */
-    void writeToFile(const std::string& filename);
+    void writeToFile(const std::string& filename) const;
 
     /**
      * Updates the full string that defines the starting time. The format for this line

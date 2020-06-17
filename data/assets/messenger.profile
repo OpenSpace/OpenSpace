@@ -5,7 +5,7 @@
 Volume	asset.require('scene/solarsystem/missions/messenger/mercurymagnetosphere')	openspace.printWarning("Volume module is not loaded, skipping asset: mercurymagnetosphere")
 
 #Asset
-scene/solarsystem/missions/messenger/messengerSC	required
+scene/solarsystem/missions/messenger/messengerSC	require
 
 #Keybinding
 1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"

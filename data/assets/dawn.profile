@@ -2,9 +2,9 @@
 1.0
 
 #Asset
-scene/solarsystem/missions/dawn/ceres	required
-scene/solarsystem/missions/dawn/dawn	required
-scene/solarsystem/missions/dawn/vesta	required
+scene/solarsystem/missions/dawn/ceres	require
+scene/solarsystem/missions/dawn/dawn	require
+scene/solarsystem/missions/dawn/vesta	require
 
 #Time
 absolute	2011 AUG 06 00:00:00

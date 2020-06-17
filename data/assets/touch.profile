@@ -5,8 +5,8 @@
 Touch	local webGui = asset.require('util/webgui'); webGui.setCefRoute("ontouch")	openspace.printFatal('Could not load scene due to missing module "touch"')
 
 #Asset
-scene/solarsystem/planets/earth/earth	required
-util/webgui	required
+scene/solarsystem/planets/earth/earth	require
+util/webgui	require
 
 #Property
 setPropertyValueSingle	Scene.Pluto.Renderable.Enabled	false

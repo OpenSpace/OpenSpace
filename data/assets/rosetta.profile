@@ -5,8 +5,8 @@
 Volume	asset.require('scene/solarsystem/missions/messenger/mercurymagnetosphere')	openspace.printWarning("Volume module is not loaded, skipping asset: mercurymagnetosphere")
 
 #Asset
-scene/solarsystem/missions/rosetta/67p	required
-scene/solarsystem/missions/rosetta/rosetta	required
+scene/solarsystem/missions/rosetta/67p	require
+scene/solarsystem/missions/rosetta/rosetta	require
 
 #Property
 setPropertyValue	Scene.67P.Renderable.PerformShading	false

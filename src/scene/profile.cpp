@@ -156,7 +156,7 @@ void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
 
 std::string Profile::saveCurrentSettingsToProfile_string() {
     ProfileFile pf = collateBaseWithChanges();
-    return pf.writeToString();
+    return serialize(pf.profile);
 }
 
 bool Profile::usingProfile() const {
@@ -418,10 +418,10 @@ std::string Profile::convertToScene_assets(ProfileFile& pf) {
     for (size_t i = 0; i < pf.assets().size(); ++i) {
         std::vector<std::string> fields = ghoul::tokenizeString(pf.assets()[i], '\t');
 
-        if (fields[assetFieldReqd] == "required") {
+        if (fields[assetFieldReqd] == "require") {
             assetR = "require";
         }
-        else if (fields[assetFieldReqd] == "requested") {
+        else if (fields[assetFieldReqd] == "request") {
             assetR = "request";
         }
         else if (fields[assetFieldReqd] == "") {
@@ -429,7 +429,7 @@ std::string Profile::convertToScene_assets(ProfileFile& pf) {
         }
         else {
             std::string err = fmt::format(
-                "Asset {} of {} has bad arg 2/2 which must be 'required' or 'requested'",
+                "Asset {} of {} has bad arg 2/2 which must be 'require' or 'request'",
                 i + 1, pf.assets().size()
             );
             throw ghoul::RuntimeError(err);

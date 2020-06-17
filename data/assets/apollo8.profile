@@ -2,9 +2,9 @@
 1.0
 
 #Asset
-scene/solarsystem/planets/earth/moon/moon	required
-scene/solarsystem/missions/apollo/8/apollo8	required
-scene/solarsystem/planets/earth/earth	required
+scene/solarsystem/planets/earth/moon/moon	require
+scene/solarsystem/missions/apollo/8/apollo8	require
+scene/solarsystem/planets/earth/earth	require
 
 #Property
 setPropertyValueSingle	NavigationHandler.OrbitalNavigator.MinimumAllowedDistance	0.000000

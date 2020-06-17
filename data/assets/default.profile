@@ -2,8 +2,8 @@
 1.0
 
 #Asset
-scene/solarsystem/planets/earth/earth	required
-scene/solarsystem/planets/earth/satellites/satellites	required
+scene/solarsystem/planets/earth/earth	require
+scene/solarsystem/planets/earth/satellites/satellites	require
 
 #Property
 setPropertyValue	{earth_satellites}.Renderable.Enabled	false

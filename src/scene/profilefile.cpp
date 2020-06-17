@@ -50,6 +50,10 @@ namespace {
     constexpr const char* headerCamera = "#Camera";
     constexpr const char* headerMarkNodes = "#MarkNodes";
 
+    // Helper structs for the visitor pattern of the std::variant
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
     struct ProfileError : public ghoul::RuntimeError {
         explicit ProfileError(unsigned int lineNum, std::string msg)
             : ghoul::RuntimeError(
@@ -62,6 +66,95 @@ namespace {
 
 namespace openspace {
 
+std::string serialize(const ProfileStruct& ps) {
+    std::string output;
+    output += fmt::format("{}\n", headerVersion);
+    output += fmt::format("{}.{}.{}\n", ps.version.major, ps.version.minor, ps.version.patch);
+
+    output += fmt::format("\n{}\n", headerModule);
+    for (const ProfileStruct::Module& m : ps.modules) {
+        output += fmt::format("{}\t{}\t{}\n", m.name, m.loadedInstruction, m.notLoadedInstruction);
+    }
+
+    output += fmt::format("\n{}\n", headerAsset);
+    for (const ProfileStruct::Asset& a : ps.assets) {
+        const std::string type = [](ProfileStruct::Asset::Type t) {
+            switch (t) {
+            case ProfileStruct::Asset::Type::Require: return "require";
+            case ProfileStruct::Asset::Type::Request: return "request";
+            default: throw ghoul::MissingCaseException();
+            }
+        }(a.type);
+        output += fmt::format("{}\t{}\n", a.path, type);
+    }
+
+    output += fmt::format("\n{}\n", headerProperty);
+    for (const ProfileStruct::Property& p : ps.properties) {
+        const std::string type = [](ProfileStruct::Property::SetType t) {
+            switch (t) {
+            case ProfileStruct::Property::SetType::SetPropertyValue:
+                return "setPropertyValue";
+            case ProfileStruct::Property::SetType::SetPropertyValueSingle:
+                return "setPropertyValueSingle";
+            }
+        }(p.setType);
+        output += fmt::format("{}\t{}\t{}\n", type, p.name, p.value);
+    }
+
+    output += fmt::format("\n{}\n", headerKeybinding);
+    for (const ProfileStruct::Keybinding& k : ps.keybindings) {
+        const std::string local = k.isLocal ? "true" : "false";
+        output += fmt::format(
+            "{}\t{}\t{}\t{}\t{}\t{}\n",
+            k.key, k.documentation, k.name, k.guiPath, local, k.script
+        );
+    }
+
+    output += fmt::format("\n{}\n", headerTime);
+    {
+        const std::string type = [](ProfileStruct::Time::Type t) {
+            switch (t) {
+            case ProfileStruct::Time::Type::Absolute: return "absolute";
+            case ProfileStruct::Time::Type::Relative: return "relative";
+            default: throw ghoul::MissingCaseException();
+            }
+        }(ps.time.type);
+        output += fmt::format("{}\t{}\n", type, ps.time.time);
+    }
+
+    output += fmt::format("\n{}\n", headerCamera);
+    output += std::visit(overloaded{
+        [](const ProfileStruct::CameraNavState& camera) {
+            return fmt::format(
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+                ProfileStruct::CameraNavState::Type,
+                camera.anchor, camera.aim, camera.referenceFrame, camera.position,
+                camera.up, camera.yaw, camera.pitch
+            );
+        },
+        [](const ProfileStruct::CameraGoToGeo& camera) {
+            std::string altitude;
+            if (camera.altitude.has_value()) {
+                altitude = std::to_string(*camera.altitude);
+            }
+
+            return fmt::format(
+                "{}\t{}\t{}\t{}\t{}\n",
+                ProfileStruct::CameraGoToGeo::Type,
+                camera.anchor, camera.latitude, camera.longitude, altitude
+            );
+        }
+        }, ps.camera);
+
+    output += fmt::format("\n{}\n", headerMarkNodes);
+    for (const std::string& n : ps.markNodes) {
+        output += fmt::format("{}\n", n);
+    }
+
+    return output;
+}
+
+
 ProfileFile::ProfileFile(std::string filename) {
     clearAllFields();
     _lineNum = 1;
@@ -70,7 +163,7 @@ ProfileFile::ProfileFile(std::string filename) {
     try {
         inFile.open(filename, std::ifstream::in);
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
         throw ghoul::RuntimeError(fmt::format(
             "Exception opening profile file for read: {} ({})", filename, e.what()),
             "profileFile"
@@ -85,7 +178,7 @@ ProfileFile::ProfileFile(std::string filename) {
             _lineNum++;
         }
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
         throw ProfileError(
             _lineNum,
             fmt::format("Read error using getline in: {} ({})", filename, e.what()
@@ -110,16 +203,16 @@ void ProfileFile::processIndividualLine(bool& insideSection, std::string line) {
     }
 }
 
-void ProfileFile::writeToFile(const std::string& filename) {
-    if (filename.find("/") != std::string::npos) {
+void ProfileFile::writeToFile(const std::string& filename) const {
+    if (filename.find('/') != std::string::npos) {
         LERROR("Profile filename must not contain path (/) elements");
         return;
     }
-    else if (filename.find(":") != std::string::npos) {
+    else if (filename.find(':') != std::string::npos) {
         LERROR("Profile filename must not contain path (:) elements");
         return;
     }
-    else if (filename.find(".") != std::string::npos) {
+    else if (filename.find('.') != std::string::npos) {
         LERROR("Only provide the filename to save without file extension");
         return;
     }
@@ -138,16 +231,16 @@ void ProfileFile::writeToFile(const std::string& filename) {
     try {
         outFile.open(absFilename, std::ofstream::out);
     }
-    catch (std::ofstream::failure& e) {
+    catch (const std::ofstream::failure& e) {
         LERROR(fmt::format(
             "Exception opening profile file for write: {} ({})", absFilename, e.what()
         ));
     }
 
     try {
-        outFile << writeToString();
+        outFile << serialize(profile);
     }
-    catch (std::ofstream::failure& e) {
+    catch (const std::ofstream::failure& e) {
         LERROR("Data write error to file: "
             + absFilename + " (" + e.what() + ")");
     }
@@ -155,31 +248,6 @@ void ProfileFile::writeToFile(const std::string& filename) {
     outFile.close();
 }
 
-std::string ProfileFile::writeToString() {
-    std::string output;
-    output = headerVersion + '\n';
-    output += _version + '\n' + '\n';
-    output += headerModule + '\n';
-    output += ghoul::join(_modules, "\n");
-    output += '\n';
-    output += headerAsset + '\n';
-    output += ghoul::join(_assets, "\n");
-    output += '\n';
-    output += headerProperty + '\n';
-    output += ghoul::join(_properties, "\n");
-    output += '\n';
-    output += headerKeybinding + '\n';
-    output += ghoul::join(_keybindings, "\n");
-    output += '\n';
-    output += headerTime + '\n';
-    output += _time + '\n' + '\n';
-    output += headerCamera + '\n';
-    output += _camera + '\n' + '\n';
-    output += headerMarkNodes + '\n';
-    output += ghoul::join(_markNodes, "\n");
-
-    return output;
-}
 
 const std::string& ProfileFile::version() const {
     return _version;
@@ -268,11 +336,13 @@ ProfileFile::Lines ProfileFile::markNodes() const {
 }
 
 void ProfileFile::parseVersion(std::string line) {
-    if (++_numLinesVersion > versionLinesExpected) {
+    constexpr const size_t VersionLinesExpected = 1;
+
+    if (++_numLinesVersion > VersionLinesExpected) {
         throw ProfileError(_lineNum, "Too many lines in Version section");
     }
     std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-    if (fields.size() > versionFieldsExpected) {
+    if (fields.size() > 1) {
         throw ProfileError(_lineNum, "No tabs allowed in Version entry");
     }
     _version = line;
@@ -363,7 +433,7 @@ void ProfileFile::parseAsset(std::string line) {
     ProfileStruct::Asset a;
     a.path = fields[0];
     a.type = [&](const std::string& type) -> ProfileStruct::Asset::Type {
-        if (type == "required") {
+        if (type == "require") {
             return ProfileStruct::Asset::Type::Require;
         }
         if (type == "request") {
@@ -371,7 +441,7 @@ void ProfileFile::parseAsset(std::string line) {
         }
         throw ProfileError(
             _lineNum,
-            fmt::format("Expected asset type 'required' or 'request', got {}", type)
+            fmt::format("Expected asset type 'require' or 'request', got {}", type)
         );
     }(fields[1]);
     profile.assets.push_back(std::move(a));
@@ -573,7 +643,7 @@ void ProfileFile::parseCamera(std::string line) {
     if (fields.empty()) {
         throw ProfileError(_lineNum, "No values specified for Camera location");
     }
-    if (fields[0] == "setNavigationState") {
+    if (fields[0] == ProfileStruct::CameraNavState::Type) {
         if (fields.size() != 8) {
             throw ProfileError(
                 _lineNum,
@@ -594,7 +664,7 @@ void ProfileFile::parseCamera(std::string line) {
         profile.camera = std::move(camera);
         return;
     }
-    if (fields[0] == "goToGeo") {
+    if (fields[0] == ProfileStruct::CameraGoToGeo::Type) {
         if (fields.size() != 5) {
             throw ProfileError(
                 _lineNum,
