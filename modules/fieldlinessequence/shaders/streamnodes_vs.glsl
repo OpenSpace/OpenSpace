@@ -81,9 +81,12 @@ out vec4 vs_color;
 out float vs_depth;
 //out vec4 vs_gPosition;
 
+float minValTableRange = -2;
+float maxValTableRange =  4;
+
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
-    float lookUpVal = rTimesFluxValue;
+    float lookUpVal = (rTimesFluxValue - minValTableRange)/(maxValTableRange - minValTableRange);
     return texture(colorTable, lookUpVal);
 }
 

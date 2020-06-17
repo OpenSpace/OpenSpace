@@ -756,6 +756,7 @@ namespace openspace {
             _sequenceEndTime = DBL_MAX;
         }
     }
+
     void RenderableStreamNodes::update(const UpdateData& data) {
         if (_shaderProgram->isDirty()) {
             _shaderProgram->rebuildFromFile();
@@ -811,10 +812,11 @@ namespace openspace {
         
         _needsUpdate = false;
         _newStateIsReady = false;
+
         if(_vertexPositions.size() > 5800){
-        updatePositionBuffer();
-        updateVertexColorBuffer();
-        updateVertexFilteringBuffer();
+            updatePositionBuffer();
+            updateVertexColorBuffer();
+            updateVertexFilteringBuffer();
         }
             }
                 //needs fix, right now it stops cuz it cant find the states.
