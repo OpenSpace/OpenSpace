@@ -90,7 +90,7 @@ struct ProfileStruct {
         int minor = 0;
         int patch = 0;
     };
-    Version version;
+    Version version = { 1, 0, 0 };
 
     struct Module {
         std::string name;
@@ -150,8 +150,8 @@ struct ProfileStruct {
         std::string anchor;
         std::string aim;
         std::string referenceFrame;
-        std::string position;
-        std::string up;
+        std::string position; // @TODO (abock, 2020-06-17) change to vec3
+        std::string up;// @TODO (abock, 2020-06-17) change to vec3
         std::string yaw;
         std::string pitch;
     };
@@ -200,14 +200,14 @@ public:
      * is defined by ProfileFile::parseTime and Profile::convertToAsset_time
      * \param line The time entry line to replace current time entry
      */
-    void updateTime(std::string line);
+    //void updateTime(std::string line);
 
     /**
      * Updates the full string that defines the starting camera position. The format for
      * this line is defined by ProfileFile::parseCamera & Profile::convertToAsset_camera
      * \param line The camera entry line to replace current camera entry
      */
-    void updateCamera(std::string line);
+    //void updateCamera(std::string line);
 
     /**
      * Adds a new module line to the list of module lines to be analyzed by the profile
@@ -215,19 +215,19 @@ public:
      * and Profile::convertToAsset_modules
      * \param line The module name to be added
      */
-    void addModuleLine(std::string line);
+    //void addModuleLine(std::string line);
 
     /**
      * Adds a new asset to the list of assets to be loaded at startup. The format for an
      * asset line is defined by ProfileFile::parseAsset & Profile::convertToAsset_assets
      * \param line The asset name to be added
      */
-    void addAssetLine(std::string line);
+    //void addAssetLine(std::string line);
 
     /**
      * Clears all asset entries
      */
-    void clearAssets();
+    //void clearAssets();
 
     /**
      * Adds a new property set command to the list of property settings to be
@@ -235,7 +235,7 @@ public:
      * ProfileFile::parseProperty and Profile::convertToAsset_properties
      * \param line The property set command to be added
      */
-    void addPropertyLine(std::string line);
+    //void addPropertyLine(std::string line);
 
     /**
      * Adds a new keybinding shortcut to the list of keybindings. The format for a
@@ -243,7 +243,7 @@ public:
      * Profile::convertToAsset_keybindings
      * \param line The keyboard shortcut line to be added
      */
-    void addKeybindingLine(std::string line);
+    //void addKeybindingLine(std::string line);
 
     /**
      * Adds a new scenegraph node name to be added to the list of those marked as
@@ -251,98 +251,68 @@ public:
      * ProfileFile::parseMarkNodes and Profile::convertToAsset_markNodes
      * \param line The scenegraph node to be added
      */
-    void addMarkNodesLine(std::string line);
+    //void addMarkNodesLine(std::string line);
 
     /**
      * Returns the format version number (profiles syntax version) string
      * \return The version string
      */
-    const std::string& version() const;
+    //const std::string& version() const;
 
     /**
      * Sets the format version number (profiles syntax version) string
      * \param The version string to set
      */
-    void setVersion(std::string);
+    //void setVersion(std::string);
 
     /**
      * Returns the profile's time string. See updateTime comment header for notes on
      * syntax of this time string
      * \return The time string
      */
-    std::string time() const;
+    //std::string time() const;
 
     /**
      * Returns the profile's camera string. See updateCamera comment header for notes on
      * syntax of this camera string
      * \return The camera string
      */
-    std::string camera() const;
+    //std::string camera() const;
 
     /**
      * Returns the vector of OpenSpace modules listed in this profile. See addModuleLine
      * comment header for notes on the syntax of each entry.
      * \return The vector of module lines
      */
-    std::vector<std::string> modules() const;
+    //std::vector<std::string> modules() const;
 
     /**
      * Returns the vector of OpenSpace assets listed in this profile. See addAssetLine
      * comment header for notes on the syntax of each entry.
      * \return The vector of asset lines
      */
-    Lines assets() const;
+    //Lines assets() const;
 
     /**
      * Returns the vector of OpenSpace property set commands included in this profile.
      * See addPropertyLine comment header for notes on the syntax of each entry.
      * \return The vector of property set commands
      */
-    Lines properties() const;
+    //Lines properties() const;
 
     /**
      * Returns the vector of OpenSpace keybinding shortcut definitions included in this
      * profile. See addKeybindingLine comment header for syntax notes of each entry.
      * \return The vector of keybinding shortcut definitions
      */
-    Lines keybindings() const;
+    //Lines keybindings() const;
 
     /**
      * Returns the vector of OpenSpace scenegraph nodes marked as 'interesting'.
      * See addMarkNodesLine comment header for syntax notes of each entry.
      * \return The vector of nodes to be marked as interesting.
      */
-    Lines markNodes() const;
-
-private:
-    void clearAllFields();
-    void verifyRequiredFields(std::string sectionName, std::vector<std::string> fields,
-                              std::vector<std::string> standard, unsigned int nFields);
-    void processIndividualLine(bool& insideSection, std::string line);
-    void determineSection(std::string line);
-    void (ProfileFile::* parseCurrentSection)(std::string);
-    void parseVersion(std::string line);
-    void parseModule(std::string line);
-    void parseAsset(std::string line);
-    void parseProperty(std::string line);
-    void parseKeybinding(std::string line);
-    void parseTime(std::string line);
-    void parseCamera(std::string line);
-    void parseMarkNodes(std::string line);
-
-    size_t _lineNum = 1;
-    size_t _numLinesVersion = 0;
-    size_t _numLinesTime = 0;
-    size_t _numLinesCamera = 0;
-
-    std::string _version;
-    std::string _time;
-    std::string _camera;
-    Lines _modules;
-    Lines _assets;
-    Lines _properties;
-    Lines _keybindings;
-    Lines _markNodes;
+    //Lines markNodes() const;
 };
 
 } // namespace openspace

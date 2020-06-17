@@ -113,13 +113,6 @@ private:
     virtual std::string profileBaseDirectory() const;
     virtual std::vector<AssetEvent> assetEvents() const;
     ProfileFile collateBaseWithChanges();
-    std::string convertToScene_assets(ProfileFile& pf);
-    std::string convertToScene_modules(ProfileFile& pf);
-    std::string convertToScene_properties(ProfileFile& pf);
-    std::string convertToScene_markNodes(ProfileFile& pf);
-    std::string convertToScene_keybindings(ProfileFile& pf);
-    std::string convertToScene_time(ProfileFile& pf);
-    std::string convertToScene_camera(ProfileFile& pf);
 
     std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileFile& pf);
     void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf);

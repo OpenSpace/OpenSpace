@@ -109,12 +109,13 @@ namespace {
     void addAssetsToProfileFile(ProfileFile& pf,
                                 const std::vector<Profile::AssetEvent>& allAssets)
     {
-        pf.clearAssets();
+        pf.profile.assets.clear();
         for (Profile::AssetEvent a : allAssets) {
             if (a.eventType != Profile::AssetEventType::Ignore) {
-                std::string entry =
-                    a.name + "\t" + AssetEventTypeString.at(a.eventType);
-                pf.addAssetLine(entry);
+                ProfileStruct::Asset asset;
+                asset.path = a.name;
+                asset.type = ProfileStruct::Asset::Type::Require;
+                pf.profile.assets.push_back(std::move(asset));
             }
         }
     }
@@ -185,15 +186,17 @@ ProfileFile Profile::collateBaseWithChanges() {
     std::string inputProfilePath = absPath(_profileBaseDirectory) + "/" + initProfile
         + ".profile";
     ProfileFile pf(inputProfilePath);
-    pf.setVersion(FormatVersion);
+    pf.profile.version = ProfileStruct::Version{};
+
     std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(pf);
     addAssetsToProfileFile(pf, ass);
     modifyPropertiesToReflectChanges(pf);
 
     // add current time to profile file
-    std::string t = currentTimeUTC();
-    std::string update = "absolute\t" + t;
-    pf.updateTime(update);
+    ProfileStruct::Time time;
+    time.time = currentTimeUTC();
+    time.type = ProfileStruct::Time::Type::Absolute;
+    pf.profile.time = std::move(time);
     
     addCurrentCameraToProfileFile(pf);
     return pf;
@@ -221,46 +224,30 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFi
 }
 
 void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf) {
-    AssetEvent a;
-
-    for (std::string line : pf.assets()) {
-        std::vector<std::string> elements = ghoul::tokenizeString(line, '\t');
-
-        if (elements[0].empty()) {
-            LERROR(fmt::format(
-                "Error parsing profile line '{}'. Asset name is needed (field 1/2)",
-                line
-            ));
-        }
-        else {
-            a.name = elements[0];
-        }
-
-        if (elements[1] == AssetEventTypeString.at(AssetEventType::Require)) {
-            a.eventType = AssetEventType::Require;
-        }
-        else if (elements[1] == AssetEventTypeString.at(AssetEventType::Request)) {
-            a.eventType = AssetEventType::Request;
-        }
-        else if (elements[1] == "") {
-            a.eventType = AssetEventType::Request;
-        }
-        else {
-            LERROR(fmt::format(
-                "Error parsing profile line '{}'. Invalid required param (field 2/2)",
-                line
-            ));
-        }
-
-        results.push_back(a);
+    for (ProfileStruct::Asset& a : pf.profile.assets) {
+        AssetEvent assetEvent;
+        assetEvent.name = a.path;
+        assetEvent.eventType = [](ProfileStruct::Asset::Type type) {
+            switch (type) {
+                case ProfileStruct::Asset::Type::Request: return AssetEventType::Request;
+                case ProfileStruct::Asset::Type::Require: return AssetEventType::Require;
+                default: throw ghoul::MissingCaseException();
+            }
+        }(a.type);
+        results.push_back(assetEvent);
     }
 }
 
 void Profile::modifyPropertiesToReflectChanges(ProfileFile& pf) {
-    std::vector<std::string> formatted = changedPropertiesFormatted();
+    std::vector<properties::Property*> changedProps = changedProperties();
+    std::vector<std::string> formattedLines;
 
-    for (std::string line : formatted) {
-        pf.addPropertyLine(std::move(line));
+    for (properties::Property* prop : changedProps) {
+        ProfileStruct::Property p;
+        p.setType = ProfileStruct::Property::SetType::SetPropertyValueSingle;
+        p.name = getFullPropertyPath(prop);
+        p.value = prop->getStringValue();
+        pf.profile.properties.push_back(std::move(p));
     }
 }
 
@@ -303,27 +290,25 @@ interaction::NavigationHandler::NavigationState Profile::currentCameraState() co
 }
 
 void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) const {
-    std::string update = "setNavigationState\t";
-    interaction::NavigationHandler::NavigationState nav;
-    nav = currentCameraState();
-    update += "\"" + nav.anchor + "\"\t";
-    update += "\"" + nav.aim + "\"\t";
-    update += "\"" + nav.referenceFrame + "\"\t";
-    update += std::to_string(nav.position.x) + ",";
-    update += std::to_string(nav.position.y) + ",";
-    update += std::to_string(nav.position.z) + "\t";
-    if (nav.up.has_value()) {
-        glm::dvec3 u = nav.up.value();
-        //glm::dvec3 u = static_cast<glm::dvec3>(nav.up.value());
-        update += std::to_string(u.x) + ",";
-        update += std::to_string(u.y) + ",";
-        update += std::to_string(u.z);
-    }
-    update += "\t";
-    update += std::to_string(nav.yaw) + "\t";
-    update += std::to_string(nav.pitch);
+    interaction::NavigationHandler::NavigationState nav = currentCameraState();
 
-    pf.updateCamera(update);
+    ProfileStruct::CameraNavState camera;
+    camera.anchor = nav.anchor;
+    camera.aim = nav.aim;
+    camera.referenceFrame = nav.referenceFrame;
+    camera.position = fmt::format(
+        "{},{},{}",
+        nav.position.x, nav.position.y, nav.position.z
+    );
+    if (nav.up.has_value()) {
+        camera.up = fmt::format(
+            "{},{},{}",
+            nav.up->x, nav.up->y, nav.up->z
+        );
+    }
+    camera.yaw = nav.yaw;
+    camera.pitch = nav.pitch;
+    pf.profile.camera = std::move(camera);
 }
 
 void Profile::convertToSceneFile(const std::string& inProfilePath,
@@ -361,194 +346,6 @@ void Profile::convertToSceneFile(const std::string& inProfilePath,
 
 std::string Profile::convertToScene(ProfileFile& pf) {
     return openspace::convertToSceneFile(pf.profile);
-}
-
-std::string Profile::convertToScene_modules(ProfileFile& pf) {
-    std::string result;
-
-    for (std::string m : pf.modules()) {
-        std::vector<std::string> fields = ghoul::tokenizeString(m, '\t');
-        if (!fields[moduleFieldLoaded].empty() && !fields[moduleFieldNotLoaded].empty()) {
-            result += fmt::format(
-                "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
-                fields[moduleFieldName], fields[moduleFieldLoaded], fields[moduleFieldNotLoaded]
-            );
-        }
-        else if (fields[moduleFieldNotLoaded].empty()) {
-            result += fmt::format(
-                "if not openspace.modules.isLoaded(\"{}\") then {} end\n",
-                fields[moduleFieldName], fields[moduleFieldNotLoaded]
-            );
-        }
-        else if (fields[moduleFieldLoaded].empty()) {
-            result += fmt::format(
-                "if openspace.modules.isLoaded(\"{}\") then {} end\n",
-                fields[moduleFieldName], fields[moduleFieldLoaded]
-            );
-        }
-    }
-    return result;
-}
-
-std::string Profile::convertToScene_assets(ProfileFile& pf) {
-    std::string result;
-    std::string assetR;
-
-    for (size_t i = 0; i < pf.assets().size(); ++i) {
-        std::vector<std::string> fields = ghoul::tokenizeString(pf.assets()[i], '\t');
-
-        if (fields[assetFieldReqd] == "require") {
-            assetR = "require";
-        }
-        else if (fields[assetFieldReqd] == "request") {
-            assetR = "request";
-        }
-        else if (fields[assetFieldReqd] == "") {
-            assetR = "require";
-        }
-        else {
-            std::string err = fmt::format(
-                "Asset {} of {} has bad arg 2/2 which must be 'require' or 'request'",
-                i + 1, pf.assets().size()
-            );
-            throw ghoul::RuntimeError(err);
-        }
-
-        if (!fields[2].empty()) {
-            result += fmt::format("local {} = ", fields[2]);
-        }
-        result += fmt::format("asset.{}(\"{}\")\n", assetR, fields[assetFieldName]);
-
-    }
-    return result;
-}
-
-std::string Profile::convertToScene_properties(ProfileFile& pf) {
-    std::string result;
-
-    for (size_t i = 0; i < pf.properties().size(); ++i) {
-        std::vector<std::string> fields = ghoul::tokenizeString(pf.properties()[i], '\t');
-
-        if (fields[propertyFieldType] != "setPropertyValue"
-            && fields[propertyFieldType] != "setPropertyValueSingle")
-        {
-            std::string err = fmt::format(
-                "Property {} of {} has bad arg 1/1 which must be "
-                "'setPropertyValue' or 'setPropertyValueSingle'",
-                i + 1, pf.properties().size()
-            );
-            throw ghoul::RuntimeError(err);
-        }
-        else {
-            result += fmt::format(
-                "  openspace.{}(\"{}\", {})\n",
-                fields[propertyFieldType], fields[propertyFieldName], fields[propertyFieldValue]
-            );
-        }
-    }
-    return result;
-}
-
-std::string Profile::convertToScene_keybindings(ProfileFile& pf) {
-    std::string result;
-
-    result += "local Keybindings = {\n";
-    for (size_t i = 0; i < pf.keybindings().size(); ++i) {
-        std::vector<std::string> fields = ghoul::tokenizeString(pf.keybindings()[i], '\t');
-
-        result += "  {\n";
-        result += fmt::format("    {} = \"{}\",\n", "Key", fields[0]);
-        result += fmt::format("    {} = \"{}\",\n", "Documentation", fields[1]);
-        result += fmt::format("    {} = \"{}\",\n", "Name", fields[2]);
-        result += fmt::format("    {} = \"{}\",\n", "GuiPath", fields[3]);
-        result += fmt::format("    {} = \"{}\",\n", "Local", fields[4]);
-        result += fmt::format("    {} = {}\n", "Command", fields[5]);
-        result += "  },\n";
-    }
-    result += "}\n";
-    return result;
-}
-
-std::string Profile::convertToScene_markNodes(ProfileFile& pf) {
-    std::string result;
-
-    if (!pf.markNodes().empty()) {
-        result += "  openspace.markInterestingNodes({";
-        for (const std::string& m : pf.markNodes()) {
-            result += fmt::format("\"{}\",", m);
-        }
-        result += "})\n";
-    }
-    return result;
-}
-
-std::string Profile::convertToScene_time(ProfileFile& pf) {
-    std::string result;
-
-    std::vector<std::string> fields = ghoul::tokenizeString(pf.time(), '\t');
-    if (fields[timeFieldType] == "absolute") {
-        result += fmt::format("  openspace.time.setTime(\"{}\")\n", fields[timeFieldSet]);
-    }
-    else if (fields[timeFieldType] == "relative") {
-        result += fmt::format(
-            "  openspace.time.setTime(openspace.time.advancedTime("
-            "openspace.time.currentWallTime(), \"{}\"))\n",
-            fields[timeFieldSet]
-        );
-        result += "  local now = openspace.time.currentWallTime(); ";
-        result += "openspace.time.setTime(";
-        result += "openspace.time.advancedTime(now, \"" + fields[timeFieldSet] + "\"))\n";
-    }
-    else {
-        std::string err = "Time entry's arg 1/1 must be either 'absolute' or 'relative'";
-        throw ghoul::RuntimeError(err);
-    }
-    return result;
-}
-
-std::string Profile::convertToScene_camera(ProfileFile& pf) {
-    std::string result;
-
-    std::vector<std::string> fields = ghoul::tokenizeString(pf.camera(), '\t');
-    if (fields[cameraFieldType] == "setNavigationState") {
-        result += "  openspace.navigation.setNavigationState({";
-        result += fmt::format("Anchor = {}, ", fields[cameraNavigationFieldAnchor]);
-        if (!fields[cameraNavigationFieldAim].empty()) {
-            result += fmt::format("Aim = {}, ", fields[cameraNavigationFieldAim]);
-        }
-        if (!fields[cameraNavigationFieldRef].empty()) {
-            result += fmt::format("ReferenceFrame = {}, ", fields[cameraNavigationFieldRef]);
-        }
-        result += fmt::format("Position = {{ {} }}, ", fields[cameraNavigationFieldPosition]);
-        if (!fields[cameraNavigationFieldUp].empty()) {
-            result += fmt::format("Up = {{ {} }}, ", fields[cameraNavigationFieldUp]);
-        }
-        if (!fields[cameraNavigationFieldYaw].empty()) {
-            result += fmt::format("Yaw = {}, ", fields[cameraNavigationFieldYaw]);
-        }
-        if (!fields[cameraNavigationFieldPitch].empty()) {
-            result += fmt::format("Pitch = {} ", fields[cameraNavigationFieldPitch]);
-        }
-        result += "})\n";
-    }
-    else if (fields[cameraFieldType] == "goToGeo") {
-        result += "  openspace.globebrowsing.goToGeo(";
-        if (!fields[cameraGeoFieldAnchor].empty()) {
-            result += fields[cameraGeoFieldAnchor] + ", ";
-        }
-        result += fields[cameraGeoFieldLatitude] + ", ";
-        result += fields[cameraGeoFieldLongitude];
-        if (!fields[cameraGeoFieldAltitude].empty()) {
-            result += + ", " + fields[cameraGeoFieldAltitude];
-        }
-        result += ")\n";
-    }
-    else {
-        throw ghoul::RuntimeError(
-            "Camera entry's arg 1/1 must be either 'setNavigationState' or 'goToGeo'"
-        );
-    }
-    return result;
 }
 
 scripting::LuaLibrary Profile::luaLibrary() {
