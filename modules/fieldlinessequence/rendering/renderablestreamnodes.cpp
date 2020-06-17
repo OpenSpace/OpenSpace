@@ -246,17 +246,21 @@ namespace openspace {
         //if (!_loadingStatesDynamically) {
         //    _sourceFiles.clear();
         //}
-        _nStates = 270;
+        _nStates = 274;
         setupProperties();
-        if(!_loadingStatesDynamically){
-        LoadfilesintoRam();
-        }
+       
         extractTriggerTimesFromFileNames();
         computeSequenceEndTime();
+        LDEBUG("filepath i init: " + std::to_string(_sourceFiles.size()));
+        if (!_loadingStatesDynamically) {
+            LoadfilesintoRam();
+        }
         std::string filepath = _sourceFiles[0];
+       
         //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
-        std::vector<std::string> vec = LoadJsonfile(filepath);
+        //std::vector<std::string> vec = LoadJsonfile(filepath);
         // Setup shader program
+        computeSequenceEndTime();
         _shaderProgram = global::renderEngine.buildRenderProgram(
             "Streamnodes",
             absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
@@ -278,26 +282,17 @@ namespace openspace {
     }
 
     bool RenderableStreamNodes::LoadfilesintoRam() {
-        size_t filesnumbers = 10;
-        for (size_t j = 0; j < filesnumbers; ++j) {
+        size_t filesnumbers = 270;
+        for (size_t j = 0; j < _nStates; ++j) {
             
             std::ifstream streamdata(_sourceFiles[j]);
-            //std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/2/datawithoutprettyprint_newmethod.json");
             if (!streamdata.is_open())
             {
                 LDEBUG("did not read the data.json file");
+                return false;
             }
             json jsonobj = json::parse(streamdata);
-            //json jsonobj;
-            //streamdata >> jsonobj;
-
-
-
-            //printDebug(jsonobj["stream0"]);
-            //LDEBUG(jsonobj["stream0"]);
-           // std::ofstream o("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/newdata2.json");
-            //o << jsonobj << std::endl;
-            //LDEBUG("vi callade på loadJSONfile med  " + filepath);
+           
             const char* sNode = "node0";
             const char* sStream = "stream0";
             const char* sData = "data";
@@ -306,18 +301,12 @@ namespace openspace {
             const char* sTime = "time";
             //double testtime = jTmp[sTime];
             std::string testtime = jsonobj["time"];
-            //double testtime = Time::now();
-            //const json::value_type& variableNameVec = jTmp[sStream][sNode][sData];
-            //const size_t nVariables = variableNameVec.size();
-
+          
             size_t lineStartIdx = 0;
             //Loop through all the nodes
-            const int numberofStreams = 200;
+            const int numberofStreams = 383;
             constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
-            //constexpr const float ReToMeter = 6371000.f;       // Earth radius
-            //constexpr const float RsToMeter = 695700000.f;     // Sun radius
-            //const int coordToMeters = 1;
-            //we have to have coordToMeters * our coord. 
+          
             _vertexPositions.clear();
             _lineCount.clear();
             _lineStart.clear();
@@ -326,7 +315,7 @@ namespace openspace {
             int counter = 0;
 
             const size_t nPoints = 1;
-            for (int i = 100; i < numberofStreams; ++i) {
+            for (int i = 0; i < numberofStreams; ++i) {
                 //i += 20;
                /* if (i > 37 && i < 154) {
                     i = 154;
@@ -341,38 +330,13 @@ namespace openspace {
 
                 for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                     lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
-                    //  for (size_t k = 0; k < 1999; ++k) {
-                     //     json::iterator lineIter = jsonobj["stream" + std::to_string(i)][std::to_string(k)].begin();
-
-                      //lineIter += 20;
-                      //const size_t Nodesamount = 
-                      //LDEBUG("testar debuggen");
-                      //log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.key());
-                      //LDEBUG("stream" + std::to_string(i));
-                      //LDEBUG("Phi value: " + (*lineIter)["Phi"].get<std::string>());
-                      //LDEBUG("Theta value: " + (*lineIter)["Theta"].get<std::string>());
-                      //LDEBUG("R value: " + (*lineIter)["R"].get<std::string>());
-                      //LDEBUG("Flux value: " + (*lineIter)["Flux"].get<std::string>());
-
-                       //probably needs some work with types, not loading in strings. 
+                 
                     std::string r = (*lineIter)["R"].get<std::string>();
                     std::string phi = (*lineIter)["Phi"].get<std::string>();
                     std::string theta = (*lineIter)["Theta"].get<std::string>();
                     std::string flux = (*lineIter)["Flux"].get<std::string>();
 
-                    //LDEBUG("testar koordinater: " + r + "phi" + phi + "theta: " + theta);
-                    //LDEBUG("flux: " + r);
-                    //------DOUBLE 
-                    /*
-                    double rvalue = stringToDouble(r);
-                    double phivalue = stringToDouble(phi);
-                    double thetavalue = stringToDouble(theta);
-                    const double pi = 3.14159265359;
-                    phivalue = phivalue * (180 / pi);
-                    thetavalue = thetavalue * (180 / pi);
-                    rvalue = rvalue * AuToMeter;
-                    */
-                    //lineIter += 20;
+                  
                     //--------FLOAT
                     float rValue = stringToFloat(r);
                     float phiValue = stringToFloat(phi);
@@ -380,12 +344,11 @@ namespace openspace {
                     float fluxValue = stringToFloat(flux);
                     float ninetyDeToRad = 1.57079633f * 2;
                     const float pi = 3.14159265359f;
-                    //phiValue = phiValue * (180.f / pi);
-                    //thetaValue = thetaValue + ninetyDeToRad; //(180.f / pi);
-                    //phiValue = phiValue + ninetyDeToRad;
+                  
                     float rTimesFluxValue = rValue * rValue * fluxValue;
                     rValue = rValue * AuToMeter;
 
+                    //if(thetaValue > 1.4 && thetaValue < 1.6){
                     //if(rTimesFluxValue > 0)
                     glm::vec3 sphericalcoordinates =
                         glm::vec3(rValue, phiValue, thetaValue);
@@ -393,16 +356,6 @@ namespace openspace {
 
 
 
-                    //glm::dvec3 sphericalcoordinates =
-                    //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),
-                      //      stringToDouble((*lineIter)["Phi"].get<std::string>()),
-                       //     stringToDouble((*lineIter)["Theta"].get<std::string>()));
-
-                    //precision issue, right now rounding up at around 7th decimal. Probably 
-                    //around conversion with string to Double.
-                    //LDEBUG("R value after string to Float: " + std::to_string(stringToDouble
-                    //((*lineIter)["R"].get<std::string>())));
-                    //sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
                     glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
                     //KOLLA OM DEN KONVERTATION FROM DEGREE
                     //Look in to convertion
@@ -414,13 +367,7 @@ namespace openspace {
                     _vertexPositions.push_back(
                         position);
                     ++counter;
-                    //   coordToMeters * glm::vec3(
-                      //     stringToFloat((*lineIter)["Phi"].get<std::string>(), 0.0f),
-                       //    ,
-
-                        //   )
-                       //);
-
+              
                     _lineCount.push_back(static_cast<GLsizei>(nPoints));
                     _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
                     lineStartIdx += nPoints;
@@ -429,23 +376,26 @@ namespace openspace {
                     _vertexRadius.push_back(rValue);
 
                     int skipcounter = 0;
-                    int nodeskipn = 20;
-                    while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end()) {
+                    int nodeskipn = 10;
+                    
+                    while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
                         ++lineIter;
                         ++skipcounter;
                     }
-
+                   // }
                 }
             }
 
             LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
             LDEBUG("counter for how many times we push back" + std::to_string(counter));
 
-            _states.push_back(_vertexPositions);
-            LDEBUG("_states size: " + std::to_string(_states.size()));
+            _statesPos.push_back(_vertexPositions);
+            _statesColor.push_back(_vertexColor);
+            _statesRadius.push_back(_vertexRadius);
+            LDEBUG("_states size: " + std::to_string(_statesPos.size()));
         }
 
-        
+        return true;
     }
     /**
      * Extracts the general information (from the lua modfile) that is mandatory for the class
@@ -599,6 +549,16 @@ namespace openspace {
             global::renderEngine.removeRenderProgram(_shaderProgram.get());
             _shaderProgram = nullptr;
         }
+
+        // Stall main thread until thread that's loading states is done!
+        bool printedWarning = false;
+        while (_isLoadingStateFromDisk) {
+            if (!printedWarning) {
+                LWARNING("Trying to destroy class when an active thread is still using it");
+                printedWarning = true;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
     }
 
     bool RenderableStreamNodes::isReady() const {
@@ -651,19 +611,19 @@ namespace openspace {
         }
     }
     void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
-        //if (_activeTriggerTimeIndex != -1) {
-        _shaderProgram->activate();
+        if (_activeTriggerTimeIndex != -1) {
+            _shaderProgram->activate();
 
-        // Calculate Model View MatrixProjection
-        const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
-        const glm::dmat4 modelMat =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            rotMat *
-            glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
-        const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
+            // Calculate Model View MatrixProjection
+            const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
+            const glm::dmat4 modelMat =
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+                rotMat *
+                glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+            const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
-        _shaderProgram->setUniform("modelViewProjection",
-            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+            _shaderProgram->setUniform("modelViewProjection",
+                data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
         // Flow/Particles
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
@@ -697,16 +657,19 @@ namespace openspace {
 
          glPointSize(_pNodeSize);
         
-        GLint temp = 0;
-        glDrawArrays(
-            GL_POINTS,
-            temp,
-            static_cast<GLsizei>(_lineCount.size())
-        );
+            GLint temp = 0;
+            glDrawArrays(
+                GL_PATCHES,
+                temp,
+                static_cast<GLsizei>(_lineCount.size())
+            );
 
-        glBindVertexArray(0);
-        _shaderProgram->deactivate();
-     
+
+
+            glBindVertexArray(0);
+            _shaderProgram->deactivate();
+
+        }
     }
     inline void unbindGL() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -734,11 +697,9 @@ namespace openspace {
         //Everything below is for updating depending on time.
         
         const double currentTime = data.time.j2000Seconds();
-        const bool isInInterval = (currentTime >= _startTimes[0]) &&
-            (currentTime < _sequenceEndTime);
+         const bool isInInterval = (currentTime >= _startTimes[0]) &&
+             (currentTime < _sequenceEndTime);
         //const bool isInInterval = true;
-        //check if current time in Openspace is within sequence interval
-        
         if (isInInterval) {
             const size_t nextIdx = _activeTriggerTimeIndex + 1;
             if (
@@ -750,11 +711,15 @@ namespace openspace {
                 (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
             {
                 updateActiveTriggerTimeIndex(currentTime);
-                //_activeTriggerTimeIndex++;
+                //LDEBUG("Vi borde uppdatera1");
+
+                // _mustLoadNewStateFromDisk = true;
+
+
                 _needsUpdate = true;
                 _activeStateIndex = _activeTriggerTimeIndex;
 
-            }
+            } // else {we're still in same state as previous frame (no changes needed)}
         }
             else {
                 //not in interval => set everything to false
@@ -763,6 +728,7 @@ namespace openspace {
                 _needsUpdate = false;
             }
 
+        
             if (_needsUpdate) {
                 //LDEBUG("needsupdate");
                 if(_loadingStatesDynamically){
@@ -779,14 +745,17 @@ namespace openspace {
         
         _needsUpdate = false;
         _newStateIsReady = false;
-
+        if(_vertexPositions.size() > 5800){
         updatePositionBuffer();
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();
+        }
             }
                 //needs fix, right now it stops cuz it cant find the states.
-                else if(!_states[_activeTriggerTimeIndex].empty()){
-                    _vertexPositions = _states[_activeTriggerTimeIndex];
+                else if(!_statesPos[_activeTriggerTimeIndex].empty()){
+                    _vertexPositions = _statesPos[_activeTriggerTimeIndex];
+                    _vertexColor = _statesColor[_activeTriggerTimeIndex];
+                    _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
                     _needsUpdate = false;
                     _newStateIsReady = false;
                     updatePositionBuffer();
@@ -909,6 +878,7 @@ namespace openspace {
                 float rTimesFluxValue = rValue * rValue * fluxValue;
                 rValue = rValue * AuToMeter;
                 
+                if(thetaValue < 1.6 && thetaValue > 1.4){
                 //if(rTimesFluxValue > 0)
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rValue, phiValue, thetaValue);
@@ -951,14 +921,14 @@ namespace openspace {
                 _vertexColor.push_back(rTimesFluxValue);
                 _vertexRadius.push_back(rValue);
 
-
+                //skipping nodes
                 int skipcounter = 0;
-                int nodeskipn = 30;
+                int nodeskipn = 10;
                 while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
                     ++lineIter;
                     ++skipcounter;
                 }
-
+                }
             }
         }
 
@@ -981,7 +951,7 @@ namespace openspace {
 
         //LWARNING(fmt::format("Testar json"));
         _isLoadingStateFromDisk = false;
-        streamdata.close();
+        //streamdata.close();
         return std::vector<std::string>();
     }
 

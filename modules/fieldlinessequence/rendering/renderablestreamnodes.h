@@ -87,6 +87,7 @@ namespace openspace {
         // another thread.
         std::atomic_bool _newStateIsReady = false;
         bool _isLoadingStateFromDisk = false;
+        bool _mustLoadNewStateFromDisk = true;
         // --------------------------------- NUMERICALS ----------------------------------- //
         // In setup it is used to scale JSON coordinates. During runtime it is used to scale
         // domain limits.
@@ -147,8 +148,9 @@ namespace openspace {
         // Contains vertexRedius
         std::vector<float> _vertexRadius;
 
-        std::vector<std::vector<glm::vec3>> _states;
-
+        std::vector<std::vector<glm::vec3>> _statesPos;
+        std::vector<std::vector<float>> _statesColor;
+        std::vector<std::vector<float>> _statesRadius;
         // ----------------------------------- POINTERS ------------------------------------//
         // The Lua-Modfile-Dictionary used during initialization
         std::unique_ptr<ghoul::Dictionary> _dictionary;
