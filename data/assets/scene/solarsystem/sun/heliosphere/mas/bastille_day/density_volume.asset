@@ -2,13 +2,14 @@ asset.info = {
     Name = "Predictive Science Inc. Volume Rendering Bastille Day",
     Version = "1.0",
     Description = " Volumetric rendering for the bastille day CME event ",
-    Author = "Jonathan Grangien, Matthias Berg, Elon Olsson",
+    Author = "OpenSpace team",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }
 
 local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require('./transforms')
 
 local densityDirectory = asset.syncedResource({
     Name = "Bastille Day MAS Density",
@@ -21,7 +22,9 @@ local sunRadius = 6.957E8
 
 local densityVolume = {
     Identifier = "MAS_MHD_density",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    -- wrong Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Parent = sunTransforms.SunIAU.Identifier,
+    -- wrong Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
         StepSize = 0.004,
@@ -38,7 +41,15 @@ local densityVolume = {
         Scale = {
             Type = "StaticScale",
             Scale = sunRadius
-        }
+        },
+        Rotation = {
+            Type = "FixedRotation", --LuaRotation
+            XAxis = {0.0, 1.0, 0.0},
+            YAxis = {1.0, 0.0, 0.0},     
+            ZAxis = {0.0, 0.0, -1.0}
+
+            --Script = asset.localResource("kernels/carringtonRotation.lua")
+        }       
     },
     GUI = {
         Name = "MAS Density",

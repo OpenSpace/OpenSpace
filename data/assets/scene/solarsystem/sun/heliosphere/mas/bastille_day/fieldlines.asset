@@ -2,12 +2,13 @@ asset.info = {
     Name = "Predictive Science Inc. Fieldlines Bastille Day",
     Version = "1.0",
     Description = " Magnetic fieldlines for the bastille day CME event ",
-    Author = "Jonathan Grangien, Matthias Berg, Elon Olsson",
+    Author = "OpenSpace team",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }
 
 local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('./transforms')
 
 local transferFunctions = asset.localResource("transferfunctions")
@@ -27,7 +28,8 @@ local sunRadius = 6.957E8
 -- Fieldlies from binaries
 local fieldlines = {
     Identifier = "MAS_MHD_Fieldlines",
-    Parent = transforms.HNMReferenceFrame.Identifier,
+    --Parent = transforms.HNMReferenceFrame.Identifier,
+    Parent = sunTransforms.SunIAU.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
