@@ -123,28 +123,31 @@ std::string serialize(const ProfileStruct& ps) {
     }
 
     output += fmt::format("\n{}\n", headerCamera);
-    output += std::visit(overloaded{
-        [](const ProfileStruct::CameraNavState& camera) {
-            return fmt::format(
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-                ProfileStruct::CameraNavState::Type,
-                camera.anchor, camera.aim, camera.referenceFrame, camera.position,
-                camera.up, camera.yaw, camera.pitch
-            );
-        },
-        [](const ProfileStruct::CameraGoToGeo& camera) {
-            std::string altitude;
-            if (camera.altitude.has_value()) {
-                altitude = std::to_string(*camera.altitude);
-            }
+    output += std::visit(
+        overloaded {
+            [](const ProfileStruct::CameraNavState& camera) {
+                return fmt::format(
+                    "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+                    ProfileStruct::CameraNavState::Type,
+                    camera.anchor, camera.aim, camera.referenceFrame, camera.position,
+                    camera.up, camera.yaw, camera.pitch
+                );
+            },
+            [](const ProfileStruct::CameraGoToGeo& camera) {
+                std::string altitude;
+                if (camera.altitude.has_value()) {
+                    altitude = std::to_string(*camera.altitude);
+                }
 
-            return fmt::format(
-                "{}\t{}\t{}\t{}\t{}\n",
-                ProfileStruct::CameraGoToGeo::Type,
-                camera.anchor, camera.latitude, camera.longitude, altitude
-            );
-        }
-        }, ps.camera);
+                return fmt::format(
+                    "{}\t{}\t{}\t{}\t{}\n",
+                    ProfileStruct::CameraGoToGeo::Type,
+                    camera.anchor, camera.latitude, camera.longitude, altitude
+                );
+            }
+        },
+        ps.camera
+    );
 
     output += fmt::format("\n{}\n", headerMarkNodes);
     for (const std::string& n : ps.markNodes) {
@@ -154,6 +157,145 @@ std::string serialize(const ProfileStruct& ps) {
     return output;
 }
 
+ProfileStruct deserialize(const std::string& filename) {
+    return ProfileStruct();
+}
+
+std::string convertToSceneFile(const ProfileStruct& ps) {
+    ZoneScoped
+
+    std::string output;
+
+    // Modules
+    for (const ProfileStruct::Module& m : ps.modules) {
+        output += fmt::format(
+            "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
+            m.name, m.loadedInstruction, m.notLoadedInstruction
+        );
+    }
+
+    // Assets
+    for (const ProfileStruct::Asset& a : ps.assets) {
+        if (!a.name.empty()) {
+            output += fmt::format("local {} = ", a.name);
+        }
+        std::string type = [](ProfileStruct::Asset::Type t) {
+            switch (t) {
+                case ProfileStruct::Asset::Type::Request: return "request";
+                case ProfileStruct::Asset::Type::Require: return "require";
+                default: throw ghoul::MissingCaseException();
+            }
+        }(a.type);
+
+        output += fmt::format("asset.{}(\"{}\");\n", type, a.path);
+    }
+
+    output += "asset.onInitialize(function()\n";
+    // Keybindings
+    for (const ProfileStruct::Keybinding& k : ps.keybindings) {
+        const std::string name = k.name.empty() ? k.key : k.name;
+        output += fmt::format(
+            k.isLocal ?
+                "openspace.bindKeyLocal(\"{}\", {}, [[{}]], [[{}]], [[{}]]);\n" :
+                "openspace.bindKey(\"{}\", {}, [[{}]], [[{}]], [[{}]]);\n",
+            k.key, k.script, k.documentation, k.name.empty() ? k.key : k.name, k.guiPath
+        );
+    }
+
+    // Time
+    switch (ps.time.type) {
+        case ProfileStruct::Time::Type::Absolute:
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", ps.time.time);
+            break;
+        case ProfileStruct::Time::Type::Relative:
+            output += "local now = openspace.time.currentWallTime();\n";
+            output += fmt::format(
+                "local prev = openspace.time.advancedTime(now, \"{}\");\n", ps.time.time
+            );
+            output += "openspace.time.setTime(prev);\n";
+        default:
+            throw ghoul::MissingCaseException();
+    }
+
+    // Mark Nodes
+    {
+        std::string nodes;
+        for (const std::string& n : ps.markNodes) {
+            nodes += fmt::format("[[ {} ]],", n);
+        }
+        output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
+    }
+
+    // Properties
+    for (const ProfileStruct::Property& p : ps.properties) {
+        constexpr const char* regular = "openspace.setPropertyValue(\"{}\", {});\n";
+        constexpr const char* single = "openspace.setPropertyValueSingle(\"{}\", {});\n";
+
+        switch (p.setType) {
+            case ProfileStruct::Property::SetType::SetPropertyValue:
+                output += fmt::format(
+                    "openspace.setPropertyValue(\"{}\", {});\n",
+                    p.name, p.value
+                );
+                break;
+            case ProfileStruct::Property::SetType::SetPropertyValueSingle:
+                output += fmt::format(
+                    "openspace.setPropertyValueSingle(\"{}\", {});\n",
+                    p.name, p.value
+                );
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+
+    // Camera
+    output += std::visit(
+        overloaded {
+            [](const ProfileStruct::CameraNavState& camera) {
+                std::string result;
+                result += "  openspace.navigation.setNavigationState({";
+                result += fmt::format("Anchor = {}, ", camera.anchor);
+                if (!camera.aim.empty()) {
+                    result += fmt::format("Aim = {}, ", camera.aim);
+                }
+                if (!camera.referenceFrame.empty()) {
+                    result += fmt::format("ReferenceFrame = {}, ", camera.referenceFrame);
+                }
+                result += fmt::format("Position = {{ {} }}, ", camera.position);
+                if (!camera.up.empty()) {
+                    result += fmt::format("Up = {{ {} }}, ", camera.up);
+                }
+                if (!camera.yaw.empty()) {
+                    result += fmt::format("Yaw = {}, ", camera.yaw);
+                }
+                if (!camera.pitch.empty()) {
+                    result += fmt::format("Pitch = {} ", camera.pitch);
+                }
+                result += "})\n";
+                return result;
+            },
+            [](const ProfileStruct::CameraGoToGeo& camera) {
+                if (camera.altitude.has_value()) {
+                    return fmt::format(
+                        "openspace.globebrowsing.goToGeo({}, {}, {}, {});\n",
+                        camera.anchor, camera.latitude, camera.longitude, *camera.altitude
+                    );
+                }
+                else {
+                    return fmt::format(
+                        "openspace.globebrowsing.goToGeo({}, {}, {});\n",
+                        camera.anchor, camera.latitude, camera.longitude
+                    );
+                }
+            }
+        },
+        ps.camera
+    );
+    output += "end)\n";
+
+    return output;
+}
 
 ProfileFile::ProfileFile(std::string filename) {
     clearAllFields();
@@ -414,6 +556,7 @@ void ProfileFile::parseAsset(std::string line) {
     }
     std::vector<std::string> standard = {
         "asset name",
+        "",
         ""
     };
     verifyRequiredFields("Asset", fields, standard, assetFieldsExpected);
@@ -423,10 +566,10 @@ void ProfileFile::parseAsset(std::string line) {
     //
     // New
     //
-    if (fields.size() != 2) {
+    if (fields.size() != 3) {
         throw ProfileError(
             _lineNum,
-            fmt::format("Expected 2 fields in an Asset entry, got {}", fields.size())
+            fmt::format("Expected 3 fields in an Asset entry, got {}", fields.size())
         );
     }
 
@@ -444,6 +587,7 @@ void ProfileFile::parseAsset(std::string line) {
             fmt::format("Expected asset type 'require' or 'request', got {}", type)
         );
     }(fields[1]);
+    a.name = fields[2];
     profile.assets.push_back(std::move(a));
 }
 

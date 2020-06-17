@@ -360,22 +360,7 @@ void Profile::convertToSceneFile(const std::string& inProfilePath,
 }
 
 std::string Profile::convertToScene(ProfileFile& pf) {
-    ZoneScoped
-
-    std::string result;
-
-    result += convertToScene_modules(pf) + "\n";
-    result += convertToScene_assets(pf) + "\n";
-    result += convertToScene_keybindings(pf) + "\n";
-    result += "asset.onInitialize(function ()\n";
-    result += convertToScene_time(pf) + "\n";
-    result += "  sceneHelper.bindKeys(Keybindings)\n\n";
-    result += convertToScene_markNodes(pf) + "\n";
-    result += convertToScene_properties(pf) + "\n";
-    result += convertToScene_camera(pf);
-    result += "end)\n";
-
-    return result;
+    return openspace::convertToSceneFile(pf.profile);
 }
 
 std::string Profile::convertToScene_modules(ProfileFile& pf) {
@@ -409,12 +394,6 @@ std::string Profile::convertToScene_assets(ProfileFile& pf) {
     std::string result;
     std::string assetR;
 
-    result += "asset.require(\"base\");\n";
-    result += "local assetHelper = asset.require(\"util/asset_helper\")\n";
-    result += "local propertyHelper = asset.require(\"util/property_helper\")\n";
-    result += "local sceneHelper = asset.require(\"util/scene_helper\")\n";
-    result += "local renderableHelper = asset.require(\"util/renderable_helper\")\n";
-
     for (size_t i = 0; i < pf.assets().size(); ++i) {
         std::vector<std::string> fields = ghoul::tokenizeString(pf.assets()[i], '\t');
 
@@ -434,7 +413,12 @@ std::string Profile::convertToScene_assets(ProfileFile& pf) {
             );
             throw ghoul::RuntimeError(err);
         }
+
+        if (!fields[2].empty()) {
+            result += fmt::format("local {} = ", fields[2]);
+        }
         result += fmt::format("asset.{}(\"{}\")\n", assetR, fields[assetFieldName]);
+
     }
     return result;
 }

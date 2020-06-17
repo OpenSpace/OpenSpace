@@ -2,7 +2,12 @@
 1.0
 
 #Asset
-scene/solarsystem/missions/juno/juno	require
+util/asset_helper	require	assetHelper
+util/property_helper	require	propertyHelper
+util/scene_helper	require	sceneHelper
+util/renderable_helper	require	renderableHelper
+base	require	
+scene/solarsystem/missions/juno/juno	require	
 
 #Keybinding
 1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"

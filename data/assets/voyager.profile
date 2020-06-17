@@ -2,14 +2,19 @@
 1.0
 
 #Asset
-scene/solarsystem/planets/jupiter/minor_moons	require
-scene/solarsystem/planets/saturn/minor_moons	require
-scene/solarsystem/planets/uranus/minor_moons	require
-scene/solarsystem/planets/neptune/inner_moons	require
-scene/solarsystem/planets/neptune/irregular_prograde_moons	require
-scene/solarsystem/planets/neptune/irregular_retrograde_moons	require
-scene/solarsystem/missions/voyager/voyager1	require
-scene/solarsystem/missions/voyager/voyager2	require
+util/asset_helper	require	assetHelper
+util/property_helper	require	propertyHelper
+util/scene_helper	require	sceneHelper
+util/renderable_helper	require	renderableHelper
+base	require	
+scene/solarsystem/planets/jupiter/minor_moons	require	
+scene/solarsystem/planets/saturn/minor_moons	require	
+scene/solarsystem/planets/uranus/minor_moons	require	
+scene/solarsystem/planets/neptune/inner_moons	require	
+scene/solarsystem/planets/neptune/irregular_prograde_moons	require	
+scene/solarsystem/planets/neptune/irregular_retrograde_moons	require	
+scene/solarsystem/missions/voyager/voyager1	require	
+scene/solarsystem/missions/voyager/voyager2	require	
 
 #Keybinding
 1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"

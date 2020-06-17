@@ -46,7 +46,7 @@ namespace scripting { struct LuaLibrary; }
 const size_t timeLinesExpected = 1;
 const size_t cameraLinesExpected = 1;
 const size_t moduleFieldsExpected = 3;
-const size_t assetFieldsExpected = 2;
+const size_t assetFieldsExpected = 3;
 const size_t propertyFieldsExpected = 3;
 const size_t keybindingFieldsExpected = 6;
 const size_t timeFieldsExpected = 2;
@@ -107,6 +107,7 @@ struct ProfileStruct {
 
         std::string path;
         Type type;
+        std::string name;
     };
     std::vector<Asset> assets;
 
@@ -168,6 +169,9 @@ struct ProfileStruct {
 };
 
 std::string serialize(const ProfileStruct& ps);
+ProfileStruct deserialize(const std::string& filename);
+ 
+std::string convertToSceneFile(const ProfileStruct& ps);
 
 class ProfileFile {
 public:

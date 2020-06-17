@@ -2,7 +2,12 @@
 1.0
 
 #Asset
-scene/solarsystem/missions/insight/edl	require
+util/asset_helper	require	assetHelper
+util/property_helper	require	propertyHelper
+util/scene_helper	require	sceneHelper
+util/renderable_helper	require	renderableHelper
+base	require	
+scene/solarsystem/missions/insight/edl	require	
 
 #Property
 setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false
