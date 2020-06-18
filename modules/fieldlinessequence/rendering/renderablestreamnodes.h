@@ -132,9 +132,9 @@ namespace openspace {
         // Index of the flux value to color lines by
         //properties::OptionProperty _pColorFlux;
         // Color table/transfer function min
-        properties::StringProperty _pColorFluxMin;
+        //properties::StringProperty _pColorFluxMin;
         // Color table/transfer function max
-        properties::StringProperty _pColorFluxMax;
+        //properties::StringProperty _pColorFluxMax;
         // Color table/transfer function for "By Flux value" coloring
         properties::StringProperty _pColorTablePath;
         // Toggle flow [ON/OFF]
@@ -145,6 +145,10 @@ namespace openspace {
         properties::FloatProperty _pNodeSize;
         /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;
+        ////////////////
+        properties::Vec2Property _pColorTableRange;
+        ////////////////
+        properties::Vec2Property _pDomainZ;
         /// ///////////
         properties::FloatProperty _pThresholdRadius;
         // Filtering nodes within a range
@@ -195,6 +199,7 @@ namespace openspace {
         void updateVertexFilteringBuffer();
         void extractTriggerTimesFromFileNames();
         void computeSequenceEndTime();
+        void setModelDependentConstants();
 
         bool LoadfilesintoRam();
 
