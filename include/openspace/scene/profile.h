@@ -165,43 +165,12 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     ProfileData profile;
-
-protected:
-    std::string _profileBaseDirectory = "${ASSETS}";
-
-private:
-    struct AllAssetDetails {
-        std::vector<AssetEvent> base;
-        std::vector<AssetEvent> changed;
-    };
-    virtual std::string initialProfile() const;
-    virtual std::string profileBaseDirectory() const;
-    virtual std::vector<AssetEvent> assetEvents() const;
-
-    std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileData& ps);
-    void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileData& ps);
-
-    void modifyPropertiesToReflectChanges(ProfileData& ps);
-    virtual std::vector<openspace::properties::Property*> changedProperties();
-    virtual interaction::NavigationHandler::NavigationState currentCameraState() const;
 };
-
 
 std::string serialize(const ProfileData& ps);
 ProfileData deserialize(const std::vector<std::string>& content);
 
 std::string convertToSceneFile(const ProfileData& ps);
-
-/**
- * Reads in a .profile file, converts it to scene/asset equivalent syntax, and
- * writes the result to the specified output path.
- * \param inProfilePath The .profile file to be converted
- * \param outFilePath The output file path that will be written with the converted
- *                       contents (in an .asset file)
- */
-void convertProfileToScene(const std::string& inProfilePath,
-    const std::string& outFilePath);
-
 
 } // namespace openspace
 

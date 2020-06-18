@@ -91,7 +91,7 @@ int saveSettingsToProfile(lua_State* L) {
     }
     const std::string absFilename = absPath("${ASSETS}/" + saveFilePath + ".profile");
 
-    const bool overwrite = (n == 2) ? ghoul::lua::value< bool>(L, 2) : false;
+    const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : false;
     LINFOC("3", ghoul::lua::stackInformation(L));
 
     if (FileSys.fileExists(absFilename) && !overwrite) {

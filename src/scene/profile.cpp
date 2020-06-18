@@ -431,6 +431,43 @@ namespace {
     [[ nodiscard ]] std::string parseMarkNodes(const std::string& line, int) {
         return line;
     }
+
+    std::vector<Profile::AssetEvent> modifyAssetsToReflectChanges(ProfileData& ps) {
+        std::vector<Profile::AssetEvent> results;
+        for (ProfileData::Asset& a : ps.assets) {
+            Profile::AssetEvent assetEvent;
+            assetEvent.name = a.path;
+            assetEvent.eventType = [](ProfileData::Asset::Type type) {
+                switch (type) {
+                case ProfileData::Asset::Type::Request:
+                    return Profile::AssetEventType::Request;
+                case ProfileData::Asset::Type::Require:
+                    return Profile::AssetEventType::Require;
+                default: throw ghoul::MissingCaseException();
+                }
+            }(a.type);
+            results.push_back(assetEvent);
+        }
+        struct {
+            std::vector<Profile::AssetEvent> base;
+            std::vector<Profile::AssetEvent> changed;
+        } assetDetails;
+
+        assetDetails.base = results;
+        assetDetails.changed = global::openSpaceEngine.assetEvents();
+
+        for (unsigned int i = 0; i < assetDetails.changed.size(); i++) {
+            Profile::AssetEvent event = assetDetails.changed[i];
+
+            if (event.eventType == Profile::AssetEventType::Add) {
+                handleChangedAdd(assetDetails.base, i, assetDetails.changed, event.name);
+            }
+            else if (event.eventType == Profile::AssetEventType::Remove) {
+                assetDetails.base.push_back({ event.name, Profile::AssetEventType::Remove });
+            }
+        }
+        return assetDetails.base;
+    }
 } // namespace
 
 Profile::Profile(const std::string& filename) {
@@ -440,18 +477,43 @@ Profile::Profile(const std::string& filename) {
 void Profile::saveCurrentSettingsToProfile() {
     profile.version = ProfileData::CurrentVersion;
 
+    //
+    // Update assets
+    //
     std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(profile);
     addAssetsToProfileFile(profile, ass);
-    modifyPropertiesToReflectChanges(profile);
 
+    //
+    // Update properties
+    //
+    std::vector<SceneGraphNode*> nodes =
+        global::renderEngine.scene()->allSceneGraphNodes();
+    std::vector<properties::Property*> changedProps;
+
+    for (SceneGraphNode* n : nodes) {
+        checkForChangedProps(changedProps, n);
+    }
+    std::vector<std::string> formattedLines;
+
+    for (properties::Property* prop : changedProps) {
+        ProfileData::Property p;
+        p.setType = ProfileData::Property::SetType::SetPropertyValueSingle;
+        p.name = recurseForFullName(prop->owner()) + prop->identifier();
+        p.value = prop->getStringValue();
+        profile.properties.push_back(std::move(p));
+    }
+
+    //
     // add current time to profile file
+    //
     ProfileData::Time time;
     time.time = global::timeManager.time().ISO8601();
     time.type = ProfileData::Time::Type::Absolute;
     profile.time = std::move(time);
 
     // Camera
-    interaction::NavigationHandler::NavigationState nav = currentCameraState();
+    interaction::NavigationHandler::NavigationState nav =
+        global::navigationHandler.navigationState();
 
     ProfileData::CameraNavState camera;
     camera.anchor = nav.anchor;
@@ -470,111 +532,6 @@ void Profile::saveCurrentSettingsToProfile() {
     camera.yaw = std::to_string(nav.yaw);
     camera.pitch = std::to_string(nav.pitch);
     profile.camera = std::move(camera);
-}
-
-std::string Profile::initialProfile() const {
-    return global::configuration.profile;
-}
-
-std::vector<Profile::AssetEvent> Profile::assetEvents() const {
-    return global::openSpaceEngine.assetEvents();
-}
-
-std::string Profile::profileBaseDirectory() const {
-    return _profileBaseDirectory;
-}
-
-std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileData& ps) {
-    std::vector<AssetEvent> a;
-    parseAssetFileLines(a, ps);
-    AllAssetDetails assetDetails;
-
-    assetDetails.base = a;
-    assetDetails.changed = assetEvents();
-
-    for (unsigned int i = 0; i < assetDetails.changed.size(); i++) {
-        AssetEvent event = assetDetails.changed[i];
-
-        if (event.eventType == AssetEventType::Add) {
-            handleChangedAdd(assetDetails.base, i, assetDetails.changed, event.name);
-        }
-        else if (event.eventType == AssetEventType::Remove) {
-            assetDetails.base.push_back({ event.name, Profile::AssetEventType::Remove });
-        }
-    }
-    return assetDetails.base;
-}
-
-void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileData& ps) {
-    for (ProfileData::Asset& a : ps.assets) {
-        AssetEvent assetEvent;
-        assetEvent.name = a.path;
-        assetEvent.eventType = [](ProfileData::Asset::Type type) {
-            switch (type) {
-                case ProfileData::Asset::Type::Request: return AssetEventType::Request;
-                case ProfileData::Asset::Type::Require: return AssetEventType::Require;
-                default: throw ghoul::MissingCaseException();
-            }
-        }(a.type);
-        results.push_back(assetEvent);
-    }
-}
-
-void Profile::modifyPropertiesToReflectChanges(ProfileData& ps) {
-    std::vector<properties::Property*> changedProps = changedProperties();
-    std::vector<std::string> formattedLines;
-
-    for (properties::Property* prop : changedProps) {
-        ProfileData::Property p;
-        p.setType = ProfileData::Property::SetType::SetPropertyValueSingle;
-        p.name = recurseForFullName(prop->owner()) + prop->identifier();
-        p.value = prop->getStringValue();
-        ps.properties.push_back(std::move(p));
-    }
-}
-
-std::vector<properties::Property*> Profile::changedProperties() {
-    ZoneScoped
-
-    std::vector<SceneGraphNode*> nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
-    std::vector<properties::Property*> changedProps;
-
-    for (SceneGraphNode* n : nodes) {
-        checkForChangedProps(changedProps, n);
-    }
-    return changedProps;
-}
-
-interaction::NavigationHandler::NavigationState Profile::currentCameraState() const {
-    return global::navigationHandler.navigationState();
-}
-
-void convertProfileToScene(const std::string& inProfilePath,
-                           const std::string& outFilePath)
-{
-    ZoneScoped
-
-    ProfileData ps = readFromFile(inProfilePath);
-
-    std::ofstream outFile;
-    try {
-        outFile.open(outFilePath, std::ofstream::out);
-    }
-    catch (const std::ofstream::failure& e) {
-        LERROR(fmt::format(
-            "Exception opening scene file for write: {} ({})", outFilePath, e.what()
-        ));
-    }
-
-    try {
-        outFile << openspace::convertToSceneFile(ps);
-    }
-    catch (const std::ofstream::failure& e) {
-        LERROR(fmt::format(
-            "Data write error to scene file: {} ({})", outFilePath, e.what()
-        ));
-    }
 }
 
 scripting::LuaLibrary Profile::luaLibrary() {
