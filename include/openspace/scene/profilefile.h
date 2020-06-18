@@ -177,9 +177,6 @@ std::string convertToSceneFile(const ProfileStruct& ps);
 class ProfileFile {
 public:
     ProfileStruct profile;
-
-    using Lines = std::vector<std::string>;
-
     /**
      * Constructs object by reading the contents of a profile file and populates vector
      * containers for all sections. This only pulls individual line entries into their
@@ -187,14 +184,6 @@ public:
      * \param filename The profile file to read
      */
     ProfileFile(const std::string& filename);
-
-    /**
-     * Writes the formatted contents of this object to a file.
-     * This function calls writeToString() in order to get everything in formatted
-     * form.
-     * \param filename The filename to write to.
-     */
-    void writeToFile(const std::string& filename) const;
 };
 
 } // namespace openspace

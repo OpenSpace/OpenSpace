@@ -102,10 +102,6 @@ namespace {
         }
     }
 
-    void handleChangedRemove(std::vector<Profile::AssetEvent>& base, std::string asset) {
-        base.push_back({ std::move(asset), Profile::AssetEventType::Remove });
-    }
-
     void addAssetsToProfileFile(ProfileFile& pf,
                                 const std::vector<Profile::AssetEvent>& allAssets)
     {
@@ -147,12 +143,53 @@ namespace {
             }
         }
     }
-
 } // namespace
 
 void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
     ProfileFile pf = collateBaseWithChanges();
-    pf.writeToFile(filename);
+
+    if (filename.find('/') != std::string::npos) {
+        LERROR("Profile filename must not contain path (/) elements");
+        return;
+    }
+    else if (filename.find(':') != std::string::npos) {
+        LERROR("Profile filename must not contain path (:) elements");
+        return;
+    }
+    else if (filename.find('.') != std::string::npos) {
+        LERROR("Only provide the filename to save without file extension");
+        return;
+    }
+    const std::string absFilename = absPath("${ASSETS}/" + filename + ".profile");
+
+    if (FileSys.fileExists(absFilename)) {
+        LERROR(fmt::format(
+            "Unable to save profile '{}'. File of same name already exists.",
+            absFilename.c_str()
+        ));
+        return;
+    }
+
+    std::ofstream outFile;
+    // @TODO (abock, 2020-06-15) Replace with non-throwing stream
+    try {
+        outFile.open(absFilename, std::ofstream::out);
+    }
+    catch (const std::ofstream::failure& e) {
+        LERROR(fmt::format(
+            "Exception opening profile file for write: {} ({})", absFilename, e.what()
+        ));
+    }
+
+    try {
+        outFile << serialize(pf.profile);
+    }
+    catch (const std::ofstream::failure& e) {
+        LERROR("Data write error to file: "
+            + absFilename + " (" + e.what() + ")");
+    }
+
+    outFile.close();
 }
 
 std::string Profile::saveCurrentSettingsToProfile_string() {
@@ -217,7 +254,7 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFi
             handleChangedAdd(assetDetails.base, i, assetDetails.changed, event.name);
         }
         else if (event.eventType == AssetEventType::Remove) {
-            handleChangedRemove(assetDetails.base, event.name);
+            assetDetails.base.push_back({ event.name, Profile::AssetEventType::Remove });
         }
     }
     return assetDetails.base;
@@ -323,29 +360,19 @@ void Profile::convertToSceneFile(const std::string& inProfilePath,
         outFile.open(outFilePath, std::ofstream::out);
     }
     catch (const std::ofstream::failure& e) {
-        LERROR("Exception opening scene file for write: " + outFilePath
-            + " (" + e.what() + ")");
+        LERROR(fmt::format(
+            "Exception opening scene file for write: {} ({})", outFilePath, e.what()
+        ));
     }
 
     try {
-        outFile << convertToScene(pf);
+        outFile << openspace::convertToSceneFile(pf.profile);
     }
     catch (const std::ofstream::failure& e) {
-        LERROR("Data write error to scene file: " + outFilePath
-            + " (" + e.what() + ")");
+        LERROR(fmt::format(
+            "Data write error to scene file: {} ({})", outFilePath, e.what()
+        ));
     }
-
-    try {
-        outFile.close();
-    }
-    catch (const std::ofstream::failure& e) {
-        LERROR("Exception closing scene file after write: " + outFilePath
-            + " (" + e.what() + ")");
-    }
-}
-
-std::string Profile::convertToScene(ProfileFile& pf) {
-    return openspace::convertToSceneFile(pf.profile);
 }
 
 scripting::LuaLibrary Profile::luaLibrary() {

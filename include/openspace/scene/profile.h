@@ -85,13 +85,6 @@ public:
     void convertToSceneFile(const std::string& inProfilePath,
         const std::string& outFilePath);
 
-    /**
-     * Returns the string contents of a profileFile object converted to scene/asset
-     * equivalent syntax.
-     * \param pf The profileFile object to be converted
-     * \return The full string contents of scene/asset equivalent of the profile file.
-     */
-    std::string convertToScene(ProfileFile& pf);
 
     /**
      * Returns the Lua library that contains all Lua functions available to provide

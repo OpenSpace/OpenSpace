@@ -606,49 +606,4 @@ ProfileFile::ProfileFile(const std::string& filename) {
     profile = deserialize(content);
 }
 
-void ProfileFile::writeToFile(const std::string& filename) const {
-    if (filename.find('/') != std::string::npos) {
-        LERROR("Profile filename must not contain path (/) elements");
-        return;
-    }
-    else if (filename.find(':') != std::string::npos) {
-        LERROR("Profile filename must not contain path (:) elements");
-        return;
-    }
-    else if (filename.find('.') != std::string::npos) {
-        LERROR("Only provide the filename to save without file extension");
-        return;
-    }
-    const std::string absFilename = absPath("${ASSETS}/" + filename + ".profile");
-
-    if (FileSys.fileExists(absFilename)) {
-        LERROR(fmt::format(
-            "Unable to save profile '{}'. File of same name already exists.",
-            absFilename.c_str()
-        ));
-        return;
-    }
-
-    std::ofstream outFile;
-    // @TODO (abock, 2020-06-15) Replace with non-throwing stream
-    try {
-        outFile.open(absFilename, std::ofstream::out);
-    }
-    catch (const std::ofstream::failure& e) {
-        LERROR(fmt::format(
-            "Exception opening profile file for write: {} ({})", absFilename, e.what()
-        ));
-    }
-
-    try {
-        outFile << serialize(profile);
-    }
-    catch (const std::ofstream::failure& e) {
-        LERROR("Data write error to file: "
-            + absFilename + " (" + e.what() + ")");
-    }
-
-    outFile.close();
-}
-
 }  // namespace openspace
