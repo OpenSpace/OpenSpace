@@ -150,17 +150,17 @@ namespace {
     };
     constexpr openspace::properties::Property::PropertyInfo ThresholdRadiusInfo = {
        "thresholdRadius",
-       "Threshold Radius",
+       "Threshold flux scaling",
        "This value specifies the threshold that will be changed with the radius."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
         "filtering",
-        "FilteringLower",
+        "FilteringLower in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
         "filtering2",
-        "FilteringUpper",
+        "FilteringUpper in AU",
         "Use filtering to show nodes within a given range."
     };
     
