@@ -47,6 +47,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #else
 #define GLFW_INCLUDE_NONE
+#endif
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
