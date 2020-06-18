@@ -22,23 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/filesystem/file.h>
+#include <ctime>
+
 namespace openspace::luascriptfunctions {
 
-
 int saveCurrentSettingsToProfile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::saveCurrentSettingsToProfile");
-
-    using ghoul::lua::luaTypeToString;
-
-    const std::string saveFilePath = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    if (saveFilePath.empty()) {
-        return luaL_error(L, "save filepath string is empty");
-    }
     if (!global::configuration.usingProfile) {
         return luaL_error(
             L,
@@ -46,9 +35,46 @@ int saveCurrentSettingsToProfile(lua_State* L) {
             "save-current-settings feature"
         );
     }
-    global::profile.saveCurrentSettingsToProfile(
-        saveFilePath
+
+    const int n = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 0, 1 },
+        "lua::saveCurrentSettingsToProfile"
     );
+
+    using ghoul::lua::luaTypeToString;
+
+    std::string saveFilePath;
+    if (n == 0) {
+        const ghoul::filesystem::File f = global::configuration.profile;
+
+        std::time_t t = std::time(nullptr);
+        std::tm* utcTime = std::gmtime(&t);
+        ghoul_assert(utcTime, "Conversion to UTC failed");
+
+        std::string time = fmt::format(
+            "{:04d}-{:02d}-{:02d}T{:02d}_{:02d}_{:02d}",
+            utcTime->tm_year + 1900,
+            utcTime->tm_mon + 1,
+            utcTime->tm_mday,
+            utcTime->tm_hour,
+            utcTime->tm_min,
+            utcTime->tm_sec
+        );
+        saveFilePath = fmt::format("{}_{}.{}", f.fullBaseName(), time, f.fileExtension());
+    }
+    else {
+        saveFilePath = ghoul::lua::value<std::string>(
+            L,
+            1,
+            ghoul::lua::PopValue::Yes
+        );
+        if (saveFilePath.empty()) {
+            return luaL_error(L, "save filepath string is empty");
+        }
+    }
+
+    global::profile.saveCurrentSettingsToProfile(saveFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

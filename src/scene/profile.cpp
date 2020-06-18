@@ -437,22 +437,18 @@ Profile::Profile(const std::string& filename) {
     profile = readFromFile(filename);
 }
 
-void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
-    std::string initProfile = initialProfile();
-    std::string inputProfilePath = absPath(_profileBaseDirectory) + "/" + initProfile
-        + ".profile";
-    ProfileData ps = readFromFile(inputProfilePath);
-    ps.version = ProfileData::Version{};
+void Profile::saveCurrentSettingsToProfile() {
+    profile.version = ProfileData::CurrentVersion;
 
-    std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(ps);
-    addAssetsToProfileFile(ps, ass);
-    modifyPropertiesToReflectChanges(ps);
+    std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(profile);
+    addAssetsToProfileFile(profile, ass);
+    modifyPropertiesToReflectChanges(profile);
 
     // add current time to profile file
     ProfileData::Time time;
     time.time = currentTimeUTC();
     time.type = ProfileData::Time::Type::Absolute;
-    ps.time = std::move(time);
+    profile.time = std::move(time);
 
     // Camera
     interaction::NavigationHandler::NavigationState nav = currentCameraState();
@@ -473,7 +469,16 @@ void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
     }
     camera.yaw = std::to_string(nav.yaw);
     camera.pitch = std::to_string(nav.pitch);
-    ps.camera = std::move(camera);
+    profile.camera = std::move(camera);
+}
+
+void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
+    //std::string initProfile = initialProfile();
+    //std::string inputProfilePath = absPath(_profileBaseDirectory) + "/" + initProfile
+    //    + ".profile";
+    //ProfileData ps = readFromFile(inputProfilePath);
+
+    saveCurrentSettingsToProfile();
 
 
     if (filename.find('/') != std::string::npos) {
@@ -510,11 +515,10 @@ void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
     }
 
     try {
-        outFile << serialize(ps);
+        outFile << serialize(profile);
     }
     catch (const std::ofstream::failure& e) {
-        LERROR("Data write error to file: "
-            + absFilename + " (" + e.what() + ")");
+        LERROR(fmt::format("Data write error to file: {} ({})", absFilename, e.what()));
     }
 
     outFile.close();
@@ -662,48 +666,56 @@ std::string serialize(const ProfileData& ps) {
         ps.version.major, ps.version.minor, ps.version.patch
     );
 
-    output += fmt::format("\n{}\n", headerModule);
-    for (const ProfileData::Module& m : ps.modules) {
-        output += fmt::format(
-            "{}\t{}\t{}\n",
-            m.name, m.loadedInstruction, m.notLoadedInstruction
-        );
+    if (!ps.modules.empty()) {
+        output += fmt::format("\n{}\n", headerModule);
+        for (const ProfileData::Module& m : ps.modules) {
+            output += fmt::format(
+                "{}\t{}\t{}\n",
+                m.name, m.loadedInstruction, m.notLoadedInstruction
+            );
+        }
     }
 
-    output += fmt::format("\n{}\n", headerAsset);
-    for (const ProfileData::Asset& a : ps.assets) {
-        const std::string type = [](ProfileData::Asset::Type t) {
-            switch (t) {
-            case ProfileData::Asset::Type::Require: return "require";
-            case ProfileData::Asset::Type::Request: return "request";
-            default: throw ghoul::MissingCaseException();
-            }
-        }(a.type);
-        output += fmt::format("{}\t{}\n", a.path, type);
+    if (!ps.assets.empty()) {
+        output += fmt::format("\n{}\n", headerAsset);
+        for (const ProfileData::Asset& a : ps.assets) {
+            const std::string type = [](ProfileData::Asset::Type t) {
+                switch (t) {
+                case ProfileData::Asset::Type::Require: return "require";
+                case ProfileData::Asset::Type::Request: return "request";
+                default: throw ghoul::MissingCaseException();
+                }
+            }(a.type);
+            output += fmt::format("{}\t{}\n", a.path, type);
+        }
     }
 
-    output += fmt::format("\n{}\n", headerProperty);
-    for (const ProfileData::Property& p : ps.properties) {
-        const std::string type = [](ProfileData::Property::SetType t) {
-            switch (t) {
-            case ProfileData::Property::SetType::SetPropertyValue:
-                return "setPropertyValue";
-            case ProfileData::Property::SetType::SetPropertyValueSingle:
-                return "setPropertyValueSingle";
-            default:
-                throw ghoul::MissingCaseException();
-            }
-        }(p.setType);
-        output += fmt::format("{}\t{}\t{}\n", type, p.name, p.value);
+    if (!ps.properties.empty()) {
+        output += fmt::format("\n{}\n", headerProperty);
+        for (const ProfileData::Property& p : ps.properties) {
+            const std::string type = [](ProfileData::Property::SetType t) {
+                switch (t) {
+                case ProfileData::Property::SetType::SetPropertyValue:
+                    return "setPropertyValue";
+                case ProfileData::Property::SetType::SetPropertyValueSingle:
+                    return "setPropertyValueSingle";
+                default:
+                    throw ghoul::MissingCaseException();
+                }
+            }(p.setType);
+            output += fmt::format("{}\t{}\t{}\n", type, p.name, p.value);
+        }
     }
 
-    output += fmt::format("\n{}\n", headerKeybinding);
-    for (const ProfileData::Keybinding& k : ps.keybindings) {
-        const std::string local = k.isLocal ? "true" : "false";
-        output += fmt::format(
-            "{}\t{}\t{}\t{}\t{}\t{}\n",
-            k.key, k.documentation, k.name, k.guiPath, local, k.script
-        );
+    if (!ps.keybindings.empty()) {
+        output += fmt::format("\n{}\n", headerKeybinding);
+        for (const ProfileData::Keybinding& k : ps.keybindings) {
+            const std::string local = k.isLocal ? "true" : "false";
+            output += fmt::format(
+                "{}\t{}\t{}\t{}\t{}\t{}\n",
+                k.key, k.documentation, k.name, k.guiPath, local, k.script
+            );
+        }
     }
 
     output += fmt::format("\n{}\n", headerTime);
@@ -743,11 +755,13 @@ std::string serialize(const ProfileData& ps) {
             }
         },
         ps.camera
-                );
+    );
 
-    output += fmt::format("\n{}\n", headerMarkNodes);
-    for (const std::string& n : ps.markNodes) {
-        output += fmt::format("{}\n", n);
+    if (!ps.markNodes.empty()) {
+        output += fmt::format("\n{}\n", headerMarkNodes);
+        for (const std::string& n : ps.markNodes) {
+            output += fmt::format("{}\n", n);
+        }
     }
 
     return output;
@@ -818,7 +832,7 @@ ProfileData deserialize(const std::vector<std::string>& content) {
 std::string convertToSceneFile(const ProfileData& ps) {
     ZoneScoped
 
-        std::string output;
+    std::string output;
 
     // Modules
     for (const ProfileData::Module& m : ps.modules) {
@@ -835,9 +849,9 @@ std::string convertToSceneFile(const ProfileData& ps) {
         }
         std::string type = [](ProfileData::Asset::Type t) {
             switch (t) {
-            case ProfileData::Asset::Type::Request: return "request";
-            case ProfileData::Asset::Type::Require: return "require";
-            default: throw ghoul::MissingCaseException();
+                case ProfileData::Asset::Type::Request: return "request";
+                case ProfileData::Asset::Type::Require: return "require";
+                default: throw ghoul::MissingCaseException();
             }
         }(a.type);
 
@@ -858,17 +872,18 @@ std::string convertToSceneFile(const ProfileData& ps) {
 
     // Time
     switch (ps.time.type) {
-    case ProfileData::Time::Type::Absolute:
-        output += fmt::format("openspace.time.setTime(\"{}\")\n", ps.time.time);
-        break;
-    case ProfileData::Time::Type::Relative:
-        output += "local now = openspace.time.currentWallTime();\n";
-        output += fmt::format(
-            "local prev = openspace.time.advancedTime(now, \"{}\");\n", ps.time.time
-        );
-        output += "openspace.time.setTime(prev);\n";
-    default:
-        throw ghoul::MissingCaseException();
+        case ProfileData::Time::Type::Absolute:
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", ps.time.time);
+            break;
+        case ProfileData::Time::Type::Relative:
+            output += "local now = openspace.time.currentWallTime();\n";
+            output += fmt::format(
+                "local prev = openspace.time.advancedTime(now, \"{}\");\n", ps.time.time
+            );
+            output += "openspace.time.setTime(prev);\n";
+            break;
+        default:
+            throw ghoul::MissingCaseException();
     }
 
     // Mark Nodes
@@ -883,20 +898,20 @@ std::string convertToSceneFile(const ProfileData& ps) {
     // Properties
     for (const ProfileData::Property& p : ps.properties) {
         switch (p.setType) {
-        case ProfileData::Property::SetType::SetPropertyValue:
-            output += fmt::format(
-                "openspace.setPropertyValue(\"{}\", {});\n",
-                p.name, p.value
-            );
-            break;
-        case ProfileData::Property::SetType::SetPropertyValueSingle:
-            output += fmt::format(
-                "openspace.setPropertyValueSingle(\"{}\", {});\n",
-                p.name, p.value
-            );
-            break;
-        default:
-            throw ghoul::MissingCaseException();
+            case ProfileData::Property::SetType::SetPropertyValue:
+                output += fmt::format(
+                    "openspace.setPropertyValue(\"{}\", {});\n",
+                    p.name, p.value
+                );
+                break;
+            case ProfileData::Property::SetType::SetPropertyValueSingle:
+                output += fmt::format(
+                    "openspace.setPropertyValueSingle(\"{}\", {});\n",
+                    p.name, p.value
+                );
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
 

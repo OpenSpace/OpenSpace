@@ -51,7 +51,8 @@ struct ProfileData {
         int minor = 0;
         int patch = 0;
     };
-    Version version = { 1, 0, 0 };
+    static constexpr const Version CurrentVersion = Version{ 1, 0, 0 };
+    Version version = CurrentVersion;
 
     struct Module {
         std::string name;
@@ -149,6 +150,12 @@ public:
     explicit Profile(const std::string& filename);
 
     virtual ~Profile() {};
+
+    /**
+     * Saves all current settings, starting from the profile that was loaded at startup,
+     * and all of the property & asset changes that were made since startup.
+     */
+    void saveCurrentSettingsToProfile();
 
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
