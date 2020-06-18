@@ -147,9 +147,10 @@ public:
     };
 
     Profile() = default;
-    explicit Profile(const std::string& filename);
+    Profile(const std::vector<std::string>& content);
+    std::string serialize() const;
 
-    virtual ~Profile() {};
+    std::string convertToScene() const;
 
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
@@ -166,11 +167,6 @@ public:
 
     ProfileData profile;
 };
-
-std::string serialize(const ProfileData& ps);
-ProfileData deserialize(const std::vector<std::string>& content);
-
-std::string convertToSceneFile(const ProfileData& ps);
 
 } // namespace openspace
 

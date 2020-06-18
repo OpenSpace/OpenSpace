@@ -313,12 +313,29 @@ void OpenSpaceEngine::initialize() {
         }
         else {
             // Load the profile
-            global::profile = Profile(inputProfile);
+            std::ifstream inFile;
+            try {
+                inFile.open(inputProfile, std::ifstream::in);
+            }
+            catch (const std::ifstream::failure& e) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Exception opening profile file for read: {} ({})",
+                    inputProfile, e.what())
+                );
+            }
+
+            std::vector<std::string> content;
+            std::string line;
+            while (std::getline(inFile, line)) {
+                content.push_back(std::move(line));
+            }
+
+            global::profile = Profile(content);
 
             // Then save the profile to a scene so that we can load it with the
             // existing infrastructure
             std::ofstream scene(outputAsset);
-            std::string sceneContent = convertToSceneFile(global::profile.profile);
+            std::string sceneContent = global::profile.convertToScene();
             scene << sceneContent;
 
             // Set asset name to that of the profile because a new scene file will be

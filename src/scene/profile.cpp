@@ -170,26 +170,6 @@ namespace {
         }
     }
 
-    ProfileData readFromFile(const std::string& filename) {
-        std::ifstream inFile;
-        try {
-            inFile.open(filename, std::ifstream::in);
-        }
-        catch (const std::ifstream::failure& e) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Exception opening profile file for read: {} ({})", filename, e.what())
-            );
-        }
-    
-        std::vector<std::string> content;
-        std::string line;
-        while (std::getline(inFile, line)) {
-            content.push_back(std::move(line));
-        }
-    
-        return deserialize(content);
-    }
-
     enum class Section {
         None,
         Version,
@@ -470,10 +450,6 @@ namespace {
     }
 } // namespace
 
-Profile::Profile(const std::string& filename) {
-    profile = readFromFile(filename);
-}
-
 void Profile::saveCurrentSettingsToProfile() {
     profile.version = ProfileData::CurrentVersion;
 
@@ -557,17 +533,17 @@ scripting::LuaLibrary Profile::luaLibrary() {
     };
 }
 
-std::string serialize(const ProfileData& ps) {
+std::string Profile::serialize() const {
     std::string output;
     output += fmt::format("{}\n", headerVersion);
     output += fmt::format(
         "{}.{}.{}\n",
-        ps.version.major, ps.version.minor, ps.version.patch
+        profile.version.major, profile.version.minor, profile.version.patch
     );
 
-    if (!ps.modules.empty()) {
+    if (!profile.modules.empty()) {
         output += fmt::format("\n{}\n", headerModule);
-        for (const ProfileData::Module& m : ps.modules) {
+        for (const ProfileData::Module& m : profile.modules) {
             output += fmt::format(
                 "{}\t{}\t{}\n",
                 m.name, m.loadedInstruction, m.notLoadedInstruction
@@ -575,9 +551,9 @@ std::string serialize(const ProfileData& ps) {
         }
     }
 
-    if (!ps.assets.empty()) {
+    if (!profile.assets.empty()) {
         output += fmt::format("\n{}\n", headerAsset);
-        for (const ProfileData::Asset& a : ps.assets) {
+        for (const ProfileData::Asset& a : profile.assets) {
             const std::string type = [](ProfileData::Asset::Type t) {
                 switch (t) {
                 case ProfileData::Asset::Type::Require: return "require";
@@ -589,9 +565,9 @@ std::string serialize(const ProfileData& ps) {
         }
     }
 
-    if (!ps.properties.empty()) {
+    if (!profile.properties.empty()) {
         output += fmt::format("\n{}\n", headerProperty);
-        for (const ProfileData::Property& p : ps.properties) {
+        for (const ProfileData::Property& p : profile.properties) {
             const std::string type = [](ProfileData::Property::SetType t) {
                 switch (t) {
                 case ProfileData::Property::SetType::SetPropertyValue:
@@ -606,9 +582,9 @@ std::string serialize(const ProfileData& ps) {
         }
     }
 
-    if (!ps.keybindings.empty()) {
+    if (!profile.keybindings.empty()) {
         output += fmt::format("\n{}\n", headerKeybinding);
-        for (const ProfileData::Keybinding& k : ps.keybindings) {
+        for (const ProfileData::Keybinding& k : profile.keybindings) {
             const std::string local = k.isLocal ? "true" : "false";
             output += fmt::format(
                 "{}\t{}\t{}\t{}\t{}\t{}\n",
@@ -625,8 +601,8 @@ std::string serialize(const ProfileData& ps) {
             case ProfileData::Time::Type::Relative: return "relative";
             default: throw ghoul::MissingCaseException();
             }
-        }(ps.time.type);
-        output += fmt::format("{}\t{}\n", type, ps.time.time);
+        }(profile.time.type);
+        output += fmt::format("{}\t{}\n", type, profile.time.time);
     }
 
     output += fmt::format("\n{}\n", headerCamera);
@@ -653,12 +629,12 @@ std::string serialize(const ProfileData& ps) {
                 );
             }
         },
-        ps.camera
+        profile.camera
     );
 
-    if (!ps.markNodes.empty()) {
+    if (!profile.markNodes.empty()) {
         output += fmt::format("\n{}\n", headerMarkNodes);
-        for (const std::string& n : ps.markNodes) {
+        for (const std::string& n : profile.markNodes) {
             output += fmt::format("{}\n", n);
         }
     }
@@ -666,9 +642,7 @@ std::string serialize(const ProfileData& ps) {
     return output;
 }
 
-ProfileData deserialize(const std::vector<std::string>& content) {
-    ProfileData result;
-
+Profile::Profile(const std::vector<std::string>& content) {
     Section currentSection = Section::None;
     for (int lineNum = 1; lineNum <= static_cast<int>(content.size()); ++lineNum) {
         std::string line = content[lineNum - 1];
@@ -682,59 +656,57 @@ ProfileData deserialize(const std::vector<std::string>& content) {
             currentSection = parseSection(line, lineNum);
             break;
         case Section::Version:
-            result.version = parseVersion(line, lineNum);
+            profile.version = parseVersion(line, lineNum);
             break;
         case Section::Module:
         {
             ProfileData::Module m = parseModule(line, lineNum);
-            result.modules.push_back(std::move(m));
+            profile.modules.push_back(std::move(m));
             break;
         }
         case Section::Asset:
         {
             ProfileData::Asset a = parseAsset(line, lineNum);
-            result.assets.push_back(std::move(a));
+            profile.assets.push_back(std::move(a));
             break;
         }
         case Section::Property:
         {
             ProfileData::Property p = parseProperty(line, lineNum);
-            result.properties.push_back(std::move(p));
+            profile.properties.push_back(std::move(p));
             break;
         }
         case Section::Keybinding:
         {
             ProfileData::Keybinding kb = parseKeybinding(line, lineNum);
-            result.keybindings.push_back(std::move(kb));
+            profile.keybindings.push_back(std::move(kb));
             break;
         }
         case Section::Time:
-            result.time = parseTime(line, lineNum);
+            profile.time = parseTime(line, lineNum);
             break;
         case Section::Camera:
-            result.camera = parseCamera(line, lineNum);
+            profile.camera = parseCamera(line, lineNum);
             break;
         case Section::MarkNodes:
         {
             std::string m = parseMarkNodes(line, lineNum);
-            result.markNodes.push_back(std::move(m));
+            profile.markNodes.push_back(std::move(m));
             break;
         }
         default:
             throw ghoul::MissingCaseException();
         }
     }
-
-    return result;
 }
 
-std::string convertToSceneFile(const ProfileData& ps) {
+std::string Profile::convertToScene() const {
     ZoneScoped
 
     std::string output;
 
     // Modules
-    for (const ProfileData::Module& m : ps.modules) {
+    for (const ProfileData::Module& m : profile.modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
             m.name, m.loadedInstruction, m.notLoadedInstruction
@@ -742,7 +714,7 @@ std::string convertToSceneFile(const ProfileData& ps) {
     }
 
     // Assets
-    for (const ProfileData::Asset& a : ps.assets) {
+    for (const ProfileData::Asset& a : profile.assets) {
         if (!a.name.empty()) {
             output += fmt::format("local {} = ", a.name);
         }
@@ -759,7 +731,7 @@ std::string convertToSceneFile(const ProfileData& ps) {
 
     output += "asset.onInitialize(function()\n";
     // Keybindings
-    for (const ProfileData::Keybinding& k : ps.keybindings) {
+    for (const ProfileData::Keybinding& k : profile.keybindings) {
         const std::string name = k.name.empty() ? k.key : k.name;
         output += fmt::format(
             k.isLocal ?
@@ -770,14 +742,15 @@ std::string convertToSceneFile(const ProfileData& ps) {
     }
 
     // Time
-    switch (ps.time.type) {
+    switch (profile.time.type) {
         case ProfileData::Time::Type::Absolute:
-            output += fmt::format("openspace.time.setTime(\"{}\")\n", ps.time.time);
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", profile.time.time);
             break;
         case ProfileData::Time::Type::Relative:
             output += "local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
-                "local prev = openspace.time.advancedTime(now, \"{}\");\n", ps.time.time
+                "local prev = openspace.time.advancedTime(now, \"{}\");\n",
+                profile.time.time
             );
             output += "openspace.time.setTime(prev);\n";
             break;
@@ -788,14 +761,14 @@ std::string convertToSceneFile(const ProfileData& ps) {
     // Mark Nodes
     {
         std::string nodes;
-        for (const std::string& n : ps.markNodes) {
+        for (const std::string& n : profile.markNodes) {
             nodes += fmt::format("[[ {} ]],", n);
         }
         output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
 
     // Properties
-    for (const ProfileData::Property& p : ps.properties) {
+    for (const ProfileData::Property& p : profile.properties) {
         switch (p.setType) {
             case ProfileData::Property::SetType::SetPropertyValue:
                 output += fmt::format(
@@ -855,8 +828,8 @@ std::string convertToSceneFile(const ProfileData& ps) {
                 }
             }
         },
-        ps.camera
-                );
+        profile.camera
+    );
     output += "end)\n";
 
     return output;

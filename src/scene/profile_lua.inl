@@ -119,7 +119,7 @@ int saveSettingsToProfile(lua_State* L) {
     }
 
     try {
-        outFile << serialize(global::profile.profile);
+        outFile << global::profile.serialize();
     }
     catch (const std::ofstream::failure& e) {
         return luaL_error(
