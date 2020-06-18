@@ -73,7 +73,7 @@ public:
      * Saves all current settings, similar to saveCurrentSettingsToProfile() except the
      * output is a string without writing to a file.
      */
-    std::string saveCurrentSettingsToProfile_string();
+    //std::string saveCurrentSettingsToProfile_string();
 
     /**
      * Reads in a .profile file, converts it to scene/asset equivalent syntax, and
@@ -97,26 +97,25 @@ protected:
     std::string _profileBaseDirectory = "${ASSETS}";
 
 private:
+    ProfileData profile;
+
     struct AllAssetDetails {
         std::vector<AssetEvent> base;
         std::vector<AssetEvent> changed;
     };
-    virtual bool usingProfile() const;
     virtual std::string initialProfile() const;
     virtual std::string profileBaseDirectory() const;
     virtual std::vector<AssetEvent> assetEvents() const;
-    ProfileStruct collateBaseWithChanges();
+    ProfileData collateBaseWithChanges();
 
-    std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileStruct& ps);
-    void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileStruct& ps);
+    std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileData& ps);
+    void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileData& ps);
 
-    void modifyPropertiesToReflectChanges(ProfileStruct& ps);
+    void modifyPropertiesToReflectChanges(ProfileData& ps);
     virtual std::vector<openspace::properties::Property*> changedProperties();
     std::string getFullPropertyPath(openspace::properties::Property* prop);
-    virtual std::vector<std::string> changedPropertiesFormatted();
     virtual std::string currentTimeUTC() const;
     virtual interaction::NavigationHandler::NavigationState currentCameraState() const;
-    void addCurrentCameraToProfileFile(ProfileStruct& ps) const;
 };
 
 } // namespace openspace

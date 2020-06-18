@@ -102,15 +102,15 @@ namespace {
         }
     }
 
-    void addAssetsToProfileFile(ProfileStruct& ps,
+    void addAssetsToProfileFile(ProfileData& ps,
                                 const std::vector<Profile::AssetEvent>& allAssets)
     {
         ps.assets.clear();
         for (Profile::AssetEvent a : allAssets) {
             if (a.eventType != Profile::AssetEventType::Ignore) {
-                ProfileStruct::Asset asset;
+                ProfileData::Asset asset;
                 asset.path = a.name;
-                asset.type = ProfileStruct::Asset::Type::Require;
+                asset.type = ProfileData::Asset::Type::Require;
                 ps.assets.push_back(std::move(asset));
             }
         }
@@ -143,10 +143,31 @@ namespace {
             }
         }
     }
+
+    ProfileData readFromFile(const std::string& filename) {
+        std::ifstream inFile;
+        try {
+            inFile.open(filename, std::ifstream::in);
+        }
+        catch (const std::ifstream::failure& e) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Exception opening profile file for read: {} ({})", filename, e.what())
+            );
+        }
+    
+        std::vector<std::string> content;
+        std::string line;
+        while (std::getline(inFile, line)) {
+            content.push_back(std::move(line));
+        }
+    
+        return deserialize(content);
+    }
+
 } // namespace
 
 void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
-    ProfileStruct ps = collateBaseWithChanges();
+    ProfileData ps = collateBaseWithChanges();
 
     if (filename.find('/') != std::string::npos) {
         LERROR("Profile filename must not contain path (/) elements");
@@ -192,15 +213,6 @@ void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
     outFile.close();
 }
 
-std::string Profile::saveCurrentSettingsToProfile_string() {
-    ProfileStruct ps = collateBaseWithChanges();
-    return serialize(ps);
-}
-
-bool Profile::usingProfile() const {
-    return global::configuration.usingProfile;
-}
-
 std::string Profile::initialProfile() const {
     return global::configuration.profile;
 }
@@ -213,33 +225,47 @@ std::string Profile::profileBaseDirectory() const {
     return _profileBaseDirectory;
 }
 
-ProfileStruct Profile::collateBaseWithChanges() {
-    if (!usingProfile()) {
-        std::string errorMessage = "Program was not started using a profile, "
-            "so cannot use this save-current-settings feature";
-        LERROR(errorMessage);
-    }
+ProfileData Profile::collateBaseWithChanges() {
     std::string initProfile = initialProfile();
     std::string inputProfilePath = absPath(_profileBaseDirectory) + "/" + initProfile
         + ".profile";
-    ProfileStruct ps = readFromFile(inputProfilePath);
-    ps.version = ProfileStruct::Version{};
+    ProfileData ps = readFromFile(inputProfilePath);
+    ps.version = ProfileData::Version{};
 
     std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(ps);
     addAssetsToProfileFile(ps, ass);
     modifyPropertiesToReflectChanges(ps);
 
     // add current time to profile file
-    ProfileStruct::Time time;
+    ProfileData::Time time;
     time.time = currentTimeUTC();
-    time.type = ProfileStruct::Time::Type::Absolute;
+    time.type = ProfileData::Time::Type::Absolute;
     ps.time = std::move(time);
     
-    addCurrentCameraToProfileFile(ps);
+    // Camera
+    interaction::NavigationHandler::NavigationState nav = currentCameraState();
+
+    ProfileData::CameraNavState camera;
+    camera.anchor = nav.anchor;
+    camera.aim = nav.aim;
+    camera.referenceFrame = nav.referenceFrame;
+    camera.position = fmt::format(
+        "{},{},{}",
+        nav.position.x, nav.position.y, nav.position.z
+    );
+    if (nav.up.has_value()) {
+        camera.up = fmt::format(
+            "{},{},{}",
+            nav.up->x, nav.up->y, nav.up->z
+        );
+    }
+    camera.yaw = std::to_string(nav.yaw);
+    camera.pitch = std::to_string(nav.pitch);
+    ps.camera = std::move(camera);
     return ps;
 }
 
-std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileStruct& ps) {
+std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileData& ps) {
     std::vector<AssetEvent> a;
     parseAssetFileLines(a, ps);
     AllAssetDetails assetDetails;
@@ -260,14 +286,14 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileSt
     return assetDetails.base;
 }
 
-void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileStruct& ps) {
-    for (ProfileStruct::Asset& a : ps.assets) {
+void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileData& ps) {
+    for (ProfileData::Asset& a : ps.assets) {
         AssetEvent assetEvent;
         assetEvent.name = a.path;
-        assetEvent.eventType = [](ProfileStruct::Asset::Type type) {
+        assetEvent.eventType = [](ProfileData::Asset::Type type) {
             switch (type) {
-                case ProfileStruct::Asset::Type::Request: return AssetEventType::Request;
-                case ProfileStruct::Asset::Type::Require: return AssetEventType::Require;
+                case ProfileData::Asset::Type::Request: return AssetEventType::Request;
+                case ProfileData::Asset::Type::Require: return AssetEventType::Require;
                 default: throw ghoul::MissingCaseException();
             }
         }(a.type);
@@ -275,30 +301,17 @@ void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileStruc
     }
 }
 
-void Profile::modifyPropertiesToReflectChanges(ProfileStruct& ps) {
+void Profile::modifyPropertiesToReflectChanges(ProfileData& ps) {
     std::vector<properties::Property*> changedProps = changedProperties();
     std::vector<std::string> formattedLines;
 
     for (properties::Property* prop : changedProps) {
-        ProfileStruct::Property p;
-        p.setType = ProfileStruct::Property::SetType::SetPropertyValueSingle;
+        ProfileData::Property p;
+        p.setType = ProfileData::Property::SetType::SetPropertyValueSingle;
         p.name = getFullPropertyPath(prop);
         p.value = prop->getStringValue();
         ps.properties.push_back(std::move(p));
     }
-}
-
-std::vector<std::string> Profile::changedPropertiesFormatted() {
-    std::vector<properties::Property*> changedProps = changedProperties();
-    std::vector<std::string> formattedLines;
-
-    for (properties::Property* prop : changedProps) {
-        std::string newLine = "setPropertyValueSingle\t";
-        newLine += getFullPropertyPath(prop) + "\t";
-        newLine += prop->getStringValue();
-        formattedLines.push_back(newLine);
-    }
-    return formattedLines;
 }
 
 std::string Profile::getFullPropertyPath(properties::Property* prop) {
@@ -308,8 +321,8 @@ std::string Profile::getFullPropertyPath(properties::Property* prop) {
 std::vector<properties::Property*> Profile::changedProperties() {
     ZoneScoped
 
-    std::vector<SceneGraphNode*> nodes 
-        = global::renderEngine.scene()->allSceneGraphNodes();
+    std::vector<SceneGraphNode*> nodes =
+        global::renderEngine.scene()->allSceneGraphNodes();
     std::vector<properties::Property*> changedProps;
 
     for (SceneGraphNode* n : nodes) {
@@ -326,34 +339,12 @@ interaction::NavigationHandler::NavigationState Profile::currentCameraState() co
     return global::navigationHandler.navigationState();
 }
 
-void Profile::addCurrentCameraToProfileFile(ProfileStruct& ps) const {
-    interaction::NavigationHandler::NavigationState nav = currentCameraState();
-
-    ProfileStruct::CameraNavState camera;
-    camera.anchor = nav.anchor;
-    camera.aim = nav.aim;
-    camera.referenceFrame = nav.referenceFrame;
-    camera.position = fmt::format(
-        "{},{},{}",
-        nav.position.x, nav.position.y, nav.position.z
-    );
-    if (nav.up.has_value()) {
-        camera.up = fmt::format(
-            "{},{},{}",
-            nav.up->x, nav.up->y, nav.up->z
-        );
-    }
-    camera.yaw = nav.yaw;
-    camera.pitch = nav.pitch;
-    ps.camera = std::move(camera);
-}
-
 void Profile::convertToSceneFile(const std::string& inProfilePath,
                                  const std::string& outFilePath)
 {
     ZoneScoped
 
-    ProfileStruct ps = readFromFile(inProfilePath);
+    ProfileData ps = readFromFile(inProfilePath);
 
     std::ofstream outFile;
     try {

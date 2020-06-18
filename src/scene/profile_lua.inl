@@ -39,6 +39,13 @@ int saveCurrentSettingsToProfile(lua_State* L) {
     if (saveFilePath.empty()) {
         return luaL_error(L, "save filepath string is empty");
     }
+    if (!global::configuration.usingProfile) {
+        return luaL_error(
+            L,
+            "Program was not started with a profile, so cannot use this "
+            "save-current-settings feature"
+        );
+    }
     global::profile.saveCurrentSettingsToProfile(
         saveFilePath
     );

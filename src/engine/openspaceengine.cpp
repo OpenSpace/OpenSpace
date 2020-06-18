@@ -312,6 +312,8 @@ void OpenSpaceEngine::initialize() {
             );
         }
         else {
+
+
             global::profile.convertToSceneFile(inputProfile, outputAsset);
 
             // Set asset name to that of the profile because a new scene file will be

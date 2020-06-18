@@ -25,25 +25,14 @@
 #ifndef __OPENSPACE_CORE___PROFILEFILE___H__
 #define __OPENSPACE_CORE___PROFILEFILE___H__
 
-#include <string>
-#include <istream>
-#include <fstream>
-#include <functional>
 #include <optional>
+#include <string>
 #include <variant>
 #include <vector>
 
-#include <ghoul/systemcapabilities/version.h>
-
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
-
-struct ProfileStruct {
+struct ProfileData {
     // Version
     struct Version {
         int major = 0;
@@ -128,12 +117,10 @@ struct ProfileStruct {
     std::vector<std::string> markNodes;
 };
 
-std::string serialize(const ProfileStruct& ps);
-ProfileStruct deserialize(const std::vector<std::string>& content);
+std::string serialize(const ProfileData& ps);
+ProfileData deserialize(const std::vector<std::string>& content);
  
-std::string convertToSceneFile(const ProfileStruct& ps);
-
-ProfileStruct readFromFile(const std::string& filename);
+std::string convertToSceneFile(const ProfileData& ps);
 
 } // namespace openspace
 
