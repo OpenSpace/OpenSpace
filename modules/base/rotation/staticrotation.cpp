@@ -94,7 +94,10 @@ StaticRotation::StaticRotation()
     )
 {
     addProperty(_eulerRotation);
-    _eulerRotation.onChange([this]() { requireUpdate(); });
+    _eulerRotation.onChange([this]() { 
+        _matrixIsDirty = true;
+        requireUpdate(); 
+    });
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
@@ -123,10 +126,6 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
         );
         _matrixIsDirty = true;
     }
-
-    _eulerRotation.onChange([this]() {
-        _matrixIsDirty = true;
-    });
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
