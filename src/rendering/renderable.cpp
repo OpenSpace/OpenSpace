@@ -115,8 +115,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _renderableType(RenderableTypeInfo, "Renderable")
     , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
+    , _renderableType(RenderableTypeInfo, "Renderable")
 {
     ZoneScoped
 

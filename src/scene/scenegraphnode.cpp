@@ -38,6 +38,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
 
+#include <cmath>
+
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
     constexpr const char* KeyRenderable = "Renderable";
@@ -735,13 +737,13 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     );
 
     constexpr const double RadiusThreshold = 2.0;
-    const double r = abs(_screenSizeRadius - screenSpaceRadius);
+    const double r = std::fabs(_screenSizeRadius - screenSpaceRadius);
     if (r > RadiusThreshold) {
         _screenSizeRadius = screenSpaceRadius;
     }
 
     constexpr const double ZoomThreshold = 0.1;
-    const double d = abs(_distFromCamToNode - distFromCamToNode);
+    const double d = std::fabs(_distFromCamToNode - distFromCamToNode);
     if (d > (ZoomThreshold * distFromCamToNode)) {
         _distFromCamToNode = distFromCamToNode;
     }

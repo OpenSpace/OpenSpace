@@ -110,7 +110,8 @@ function (set_openspace_compile_settings project)
         target_compile_options(
             ${project}
             PRIVATE
-            "-stdlib=libc++"
+            "-stdlib=libstdc++"
+            "-std=gnu++17"
             "-Wall"
             "-Wextra"
             "-Wabstract-vbase-init"
