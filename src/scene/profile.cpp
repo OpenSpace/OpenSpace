@@ -189,7 +189,7 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] ProfileData::Version parseVersion(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::Version parseVersion(const std::string& line, int lineNumber) {
         std::vector<std::string> parts = ghoul::tokenizeString(line, '.');
         if (parts.empty() || parts.size() > 3) {
             throw ProfileParsingError(
@@ -198,7 +198,7 @@ namespace {
             );
         }
 
-        ProfileData::Version version;
+        Profile::Version version;
         version.major = std::stoi(parts[0]);
         if (parts.size() > 1) {
             version.minor = std::stoi(parts[1]);
@@ -209,7 +209,7 @@ namespace {
         return version;
     }
 
-    [[ nodiscard ]] ProfileData::Module parseModule(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::Module parseModule(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 3) {
             throw ProfileParsingError(
@@ -217,14 +217,14 @@ namespace {
                 fmt::format("Expected 3 fields in a Module entry, got {}", fields.size())
             );
         }
-        ProfileData::Module m;
+        Profile::Module m;
         m.name = fields[0];
         m.loadedInstruction = fields[1];
         m.notLoadedInstruction = fields[2];
         return m;
     }
 
-    [[ nodiscard ]] ProfileData::Asset parseAsset(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::Asset parseAsset(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 3) {
             throw ProfileParsingError(
@@ -233,14 +233,14 @@ namespace {
             );
         }
 
-        ProfileData::Asset a;
+        Profile::Asset a;
         a.path = fields[0];
-        a.type = [&](const std::string& type) -> ProfileData::Asset::Type {
+        a.type = [&](const std::string& type) -> Profile::Asset::Type {
             if (type == "require") {
-                return ProfileData::Asset::Type::Require;
+                return Profile::Asset::Type::Require;
             }
             if (type == "request") {
-                return ProfileData::Asset::Type::Request;
+                return Profile::Asset::Type::Request;
             }
             throw ProfileParsingError(
                 lineNumber,
@@ -251,7 +251,7 @@ namespace {
         return a;
     }
 
-    [[ nodiscard ]] ProfileData::Property parseProperty(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::Property parseProperty(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 3) {
             throw ProfileParsingError(
@@ -259,13 +259,13 @@ namespace {
                 fmt::format("Expected 3 fields in Property entry, got {}", fields.size())
             );
         }
-        ProfileData::Property p;
-        p.setType = [&](const std::string& type) -> ProfileData::Property::SetType {
+        Profile::Property p;
+        p.setType = [&](const std::string& type) -> Profile::Property::SetType {
             if (type == "setPropertyValue") {
-                return ProfileData::Property::SetType::SetPropertyValue;
+                return Profile::Property::SetType::SetPropertyValue;
             }
             if (type == "setPropertyValueSingle") {
-                return ProfileData::Property::SetType::SetPropertyValueSingle;
+                return Profile::Property::SetType::SetPropertyValueSingle;
             }
             throw ProfileParsingError(
                 lineNumber,
@@ -281,7 +281,7 @@ namespace {
         return p;
     }
 
-    [[ nodiscard ]] ProfileData::Keybinding parseKeybinding(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::Keybinding parseKeybinding(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 6) {
             throw ProfileParsingError(
@@ -289,7 +289,7 @@ namespace {
                 fmt::format("Expected 6 fields in Keybinding entry, got {}", fields.size())
             );
         }
-        ProfileData::Keybinding kb;
+        Profile::Keybinding kb;
         kb.key = fields[0];
         kb.documentation = fields[1];
         kb.name = fields[2];
@@ -310,7 +310,7 @@ namespace {
         return kb;
     }
 
-    [[ nodiscard ]] ProfileData::Time parseTime(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::Time parseTime(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 2) {
             throw ProfileParsingError(
@@ -318,13 +318,13 @@ namespace {
                 fmt::format("Expected 2 fields in Time entry, got {}", fields.size())
             );
         }
-        ProfileData::Time time;
-        time.type = [&](const std::string& type) -> ProfileData::Time::Type {
+        Profile::Time time;
+        time.type = [&](const std::string& type) -> Profile::Time::Type {
             if (type == "absolute") {
-                return ProfileData::Time::Type::Absolute;
+                return Profile::Time::Type::Absolute;
             }
             if (type == "relative") {
-                return ProfileData::Time::Type::Relative;
+                return Profile::Time::Type::Relative;
             }
             throw ProfileParsingError(
                 lineNumber,
@@ -335,15 +335,15 @@ namespace {
         return time;
     }
 
-    [[ nodiscard ]] ProfileData::CameraType parseCamera(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::CameraType parseCamera(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.empty()) {
             throw ProfileParsingError(lineNumber, "No values specified for Camera location");
         }
-        ProfileData::CameraType camera = [&](const std::string& type) ->
-            std::variant<ProfileData::CameraNavState, ProfileData::CameraGoToGeo>
+        Profile::CameraType camera = [&](const std::string& type) ->
+            std::variant<Profile::CameraNavState, Profile::CameraGoToGeo>
         {
-            if (type == ProfileData::CameraNavState::Type) {
+            if (type == Profile::CameraNavState::Type) {
                 if (fields.size() != 8) {
                     throw ProfileParsingError(
                         lineNumber,
@@ -353,7 +353,7 @@ namespace {
                     );
                 }
 
-                ProfileData::CameraNavState camera;
+                Profile::CameraNavState camera;
                 camera.anchor = fields[1];
                 camera.aim = fields[2];
                 camera.referenceFrame = fields[3];
@@ -363,7 +363,7 @@ namespace {
                 camera.pitch = fields[7];
                 return camera;
             }
-            if (type == ProfileData::CameraGoToGeo::Type) {
+            if (type == Profile::CameraGoToGeo::Type) {
                 if (fields.size() != 5) {
                     throw ProfileParsingError(
                         lineNumber,
@@ -373,7 +373,7 @@ namespace {
                     );
                 }
 
-                ProfileData::CameraGoToGeo camera;
+                Profile::CameraGoToGeo camera;
                 camera.anchor = fields[1];
                 camera.latitude = std::stod(fields[2]);
                 camera.longitude = std::stod(fields[3]);
@@ -400,7 +400,7 @@ namespace {
 } // namespace
 
 void Profile::saveCurrentSettingsToProfile() {
-    profile.version = ProfileData::CurrentVersion;
+    version = Profile::CurrentVersion;
 
     //
     // Update properties
@@ -415,42 +415,42 @@ void Profile::saveCurrentSettingsToProfile() {
     std::vector<std::string> formattedLines;
 
     for (properties::Property* prop : changedProps) {
-        ProfileData::Property p;
-        p.setType = ProfileData::Property::SetType::SetPropertyValueSingle;
+        Property p;
+        p.setType = Property::SetType::SetPropertyValueSingle;
         p.name = recurseForFullName(prop->owner()) + prop->identifier();
         p.value = prop->getStringValue();
-        profile.properties.push_back(std::move(p));
+        properties.push_back(std::move(p));
     }
 
     //
     // add current time to profile file
     //
-    ProfileData::Time time;
-    time.time = global::timeManager.time().ISO8601();
-    time.type = ProfileData::Time::Type::Absolute;
-    profile.time = std::move(time);
+    Time t;
+    t.time = global::timeManager.time().ISO8601();
+    t.type = Time::Type::Absolute;
+    time = std::move(t);
 
     // Camera
     interaction::NavigationHandler::NavigationState nav =
         global::navigationHandler.navigationState();
 
-    ProfileData::CameraNavState camera;
-    camera.anchor = nav.anchor;
-    camera.aim = nav.aim;
-    camera.referenceFrame = nav.referenceFrame;
-    camera.position = fmt::format(
+    CameraNavState c;
+    c.anchor = nav.anchor;
+    c.aim = nav.aim;
+    c.referenceFrame = nav.referenceFrame;
+    c.position = fmt::format(
         "{},{},{}",
         nav.position.x, nav.position.y, nav.position.z
     );
     if (nav.up.has_value()) {
-        camera.up = fmt::format(
+        c.up = fmt::format(
             "{},{},{}",
             nav.up->x, nav.up->y, nav.up->z
         );
     }
-    camera.yaw = std::to_string(nav.yaw);
-    camera.pitch = std::to_string(nav.pitch);
-    profile.camera = std::move(camera);
+    c.yaw = std::to_string(nav.yaw);
+    c.pitch = std::to_string(nav.pitch);
+    camera = std::move(c);
 }
 
 void Profile::setIgnoreUpdates(bool ignoreUpdates) {
@@ -463,20 +463,20 @@ void Profile::addAsset(const std::string& path) {
     }
 
     const auto it = std::find_if(
-        profile.assets.begin(),
-        profile.assets.end(),
-        [path](const ProfileData::Asset& a) { return a.path == path; }
+        assets.begin(),
+        assets.end(),
+        [path](const Asset& a) { return a.path == path; }
     );
 
-    if (it != profile.assets.end()) {
+    if (it != assets.end()) {
         // Asset already existed, so nothing to do here
         return;
     }
 
-    ProfileData::Asset a;
+    Asset a;
     a.path = path;
-    a.type = ProfileData::Asset::Type::Require;
-    profile.assets.push_back(std::move(a));
+    a.type = Asset::Type::Require;
+    assets.push_back(std::move(a));
 }
 
 void Profile::removeAsset(const std::string& path) {
@@ -485,18 +485,18 @@ void Profile::removeAsset(const std::string& path) {
     }
 
     const auto it = std::find_if(
-        profile.assets.begin(),
-        profile.assets.end(),
-        [path](const ProfileData::Asset& a) { return a.path == path; }
+        assets.begin(),
+        assets.end(),
+        [path](const Asset& a) { return a.path == path; }
     );
 
-    if (it == profile.assets.end()) {
+    if (it == assets.end()) {
         throw ghoul::RuntimeError(fmt::format(
             "Tried to remove non-existing asset '{}'", path
         ));
     }
 
-    profile.assets.erase(it);
+    assets.erase(it);
 }
 
 scripting::LuaLibrary Profile::luaLibrary() {
@@ -526,13 +526,12 @@ std::string Profile::serialize() const {
     std::string output;
     output += fmt::format("{}\n", headerVersion);
     output += fmt::format(
-        "{}.{}.{}\n",
-        profile.version.major, profile.version.minor, profile.version.patch
+        "{}.{}.{}\n", version.major, version.minor, version.patch
     );
 
-    if (!profile.modules.empty()) {
+    if (!modules.empty()) {
         output += fmt::format("\n{}\n", headerModule);
-        for (const ProfileData::Module& m : profile.modules) {
+        for (const Module& m : modules) {
             output += fmt::format(
                 "{}\t{}\t{}\n",
                 m.name, m.loadedInstruction, m.notLoadedInstruction
@@ -540,40 +539,40 @@ std::string Profile::serialize() const {
         }
     }
 
-    if (!profile.assets.empty()) {
+    if (!assets.empty()) {
         output += fmt::format("\n{}\n", headerAsset);
-        for (const ProfileData::Asset& a : profile.assets) {
-            const std::string type = [](ProfileData::Asset::Type t) {
+        for (const Asset& a : assets) {
+            const std::string type = [](Asset::Type t) {
                 switch (t) {
-                case ProfileData::Asset::Type::Require: return "require";
-                case ProfileData::Asset::Type::Request: return "request";
-                default: throw ghoul::MissingCaseException();
+                    case Asset::Type::Require: return "require";
+                    case Asset::Type::Request: return "request";
+                    default: throw ghoul::MissingCaseException();
                 }
             }(a.type);
             output += fmt::format("{}\t{}\t{}\n", a.path, type, a.name);
         }
     }
 
-    if (!profile.properties.empty()) {
+    if (!properties.empty()) {
         output += fmt::format("\n{}\n", headerProperty);
-        for (const ProfileData::Property& p : profile.properties) {
-            const std::string type = [](ProfileData::Property::SetType t) {
+        for (const Property& p : properties) {
+            const std::string type = [](Property::SetType t) {
                 switch (t) {
-                case ProfileData::Property::SetType::SetPropertyValue:
-                    return "setPropertyValue";
-                case ProfileData::Property::SetType::SetPropertyValueSingle:
-                    return "setPropertyValueSingle";
-                default:
-                    throw ghoul::MissingCaseException();
+                    case Property::SetType::SetPropertyValue:
+                        return "setPropertyValue";
+                    case Property::SetType::SetPropertyValueSingle:
+                        return "setPropertyValueSingle";
+                    default:
+                        throw ghoul::MissingCaseException();
                 }
             }(p.setType);
             output += fmt::format("{}\t{}\t{}\n", type, p.name, p.value);
         }
     }
 
-    if (!profile.keybindings.empty()) {
+    if (!keybindings.empty()) {
         output += fmt::format("\n{}\n", headerKeybinding);
-        for (const ProfileData::Keybinding& k : profile.keybindings) {
+        for (const Keybinding& k : keybindings) {
             const std::string local = k.isLocal ? "true" : "false";
             output += fmt::format(
                 "{}\t{}\t{}\t{}\t{}\t{}\n",
@@ -584,28 +583,28 @@ std::string Profile::serialize() const {
 
     output += fmt::format("\n{}\n", headerTime);
     {
-        const std::string type = [](ProfileData::Time::Type t) {
+        const std::string type = [](Time::Type t) {
             switch (t) {
-            case ProfileData::Time::Type::Absolute: return "absolute";
-            case ProfileData::Time::Type::Relative: return "relative";
-            default: throw ghoul::MissingCaseException();
+                case Time::Type::Absolute: return "absolute";
+                case Time::Type::Relative: return "relative";
+                default: throw ghoul::MissingCaseException();
             }
-        }(profile.time.type);
-        output += fmt::format("{}\t{}\n", type, profile.time.time);
+        }(time.type);
+        output += fmt::format("{}\t{}\n", type, time.time);
     }
 
     output += fmt::format("\n{}\n", headerCamera);
     output += std::visit(
         overloaded{
-            [](const ProfileData::CameraNavState& camera) {
+            [](const CameraNavState& camera) {
                 return fmt::format(
                     "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-                    ProfileData::CameraNavState::Type,
+                    CameraNavState::Type,
                     camera.anchor, camera.aim, camera.referenceFrame, camera.position,
                     camera.up, camera.yaw, camera.pitch
                 );
             },
-            [](const ProfileData::CameraGoToGeo& camera) {
+            [](const Profile::CameraGoToGeo& camera) {
                 std::string altitude;
                 if (camera.altitude.has_value()) {
                     altitude = std::to_string(*camera.altitude);
@@ -613,17 +612,17 @@ std::string Profile::serialize() const {
 
                 return fmt::format(
                     "{}\t{}\t{}\t{}\t{}\n",
-                    ProfileData::CameraGoToGeo::Type,
+                    CameraGoToGeo::Type,
                     camera.anchor, camera.latitude, camera.longitude, altitude
                 );
             }
         },
-        profile.camera
+        camera
     );
 
-    if (!profile.markNodes.empty()) {
+    if (!markNodes.empty()) {
         output += fmt::format("\n{}\n", headerMarkNodes);
-        for (const std::string& n : profile.markNodes) {
+        for (const std::string& n : markNodes) {
             output += fmt::format("{}\n", n);
         }
     }
@@ -648,44 +647,44 @@ Profile::Profile(const std::vector<std::string>& content) {
             currentSection = parseSection(line, lineNum);
             break;
         case Section::Version:
-            profile.version = parseVersion(line, lineNum);
+            version = parseVersion(line, lineNum);
             foundVersion = true;
             break;
         case Section::Module:
         {
-            ProfileData::Module m = parseModule(line, lineNum);
-            profile.modules.push_back(std::move(m));
+            Module m = parseModule(line, lineNum);
+            modules.push_back(std::move(m));
             break;
         }
         case Section::Asset:
         {
-            ProfileData::Asset a = parseAsset(line, lineNum);
-            profile.assets.push_back(std::move(a));
+            Asset a = parseAsset(line, lineNum);
+            assets.push_back(std::move(a));
             break;
         }
         case Section::Property:
         {
-            ProfileData::Property p = parseProperty(line, lineNum);
-            profile.properties.push_back(std::move(p));
+            Property p = parseProperty(line, lineNum);
+            properties.push_back(std::move(p));
             break;
         }
         case Section::Keybinding:
         {
-            ProfileData::Keybinding kb = parseKeybinding(line, lineNum);
-            profile.keybindings.push_back(std::move(kb));
+            Keybinding kb = parseKeybinding(line, lineNum);
+            keybindings.push_back(std::move(kb));
             break;
         }
         case Section::Time:
-            profile.time = parseTime(line, lineNum);
+            time = parseTime(line, lineNum);
             break;
         case Section::Camera:
-            profile.camera = parseCamera(line, lineNum);
+            camera = parseCamera(line, lineNum);
             foundCamera = true;
             break;
         case Section::MarkNodes:
         {
             std::string m = parseMarkNodes(line, lineNum);
-            profile.markNodes.push_back(std::move(m));
+            markNodes.push_back(std::move(m));
             break;
         }
         default:
@@ -712,7 +711,7 @@ std::string Profile::convertToScene() const {
     std::string output;
 
     // Modules
-    for (const ProfileData::Module& m : profile.modules) {
+    for (const Module& m : modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
             m.name, m.loadedInstruction, m.notLoadedInstruction
@@ -720,14 +719,14 @@ std::string Profile::convertToScene() const {
     }
 
     // Assets
-    for (const ProfileData::Asset& a : profile.assets) {
+    for (const Asset& a : assets) {
         if (!a.name.empty()) {
             output += fmt::format("local {} = ", a.name);
         }
-        std::string type = [](ProfileData::Asset::Type t) {
+        std::string type = [](Asset::Type t) {
             switch (t) {
-                case ProfileData::Asset::Type::Request: return "request";
-                case ProfileData::Asset::Type::Require: return "require";
+                case Asset::Type::Request: return "request";
+                case Asset::Type::Require: return "require";
                 default: throw ghoul::MissingCaseException();
             }
         }(a.type);
@@ -737,7 +736,7 @@ std::string Profile::convertToScene() const {
 
     output += "asset.onInitialize(function()\n";
     // Keybindings
-    for (const ProfileData::Keybinding& k : profile.keybindings) {
+    for (const Keybinding& k : keybindings) {
         const std::string name = k.name.empty() ? k.key : k.name;
         output += fmt::format(
             k.isLocal ?
@@ -748,19 +747,19 @@ std::string Profile::convertToScene() const {
     }
 
     // Time
-    switch (profile.time.type) {
-        case ProfileData::Time::Type::Absolute:
-            output += fmt::format("openspace.time.setTime(\"{}\")\n", profile.time.time);
+    switch (time.type) {
+        case Time::Type::Absolute:
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", time.time);
             break;
-        case ProfileData::Time::Type::Relative:
+        case Time::Type::Relative:
             output += "local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
                 "local prev = openspace.time.advancedTime(now, \"{}\");\n",
-                profile.time.time
+                time.time
             );
             output += "openspace.time.setTime(prev);\n";
             break;
-        case ProfileData::Time::Type::None:
+        case Time::Type::None:
             output += "openspace.time.setTime(openspace.time.currentWallTime());\n";
             break;
         default:
@@ -770,22 +769,22 @@ std::string Profile::convertToScene() const {
     // Mark Nodes
     {
         std::string nodes;
-        for (const std::string& n : profile.markNodes) {
+        for (const std::string& n : markNodes) {
             nodes += fmt::format("[[ {} ]],", n);
         }
         output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
 
     // Properties
-    for (const ProfileData::Property& p : profile.properties) {
+    for (const Property& p : properties) {
         switch (p.setType) {
-            case ProfileData::Property::SetType::SetPropertyValue:
+            case Property::SetType::SetPropertyValue:
                 output += fmt::format(
                     "openspace.setPropertyValue(\"{}\", {});\n",
                     p.name, p.value
                 );
                 break;
-            case ProfileData::Property::SetType::SetPropertyValueSingle:
+            case Property::SetType::SetPropertyValueSingle:
                 output += fmt::format(
                     "openspace.setPropertyValueSingle(\"{}\", {});\n",
                     p.name, p.value
@@ -799,7 +798,7 @@ std::string Profile::convertToScene() const {
     // Camera
     output += std::visit(
         overloaded{
-            [](const ProfileData::CameraNavState& camera) {
+            [](const CameraNavState& camera) {
                 std::string result;
                 result += "openspace.navigation.setNavigationState({";
                 result += fmt::format("Anchor = {}, ", camera.anchor);
@@ -822,7 +821,7 @@ std::string Profile::convertToScene() const {
                 result += "})\n";
                 return result;
             },
-            [](const ProfileData::CameraGoToGeo& camera) {
+            [](const CameraGoToGeo& camera) {
                 if (camera.altitude.has_value()) {
                     return fmt::format(
                         "openspace.globebrowsing.goToGeo({}, {}, {}, {});\n",
@@ -837,7 +836,7 @@ std::string Profile::convertToScene() const {
                 }
             }
         },
-        profile.camera
+        camera
     );
     output += "end)\n";
 

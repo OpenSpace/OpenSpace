@@ -44,23 +44,19 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-struct ProfileData {
+class Profile {
+public:
     // Version
     struct Version {
         int major = 0;
         int minor = 0;
         int patch = 0;
     };
-    static constexpr const Version CurrentVersion = Version{ 1, 0, 0 };
-    Version version = CurrentVersion;
-
     struct Module {
         std::string name;
         std::string loadedInstruction;
         std::string notLoadedInstruction;
     };
-    std::vector<Module> modules;
-
     struct Asset {
         enum class Type {
             Require,
@@ -71,8 +67,6 @@ struct ProfileData {
         Type type;
         std::string name;
     };
-    std::vector<Asset> assets;
-
     struct Property {
         enum class SetType {
             SetPropertyValue,
@@ -83,8 +77,6 @@ struct ProfileData {
         std::string name;
         std::string value;
     };
-    std::vector<Property> properties;
-
     struct Keybinding {
         std::string key; // @TODO (abock, 2020-06-16) change to key+action
         std::string documentation;
@@ -93,8 +85,6 @@ struct ProfileData {
         bool isLocal;
         std::string script;
     };
-    std::vector<Keybinding> keybindings;
-
     struct Time {
         enum class Type {
             Absolute,
@@ -105,8 +95,6 @@ struct ProfileData {
         Type type = Type::None;
         std::string time;
     };
-    Time time;
-
     struct CameraNavState {
         static constexpr const char* Type = "setNavigationState";
 
@@ -127,13 +115,7 @@ struct ProfileData {
         std::optional<double> altitude;
     };
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
-    CameraType camera;
 
-    std::vector<std::string> markNodes;
-};
-
-class Profile {
-public:
     enum class AssetEventType {
         Add,
         Require,
@@ -176,9 +158,18 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    ProfileData profile;
-
 private:
+    static constexpr const Version CurrentVersion = Version{ 1, 0, 0 };
+    Version version = CurrentVersion;
+    std::vector<Module> modules;
+    std::vector<Asset> assets;
+    std::vector<Property> properties;
+    std::vector<Keybinding> keybindings;
+    Time time;
+    CameraType camera;
+    std::vector<std::string> markNodes;
+
+
     bool _ignoreUpdates = false;
 };
 
