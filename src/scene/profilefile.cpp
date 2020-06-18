@@ -395,26 +395,25 @@ std::string serialize(const ProfileStruct& ps) {
     return output;
 }
 
-ProfileStruct deserialize(const std::string& filename) {
+ProfileStruct deserialize(const std::vector<std::string>& content) {
     ProfileStruct result;
 
-    int lineNum = 1;
-    std::ifstream inFile;
-    try {
-        inFile.open(filename, std::ifstream::in);
-    }
-    catch (const std::ifstream::failure& e) {
-        throw ProfileError(fmt::format(
-            "Exception opening profile file for read: {} ({})", filename, e.what())
-        );
-    }
+    //int lineNum = 1;
+    //std::ifstream inFile;
+    //try {
+    //    inFile.open(filename, std::ifstream::in);
+    //}
+    //catch (const std::ifstream::failure& e) {
+    //    throw ProfileError(fmt::format(
+    //        "Exception opening profile file for read: {} ({})", filename, e.what())
+    //    );
+    //}
 
     Section currentSection = Section::None;
-    std::string line;
-    while (std::getline(inFile, line)) {
+    for (int lineNum = 1; lineNum <= static_cast<int>(content.size()); ++lineNum) {
+        std::string line = content[lineNum - 1];
         if (std::all_of(line.begin(), line.end(), ::isspace)) {
             currentSection = Section::None;
-            lineNum++;
             continue;
         }
 
@@ -449,8 +448,6 @@ ProfileStruct deserialize(const std::string& filename) {
             default:
                 throw ghoul::MissingCaseException();
         }
-
-        lineNum++;
     }
 
     return result;
@@ -589,26 +586,25 @@ std::string convertToSceneFile(const ProfileStruct& ps) {
     return output;
 }
 
-ProfileFile::ProfileFile(std::string filename) {
-    profile = deserialize(filename);
-}
+ProfileFile::ProfileFile(const std::string& filename) {
+    std::ifstream inFile;
+    try {
+        inFile.open(filename, std::ifstream::in);
+    }
+    catch (const std::ifstream::failure& e) {
+        throw ProfileError(fmt::format(
+            "Exception opening profile file for read: {} ({})", filename, e.what())
+        );
+    }
 
-//void ProfileFile::processIndividualLine(bool& insideSection, std::string line) {
-//    if (insideSection) {
-//        if (std::all_of(line.begin(), line.end(), ::isspace)) {
-//            insideSection = false;
-//        }
-//        else {
-//            if (parseCurrentSection != nullptr) {
-//                (this->*parseCurrentSection)(line);
-//            }
-//        }
-//    }
-//    else if (line.substr(0, 1) == "#") {
-//        determineSection(line);
-//        insideSection = true;
-//    }
-//}
+    std::vector<std::string> content;
+    std::string line;
+    while (std::getline(inFile, line)) {
+        content.push_back(std::move(line));
+    }
+
+    profile = deserialize(content);
+}
 
 void ProfileFile::writeToFile(const std::string& filename) const {
     if (filename.find('/') != std::string::npos) {
