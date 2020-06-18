@@ -24,7 +24,9 @@
 
 #include <openspace/scene/assetmanager.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scene/assetloader.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/synchronizationwatcher.h>
 #include <ghoul/filesystem/file.h>
@@ -60,6 +62,7 @@ bool AssetManager::update() {
         const bool add = c.second;
         if (add) {
             _assetLoader.add(path);
+            global::profile.addAsset(path);
         }
     }
     // Remove assets
@@ -68,6 +71,7 @@ bool AssetManager::update() {
         const bool remove = !c.second;
         if (remove && _assetLoader.has(path)) {
             _assetLoader.remove(path);
+            global::profile.removeAsset(path);
         }
     }
     _pendingStateChangeCommands.clear();
@@ -116,14 +120,6 @@ const Asset& AssetManager::rootAsset() const {
 
 Asset& AssetManager::rootAsset() {
     return _assetLoader.rootAsset();
-}
-
-const std::vector<Profile::AssetEvent>& AssetManager::assetEvents() const {
-    return _assetLoader.assetEvents();
-}
-
-void AssetManager::resetAssetEvents() {
-    _assetLoader.resetAssetEvents();
 }
 
 scripting::LuaLibrary AssetManager::luaLibrary() {

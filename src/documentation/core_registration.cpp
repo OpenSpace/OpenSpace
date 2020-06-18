@@ -40,6 +40,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/lightsource.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>

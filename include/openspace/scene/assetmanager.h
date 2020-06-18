@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
 #include <openspace/scene/assetlistener.h>
-#include <openspace/scene/profile.h>
 
 #include <openspace/scene/assetloader.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -69,8 +68,6 @@ public:
     void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child) override;
 
     bool update();
-    const std::vector<Profile::AssetEvent>& assetEvents() const;
-    void resetAssetEvents();
     scripting::LuaLibrary luaLibrary();
 
 private:

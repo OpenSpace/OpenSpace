@@ -1073,7 +1073,10 @@ void OpenSpaceEngine::preSynchronization() {
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
+        global::profile.setIgnoreUpdates(true);
         loadSingleAsset(_scheduledAssetPathToLoad);
+        global::profile.setIgnoreUpdates(false);
+        resetPropertyChangeFlagsOfSubowners(&global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
     }
@@ -1290,19 +1293,10 @@ void OpenSpaceEngine::postDraw() {
     if (_isFirstRenderingFirstFrame) {
         global::windowDelegate.setSynchronization(true);
         resetPropertyChangeFlags();
-        resetAssetChangeTracking();
         _isFirstRenderingFirstFrame = false;
     }
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
-}
-
-void OpenSpaceEngine::resetAssetChangeTracking() {
-    global::openSpaceEngine._assetManager->resetAssetEvents();
-}
-
-std::vector<Profile::AssetEvent> OpenSpaceEngine::assetEvents() {
-    return global::openSpaceEngine._assetManager->assetEvents();
 }
 
 void OpenSpaceEngine::resetPropertyChangeFlags() {
@@ -1310,18 +1304,16 @@ void OpenSpaceEngine::resetPropertyChangeFlags() {
 
     std::vector<SceneGraphNode*> nodes =
             global::renderEngine.scene()->allSceneGraphNodes();
-    for (auto n : nodes) {
+    for (SceneGraphNode* n : nodes) {
         resetPropertyChangeFlagsOfSubowners(n);
     }
 }
 
-void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(
-                                                openspace::properties::PropertyOwner* po)
-{
-    for (auto subOwner : po->propertySubOwners()) {
+void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(properties::PropertyOwner* po) {
+    for (properties::PropertyOwner* subOwner : po->propertySubOwners()) {
         resetPropertyChangeFlagsOfSubowners(subOwner);
     }
-    for (auto p : po->properties()) {
+    for (properties::Property* p : po->properties()) {
         p->resetToUnchanged();
     }
 }

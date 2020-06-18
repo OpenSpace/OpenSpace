@@ -128,20 +128,6 @@ namespace {
         }
     }
 
-    void addAssetsToProfileFile(ProfileData& ps,
-                                const std::vector<Profile::AssetEvent>& allAssets)
-    {
-        ps.assets.clear();
-        for (Profile::AssetEvent a : allAssets) {
-            if (a.eventType != Profile::AssetEventType::Ignore) {
-                ProfileData::Asset asset;
-                asset.path = a.name;
-                asset.type = ProfileData::Asset::Type::Require;
-                ps.assets.push_back(std::move(asset));
-            }
-        }
-    }
-
     std::string recurseForFullName(properties::PropertyOwner* po) {
         if (po == nullptr) {
             return "";
@@ -411,64 +397,21 @@ namespace {
     [[ nodiscard ]] std::string parseMarkNodes(const std::string& line, int) {
         return line;
     }
-
-    std::vector<Profile::AssetEvent> modifyAssetsToReflectChanges(ProfileData& ps) {
-        std::vector<Profile::AssetEvent> results;
-        for (ProfileData::Asset& a : ps.assets) {
-            Profile::AssetEvent assetEvent;
-            assetEvent.name = a.path;
-            assetEvent.eventType = [](ProfileData::Asset::Type type) {
-                switch (type) {
-                case ProfileData::Asset::Type::Request:
-                    return Profile::AssetEventType::Request;
-                case ProfileData::Asset::Type::Require:
-                    return Profile::AssetEventType::Require;
-                default: throw ghoul::MissingCaseException();
-                }
-            }(a.type);
-            results.push_back(assetEvent);
-        }
-        struct {
-            std::vector<Profile::AssetEvent> base;
-            std::vector<Profile::AssetEvent> changed;
-        } assetDetails;
-
-        assetDetails.base = results;
-        assetDetails.changed = global::openSpaceEngine.assetEvents();
-
-        for (unsigned int i = 0; i < assetDetails.changed.size(); i++) {
-            Profile::AssetEvent event = assetDetails.changed[i];
-
-            if (event.eventType == Profile::AssetEventType::Add) {
-                handleChangedAdd(assetDetails.base, i, assetDetails.changed, event.name);
-            }
-            else if (event.eventType == Profile::AssetEventType::Remove) {
-                assetDetails.base.push_back({ event.name, Profile::AssetEventType::Remove });
-            }
-        }
-        return assetDetails.base;
-    }
 } // namespace
 
 void Profile::saveCurrentSettingsToProfile() {
     profile.version = ProfileData::CurrentVersion;
 
     //
-    // Update assets
-    //
-    std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(profile);
-    addAssetsToProfileFile(profile, ass);
-
-    //
     // Update properties
     //
-    std::vector<SceneGraphNode*> nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+    //std::vector<SceneGraphNode*> nodes =
+    //    global::renderEngine.scene()->allSceneGraphNodes();
     std::vector<properties::Property*> changedProps;
 
-    for (SceneGraphNode* n : nodes) {
-        checkForChangedProps(changedProps, n);
-    }
+    //for (SceneGraphNode* n : nodes) {
+    checkForChangedProps(changedProps, &global::rootPropertyOwner);
+    //}
     std::vector<std::string> formattedLines;
 
     for (properties::Property* prop : changedProps) {
@@ -508,6 +451,52 @@ void Profile::saveCurrentSettingsToProfile() {
     camera.yaw = std::to_string(nav.yaw);
     camera.pitch = std::to_string(nav.pitch);
     profile.camera = std::move(camera);
+}
+
+void Profile::setIgnoreUpdates(bool ignoreUpdates) {
+    _ignoreUpdates = ignoreUpdates;
+}
+
+void Profile::addAsset(const std::string& path) {
+    if (_ignoreUpdates) {
+        return;
+    }
+
+    const auto it = std::find_if(
+        profile.assets.begin(),
+        profile.assets.end(),
+        [path](const ProfileData::Asset& a) { return a.path == path; }
+    );
+
+    if (it != profile.assets.end()) {
+        // Asset already existed, so nothing to do here
+        return;
+    }
+
+    ProfileData::Asset a;
+    a.path = path;
+    a.type = ProfileData::Asset::Type::Require;
+    profile.assets.push_back(std::move(a));
+}
+
+void Profile::removeAsset(const std::string& path) {
+    if (_ignoreUpdates) {
+        return;
+    }
+
+    const auto it = std::find_if(
+        profile.assets.begin(),
+        profile.assets.end(),
+        [path](const ProfileData::Asset& a) { return a.path == path; }
+    );
+
+    if (it == profile.assets.end()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Tried to remove non-existing asset '{}'", path
+        ));
+    }
+
+    profile.assets.erase(it);
 }
 
 scripting::LuaLibrary Profile::luaLibrary() {
@@ -561,7 +550,7 @@ std::string Profile::serialize() const {
                 default: throw ghoul::MissingCaseException();
                 }
             }(a.type);
-            output += fmt::format("{}\t{}\n", a.path, type);
+            output += fmt::format("{}\t{}\t{}\n", a.path, type, a.name);
         }
     }
 

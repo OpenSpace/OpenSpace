@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
@@ -77,8 +76,6 @@ public:
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
-    std::vector<Profile::AssetEvent> assetEvents();
-    void resetAssetChangeTracking();
     void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);

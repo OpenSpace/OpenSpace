@@ -43,8 +43,6 @@ int saveSettingsToProfile(lua_State* L) {
         "lua::saveSettingsToProfile"
     );
 
-    LINFOC("1", ghoul::lua::stackInformation(L));
-
     std::string saveFilePath;
     if (n == 0) {
         const ghoul::filesystem::File f = global::configuration.profile;
@@ -71,7 +69,6 @@ int saveSettingsToProfile(lua_State* L) {
     }
     else {
         saveFilePath = ghoul::lua::value<std::string>(L, 1);
-        LINFOC("2", ghoul::lua::stackInformation(L));
         if (saveFilePath.empty()) {
             return luaL_error(L, "save filepath string is empty");
         }
@@ -92,7 +89,6 @@ int saveSettingsToProfile(lua_State* L) {
     const std::string absFilename = absPath("${ASSETS}/" + saveFilePath + ".profile");
 
     const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : false;
-    LINFOC("3", ghoul::lua::stackInformation(L));
 
     if (FileSys.fileExists(absFilename) && !overwrite) {
         return luaL_error(

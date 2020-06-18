@@ -159,6 +159,16 @@ public:
      */
     void saveCurrentSettingsToProfile();
 
+    /// If the value passed to this function is 'true', the addAsset and removeAsset
+    /// functions will be no-ops instead
+    void setIgnoreUpdates(bool ignoreUpdates);
+
+    /// Adds a new asset and checks for duplicates
+    void addAsset(const std::string& path);
+
+    /// Removes an asset
+    void removeAsset(const std::string& path);
+
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
@@ -167,6 +177,9 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     ProfileData profile;
+
+private:
+    bool _ignoreUpdates = false;
 };
 
 } // namespace openspace
