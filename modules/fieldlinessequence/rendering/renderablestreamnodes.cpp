@@ -256,7 +256,7 @@ namespace openspace {
         , _pDomainZ(DomainZInfo)
         //, _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
         //, _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
-        , _pThresholdRadius(ThresholdRadiusInfo, 0.f, -10.f, 10.f)
+        , _pThresholdRadius(ThresholdRadiusInfo, -10.f, -10.f, 10.f)
 
        // , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
        // , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
@@ -278,7 +278,7 @@ namespace openspace {
         float limit = 8.f; // Just used as a default value.
         _pColorTableRange.setMinValue(glm::vec2(-limit));
         _pColorTableRange.setMaxValue(glm::vec2(limit));
-        _pColorTableRange = glm::vec2(-limit, limit);
+        _pColorTableRange = glm::vec2(-2, 4);
 
         //float limitZ = 1000000000000; // Just used as a default value.
         float limitZMin = -1000000000000;
