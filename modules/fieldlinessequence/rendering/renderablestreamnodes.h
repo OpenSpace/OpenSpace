@@ -67,7 +67,14 @@ namespace openspace {
         // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
         enum class ColorMethod : int {
             Uniform = 0,
-            ByFluxValue
+            ByFluxValue = 1
+        };
+        enum class ScalingMethod : int {
+            Flux = 0,
+            RFlux = 1,
+            R2Flux = 2,
+            log10RFlux = 3,
+            lnRFlux = 4
         };
 
         UniformCache(streamColor, usingParticles, nodeSize, thresholdRadius)
@@ -103,7 +110,7 @@ namespace openspace {
         // Estimated end of sequence.
         double _sequenceEndTime;
         // Number of states in the sequence
-        size_t _nStates = 0;
+        size_t _nStates = 274;
 
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions
@@ -118,6 +125,8 @@ namespace openspace {
         properties::PropertyOwner _pColorGroup;
         // Uniform/transfer function/topology? //////////////////////?
         properties::OptionProperty _pColorMode;
+        // Scaling options
+        properties::OptionProperty _pScalingmethod;
         // Uniform stream Color
         properties::Vec4Property _pStreamColor;
         // Index of the flux value to color lines by
