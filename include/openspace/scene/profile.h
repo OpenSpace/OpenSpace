@@ -98,10 +98,11 @@ struct ProfileData {
     struct Time {
         enum class Type {
             Absolute,
-            Relative
+            Relative,
+            None
         };
 
-        Type type;
+        Type type = Type::None;
         std::string time;
     };
     Time time;

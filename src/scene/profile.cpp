@@ -644,6 +644,9 @@ std::string Profile::serialize() const {
 
 Profile::Profile(const std::vector<std::string>& content) {
     Section currentSection = Section::None;
+    bool foundVersion = false;
+    bool foundCamera = false;
+
     for (int lineNum = 1; lineNum <= static_cast<int>(content.size()); ++lineNum) {
         std::string line = content[lineNum - 1];
         if (std::all_of(line.begin(), line.end(), ::isspace)) {
@@ -657,6 +660,7 @@ Profile::Profile(const std::vector<std::string>& content) {
             break;
         case Section::Version:
             profile.version = parseVersion(line, lineNum);
+            foundVersion = true;
             break;
         case Section::Module:
         {
@@ -687,6 +691,7 @@ Profile::Profile(const std::vector<std::string>& content) {
             break;
         case Section::Camera:
             profile.camera = parseCamera(line, lineNum);
+            foundCamera = true;
             break;
         case Section::MarkNodes:
         {
@@ -697,6 +702,18 @@ Profile::Profile(const std::vector<std::string>& content) {
         default:
             throw ghoul::MissingCaseException();
         }
+    }
+
+    if (!foundVersion) {
+        throw ghoul::RuntimeError(
+            "Did not find Version information when loading profile"
+        );
+    }
+
+    if (!foundCamera) {
+        throw ghoul::RuntimeError(
+            "Did not find Camera information when loading profile"
+        );
     }
 }
 
@@ -753,6 +770,9 @@ std::string Profile::convertToScene() const {
                 profile.time.time
             );
             output += "openspace.time.setTime(prev);\n";
+            break;
+        case ProfileData::Time::Type::None:
+            output += "openspace.time.setTime(openspace.time.currentWallTime());\n";
             break;
         default:
             throw ghoul::MissingCaseException();
