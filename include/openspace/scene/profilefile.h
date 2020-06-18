@@ -43,46 +43,6 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-const size_t timeLinesExpected = 1;
-const size_t cameraLinesExpected = 1;
-const size_t moduleFieldsExpected = 3;
-const size_t assetFieldsExpected = 3;
-const size_t propertyFieldsExpected = 3;
-const size_t keybindingFieldsExpected = 6;
-const size_t timeFieldsExpected = 2;
-const size_t cameraNavigationFieldsExpected = 8;
-const size_t cameraGeoFieldsExpected = 5;
-const size_t markNodesFieldsExpected = 1;
-
-const size_t moduleFieldName = 0;
-const size_t moduleFieldLoaded = 1;
-const size_t moduleFieldNotLoaded = 2;
-const size_t assetFieldName = 0;
-const size_t assetFieldReqd = 1;
-const size_t propertyFieldType = 0;
-const size_t propertyFieldName = 1;
-const size_t propertyFieldValue = 2;
-const size_t keybindingFieldKey = 0;
-const size_t keybindingFieldDoc = 1;
-const size_t keybindingFieldName = 2;
-const size_t keybindingFieldGuiPath = 3;
-const size_t keybindingFieldLocal = 4;
-const size_t keybindingFieldCommand = 5;
-const size_t timeFieldType = 0;
-const size_t timeFieldSet = 1;
-const size_t cameraFieldType = 0;
-const size_t cameraNavigationFieldAnchor = 1;
-const size_t cameraNavigationFieldAim = 2;
-const size_t cameraNavigationFieldRef = 3;
-const size_t cameraNavigationFieldPosition = 4;
-const size_t cameraNavigationFieldUp = 5;
-const size_t cameraNavigationFieldYaw = 6;
-const size_t cameraNavigationFieldPitch = 7;
-const size_t cameraGeoFieldAnchor = 1;
-const size_t cameraGeoFieldLatitude = 2;
-const size_t cameraGeoFieldLongitude = 3;
-const size_t cameraGeoFieldAltitude = 4;
-
 struct ProfileStruct {
     // Version
     struct Version {
@@ -173,18 +133,7 @@ ProfileStruct deserialize(const std::vector<std::string>& content);
  
 std::string convertToSceneFile(const ProfileStruct& ps);
 
-
-class ProfileFile {
-public:
-    ProfileStruct profile;
-    /**
-     * Constructs object by reading the contents of a profile file and populates vector
-     * containers for all sections. This only pulls individual line entries into their
-     * proper sections; it does not parse the tab-delimited fields of each line.
-     * \param filename The profile file to read
-     */
-    ProfileFile(const std::string& filename);
-};
+ProfileStruct readFromFile(const std::string& filename);
 
 } // namespace openspace
 

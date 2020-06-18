@@ -586,7 +586,7 @@ std::string convertToSceneFile(const ProfileStruct& ps) {
     return output;
 }
 
-ProfileFile::ProfileFile(const std::string& filename) {
+ProfileStruct readFromFile(const std::string& filename) {
     std::ifstream inFile;
     try {
         inFile.open(filename, std::ifstream::in);
@@ -603,7 +603,7 @@ ProfileFile::ProfileFile(const std::string& filename) {
         content.push_back(std::move(line));
     }
 
-    profile = deserialize(content);
+    return deserialize(content);
 }
 
 }  // namespace openspace

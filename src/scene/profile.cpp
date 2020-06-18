@@ -102,16 +102,16 @@ namespace {
         }
     }
 
-    void addAssetsToProfileFile(ProfileFile& pf,
+    void addAssetsToProfileFile(ProfileStruct& ps,
                                 const std::vector<Profile::AssetEvent>& allAssets)
     {
-        pf.profile.assets.clear();
+        ps.assets.clear();
         for (Profile::AssetEvent a : allAssets) {
             if (a.eventType != Profile::AssetEventType::Ignore) {
                 ProfileStruct::Asset asset;
                 asset.path = a.name;
                 asset.type = ProfileStruct::Asset::Type::Require;
-                pf.profile.assets.push_back(std::move(asset));
+                ps.assets.push_back(std::move(asset));
             }
         }
     }
@@ -146,7 +146,7 @@ namespace {
 } // namespace
 
 void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
-    ProfileFile pf = collateBaseWithChanges();
+    ProfileStruct ps = collateBaseWithChanges();
 
     if (filename.find('/') != std::string::npos) {
         LERROR("Profile filename must not contain path (/) elements");
@@ -182,7 +182,7 @@ void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
     }
 
     try {
-        outFile << serialize(pf.profile);
+        outFile << serialize(ps);
     }
     catch (const std::ofstream::failure& e) {
         LERROR("Data write error to file: "
@@ -193,8 +193,8 @@ void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
 }
 
 std::string Profile::saveCurrentSettingsToProfile_string() {
-    ProfileFile pf = collateBaseWithChanges();
-    return serialize(pf.profile);
+    ProfileStruct ps = collateBaseWithChanges();
+    return serialize(ps);
 }
 
 bool Profile::usingProfile() const {
@@ -213,7 +213,7 @@ std::string Profile::profileBaseDirectory() const {
     return _profileBaseDirectory;
 }
 
-ProfileFile Profile::collateBaseWithChanges() {
+ProfileStruct Profile::collateBaseWithChanges() {
     if (!usingProfile()) {
         std::string errorMessage = "Program was not started using a profile, "
             "so cannot use this save-current-settings feature";
@@ -222,26 +222,26 @@ ProfileFile Profile::collateBaseWithChanges() {
     std::string initProfile = initialProfile();
     std::string inputProfilePath = absPath(_profileBaseDirectory) + "/" + initProfile
         + ".profile";
-    ProfileFile pf(inputProfilePath);
-    pf.profile.version = ProfileStruct::Version{};
+    ProfileStruct ps = readFromFile(inputProfilePath);
+    ps.version = ProfileStruct::Version{};
 
-    std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(pf);
-    addAssetsToProfileFile(pf, ass);
-    modifyPropertiesToReflectChanges(pf);
+    std::vector<AssetEvent> ass = modifyAssetsToReflectChanges(ps);
+    addAssetsToProfileFile(ps, ass);
+    modifyPropertiesToReflectChanges(ps);
 
     // add current time to profile file
     ProfileStruct::Time time;
     time.time = currentTimeUTC();
     time.type = ProfileStruct::Time::Type::Absolute;
-    pf.profile.time = std::move(time);
+    ps.time = std::move(time);
     
-    addCurrentCameraToProfileFile(pf);
-    return pf;
+    addCurrentCameraToProfileFile(ps);
+    return ps;
 }
 
-std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFile& pf) {
+std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileStruct& ps) {
     std::vector<AssetEvent> a;
-    parseAssetFileLines(a, pf);
+    parseAssetFileLines(a, ps);
     AllAssetDetails assetDetails;
 
     assetDetails.base = a;
@@ -260,8 +260,8 @@ std::vector<Profile::AssetEvent> Profile::modifyAssetsToReflectChanges(ProfileFi
     return assetDetails.base;
 }
 
-void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf) {
-    for (ProfileStruct::Asset& a : pf.profile.assets) {
+void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileStruct& ps) {
+    for (ProfileStruct::Asset& a : ps.assets) {
         AssetEvent assetEvent;
         assetEvent.name = a.path;
         assetEvent.eventType = [](ProfileStruct::Asset::Type type) {
@@ -275,7 +275,7 @@ void Profile::parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile&
     }
 }
 
-void Profile::modifyPropertiesToReflectChanges(ProfileFile& pf) {
+void Profile::modifyPropertiesToReflectChanges(ProfileStruct& ps) {
     std::vector<properties::Property*> changedProps = changedProperties();
     std::vector<std::string> formattedLines;
 
@@ -284,7 +284,7 @@ void Profile::modifyPropertiesToReflectChanges(ProfileFile& pf) {
         p.setType = ProfileStruct::Property::SetType::SetPropertyValueSingle;
         p.name = getFullPropertyPath(prop);
         p.value = prop->getStringValue();
-        pf.profile.properties.push_back(std::move(p));
+        ps.properties.push_back(std::move(p));
     }
 }
 
@@ -326,7 +326,7 @@ interaction::NavigationHandler::NavigationState Profile::currentCameraState() co
     return global::navigationHandler.navigationState();
 }
 
-void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) const {
+void Profile::addCurrentCameraToProfileFile(ProfileStruct& ps) const {
     interaction::NavigationHandler::NavigationState nav = currentCameraState();
 
     ProfileStruct::CameraNavState camera;
@@ -345,7 +345,7 @@ void Profile::addCurrentCameraToProfileFile(ProfileFile& pf) const {
     }
     camera.yaw = nav.yaw;
     camera.pitch = nav.pitch;
-    pf.profile.camera = std::move(camera);
+    ps.camera = std::move(camera);
 }
 
 void Profile::convertToSceneFile(const std::string& inProfilePath,
@@ -353,7 +353,7 @@ void Profile::convertToSceneFile(const std::string& inProfilePath,
 {
     ZoneScoped
 
-    ProfileFile pf(inProfilePath);
+    ProfileStruct ps = readFromFile(inProfilePath);
 
     std::ofstream outFile;
     try {
@@ -366,7 +366,7 @@ void Profile::convertToSceneFile(const std::string& inProfilePath,
     }
 
     try {
-        outFile << openspace::convertToSceneFile(pf.profile);
+        outFile << openspace::convertToSceneFile(ps);
     }
     catch (const std::ofstream::failure& e) {
         LERROR(fmt::format(

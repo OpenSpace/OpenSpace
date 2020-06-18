@@ -105,18 +105,18 @@ private:
     virtual std::string initialProfile() const;
     virtual std::string profileBaseDirectory() const;
     virtual std::vector<AssetEvent> assetEvents() const;
-    ProfileFile collateBaseWithChanges();
+    ProfileStruct collateBaseWithChanges();
 
-    std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileFile& pf);
-    void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileFile& pf);
+    std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileStruct& ps);
+    void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileStruct& ps);
 
-    void modifyPropertiesToReflectChanges(ProfileFile& pf);
+    void modifyPropertiesToReflectChanges(ProfileStruct& ps);
     virtual std::vector<openspace::properties::Property*> changedProperties();
     std::string getFullPropertyPath(openspace::properties::Property* prop);
     virtual std::vector<std::string> changedPropertiesFormatted();
     virtual std::string currentTimeUTC() const;
     virtual interaction::NavigationHandler::NavigationState currentCameraState() const;
-    void addCurrentCameraToProfileFile(ProfileFile& pf) const;
+    void addCurrentCameraToProfileFile(ProfileStruct& ps) const;
 };
 
 } // namespace openspace
