@@ -446,7 +446,7 @@ void Profile::saveCurrentSettingsToProfile() {
 
     // add current time to profile file
     ProfileData::Time time;
-    time.time = currentTimeUTC();
+    time.time = global::timeManager.time().ISO8601();
     time.type = ProfileData::Time::Type::Absolute;
     profile.time = std::move(time);
 
@@ -470,58 +470,6 @@ void Profile::saveCurrentSettingsToProfile() {
     camera.yaw = std::to_string(nav.yaw);
     camera.pitch = std::to_string(nav.pitch);
     profile.camera = std::move(camera);
-}
-
-void Profile::saveCurrentSettingsToProfile(const std::string& filename) {
-    //std::string initProfile = initialProfile();
-    //std::string inputProfilePath = absPath(_profileBaseDirectory) + "/" + initProfile
-    //    + ".profile";
-    //ProfileData ps = readFromFile(inputProfilePath);
-
-    saveCurrentSettingsToProfile();
-
-
-    if (filename.find('/') != std::string::npos) {
-        LERROR("Profile filename must not contain path (/) elements");
-        return;
-    }
-    else if (filename.find(':') != std::string::npos) {
-        LERROR("Profile filename must not contain path (:) elements");
-        return;
-    }
-    else if (filename.find('.') != std::string::npos) {
-        LERROR("Only provide the filename to save without file extension");
-        return;
-    }
-    const std::string absFilename = absPath("${ASSETS}/" + filename + ".profile");
-
-    if (FileSys.fileExists(absFilename)) {
-        LERROR(fmt::format(
-            "Unable to save profile '{}'. File of same name already exists.",
-            absFilename.c_str()
-        ));
-        return;
-    }
-
-    std::ofstream outFile;
-    // @TODO (abock, 2020-06-15) Replace with non-throwing stream
-    try {
-        outFile.open(absFilename, std::ofstream::out);
-    }
-    catch (const std::ofstream::failure& e) {
-        LERROR(fmt::format(
-            "Exception opening profile file for write: {} ({})", absFilename, e.what()
-        ));
-    }
-
-    try {
-        outFile << serialize(profile);
-    }
-    catch (const std::ofstream::failure& e) {
-        LERROR(fmt::format("Data write error to file: {} ({})", absFilename, e.what()));
-    }
-
-    outFile.close();
 }
 
 std::string Profile::initialProfile() const {
@@ -579,14 +527,10 @@ void Profile::modifyPropertiesToReflectChanges(ProfileData& ps) {
     for (properties::Property* prop : changedProps) {
         ProfileData::Property p;
         p.setType = ProfileData::Property::SetType::SetPropertyValueSingle;
-        p.name = getFullPropertyPath(prop);
+        p.name = recurseForFullName(prop->owner()) + prop->identifier();
         p.value = prop->getStringValue();
         ps.properties.push_back(std::move(p));
     }
-}
-
-std::string Profile::getFullPropertyPath(properties::Property* prop) {
-    return recurseForFullName(prop->owner()) + prop->identifier();
 }
 
 std::vector<properties::Property*> Profile::changedProperties() {
@@ -600,10 +544,6 @@ std::vector<properties::Property*> Profile::changedProperties() {
         checkForChangedProps(changedProps, n);
     }
     return changedProps;
-}
-
-std::string Profile::currentTimeUTC() const {
-    return global::timeManager.time().ISO8601();
 }
 
 interaction::NavigationHandler::NavigationState Profile::currentCameraState() const {
@@ -642,17 +582,19 @@ scripting::LuaLibrary Profile::luaLibrary() {
         "",
         {
             {
-                "saveCurrentSettingsToProfile",
-                &luascriptfunctions::saveCurrentSettingsToProfile,
+                "saveSettingsToProfile",
+                &luascriptfunctions::saveSettingsToProfile,
                 {},
-                "string",
+                "[string, bool]",
                 "Collects all changes that have been made since startup, including all "
                 "property changes and assets required, requested, or removed. All "
                 "changes will be added to the profile that OpenSpace was started with, "
-                "and the new saved file will contain all of this information. The "
-                "file will be named according to the argument provided. If this argument "
-                "is blank, then the new file will have the base name of the profile that "
-                " was started, with a _YYYYMMDD suffix."
+                "and the new saved file will contain all of this information. If the "
+                "arugment is provided, the settings will be saved into new profile with "
+                "that name. If the argument is blank, the current profile will be saved "
+                "to a backup file and the original profile will be overwritten. The "
+                "second argument determines if a file that already exists should be "
+                "overwritten, which is 'false' by default"
             }
         }
     };

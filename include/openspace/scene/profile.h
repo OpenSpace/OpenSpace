@@ -158,19 +158,6 @@ public:
     void saveCurrentSettingsToProfile();
 
     /**
-     * Saves all current settings, starting from the profile that was loaded at startup,
-     * and all of the property & asset changes that were made since startup.
-     * \param filename The filename of the new profile to be saved
-     */
-    void saveCurrentSettingsToProfile(const std::string& filename);
-
-    /**
-     * Saves all current settings, similar to saveCurrentSettingsToProfile() except the
-     * output is a string without writing to a file.
-     */
-    //std::string saveCurrentSettingsToProfile_string();
-
-    /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
      * \return The Lua library that contains all Lua functions available for profiles
@@ -196,8 +183,6 @@ private:
 
     void modifyPropertiesToReflectChanges(ProfileData& ps);
     virtual std::vector<openspace::properties::Property*> changedProperties();
-    std::string getFullPropertyPath(openspace::properties::Property* prop);
-    virtual std::string currentTimeUTC() const;
     virtual interaction::NavigationHandler::NavigationState currentCameraState() const;
 };
 

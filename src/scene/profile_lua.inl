@@ -24,10 +24,11 @@
 
 #include <ghoul/filesystem/file.h>
 #include <ctime>
+#include <filesystem>
 
 namespace openspace::luascriptfunctions {
 
-int saveCurrentSettingsToProfile(lua_State* L) {
+int saveSettingsToProfile(lua_State* L) {
     if (!global::configuration.usingProfile) {
         return luaL_error(
             L,
@@ -38,11 +39,11 @@ int saveCurrentSettingsToProfile(lua_State* L) {
 
     const int n = ghoul::lua::checkArgumentsAndThrow(
         L,
-        { 0, 1 },
-        "lua::saveCurrentSettingsToProfile"
+        { 0, 2 },
+        "lua::saveSettingsToProfile"
     );
 
-    using ghoul::lua::luaTypeToString;
+    LINFOC("1", ghoul::lua::stackInformation(L));
 
     std::string saveFilePath;
     if (n == 0) {
@@ -61,22 +62,78 @@ int saveCurrentSettingsToProfile(lua_State* L) {
             utcTime->tm_min,
             utcTime->tm_sec
         );
-        saveFilePath = fmt::format("{}_{}.{}", f.fullBaseName(), time, f.fileExtension());
+        std::string newFile = fmt::format(
+            "{}_{}.{}",
+            f.fullBaseName(), time, f.fileExtension()
+        );
+        std::filesystem::copy(global::configuration.profile, newFile);
+        saveFilePath = global::configuration.profile;
     }
     else {
-        saveFilePath = ghoul::lua::value<std::string>(
-            L,
-            1,
-            ghoul::lua::PopValue::Yes
-        );
+        saveFilePath = ghoul::lua::value<std::string>(L, 1);
+        LINFOC("2", ghoul::lua::stackInformation(L));
         if (saveFilePath.empty()) {
             return luaL_error(L, "save filepath string is empty");
         }
     }
 
-    global::profile.saveCurrentSettingsToProfile(saveFilePath);
+    global::profile.saveCurrentSettingsToProfile();
+    global::configuration.profile = saveFilePath;
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    if (saveFilePath.find('/') != std::string::npos) {
+        return luaL_error(L, "Profile filename must not contain path (/) elements");
+    }
+    else if (saveFilePath.find(':') != std::string::npos) {
+        return luaL_error(L, "Profile filename must not contain path (:) elements");
+    }
+    else if (saveFilePath.find('.') != std::string::npos) {
+        return luaL_error(L, "Only provide the filename to save without file extension");
+    }
+    const std::string absFilename = absPath("${ASSETS}/" + saveFilePath + ".profile");
+
+    const bool overwrite = (n == 2) ? ghoul::lua::value< bool>(L, 2) : false;
+    LINFOC("3", ghoul::lua::stackInformation(L));
+
+    if (FileSys.fileExists(absFilename) && !overwrite) {
+        return luaL_error(
+            L, 
+            fmt::format(
+                "Unable to save profile '{}'. File of same name already exists.",
+                absFilename.c_str()
+            ).c_str()
+        );
+    }
+
+    std::ofstream outFile;
+    // @TODO (abock, 2020-06-15) Replace with non-throwing stream
+    try {
+        outFile.open(absFilename, std::ofstream::out);
+    }
+    catch (const std::ofstream::failure& e) {
+        return luaL_error(
+            L,
+            fmt::format(
+                "Exception opening profile file for write: {} ({})", absFilename, e.what()
+            ).c_str()
+        );
+    }
+
+    try {
+        outFile << serialize(global::profile.profile);
+    }
+    catch (const std::ofstream::failure& e) {
+        return luaL_error(
+            L,
+            fmt::format(
+                "Data write error to file: {} ({})",
+                absFilename, e.what()
+            ).c_str()
+        );
+    }
+
+    outFile.close();
+
+    lua_settop(L, 0);
     return 0;
 }
 
