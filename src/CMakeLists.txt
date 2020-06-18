@@ -153,7 +153,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/lightsource.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/profile.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/profilefile.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/profile_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
@@ -345,7 +344,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/lightsource.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/profile.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/scene/profilefile.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h

@@ -312,15 +312,19 @@ void OpenSpaceEngine::initialize() {
             );
         }
         else {
+            // Load the profile
+            global::profile = Profile(inputProfile);
 
-
-            global::profile.convertToSceneFile(inputProfile, outputAsset);
+            // Then save the profile to a scene so that we can load it with the
+            // existing infrastructure
+            std::ofstream scene(outputAsset);
+            std::string sceneContent = convertToSceneFile(global::profile.profile);
+            scene << sceneContent;
 
             // Set asset name to that of the profile because a new scene file will be
             // created with that name, and also because the profile name will override
             // an asset name if both are provided.
-            global::configuration.asset =
-                absPath("${TEMPORARY}/") + global::configuration.profile;
+            global::configuration.asset = outputAsset;
             global::configuration.usingProfile = true;
         }
     }

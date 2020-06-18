@@ -26,13 +26,14 @@
 #define __OPENSPACE_CORE___PROFILE___H__
 
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/scene/profilefile.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
@@ -43,10 +44,94 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
+struct ProfileData {
+    // Version
+    struct Version {
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+    };
+    Version version = { 1, 0, 0 };
+
+    struct Module {
+        std::string name;
+        std::string loadedInstruction;
+        std::string notLoadedInstruction;
+    };
+    std::vector<Module> modules;
+
+    struct Asset {
+        enum class Type {
+            Require,
+            Request
+        };
+
+        std::string path;
+        Type type;
+        std::string name;
+    };
+    std::vector<Asset> assets;
+
+    struct Property {
+        enum class SetType {
+            SetPropertyValue,
+            SetPropertyValueSingle
+        };
+
+        SetType setType;
+        std::string name;
+        std::string value;
+    };
+    std::vector<Property> properties;
+
+    struct Keybinding {
+        std::string key; // @TODO (abock, 2020-06-16) change to key+action
+        std::string documentation;
+        std::string name;
+        std::string guiPath;
+        bool isLocal;
+        std::string script;
+    };
+    std::vector<Keybinding> keybindings;
+
+    struct Time {
+        enum class Type {
+            Absolute,
+            Relative
+        };
+
+        Type type;
+        std::string time;
+    };
+    Time time;
+
+    struct CameraNavState {
+        static constexpr const char* Type = "setNavigationState";
+
+        std::string anchor;
+        std::string aim;
+        std::string referenceFrame;
+        std::string position; // @TODO (abock, 2020-06-17) change to vec3
+        std::string up;// @TODO (abock, 2020-06-17) change to vec3
+        std::string yaw;
+        std::string pitch;
+    };
+    struct CameraGoToGeo {
+        static constexpr const char* Type = "goToGeo";
+
+        std::string anchor;
+        double latitude;
+        double longitude;
+        std::optional<double> altitude;
+    };
+    using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
+    CameraType camera;
+
+    std::vector<std::string> markNodes;
+};
+
 class Profile {
 public:
-    static constexpr const char* FormatVersion = "1.0";
-
     enum class AssetEventType {
         Add,
         Require,
@@ -59,6 +144,9 @@ public:
         std::string name;
         AssetEventType eventType;
     };
+
+    Profile() = default;
+    explicit Profile(const std::string& filename);
 
     virtual ~Profile() {};
 
@@ -76,29 +164,18 @@ public:
     //std::string saveCurrentSettingsToProfile_string();
 
     /**
-     * Reads in a .profile file, converts it to scene/asset equivalent syntax, and
-     * writes the result to the specified output path.
-     * \param inProfilePath The .profile file to be converted
-     * \param outFilePath The output file path that will be written with the converted
-     *                       contents (in an .asset file)
-     */
-    void convertToSceneFile(const std::string& inProfilePath,
-        const std::string& outFilePath);
-
-
-    /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();
 
+    ProfileData profile;
+
 protected:
     std::string _profileBaseDirectory = "${ASSETS}";
 
 private:
-    ProfileData profile;
-
     struct AllAssetDetails {
         std::vector<AssetEvent> base;
         std::vector<AssetEvent> changed;
@@ -106,7 +183,6 @@ private:
     virtual std::string initialProfile() const;
     virtual std::string profileBaseDirectory() const;
     virtual std::vector<AssetEvent> assetEvents() const;
-    ProfileData collateBaseWithChanges();
 
     std::vector<AssetEvent> modifyAssetsToReflectChanges(ProfileData& ps);
     void parseAssetFileLines(std::vector<AssetEvent>& results, ProfileData& ps);
@@ -117,6 +193,23 @@ private:
     virtual std::string currentTimeUTC() const;
     virtual interaction::NavigationHandler::NavigationState currentCameraState() const;
 };
+
+
+std::string serialize(const ProfileData& ps);
+ProfileData deserialize(const std::vector<std::string>& content);
+
+std::string convertToSceneFile(const ProfileData& ps);
+
+/**
+ * Reads in a .profile file, converts it to scene/asset equivalent syntax, and
+ * writes the result to the specified output path.
+ * \param inProfilePath The .profile file to be converted
+ * \param outFilePath The output file path that will be written with the converted
+ *                       contents (in an .asset file)
+ */
+void convertProfileToScene(const std::string& inProfilePath,
+    const std::string& outFilePath);
+
 
 } // namespace openspace
 
