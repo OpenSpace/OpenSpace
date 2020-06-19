@@ -67,7 +67,14 @@ namespace openspace {
         // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
         enum class ColorMethod : int {
             Uniform = 0,
-            ByFluxValue
+            ByFluxValue = 1
+        };
+        enum class ScalingMethod : int {
+            Flux = 0,
+            RFlux = 1,
+            R2Flux = 2,
+            log10RFlux = 3,
+            lnRFlux = 4
         };
 
         UniformCache(streamColor, usingParticles, nodeSize, thresholdRadius)
@@ -103,7 +110,7 @@ namespace openspace {
         // Estimated end of sequence.
         double _sequenceEndTime;
         // Number of states in the sequence
-        size_t _nStates = 200;
+        size_t _nStates = 274;
 
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions
@@ -118,14 +125,16 @@ namespace openspace {
         properties::PropertyOwner _pColorGroup;
         // Uniform/transfer function/topology? //////////////////////?
         properties::OptionProperty _pColorMode;
+        // Scaling options
+        properties::OptionProperty _pScalingmethod;
         // Uniform stream Color
         properties::Vec4Property _pStreamColor;
         // Index of the flux value to color lines by
         //properties::OptionProperty _pColorFlux;
         // Color table/transfer function min
-        properties::StringProperty _pColorFluxMin;
+        //properties::StringProperty _pColorFluxMin;
         // Color table/transfer function max
-        properties::StringProperty _pColorFluxMax;
+        //properties::StringProperty _pColorFluxMax;
         // Color table/transfer function for "By Flux value" coloring
         properties::StringProperty _pColorTablePath;
         // Toggle flow [ON/OFF]
@@ -136,6 +145,10 @@ namespace openspace {
         properties::FloatProperty _pNodeSize;
         /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;
+        ////////////////
+        properties::Vec2Property _pColorTableRange;
+        ////////////////
+        properties::Vec2Property _pDomainZ;
         /// ///////////
         properties::FloatProperty _pThresholdRadius;
         // Filtering nodes within a range
@@ -186,6 +199,7 @@ namespace openspace {
         void updateVertexFilteringBuffer();
         void extractTriggerTimesFromFileNames();
         void computeSequenceEndTime();
+        void setModelDependentConstants();
 
         bool LoadfilesintoRam();
 

@@ -58,6 +58,7 @@ uniform vec4 streamColor;
 uniform float thresholdRadius;
 uniform float filterRadius;
 uniform float filterUpper;
+uniform int ScalingMode;
 
 // Inputs
 // Should be provided in meters
@@ -65,7 +66,7 @@ layout(location = 0) in vec3 in_position;
 
 // The extra value used to color lines. Location must correspond to _VA_COLOR in 
 // renderablefieldlinessequence.h
-layout(location = 1) in float rTimesFluxValue;
+layout(location = 1) in float fluxValue;
 
 // The extra value used to mask out parts of lines. Location must correspond to 
 // _VA_MASKING in renderablefieldlinessequence.h
@@ -77,17 +78,40 @@ in float rValue;
 const int uniformColor     = 0;
 const int colorByFluxValue  = 1;
 
+const int Fluxmode = 0;
+const int RFlux = 1;
+const int R2Flux = 2;
+const int log10RFlux = 3;
+const int lnRFlux = 4;
 out vec4 vs_color;
 out float vs_depth;
 //out vec4 vs_gPosition;
 
-float minValTableRange = -2;
-float maxValTableRange =  4;
-
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
-    float lookUpVal = (rTimesFluxValue - minValTableRange)/(maxValTableRange - minValTableRange);
-    return texture(colorTable, lookUpVal);
+    float scalevalue = 0;
+    if(ScalingMode == Fluxmode){
+        scalevalue = fluxValue;
+    }
+    else if(ScalingMode == RFlux){
+       scalevalue = rValue * fluxValue;
+    }
+    else if(ScalingMode == log10RFlux){
+        //conversion from logbase e to log10 since glsl does not support log10. 
+        float logtoTen = log(rValue) / log(10);
+        scalevalue = logtoTen * fluxValue;
+    }
+    else if(ScalingMode == lnRFlux){
+        scalevalue = log(rValue) * fluxValue;
+    }
+    else if(ScalingMode == R2Flux){
+        scalevalue = rValue * rValue * fluxValue;
+    }
+    if(scalevalue > thresholdRadius){
+        float lookUpVal = (scalevalue - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
+        return texture(colorTable, lookUpVal);
+    }
+    return vec4(0);
 }
 
 bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
@@ -100,22 +124,24 @@ void main() {
 
     //vs_color = streamColor;
 
-    if(rValue > filterRadius && rValue < filterUpper){
-    //if(rValue > filterRadius){
-        if(colorMode == 0){
-        vs_color = streamColor;
-        }
-        else if (colorMode == 1){
-            vec4 quantityColor = getTransferFunctionColor();
-            vs_color = vec4(quantityColor.xyz, 1);
-        }
-         else{
-            vs_color = vec4(0);
-        }
+    if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
+        if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
+            if(colorMode == 0){
+                vs_color = streamColor;
+            }
+            else if (colorMode == 1){
+                vec4 quantityColor = getTransferFunctionColor();
+                vs_color = vec4(quantityColor.xyz, quantityColor.w);
+            }
         }
         else{
-         vs_color = vec4(0);
+            vs_color = vec4(0);
+            }
         }
+    else{
+        vs_color = vec4(0);
+    }
+
     //if(rValue > thresholdRadius){
     //  vs_color = vec4(0);
     //}

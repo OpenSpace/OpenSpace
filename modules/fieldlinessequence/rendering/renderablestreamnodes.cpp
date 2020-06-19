@@ -81,9 +81,6 @@ namespace {
     // [BOOLEAN] If value False => Load in initializing step and store in RAM
     constexpr const char* KeyOslfsLoadAtRuntime = "LoadAtRuntime";
 
-    //[INT] Line Width should have a range
-    constexpr const char* KeyLineWidth = "LineWidth";
-
     //[INT] Threshold Radius should have a range
     constexpr const char* KeyThresholdRadius = "ThresholdRadius";
     // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
@@ -91,6 +88,11 @@ namespace {
     constexpr const char* KeyColorTablePaths = "ColorTablePaths";
     // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     constexpr const char* KeyColorTableRanges = "ColorTableRanges";
+    //[INT] Line Width should have a range
+    constexpr const char* minValTableRange = "minTableValue";
+
+    //[INT] Line Width should have a range
+    constexpr const char* KeyLineWidth = "LineWidth";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
@@ -150,20 +152,34 @@ namespace {
     };
     constexpr openspace::properties::Property::PropertyInfo ThresholdRadiusInfo = {
        "thresholdRadius",
-       "Threshold Radius",
+       "Threshold flux scaling",
        "This value specifies the threshold that will be changed with the radius."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
         "filtering",
-        "FilteringLower",
+        "FilteringLower in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
         "filtering2",
-        "FilteringUpper",
+        "FilteringUpper in AU",
         "Use filtering to show nodes within a given range."
     };
-
+    constexpr openspace::properties::Property::PropertyInfo ScalingmethodInfo = {
+          "Scaling flux",
+          "Scale the flux value with colortable",
+          "Use scaling to color nodes with a given method."
+    };
+    constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
+        "colorTableRange",
+        "Color Table Range",
+        "Valid range for the color table. [Min, Max]"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
+        "limitsZLower",
+        "Z-limits Lower",
+        "Valid range along the Z-axis. [Min, Max]"
+    };
     enum class SourceFileType : int {
         Json = 0,
         Cdf,
@@ -223,9 +239,10 @@ namespace openspace {
         : Renderable(dictionary)
         , _pColorGroup({ "Color" })
         , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
+        , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
         //, _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
-        , _pColorFluxMin(ColorFluxMinInfo)
-        , _pColorFluxMax(ColorFluxMaxInfo)
+        //, _pColorFluxMin(ColorFluxMinInfo)
+        //, _pColorFluxMax(ColorFluxMaxInfo)
         , _pColorTablePath(ColorTablePathInfo)
         , _pStreamColor(StreamColorInfo,
             glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
@@ -235,13 +252,17 @@ namespace openspace {
         , _pStreamGroup({ "Streams" })
         , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+        , _pColorTableRange(colorTableRangeInfo)
+        , _pDomainZ(DomainZInfo)
         //, _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
         //, _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
-        , _pThresholdRadius(ThresholdRadiusInfo, 0.f, -10.f, 10.f)
+        , _pThresholdRadius(ThresholdRadiusInfo, -10.f, -10.f, 10.f)
 
-        , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
-        , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
-       
+       // , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
+       // , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
+        , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
+        , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
+
         
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -253,6 +274,21 @@ namespace openspace {
             _colorTablePaths[0] = _pColorTablePath;    
     }
 
+    void RenderableStreamNodes::setModelDependentConstants() {
+        float limit = 8.f; // Just used as a default value.
+        _pColorTableRange.setMinValue(glm::vec2(-limit));
+        _pColorTableRange.setMaxValue(glm::vec2(limit));
+        _pColorTableRange = glm::vec2(-2, 4);
+
+        //float limitZ = 1000000000000; // Just used as a default value.
+        float limitZMin = -1000000000000;
+        float limitZMax = 1000000000000;
+
+        _pDomainZ.setMinValue(glm::vec2(limitZMin));
+        _pDomainZ.setMaxValue(glm::vec2(limitZMax));
+        _pDomainZ = glm::vec2(limitZMin, limitZMax);
+    }
+    
     void RenderableStreamNodes::initializeGL() {
         // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
         //std::string filepath = "C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
@@ -296,12 +332,12 @@ namespace openspace {
         // dictionary is no longer needed as everything is extracted
         _dictionary.reset();
 
-
         // No need to store source paths in memory if they are already in RAM!
         //if (!_loadingStatesDynamically) {
         //    _sourceFiles.clear();
         //}
-        //_nStates = 20;
+        //_nStates = 274;
+        setModelDependentConstants();
         setupProperties();
        
         extractTriggerTimesFromFileNames();
@@ -401,7 +437,9 @@ namespace openspace {
                     const float pi = 3.14159265359f;
                   
                     //float rTimesFluxValue = rValue * rValue * fluxValue;
-                    float rTimesFluxValue = rValue * fluxValue;
+                    float rTimesFluxValue = fluxValue;
+                    _vertexColor.push_back(rTimesFluxValue);
+                    _vertexRadius.push_back(rValue);
                     rValue = rValue * AuToMeter;
 
                     //if(thetaValue > 1.4 && thetaValue < 1.6){
@@ -428,8 +466,7 @@ namespace openspace {
                     _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
                     lineStartIdx += nPoints;
 
-                    _vertexColor.push_back(rTimesFluxValue);
-                    _vertexRadius.push_back(rValue);
+                    
 
                     int skipcounter = 0;
                     int nodeskipn = 10;
@@ -574,6 +611,7 @@ namespace openspace {
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pStreamsEnabled);
         addProperty(_pLineWidth);
+        addProperty(_pDomainZ);
         addProperty(_pFiltering);
         addProperty(_pFilteringUpper);
         // ----------------------------- Add Property Groups ----------------------------- //
@@ -581,9 +619,11 @@ namespace openspace {
         addPropertySubOwner(_pColorGroup);
         // ------------------------- Add Properties to the groups ------------------------ //
         _pColorGroup.addProperty(_pColorMode);
+        _pColorGroup.addProperty(_pScalingmethod);
         //_pColorGroup.addProperty(_pColorFlux);
-        _pColorGroup.addProperty(_pColorFluxMin);
-        _pColorGroup.addProperty(_pColorFluxMax);
+        //_pColorGroup.addProperty(_pColorFluxMin);
+        //_pColorGroup.addProperty(_pColorFluxMax);
+        _pColorGroup.addProperty(_pColorTableRange);
         _pColorGroup.addProperty(_pColorTablePath);
         _pColorGroup.addProperty(_pStreamColor);
         _pStreamGroup.addProperty(_pNodeSize);
@@ -593,6 +633,11 @@ namespace openspace {
         _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
         _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
 
+        _pScalingmethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
+        _pScalingmethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
+        _pScalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
+        _pScalingmethod.addOption(static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
+        _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
         definePropertyCallbackFunctions();
 
         // Set defaults
@@ -700,6 +745,9 @@ namespace openspace {
         _shaderProgram->setUniform("colorMode", _pColorMode);
         _shaderProgram->setUniform("filterRadius", _pFiltering);
         _shaderProgram->setUniform("filterUpper", _pFilteringUpper);
+        _shaderProgram->setUniform("ScalingMode", _pScalingmethod);
+        _shaderProgram->setUniform("colorTableRange", _pColorTableRange.value());
+        _shaderProgram->setUniform("domainLimZ", _pDomainZ.value());
 
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;
@@ -730,8 +778,6 @@ namespace openspace {
                 temp,
                 static_cast<GLsizei>(_lineCount.size())
             );
-
-
 
             glBindVertexArray(0);
             _shaderProgram->deactivate();
@@ -832,7 +878,6 @@ namespace openspace {
                     updateVertexFilteringBuffer();
                 }
             }
-        
     }
 
     std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepath) {
@@ -944,10 +989,13 @@ namespace openspace {
                 //phiValue = phiValue * (180.f / pi);
                 //thetaValue = thetaValue + ninetyDeToRad; //(180.f / pi);
                 //phiValue = phiValue + ninetyDeToRad;
-                float rTimesFluxValue = rValue * rValue * fluxValue;
+                //float rTimesFluxValue = rValue * rValue * fluxValue;
+                float rTimesFluxValue = fluxValue;
+                _vertexColor.push_back(rTimesFluxValue);
+                _vertexRadius.push_back(rValue);
                 rValue = rValue * AuToMeter;
                 
-                if(thetaValue < 1.6 && thetaValue > 1.4){
+                //if(thetaValue < 1.6 && thetaValue > 1.4){
                 //if(rTimesFluxValue > 0)
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rValue, phiValue, thetaValue);
@@ -984,8 +1032,8 @@ namespace openspace {
                 _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
                 lineStartIdx += nPoints;
 
-                _vertexColor.push_back(rTimesFluxValue);
-                _vertexRadius.push_back(rValue);
+                //_vertexColor.push_back(rTimesFluxValue);
+                //_vertexRadius.push_back(rValue);
 
                 //skipping nodes
                 int skipcounter = 0;
@@ -994,7 +1042,7 @@ namespace openspace {
                     ++lineIter;
                     ++skipcounter;
                 }
-                }
+                //}
             }
         }
 
