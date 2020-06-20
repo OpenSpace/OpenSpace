@@ -583,17 +583,17 @@ std::string Profile::serialize() const {
         }
     }
     
-    if (time.type != Time::Type::None) {
+    if (time.has_value()) {
         output += fmt::format("\n{}\n", headerTime);
         {
             const std::string type = [](Time::Type t) {
                 switch (t) {
-                case Time::Type::Absolute: return "absolute";
-                case Time::Type::Relative: return "relative";
-                default: throw ghoul::MissingCaseException();
+                    case Time::Type::Absolute: return "absolute";
+                    case Time::Type::Relative: return "relative";
+                    default: throw ghoul::MissingCaseException();
                 }
-            }(time.type);
-            output += fmt::format("{}\t{}\n", type, time.time);
+            }(time->type);
+            output += fmt::format("{}\t{}\n", type, time->time);
         }
     }
 
@@ -787,20 +787,16 @@ std::string Profile::convertToScene() const {
     }
 
     // Time
-    switch (time.type) {
+    switch (time->type) {
         case Time::Type::Absolute:
-            output += fmt::format("openspace.time.setTime(\"{}\")\n", time.time);
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", time->time);
             break;
         case Time::Type::Relative:
             output += "local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
-                "local prev = openspace.time.advancedTime(now, \"{}\");\n",
-                time.time
+                "local prev = openspace.time.advancedTime(now, \"{}\");\n", time->time
             );
             output += "openspace.time.setTime(prev);\n";
-            break;
-        case Time::Type::None:
-            output += "openspace.time.setTime(openspace.time.currentWallTime());\n";
             break;
         default:
             throw ghoul::MissingCaseException();

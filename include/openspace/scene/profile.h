@@ -87,11 +87,10 @@ public:
     struct Time {
         enum class Type {
             Absolute,
-            Relative,
-            None
+            Relative
         };
 
-        Type type = Type::None;
+        Type type;
         std::string time;
     };
     struct CameraNavState {
@@ -158,13 +157,13 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    static constexpr const Version CurrentVersion = Version { 1, 0, 0 };
+    static constexpr const Version CurrentVersion = Version { 1, 0 };
     Version version = CurrentVersion;
     std::vector<Module> modules;
     std::vector<Asset> assets;
     std::vector<Property> properties;
     std::vector<Keybinding> keybindings;
-    Time time;
+    std::optional<Time> time;
     CameraType camera;
     std::vector<std::string> markNodes;
 
