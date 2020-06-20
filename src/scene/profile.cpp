@@ -594,6 +594,13 @@ Profile::Profile(const std::vector<std::string>& content) {
             continue;
         }
 
+        if (currentSection != Section::None && line[0] == '#') {
+            throw ProfileParsingError(
+                lineNum,
+                "Sections in profile must be separated by empty lines"
+            );
+        }
+
         switch (currentSection) {
             case Section::None:
                 currentSection = parseSection(line, lineNum);
