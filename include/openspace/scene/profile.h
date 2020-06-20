@@ -114,7 +114,7 @@ public:
         double longitude;
         std::optional<double> altitude;
     };
-    using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
+    using CameraType = std::variant<std::monostate, CameraNavState, CameraGoToGeo>;
 
     enum class AssetEventType {
         Add,
@@ -159,7 +159,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    static constexpr const Version CurrentVersion = Version{ 1, 0, 0 };
+    static constexpr const Version CurrentVersion = Version { 1, 0, 0 };
     Version version = CurrentVersion;
     std::vector<Module> modules;
     std::vector<Asset> assets;
@@ -168,7 +168,6 @@ private:
     Time time;
     CameraType camera;
     std::vector<std::string> markNodes;
-
 
     bool _ignoreUpdates = false;
 };

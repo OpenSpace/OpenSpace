@@ -23,27 +23,165 @@
  ****************************************************************************************/
 
 #include "catch2/catch.hpp"
-#include "test_common.h"
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
+//#include "test_common.h"
+//#include <openspace/engine/configuration.h>
+//#include <openspace/engine/globals.h>
+//#include <openspace/engine/openspaceengine.h>
+//
+//#include <openspace/scene/assetloader.h>
+//#include <openspace/scene/asset.h>
+//#include "openspace/scene/profile.h"
+//#include <openspace/scene/scene.h>
+//#include <openspace/scene/scenegraphnode.h>
+//#include <openspace/scene/sceneinitializer.h>
+//#include <openspace/scripting/scriptengine.h>
+//#include <ghoul/misc/exception.h>
+//#include <ghoul/lua/lua_helper.h>
+//
+//#include <iostream>
+//#include <iomanip>
+//#include <memory>
 
-#include <openspace/scene/assetloader.h>
-#include <openspace/scene/asset.h>
-#include "openspace/scene/profile.h"
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/sceneinitializer.h>
-#include <openspace/scripting/scriptengine.h>
+
+#include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/lua/lua_helper.h>
-
-#include <iostream>
-#include <iomanip>
-#include <memory>
+#include <fstream>
 
 using namespace openspace;
+
+namespace {
+    Profile loadProfile(const std::string& filename) {
+        std::ifstream f(absPath(filename));
+
+        std::vector<std::string> lines;
+        std::string line;
+        while (std::getline(f, line)) {
+            lines.push_back(std::move(line));
+        }
+
+        return Profile(lines);
+    }
+
+    std::string loadFile(const std::string& filename) {
+        std::ifstream f(absPath(filename));
+        std::string content(
+            (std::istreambuf_iterator<char>(f)),
+            std::istreambuf_iterator<char>()
+        );
+        return content;
+    }
+} // namespace
+
+TEST_CASE("Minimal", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/minimal.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Module", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_modules.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Assets", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_assets.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Properties", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_properties.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Keybindings", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_keybindings.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Time Relative", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_time_relative.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Time Absolute", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_time_absolute.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Camera NavState", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_camera_navstate.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Camera GoToGeo", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_camera_gotogeo.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Camera GoToGeo altitude", "[profile]") {
+    constexpr const char* TestFile = 
+        "${TESTDIR}/profile/basic_camera_gotogeo_altitude.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Mark Nodes", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_mark_nodes.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
 
 //namespace {
 //    int passTest(lua_State* state) {

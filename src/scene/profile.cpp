@@ -341,7 +341,7 @@ namespace {
             throw ProfileParsingError(lineNumber, "No values specified for Camera location");
         }
         Profile::CameraType camera = [&](const std::string& type) ->
-            std::variant<Profile::CameraNavState, Profile::CameraGoToGeo>
+            std::variant<std::monostate, Profile::CameraNavState, Profile::CameraGoToGeo>
         {
             if (type == Profile::CameraNavState::Type) {
                 if (fields.size() != 8) {
@@ -580,45 +580,57 @@ std::string Profile::serialize() const {
             );
         }
     }
-
-    output += fmt::format("\n{}\n", headerTime);
-    {
-        const std::string type = [](Time::Type t) {
-            switch (t) {
+    
+    if (time.type != Time::Type::None) {
+        output += fmt::format("\n{}\n", headerTime);
+        {
+            const std::string type = [](Time::Type t) {
+                switch (t) {
                 case Time::Type::Absolute: return "absolute";
                 case Time::Type::Relative: return "relative";
                 default: throw ghoul::MissingCaseException();
-            }
-        }(time.type);
-        output += fmt::format("{}\t{}\n", type, time.time);
+                }
+            }(time.type);
+            output += fmt::format("{}\t{}\n", type, time.time);
+        }
     }
 
-    output += fmt::format("\n{}\n", headerCamera);
-    output += std::visit(
-        overloaded{
-            [](const CameraNavState& camera) {
-                return fmt::format(
-                    "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-                    CameraNavState::Type,
-                    camera.anchor, camera.aim, camera.referenceFrame, camera.position,
-                    camera.up, camera.yaw, camera.pitch
-                );
-            },
-            [](const Profile::CameraGoToGeo& camera) {
-                std::string altitude;
-                if (camera.altitude.has_value()) {
-                    altitude = std::to_string(*camera.altitude);
+    if (!std::holds_alternative<std::monostate>(camera)) {
+        output += fmt::format("\n{}\n", headerCamera);
+        output += std::visit(
+            overloaded{
+                [](const std::monostate&) {
+                    return std::string();
+                },
+                [](const CameraNavState& camera) {
+                    return fmt::format(
+                        "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+                        CameraNavState::Type,
+                        camera.anchor, camera.aim, camera.referenceFrame, camera.position,
+                        camera.up, camera.yaw, camera.pitch
+                    );
+                },
+                [](const Profile::CameraGoToGeo& camera) {
+                    if (camera.altitude.has_value()) {
+                        return fmt::format(
+                            "{}\t{}\t{}\t{}\t{}\n",
+                            CameraGoToGeo::Type,
+                            camera.anchor, camera.latitude, camera.longitude,
+                            *camera.altitude
+                        );
+                    }
+                    else {
+                        return fmt::format(
+                            "{}\t{}\t{}\t{}\t\n",
+                            CameraGoToGeo::Type,
+                            camera.anchor, camera.latitude, camera.longitude
+                        );
+                    }
                 }
-
-                return fmt::format(
-                    "{}\t{}\t{}\t{}\t{}\n",
-                    CameraGoToGeo::Type,
-                    camera.anchor, camera.latitude, camera.longitude, altitude
-                );
-            }
-        },
-        camera
-    );
+            },
+            camera
+        );
+    }
 
     if (!markNodes.empty()) {
         output += fmt::format("\n{}\n", headerMarkNodes);
@@ -633,7 +645,6 @@ std::string Profile::serialize() const {
 Profile::Profile(const std::vector<std::string>& content) {
     Section currentSection = Section::None;
     bool foundVersion = false;
-    bool foundCamera = false;
 
     for (int lineNum = 1; lineNum <= static_cast<int>(content.size()); ++lineNum) {
         std::string line = content[lineNum - 1];
@@ -643,64 +654,57 @@ Profile::Profile(const std::vector<std::string>& content) {
         }
 
         switch (currentSection) {
-        case Section::None:
-            currentSection = parseSection(line, lineNum);
-            break;
-        case Section::Version:
-            version = parseVersion(line, lineNum);
-            foundVersion = true;
-            break;
-        case Section::Module:
-        {
-            Module m = parseModule(line, lineNum);
-            modules.push_back(std::move(m));
-            break;
-        }
-        case Section::Asset:
-        {
-            Asset a = parseAsset(line, lineNum);
-            assets.push_back(std::move(a));
-            break;
-        }
-        case Section::Property:
-        {
-            Property p = parseProperty(line, lineNum);
-            properties.push_back(std::move(p));
-            break;
-        }
-        case Section::Keybinding:
-        {
-            Keybinding kb = parseKeybinding(line, lineNum);
-            keybindings.push_back(std::move(kb));
-            break;
-        }
-        case Section::Time:
-            time = parseTime(line, lineNum);
-            break;
-        case Section::Camera:
-            camera = parseCamera(line, lineNum);
-            foundCamera = true;
-            break;
-        case Section::MarkNodes:
-        {
-            std::string m = parseMarkNodes(line, lineNum);
-            markNodes.push_back(std::move(m));
-            break;
-        }
-        default:
-            throw ghoul::MissingCaseException();
+            case Section::None:
+                currentSection = parseSection(line, lineNum);
+                break;
+            case Section::Version:
+                version = parseVersion(line, lineNum);
+                foundVersion = true;
+                break;
+            case Section::Module:
+            {
+                Module m = parseModule(line, lineNum);
+                modules.push_back(std::move(m));
+                break;
+            }
+            case Section::Asset:
+            {
+                Asset a = parseAsset(line, lineNum);
+                assets.push_back(std::move(a));
+                break;
+            }
+            case Section::Property:
+            {
+                Property p = parseProperty(line, lineNum);
+                properties.push_back(std::move(p));
+                break;
+            }
+            case Section::Keybinding:
+            {
+                Keybinding kb = parseKeybinding(line, lineNum);
+                keybindings.push_back(std::move(kb));
+                break;
+            }
+            case Section::Time:
+                time = parseTime(line, lineNum);
+                break;
+            case Section::Camera:
+                camera = parseCamera(line, lineNum);
+                break;
+            case Section::MarkNodes:
+            {
+                std::string m = parseMarkNodes(line, lineNum);
+                markNodes.push_back(std::move(m));
+                break;
+            }
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
 
     if (!foundVersion) {
         throw ghoul::RuntimeError(
             "Did not find Version information when loading profile"
-        );
-    }
-
-    if (!foundCamera) {
-        throw ghoul::RuntimeError(
-            "Did not find Camera information when loading profile"
         );
     }
 }
@@ -798,6 +802,9 @@ std::string Profile::convertToScene() const {
     // Camera
     output += std::visit(
         overloaded{
+            [](const std::monostate&) {
+                return std::string();
+            },
             [](const CameraNavState& camera) {
                 std::string result;
                 result += "openspace.navigation.setNavigationState({";
