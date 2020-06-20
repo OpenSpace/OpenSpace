@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
+#include <openspace/engine/globals.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/properties/propertyowner.h>
 #include <optional>
 #include <string>
 #include <variant>
@@ -114,7 +117,9 @@ public:
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
      */
-    void saveCurrentSettingsToProfile();
+    void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
+        const std::string& currentTime,
+        interaction::NavigationHandler::NavigationState navState);
 
     /// If the value passed to this function is 'true', the addAsset and removeAsset
     /// functions will be no-ops instead

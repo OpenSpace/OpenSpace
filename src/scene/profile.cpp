@@ -24,16 +24,12 @@
 
 #include <openspace/scene/profile.h>
 
-#include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <ghoul/fmt.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
-
-#include <openspace/util/timemanager.h>
-#include <openspace/interaction/navigationhandler.h>
 
 #include "profile_lua.inl"
 
@@ -53,7 +49,7 @@ namespace {
 
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     struct ProfileParsingError : public ghoul::RuntimeError {
         explicit ProfileParsingError(std::string msg)
@@ -68,32 +64,20 @@ namespace {
         {}
     };
 
-    std::string recurseForFullName(properties::PropertyOwner* po) {
-        if (po == nullptr) {
-            return "";
-        }
-        std::string name = recurseForFullName(po->owner()) + po->identifier();
-        if (!name.empty()) {
-            return name + ".";
-        }
-        else {
-            return "";
-        }
-    }
-
-    void checkForChangedProps(std::vector<properties::Property*>& changedList,
-                              properties::PropertyOwner* po)
+    std::vector<properties::Property*> changedProperties(
+                                                      const properties::PropertyOwner& po)
     {
-        if (po) {
-            for (properties::PropertyOwner* subOwner : po->propertySubOwners()) {
-                checkForChangedProps(changedList, subOwner);
-            }
-            for (properties::Property* p : po->properties()) {
-                if (p->hasChanged()) {
-                    changedList.push_back(p);
-                }
+        std::vector<properties::Property*> res;
+        for (properties::PropertyOwner* subOwner : po.propertySubOwners()) {
+            std::vector<properties::Property*> ps = changedProperties(*subOwner);
+            res.insert(res.end(), ps.begin(), ps.end());
+        }
+        for (properties::Property* p : po.properties()) {
+            if (p->hasChanged()) {
+                res.push_back(p);
             }
         }
+        return res;
     }
 
     enum class Section {
@@ -347,21 +331,21 @@ namespace {
     }
 } // namespace
 
-void Profile::saveCurrentSettingsToProfile() {
+void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
+                                           const std::string& currentTime,
+                                 interaction::NavigationHandler::NavigationState navState)
+{
     version = Profile::CurrentVersion;
 
     //
     // Update properties
     //
-    std::vector<properties::Property*> changedProps;
+    std::vector<properties::Property*> ps = changedProperties(rootOwner);
 
-    checkForChangedProps(changedProps, &global::rootPropertyOwner);
-    std::vector<std::string> formattedLines;
-
-    for (properties::Property* prop : changedProps) {
+    for (properties::Property* prop : ps) {
         Property p;
         p.setType = Property::SetType::SetPropertyValueSingle;
-        p.name = recurseForFullName(prop->owner()) + prop->identifier();
+        p.name = prop->fullyQualifiedIdentifier();
         p.value = prop->getStringValue();
         properties.push_back(std::move(p));
     }
@@ -370,30 +354,28 @@ void Profile::saveCurrentSettingsToProfile() {
     // add current time to profile file
     //
     Time t;
-    t.time = global::timeManager.time().ISO8601();
+    t.time = currentTime;
     t.type = Time::Type::Absolute;
     time = std::move(t);
 
     // Camera
-    interaction::NavigationHandler::NavigationState nav =
-        global::navigationHandler.navigationState();
 
     CameraNavState c;
-    c.anchor = nav.anchor;
-    c.aim = nav.aim;
-    c.referenceFrame = nav.referenceFrame;
+    c.anchor = navState.anchor;
+    c.aim = navState.aim;
+    c.referenceFrame = navState.referenceFrame;
     c.position = fmt::format(
         "{},{},{}",
-        nav.position.x, nav.position.y, nav.position.z
+        navState.position.x, navState.position.y, navState.position.z
     );
-    if (nav.up.has_value()) {
+    if (navState.up.has_value()) {
         c.up = fmt::format(
             "{},{},{}",
-            nav.up->x, nav.up->y, nav.up->z
+            navState.up->x, navState.up->y, navState.up->z
         );
     }
-    c.yaw = std::to_string(nav.yaw);
-    c.pitch = std::to_string(nav.pitch);
+    c.yaw = std::to_string(navState.yaw);
+    c.pitch = std::to_string(navState.pitch);
     camera = std::move(c);
 }
 
