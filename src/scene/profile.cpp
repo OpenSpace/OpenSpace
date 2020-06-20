@@ -192,10 +192,10 @@ namespace {
     [[ nodiscard ]] Profile::Version parseVersion(const std::string& line, int lineNumber)
     {
         std::vector<std::string> parts = ghoul::tokenizeString(line, '.');
-        if (parts.size() > 3) {
+        if (parts.size() > 2) {
             throw ProfileParsingError(
                 lineNumber,
-                fmt::format("Expected 1-3 version components, got {}", parts.size())
+                fmt::format("Expected 1-2 version components, got {}", parts.size())
             );
         }
 
@@ -209,9 +209,6 @@ namespace {
             }
             if (parts.size() > 1) {
                 version.minor = std::stoi(parts[1]);
-            }
-            if (parts.size() > 2) {
-                version.patch = std::stoi(parts[2]);
             }
             return version;
         }
@@ -532,9 +529,7 @@ scripting::LuaLibrary Profile::luaLibrary() {
 std::string Profile::serialize() const {
     std::string output;
     output += fmt::format("{}\n", headerVersion);
-    output += fmt::format(
-        "{}.{}.{}\n", version.major, version.minor, version.patch
-    );
+    output += fmt::format("{}.{}\n", version.major, version.minor);
 
     if (!modules.empty()) {
         output += fmt::format("\n{}\n", headerModule);

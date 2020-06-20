@@ -50,7 +50,6 @@ public:
     struct Version {
         int major = 0;
         int minor = 0;
-        int patch = 0;
     };
     struct Module {
         std::string name;
