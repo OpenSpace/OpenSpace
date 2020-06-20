@@ -189,24 +189,38 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] Profile::Version parseVersion(const std::string& line, int lineNumber) {
+    [[ nodiscard ]] Profile::Version parseVersion(const std::string& line, int lineNumber)
+    {
         std::vector<std::string> parts = ghoul::tokenizeString(line, '.');
-        if (parts.empty() || parts.size() > 3) {
+        if (parts.size() > 3) {
             throw ProfileParsingError(
                 lineNumber,
                 fmt::format("Expected 1-3 version components, got {}", parts.size())
             );
         }
 
-        Profile::Version version;
-        version.major = std::stoi(parts[0]);
-        if (parts.size() > 1) {
-            version.minor = std::stoi(parts[1]);
+        try {
+            Profile::Version version;
+            if (parts.empty()) {
+                version.major = std::stoi(line);
+            }
+            else {
+                version.major = std::stoi(parts[0]);
+            }
+            if (parts.size() > 1) {
+                version.minor = std::stoi(parts[1]);
+            }
+            if (parts.size() > 2) {
+                version.patch = std::stoi(parts[2]);
+            }
+            return version;
         }
-        if (parts.size() > 2) {
-            version.patch = std::stoi(parts[2]);
+        catch (const std::invalid_argument&) {
+            throw ProfileParsingError(
+                lineNumber,
+                "Error parsing Version. Version number is not a number"
+            );
         }
-        return version;
     }
 
     [[ nodiscard ]] Profile::Module parseModule(const std::string& line, int lineNumber) {
@@ -271,7 +285,7 @@ namespace {
                 lineNumber,
                 fmt::format(
                     "Expected property set type 'setPropertyValue' or "
-                    "'setPropertyValueSingle', got {}",
+                    "'setPropertyValueSingle', got '{}'",
                     type
                 )
             );
@@ -337,9 +351,6 @@ namespace {
 
     [[ nodiscard ]] Profile::CameraType parseCamera(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.empty()) {
-            throw ProfileParsingError(lineNumber, "No values specified for Camera location");
-        }
         Profile::CameraType camera = [&](const std::string& type) ->
             std::variant<std::monostate, Profile::CameraNavState, Profile::CameraGoToGeo>
         {
@@ -405,13 +416,9 @@ void Profile::saveCurrentSettingsToProfile() {
     //
     // Update properties
     //
-    //std::vector<SceneGraphNode*> nodes =
-    //    global::renderEngine.scene()->allSceneGraphNodes();
     std::vector<properties::Property*> changedProps;
 
-    //for (SceneGraphNode* n : nodes) {
     checkForChangedProps(changedProps, &global::rootPropertyOwner);
-    //}
     std::vector<std::string> formattedLines;
 
     for (properties::Property* prop : changedProps) {
@@ -645,6 +652,8 @@ std::string Profile::serialize() const {
 Profile::Profile(const std::vector<std::string>& content) {
     Section currentSection = Section::None;
     bool foundVersion = false;
+    bool foundTime = false;
+    bool foundCamera = false;
 
     for (int lineNum = 1; lineNum <= static_cast<int>(content.size()); ++lineNum) {
         std::string line = content[lineNum - 1];
@@ -656,8 +665,24 @@ Profile::Profile(const std::vector<std::string>& content) {
         switch (currentSection) {
             case Section::None:
                 currentSection = parseSection(line, lineNum);
+
+                if (!foundVersion && currentSection != Section::Version) {
+                    throw ProfileParsingError(
+                        lineNum,
+                        fmt::format(
+                            "First header in the file must be Version, but got {}", line
+                        )
+                    );
+                }
                 break;
             case Section::Version:
+                if (foundVersion) {
+                    throw ProfileParsingError(
+                        lineNum,
+                        "Version section can only appear once per profile"
+                    );
+                }
+
                 version = parseVersion(line, lineNum);
                 foundVersion = true;
                 break;
@@ -686,10 +711,26 @@ Profile::Profile(const std::vector<std::string>& content) {
                 break;
             }
             case Section::Time:
+                if (foundTime) {
+                    throw ProfileParsingError(
+                        lineNum,
+                        "Time section can only appear once per profile"
+                    );
+                }
+
                 time = parseTime(line, lineNum);
+                foundTime = true;
                 break;
             case Section::Camera:
+                if (foundCamera) {
+                    throw ProfileParsingError(
+                        lineNum,
+                        "Camera section can only appear once per profile"
+                    );
+                }
+
                 camera = parseCamera(line, lineNum);
+                foundCamera = true;
                 break;
             case Section::MarkNodes:
             {

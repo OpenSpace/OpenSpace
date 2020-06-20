@@ -45,12 +45,17 @@
 
 #include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace openspace;
 
 namespace {
     Profile loadProfile(const std::string& filename) {
+        if (!std::filesystem::exists(absPath(filename))) {
+            throw std::runtime_error("Could not find file)");
+        }
+
         std::ifstream f(absPath(filename));
 
         std::vector<std::string> lines;
@@ -72,6 +77,9 @@ namespace {
     }
 } // namespace
 
+//
+// Minimal
+//
 TEST_CASE("Minimal", "[profile]") {
     constexpr const char* TestFile = "${TESTDIR}/profile/minimal.profile";
     Profile p = loadProfile(TestFile);
@@ -79,6 +87,39 @@ TEST_CASE("Minimal", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
+    REQUIRE(serialized == contents);
+}
+
+//
+// Basic functionality
+//
+TEST_CASE("Basic Version One Component", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/basic_version_one_component.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    constexpr const char* contents = "#Version\n100.0.0\n";
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Version Two Components", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/basic_version_two_components.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    constexpr const char* contents = "#Version\n100.200.0\n";
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Basic Version Three Components", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/basic_version_three_components.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    constexpr const char* contents = "#Version\n100.200.300\n";
     REQUIRE(serialized == contents);
 }
 
@@ -183,308 +224,257 @@ TEST_CASE("Basic Mark Nodes", "[profile]") {
     REQUIRE(serialized == contents);
 }
 
-//namespace {
-//    int passTest(lua_State* state) {
-//        bool* test = reinterpret_cast<bool*>(lua_touserdata(state, lua_upvalueindex(1)));
-//        *test = true;
-//        return 0;
-//    }
-//} // namespace
 //
-//class Profile2 : public Profile {
-//public:
-//    Profile2(AssetLoader& refAssetLoader) : _assLoader(refAssetLoader) {}
-//    std::string currentTimeUTC() const override {
-//        return "2020-02-29T01:23:45.00";
-//    }
-//    interaction::NavigationHandler::NavigationState currentCameraState() const override {
-//        interaction::NavigationHandler::NavigationState n;
-//        n.anchor = "Earth";
-//        n.aim = "Sun";
-//        n.referenceFrame = "root";
-//        n.position = {-1.0, -2.0, -3.0};
-//        n.up = {0.0, 0.0, 1.0};
-//        n.pitch = 0.0;
-//        n.yaw = 0.0;
-//        return n;
-//    }
-//    void addPropertiesMarkedAsChanged(std::string formattedLine) {
-//        _scenegraphProps.push_back(formattedLine);
-//    }
-//    std::vector<std::string> changedPropertiesFormatted() override {
-//        std::vector<std::string> formattedLines;
-//        for (std::string s : _scenegraphProps) {
-//            formattedLines.push_back(s);
-//        }
-//        return formattedLines;
-//    }
-//    bool usingProfile() const override {
-//        return true;
-//    }
-//    std::string initialProfile() const override {
-//        return _initProfile;
-//    }
-//    void setInitialProfile(std::string file) {
-//        _initProfile = file;
-//    }
-//    std::vector<Profile::AssetEvent> assetEvents() const override {
-//        return _assLoader.assetEvents();
-//    }
-//    void setProfileBaseDirectory(std::string dir) {
-//        _profileBaseDirectory = dir;
-//    }
-//private:
-//    std::vector<std::string> _scenegraphProps;
-//    std::string _initProfile;
-//    AssetLoader& _assLoader;
-//};
+// Integration
 //
-//static void addLineHeaderForFailureMessage(std::string& s, size_t lineNumber) {
-//    s = "@line " + std::to_string(lineNumber) + ": '" + s + "'";
-//}
+TEST_CASE("Integration Full Test", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/integration_full_test.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
+TEST_CASE("Integration Full Test Permutation 1", "[profile]") {
+    constexpr const char* TestFileOriginal =
+        "${TESTDIR}/profile/integration_full_test_permutation_base.profile";
+    constexpr const char* TestFilePermutation =
+        "${TESTDIR}/profile/integration_full_test_permutation_1.profile";
+    Profile original = loadProfile(TestFileOriginal);
+    Profile permutation = loadProfile(TestFilePermutation);
+
+    std::string originalSerialized = original.serialize();
+    std::string permutationSerialized = permutation.serialize();
+    REQUIRE(originalSerialized == permutationSerialized);
+}
+
 //
-//TEST_CASE("profile: Convert profileFile to asset", "[profile]") {
-//    testProfileFormat test = buildTestProfile1();
-//    std::string testFull_string = stringFromTestProfileFormat(test);
-//    std::string testFilePath = absPath("${TEMPORARY}/test-profile-convert.profile");
-//    {
-//        std::ofstream testFile(testFilePath);
-//        testFile << testFull_string;
-//    }
+// Adding assets
 //
-//    ProfileFile pf(testFilePath);
-//    Profile p;
-//    REQUIRE_NOTHROW(
-//        p.convertToScene(pf)
-//    );
-//}
+
+
 //
-//TEST_CASE("profile: Verify conversion to scene", "[profile]") {
-//    std::istringstream iss(newHorizonsProfileInput);
-//    ProfileFile pf(newHorizonsProfileInput);
-//    Profile p;
-//    std::string result;
-//    REQUIRE_NOTHROW(
-//        result = p.convertToScene(pf)
-//    );
-//    
-//    if (result != newHorizonsExpectedSceneOutput) {
-//        std::string testing, comparing;
-//        StringPerLineReader sr_result(result);
-//        StringPerLineReader sr_standard(newHorizonsExpectedSceneOutput);
+// Error states
 //
-//        size_t lineN = 1;
-//        while (sr_result.getNextLine(testing)) {
-//            sr_standard.getNextLine(comparing);
-//            addLineHeaderForFailureMessage(testing, lineN);
-//            addLineHeaderForFailureMessage(comparing, lineN);
-//            REQUIRE(testing == comparing);
-//            lineN++;
-//        }
-//        //If this fails there are extra lines in the comparison string that weren't in result
-//        REQUIRE(sr_standard.getNextLine(comparing) == false);
-//    }
-//    //REQUIRE(result == newHorizonsExpectedSceneOutput);
-//}
-//
-//TEST_CASE("profile: Detect new properties", "[profile]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    AssetLoader assetLoader(
-//        state,
-//        &syncWatcher,
-//        FileSys.absolutePath("${TESTDIR}/profile/")
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    Profile2 p(assetLoader);
-//    p.setProfileBaseDirectory("${TESTDIR}/profile");
-//    p.setInitialProfile("test2");
-//    p.addPropertiesMarkedAsChanged("initialized 1st\t123");
-//    p.addPropertiesMarkedAsChanged("initialized 2nd\t3.14159");
-//    p.addPropertiesMarkedAsChanged("initialized 3rd\ttested.");
-//    p.addPropertiesMarkedAsChanged("initialized fourth\tfalse.");
-//    std::string output = p.saveCurrentSettingsToProfile_string();
-//    REQUIRE(output == detectChangedPropsResult_1);
-//}
-//
-//TEST_CASE("profile: Detect new added assets", "[profile]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    AssetLoader assetLoader(
-//        state,
-//        &syncWatcher,
-//        FileSys.absolutePath("${TESTDIR}/profile/")
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    std::shared_ptr<openspace::Asset> asset = assetLoader.add("initialization");
-//    asset->initialize();
-//    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test2");
-//    asset2->initialize();
-//    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("test3");
-//    asset3->initialize();
-//
-//    Profile2 p(assetLoader);
-//    p.setProfileBaseDirectory("${TESTDIR}/profile");
-//    p.setInitialProfile("test2");
-//    std::string output = p.saveCurrentSettingsToProfile_string();
-//    REQUIRE(output == detectChangedAssetsResult_1);
-//}
-//
-//TEST_CASE("profile: Detect new added assets after reset", "[profile]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    AssetLoader assetLoader(
-//        state,
-//        &syncWatcher,
-//        FileSys.absolutePath("${TESTDIR}/profile/")
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    std::shared_ptr<openspace::Asset> asset = assetLoader.add("initialization");
-//    asset->initialize();
-//    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test2");
-//    asset2->initialize();
-//    assetLoader.resetAssetEvents();
-//    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("test3");
-//    asset3->initialize();
-//    std::shared_ptr<openspace::Asset> asset4 = assetLoader.add("test4");
-//    asset4->initialize();
-//
-//    Profile2 p(assetLoader);
-//    p.setProfileBaseDirectory("${TESTDIR}/profile");
-//    p.setInitialProfile("test2");
-//    std::string output = p.saveCurrentSettingsToProfile_string();
-//    REQUIRE(output == detectChangedAssetsResult_2);
-//}
-//
-//TEST_CASE("profile: Detect repeat added assets from new", "[profile]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    AssetLoader assetLoader(
-//        state,
-//        &syncWatcher,
-//        FileSys.absolutePath("${TESTDIR}/profile/")
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
-//    asset->initialize();
-//    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
-//    asset2->initialize();
-//    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("test2");
-//    asset3->initialize();
-//
-//    Profile2 p(assetLoader);
-//    p.setProfileBaseDirectory("${TESTDIR}/profile");
-//    p.setInitialProfile("test2");
-//    std::string output = p.saveCurrentSettingsToProfile_string();
-//    REQUIRE(output == detectChangedAssetsResult_3);
-//}
-//
-//TEST_CASE("profile: Detect repeat added assets from base", "[profile]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    AssetLoader assetLoader(
-//        state,
-//        &syncWatcher,
-//        FileSys.absolutePath("${TESTDIR}/profile/")
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
-//    asset->initialize();
-//    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
-//    asset2->initialize();
-//    std::shared_ptr<openspace::Asset> asset3 = assetLoader.add("scene/solarsystem/planets/earth/earth");
-//    asset3->initialize();
-//
-//    Profile2 p(assetLoader);
-//    p.setProfileBaseDirectory("${TESTDIR}/profile");
-//    p.setInitialProfile("test2");
-//    std::string output = p.saveCurrentSettingsToProfile_string();
-//    REQUIRE(output == detectChangedAssetsResult_4);
-//}
-//
-//TEST_CASE("profile: Detect removed assets not already loaded", "[profile]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    AssetLoader assetLoader(
-//        state,
-//        &syncWatcher,
-//        FileSys.absolutePath("${TESTDIR}/profile/")
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
-//    asset->initialize();
-//    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
-//    asset2->initialize();
-//    assetLoader.remove("test5");
-//
-//    Profile2 p(assetLoader);
-//    p.setProfileBaseDirectory("${TESTDIR}/profile");
-//    p.setInitialProfile("test2");
-//    std::string output = p.saveCurrentSettingsToProfile_string();
-//    REQUIRE(output == detectChangedAssetsResult_5);
-//}
-//
-//TEST_CASE("profile: Detect removed assets from already loaded", "[profile]") {
-//    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-//    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
-//    openspace::SynchronizationWatcher syncWatcher;
-//    AssetLoader assetLoader(
-//        state,
-//        &syncWatcher,
-//        FileSys.absolutePath("${TESTDIR}/profile/")
-//    );
-//
-//    bool passed;
-//    lua_pushlightuserdata(*state, &passed);
-//    lua_pushcclosure(*state, &passTest, 1);
-//    lua_setglobal(*state, "passTest");
-//
-//    std::shared_ptr<openspace::Asset> asset = assetLoader.add("test2");
-//    asset->initialize();
-//    std::shared_ptr<openspace::Asset> asset2 = assetLoader.add("test4");
-//    asset2->initialize();
-//    assetLoader.remove("scene/solarsystem/planets/earth/earth");
-//    assetLoader.remove("scene/solarsystem/planets/earth/satellites/satellites");
-//
-//    Profile2 p(assetLoader);
-//    p.setProfileBaseDirectory("${TESTDIR}/profile");
-//    p.setInitialProfile("test2");
-//    std::string output = p.saveCurrentSettingsToProfile_string();
-//    REQUIRE(output == detectChangedAssetsResult_6);
-//}
+TEST_CASE("Error Unrecognized Header", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_unrecognized_header.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Invalid section header") &&
+        Catch::Matchers::Contains("#Azzet")
+    );
+}
+
+TEST_CASE("Error version not first header", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_version_not_first.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("First header in the file must be Version") &&
+        Catch::Matchers::Contains("#Asset")
+    );
+}
+
+TEST_CASE("Error two version sections", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_two_version_sections.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Version section can only appear once per profile")
+    );
+}
+
+TEST_CASE("Error two camera sections", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_two_camera_sections.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Camera section can only appear once per profile")
+    );
+}
+
+TEST_CASE("Error two time sections", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_two_time_sections.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Time section can only appear once per profile")
+    );
+}
+
+TEST_CASE("Error version malformed component", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_version_malformed_component.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Error parsing Version. Version number is not a number")
+    );
+}
+
+TEST_CASE("Error version too many components", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_version_too_many_components.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 1-3 version components, got 4")
+    );
+}
+
+TEST_CASE("Error module too few parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_module_too_few_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 3 fields in a Module entry, got 1")
+    );
+}
+
+TEST_CASE("Error module too many parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_module_too_many_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 3 fields in a Module entry, got 4")
+    );
+}
+
+TEST_CASE("Error profile too few parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_property_too_few_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 3 fields in Property entry, got 1")
+    );
+}
+
+TEST_CASE("Error profile too many parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_property_too_many_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 3 fields in Property entry, got 4")
+    );
+}
+
+TEST_CASE("Error profile wrong parameter type 'type'", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_property_wrong_parameter_value_type.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains(
+            "Expected property set type 'setPropertyValue' or "
+            "'setPropertyValueSingle', got 'unknown-set-property-command'"
+        )
+    );
+}
+
+TEST_CASE("Error keybinding too few parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_keybinding_too_few_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 6 fields in Keybinding entry, got 1")
+    );
+}
+
+TEST_CASE("Error keybinding too many parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_keybinding_too_many_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 6 fields in Keybinding entry, got 7")
+    );
+}
+
+TEST_CASE("Error keybinding wrong parameter type 'local'", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_keybinding_wrong_parameter_type_local.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 'false' or 'true' for the local path, got ER")
+    );
+}
+
+TEST_CASE("Error time too few parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_time_too_few_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 2 fields in Time entry, got 1")
+    );
+}
+
+TEST_CASE("Error time too many parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_time_too_many_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 2 fields in Time entry, got 3")
+    );
+}
+
+TEST_CASE("Error time wrong parameter type 'type'", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_time_wrong_parameter_value_type.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains(
+            "Expected 'absolute' or 'relative' for the type, got ER"
+        )
+    );
+}
+
+TEST_CASE("Error camera navigation state too few parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_camera_navstate_too_few_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 8 fields in the Camera entry, got 1")
+    );
+}
+
+TEST_CASE("Error camera navigation state too many parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_camera_navstate_too_many_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 8 fields in the Camera entry, got 9")
+    );
+}
+
+TEST_CASE("Error camera goToGeo too few parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_camera_gotogeo_too_few_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 5 fields in the Camera entry, got 1")
+    );
+}
+
+TEST_CASE("Error camera goToGeo too many parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_camera_gotogeo_too_many_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 5 fields in the Camera entry, got 6")
+    );
+}
+
+TEST_CASE("Error camera wrong parameter value 'type'", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_camera_wrong_parameter_value_type.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains(
+            "Expected 'setNavigationState' or 'goToGeo' for the type, got ER"
+        )
+    );
+}
+
+
+
+
+
