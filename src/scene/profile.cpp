@@ -24,31 +24,16 @@
 
 #include <openspace/scene/profile.h>
 
-#include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicensewriter.h>
-#include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
+#include <ghoul/fmt.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <string>
-#include <stack>
-#include <optional>
+
+#include <openspace/util/timemanager.h>
+#include <openspace/interaction/navigationhandler.h>
 
 #include "profile_lua.inl"
 
@@ -56,8 +41,6 @@ namespace openspace {
 
 namespace {
     constexpr const char* _loggerCat = "Profile";
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyParent = "Parent";
     
     constexpr const char* headerVersion = "#Version";
     constexpr const char* headerModule = "#Module";
@@ -84,49 +67,6 @@ namespace {
             )
         {}
     };
-
-    const std::map<Profile::AssetEventType, std::string> AssetEventTypeString{
-        { Profile::AssetEventType::Add, "add" },
-        { Profile::AssetEventType::Require, "required" },
-        { Profile::AssetEventType::Request, "requested" },
-        { Profile::AssetEventType::Remove,  "removed" },
-        { Profile::AssetEventType::Ignore,  "ignored" }
-    };
-
-    void handleChangedAdd(std::vector<Profile::AssetEvent>& base, unsigned int changedIdx,
-                          std::vector<Profile::AssetEvent>& changed, std::string asset)
-    {
-        // @TODO:  Replace the next for loop with std::any_of or std::all_of
-
-        bool addThisAsset = true;
-        // Check base profile to see if has already been added there
-        for (const Profile::AssetEvent& b : base) {
-            if (b.name == asset) {
-                if (b.eventType == Profile::AssetEventType::Require
-                    || b.eventType == Profile::AssetEventType::Request)
-                {
-                    addThisAsset = false;
-                    break;
-                }
-            }
-        }
-
-        // Check changed asset commands only prior to this one to see if already added
-        for (unsigned int i = 0; i < changedIdx; i++) {
-            if (changed[i].name == asset) {
-                addThisAsset = false;
-                break;
-            }
-        }
-
-        if (addThisAsset) {
-            Profile::AssetEvent ae = {
-                std::move(asset),
-                Profile::AssetEventType::Request
-            };
-            base.push_back(ae);
-        }
-    }
 
     std::string recurseForFullName(properties::PropertyOwner* po) {
         if (po == nullptr) {

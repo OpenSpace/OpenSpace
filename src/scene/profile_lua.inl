@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/configuration.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ctime>
 #include <filesystem>
 

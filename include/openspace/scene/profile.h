@@ -25,23 +25,13 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/exception.h>
-#include <mutex>
 #include <optional>
-#include <set>
-#include <unordered_map>
+#include <string>
 #include <variant>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
 
-namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
 class Profile {
@@ -114,19 +104,6 @@ public:
     };
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
 
-    enum class AssetEventType {
-        Add,
-        Require,
-        Request,
-        Remove,
-        Ignore
-    };
-
-    struct AssetEvent {
-        std::string name;
-        AssetEventType eventType;
-    };
-
     Profile() = default;
     Profile(const std::vector<std::string>& content);
     std::string serialize() const;
@@ -158,6 +135,7 @@ public:
 
 private:
     static constexpr const Version CurrentVersion = Version { 1, 0 };
+
     Version version = CurrentVersion;
     std::vector<Module> modules;
     std::vector<Asset> assets;
