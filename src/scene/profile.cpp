@@ -349,7 +349,7 @@ namespace {
     [[ nodiscard ]] Profile::CameraType parseCamera(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         Profile::CameraType camera = [&](const std::string& type) ->
-            std::variant<std::monostate, Profile::CameraNavState, Profile::CameraGoToGeo>
+            std::variant<Profile::CameraNavState, Profile::CameraGoToGeo>
         {
             if (type == Profile::CameraNavState::Type) {
                 if (fields.size() != 8) {
@@ -597,13 +597,10 @@ std::string Profile::serialize() const {
         }
     }
 
-    if (!std::holds_alternative<std::monostate>(camera)) {
+    if (camera.has_value()) {
         output += fmt::format("\n{}\n", headerCamera);
         output += std::visit(
-            overloaded{
-                [](const std::monostate&) {
-                    return std::string();
-                },
+            overloaded {
                 [](const CameraNavState& camera) {
                     return fmt::format(
                         "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
@@ -630,7 +627,7 @@ std::string Profile::serialize() const {
                     }
                 }
             },
-            camera
+            *camera
         );
     }
 
@@ -832,51 +829,50 @@ std::string Profile::convertToScene() const {
     }
 
     // Camera
-    output += std::visit(
-        overloaded{
-            [](const std::monostate&) {
-                return std::string();
+    if (camera.has_value()) {
+        output += std::visit(
+            overloaded {
+                [](const CameraNavState& camera) {
+                    std::string result;
+                    result += "openspace.navigation.setNavigationState({";
+                    result += fmt::format("Anchor = {}, ", camera.anchor);
+                    if (!camera.aim.empty()) {
+                        result += fmt::format("Aim = {}, ", camera.aim);
+                    }
+                    if (!camera.referenceFrame.empty()) {
+                        result += fmt::format("ReferenceFrame = {}, ", camera.referenceFrame);
+                    }
+                    result += fmt::format("Position = {{ {} }}, ", camera.position);
+                    if (!camera.up.empty()) {
+                        result += fmt::format("Up = {{ {} }}, ", camera.up);
+                    }
+                    if (!camera.yaw.empty()) {
+                        result += fmt::format("Yaw = {}, ", camera.yaw);
+                    }
+                    if (!camera.pitch.empty()) {
+                        result += fmt::format("Pitch = {} ", camera.pitch);
+                    }
+                    result += "})\n";
+                    return result;
+                },
+                [](const CameraGoToGeo& camera) {
+                    if (camera.altitude.has_value()) {
+                        return fmt::format(
+                            "openspace.globebrowsing.goToGeo({}, {}, {}, {});\n",
+                            camera.anchor, camera.latitude, camera.longitude, *camera.altitude
+                        );
+                    }
+                    else {
+                        return fmt::format(
+                            "openspace.globebrowsing.goToGeo({}, {}, {});\n",
+                            camera.anchor, camera.latitude, camera.longitude
+                        );
+                    }
+                }
             },
-            [](const CameraNavState& camera) {
-                std::string result;
-                result += "openspace.navigation.setNavigationState({";
-                result += fmt::format("Anchor = {}, ", camera.anchor);
-                if (!camera.aim.empty()) {
-                    result += fmt::format("Aim = {}, ", camera.aim);
-                }
-                if (!camera.referenceFrame.empty()) {
-                    result += fmt::format("ReferenceFrame = {}, ", camera.referenceFrame);
-                }
-                result += fmt::format("Position = {{ {} }}, ", camera.position);
-                if (!camera.up.empty()) {
-                    result += fmt::format("Up = {{ {} }}, ", camera.up);
-                }
-                if (!camera.yaw.empty()) {
-                    result += fmt::format("Yaw = {}, ", camera.yaw);
-                }
-                if (!camera.pitch.empty()) {
-                    result += fmt::format("Pitch = {} ", camera.pitch);
-                }
-                result += "})\n";
-                return result;
-            },
-            [](const CameraGoToGeo& camera) {
-                if (camera.altitude.has_value()) {
-                    return fmt::format(
-                        "openspace.globebrowsing.goToGeo({}, {}, {}, {});\n",
-                        camera.anchor, camera.latitude, camera.longitude, *camera.altitude
-                    );
-                }
-                else {
-                    return fmt::format(
-                        "openspace.globebrowsing.goToGeo({}, {}, {});\n",
-                        camera.anchor, camera.latitude, camera.longitude
-                    );
-                }
-            }
-        },
-        camera
-    );
+            *camera
+        );
+    }
     output += "end)\n";
 
     return output;

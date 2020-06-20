@@ -112,7 +112,7 @@ public:
         double longitude;
         std::optional<double> altitude;
     };
-    using CameraType = std::variant<std::monostate, CameraNavState, CameraGoToGeo>;
+    using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
 
     enum class AssetEventType {
         Add,
@@ -164,7 +164,7 @@ private:
     std::vector<Property> properties;
     std::vector<Keybinding> keybindings;
     std::optional<Time> time;
-    CameraType camera;
+    std::optional<CameraType> camera;
     std::vector<std::string> markNodes;
 
     bool _ignoreUpdates = false;
