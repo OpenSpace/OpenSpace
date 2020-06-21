@@ -199,6 +199,17 @@ TEST_CASE("Basic Mark Nodes", "[profile]") {
     REQUIRE(serialized == contents);
 }
 
+TEST_CASE("Basic Additional Scripts", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/basic_additional_scripts.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
 //
 // Integration
 //

@@ -46,6 +46,7 @@ namespace {
     constexpr const char* headerTime = "#Time";
     constexpr const char* headerCamera = "#Camera";
     constexpr const char* headerMarkNodes = "#MarkNodes";
+    constexpr const char* headerAdditionalScripts = "#AdditionalScripts";
 
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -89,7 +90,8 @@ namespace {
         Keybinding,
         Time,
         Camera,
-        MarkNodes
+        MarkNodes,
+        AdditionalScripts
     };
 
     //struct ParsingContext {
@@ -106,6 +108,7 @@ namespace {
         if (line == headerTime) { return Section::Time; }
         if (line == headerCamera) { return Section::Camera; }
         if (line == headerMarkNodes) { return Section::MarkNodes; }
+        if (line == headerAdditionalScripts) { return Section::AdditionalScripts; }
 
         throw ProfileParsingError(
             lineNumber,
@@ -399,6 +402,10 @@ namespace {
     [[ nodiscard ]] std::string parseMarkNodes(const std::string& line, int) {
         return line;
     }
+
+    [[ nodiscard ]] std::string parseAdditionalScript(const std::string& line, int) {
+        return line;
+    }
 } // namespace
 
 void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
@@ -638,6 +645,13 @@ std::string Profile::serialize() const {
         }
     }
 
+    if (!additionalScripts.empty()) {
+        output += fmt::format("\n{}\n", headerAdditionalScripts);
+        for (const std::string& s : additionalScripts) {
+            output += fmt::format("{}\n", s);
+        }
+    }
+
     return output;
 }
 
@@ -735,6 +749,12 @@ Profile::Profile(const std::vector<std::string>& content) {
             {
                 std::string m = parseMarkNodes(line, lineNum);
                 markNodes.push_back(std::move(m));
+                break;
+            }
+            case Section::AdditionalScripts:
+            {
+                std::string a = parseAdditionalScript(line, lineNum);
+                additionalScripts.push_back(std::move(a));
                 break;
             }
             default:
@@ -886,6 +906,11 @@ std::string Profile::convertToScene() const {
             *camera
         );
     }
+
+    for (const std::string& a : additionalScripts) {
+        output += fmt::format("{}\n", a);
+    }
+
     output += "end)\n";
 
     return output;

@@ -22,6 +22,11 @@ setPropertyValueSingle	property_name_4	property_value_5
 setPropertyValueSingle	property_name_4	property_value_5
 setPropertyValueSingle	property_name_4	property_value_5
 
+#AdditionalScripts
+script-1
+script-2
+script-3
+
 #Asset
 scene/solarsystem/planets/earth/earth	require	
 scene/solarsystem/planets/earth/satellites/satellites	require	

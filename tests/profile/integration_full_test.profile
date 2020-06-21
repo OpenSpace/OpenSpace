@@ -38,3 +38,8 @@ Earth
 Mars
 Moon
 Sun
+
+#AdditionalScripts
+script-1
+script-2
+script-3

@@ -149,6 +149,7 @@ private:
     std::optional<Time> time;
     std::optional<CameraType> camera;
     std::vector<std::string> markNodes;
+    std::vector<std::string> additionalScripts;
 
     bool _ignoreUpdates = false;
 };
