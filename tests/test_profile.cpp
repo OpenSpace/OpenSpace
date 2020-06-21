@@ -23,26 +23,11 @@
  ****************************************************************************************/
 
 #include "catch2/catch.hpp"
-//#include "test_common.h"
-//#include <openspace/engine/configuration.h>
-//#include <openspace/engine/globals.h>
-//#include <openspace/engine/openspaceengine.h>
-//
-//#include <openspace/scene/assetloader.h>
-//#include <openspace/scene/asset.h>
-//#include "openspace/scene/profile.h"
-//#include <openspace/scene/scene.h>
-//#include <openspace/scene/scenegraphnode.h>
-//#include <openspace/scene/sceneinitializer.h>
-//#include <openspace/scripting/scriptengine.h>
-//#include <ghoul/misc/exception.h>
-//#include <ghoul/lua/lua_helper.h>
-//
-//#include <iostream>
-//#include <iomanip>
-//#include <memory>
 
-
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
@@ -393,7 +378,6 @@ TEST_CASE("Removing non-exisiting asset", "[profile]") {
     );
 }
 
-
 TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
     std::vector<std::string> source = {
         "#Version",
@@ -409,6 +393,55 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
     REQUIRE_NOTHROW(p.removeAsset("unknown-asset"));
 }
 
+//
+// Save settings to profile
+//
+TEST_CASE("Save settings to profile", "[profile]") {
+    properties::PropertyOwner owner({ "base" });
+    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    owner.addProperty(p1);
+    properties::StringProperty p2(properties::Property::PropertyInfo("p2", "c", "d"));
+    owner.addProperty(p2);
+
+    p1 = 2.f;
+    p2 = "test-string";
+
+    interaction::NavigationHandler::NavigationState state;
+    state.anchor = "anchor";
+    state.aim = "aim";
+    state.referenceFrame = "refFrame";
+    state.position = glm::dvec3(1.0, 2.0, 3.0);
+    state.up = glm::dvec3(4.0, 5.0, 6.0);
+    state.yaw = -1.0;
+    state.pitch = -2.0;
+
+    std::vector<std::string> baseSource = {
+        "#Version",
+        "1.0"
+    };
+    Profile p(baseSource);
+    p.saveCurrentSettingsToProfile(owner, "current-time", state);
+    std::string serialized = p.serialize();
+
+    std::vector<std::string> targetSource = baseSource;
+    targetSource.push_back("");
+    targetSource.push_back("#Property");
+    targetSource.push_back("setPropertyValueSingle\tbase.p1\t2.000000");
+    targetSource.push_back("setPropertyValueSingle\tbase.p2\t\"test-string\"");
+    targetSource.push_back("");
+    targetSource.push_back("#Camera");
+    targetSource.push_back(
+        "setNavigationState\tanchor\taim\trefFrame\t1.0, 2.0, 3.0\t4.0, 5.0, 6.0\t"
+        "-1.0\t-2.0"
+    );
+    targetSource.push_back("");
+    targetSource.push_back("#Time");
+    targetSource.push_back("absolute\tcurrent-time");
+
+    std::string targetSerialized = Profile(targetSource).serialize();
+
+    REQUIRE(serialized == targetSerialized);
+}
 
 //
 // Error states
@@ -606,6 +639,78 @@ TEST_CASE("Error camera navigation state too many parameters", "[profile]") {
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("Expected 8 fields in the Camera entry, got 9")
+    );
+}
+
+TEST_CASE("Error camera navigation state too few parameters in position", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/"
+        "error_camera_navstate_wrong_parameter_too_few_components_position.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 3 fields for the camera's position, got 2")
+    );
+}
+
+TEST_CASE("Error camera navigation state too many parameters in position", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/"
+        "error_camera_navstate_wrong_parameter_too_many_components_position.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 3 fields for the camera's position, got 4")
+    );
+}
+
+TEST_CASE("Error camera navigation state wrong parameter type position", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/"
+        "error_camera_navstate_wrong_parameter_wrong_component_type_position.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Camera's position components must be numbers")
+    );
+}
+
+TEST_CASE("Error camera navigation state too few parameters in up vector", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/"
+        "error_camera_navstate_wrong_parameter_too_few_components_up.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains(
+            "Expected 0 or 3 fields for the camera's up vector, got 2"
+        )
+    );
+}
+
+TEST_CASE("Error camera navigation state wrong parameter type up vector", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/"
+        "error_camera_navstate_wrong_parameter_wrong_component_type_up.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Camera's up vector components must be numbers")
+    );
+}
+
+TEST_CASE("Error camera navigation state wrong parameter type up yaw", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/"
+        "error_camera_navstate_wrong_parameter_type_yaw.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Camera's yaw value must be a number")
+    );
+}
+
+TEST_CASE("Error camera navigation state wrong parameter type up pitch", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/"
+        "error_camera_navstate_wrong_parameter_type_pitch.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Camera's pitch value must be a number")
     );
 }
 

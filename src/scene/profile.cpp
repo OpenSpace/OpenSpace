@@ -289,10 +289,80 @@ namespace {
                 camera.anchor = fields[1];
                 camera.aim = fields[2];
                 camera.referenceFrame = fields[3];
-                camera.position = fields[4];
-                camera.up = fields[5];
-                camera.yaw = fields[6];
-                camera.pitch = fields[7];
+
+                std::vector<std::string> position = ghoul::tokenizeString(fields[4], ' ');
+                if (position.size() != 3) {
+                    throw ProfileParsingError(
+                        lineNumber,
+                        fmt::format(
+                            "Expected 3 fields for the camera's position, got {}",
+                            position.size()
+                        )
+                    );
+                }
+                try {
+                    camera.position = glm::dvec3(
+                        std::stod(position[0]),
+                        std::stod(position[1]),
+                        std::stod(position[2])
+                    );
+                }
+                catch (const std::invalid_argument&) {
+                    throw ProfileParsingError(
+                        lineNumber,
+                        "Camera's position components must be numbers"
+                    );
+                }
+
+                std::vector<std::string> up = ghoul::tokenizeString(fields[5], ' ');
+                if (up.size() != 0 && up.size() != 3) {
+                    throw ProfileParsingError(
+                        lineNumber,
+                        fmt::format(
+                            "Expected 0 or 3 fields for the camera's up vector, got {}",
+                            up.size()
+                        )
+                    );
+                }
+                if (up.size() == 3) {
+                    try {
+                        camera.up = glm::dvec3(
+                            std::stod(up[0]),
+                            std::stod(up[1]),
+                            std::stod(up[2])
+                        );
+                    }
+                    catch (const std::invalid_argument&) {
+                        throw ProfileParsingError(
+                            lineNumber,
+                            "Camera's up vector components must be numbers"
+                        );
+                    }
+                }
+
+                if (!fields[6].empty()) {
+                    try {
+                        camera.yaw = std::stod(fields[6]);
+                    }
+                    catch (const std::invalid_argument&) {
+                        throw ProfileParsingError(
+                            lineNumber,
+                            "Camera's yaw value must be a number"
+                        );
+                    }
+                }
+
+                if (!fields[7].empty()) {
+                    try {
+                        camera.pitch = std::stod(fields[7]);
+                    }
+                    catch (const std::invalid_argument&) {
+                        throw ProfileParsingError(
+                            lineNumber,
+                            "Camera's pitch value must be a number"
+                        );
+                    }
+                }
                 return camera;
             }
             if (type == Profile::CameraGoToGeo::Type) {
@@ -364,18 +434,10 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     c.anchor = navState.anchor;
     c.aim = navState.aim;
     c.referenceFrame = navState.referenceFrame;
-    c.position = fmt::format(
-        "{},{},{}",
-        navState.position.x, navState.position.y, navState.position.z
-    );
-    if (navState.up.has_value()) {
-        c.up = fmt::format(
-            "{},{},{}",
-            navState.up->x, navState.up->y, navState.up->z
-        );
-    }
-    c.yaw = std::to_string(navState.yaw);
-    c.pitch = std::to_string(navState.pitch);
+    c.position = navState.position;
+    c.up = navState.up;
+    c.yaw = navState.yaw;
+    c.pitch = navState.pitch;
     camera = std::move(c);
 }
 
@@ -524,11 +586,27 @@ std::string Profile::serialize() const {
         output += std::visit(
             overloaded {
                 [](const CameraNavState& camera) {
+                    std::string position = fmt::format(
+                        "{}, {}, {}",
+                        camera.position.x, camera.position.y, camera.position.z
+                    );
+                    std::string up = camera.up.has_value() ?
+                        fmt::format(
+                            "{}, {}, {}", camera.up->x, camera.up->y, camera.up->z
+                        ) :
+                        "";
+                    std::string yaw = camera.yaw.has_value() ?
+                        fmt::format("{}", *camera.yaw) :
+                        "";
+                    std::string pitch = camera.pitch.has_value() ?
+                        fmt::format("{}", *camera.pitch) :
+                        "";
+
                     return fmt::format(
                         "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
                         CameraNavState::Type,
-                        camera.anchor, camera.aim, camera.referenceFrame, camera.position,
-                        camera.up, camera.yaw, camera.pitch
+                        camera.anchor, camera.aim, camera.referenceFrame, position, up,
+                        yaw, pitch
                     );
                 },
                 [](const Profile::CameraGoToGeo& camera) {
@@ -771,15 +849,21 @@ std::string Profile::convertToScene() const {
                     if (!camera.referenceFrame.empty()) {
                         result += fmt::format("ReferenceFrame = {}, ", camera.referenceFrame);
                     }
-                    result += fmt::format("Position = {{ {} }}, ", camera.position);
-                    if (!camera.up.empty()) {
-                        result += fmt::format("Up = {{ {} }}, ", camera.up);
+                    result += fmt::format(
+                        "Position = {{ {}, {}, {} }}, ",
+                        camera.position.x, camera.position.y, camera.position.z
+                    );
+                    if (camera.up.has_value()) {
+                        result += fmt::format(
+                            "Up = {{ {}, {}, {} }}, ", 
+                            camera.up->x, camera.up->y, camera.up->z
+                        );
                     }
-                    if (!camera.yaw.empty()) {
-                        result += fmt::format("Yaw = {}, ", camera.yaw);
+                    if (camera.yaw.has_value()) {
+                        result += fmt::format("Yaw = {}, ", *camera.yaw);
                     }
-                    if (!camera.pitch.empty()) {
-                        result += fmt::format("Pitch = {} ", camera.pitch);
+                    if (camera.pitch.has_value()) {
+                        result += fmt::format("Pitch = {} ", *camera.pitch);
                     }
                     result += "})\n";
                     return result;

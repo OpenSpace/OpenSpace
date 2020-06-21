@@ -92,10 +92,10 @@ public:
         std::string anchor;
         std::string aim;
         std::string referenceFrame;
-        std::string position; // @TODO (abock, 2020-06-17) change to vec3
-        std::string up;// @TODO (abock, 2020-06-17) change to vec3
-        std::string yaw;
-        std::string pitch;
+        glm::dvec3 position;
+        std::optional<glm::dvec3> up;
+        std::optional<double> yaw;
+        std::optional<double> pitch;
     };
     struct CameraGoToGeo {
         static constexpr const char* Type = "goToGeo";
