@@ -597,6 +597,14 @@ TEST_CASE("Error keybinding too many parameters", "[profile]") {
     );
 }
 
+TEST_CASE("Error keybinding wrong parameter value 'key'", "[profile]") {
+    error_keybinding_wrong_parameter_value_key
+}
+
+TEST_CASE("Error keybinding wrong parameter value 'key, modifier'", "[profile]") {
+    error_keybinding_wrong_parameter_value_modifier
+}
+
 TEST_CASE("Error keybinding wrong parameter type 'local'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error_keybinding_wrong_parameter_type_local.profile";

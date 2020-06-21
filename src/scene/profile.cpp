@@ -228,7 +228,12 @@ namespace {
             );
         }
         Profile::Keybinding kb;
-        kb.key = fields[0];
+        try {
+            kb.key = stringToKey(fields[0]);
+        }
+        catch (const ghoul::RuntimeError& e) {
+            throw ProfileParsingError(lineNumber, e.what());
+        }
         kb.documentation = fields[1];
         kb.name = fields[2];
         kb.guiPath = fields[3];
@@ -566,10 +571,11 @@ std::string Profile::serialize() const {
     if (!keybindings.empty()) {
         output += fmt::format("\n{}\n", headerKeybinding);
         for (const Keybinding& k : keybindings) {
+            const std::string key = ghoul::to_string(k.key);
             const std::string local = k.isLocal ? "true" : "false";
             output += fmt::format(
                 "{}\t{}\t{}\t{}\t{}\t{}\n",
-                k.key, k.documentation, k.name, k.guiPath, local, k.script
+                key, k.documentation, k.name, k.guiPath, local, k.script
             );
         }
     }
@@ -801,12 +807,13 @@ std::string Profile::convertToScene() const {
     output += "asset.onInitialize(function()\n";
     // Keybindings
     for (const Keybinding& k : keybindings) {
-        const std::string name = k.name.empty() ? k.key : k.name;
+        const std::string key = ghoul::to_string(k.key);
+        const std::string name = k.name.empty() ? key : k.name;
         output += fmt::format(
             k.isLocal ?
             "openspace.bindKeyLocal(\"{}\", {}, [[{}]], [[{}]], [[{}]]);\n" :
             "openspace.bindKey(\"{}\", {}, [[{}]], [[{}]], [[{}]]);\n",
-            k.key, k.script, k.documentation, k.name.empty() ? k.key : k.name, k.guiPath
+            key, k.script, k.documentation, name, k.guiPath
         );
     }
 

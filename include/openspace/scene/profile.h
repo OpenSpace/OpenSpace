@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/util/keys.h>
 #include <optional>
 #include <string>
 #include <variant>
@@ -70,7 +71,7 @@ public:
         std::string value;
     };
     struct Keybinding {
-        std::string key; // @TODO (abock, 2020-06-16) change to key+action
+        KeyWithModifier key;
         std::string documentation;
         std::string name;
         std::string guiPath;
