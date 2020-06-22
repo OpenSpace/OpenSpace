@@ -58,7 +58,7 @@ local UranusLabel = {
     },
     Tag = { "solarsystem_labels" },
     GUI = {
-        Name = "Neptune Label",
+        Name = "Uranus Label",
         Path = "/Solar System/Planets/Uranus"
     }
 }

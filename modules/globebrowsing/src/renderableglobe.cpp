@@ -577,10 +577,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
+    //_debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
+    //_debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
+    //_debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
+    //_debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
