@@ -59,6 +59,11 @@ uniform float thresholdFlux;
 uniform float filterRadius;
 uniform float filterUpper;
 uniform int ScalingMode;
+uniform int NodeskipMethod;
+uniform int Nodeskip;
+uniform int Nodeskipdefault;
+uniform float NodeskipFluxThreshold;
+uniform float NodeskipRadiusThreshold;
 uniform float fluxColorAlpha;
 
 // Inputs
@@ -74,10 +79,19 @@ layout(location = 1) in float fluxValue;
 layout(location = 2)
 in float rValue;
 
+// The vertex index of every node. Location must correspond to 
+// _VA_INDEX in renderableStreamNodes.h
+layout(location = 3)
+in int nodeIndex;
+
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
 const int uniformColor     = 0;
 const int colorByFluxValue  = 1;
+
+const int uniformskip = 0;
+const int Fluxskip = 1;
+const int Radiusskip = 2;
 
 const int Fluxmode = 0;
 const int RFlux = 1;
@@ -121,11 +135,37 @@ bool isPartOfParticle(const double time, const int vertexId, const int particleS
     int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
     return modulusResult > 0 && modulusResult <= particleSize;
 }
+bool CheckvertexIndex(){
+    if(NodeskipMethod == uniformskip){
+        
+        if(mod(nodeIndex, Nodeskip) == 0){
+        return true;
+        }
+    }
+    else if(NodeskipMethod == Fluxskip){
+        
+        if(fluxValue > NodeskipFluxThreshold && mod(nodeIndex, Nodeskip) == 0){
+        return true;
+        }
+        if(fluxValue < NodeskipFluxThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
+        return true;
+        }
+    }
+    else if(NodeskipMethod == Radiusskip){
+        if(rValue < NodeskipRadiusThreshold && mod(nodeIndex, Nodeskip) == 0){
+        return true;
+        }
+        if(rValue > NodeskipRadiusThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
+        return true;
+        }
+    }
+    return false;
+}
 
 void main() {
 
     //vs_color = streamColor;
-
+    if(CheckvertexIndex()){
     if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
         if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
             if(colorMode == 0){
@@ -148,6 +188,10 @@ void main() {
         }
     else{
         vs_color = vec4(0);
+    }
+    }
+    else{
+    vs_color = vec4(0);
     }
 
     //if(rValue > thresholdFlux){

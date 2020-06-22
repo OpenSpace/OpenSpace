@@ -58,6 +58,7 @@ namespace {
     constexpr const GLuint VaPosition   = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaColor      = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaFiltering  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaIndex      = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
 
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
@@ -156,19 +157,34 @@ namespace {
        "This value specifies the threshold that will be changed with the flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
-        "filtering",
+        "filteringlower",
         "FilteringLower in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
-        "filtering2",
+        "filteringupper",
         "FilteringUpper in AU",
         "Use filtering to show nodes within a given range."
+    };
+    constexpr openspace::properties::Property::PropertyInfo AmountofNodesInfo = {
+        "AmountofNodes",
+        "Every nth node to render in",
+        "Show only every nth node"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DefaultNodeSkipInfo = {
+       "NodeSkipInfo",
+       "Every nth node to render default",
+       "Show only every nth node outside of skippingmethod"
     };
     constexpr openspace::properties::Property::PropertyInfo ScalingmethodInfo = {
           "Scaling flux",
           "Scale the flux value with colortable",
           "Use scaling to color nodes with a given method."
+    };
+    constexpr openspace::properties::Property::PropertyInfo NodeskipMethodInfo = {
+         "Skipping Nodes",
+         "How to select nodes to skip",
+         "Methods to select nodes to skip."
     };
     constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
         "colorTableRange",
@@ -184,6 +200,16 @@ namespace {
         "fluxColorAlpha",
         "Flux Color Alpha",
         "The value of alpha for the flux color mode"
+    };
+    constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
+        "Skipping Nodes by Flux",
+        "Select nodes to skip by flux",
+        "Skip nodes by Flux"
+    };
+    constexpr openspace::properties::Property::PropertyInfo RadiusNodeSkipThresholdInfo = {
+        "Skipping Nodes by Radius",
+        "Select nodes to skip by Radius",
+        "Skip nodes by Radius"
     };
     enum class SourceFileType : int {
         Json = 0,
@@ -245,6 +271,7 @@ namespace openspace {
         , _pColorGroup({ "Color" })
         , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
         , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
+        , _pNodeskipMethod(NodeskipMethodInfo, OptionProperty::DisplayType::Radio)
         , _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
         //, _pColorFluxMin(ColorFluxMinInfo)
         //, _pColorFluxMax(ColorFluxMaxInfo)
@@ -255,6 +282,7 @@ namespace openspace {
             glm::vec4(1.f))
         , _pStreamsEnabled(StreamsenabledInfo, true)
         , _pStreamGroup({ "Streams" })
+        , _pNodesamountGroup({ "NodeGroup" })
         , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         , _pColorTableRange(colorTableRangeInfo)
@@ -265,6 +293,10 @@ namespace openspace {
        // , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
         , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
         , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
+        , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
+        , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
+        , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -10, 10)
+        , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
 
         
     {
@@ -380,6 +412,7 @@ namespace openspace {
         glGenBuffers(1, &_vertexPositionBuffer);
         glGenBuffers(1, &_vertexColorBuffer);
         glGenBuffers(1, &_vertexFilteringBuffer);
+        glGenBuffers(1, &_vertexindexBuffer);
 
         // Probably not needed, seems to be needed for additive blending
         //setRenderBin(Renderable::RenderBin::Overlay);
@@ -416,7 +449,9 @@ namespace openspace {
             _lineStart.clear();
             _vertexRadius.clear();
             _vertexColor.clear();
+            _vertexIndex.clear();
             int counter = 0;
+            int NodeIndexCounter = 0;
 
             const size_t nPoints = 1;
             for (int i = 0; i < numberofStreams; ++i) {
@@ -431,6 +466,8 @@ namespace openspace {
                     break;
                 }
                 */
+             
+                NodeIndexCounter = 0;
 
                 for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                     lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
@@ -453,6 +490,8 @@ namespace openspace {
                     float rTimesFluxValue = fluxValue;
                     _vertexColor.push_back(rTimesFluxValue);
                     _vertexRadius.push_back(rValue);
+                    _vertexIndex.push_back(NodeIndexCounter);
+                    NodeIndexCounter++;
                     rValue = rValue * AuToMeter;
 
                     //if(thetaValue > 1.4 && thetaValue < 1.6){
@@ -481,13 +520,13 @@ namespace openspace {
 
                     
 
-                    int skipcounter = 0;
-                    int nodeskipn = 10;
+                  //  int skipcounter = 0;
+                  //  int nodeskipn = 10;
                     
-                    while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
-                        ++lineIter;
-                        ++skipcounter;
-                    }
+                  //  while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
+                  //      ++lineIter;
+                  //      ++skipcounter;
+                  //  }
                    // }
                 }
             }
@@ -498,6 +537,7 @@ namespace openspace {
             _statesPos.push_back(_vertexPositions);
             _statesColor.push_back(_vertexColor);
             _statesRadius.push_back(_vertexRadius);
+            _statesIndex.push_back(_vertexIndex);
             LDEBUG("_states size: " + std::to_string(_statesPos.size()));
         }
 
@@ -624,15 +664,23 @@ namespace openspace {
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pStreamsEnabled);
         addProperty(_pLineWidth);
-        addProperty(_pDomainZ);
-        addProperty(_pFiltering);
-        addProperty(_pFilteringUpper);
+        //addProperty(_pDomainZ);
+        
         // ----------------------------- Add Property Groups ----------------------------- //
         addPropertySubOwner(_pStreamGroup);
         addPropertySubOwner(_pColorGroup);
+        addPropertySubOwner(_pNodesamountGroup);
         // ------------------------- Add Properties to the groups ------------------------ //
         _pColorGroup.addProperty(_pColorMode);
         _pColorGroup.addProperty(_pScalingmethod);
+
+        _pNodesamountGroup.addProperty(_pNodeskipMethod);
+        _pNodesamountGroup.addProperty(_pAmountofNodes);
+        _pNodesamountGroup.addProperty(_pDefaultNodeSkip);
+        _pNodesamountGroup.addProperty(_pNodeSize);
+        _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
+        _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
+
         //_pColorGroup.addProperty(_pColorFlux);
         //_pColorGroup.addProperty(_pColorFluxMin);
         //_pColorGroup.addProperty(_pColorFluxMax);
@@ -640,8 +688,14 @@ namespace openspace {
         _pColorGroup.addProperty(_pColorTablePath);
         _pColorGroup.addProperty(_pStreamColor);
         _pColorGroup.addProperty(_pFluxColorAlpha);
-        _pStreamGroup.addProperty(_pNodeSize);
         _pStreamGroup.addProperty(_pThresholdFlux);
+
+
+       
+        _pStreamGroup.addProperty(_pFiltering);
+        _pStreamGroup.addProperty(_pFilteringUpper);
+        _pStreamGroup.addProperty(_pDomainZ);
+        
 
         // --------------------- Add Options to OptionProperties --------------------- //
         _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -653,6 +707,9 @@ namespace openspace {
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
         
+        _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Uniform), "Uniform");
+        _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Flux), "Flux");
+        _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Radius), "Radius");
         definePropertyCallbackFunctions();
 
         // Set defaults
@@ -672,6 +729,8 @@ namespace openspace {
 
         glDeleteBuffers(1, &_vertexFilteringBuffer);
         _vertexFilteringBuffer = 0;
+        glDeleteBuffers(1, &_vertexindexBuffer);
+        _vertexindexBuffer = 0;
 
         if (_shaderProgram) {
             global::renderEngine.removeRenderProgram(_shaderProgram.get());
@@ -764,6 +823,11 @@ namespace openspace {
         _shaderProgram->setUniform("ScalingMode", _pScalingmethod);
         _shaderProgram->setUniform("colorTableRange", _pColorTableRange.value());
         _shaderProgram->setUniform("domainLimZ", _pDomainZ.value());
+        _shaderProgram->setUniform("Nodeskip", _pAmountofNodes);
+        _shaderProgram->setUniform("Nodeskipdefault", _pDefaultNodeSkip);
+        _shaderProgram->setUniform("NodeskipMethod", _pNodeskipMethod);
+        _shaderProgram->setUniform("NodeskipFluxThreshold", _pFluxNodeskipThreshold);
+        _shaderProgram->setUniform("NodeskipRadiusThreshold", _pRadiusNodeSkipThreshold);
         _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
 
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
@@ -791,7 +855,7 @@ namespace openspace {
         
             GLint temp = 0;
             glDrawArrays(
-                GL_PATCHES,
+                GL_POINTS,
                 temp,
                 static_cast<GLsizei>(_lineCount.size())
             );
@@ -880,6 +944,7 @@ namespace openspace {
             updatePositionBuffer();
             updateVertexColorBuffer();
             updateVertexFilteringBuffer();
+            updateVertexIndexBuffer();
         }
             }
                 //needs fix, right now it stops cuz it cant find the states.
@@ -887,11 +952,13 @@ namespace openspace {
                     _vertexPositions = _statesPos[_activeTriggerTimeIndex];
                     _vertexColor = _statesColor[_activeTriggerTimeIndex];
                     _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
+                    _vertexIndex = _statesIndex[_activeTriggerTimeIndex];
                     _needsUpdate = false;
                     _newStateIsReady = false;
                     updatePositionBuffer();
                     updateVertexColorBuffer();
                     updateVertexFilteringBuffer();
+                    updateVertexIndexBuffer();
                 }
             }
     }
@@ -945,7 +1012,9 @@ namespace openspace {
          _lineStart.clear();
          _vertexRadius.clear();
          _vertexColor.clear();
+         _vertexIndex.clear();
         int counter = 0;
+        int NodeIndexCounter = 0;
         
         const size_t nPoints = 1;
         for (int i = 0; i < numberofStreams; ++i) {
@@ -960,6 +1029,7 @@ namespace openspace {
                 break;
             }
             */
+            NodeIndexCounter = 0;
             
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                 lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
@@ -1009,6 +1079,8 @@ namespace openspace {
                 float rTimesFluxValue = fluxValue;
                 _vertexColor.push_back(rTimesFluxValue);
                 _vertexRadius.push_back(rValue);
+                _vertexIndex.push_back(NodeIndexCounter);
+                NodeIndexCounter = NodeIndexCounter + 1;
                 rValue = rValue * AuToMeter;
                 
                 //if(thetaValue < 1.6 && thetaValue > 1.4){
@@ -1052,12 +1124,12 @@ namespace openspace {
                 //_vertexRadius.push_back(rValue);
 
                 //skipping nodes
-                int skipcounter = 0;
-                int nodeskipn = 10;
-                while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
-                    ++lineIter;
-                    ++skipcounter;
-                }
+               // int skipcounter = 0;
+               // int nodeskipn = 10;
+                //while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
+                //    ++lineIter;
+                //    ++skipcounter;
+               // }
                 //}
             }
         }
@@ -1141,6 +1213,25 @@ namespace openspace {
 
             unbindGL();
     }
+    void RenderableStreamNodes::updateVertexIndexBuffer() {
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexindexBuffer);
+
+        const std::vector<int>& vertexIndex = _vertexIndex;
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertexIndex.size() * sizeof(float),
+            vertexIndex.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(VaIndex);
+        glVertexAttribPointer(VaIndex, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+    }
+
 
     const std::vector<GLsizei>& RenderableStreamNodes::lineCount() const {
         return _lineCount;
