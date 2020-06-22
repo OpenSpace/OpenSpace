@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'encke-type_comet', 'sssb_data_encke-type_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_encke-type_comet.csv', "Encke-type Comets", filepath, { 0.16, 0.25, 1.0 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_encke-type_comet.csv', "Encke-type Comets", filepath, { 0.8, 0.34, 1.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 2
 object.Renderable.TrailFade = 23
