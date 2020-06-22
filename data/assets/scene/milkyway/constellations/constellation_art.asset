@@ -1,4 +1,3 @@
-local constellationsCSV = asset.localResource('constellation_data.csv')
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local images = asset.syncedResource({
@@ -7,10 +6,6 @@ local images = asset.syncedResource({
     Identifier = "constellation_images",
     Version = 1
 })
-
--- local image_resolution = "low"
--- local image_resolution = "medium"
-local image_resolution = "high"
 
 --function that reads the file
 local createConstellations = function (guiPath, constellationfile)
@@ -35,17 +30,6 @@ local createConstellations = function (guiPath, constellationfile)
         local normz = z/magVec
 
         group = (group == '' and globe or group)
-
-        local texture
-        if image_resolution == "low" then
-          texture = images .. "/" .. imageName:sub(1, -5) .. "-512.png"
-        elseif image_resolution == "medium" then
-          texture = images .. "/" .. imageName:sub(1, -5) .. "-1024.png"
-        elseif image_resolution == "high" then
-          texture = images .. "/" .. imageName
-        else
-          openspace.printError("Unknown image resolution: " .. image_resolution)
-        end
 
         local aconstellation = {
           Identifier = guiPath .. '-' .. name,
@@ -73,7 +57,7 @@ local createConstellations = function (guiPath, constellationfile)
               Origin = "Center",
               Billboard = false,
               LazyLoading = true,
-              Texture = texture,
+              Texture = images .. "/" .. imageName,
               BlendMode = "Additive",
               Opacity = 0.1
           },
@@ -96,6 +80,8 @@ end
 local nodes = {}
 
 asset.onInitialize(function ()
+  local constellationsCSV = images .. "/constellation_data.csv"
+
   nodes = createConstellations('Constellation Art', constellationsCSV)
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
