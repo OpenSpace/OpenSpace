@@ -247,7 +247,13 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     -- to be walked recursively. This is probably not what the users expects (and it is
     -- also one of the default values in the globebrowsing customization script), so we
     -- ignore the empty string here
-    if dir == '' then
+
+    if dir == nil or dir == '' then
+        openspace.printError("No directory specified")
+        return
+    end
+    if node_name == nil or node_name == '' then
+        openspace.printError("No node name specified")
         return
     end
 
