@@ -150,10 +150,10 @@ namespace {
        "This value specifies the line width of the field lines if the "
        "selected rendering method includes lines."
     };
-    constexpr openspace::properties::Property::PropertyInfo ThresholdRadiusInfo = {
-       "thresholdRadius",
-       "Threshold flux scaling",
-       "This value specifies the threshold that will be changed with the radius."
+    constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
+       "thresholdFlux",
+       "Threshold flux value",
+       "This value specifies the threshold that will be changed with the flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
         "filtering",
@@ -179,6 +179,11 @@ namespace {
         "limitsZLower",
         "Z-limits Lower",
         "Valid range along the Z-axis. [Min, Max]"
+    };
+    constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaInfo = {
+        "fluxColorAlpha",
+        "Flux Color Alpha",
+        "The value of alpha for the flux color mode"
     };
     enum class SourceFileType : int {
         Json = 0,
@@ -240,7 +245,7 @@ namespace openspace {
         , _pColorGroup({ "Color" })
         , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
         , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
-        //, _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
+        , _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
         //, _pColorFluxMin(ColorFluxMinInfo)
         //, _pColorFluxMax(ColorFluxMaxInfo)
         , _pColorTablePath(ColorTablePathInfo)
@@ -254,10 +259,8 @@ namespace openspace {
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         , _pColorTableRange(colorTableRangeInfo)
         , _pDomainZ(DomainZInfo)
-        //, _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
-        //, _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
-        , _pThresholdRadius(ThresholdRadiusInfo, -10.f, -10.f, 10.f)
-
+        , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
+        , _pThresholdFlux(ThresholdFluxInfo, -10.f, -10.f, 10.f)
        // , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
        // , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
         , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
@@ -269,9 +272,18 @@ namespace openspace {
     }
 
     void RenderableStreamNodes::definePropertyCallbackFunctions() {
-            _pColorTablePath = _colorTablePaths[0];
+            /*_pColorTablePath = _colorTablePaths[0];
             _transferFunction->setPath(_pColorTablePath);
-            _colorTablePaths[0] = _pColorTablePath;    
+            _colorTablePaths[0] = _pColorTablePath;*/ 
+
+            _pColorFlux.onChange([this] {
+                _pColorTablePath = _colorTablePaths[_pColorFlux];
+            });
+
+            _pColorTablePath.onChange([this] {
+                _transferFunction->setPath(_pColorTablePath);
+                _colorTablePaths[_pColorFlux] = _pColorTablePath;
+                });
     }
 
     void RenderableStreamNodes::setModelDependentConstants() {
@@ -342,6 +354,7 @@ namespace openspace {
        
         extractTriggerTimesFromFileNames();
         computeSequenceEndTime();
+
         LDEBUG("filepath i init: " + std::to_string(_sourceFiles.size()));
         if (!_loadingStatesDynamically) {
             LoadfilesintoRam();
@@ -361,7 +374,7 @@ namespace openspace {
         _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
         _uniformCache.usingParticles = _shaderProgram->uniformLocation("usingParticles");
         _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
-        _uniformCache.thresholdRadius = _shaderProgram->uniformLocation("thresholdRadius");
+        _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
         glGenVertexArrays(1, &_vertexArrayObject);
         glGenBuffers(1, &_vertexPositionBuffer);
@@ -373,7 +386,7 @@ namespace openspace {
     }
 
     bool RenderableStreamNodes::LoadfilesintoRam() {
-        size_t filesnumbers = 270;
+        //size_t filesnumbers = 270;
         for (size_t j = 0; j < _nStates; ++j) {
             
             std::ifstream streamdata(_sourceFiles[j]);
@@ -591,7 +604,7 @@ namespace openspace {
         }
         float thresholdRadiusValue;
         if (_dictionary->getValue(KeyThresholdRadius, thresholdRadiusValue)) {
-            _pThresholdRadius = thresholdRadiusValue;
+            _pThresholdFlux = thresholdRadiusValue;
         }
         float scaleFactor;
         if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
@@ -626,8 +639,9 @@ namespace openspace {
         _pColorGroup.addProperty(_pColorTableRange);
         _pColorGroup.addProperty(_pColorTablePath);
         _pColorGroup.addProperty(_pStreamColor);
+        _pColorGroup.addProperty(_pFluxColorAlpha);
         _pStreamGroup.addProperty(_pNodeSize);
-        _pStreamGroup.addProperty(_pThresholdRadius);
+        _pStreamGroup.addProperty(_pThresholdFlux);
 
         // --------------------- Add Options to OptionProperties --------------------- //
         _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -638,9 +652,11 @@ namespace openspace {
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
+        
         definePropertyCallbackFunctions();
 
         // Set defaults
+        //_pColorFlux = 0;
         _pColorTablePath = _colorTablePaths[0];
     }
 
@@ -741,13 +757,14 @@ namespace openspace {
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
         _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
-        _shaderProgram->setUniform(_uniformCache.thresholdRadius, _pThresholdRadius);
+        _shaderProgram->setUniform(_uniformCache.thresholdFlux, _pThresholdFlux);
         _shaderProgram->setUniform("colorMode", _pColorMode);
         _shaderProgram->setUniform("filterRadius", _pFiltering);
         _shaderProgram->setUniform("filterUpper", _pFilteringUpper);
         _shaderProgram->setUniform("ScalingMode", _pScalingmethod);
         _shaderProgram->setUniform("colorTableRange", _pColorTableRange.value());
         _shaderProgram->setUniform("domainLimZ", _pDomainZ.value());
+        _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
 
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;
@@ -828,7 +845,6 @@ namespace openspace {
                 //LDEBUG("Vi borde uppdatera1");
 
                 // _mustLoadNewStateFromDisk = true;
-
 
                 _needsUpdate = true;
                 _activeStateIndex = _activeTriggerTimeIndex;

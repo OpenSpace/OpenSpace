@@ -77,7 +77,7 @@ namespace openspace {
             lnRFlux = 4
         };
 
-        UniformCache(streamColor, usingParticles, nodeSize, thresholdRadius)
+        UniformCache(streamColor, usingParticles, nodeSize, thresholdFlux)
             _uniformCache;
 
         // ------------------------------------ STRINGS ------------------------------------//
@@ -130,7 +130,7 @@ namespace openspace {
         // Uniform stream Color
         properties::Vec4Property _pStreamColor;
         // Index of the flux value to color lines by
-        //properties::OptionProperty _pColorFlux;
+        properties::OptionProperty _pColorFlux;
         // Color table/transfer function min
         //properties::StringProperty _pColorFluxMin;
         // Color table/transfer function max
@@ -150,11 +150,13 @@ namespace openspace {
         ////////////////
         properties::Vec2Property _pDomainZ;
         /// ///////////
-        properties::FloatProperty _pThresholdRadius;
+        properties::FloatProperty _pThresholdFlux;
         // Filtering nodes within a range
         properties::FloatProperty _pFiltering;
         // Filtering nodes with a upper range
         properties::FloatProperty _pFilteringUpper;
+        ////////////////
+        properties::FloatProperty _pFluxColorAlpha;
 
         // initialization
         std::vector<std::string> _sourceFiles;

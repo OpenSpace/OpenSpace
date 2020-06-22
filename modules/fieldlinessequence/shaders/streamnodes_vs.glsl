@@ -55,10 +55,11 @@ uniform vec2      domainLimR;
 // Streamnodes specific uniforms
 uniform float nodeSize;
 uniform vec4 streamColor;
-uniform float thresholdRadius;
+uniform float thresholdFlux;
 uniform float filterRadius;
 uniform float filterUpper;
 uniform int ScalingMode;
+uniform float fluxColorAlpha;
 
 // Inputs
 // Should be provided in meters
@@ -107,11 +108,12 @@ vec4 getTransferFunctionColor() {
     else if(ScalingMode == R2Flux){
         scalevalue = rValue * rValue * fluxValue;
     }
-    if(scalevalue > thresholdRadius){
+
+    //if(scalevalue > thresholdFlux){
         float lookUpVal = (scalevalue - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
         return texture(colorTable, lookUpVal);
-    }
-    return vec4(0);
+    //}
+   // return vec4(0);
 }
 
 bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
@@ -129,9 +131,15 @@ void main() {
             if(colorMode == 0){
                 vs_color = streamColor;
             }
-            else if (colorMode == 1){
-                vec4 quantityColor = getTransferFunctionColor();
-                vs_color = vec4(quantityColor.xyz, quantityColor.w);
+            else{ //else if (colorMode == 1){
+                vec4 fluxColor = getTransferFunctionColor();
+
+                if(fluxValue > thresholdFlux){
+                    vs_color = vec4(fluxColor.xyz, fluxColor.w);                
+                }
+                else{
+                    vs_color = vec4(fluxColor.xyz, fluxColorAlpha);   
+                }
             }
         }
         else{
@@ -142,7 +150,7 @@ void main() {
         vs_color = vec4(0);
     }
 
-    //if(rValue > thresholdRadius){
+    //if(rValue > thresholdFlux){
     //  vs_color = vec4(0);
     //}
 
