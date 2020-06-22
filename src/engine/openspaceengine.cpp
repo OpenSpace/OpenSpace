@@ -299,7 +299,7 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration.profile.empty()) {
-        std::string inputProfilePath = absPath("${ASSETS}");
+        std::string inputProfilePath = absPath("${PROFILES}");
         std::string outputScenePath = absPath("${TEMPORARY}");
         std::string inputProfile = inputProfilePath + "/" + global::configuration.profile
             + ".profile";

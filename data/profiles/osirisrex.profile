@@ -2,10 +2,7 @@
 1.0
 
 #Asset
-util/asset_helper	require	assetHelper
 util/property_helper	require	propertyHelper
-util/scene_helper	require	sceneHelper
-util/renderable_helper	require	renderableHelper
 base	require	
 scene/solarsystem/missions/osirisrex/model	require	
 scene/solarsystem/missions/osirisrex/osirisrex	require	

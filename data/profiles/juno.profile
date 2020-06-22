@@ -2,19 +2,8 @@
 1.0
 
 #Asset
-util/asset_helper	require	assetHelper
-util/property_helper	require	propertyHelper
-util/scene_helper	require	sceneHelper
-util/renderable_helper	require	renderableHelper
 base	require	
-scene/solarsystem/planets/jupiter/minor_moons	require	
-scene/solarsystem/planets/saturn/minor_moons	require	
-scene/solarsystem/planets/uranus/minor_moons	require	
-scene/solarsystem/planets/neptune/inner_moons	require	
-scene/solarsystem/planets/neptune/irregular_prograde_moons	require	
-scene/solarsystem/planets/neptune/irregular_retrograde_moons	require	
-scene/solarsystem/missions/voyager/voyager1	require	
-scene/solarsystem/missions/voyager/voyager2	require	
+scene/solarsystem/missions/juno/juno	require	
 
 #Keybinding
 1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"
@@ -38,22 +27,12 @@ Shift+8	Setting the simulation speed to 3686400 seconds per realtime second	Set 
 Shift+9	Setting the simulation speed to 7372800 seconds per realtime second	Set sim speed 7372800	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(7372800)"
 Shift+0	Setting the simulation speed to 14745600 seconds per realtime second	Set sim speed 14745600	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(14745600)"
 
-#Property
-setPropertyValueSingle	Scene.Pluto.Renderable.Enabled	false
-setPropertyValueSingle	Scene.Charon.Renderable.Enabled	false
-setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false
-
 #Time
-absolute	1977 SEP 10 12:00:00
+absolute	2016-07-01T10:05:00.00
 
 #Camera
-setNavigationState	"Voyager_1"	"Root"		526781518487.171326, 257168309890.072144, -1381125204152.817383			
+setNavigationState	"Juno"		"Root"	1.243398E8, 7.176068E7, -1.519733E7	-0.377400E0, 0.764573E0, 0.522492E0		
 
 #MarkNodes
-Earth
-Voyager 1
-Voyager 2
 Jupiter
-Saturn
-Uranus
-Neptune
+Juno

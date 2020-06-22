@@ -1,13 +1,12 @@
 #Version
 1.0
 
+#Module
+Volume	asset.require('scene/solarsystem/missions/messenger/mercurymagnetosphere')	openspace.printWarning("Volume module is not loaded, skipping asset: mercurymagnetosphere")
+
 #Asset
-util/asset_helper	require	assetHelper
-util/property_helper	require	propertyHelper
-util/scene_helper	require	sceneHelper
-util/renderable_helper	require	renderableHelper
 base	require	
-scene/solarsystem/missions/juno/juno	require	
+scene/solarsystem/missions/messenger/messengerSC	require	
 
 #Keybinding
 1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"
@@ -32,11 +31,12 @@ Shift+9	Setting the simulation speed to 7372800 seconds per realtime second	Set 
 Shift+0	Setting the simulation speed to 14745600 seconds per realtime second	Set sim speed 14745600	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(14745600)"
 
 #Time
-absolute	2016-07-01T10:05:00.00
+absolute	2011 MAY 13 00:05:18
 
 #Camera
-setNavigationState	"Juno"		"Root"	1.243398E8, 7.176068E7, -1.519733E7	-0.377400E0, 0.764573E0, 0.522492E0		
+setNavigationState	"Mercury"		"Root"	2.423690E11, 1.979038E11, -2.241483E10	-0.492046E0, 0.666088E0, 0.560551E0		
 
 #MarkNodes
-Jupiter
-Juno
+Mercury
+Messenger
+Sun

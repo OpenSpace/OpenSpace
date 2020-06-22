@@ -95,7 +95,7 @@ int saveSettingsToProfile(lua_State* L) {
     else if (saveFilePath.find('.') != std::string::npos) {
         return luaL_error(L, "Only provide the filename to save without file extension");
     }
-    const std::string absFilename = absPath("${ASSETS}/" + saveFilePath + ".profile");
+    const std::string absFilename = absPath("${PROFILES}/" + saveFilePath + ".profile");
 
     const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : false;
 

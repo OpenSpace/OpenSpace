@@ -2,10 +2,6 @@
 1.0
 
 #Asset
-util/asset_helper	require	assetHelper
-util/property_helper	require	propertyHelper
-util/scene_helper	require	sceneHelper
-util/renderable_helper	require	renderableHelper
 base	require	
 scene/solarsystem/planets/earth/moon/moon	require	
 scene/solarsystem/missions/apollo/8/apollo8	require	
