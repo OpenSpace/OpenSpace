@@ -54,6 +54,7 @@ uniform vec2      domainLimR;
 
 // Streamnodes specific uniforms
 uniform float nodeSize;
+uniform float nodeSizeLargerFlux;
 uniform vec4 streamColor;
 uniform float thresholdFlux;
 uniform float filterRadius;
@@ -83,7 +84,6 @@ in float rValue;
 // _VA_INDEX in renderableStreamNodes.h
 layout(location = 3)
 in int nodeIndex;
-
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
 const int uniformColor     = 0;
@@ -188,19 +188,28 @@ void main() {
         }
     else{
         vs_color = vec4(0);
-    }
+        }
     }
     else{
-    vs_color = vec4(0);
+        vs_color = vec4(0);
     }
 
     //if(rValue > thresholdFlux){
     //  vs_color = vec4(0);
     //}
 
+    if(fluxValue < thresholdFlux){
+        gl_PointSize = nodeSize;
+    }
+    else{
+        gl_PointSize = nodeSizeLargerFlux;
+    }
+
         vec4 position_in_meters = vec4(in_position, 1);
         vec4 positionClipSpace = modelViewProjection * position_in_meters;
         //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+        
+        //gl_PointSize = nodeSize;
         gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
 
         vs_depth = gl_Position.w;
