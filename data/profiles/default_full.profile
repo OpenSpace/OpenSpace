@@ -2,15 +2,15 @@
 1.0
 
 #Asset
-base	require	
-scene/solarsystem/planets/earth/earth	require	
-scene/solarsystem/planets/earth/satellites/satellites   require 
-scene/solarsystem/planets/jupiter/minor_moons	require	
-scene/solarsystem/planets/saturn/minor_moons	require	
-scene/solarsystem/planets/uranus/minor_moons	require	
-scene/solarsystem/planets/neptune/inner_moons	require	
-scene/solarsystem/planets/neptune/irregular_prograde_moons	require	
-scene/solarsystem/planets/neptune/irregular_retrograde_moons	require	
+base	
+scene/solarsystem/planets/earth/earth	
+scene/solarsystem/planets/earth/satellites/satellites   
+scene/solarsystem/planets/jupiter/minor_moons	
+scene/solarsystem/planets/saturn/minor_moons	
+scene/solarsystem/planets/uranus/minor_moons	
+scene/solarsystem/planets/neptune/inner_moons	
+scene/solarsystem/planets/neptune/irregular_prograde_moons	
+scene/solarsystem/planets/neptune/irregular_retrograde_moons	
 
 #Property
 setPropertyValue	{earth_satellites}.Renderable.Enabled	false

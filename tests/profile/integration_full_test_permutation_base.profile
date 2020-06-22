@@ -7,11 +7,11 @@ def-module
 ghi-module		
 
 #Asset
-scene/solarsystem/planets/earth/earth	require	
-scene/solarsystem/planets/earth/satellites/satellites	require	
-folder1/folder2/asset	require	
-folder3/folder4/asset2	require	variable
-folder5/folder6/asset3	request	
+scene/solarsystem/planets/earth/earth	
+scene/solarsystem/planets/earth/satellites/satellites	
+folder1/folder2/asset	
+folder3/folder4/asset2	variable
+folder5/folder6/asset3	
 
 #Property
 setPropertyValue	{earth_satellites}.Renderable.Enabled	false

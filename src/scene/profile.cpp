@@ -164,28 +164,16 @@ namespace {
 
     [[ nodiscard ]] Profile::Asset parseAsset(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.size() != 3) {
+        if (fields.size() != 2) {
             throw ProfileParsingError(
                 lineNumber,
-                fmt::format("Expected 3 fields in an Asset entry, got {}", fields.size())
+                fmt::format("Expected 2 fields in an Asset entry, got {}", fields.size())
             );
         }
 
         Profile::Asset a;
         a.path = fields[0];
-        a.type = [&](const std::string& type) -> Profile::Asset::Type {
-            if (type == "require") {
-                return Profile::Asset::Type::Require;
-            }
-            if (type == "request") {
-                return Profile::Asset::Type::Request;
-            }
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected asset type 'require' or 'request', got {}", type)
-            );
-        }(fields[1]);
-        a.name = fields[2];
+        a.name = fields[1];
         return a;
     }
 
@@ -475,7 +463,6 @@ void Profile::addAsset(const std::string& path) {
 
     Asset a;
     a.path = path;
-    a.type = Asset::Type::Require;
     assets.push_back(std::move(a));
 }
 
@@ -540,14 +527,7 @@ std::string Profile::serialize() const {
     if (!assets.empty()) {
         output += fmt::format("\n{}\n", headerAsset);
         for (const Asset& a : assets) {
-            const std::string type = [](Asset::Type t) {
-                switch (t) {
-                    case Asset::Type::Require: return "require";
-                    case Asset::Type::Request: return "request";
-                    default: throw ghoul::MissingCaseException();
-                }
-            }(a.type);
-            output += fmt::format("{}\t{}\t{}\n", a.path, type, a.name);
+            output += fmt::format("{}\t{}\n", a.path, a.name);
         }
     }
 
@@ -790,18 +770,12 @@ std::string Profile::convertToScene() const {
 
     // Assets
     for (const Asset& a : assets) {
-        if (!a.name.empty()) {
-            output += fmt::format("local {} = ", a.name);
+        if (a.name.empty()) {
+            output += fmt::format("asset.require(\"{}\");\n", a.path);
         }
-        std::string type = [](Asset::Type t) {
-            switch (t) {
-                case Asset::Type::Request: return "request";
-                case Asset::Type::Require: return "require";
-                default: throw ghoul::MissingCaseException();
-            }
-        }(a.type);
-
-        output += fmt::format("asset.{}(\"{}\");\n", type, a.path);
+        else {
+            output += fmt::format("local {} = asset.require(\"{}\");\n", a.name, a.path);
+        }
     }
 
     output += "asset.onInitialize(function()\n";

@@ -2,6 +2,6 @@
 12.13
 
 #Asset
-folder1/folder2/asset	require	
-folder3/folder4/asset2	require	variable
-folder5/folder6/asset3	request	
+folder1/folder2/asset	
+folder3/folder4/asset2	variable
+folder5/folder6/asset3	

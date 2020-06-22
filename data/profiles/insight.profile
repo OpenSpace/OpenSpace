@@ -2,8 +2,8 @@
 1.0
 
 #Asset
-base	require	
-scene/solarsystem/missions/insight/edl	require	
+base	
+scene/solarsystem/missions/insight/edl	
 
 #Property
 setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false

@@ -2,11 +2,11 @@
 1.0
 
 #Asset
-util/property_helper	require	propertyHelper
-util/renderable_helper	require	renderableHelper
-base	require	
-scene/solarsystem/missions/newhorizons/newhorizons	require	
-scene/solarsystem/missions/newhorizons/model	require	
+util/property_helper	propertyHelper
+util/renderable_helper	renderableHelper
+base	
+scene/solarsystem/missions/newhorizons/newhorizons	
+scene/solarsystem/missions/newhorizons/model	
 
 #Property
 setPropertyValueSingle	NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance	20.000000

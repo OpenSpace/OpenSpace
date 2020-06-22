@@ -51,13 +51,7 @@ public:
         std::string notLoadedInstruction;
     };
     struct Asset {
-        enum class Type {
-            Require,
-            Request
-        };
-
         std::string path;
-        Type type;
         std::string name;
     };
     struct Property {

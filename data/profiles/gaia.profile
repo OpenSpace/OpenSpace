@@ -5,13 +5,13 @@
 Gaia		openspace.printFatal('Could not load scene due to missing module "gaia"')
 
 #Asset
-base	require	
-scene/solarsystem/planets/earth/earth	require	
-scene/milkyway/gaia/gaiastars	require	
-scene/milkyway/gaia/apogee	require	
-scene/milkyway/gaia/galah	require	
-scene/solarsystem/missions/gaia/gaia	require	
-scene/solarsystem/missions/gaia/trail	require	
+base	
+scene/solarsystem/planets/earth/earth	
+scene/milkyway/gaia/gaiastars	
+scene/milkyway/gaia/apogee	
+scene/milkyway/gaia/galah	
+scene/solarsystem/missions/gaia/gaia	
+scene/solarsystem/missions/gaia/trail	
 
 #Property
 setPropertyValueSingle	Scene.Stars.Renderable.Enabled	false

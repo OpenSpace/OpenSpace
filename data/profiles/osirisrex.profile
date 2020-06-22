@@ -2,10 +2,10 @@
 1.0
 
 #Asset
-util/property_helper	require	propertyHelper
-base	require	
-scene/solarsystem/missions/osirisrex/model	require	
-scene/solarsystem/missions/osirisrex/osirisrex	require	
+util/property_helper	propertyHelper
+base	
+scene/solarsystem/missions/osirisrex/model	
+scene/solarsystem/missions/osirisrex/osirisrex	
 
 #Property
 setPropertyValueSingle	NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance	20.000000

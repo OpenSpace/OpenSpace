@@ -251,7 +251,7 @@ TEST_CASE("Add asset to empty Profile", "[profile]") {
     std::vector<std::string> targetSource = originalSource;
     targetSource.push_back("");
     targetSource.push_back("#Asset");
-    targetSource.push_back("new-asset\trequire\t");
+    targetSource.push_back("new-asset\t");
     std::string targetSerialized(Profile(targetSource).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
@@ -278,14 +278,14 @@ TEST_CASE("Add asset to not-empty Profile", "[profile]") {
         "10.11",
         "",
         "#Asset",
-        "old-asset\trequire\t"
+        "old-asset\t"
     };
     Profile p(originalSource);
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
     std::vector<std::string> targetSource = originalSource;
-    targetSource.push_back("new-asset\trequire\t");
+    targetSource.push_back("new-asset\t");
     std::string targetSerialized(Profile(targetSource).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
@@ -297,7 +297,7 @@ TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
         "10.11",
         "",
         "#Asset",
-        "old-asset\trequire\t"
+        "old-asset\t"
     };
     Profile p(source);
     p.setIgnoreUpdates(true);
@@ -315,7 +315,7 @@ TEST_CASE("Add duplicate asset", "[profile]") {
         "10.11",
         "",
         "#Asset",
-        "old-asset\trequire\t"
+        "old-asset\t"
     };
     Profile p(originalSource);
     p.addAsset("new-asset");
@@ -323,7 +323,7 @@ TEST_CASE("Add duplicate asset", "[profile]") {
     std::string originalSerialized = p.serialize();
 
     std::vector<std::string> targetSource = originalSource;
-    targetSource.push_back("new-asset\trequire\t");
+    targetSource.push_back("new-asset\t");
     std::string targetSerialized(Profile(targetSource).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
@@ -338,10 +338,10 @@ TEST_CASE("Remove asset", "[profile]") {
         "99.88",
         "",
         "#Asset",
-        "asset1\trequire\t"
+        "asset1\t"
     };
     std::vector<std::string> originalSource = targetSource;
-    originalSource.push_back("asset2\trequire\t");
+    originalSource.push_back("asset2\t");
 
     Profile p(originalSource);
     p.removeAsset("asset2");
@@ -358,8 +358,8 @@ TEST_CASE("Remove asset (ignored)", "[profile]") {
         "99.88",
         "",
         "#Asset",
-        "asset1\trequire\t",
-        "asset2\trequire\t"
+        "asset1\t",
+        "asset2\t"
     };
 
     Profile p(source);
@@ -378,8 +378,8 @@ TEST_CASE("Removing non-exisiting asset", "[profile]") {
         "66.67",
         "",
         "#Asset",
-        "asset1\trequire\t",
-        "asset3\trequire\t"
+        "asset1\t",
+        "asset3\t"
     };
 
     Profile p(source);
@@ -395,8 +395,8 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
         "66.67",
         "",
         "#Asset",
-        "asset1\trequire\t",
-        "asset3\trequire\t"
+        "asset1\t",
+        "asset3\t"
     };
 
     Profile p(source);
@@ -549,7 +549,25 @@ TEST_CASE("Error module too many parameters", "[profile]") {
     );
 }
 
-TEST_CASE("Error profile too few parameters", "[profile]") {
+TEST_CASE("Error asset too few parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_asset_too_few_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 2 fields in an Asset entry, got 1")
+    );
+}
+
+TEST_CASE("Error asset too many parameters", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_asset_too_many_parameters.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Expected 2 fields in an Asset entry, got 3")
+    );
+}
+
+TEST_CASE("Error property too few parameters", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error_property_too_few_parameters.profile";
     REQUIRE_THROWS_WITH(
@@ -558,7 +576,7 @@ TEST_CASE("Error profile too few parameters", "[profile]") {
     );
 }
 
-TEST_CASE("Error profile too many parameters", "[profile]") {
+TEST_CASE("Error property too many parameters", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error_property_too_many_parameters.profile";
     REQUIRE_THROWS_WITH(
@@ -567,7 +585,7 @@ TEST_CASE("Error profile too many parameters", "[profile]") {
     );
 }
 
-TEST_CASE("Error profile wrong parameter type 'type'", "[profile]") {
+TEST_CASE("Error property wrong parameter type 'type'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error_property_wrong_parameter_value_type.profile";
     REQUIRE_THROWS_WITH(
@@ -598,11 +616,21 @@ TEST_CASE("Error keybinding too many parameters", "[profile]") {
 }
 
 TEST_CASE("Error keybinding wrong parameter value 'key'", "[profile]") {
-    error_keybinding_wrong_parameter_value_key
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_keybinding_wrong_parameter_value_key.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Could not find key for 'F50'")
+    );
 }
 
 TEST_CASE("Error keybinding wrong parameter value 'key, modifier'", "[profile]") {
-    error_keybinding_wrong_parameter_value_modifier
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_keybinding_wrong_parameter_value_modifier.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Unknown modifier key 'KEYKEY'")
+    );
 }
 
 TEST_CASE("Error keybinding wrong parameter type 'local'", "[profile]") {

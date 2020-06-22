@@ -2,14 +2,14 @@
 1.0
 
 #Asset
-base	require	
-scene/solarsystem/planets/earth/moon/moon	require	
-scene/solarsystem/missions/apollo/8/apollo8	require	
-scene/solarsystem/missions/apollo/11/apollo11	require	
-scene/solarsystem/missions/apollo/17/lem	require	
-scene/solarsystem/missions/apollo/apollo_globebrowsing	require	
-scene/solarsystem/missions/apollo/11/lem_flipbook	require	
-scene/solarsystem/missions/apollo/insignias_map	require	
+base	
+scene/solarsystem/planets/earth/moon/moon	
+scene/solarsystem/missions/apollo/8/apollo8	
+scene/solarsystem/missions/apollo/11/apollo11	
+scene/solarsystem/missions/apollo/17/lem	
+scene/solarsystem/missions/apollo/apollo_globebrowsing	
+scene/solarsystem/missions/apollo/11/lem_flipbook	
+scene/solarsystem/missions/apollo/insignias_map	
 
 #Property
 setPropertyValueSingle	Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode	0
