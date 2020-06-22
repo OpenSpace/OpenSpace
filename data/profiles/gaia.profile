@@ -2,7 +2,7 @@
 1.0
 
 #Module
-Gaia		openspace.printFatal('Could not load scene due to missing module "gaia"')
+Gaia		openspace.printFatal('Could not load gaia profile due to missing module "gaia"')
 
 #Asset
 base	
@@ -12,6 +12,7 @@ scene/milkyway/gaia/apogee
 scene/milkyway/gaia/galah	
 scene/solarsystem/missions/gaia/gaia	
 scene/solarsystem/missions/gaia/trail	
+scene/solarsystem/missions/gaia/dashboard	
 
 #Property
 setPropertyValueSingle	Scene.Stars.Renderable.Enabled	false

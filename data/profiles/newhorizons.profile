@@ -7,6 +7,7 @@ util/renderable_helper	renderableHelper
 base	
 scene/solarsystem/missions/newhorizons/newhorizons	
 scene/solarsystem/missions/newhorizons/model	
+scene/solarsystem/missions/newhorizons/dashboard	
 
 #Property
 setPropertyValueSingle	NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance	20.000000

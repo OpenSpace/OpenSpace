@@ -3,7 +3,7 @@
 
 #Asset
 base	
-scene/solarsystem/planets/earth/moon/moon	
+scene/solarsystem/planets/earth/moon/moon	moonAsset
 scene/solarsystem/missions/apollo/8/apollo8	
 scene/solarsystem/missions/apollo/11/apollo11	
 scene/solarsystem/missions/apollo/17/lem	
@@ -25,7 +25,7 @@ F7	Setup for A17 site	Setup A17 site	/Missions/Apollo/17	false	"openspace.time.s
 absolute	1972 DEC 12 19:47:11
 
 #Camera
-goToGeo	"Moon"	20	-60	15000000
+goToGeo	moonAsset.Moon.Identifier	20	-60	15000000
 
 #MarkNodes
 Moon

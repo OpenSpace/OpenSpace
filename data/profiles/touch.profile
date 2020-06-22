@@ -6,7 +6,7 @@ Touch	local webGui = asset.require('util/webgui'); webGui.setCefRoute("ontouch")
 
 #Asset
 base	
-scene/solarsystem/planets/earth/earth	
+scene/solarsystem/planets/earth/earth	earthAsset
 util/webgui	
 
 #Property
@@ -18,7 +18,7 @@ setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false
 relative	-1d
 
 #Camera
-setNavigationState	"Earth"			58.5877,16.1924,20000000			
+setNavigationState	earthAsset.Earth.Identifier			58.5877,16.1924,20000000			
 
 #MarkNodes
 Earth

@@ -3,7 +3,7 @@
 
 #Asset
 base	
-scene/solarsystem/planets/earth/earth	
+scene/solarsystem/planets/earth/earth	earthAsset
 scene/solarsystem/sssb/amor_asteroid	
 scene/solarsystem/sssb/apollo_asteroid	
 scene/solarsystem/sssb/aten_asteroid	
@@ -25,7 +25,7 @@ scene/solarsystem/sssb/pha
 relative	-1d
 
 #Camera
-goToGeo	Earth	58.5877	16.1924	2.7e12
+goToGeo	earthAsset.Earth.Identifier	58.5877	16.1924	2.7e12
 
 #MarkNodes
 Earth

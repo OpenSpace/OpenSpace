@@ -6,6 +6,7 @@ Volume	asset.require('scene/solarsystem/missions/messenger/mercurymagnetosphere'
 
 #Asset
 base	
+scene/solarsystem/missions/messenger/dashboard	
 scene/solarsystem/missions/messenger/messengerSC	
 
 #Keybinding

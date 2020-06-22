@@ -3,7 +3,7 @@
 
 #Asset
 base	
-scene/solarsystem/planets/earth/earth	
+scene/solarsystem/planets/earth/earth	earthAsset
 scene/solarsystem/planets/earth/satellites/satellites	
 
 #Property
@@ -13,7 +13,7 @@ setPropertyValue	{earth_satellites}.Renderable.Enabled	false
 relative	-1d
 
 #Camera
-goToGeo	"Earth"	58.5877	16.1924	20000000
+goToGeo	earthAsset.Earth.Identifier	58.5877	16.1924	20000000
 
 #MarkNodes
 Earth

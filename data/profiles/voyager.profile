@@ -9,8 +9,9 @@ scene/solarsystem/planets/uranus/minor_moons
 scene/solarsystem/planets/neptune/inner_moons	
 scene/solarsystem/planets/neptune/irregular_prograde_moons	
 scene/solarsystem/planets/neptune/irregular_retrograde_moons	
-scene/solarsystem/missions/voyager/voyager1	
+scene/solarsystem/missions/voyager/voyager1	VoyagerAsset
 scene/solarsystem/missions/voyager/voyager2	
+scene/solarsystem/missions/voyager/dashboard	
 
 #Keybinding
 1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"
@@ -43,7 +44,7 @@ setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false
 absolute	1977 SEP 10 12:00:00
 
 #Camera
-setNavigationState	"Voyager_1"	"Root"		526781518487.171326, 257168309890.072144, -1381125204152.817383			
+setNavigationState	VoyagerAsset.Voyager_1.Identifier	"Root"		526781518487.171326, 257168309890.072144, -1381125204152.817383			
 
 #MarkNodes
 Earth

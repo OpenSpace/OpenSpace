@@ -4,7 +4,7 @@
 #Asset
 base	
 scene/solarsystem/planets/earth/earth	
-scene/solarsystem/planets/earth/satellites/satellites   
+scene/solarsystem/planets/earth/satellites/satellites	
 scene/solarsystem/planets/jupiter/minor_moons	
 scene/solarsystem/planets/saturn/minor_moons	
 scene/solarsystem/planets/uranus/minor_moons	

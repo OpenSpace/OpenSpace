@@ -3,7 +3,7 @@
 
 #Asset
 base	
-scene/solarsystem/missions/juno/juno	
+scene/solarsystem/missions/juno/juno	junoAsset
 
 #Keybinding
 1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"
@@ -31,7 +31,7 @@ Shift+0	Setting the simulation speed to 14745600 seconds per realtime second	Set
 absolute	2016-07-01T10:05:00.00
 
 #Camera
-setNavigationState	"Juno"		"Root"	1.243398E8, 7.176068E7, -1.519733E7	-0.377400E0, 0.764573E0, 0.522492E0		
+setNavigationState	junoAsset.Juno.Identifier		"Root"	1.243398E8, 7.176068E7, -1.519733E7	-0.377400E0, 0.764573E0, 0.522492E0		
 
 #MarkNodes
 Jupiter
