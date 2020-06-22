@@ -82,7 +82,7 @@ namespace openspace {
             Radius = 2
         };
 
-        UniformCache(streamColor, usingParticles, nodeSize, thresholdFlux)
+        UniformCache(streamColor, usingParticles, nodeSize, nodeSizeLargerFlux, thresholdFlux)
             _uniformCache;
 
         // ------------------------------------ STRINGS ------------------------------------//
@@ -154,6 +154,8 @@ namespace openspace {
         properties::PropertyOwner _pNodesamountGroup;
         // Size of simulated node particles
         properties::FloatProperty _pNodeSize;
+        // Size of simulated node particles with larger flux value
+        properties::FloatProperty _pNodeSizeLargerFlux;
         /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;
         ////////////////

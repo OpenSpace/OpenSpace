@@ -126,7 +126,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "colorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring."
+        "Color Table/Transfer Function to use for 'By Flux Value' coloring."
     };
     // Size of simulated flow particles
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
@@ -144,6 +144,11 @@ namespace {
        "nodeSize",
        "Size of nodes",
        "Change the size of the nodes"
+    };
+    constexpr openspace::properties::Property::PropertyInfo NodeSizeLargerFluxInfo = {
+       "nodeSizeLargerFlux",
+       "Size of nodes for larger flux",
+       "Change the size of the nodes when flux is larger than flux threshold value"
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
        "lineWidth",
@@ -283,7 +288,8 @@ namespace openspace {
         , _pStreamsEnabled(StreamsenabledInfo, true)
         , _pStreamGroup({ "Streams" })
         , _pNodesamountGroup({ "NodeGroup" })
-        , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
+        , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
+        , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 5.f, 1.f, 10.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         , _pColorTableRange(colorTableRangeInfo)
         , _pDomainZ(DomainZInfo)
@@ -406,6 +412,7 @@ namespace openspace {
         _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
         _uniformCache.usingParticles = _shaderProgram->uniformLocation("usingParticles");
         _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
+        _uniformCache.nodeSizeLargerFlux = _shaderProgram->uniformLocation("nodeSizeLargerFlux");
         _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
         glGenVertexArrays(1, &_vertexArrayObject);
@@ -678,6 +685,7 @@ namespace openspace {
         _pNodesamountGroup.addProperty(_pAmountofNodes);
         _pNodesamountGroup.addProperty(_pDefaultNodeSkip);
         _pNodesamountGroup.addProperty(_pNodeSize);
+        _pNodesamountGroup.addProperty(_pNodeSizeLargerFlux);
         _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
         _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
 
@@ -815,7 +823,8 @@ namespace openspace {
         // Flow/Particles
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
-        _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
+        _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
+        _shaderProgram->setUniform(_uniformCache.nodeSizeLargerFlux, _pNodeSizeLargerFlux);
         _shaderProgram->setUniform(_uniformCache.thresholdFlux, _pThresholdFlux);
         _shaderProgram->setUniform("colorMode", _pColorMode);
         _shaderProgram->setUniform("filterRadius", _pFiltering);
@@ -851,8 +860,6 @@ namespace openspace {
             static_cast<GLsizei>(_lineStart.size())
         );*/
 
-         glPointSize(_pNodeSize);
-        
             GLint temp = 0;
             glDrawArrays(
                 GL_POINTS,
@@ -1171,6 +1178,7 @@ namespace openspace {
         );
 
         glEnableVertexAttribArray(VaPosition);
+        glEnable(GL_PROGRAM_POINT_SIZE);
         glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         unbindGL();
