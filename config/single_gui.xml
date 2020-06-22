@@ -24,6 +24,10 @@
       <Viewport>
         <Pos x="0.0" y="0.0" />
         <Size x="1.0" y="1.0" />
+        <PlanarProjection>
+          <FOV down="25.267007923362" left="40.0" right="40.0" up="25.267007923362" />
+          <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+        </PlanarProjection>
       </Viewport>
     </Window>
   </Node>

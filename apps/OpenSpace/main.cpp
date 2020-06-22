@@ -1272,7 +1272,7 @@ int main(int argc, char** argv) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     Configuration config = parseArguments(arg);
-    config::Cluster cluster = loadCluster(windowConfiguration);
+    config::Cluster cluster = loadCluster(absPath(windowConfiguration));
 
     Engine::Callbacks callbacks;
     callbacks.initOpenGL = mainInitFunc;
