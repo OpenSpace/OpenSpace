@@ -61,6 +61,9 @@ namespace {
     constexpr const GLuint VaIndex      = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
 
 
+    constexpr int8_t CurrentCacheVersion = 1;
+
+
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
    // [STRING] "cdf", "json" or "osfls"
@@ -549,6 +552,72 @@ namespace openspace {
         }
 
         return true;
+    }
+
+    void RenderableStreamNodes::WritecachedFile() {
+        //Todo, write all of the vertexobjects into here
+        std::ofstream fileStream("StreamnodesCache", std::ofstream::binary);
+
+        if (!fileStream.good()) {
+            LERROR(fmt::format("Error opening file '{}' for save cache file"), "StreamnodesCache");
+            return;
+        }
+        
+        fileStream.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        
+
+        int32_t nValues = static_cast<int32_t>(_statesPos.size());
+        if (nValues == 0) {
+            throw ghoul::RuntimeError("Error writing cache: No values were loaded");
+            return;
+        }
+        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+
+        size_t nBytes = nValues * sizeof(_statesPos.size());
+        fileStream.write(reinterpret_cast<const char*>(_vertexPositions.data()), nBytes);
+        //fileStream.write(reinterpret_cast<const char*>(_vertexColor.data()), nBytes);
+        //fileStream.write(reinterpret_cast<const char*>(_vertexRadius.data()), nBytes);
+        //fileStream.write(reinterpret_cast<const char*>(_vertexIndex.data()), nBytes);
+
+        //for(int i = 0; i < _statesPos.size(); )
+
+    }
+
+    bool RenderableStreamNodes::ReadcachedFile() {
+        const std::string& file = "StreamnodesCache";
+        std::ifstream fileStream("StreamnodesCache", std::ifstream::binary);
+        if (fileStream.good()) {
+            int8_t version = 0;
+            fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+            if (version != CurrentCacheVersion) {
+                LINFO("The format of the cached file has changed: deleting old cache");
+                fileStream.close();
+                FileSys.deleteFile(file);
+                return false;
+            }
+
+            int32_t nValues = 0;
+            fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+
+            _statesPos.resize(nValues);
+            
+            fileStream.read(reinterpret_cast<char*>(
+                _statesPos.data()),
+                nValues * sizeof(_statesPos[0])
+            );
+            bool success = fileStream.good();
+            return success;
+
+        }
+        else {
+            LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+            return false;
+        }
+
+        return false;
     }
     /**
      * Extracts the general information (from the lua modfile) that is mandatory for the class
