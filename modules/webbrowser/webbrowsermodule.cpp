@@ -138,10 +138,13 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 
-    const bool isGuiWindow = global::windowDelegate.hasGuiWindow();
+    //TODO: micah - revisit this, either remove code or find situation
+    //where you haave a master without a gui and fixfor it.
+    //const bool haGuiWindow = global::windowDelegate.hasGuiWindow();
+
     const bool isMaster = global::windowDelegate.isMaster();
 
-    if (!_enabled || !isGuiWindow || !isMaster) {
+    if (!_enabled || (!isMaster) ) {
         return;
     }
 

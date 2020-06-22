@@ -91,11 +91,13 @@ void CefWebGuiModule::startOrStopGui() {
 
     WebBrowserModule* webBrowserModule = global::moduleEngine.module<WebBrowserModule>();
 
-    const bool isGuiWindow = global::windowDelegate.hasGuiWindow();
+    //TODO: micah - revisit this, either remove code or find situation
+    //where you haave a master without a gui and fixfor it.
+    //const bool hasGuiWindow = global::windowDelegate.hasGuiWindow();
 
     const bool isMaster = global::windowDelegate.isMaster();
 
-    if (_enabled && isGuiWindow && isMaster) {
+    if (_enabled && isMaster) {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _url));
 
         if (!_instance) {
