@@ -19,7 +19,7 @@
       -->
       <!-- mesh path is relative to working directory-->
       <!-- NOTE, if no working directory is set, mesh must be absolute path -->
-      <Viewport name="warped fisheye" mesh="mesh/standard_16x9.data">
+      <Viewport name="warped fisheye" mesh="mesh/standard_16x9.data" draw2d="false">
         <Pos x="0.0" y="0.0" />
         <Size x="1.0" y="1.0" />
         <FisheyeProjection fov="180" quality="2k" tilt="30.0">
@@ -27,7 +27,7 @@
         </FisheyeProjection>
       </Viewport>
     </Window>
-    <Window fullscreen="false" name="GUI" tags="GUI">
+    <Window fullscreen="false" name="GUI" tags="GUI" draw3d="false">
         <Stereo type="none" />
         <Size x="1280" y="720" />
         <Res x="2048" y="2048" />
