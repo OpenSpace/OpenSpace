@@ -68,7 +68,7 @@ SpaceModule::SpaceModule()
     addProperty(_showSpiceExceptions);
 }
 
-void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
+void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>(),
         "PlanetGeometry"
@@ -106,6 +106,10 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     auto fGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
+
+    if (dictionary.hasKeyAndValue<bool>(SpiceExceptionInfo.identifier)) {
+        _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
+    }
 }
 
 void SpaceModule::internalDeinitializeGL() {

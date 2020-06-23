@@ -5,7 +5,7 @@ local sceneHelper = asset.require('util/scene_helper')
 
 
 asset.require('scene/solarsystem/planets/earth/moon/moon')
-asset.require('scene/solarsystem/missions/apollo/apollo8.asset')
+asset.require('scene/solarsystem/missions/apollo/8/apollo8.asset')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -118,7 +118,6 @@ asset.onInitialize(function ()
     openspace.markInterestingNodes({ "Earth", "Moon", "Apollo8", "Apollo8Launch" })
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MinimumAllowedDistance', 0.000000);
-    openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 24.0);
 
     openspace.globebrowsing.goToGeo(earthAsset.Earth.Identifier, 20, -60, 15000000)
 end)

@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicense.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <mutex>
@@ -134,8 +133,6 @@ public:
      */
     void unregisterNode(SceneGraphNode* node);
 
-    void addSceneLicense(SceneLicense license);
-
     /**
     * Mark the node registry as dirty
     */
@@ -145,14 +142,6 @@ public:
      * Return a vector of all scene graph nodes in the scene.
      */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
-
-    /**
-     * Generate JSON about the license information for the scenegraph nodes that are
-     * contained in this scene
-     * \param path The file path that will contain the documentation about the licenses
-     * used in this scene
-     */
-    std::string generateSceneLicenseDocumentationJson();
 
     /**
      * Returns a map from identifier to scene graph node.
@@ -260,8 +249,6 @@ private:
     std::unique_ptr<SceneInitializer> _initializer;
 
     std::vector<InterestingTime> _interestingTimes;
-
-    std::vector<SceneLicense> _licenses;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;

@@ -57,7 +57,6 @@
 #include <sgct/viewport.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <TracyOpenGL.hpp>
 #include <chrono>
 #include <ctime>
 
@@ -855,16 +854,16 @@ void mainLogCallback(Log::Level level, const char* message) {
     // Remove the trailing \n that is passed along
     switch (level) {
         case Log::Level::Debug:
-            LDEBUGC("SGCT", msg.substr(0, msg.size() - 1));
+            LDEBUGC("SGCT", msg);
             break;
         case Log::Level::Info:
-            LINFOC("SGCT", msg.substr(0, msg.size() - 1));
+            LINFOC("SGCT", msg);
             break;
         case Log::Level::Warning:
-            LWARNINGC("SGCT", msg.substr(0, msg.size() - 1));
+            LWARNINGC("SGCT", msg);
             break;
         case Log::Level::Error:
-            LERRORC("SGCT", msg.substr(0, msg.size() - 1));
+            LERRORC("SGCT", msg);
             break;
 }
 
@@ -1273,7 +1272,7 @@ int main(int argc, char** argv) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     Configuration config = parseArguments(arg);
-    config::Cluster cluster = loadCluster(windowConfiguration);
+    config::Cluster cluster = loadCluster(absPath(windowConfiguration));
 
     Engine::Callbacks callbacks;
     callbacks.initOpenGL = mainInitFunc;
@@ -1293,6 +1292,12 @@ int main(int argc, char** argv) {
 
     try {
         Engine::create(cluster, callbacks, config);
+    }
+    catch (const std::runtime_error& e) {
+        LFATAL("main", e.what());
+        Engine::destroy();
+        global::openSpaceEngine.deinitialize();
+        ghoul::deinitialize();
     }
     catch (...) {
         Engine::destroy();

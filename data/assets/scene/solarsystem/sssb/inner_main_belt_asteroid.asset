@@ -2,9 +2,19 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'inner_main_belt_asteroid', 'sssb_data_inner_main_belt_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_inner_main_belt_asteroid.csv', "Inner Main Asteroid Belt", filepath, { 0.9, 0.3, 0.1 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_inner_main_belt_asteroid.csv', "Inner Main Asteroid Belt", filepath, { 1.0, 1.0, 0.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 1
 object.Renderable.TrailFade = 0.5
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Inner Main Asteroid Belt",
+    Version = "1.0",
+    Description = [[ Asteroids with a semi-major axis less than 2.0 au and a perihelion distance greater than 1.666 au. ]],
+    Author = "JPL Small-Body Database hosted by California Institute of Technology",
+    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+}

@@ -10,7 +10,7 @@ local EarthBarycenter = {
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Target = "EARTH",
+            Target = "EARTH BARYCENTER",
             Observer = "SUN"
         }
     },
@@ -21,10 +21,27 @@ local EarthBarycenter = {
     }
 }
 
+local EarthCenter = {
+    Identifier = "EarthCenter",
+    Parent = EarthBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "EARTH",
+            Observer = "EARTH BARYCENTER"
+        }
+    },
+    GUI = {
+        Name = "Earth Center",
+        Path = "/Solar System/Planets/Earth",
+        Hidden = true
+    }
+}
+
 local EarthInertial = {
     -- The default reference frame for Earth-orbiting satellites
     Identifier = "EarthInertial",
-    Parent = EarthBarycenter.Identifier,
+    Parent = EarthCenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -41,7 +58,7 @@ local EarthInertial = {
 
 local EarthIAU = {
     Identifier = "EarthIAU",
-    Parent = EarthBarycenter.Identifier,
+    Parent = EarthCenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -58,6 +75,7 @@ local EarthIAU = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     EarthBarycenter,
+    EarthCenter,
     EarthInertial,
     EarthIAU
 })

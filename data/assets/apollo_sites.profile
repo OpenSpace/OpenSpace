@@ -3,17 +3,15 @@
 
 #Asset
 scene/solarsystem/planets/earth/moon/moon	required
-scene/solarsystem/missions/apollo/apollo8	required
-scene/solarsystem/missions/apollo/apollo11	required
-scene/solarsystem/missions/apollo/a17_lem	required
+scene/solarsystem/missions/apollo/8/apollo8	required
+scene/solarsystem/missions/apollo/11/apollo11	required
+scene/solarsystem/missions/apollo/17/lem	required
 scene/solarsystem/missions/apollo/apollo_globebrowsing	required
-scene/solarsystem/missions/apollo/apollo_11_lem_flipbook	required
+scene/solarsystem/missions/apollo/11/lem_flipbook	required
 scene/solarsystem/missions/apollo/insignias_map	required
 
 #Property
 setPropertyValueSingle	Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode	0
-setPropertyValueSingle	Scene.Apollo11LemDescentModel.Renderable.RotationVector	{ 273.750,28.0,309.85 }
-setPropertyValueSingle	Scene.Apollo11LemLandedModel.Renderable.RotationVector	{ 273.750,28.0,309.85 }
 setPropertyValueSingle	Scene.Moon.Renderable.PerformShading	false
 
 #Keybinding

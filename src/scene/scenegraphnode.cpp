@@ -735,13 +735,13 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     );
 
     constexpr const double RadiusThreshold = 2.0;
-    const double r = abs(_screenSizeRadius - screenSpaceRadius);
+    const double r = std::fabs(_screenSizeRadius - screenSpaceRadius);
     if (r > RadiusThreshold) {
         _screenSizeRadius = screenSpaceRadius;
     }
 
     constexpr const double ZoomThreshold = 0.1;
-    const double d = abs(_distFromCamToNode - distFromCamToNode);
+    const double d = std::fabs(_distFromCamToNode - distFromCamToNode);
     if (d > (ZoomThreshold * distFromCamToNode)) {
         _distFromCamToNode = distFromCamToNode;
     }
@@ -821,7 +821,7 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
         const glm::dvec3 ws = _parent->worldScale();
         const glm::dvec3 p = position();
 
-        return wp + wrot * ws * p;
+        return wp + wrot * (ws * p);
     }
     else {
         return position();

@@ -36,6 +36,8 @@
 #include <fstream>
 
 namespace {
+    constexpr const char* KeyLazyLoading = "LazyLoading";
+
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -70,6 +72,15 @@ documentation::Documentation RenderablePlaneImageLocal::Documentation() {
                 new StringVerifier,
                 Optional::Yes,
                 RenderableTypeInfo.description
+            },
+            {
+                KeyLazyLoading,
+                new BoolVerifier,
+                Optional::Yes,
+                "If this value is set to 'true', the image for this plane will not be "
+                "loaded at startup but rather when image is shown for the first time. "
+                "Additionally, if the plane is hidden, the image will automatically be "
+                "unloaded"
             }
         }
     };
@@ -116,16 +127,34 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     else {
         setRenderBin(Renderable::RenderBin::Opaque);
     }
+
+    if (dictionary.hasKey(KeyLazyLoading)) {
+        _isLoadingLazily = dictionary.value<bool>(KeyLazyLoading);
+
+        if (_isLoadingLazily) {
+            _enabled.onChange([this]() {
+                if (!_enabled) {
+                    BaseModule::TextureManager.release(_texture);
+                    _texture = nullptr;
+                }
+                if (_enabled) {
+                    _textureIsDirty = true;
+                }
+            });
+        }
+    }
 }
 
 bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady() && (_texture != nullptr);
+    return RenderablePlane::isReady();
 }
 
 void RenderablePlaneImageLocal::initializeGL() {
     RenderablePlane::initializeGL();
 
-    loadTexture();
+    if (!_isLoadingLazily) {
+        loadTexture();
+    }
 }
 
 void RenderablePlaneImageLocal::deinitializeGL() {
@@ -165,8 +194,8 @@ void RenderablePlaneImageLocal::loadTexture() {
                     fmt::format("Loaded texture from '{}'", absPath(path))
                 );
                 texture->uploadTexture();
-
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                texture->purgeFromRAM();
 
                 return texture;
             }

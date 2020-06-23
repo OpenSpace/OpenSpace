@@ -1,0 +1,17 @@
+local kernelsFolder = asset.syncedResource({
+    Name = "Apollo Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_spice",
+    Version = 1
+})
+
+local kernels = {
+    kernelsFolder .. "/moon_080317.tf",
+    kernelsFolder .. "/apollo8.tf",
+    kernelsFolder .. "/moon_pa_de421_1900-2050.bpc",
+    kernelsFolder .. '/apollo8.tsc',
+    kernelsFolder .. '/apollo8.bsp',
+    kernelsFolder .. '/apollo8_earthrise.bc',
+}
+
+asset.export('kernels', kernels)

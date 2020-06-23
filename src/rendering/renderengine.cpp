@@ -111,6 +111,13 @@ namespace {
         "log."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo VerticalLogOffsetInfo = {
+        "VerticalLogOffset",
+        "Vertical Log Offset",
+        "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
+        "is scaled with the vertical resolution"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowVersionInfo = {
         "ShowVersion",
         "Shows the version on-screen information",
@@ -253,6 +260,7 @@ RenderEngine::RenderEngine()
     , _doPerformanceMeasurements(PerformanceInfo)
     , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
     , _showLog(ShowLogInfo, true)
+    , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
     , _applyWarping(ApplyWarpingInfo, false)
@@ -296,6 +304,7 @@ RenderEngine::RenderEngine()
 
     addProperty(_showOverlayOnSlaves);
     addProperty(_showLog);
+    addProperty(_verticalLogOffset);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
 
@@ -517,7 +526,7 @@ void RenderEngine::updateScene() {
     const Time& integrateFromTime = global::timeManager.integrateFromTime();
 
     _scene->update({
-        { glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
+        TransformData{ glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
         currentTime,
         integrateFromTime,
         _doPerformanceMeasurements
@@ -1410,6 +1419,8 @@ void RenderEngine::renderScreenLog() {
         std::make_pair(entries.rbegin(), entries.rbegin() + MaxNumberMessages) :
         std::make_pair(entries.rbegin(), entries.rend());
 
+    const glm::ivec2 fontRes = fontResolution();
+
     size_t nr = 1;
     const auto now = std::chrono::steady_clock::now();
     for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
@@ -1439,7 +1450,10 @@ void RenderEngine::renderScreenLog() {
 
         RenderFont(
             *_fontLog,
-            glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
+            glm::vec2(
+                10.f,
+                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+            ),
             fmt::format(
                 "{:<15} {}{}",
                 e->timeString,
@@ -1470,14 +1484,20 @@ void RenderEngine::renderScreenLog() {
 
         RenderFont(
             *_fontLog,
-            glm::vec2(10 + 30 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
+            glm::vec2(
+                10 + 30 * _fontLog->pointSize(),
+                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+            ),
             lvl,
             color
         );
 
         RenderFont(
             *_fontLog,
-            glm::vec2(10 + 41 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
+            glm::vec2(
+                10 + 41 * _fontLog->pointSize(),
+                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+            ),
             message,
             white
         );
