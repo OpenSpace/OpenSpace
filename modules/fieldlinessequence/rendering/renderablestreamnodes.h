@@ -228,6 +228,8 @@ namespace openspace {
         void computeSequenceEndTime();
         void setModelDependentConstants();
 
+        void WritecachedFile();
+        void ReadcachedFile();
         bool LoadfilesintoRam();
 
             // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
