@@ -398,14 +398,17 @@ namespace openspace {
 
         LDEBUG("filepath i init: " + std::to_string(_sourceFiles.size()));
         if (!_loadingStatesDynamically) {
-            LoadfilesintoRam();
+              LoadfilesintoRam();
+                //when we have got it working we should readcachedfile instead of loadig in files to ram.
+              //ReadcachedFile("StreamnodesCachePos2");
         }
+        //we should writecachedfile if we loadintoram and need a new cache file. 
+       // WritecachedFile("StreamnodesCachePos2");
         std::string filepath = _sourceFiles[0];
        
         //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
         //std::vector<std::string> vec = LoadJsonfile(filepath);
         // Setup shader program
-        computeSequenceEndTime();
         _shaderProgram = global::renderEngine.buildRenderProgram(
             "Streamnodes",
             absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
@@ -554,69 +557,138 @@ namespace openspace {
         return true;
     }
 
-    void RenderableStreamNodes::WritecachedFile() {
-        //Todo, write all of the vertexobjects into here
-        std::ofstream fileStream("StreamnodesCache", std::ofstream::binary);
+    void RenderableStreamNodes::WritecachedFile(const std::string& file) const {
+        //Todo, write all of the vertexobjects into here 
+       std::ofstream fileStream(file, std::ofstream::binary);
 
+        //std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        //    file,
+        //    ghoul::filesystem::CacheManager::Persistent::Yes
+        //);
+        //std::ofstream fileStream(file);
         if (!fileStream.good()) {
             LERROR(fmt::format("Error opening file '{}' for save cache file"), "StreamnodesCache");
             return;
         }
-        
+
         fileStream.write(
             reinterpret_cast<const char*>(&CurrentCacheVersion),
             sizeof(int8_t)
         );
         
 
-        int32_t nValues = static_cast<int32_t>(_statesPos.size());
+
+        //long long int nValues = static_cast<long long int>(_statesIndex[0].size());
+        int32_t nValues = static_cast<int32_t>(_statesIndex[0].size() * _statesIndex.size());
         if (nValues == 0) {
             throw ghoul::RuntimeError("Error writing cache: No values were loaded");
             return;
         }
+        //int32_t nValuesvec = nValues * static_cast<int32_t>(_statesIndex[0].size());
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+        //LDEBUG("filestreamtest: " + std::to_string(nValues));
+        
+        //fileStream.write("34", sizeof(long long int));
+        //nValues = nValues * static_cast<int32_t>(_statesColor[0].size());
+        LDEBUG("nvalues statesPos" + std::to_string(_statesPos.size()));
+        LDEBUG("nvalues statesPos2" + std::to_string(_statesColor.size()));
+        LDEBUG("nvalues statesPos3" + std::to_string(_statesRadius.size()));
+        LDEBUG("nvalues statesPos4" + std::to_string(_statesIndex.size()));
+        LDEBUG("nvalues statesPos[0] size" + std::to_string(_statesPos[0].size()));
 
-        size_t nBytes = nValues * sizeof(_statesPos.size());
-        fileStream.write(reinterpret_cast<const char*>(_vertexPositions.data()), nBytes);
-        //fileStream.write(reinterpret_cast<const char*>(_vertexColor.data()), nBytes);
-        //fileStream.write(reinterpret_cast<const char*>(_vertexRadius.data()), nBytes);
-        //fileStream.write(reinterpret_cast<const char*>(_vertexIndex.data()), nBytes);
+        for(int i = 0; i < _nStates; ++i){
+            LDEBUG("sizeof" + std::to_string(sizeof(_statesIndex[i])));
+        size_t nBytesIndex = nValues * sizeof(_statesIndex[i]);
+        fileStream.write(reinterpret_cast<const char*>(_statesIndex[i].data()), nBytesIndex);
+        }
+        //size_t nBytesPos = nValuesvec * sizeof(_statesIndex[0].size());
+        //LDEBUG("nbytesPos " + std::to_string(nBytesPos));
+        //fileStream.write(reinterpret_cast<const char*>(_statesIndex.data()), nBytesPos);
+        
+
+
+
+       // size_t nBytesRadius = nValues * sizeof(_statesRadius[0].size());
+        
+       
+        
+        //fileStream.write(reinterpret_cast<const char*>(_statesRadius.data()), nBytesRadius);
+        //fileStream.write(reinterpret_cast<const char*>(_statesIndex.data()), nBytesIndex);
 
         //for(int i = 0; i < _statesPos.size(); )
 
+        //fileStream.close();
+        //fileStream.clear();
+
     }
 
-    bool RenderableStreamNodes::ReadcachedFile() {
-        const std::string& file = "StreamnodesCache";
-        std::ifstream fileStream("StreamnodesCache", std::ifstream::binary);
+    bool RenderableStreamNodes::ReadcachedFile(const std::string& file) const {
+       // const std::string& file = "StreamnodesCache";
+        std::ifstream fileStream("StreamnodesCachePos2", std::ifstream::binary);
         if (fileStream.good()) {
             int8_t version = 0;
             fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
             if (version != CurrentCacheVersion) {
                 LINFO("The format of the cached file has changed: deleting old cache");
                 fileStream.close();
-                FileSys.deleteFile(file);
+                // FileSys.deleteFile(file);
                 return false;
             }
+            LDEBUG("testar int8" + std::to_string(version));
+            int32_t nValuesvec = 0;
+            fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+            LDEBUG("testar int32 size" + std::to_string(nValuesvec));
 
-            int32_t nValues = 0;
-            fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+            //    std::ifstream fileStream2("StreamnodesCacheColor", std::ifstream::binary);
+            //    std::ifstream fileStream3("StreamnodesCacheRadius", std::ifstream::binary);
+            //    std::ifstream fileStream4("StreamnodesCacheIndex", std::ifstream::binary);
+            //    fileStream2.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+            //    fileStream3.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+            //    fileStream4.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+            //    int32_t nValuesvec = 0;
+            //    fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+            //    int32_t nValues = 0;
+            //    fileStream2.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+            //    fileStream3.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+            //    fileStream4.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
 
-            _statesPos.resize(nValues);
-            
-            fileStream.read(reinterpret_cast<char*>(
-                _statesPos.data()),
-                nValues * sizeof(_statesPos[0])
-            );
-            bool success = fileStream.good();
-            return success;
+            //    _statesPos.resize(nValuesvec);
+            //    _statesColor.resize(nValues);
+            //    _statesRadius.resize(nValues);
+            //    _statesIndex.resize(nValues);
+            //    
+            //    fileStream.read(reinterpret_cast<char*>(
+            //        _statesPos.data()),
+            //        nValuesvec * sizeof(_statesPos[0])
+            //    );
+            //    fileStream2.read(reinterpret_cast<char*>(
+            //        _statesColor.data()),
+            //        nValues * sizeof(_statesColor[0])
+            //    );
 
+            //    fileStream3.read(reinterpret_cast<char*>(
+            //        _statesRadius.data()),
+            //        nValues * sizeof(_statesRadius[0])
+            //    );
+            //    fileStream4.read(reinterpret_cast<char*>(
+            //        _statesIndex.data()),
+            //        nValues * sizeof(_statesIndex[0])
+            //    );
+
+            //    //LDEBUG("_statesindex" + std::to_string(_statesRadius[0][0]));
+
+            //    bool success = fileStream.good();
+            //    LDEBUG("_statesPos size: " + std::to_string(_statesPos.size()));
+            //    //LDEBUG("_statesIndex" + std::to_string(_statesRadius[0].data()));
+            //    return success;
+
+
+            //}
+            //else {
+            //   // LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+            //    return false;
+            //}
         }
-        else {
-            LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-            return false;
-        }
-
         return false;
     }
     /**

@@ -91,7 +91,7 @@ namespace openspace {
     // ------------------------------------- FLAGS -------------------------------------//
     // False => states are stored in RAM (using 'in-RAM-states'), True => states are
     // loaded from disk during runtime (using 'runtime-states')
-        bool _loadingStatesDynamically = true;
+        bool _loadingStatesDynamically = false;
 
         // False => the previous frame's state should still be shown
         bool _needsUpdate = false;
@@ -115,7 +115,7 @@ namespace openspace {
         // Estimated end of sequence.
         double _sequenceEndTime;
         // Number of states in the sequence
-        size_t _nStates = 274;
+        size_t _nStates = 2;
 
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions
@@ -154,8 +154,9 @@ namespace openspace {
         properties::PropertyOwner _pNodesamountGroup;
         // Size of simulated node particles
         properties::FloatProperty _pNodeSize;
-        // Size of simulated node particles with larger flux value
+
         properties::FloatProperty _pNodeSizeLargerFlux;
+
         /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;
         ////////////////
@@ -228,8 +229,8 @@ namespace openspace {
         void computeSequenceEndTime();
         void setModelDependentConstants();
 
-        void WritecachedFile();
-        void ReadcachedFile();
+        void WritecachedFile(const std::string& file) const;
+        bool ReadcachedFile(const std::string& file) const;
         bool LoadfilesintoRam();
 
             // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
