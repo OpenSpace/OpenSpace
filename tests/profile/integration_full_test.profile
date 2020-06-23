@@ -1,6 +1,14 @@
 #Version
 22.21
 
+#Meta
+Name	name
+Version	version
+Description	description
+Author	author
+URL	url
+License	license
+
 #Module
 abc-module		
 def-module		

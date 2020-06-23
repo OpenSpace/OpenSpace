@@ -50,6 +50,14 @@ public:
         std::string loadedInstruction;
         std::string notLoadedInstruction;
     };
+    struct Meta {
+        std::string name;
+        std::string version;
+        std::string description;
+        std::string author;
+        std::string url;
+        std::string license;
+    };
     struct Asset {
         std::string path;
         std::string name;
@@ -138,6 +146,7 @@ private:
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
+    std::optional<Meta> meta;
     std::vector<Asset> assets;
     std::vector<Property> properties;
     std::vector<Keybinding> keybindings;

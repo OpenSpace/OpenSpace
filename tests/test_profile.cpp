@@ -98,6 +98,16 @@ TEST_CASE("Basic Version Two Components", "[profile]") {
     REQUIRE(serialized == contents);
 }
 
+TEST_CASE("Basic Meta", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_meta.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
 TEST_CASE("Basic Module", "[profile]") {
     constexpr const char* TestFile = "${TESTDIR}/profile/basic_modules.profile";
     Profile p = loadProfile(TestFile);
@@ -494,6 +504,16 @@ TEST_CASE("Error two version sections", "[profile]") {
         Catch::Matchers::Contains("Version section can only appear once per profile")
     );
 }
+
+TEST_CASE("Error two meta sections", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_two_meta_sections.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains("Meta section can only appear once per profile")
+    );
+}
+
 
 TEST_CASE("Error two camera sections", "[profile]") {
     constexpr const char* TestFile =

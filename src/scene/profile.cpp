@@ -39,6 +39,7 @@ namespace {
     constexpr const char* _loggerCat = "Profile";
     
     constexpr const char* headerVersion = "#Version";
+    constexpr const char* headerMeta = "#Meta";
     constexpr const char* headerModule = "#Module";
     constexpr const char* headerAsset = "#Asset";
     constexpr const char* headerProperty = "#Property";
@@ -84,6 +85,7 @@ namespace {
     enum class Section {
         None,
         Version,
+        Meta,
         Module,
         Asset,
         Property,
@@ -94,13 +96,9 @@ namespace {
         AdditionalScripts
     };
 
-    //struct ParsingContext {
-    //    std::string filename;
-    //    int lineNumber;
-    //};
-
     Section parseSection(const std::string& line, int lineNumber) {
         if (line == headerVersion) { return Section::Version; }
+        if (line == headerMeta) { return Section::Meta; }
         if (line == headerModule) { return Section::Module; }
         if (line == headerAsset) { return Section::Asset; }
         if (line == headerProperty) { return Section::Property; }
@@ -160,6 +158,60 @@ namespace {
         m.loadedInstruction = fields[1];
         m.notLoadedInstruction = fields[2];
         return m;
+    }
+
+    enum class MetaLineType {
+        Name,
+        Version,
+        Description,
+        Author,
+        URL,
+        License
+    };
+
+    [[ nodiscard ]] std::pair<MetaLineType, std::string> parseMeta(
+                                                                   const std::string& line,
+                                                                           int lineNumber)
+    {
+        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
+        if (fields.size() < 2) {
+            throw ProfileParsingError(
+                lineNumber,
+                fmt::format("Expected 2 fields in a Meta line, got {}", fields.size())
+            );
+        }
+
+        const std::string type = fields[0];
+
+        // Users are allowed to use \t in their lines, meaning that the fields could
+        // contain more than the 2 elements that we expected
+        fields.erase(fields.begin());
+        const std::string content = ghoul::join(fields, "\t");
+
+        if (type == "Name") {
+            return { MetaLineType::Name, content };
+        }
+        else if (type == "Version") {
+            return { MetaLineType::Version, content };
+        }
+        else if (type == "Description") {
+            return { MetaLineType::Description, content };
+        }
+        else if (type == "Author") {
+            return { MetaLineType::Author, content };
+        }
+        else if (type == "URL") {
+            return { MetaLineType::URL, content };
+        }
+        else if (type == "License") {
+            return { MetaLineType::License, content };
+        }
+        else {
+            throw ProfileParsingError(
+                lineNumber,
+                fmt::format("Unknown meta line type '{}'", type)
+            );
+        }
     }
 
     [[ nodiscard ]] Profile::Asset parseAsset(const std::string& line, int lineNumber) {
@@ -514,6 +566,28 @@ std::string Profile::serialize() const {
     output += fmt::format("{}\n", headerVersion);
     output += fmt::format("{}.{}\n", version.major, version.minor);
 
+    if (meta.has_value()) {
+        output += fmt::format("\n{}\n", headerMeta);
+        if (!meta->name.empty()) {
+            output += fmt::format("Name\t{}\n", meta->name);
+        }
+        if (!meta->version.empty()) {
+            output += fmt::format("Version\t{}\n", meta->version);
+        }
+        if (!meta->description.empty()) {
+            output += fmt::format("Description\t{}\n", meta->description);
+        }
+        if (!meta->author.empty()) {
+            output += fmt::format("Author\t{}\n", meta->author);
+        }
+        if (!meta->url.empty()) {
+            output += fmt::format("URL\t{}\n", meta->url);
+        }
+        if (!meta->license.empty()) {
+            output += fmt::format("License\t{}\n", meta->license);
+        }
+    }
+
     if (!modules.empty()) {
         output += fmt::format("\n{}\n", headerModule);
         for (const Module& m : modules) {
@@ -644,6 +718,7 @@ std::string Profile::serialize() const {
 Profile::Profile(const std::vector<std::string>& content) {
     Section currentSection = Section::None;
     bool foundVersion = false;
+    bool foundMeta = false;
     bool foundTime = false;
     bool foundCamera = false;
 
@@ -685,6 +760,81 @@ Profile::Profile(const std::vector<std::string>& content) {
                 version = parseVersion(line, lineNum);
                 foundVersion = true;
                 break;
+            case Section::Meta:
+            {
+                if (foundMeta) {
+                    throw ProfileParsingError(
+                        lineNum,
+                        "Meta section can only appear once per profile"
+                    );
+                }
+
+                if (!meta.has_value()) {
+                    meta = Meta();
+                }
+
+                std::pair<MetaLineType, std::string> m = parseMeta(line, lineNum);
+                switch (m.first) {
+                    case MetaLineType::Name:
+                        if (!meta->name.empty()) {
+                            throw ProfileParsingError(
+                                lineNum,
+                                "Meta information 'Name' specified twice"
+                            );
+                        }
+                        meta->name = m.second;
+                        break;
+                    case MetaLineType::Version:
+                        if (!meta->version.empty()) {
+                            throw ProfileParsingError(
+                                lineNum,
+                                "Meta information 'Version' specified twice"
+                            );
+                        }
+                        meta->version = m.second;
+                        break;
+                    case MetaLineType::Description:
+                        if (!meta->description.empty()) {
+                            throw ProfileParsingError(
+                                lineNum,
+                                "Meta information 'Description' specified twice"
+                            );
+                        }
+                        meta->description = m.second;
+                        break;
+                    case MetaLineType::Author:
+                        if (!meta->author.empty()) {
+                            throw ProfileParsingError(
+                                lineNum,
+                                "Meta information 'Author' specified twice"
+                            );
+                        }
+                        meta->author = m.second;
+                        break;
+                    case MetaLineType::URL:
+                        if (!meta->url.empty()) {
+                            throw ProfileParsingError(
+                                lineNum,
+                                "Meta information 'URL' specified twice"
+                            );
+                        }
+                        meta->url = m.second;
+                        break;
+                    case MetaLineType::License:
+                        if (!meta->license.empty()) {
+                            throw ProfileParsingError(
+                                lineNum,
+                                "Meta information 'License' specified twice"
+                            );
+                        }
+                        meta->license = m.second;
+                        break;
+                    default:
+                        throw ghoul::MissingCaseException();
+                }
+                foundMeta = true;
+                break;
+            }
             case Section::Module:
             {
                 Module m = parseModule(line, lineNum);
@@ -759,6 +909,30 @@ std::string Profile::convertToScene() const {
     ZoneScoped
 
     std::string output;
+
+    if (meta.has_value()) {
+        output += "asset.meta = {";
+        if (!meta->name.empty()) {
+            output += fmt::format("  Name = {},", meta->name);
+        }
+        if (!meta->version.empty()) {
+            output += fmt::format("  Version = {},", meta->version);
+        }
+        if (!meta->description.empty()) {
+            output += fmt::format("  Description = {},", meta->description);
+        }
+        if (!meta->author.empty()) {
+            output += fmt::format("  Author = {},", meta->author);
+        }
+        if (!meta->url.empty()) {
+            output += fmt::format("  URL = {},", meta->url);
+        }
+        if (!meta->license.empty()) {
+            output += fmt::format("  License = {},", meta->license);
+        }
+
+        output += "}";
+    }
 
     // Modules
     for (const Module& m : modules) {

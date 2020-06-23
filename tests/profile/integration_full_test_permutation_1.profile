@@ -34,6 +34,14 @@ folder1/folder2/asset
 folder3/folder4/asset2	variable
 folder5/folder6/asset3	
 
+#Meta
+Name	name
+Version	version
+Description	description
+Author	author
+URL	url
+License	license
+
 #Keybinding
 T	T documentation	T name	T Gui-Path	true	T script
 U	U documentation	U name	U Gui-Path	false	U script
