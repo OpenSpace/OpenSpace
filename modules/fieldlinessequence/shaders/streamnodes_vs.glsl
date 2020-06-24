@@ -54,11 +54,18 @@ uniform vec2      domainLimR;
 
 // Streamnodes specific uniforms
 uniform float nodeSize;
+uniform float nodeSizeLargerFlux;
 uniform vec4 streamColor;
-uniform float thresholdRadius;
+uniform float thresholdFlux;
 uniform float filterRadius;
 uniform float filterUpper;
 uniform int ScalingMode;
+uniform int NodeskipMethod;
+uniform int Nodeskip;
+uniform int Nodeskipdefault;
+uniform float NodeskipFluxThreshold;
+uniform float NodeskipRadiusThreshold;
+uniform float fluxColorAlpha;
 
 // Inputs
 // Should be provided in meters
@@ -73,10 +80,18 @@ layout(location = 1) in float fluxValue;
 layout(location = 2)
 in float rValue;
 
+// The vertex index of every node. Location must correspond to 
+// _VA_INDEX in renderableStreamNodes.h
+layout(location = 3)
+in int nodeIndex;
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
 const int uniformColor     = 0;
 const int colorByFluxValue  = 1;
+
+const int uniformskip = 0;
+const int Fluxskip = 1;
+const int Radiusskip = 2;
 
 const int Fluxmode = 0;
 const int RFlux = 1;
@@ -107,11 +122,12 @@ vec4 getTransferFunctionColor() {
     else if(ScalingMode == R2Flux){
         scalevalue = rValue * rValue * fluxValue;
     }
-    if(scalevalue > thresholdRadius){
+
+    //if(scalevalue > thresholdFlux){
         float lookUpVal = (scalevalue - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
         return texture(colorTable, lookUpVal);
-    }
-    return vec4(0);
+    //}
+   // return vec4(0);
 }
 
 bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
@@ -119,19 +135,51 @@ bool isPartOfParticle(const double time, const int vertexId, const int particleS
     int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
     return modulusResult > 0 && modulusResult <= particleSize;
 }
+bool CheckvertexIndex(){
+    if(NodeskipMethod == uniformskip){
+        
+        if(mod(nodeIndex, Nodeskip) == 0){
+        return true;
+        }
+    }
+    else if(NodeskipMethod == Fluxskip){
+        
+        if(fluxValue > NodeskipFluxThreshold && mod(nodeIndex, Nodeskip) == 0){
+        return true;
+        }
+        if(fluxValue < NodeskipFluxThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
+        return true;
+        }
+    }
+    else if(NodeskipMethod == Radiusskip){
+        if(rValue < NodeskipRadiusThreshold && mod(nodeIndex, Nodeskip) == 0){
+        return true;
+        }
+        if(rValue > NodeskipRadiusThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
+        return true;
+        }
+    }
+    return false;
+}
 
 void main() {
 
     //vs_color = streamColor;
-
+    if(CheckvertexIndex()){
     if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
         if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
             if(colorMode == 0){
                 vs_color = streamColor;
             }
-            else if (colorMode == 1){
-                vec4 quantityColor = getTransferFunctionColor();
-                vs_color = vec4(quantityColor.xyz, quantityColor.w);
+            else{ //else if (colorMode == 1){
+                vec4 fluxColor = getTransferFunctionColor();
+
+                if(fluxValue > thresholdFlux){
+                    vs_color = vec4(fluxColor.xyz, fluxColor.w);                
+                }
+                else{
+                    vs_color = vec4(fluxColor.xyz, fluxColorAlpha);   
+                }
             }
         }
         else{
@@ -140,15 +188,28 @@ void main() {
         }
     else{
         vs_color = vec4(0);
+        }
+    }
+    else{
+        vs_color = vec4(0);
     }
 
-    //if(rValue > thresholdRadius){
+    //if(rValue > thresholdFlux){
     //  vs_color = vec4(0);
     //}
+
+    if(fluxValue < thresholdFlux){
+        gl_PointSize = nodeSize;
+    }
+    else{
+        gl_PointSize = nodeSizeLargerFlux;
+    }
 
         vec4 position_in_meters = vec4(in_position, 1);
         vec4 positionClipSpace = modelViewProjection * position_in_meters;
         //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+        
+        //gl_PointSize = nodeSize;
         gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
 
         vs_depth = gl_Position.w;

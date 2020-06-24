@@ -76,8 +76,13 @@ namespace openspace {
             log10RFlux = 3,
             lnRFlux = 4
         };
+        enum class NodeskipMethod : int {
+            Uniform = 0,
+            Flux = 1,
+            Radius = 2
+        };
 
-        UniformCache(streamColor, usingParticles, nodeSize, thresholdRadius)
+        UniformCache(streamColor, usingParticles, nodeSize, nodeSizeLargerFlux, thresholdFlux)
             _uniformCache;
 
         // ------------------------------------ STRINGS ------------------------------------//
@@ -95,6 +100,7 @@ namespace openspace {
         std::atomic_bool _newStateIsReady = false;
         bool _isLoadingStateFromDisk = false;
         bool _mustLoadNewStateFromDisk = true;
+        bool _loadingcachedfile = true;
         // --------------------------------- NUMERICALS ----------------------------------- //
         // In setup it is used to scale JSON coordinates. During runtime it is used to scale
         // domain limits.
@@ -110,7 +116,7 @@ namespace openspace {
         // Estimated end of sequence.
         double _sequenceEndTime;
         // Number of states in the sequence
-        size_t _nStates = 274;
+        size_t _nStates = 2;
 
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions
@@ -120,6 +126,8 @@ namespace openspace {
         GLuint _vertexColorBuffer = 0;
         // OpenGL Vertex Buffer Object containing the positions to filter the nodes
         GLuint _vertexFilteringBuffer = 0;
+        // OpenGL Vertex Buffer Object containing the index of nodes
+        GLuint _vertexindexBuffer = 0;
         // ---------------------------------- Properties ---------------------------------- //
         // Group to hold the color properties
         properties::PropertyOwner _pColorGroup;
@@ -127,10 +135,12 @@ namespace openspace {
         properties::OptionProperty _pColorMode;
         // Scaling options
         properties::OptionProperty _pScalingmethod;
+        // Nodeskipping options
+        properties::OptionProperty _pNodeskipMethod;
         // Uniform stream Color
         properties::Vec4Property _pStreamColor;
         // Index of the flux value to color lines by
-        //properties::OptionProperty _pColorFlux;
+        properties::OptionProperty _pColorFlux;
         // Color table/transfer function min
         //properties::StringProperty _pColorFluxMin;
         // Color table/transfer function max
@@ -141,8 +151,13 @@ namespace openspace {
         properties::BoolProperty _pStreamsEnabled;
         // Group to hold the flow/particle properties
         properties::PropertyOwner _pStreamGroup;
+
+        properties::PropertyOwner _pNodesamountGroup;
         // Size of simulated node particles
         properties::FloatProperty _pNodeSize;
+
+        properties::FloatProperty _pNodeSizeLargerFlux;
+
         /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;
         ////////////////
@@ -150,11 +165,21 @@ namespace openspace {
         ////////////////
         properties::Vec2Property _pDomainZ;
         /// ///////////
-        properties::FloatProperty _pThresholdRadius;
+        properties::FloatProperty _pThresholdFlux;
         // Filtering nodes within a range
         properties::FloatProperty _pFiltering;
         // Filtering nodes with a upper range
         properties::FloatProperty _pFilteringUpper;
+        //Amount of nodes to show
+        properties::IntProperty _pAmountofNodes;
+        ////////////////
+        properties::FloatProperty _pFluxColorAlpha;
+
+        properties::FloatProperty _pFluxNodeskipThreshold;
+
+        properties::FloatProperty _pRadiusNodeSkipThreshold;
+
+        properties::IntProperty _pDefaultNodeSkip;
 
         // initialization
         std::vector<std::string> _sourceFiles;
@@ -168,14 +193,24 @@ namespace openspace {
         std::vector<double> _startTimes;
         // Contains vertexPositions
         std::vector<glm::vec3> _vertexPositions;
+        ///////
+        std::vector<float> _vertexposX;
+        std::vector<float> _vertexposY;
+        std::vector<float> _vertexposZ;
         // Contains vertex flux values for color
         std::vector<float> _vertexColor;
         // Contains vertexRedius
         std::vector<float> _vertexRadius;
+        // Contains VertexIndex
+        std::vector<int> _vertexIndex;
 
         std::vector<std::vector<glm::vec3>> _statesPos;
+        std::vector<std::vector<float>> _statesPosX;
+        std::vector<std::vector<float>> _statesPosY;
+        std::vector<std::vector<float>> _statesPosZ;
         std::vector<std::vector<float>> _statesColor;
         std::vector<std::vector<float>> _statesRadius;
+        std::vector<std::vector<int>> _statesIndex;
         // ----------------------------------- POINTERS ------------------------------------//
         // The Lua-Modfile-Dictionary used during initialization
         std::unique_ptr<ghoul::Dictionary> _dictionary;
@@ -197,10 +232,13 @@ namespace openspace {
         void updatePositionBuffer();
         void updateVertexColorBuffer();
         void updateVertexFilteringBuffer();
+        void updateVertexIndexBuffer();
         void extractTriggerTimesFromFileNames();
         void computeSequenceEndTime();
         void setModelDependentConstants();
 
+        void WritecachedFile(const std::string& file) const;
+        bool ReadcachedFile(const std::string& file);
         bool LoadfilesintoRam();
 
             // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //

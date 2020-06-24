@@ -58,6 +58,10 @@ namespace {
     constexpr const GLuint VaPosition   = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaColor      = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaFiltering  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaIndex      = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
+
+
+    constexpr int8_t CurrentCacheVersion = 1;
 
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
@@ -125,7 +129,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "colorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring."
+        "Color Table/Transfer Function to use for 'By Flux Value' coloring."
     };
     // Size of simulated flow particles
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
@@ -144,31 +148,51 @@ namespace {
        "Size of nodes",
        "Change the size of the nodes"
     };
+    constexpr openspace::properties::Property::PropertyInfo NodeSizeLargerFluxInfo = {
+       "nodeSizeLargerFlux",
+       "Size of nodes for larger flux",
+       "Change the size of the nodes when flux is larger than flux threshold value"
+    };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
        "lineWidth",
        "Line Width",
        "This value specifies the line width of the field lines if the "
        "selected rendering method includes lines."
     };
-    constexpr openspace::properties::Property::PropertyInfo ThresholdRadiusInfo = {
-       "thresholdRadius",
-       "Threshold flux scaling",
-       "This value specifies the threshold that will be changed with the radius."
+    constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
+       "thresholdFlux",
+       "Threshold flux value",
+       "This value specifies the threshold that will be changed with the flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
-        "filtering",
+        "filteringlower",
         "FilteringLower in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
-        "filtering2",
+        "filteringupper",
         "FilteringUpper in AU",
         "Use filtering to show nodes within a given range."
+    };
+    constexpr openspace::properties::Property::PropertyInfo AmountofNodesInfo = {
+        "AmountofNodes",
+        "Every nth node to render in",
+        "Show only every nth node"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DefaultNodeSkipInfo = {
+       "NodeSkipInfo",
+       "Every nth node to render default",
+       "Show only every nth node outside of skippingmethod"
     };
     constexpr openspace::properties::Property::PropertyInfo ScalingmethodInfo = {
           "Scaling flux",
           "Scale the flux value with colortable",
           "Use scaling to color nodes with a given method."
+    };
+    constexpr openspace::properties::Property::PropertyInfo NodeskipMethodInfo = {
+         "Skipping Nodes",
+         "How to select nodes to skip",
+         "Methods to select nodes to skip."
     };
     constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
         "colorTableRange",
@@ -179,6 +203,21 @@ namespace {
         "limitsZLower",
         "Z-limits Lower",
         "Valid range along the Z-axis. [Min, Max]"
+    };
+    constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaInfo = {
+        "fluxColorAlpha",
+        "Flux Color Alpha",
+        "The value of alpha for the flux color mode"
+    };
+    constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
+        "Skipping Nodes by Flux",
+        "Select nodes to skip by flux",
+        "Skip nodes by Flux"
+    };
+    constexpr openspace::properties::Property::PropertyInfo RadiusNodeSkipThresholdInfo = {
+        "Skipping Nodes by Radius",
+        "Select nodes to skip by Radius",
+        "Skip nodes by Radius"
     };
     enum class SourceFileType : int {
         Json = 0,
@@ -240,7 +279,8 @@ namespace openspace {
         , _pColorGroup({ "Color" })
         , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
         , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
-        //, _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
+        , _pNodeskipMethod(NodeskipMethodInfo, OptionProperty::DisplayType::Radio)
+        , _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
         //, _pColorFluxMin(ColorFluxMinInfo)
         //, _pColorFluxMax(ColorFluxMaxInfo)
         , _pColorTablePath(ColorTablePathInfo)
@@ -250,18 +290,22 @@ namespace openspace {
             glm::vec4(1.f))
         , _pStreamsEnabled(StreamsenabledInfo, true)
         , _pStreamGroup({ "Streams" })
-        , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 20.f)
+        , _pNodesamountGroup({ "NodeGroup" })
+        , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
+        , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         , _pColorTableRange(colorTableRangeInfo)
         , _pDomainZ(DomainZInfo)
-        //, _pThresholdRadius(ThresholdRadiusInfo, -2.f, -5.f, 5.f)
-        //, _pThresholdRadius(ThresholdRadiusInfo, 100000000000.f, -500000000000.f, 400000000000.f)
-        , _pThresholdRadius(ThresholdRadiusInfo, -10.f, -10.f, 10.f)
-
+        , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
+        , _pThresholdFlux(ThresholdFluxInfo, -20.f, -20.f, 10.f)
        // , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
        // , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
         , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
         , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
+        , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
+        , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
+        , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
+        , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
 
         
     {
@@ -269,9 +313,18 @@ namespace openspace {
     }
 
     void RenderableStreamNodes::definePropertyCallbackFunctions() {
-            _pColorTablePath = _colorTablePaths[0];
+            /*_pColorTablePath = _colorTablePaths[0];
             _transferFunction->setPath(_pColorTablePath);
-            _colorTablePaths[0] = _pColorTablePath;    
+            _colorTablePaths[0] = _pColorTablePath;*/ 
+
+            _pColorFlux.onChange([this] {
+                _pColorTablePath = _colorTablePaths[_pColorFlux];
+            });
+
+            _pColorTablePath.onChange([this] {
+                _transferFunction->setPath(_pColorTablePath);
+                _colorTablePaths[_pColorFlux] = _pColorTablePath;
+                });
     }
 
     void RenderableStreamNodes::setModelDependentConstants() {
@@ -342,16 +395,27 @@ namespace openspace {
        
         extractTriggerTimesFromFileNames();
         computeSequenceEndTime();
+        //std::string filepath = _sourceFiles[0];
+
+        //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
+      //  std::vector<std::string> vec = LoadJsonfile(filepath);
+
         LDEBUG("filepath i init: " + std::to_string(_sourceFiles.size()));
         if (!_loadingStatesDynamically) {
-            LoadfilesintoRam();
+            if(!_loadingcachedfile){
+              LoadfilesintoRam();
+              WritecachedFile("StreamnodesCacheindex");
+            }
+            else {
+                ReadcachedFile("StreamnodesCacheindex");
+            }
+                //when we have got it working we should readcachedfile instead of loadig in files to ram.
+            
         }
-        std::string filepath = _sourceFiles[0];
+        //we should writecachedfile if we loadintoram and need a new cache file. 
+        
        
-        //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
-        //std::vector<std::string> vec = LoadJsonfile(filepath);
         // Setup shader program
-        computeSequenceEndTime();
         _shaderProgram = global::renderEngine.buildRenderProgram(
             "Streamnodes",
             absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
@@ -361,19 +425,21 @@ namespace openspace {
         _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
         _uniformCache.usingParticles = _shaderProgram->uniformLocation("usingParticles");
         _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
-        _uniformCache.thresholdRadius = _shaderProgram->uniformLocation("thresholdRadius");
+        _uniformCache.nodeSizeLargerFlux = _shaderProgram->uniformLocation("nodeSizeLargerFlux");
+        _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
         glGenVertexArrays(1, &_vertexArrayObject);
         glGenBuffers(1, &_vertexPositionBuffer);
         glGenBuffers(1, &_vertexColorBuffer);
         glGenBuffers(1, &_vertexFilteringBuffer);
+        glGenBuffers(1, &_vertexindexBuffer);
 
         // Probably not needed, seems to be needed for additive blending
         //setRenderBin(Renderable::RenderBin::Overlay);
     }
 
     bool RenderableStreamNodes::LoadfilesintoRam() {
-        size_t filesnumbers = 270;
+        //size_t filesnumbers = 270;
         for (size_t j = 0; j < _nStates; ++j) {
             
             std::ifstream streamdata(_sourceFiles[j]);
@@ -403,7 +469,12 @@ namespace openspace {
             _lineStart.clear();
             _vertexRadius.clear();
             _vertexColor.clear();
+            _vertexIndex.clear();
+            _vertexposX.clear();
+            _vertexposY.clear();
+            _vertexposZ.clear();
             int counter = 0;
+            int NodeIndexCounter = 0;
 
             const size_t nPoints = 1;
             for (int i = 0; i < numberofStreams; ++i) {
@@ -418,6 +489,8 @@ namespace openspace {
                     break;
                 }
                 */
+             
+                NodeIndexCounter = 0;
 
                 for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                     lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
@@ -440,6 +513,8 @@ namespace openspace {
                     float rTimesFluxValue = fluxValue;
                     _vertexColor.push_back(rTimesFluxValue);
                     _vertexRadius.push_back(rValue);
+                    _vertexIndex.push_back(NodeIndexCounter);
+                    NodeIndexCounter++;
                     rValue = rValue * AuToMeter;
 
                     //if(thetaValue > 1.4 && thetaValue < 1.6){
@@ -458,6 +533,9 @@ namespace openspace {
                     //position.x = position.x * AuToMeter;
                     //position.y = position.y * AuToMeter;
                     //position.z = position.z * AuToMeter;
+                    _vertexposX.push_back(position.x);
+                    _vertexposY.push_back(position.y);
+                    _vertexposZ.push_back(position.z);
                     _vertexPositions.push_back(
                         position);
                     ++counter;
@@ -468,27 +546,286 @@ namespace openspace {
 
                     
 
-                    int skipcounter = 0;
-                    int nodeskipn = 10;
+                  //  int skipcounter = 0;
+                  //  int nodeskipn = 10;
                     
-                    while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
-                        ++lineIter;
-                        ++skipcounter;
-                    }
+                  //  while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
+                  //      ++lineIter;
+                  //      ++skipcounter;
+                  //  }
                    // }
                 }
             }
-
             LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
-            LDEBUG("counter for how many times we push back" + std::to_string(counter));
+            //LDEBUG("vertPos[0] size:" + std::to_string(_vertexPositions.size()));
 
+            LDEBUG("counter for how many times we push back" + std::to_string(counter));
+            //WritecachedFile("cacheindex" + std::to_string(j));
             _statesPos.push_back(_vertexPositions);
+            _statesPosX.push_back(_vertexposX);
+            _statesPosY.push_back(_vertexposY);
+            _statesPosZ.push_back(_vertexposZ);
             _statesColor.push_back(_vertexColor);
             _statesRadius.push_back(_vertexRadius);
+            _statesIndex.push_back(_vertexIndex);
             LDEBUG("_states size: " + std::to_string(_statesPos.size()));
+           
         }
 
+      
         return true;
+    }
+
+    void RenderableStreamNodes::WritecachedFile(const std::string& file) const {
+        //Todo, write all of the vertexobjects into here 
+       std::ofstream fileStream(file, std::ofstream::binary);
+
+        //std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        //    file,
+        //    ghoul::filesystem::CacheManager::Persistent::Yes
+        //);
+        //std::ofstream fileStream(file);
+        if (!fileStream.good()) {
+            LERROR(fmt::format("Error opening file '{}' for save cache file"), "StreamnodesCache");
+            return;
+        }
+
+        fileStream.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        
+        std::ofstream fileStream2("StreamnodesCacheColor", std::ofstream::binary);
+        std::ofstream fileStream3("StreamnodesCacheRadius", std::ofstream::binary);
+        std::ofstream fileStream4("StreamnodesCachePositionx", std::ofstream::binary);
+        std::ofstream fileStream5("StreamnodesCachePositiony", std::ofstream::binary);
+        std::ofstream fileStream6("StreamnodesCachePositionz", std::ofstream::binary);
+      //  std::ofstream fileStream5("StreamnodesCachePositiony", std::ofstream::binary);
+      //  std::ofstream fileStream6("StreamnodesCachePositionz", std::ofstream::binary);
+
+       
+        //long long int nValues = static_cast<long long int>(_statesIndex[0].size());
+        //int32_t nValues = static_cast<int32_t>(_statesIndex[0].size() * _statesIndex.size());
+        int32_t nValues = static_cast<int32_t>(_vertexIndex.size());
+        if (nValues == 0) {
+            throw ghoul::RuntimeError("Error writing cache: No values were loaded");
+            return;
+        }
+        //int32_t nValuesvec = nValues * static_cast<int32_t>(_statesIndex[0].size());
+        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+        //LDEBUG("filestreamtest: " + std::to_string(nValues));
+        
+        //fileStream.write("34", sizeof(long long int));
+        //nValues = nValues * static_cast<int32_t>(_statesColor[0].size());
+       // LDEBUG("nvalues statesPos" + std::to_string(_statesPos.size()));
+       // LDEBUG("nvalues statesPos2" + std::to_string(_statesColor.size()));
+       // LDEBUG("nvalues statesPos3" + std::to_string(_statesRadius.size()));
+        //LDEBUG("nvalues statesPos4" + std::to_string(_statesIndex.size()));
+        LDEBUG("nvalues _vertex index size" + std::to_string(_vertexIndex.size()));
+
+        //int32_t nBytes = static_cast<int32_t>(_vertexIndex.size() * 3);
+        //int32_t nBytes = static_cast<int32_t>(_vertexIndex.size() * 12);
+        //int32_t nValues2 = static_cast<int32_t>(_)
+        size_t nBytes = nValues * sizeof(_vertexPositions[0]);
+        //fileStream4.write(reinterpret_cast<const char*>(&nBytes), sizeof(int32_t));
+
+        //fileStream.write(reinterpret_cast<const char*>(_vertexIndex.data()), nValues);
+        for(int i = 0; i < _nStates; ++i){
+        fileStream.write(reinterpret_cast<const char*>(_statesIndex[i].data()), nValues);
+        fileStream2.write(reinterpret_cast<const char*>(_statesColor[i].data()), nValues);
+        fileStream3.write(reinterpret_cast<const char*>(_statesRadius[i].data()), nValues);
+        fileStream4.write(reinterpret_cast<const char*>(_statesPosX[i].data()), nValues);
+        fileStream5.write(reinterpret_cast<const char*>(_statesPosY[i].data()), nValues);
+        fileStream6.write(reinterpret_cast<const char*>(_statesPosZ[i].data()), nValues);
+        }
+
+        //size_t nBytesPos = nValuesvec * sizeof(_statesIndex[0].size());
+        //LDEBUG("nbytesPos " + std::to_string(nBytesPos));
+        //fileStream.write(reinterpret_cast<const char*>(_statesIndex.data()), nBytesPos);
+        
+
+
+
+       // size_t nBytesRadius = nValues * sizeof(_statesRadius[0].size());
+        
+       
+        
+        //fileStream.write(reinterpret_cast<const char*>(_statesRadius.data()), nBytesRadius);
+        //fileStream.write(reinterpret_cast<const char*>(_statesIndex.data()), nBytesIndex);
+
+        //for(int i = 0; i < _statesPos.size(); )
+
+        //fileStream.close();
+        //fileStream.clear();
+
+    }
+
+    bool RenderableStreamNodes::ReadcachedFile(const std::string& file) {
+       // const std::string& file = "StreamnodesCache";
+        std::ifstream fileStream(file, std::ifstream::binary);
+        if (fileStream.good()) {
+            int8_t version = 0;
+            fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+            if (version != CurrentCacheVersion) {
+                LINFO("The format of the cached file has changed: deleting old cache");
+                fileStream.close();
+                // FileSys.deleteFile(file);
+                return false;
+            }
+            LDEBUG("testar int8" + std::to_string(version));
+            int32_t nValuesvec = 0;
+            fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+            
+           // nValues2 = nValues2 * 3;
+
+            LDEBUG("testar int32 size" + std::to_string(nValuesvec));
+
+                std::ifstream fileStream2("StreamnodesCacheColor", std::ifstream::binary);
+                std::ifstream fileStream3("StreamnodesCacheRadius", std::ifstream::binary);
+                std::ifstream fileStream4("StreamnodesCachePositionx", std::ifstream::binary);
+                std::ifstream fileStream5("StreamnodesCachePositiony", std::ifstream::binary);
+                std::ifstream fileStream6("StreamnodesCachePositionz", std::ifstream::binary);
+
+            //    std::ifstream fileStream4("StreamnodesCacheIndex", std::ifstream::binary);
+              //  fileStream2.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+              //  fileStream3.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+            //    fileStream4.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+            //    int32_t nValuesvec = 0;
+            //    fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+            //    int32_t nValues = 0;
+             //   fileStream2.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+              //  fileStream3.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+            //    fileStream4.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+
+            //    _statesPos.resize(nValuesvec);
+            //    _statesColor.resize(nValues);
+            //    _statesRadius.resize(nValues);
+                 //_statesIndex[0].resize(nValuesvec);
+            //_vertexIndex.resize(nValuesvec);
+            //_vertexIndex.resize(nValuesvec);
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexIndex.resize(nValuesvec);
+                fileStream.read(reinterpret_cast<char*>(
+                    _vertexIndex.data()),
+                    nValuesvec);
+
+                _statesIndex.push_back(_vertexIndex);
+               // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexIndex.clear();
+            }
+            LDEBUG("First entry in first timestep:" + std::to_string(_statesIndex[0][0]));
+            LDEBUG("_statesindex size: " + std::to_string(_statesIndex.size()));
+            LDEBUG("_statesindex[0] size" + std::to_string(_statesIndex[0].size()));
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexColor.resize(nValuesvec);
+                fileStream2.read(reinterpret_cast<char*>(
+                    _vertexColor.data()),
+                    nValuesvec);
+
+                _statesColor.push_back(_vertexColor);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexColor.clear();
+            }
+            LDEBUG("First entry in first timestep:" + std::to_string(_statesColor[0][0]));
+            LDEBUG("_statesColor size: " + std::to_string(_statesColor.size()));
+            LDEBUG("_statesColor[0] size" + std::to_string(_statesColor[0].size()));
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexRadius.resize(nValuesvec);
+                fileStream3.read(reinterpret_cast<char*>(
+                    _vertexRadius.data()),
+                    nValuesvec);
+
+                _statesRadius.push_back(_vertexRadius);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexRadius.clear();
+            }
+            LDEBUG("First entry in first timestep:" + std::to_string(_statesRadius[0][0]));
+            LDEBUG("_statesindex size: " + std::to_string(_statesRadius.size()));
+            LDEBUG("_statesindex[0] size" + std::to_string(_statesRadius[0].size()));
+            //int32_t nBytes = 0;
+            //fileStream4.read(reinterpret_cast<char*>(&nBytes), sizeof(int32_t));
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexposX.resize(nValuesvec);
+                fileStream4.read(reinterpret_cast<char*>(
+                    _vertexposX.data()),
+                    nValuesvec);
+
+                _statesPosX.push_back(_vertexposX);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexposX.clear();
+            }
+            //LDEBUG("First entry in first timestep pos x:" + std::to_string(_statesPos[0][0].x));
+           // LDEBUG("_statesindex size: " + std::to_string(_statesPos.size()));
+           // LDEBUG("_statesindex[0] size" + std::to_string(_statesPos[0].size()));
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexposY.resize(nValuesvec);
+                fileStream5.read(reinterpret_cast<char*>(
+                    _vertexposY.data()),
+                    nValuesvec);
+
+                _statesPosY.push_back(_vertexposY);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexposY.clear();
+            }
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexposZ.resize(nValuesvec);
+                fileStream6.read(reinterpret_cast<char*>(
+                    _vertexposZ.data()),
+                    nValuesvec);
+
+                _statesPosZ.push_back(_vertexposZ);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexposZ.clear();
+            }
+
+            for (int i = 0; i < _nStates; ++i) {
+                for (int k = 0; k < nValuesvec; ++k) {
+
+                    glm::vec3 temp = glm::vec3(_statesPosX[i][k], _statesPosY[i][k], _statesPosZ[i][k]);
+                    _vertexPositions.push_back(temp);
+                   // _statesPos[i].push_back(temp);
+                }
+                _statesPos.push_back(_vertexPositions);
+                _vertexPositions.clear();
+            }
+            //    
+            //    fileStream.read(reinterpret_cast<char*>(
+            //        _statesPos.data()),
+            //        nValuesvec * sizeof(_statesPos[0])
+            //    );
+            //    fileStream2.read(reinterpret_cast<char*>(
+            //        _statesColor.data()),
+            //        nValues * sizeof(_statesColor[0])
+            //    );
+
+            //    fileStream3.read(reinterpret_cast<char*>(
+            //        _statesRadius.data()),
+            //        nValues * sizeof(_statesRadius[0])
+            //    );
+            //    fileStream4.read(reinterpret_cast<char*>(
+            //        _statesIndex.data()),
+            //        nValues * sizeof(_statesIndex[0])
+            //    );
+
+            //    //LDEBUG("_statesindex" + std::to_string(_statesRadius[0][0]));
+
+            //    bool success = fileStream.good();
+            //    LDEBUG("_statesPos size: " + std::to_string(_statesPos.size()));
+            //    //LDEBUG("_statesIndex" + std::to_string(_statesRadius[0].data()));
+            //    return success;
+
+
+            //}
+            //else {
+            //   // LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+            //    return false;
+            //}
+        }
+        return false;
     }
     /**
      * Extracts the general information (from the lua modfile) that is mandatory for the class
@@ -591,7 +928,7 @@ namespace openspace {
         }
         float thresholdRadiusValue;
         if (_dictionary->getValue(KeyThresholdRadius, thresholdRadiusValue)) {
-            _pThresholdRadius = thresholdRadiusValue;
+            _pThresholdFlux = thresholdRadiusValue;
         }
         float scaleFactor;
         if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
@@ -611,23 +948,39 @@ namespace openspace {
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pStreamsEnabled);
         addProperty(_pLineWidth);
-        addProperty(_pDomainZ);
-        addProperty(_pFiltering);
-        addProperty(_pFilteringUpper);
+        //addProperty(_pDomainZ);
+        
         // ----------------------------- Add Property Groups ----------------------------- //
         addPropertySubOwner(_pStreamGroup);
         addPropertySubOwner(_pColorGroup);
+        addPropertySubOwner(_pNodesamountGroup);
         // ------------------------- Add Properties to the groups ------------------------ //
         _pColorGroup.addProperty(_pColorMode);
         _pColorGroup.addProperty(_pScalingmethod);
+
+        _pNodesamountGroup.addProperty(_pNodeskipMethod);
+        _pNodesamountGroup.addProperty(_pAmountofNodes);
+        _pNodesamountGroup.addProperty(_pDefaultNodeSkip);
+        _pNodesamountGroup.addProperty(_pNodeSize);
+        _pNodesamountGroup.addProperty(_pNodeSizeLargerFlux);
+        _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
+        _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
+
         //_pColorGroup.addProperty(_pColorFlux);
         //_pColorGroup.addProperty(_pColorFluxMin);
         //_pColorGroup.addProperty(_pColorFluxMax);
         _pColorGroup.addProperty(_pColorTableRange);
         _pColorGroup.addProperty(_pColorTablePath);
         _pColorGroup.addProperty(_pStreamColor);
-        _pStreamGroup.addProperty(_pNodeSize);
-        _pStreamGroup.addProperty(_pThresholdRadius);
+        _pColorGroup.addProperty(_pFluxColorAlpha);
+        _pStreamGroup.addProperty(_pThresholdFlux);
+
+
+       
+        _pStreamGroup.addProperty(_pFiltering);
+        _pStreamGroup.addProperty(_pFilteringUpper);
+        _pStreamGroup.addProperty(_pDomainZ);
+        
 
         // --------------------- Add Options to OptionProperties --------------------- //
         _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -638,9 +991,14 @@ namespace openspace {
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
         _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
+        
+        _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Uniform), "Uniform");
+        _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Flux), "Flux");
+        _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Radius), "Radius");
         definePropertyCallbackFunctions();
 
         // Set defaults
+        //_pColorFlux = 0;
         _pColorTablePath = _colorTablePaths[0];
     }
 
@@ -656,6 +1014,8 @@ namespace openspace {
 
         glDeleteBuffers(1, &_vertexFilteringBuffer);
         _vertexFilteringBuffer = 0;
+        glDeleteBuffers(1, &_vertexindexBuffer);
+        _vertexindexBuffer = 0;
 
         if (_shaderProgram) {
             global::renderEngine.removeRenderProgram(_shaderProgram.get());
@@ -740,14 +1100,21 @@ namespace openspace {
         // Flow/Particles
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pStreamsEnabled);
-        _shaderProgram->setUniform(_uniformCache.nodeSize, 1);
-        _shaderProgram->setUniform(_uniformCache.thresholdRadius, _pThresholdRadius);
+        _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
+        _shaderProgram->setUniform(_uniformCache.nodeSizeLargerFlux, _pNodeSizeLargerFlux);
+        _shaderProgram->setUniform(_uniformCache.thresholdFlux, _pThresholdFlux);
         _shaderProgram->setUniform("colorMode", _pColorMode);
         _shaderProgram->setUniform("filterRadius", _pFiltering);
         _shaderProgram->setUniform("filterUpper", _pFilteringUpper);
         _shaderProgram->setUniform("ScalingMode", _pScalingmethod);
         _shaderProgram->setUniform("colorTableRange", _pColorTableRange.value());
         _shaderProgram->setUniform("domainLimZ", _pDomainZ.value());
+        _shaderProgram->setUniform("Nodeskip", _pAmountofNodes);
+        _shaderProgram->setUniform("Nodeskipdefault", _pDefaultNodeSkip);
+        _shaderProgram->setUniform("NodeskipMethod", _pNodeskipMethod);
+        _shaderProgram->setUniform("NodeskipFluxThreshold", _pFluxNodeskipThreshold);
+        _shaderProgram->setUniform("NodeskipRadiusThreshold", _pRadiusNodeSkipThreshold);
+        _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
 
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;
@@ -770,13 +1137,11 @@ namespace openspace {
             static_cast<GLsizei>(_lineStart.size())
         );*/
 
-         glPointSize(_pNodeSize);
-        
             GLint temp = 0;
             glDrawArrays(
-                GL_PATCHES,
+                GL_POINTS,
                 temp,
-                static_cast<GLsizei>(_lineCount.size())
+                static_cast<GLsizei>(_vertexPositions.size())
             );
 
             glBindVertexArray(0);
@@ -829,7 +1194,6 @@ namespace openspace {
 
                 // _mustLoadNewStateFromDisk = true;
 
-
                 _needsUpdate = true;
                 _activeStateIndex = _activeTriggerTimeIndex;
 
@@ -864,6 +1228,7 @@ namespace openspace {
             updatePositionBuffer();
             updateVertexColorBuffer();
             updateVertexFilteringBuffer();
+            updateVertexIndexBuffer();
         }
             }
                 //needs fix, right now it stops cuz it cant find the states.
@@ -871,11 +1236,13 @@ namespace openspace {
                     _vertexPositions = _statesPos[_activeTriggerTimeIndex];
                     _vertexColor = _statesColor[_activeTriggerTimeIndex];
                     _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
+                    _vertexIndex = _statesIndex[_activeTriggerTimeIndex];
                     _needsUpdate = false;
                     _newStateIsReady = false;
                     updatePositionBuffer();
                     updateVertexColorBuffer();
                     updateVertexFilteringBuffer();
+                    updateVertexIndexBuffer();
                 }
             }
     }
@@ -929,7 +1296,9 @@ namespace openspace {
          _lineStart.clear();
          _vertexRadius.clear();
          _vertexColor.clear();
+         _vertexIndex.clear();
         int counter = 0;
+        int NodeIndexCounter = 0;
         
         const size_t nPoints = 1;
         for (int i = 0; i < numberofStreams; ++i) {
@@ -944,6 +1313,7 @@ namespace openspace {
                 break;
             }
             */
+            NodeIndexCounter = 0;
             
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                 lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
@@ -993,6 +1363,8 @@ namespace openspace {
                 float rTimesFluxValue = fluxValue;
                 _vertexColor.push_back(rTimesFluxValue);
                 _vertexRadius.push_back(rValue);
+                _vertexIndex.push_back(NodeIndexCounter);
+                NodeIndexCounter = NodeIndexCounter + 1;
                 rValue = rValue * AuToMeter;
                 
                 //if(thetaValue < 1.6 && thetaValue > 1.4){
@@ -1036,12 +1408,12 @@ namespace openspace {
                 //_vertexRadius.push_back(rValue);
 
                 //skipping nodes
-                int skipcounter = 0;
-                int nodeskipn = 10;
-                while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
-                    ++lineIter;
-                    ++skipcounter;
-                }
+               // int skipcounter = 0;
+               // int nodeskipn = 10;
+                //while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
+                //    ++lineIter;
+                //    ++skipcounter;
+               // }
                 //}
             }
         }
@@ -1083,6 +1455,7 @@ namespace openspace {
         );
 
         glEnableVertexAttribArray(VaPosition);
+        glEnable(GL_PROGRAM_POINT_SIZE);
         glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         unbindGL();
@@ -1125,6 +1498,25 @@ namespace openspace {
 
             unbindGL();
     }
+    void RenderableStreamNodes::updateVertexIndexBuffer() {
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexindexBuffer);
+
+        const std::vector<int>& vertexIndex = _vertexIndex;
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertexIndex.size() * sizeof(float),
+            vertexIndex.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(VaIndex);
+        glVertexAttribPointer(VaIndex, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+    }
+
 
     const std::vector<GLsizei>& RenderableStreamNodes::lineCount() const {
         return _lineCount;
