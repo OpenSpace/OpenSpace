@@ -159,7 +159,6 @@ local Moon = {
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
             FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
             LabelsColor = {1.0, 1.0, 0.0, 1.0}

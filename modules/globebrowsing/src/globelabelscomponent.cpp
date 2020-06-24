@@ -117,24 +117,10 @@ namespace {
         "Fade In Starting Distance for Labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        LabelsFadeOutStartingDistanceInfo =
-    {
-        "FadeOutStartingDistance",
-        "Fade Out Starting Distance for Labels",
-        "Fade Out Starting Distance for Labels"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LabelsFadeInEnabledInfo = {
         "LabelsFadeInEnabled",
         "Labels fade In enabled",
         "Labels fade In enabled"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelsFadeOutEnabledInfo = {
-        "LabelsFadeOutEnabled",
-        "Labels fade Out enabled",
-        "Labels fade Out enabled"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -221,22 +207,10 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
                 LabelsFadeInStartingDistanceInfo.description
             },
             {
-                LabelsFadeOutStartingDistanceInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelsFadeOutStartingDistanceInfo.description
-            },
-            {
                 LabelsFadeInEnabledInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
                 LabelsFadeInEnabledInfo.description
-            },
-            {
-                LabelsFadeOutEnabledInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                LabelsFadeOutEnabledInfo.description
             },
             {
                 LabelsDisableCullingEnabledInfo.identifier,
@@ -275,9 +249,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
         glm::vec4(1.f)
     )
     , _labelsFadeInDist(LabelsFadeInStartingDistanceInfo, 1e6, 1e3, 1e8)
-    , _labelsFadeOutDist(LabelsFadeOutStartingDistanceInfo, 1e4, 1, 1e7)
     , _labelsFadeInEnabled(LabelsFadeInEnabledInfo, false)
-    , _labelsFadeOutEnabled(LabelsFadeOutEnabledInfo, false)
     , _labelsDisableCullingEnabled(LabelsDisableCullingEnabledInfo, false)
     , _labelsDistaneEPS(LabelsDistanceEPSInfo, 100000.f, 1000.f, 10000000.f)
     , _labelAlignmentOption(
@@ -292,10 +264,8 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     _labelsColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_labelsColor);
     addProperty(_labelsFadeInDist);
-    addProperty(_labelsFadeOutDist);
     addProperty(_labelsMinSize);
     addProperty(_labelsFadeInEnabled);
-    addProperty(_labelsFadeOutEnabled);
     addProperty(_labelsDisableCullingEnabled);
     addProperty(_labelsDistaneEPS);
 
@@ -365,18 +335,6 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     if (dictionary.hasKey(LabelsFadeInStartingDistanceInfo.identifier)) {
         _labelsFadeInDist = dictionary.value<float>(
             LabelsFadeInStartingDistanceInfo.identifier
-        );
-    }
-
-    if (dictionary.hasKey(LabelsFadeOutEnabledInfo.identifier)) {
-        _labelsFadeOutEnabled = dictionary.value<bool>(
-            LabelsFadeOutEnabledInfo.identifier
-        );
-    }
-
-    if (dictionary.hasKey(LabelsFadeOutStartingDistanceInfo.identifier)) {
-        _labelsFadeOutDist = dictionary.value<float>(
-            LabelsFadeOutStartingDistanceInfo.identifier
         );
     }
 
@@ -628,41 +586,24 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
                                             data.camera.positionVec3();
     double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
 
-    float varyingOpacity = 1.f;
+    float varyOpacity = 1.f;
 
     double averageRadius = (
         _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
         _globe->ellipsoid().radii().z
     ) / 3.0;
     if (_labelsFadeInEnabled) {
-        glm::dvec2 fadeRange = glm::dvec2(averageRadius + _labelsMinHeight);
-        fadeRange.x += _labelsFadeInDist;
-        double a = 1.0 / (fadeRange.y - fadeRange.x);
-        double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        double funcValue = a * distanceCameraGlobeWorld + b;
-        varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
+        double fadeRangeMin = averageRadius + _labelsMinHeight;
+        double distanceFromFullOpaque = distanceCameraGlobeWorld - fadeRangeMin;
+        double rangeFraction = distanceFromFullOpaque / _labelsFadeInDist;
+        varyOpacity *= (1.f - static_cast<float>(std::clamp(rangeFraction, 0.0, 1.0)));
 
-        if (varyingOpacity < MinTransparencyValueConst) {
+        if (varyOpacity < MinTransparencyValueConst) {
             return;
         }
     }
 
-    if (_labelsFadeOutEnabled) {
-        glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight + LabelFadeRangeConst
-        );
-        fadeRange.x += _labelsFadeOutDist;
-        double a = RangeAngularCoefConst / (fadeRange.x - fadeRange.y);
-        double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
-        double funcValue = a * distanceCameraGlobeWorld + b;
-        varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
-
-        if (varyingOpacity < MinTransparencyValueConst) {
-            return;
-        }
-    }
-
-    renderLabels(data, mvp, static_cast<float>(distanceCameraGlobeWorld), varyingOpacity);
+    renderLabels(data, mvp, static_cast<float>(distanceCameraGlobeWorld), varyOpacity);
 }
 
 void GlobeLabelsComponent::renderLabels(const RenderData& data,

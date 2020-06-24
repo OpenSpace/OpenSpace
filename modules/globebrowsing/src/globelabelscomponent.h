@@ -91,9 +91,7 @@ private:
     properties::FloatProperty _labelsMinHeight;
     properties::Vec4Property _labelsColor;
     properties::FloatProperty _labelsFadeInDist;
-    properties::FloatProperty _labelsFadeOutDist;
     properties::BoolProperty _labelsFadeInEnabled;
-    properties::BoolProperty _labelsFadeOutEnabled;
     properties::BoolProperty _labelsDisableCullingEnabled;
     properties::FloatProperty _labelsDistaneEPS;
     properties::OptionProperty _labelAlignmentOption;
