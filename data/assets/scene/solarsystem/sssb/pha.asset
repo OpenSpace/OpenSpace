@@ -2,9 +2,19 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'pha', 'sssb_data_pha')
-local object = sharedSssb.createSssbGroupObject('sssb_data_pha.csv', "Potentially Hazardous Asteroids", filepath, { 0.75, 0.2, 0.2 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_pha.csv', "Potentially Hazardous Asteroids", filepath, { 0.98, 0.09, 0.06})
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 3
 object.Renderable.TrailFade = 17
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Potentially-Hazardous Asteroids",
+    Version = "1.0",
+    Description = [[ Asteroids that are deemed potentially hazardous to Earth based on their close approaches. All asteroids with an Earth Minimum Orbit Intersection Distance (MOID) of 0.05 au or less, and with an absolute magnitude (H) of 22.0 or less. ]],
+    Author = "JPL Small-Body Database hosted by California Institute of Technology",
+    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+}

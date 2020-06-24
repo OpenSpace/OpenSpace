@@ -1,8 +1,8 @@
---apollo_11_lem_flipbook.asset
 local helper = asset.require('util/vrt_flipbook_helper')
+local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
 
 local assetPrefix = "A11flip";
-local assetGlobe = "Moon";
+local assetGlobe = moon_asset.Moon.Identifier;
 local flipbookCount = 19;
 
 local flipbook = nil;

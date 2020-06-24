@@ -60,6 +60,7 @@ private:
     ghoul::opengl::Texture* _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
+    bool _isLoadingLazily = false;
     bool _textureIsDirty = false;
 };
 

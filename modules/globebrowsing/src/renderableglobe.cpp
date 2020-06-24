@@ -50,13 +50,6 @@
 #include <numeric>
 #include <queue>
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-#include <openspace/engine/moduleengine.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-openspace::GlobeBrowsingModule* _module = nullptr;
-
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-
 namespace {
     // Global flags to modify the RenderableGlobe
     constexpr const bool LimitLevelByAvailableData = true;
@@ -584,10 +577,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
+    //_debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
+    //_debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
+    //_debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
+    //_debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
@@ -709,10 +702,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _module = global::moduleEngine.module<GlobeBrowsingModule>();
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void RenderableGlobe::initializeGL() {
@@ -786,7 +775,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         try {
             // Before Shadows
             //renderChunks(data, rendererTask);
-            //_globeLabelsComponent.draw(data);
+            _globeLabelsComponent.draw(data);
 
             if (_hasShadows && _shadowComponent.isEnabled()) {
                 // Set matrices and other GL states
@@ -921,11 +910,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         _shadowComponent.update(data);
     }
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _nUploadedTiles = _layerManager.update();
-#else
     _layerManager.update();
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_nLayersIsDirty) {
         std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
@@ -1236,15 +1221,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         renderChunkLocally(*local[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _module->addFrameInfo(
-        this,
-        std::min(localCount, ChunkBufferSize),
-        std::min(globalCount, ChunkBufferSize),
-        _nUploadedTiles
-    );
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {

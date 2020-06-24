@@ -117,8 +117,8 @@ local color_layers = {
         BlendMode = "Color"
     },
     {
-        Identifier = "CTX_belended_01",
-        Name = "CTX Belended beta01",
+        Identifier = "CTX_blended_01",
+        Name = "CTX Blended beta01",
         FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
         BlendMode = "Color",
         Settings = {

@@ -94,9 +94,9 @@ StaticRotation::StaticRotation()
     )
 {
     addProperty(_eulerRotation);
-    _eulerRotation.onChange([this]() {
+    _eulerRotation.onChange([this]() { 
         _matrixIsDirty = true;
-        requireUpdate();
+        requireUpdate(); 
     });
 }
 

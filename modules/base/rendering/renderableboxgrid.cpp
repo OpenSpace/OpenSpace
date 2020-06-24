@@ -76,8 +76,8 @@ namespace openspace {
 documentation::Documentation RenderableBoxGrid::Documentation() {
     using namespace documentation;
     return {
-        "RenderableSphericalGrid",
-        "base_renderable_sphericalgrid",
+        "RenderableBoxGrid",
+        "base_renderable_boxgrid",
         {
             {
                 GridMatrixInfo.identifier,
@@ -87,7 +87,7 @@ documentation::Documentation RenderableBoxGrid::Documentation() {
             },
             {
                 GridColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 GridColorInfo.description
             },
@@ -119,9 +119,9 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
     , _gridColor(
         GridColorInfo,
-        glm::vec4(0.5f, 0.5, 0.5f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(0.5f, 0.5, 0.5f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
@@ -142,7 +142,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(_gridMatrix);
 
     if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec4>(GridColorInfo.identifier);
+        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
     }
     _gridColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_gridColor);
@@ -221,7 +221,10 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _gridProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _gridProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
+    _gridProgram->setUniform(
+        "MVPTransform",
+        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
+    );
 
     _gridProgram->setUniform("gridColor", _gridColor);
 

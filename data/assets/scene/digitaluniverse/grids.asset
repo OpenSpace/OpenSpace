@@ -24,7 +24,8 @@ local radio = {
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
-        GridColor = { 0.3, 0.84, 1.0, 0.3},
+        Opacity = 1.0,
+        GridColor = { 0.3, 0.84, 1.0 },
         LineWidth = 2.0,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
                        -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -49,7 +50,8 @@ local oort = {
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
-        GridColor = { 0.8, 0.4, 0.4, 0.25},
+        Opacity = 0.8,
+        GridColor = { 0.8, 0.4, 0.4 },
         LineWidth = 2.0,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
                        -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -74,7 +76,8 @@ local ecliptic = {
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
-        GridColor = { 0.74, 0.26, 0.26, 0.5},
+        Opacity = 1.0,
+        GridColor = { 0.74, 0.26, 0.26 },
         LineWidth = 2.0,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
                        -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -127,7 +130,8 @@ local equatorial = {
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
-        GridColor = { 0.69, 0.68, 0.29, 0.8},
+        Opacity = 0.8,
+        GridColor = { 0.69, 0.68, 0.29 },
         LineWidth = 2.0,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661, 0.0,
                        -0.8734371 , -0.4448296, -0.1980764, 0.0,
@@ -181,7 +185,8 @@ local galactic = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         LineWidth = 2.0,
-        GridColor = { 0.0, 0.6, 0.6, 0.6}
+        Opacity = 1.0,
+        GridColor = { 0.0, 0.6, 0.6 }
     },
     GUI = {
         Name = "Galactic Sphere",

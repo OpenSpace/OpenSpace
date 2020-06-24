@@ -2,9 +2,19 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'jupiter-family_comet', 'sssb_data_jupiter-family_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_jupiter-family_comet.csv', "Jupiter-family Comets", filepath, { 0.9, 0.3, 0.1 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_jupiter-family_comet.csv', "Jupiter-family Comets", filepath, { 0.2, 0.8, 0.2 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 10
 object.Renderable.TrailFade = 28
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Jupiter Family Comets",
+    Version = "1.0",
+    Description = [[ Comets with a Tisserand's parameter with respect to Jupiter of between 2 and 3. ]],
+    Author = "JPL Small-Body Database hosted by California Institute of Technology",
+    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+}
