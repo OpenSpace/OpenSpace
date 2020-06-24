@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablegrid.h>
+#include <modules/base/rendering/grids/renderablegrid.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/verifier.h>

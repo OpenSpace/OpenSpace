@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablesphericalgrid.h>
+#include <modules/base/rendering/grids/renderableboxgrid.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -62,15 +63,21 @@ namespace {
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Grid Size",
+        "This value species the size of each dimensions of the box"
+    };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableSphericalGrid::Documentation() {
+documentation::Documentation RenderableBoxGrid::Documentation() {
     using namespace documentation;
     return {
-        "RenderableSphericalGrid",
-        "base_renderable_sphericalgrid",
+        "RenderableBoxGrid",
+        "base_renderable_boxgrid",
         {
             {
                 GridMatrixInfo.identifier,
@@ -95,15 +102,20 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 LineWidthInfo.description
+            },
+            {
+                SizeInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                SizeInfo.description
             }
         }
     };
 }
 
 
-RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
+RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridProgram(nullptr)
     , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
     , _gridColor(
         GridColorInfo,
@@ -113,11 +125,12 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     )
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
+    , _size(SizeInfo, glm::vec3(1e20f), glm::vec3(1.f), glm::vec3(1e35f))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "RenderableSphericalGrid"
+        "RenderableBoxGrid"
     );
 
     addProperty(_opacity);
@@ -137,12 +150,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
     }
-    _segments.onChange([&]() {
-        if (_segments.value() % 2 == 1) {
-            _segments = _segments - 1;
-        }
-        _gridIsDirty = true;
-    });
+    _segments.onChange([&]() { _gridIsDirty = true; });
     addProperty(_segments);
 
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
@@ -151,15 +159,19 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         );
     }
     addProperty(_lineWidth);
+
+    if (dictionary.hasKey(SizeInfo.identifier)) {
+        _size = dictionary.value<glm::vec3>(SizeInfo.identifier);
+    }
+    _size.onChange([&]() { _gridIsDirty = true; });
+    addProperty(_size);
 }
 
-bool RenderableSphericalGrid::isReady() const {
-    bool ready = true;
-    ready &= (_gridProgram != nullptr);
-    return ready;
+bool RenderableBoxGrid::isReady() const {
+    return _gridProgram != nullptr;
 }
 
-void RenderableSphericalGrid::initializeGL() {
+void RenderableBoxGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -173,24 +185,19 @@ void RenderableSphericalGrid::initializeGL() {
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vBufferID);
-    glGenBuffers(1, &_iBufferID);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
 
-void RenderableSphericalGrid::deinitializeGL() {
+void RenderableBoxGrid::deinitializeGL() {
     glDeleteVertexArrays(1, &_vaoID);
     _vaoID = 0;
 
     glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
-
-    glDeleteBuffers(1, &_iBufferID);
-    _iBufferID = 0;
 
     BaseModule::ProgramObjectManager.release(
         ProgramName,
@@ -201,160 +208,113 @@ void RenderableSphericalGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
+void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
     _gridProgram->setUniform("opacity", _opacity);
 
-    const glm::dmat4 modelTransform =
+    glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
+    _gridProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _gridProgram->setUniform(
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    
+
     _gridProgram->setUniform("gridColor", _gridColor);
 
-    float adjustedLineWidth = 1.f;
-
-#ifndef __APPLE__
-    adjustedLineWidth = _lineWidth;
-#endif
-
-    // Saves current state:
-    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLfloat currentLineWidth;
-    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
-    
-    GLenum currentDepthFunction;
-    glGetIntegerv(GL_DEPTH_FUNC, &currentDepthFunction);
-    glDepthFunc(GL_LEQUAL);
-
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
-        blendDestRGB, blendSrcAlpha, blendSrcRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
-    // Changes GL state:
-    glLineWidth(adjustedLineWidth);
-    glEnablei(GL_BLEND, 0);
+    glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
     glEnable(GL_LINE_SMOOTH);
-    
+
     glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glDrawElements(_mode, _isize, GL_UNSIGNED_INT, nullptr);
+    glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
-
-    // Restores GL State
-    glLineWidth(currentLineWidth);
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    
-    if (!isBlendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-    
-    if (!isLineSmoothEnabled) {
-        glDisable(GL_LINE_SMOOTH);
-    }
-
-    glDepthFunc(currentDepthFunction);
 }
 
-void RenderableSphericalGrid::update(const UpdateData&) {
+void RenderableBoxGrid::update(const UpdateData&) {
     if (_gridIsDirty) {
-        _isize = 6 * _segments * _segments;
-        _vsize = (_segments + 1) * (_segments + 1);
-        _varray.resize(_vsize);
-        Vertex v = { 0.f, 0.f, 0.f };
-        std::fill(_varray.begin(), _varray.end(), v);
-        _iarray.resize(_isize);
-        std::fill(_iarray.begin(), _iarray.end(), 0);
+        //_vsize = (_segments + 1) * (_segments + 1);
+        //_varray.resize(_vsize);
 
-        int nr = 0;
-        const float fsegments = static_cast<float>(_segments);
+        const glm::vec3 llf = -_size.value() / 2.f;
+        const glm::vec3 urb =  _size.value() / 2.f;
 
-        for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
-            // define an extra vertex around the y-axis due to texture mapping
-            for (int j = 0; j <= _segments; j++) {
-                const float fi = static_cast<float>(nSegment);
-                const float fj = static_cast<float>(j);
+        //     7
+        //      --------------------  6
+        //     /                   /
+        //    /|                  /|
+        // 4 / |                 / |
+        //  x-------------------x  |
+        //  |  |                |5 |
+        //  |  |                |  |
+        //  |  |                |  |
+        //  | 3/----------------|--/ 2
+        //  | /                 | /
+        //  |/                  |/
+        //  x-------------------x
+        // 0                     1
+        //
+        //
+        //  For Line strip:
+        //  0 -> 1 -> 2 -> 3 -> 0 -> 4 -> 5 -> 6 -> 7 -> 4 -> 5(d) -> 1 -> 2(d) -> 6
+        //  -> 7(d) -> 3
 
-                // inclination angle (north to south)
-                const float theta = fi * glm::pi<float>() / fsegments * 2.f;  // 0 -> PI
+        const glm::vec3 v0 = glm::vec3(llf.x, llf.y, llf.z);
+        const glm::vec3 v1 = glm::vec3(urb.x, llf.y, llf.z);
+        const glm::vec3 v2 = glm::vec3(urb.x, urb.y, llf.z);
+        const glm::vec3 v3 = glm::vec3(llf.x, urb.y, llf.z);
+        const glm::vec3 v4 = glm::vec3(llf.x, llf.y, urb.z);
+        const glm::vec3 v5 = glm::vec3(urb.x, llf.y, urb.z);
+        const glm::vec3 v6 = glm::vec3(urb.x, urb.y, urb.z);
+        const glm::vec3 v7 = glm::vec3(llf.x, urb.y, urb.z);
 
-                // azimuth angle (east to west)
-                const float phi = fj * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
+        // First add the bounds
+        _varray.push_back({ v0.x, v0.y, v0.z });
+        _varray.push_back({ v1.x, v1.y, v1.z });
+        _varray.push_back({ v2.x, v2.y, v2.z });
+        _varray.push_back({ v3.x, v3.y, v3.z });
+        _varray.push_back({ v0.x, v0.y, v0.z });
+        _varray.push_back({ v4.x, v4.y, v4.z });
+        _varray.push_back({ v5.x, v5.y, v5.z });
+        _varray.push_back({ v6.x, v6.y, v6.z });
+        _varray.push_back({ v7.x, v7.y, v7.z });
+        _varray.push_back({ v4.x, v4.y, v4.z });
+        _varray.push_back({ v5.x, v5.y, v5.z });
+        _varray.push_back({ v1.x, v1.y, v1.z });
+        _varray.push_back({ v2.x, v2.y, v2.z });
+        _varray.push_back({ v6.x, v6.y, v6.z });
+        _varray.push_back({ v7.x, v7.y, v7.z });
+        _varray.push_back({ v3.x, v3.y, v3.z });
 
-                const float x = sin(phi) * sin(theta);  //
-                const float y = cos(theta);             // up
-                const float z = cos(phi) * sin(theta);  //
-
-                glm::vec3 normal = glm::vec3(x, y, z);
-                if (!(x == 0.f && y == 0.f && z == 0.f)) {
-                    normal = glm::normalize(normal);
-                }
-
-                glm::vec4 tmp(x, y, z, 1);
-                glm::mat4 rot = glm::rotate(
-                    glm::mat4(1),
-                    glm::half_pi<float>(),
-                    glm::vec3(1, 0, 0)
-                );
-                tmp = glm::vec4(_gridMatrix.value() * glm::dmat4(rot) * glm::dvec4(tmp));
-
-                for (int i = 0; i < 3; i++) {
-                    _varray[nr].location[i] = tmp[i];
-                }
-                ++nr;
-            }
-        }
-        nr = 0;
-        // define indices for all triangles
-        for (int i = 1; i <= _segments; ++i) {
-            for (int j = 0; j < _segments; ++j) {
-                const int t = _segments + 1;
-                _iarray[nr] = t * (i - 1) + j + 0; ++nr;
-                _iarray[nr] = t * (i + 0) + j + 0; ++nr;
-                _iarray[nr] = t * (i + 0) + j + 1; ++nr;
-                _iarray[nr] = t * (i - 1) + j + 1; ++nr;
-                _iarray[nr] = t * (i - 1) + j + 0; ++nr;
-            }
-        }
 
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _vsize * sizeof(Vertex),
+            _varray.size() * sizeof(Vertex),
             _varray.data(),
             GL_STATIC_DRAW
         );
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            _isize * sizeof(int),
-            _iarray.data(),
-            GL_STATIC_DRAW
+        glVertexAttribPointer(
+            0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(Vertex),
+            nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
         );
+
+        glBindVertexArray(0);
 
         _gridIsDirty = false;
     }

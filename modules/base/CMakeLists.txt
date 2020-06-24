@@ -39,9 +39,10 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableboxgrid.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablegrid.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablesphericalgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablenodeline.h
@@ -49,7 +50,6 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.h
@@ -90,9 +90,10 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableboxgrid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablegrid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablesphericalgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablenodeline.cpp
@@ -100,7 +101,6 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.cpp
