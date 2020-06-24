@@ -44,20 +44,6 @@ namespace {
         "This value determines the color of the grid lines that are rendered."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GridMatrixInfo = {
-        "GridMatrix",
-        "Grid Matrix",
-        "This value specifies the local transformation matrix that defines the "
-        "orientation of this grid relative to the parent's rotation."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Number of Segments",
-        "This value specifies the number of segments that are used to render the "
-        "surrounding sphere."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -80,22 +66,10 @@ documentation::Documentation RenderableBoxGrid::Documentation() {
         "base_renderable_boxgrid",
         {
             {
-                GridMatrixInfo.identifier,
-                new DoubleMatrix4x4Verifier,
-                Optional::Yes,
-                GridMatrixInfo.description
-            },
-            {
                 GridColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
                 GridColorInfo.description
-            },
-            {
-                SegmentsInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                SegmentsInfo.description
             },
             {
                 LineWidthInfo.identifier,
@@ -116,14 +90,12 @@ documentation::Documentation RenderableBoxGrid::Documentation() {
 
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
     , _gridColor(
         GridColorInfo,
         glm::vec3(0.5f, 0.5, 0.5f),
         glm::vec3(0.f),
         glm::vec3(1.f)
     )
-    , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _size(SizeInfo, glm::vec3(1e20f), glm::vec3(1.f), glm::vec3(1e35f))
 {
@@ -136,22 +108,11 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridMatrixInfo.identifier)) {
-        _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);
-    }
-    addProperty(_gridMatrix);
-
     if (dictionary.hasKey(GridColorInfo.identifier)) {
         _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
     }
     _gridColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_gridColor);
-
-    if (dictionary.hasKey(SegmentsInfo.identifier)) {
-        _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    }
-    _segments.onChange([&]() { _gridIsDirty = true; });
-    addProperty(_segments);
 
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(
@@ -220,7 +181,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _gridProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
     _gridProgram->setUniform(
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
@@ -228,9 +189,29 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->setUniform("gridColor", _gridColor);
 
+    // Saves current state:
+    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
+    GLfloat currentLineWidth;
+    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
+    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
+
+    GLenum blendEquationRGB;
+    GLenum blendEquationAlpha;
+    GLenum blendDestAlpha;
+    GLenum blendDestRGB;
+    GLenum blendSrcAlpha;
+    GLenum blendSrcRGB;
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+    // Changes GL state:
     glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
+    glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
 
     glBindVertexArray(_vaoID);
@@ -238,6 +219,19 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
+
+    // Restores GL State
+    glLineWidth(currentLineWidth);
+    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+
+    if (!isBlendEnabled) {
+        glDisablei(GL_BLEND, 0);
+    }
+
+    if (!isLineSmoothEnabled) {
+        glDisable(GL_LINE_SMOOTH);
+    }
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
@@ -311,7 +305,7 @@ void RenderableBoxGrid::update(const UpdateData&) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(Vertex),
-            nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
+            nullptr 
         );
 
         glBindVertexArray(0);
