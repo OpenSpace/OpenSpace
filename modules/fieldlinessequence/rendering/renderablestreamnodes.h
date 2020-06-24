@@ -100,6 +100,7 @@ namespace openspace {
         std::atomic_bool _newStateIsReady = false;
         bool _isLoadingStateFromDisk = false;
         bool _mustLoadNewStateFromDisk = true;
+        bool _loadingcachedfile = true;
         // --------------------------------- NUMERICALS ----------------------------------- //
         // In setup it is used to scale JSON coordinates. During runtime it is used to scale
         // domain limits.
@@ -192,6 +193,10 @@ namespace openspace {
         std::vector<double> _startTimes;
         // Contains vertexPositions
         std::vector<glm::vec3> _vertexPositions;
+        ///////
+        std::vector<float> _vertexposX;
+        std::vector<float> _vertexposY;
+        std::vector<float> _vertexposZ;
         // Contains vertex flux values for color
         std::vector<float> _vertexColor;
         // Contains vertexRedius
@@ -200,6 +205,9 @@ namespace openspace {
         std::vector<int> _vertexIndex;
 
         std::vector<std::vector<glm::vec3>> _statesPos;
+        std::vector<std::vector<float>> _statesPosX;
+        std::vector<std::vector<float>> _statesPosY;
+        std::vector<std::vector<float>> _statesPosZ;
         std::vector<std::vector<float>> _statesColor;
         std::vector<std::vector<float>> _statesRadius;
         std::vector<std::vector<int>> _statesIndex;
@@ -230,7 +238,7 @@ namespace openspace {
         void setModelDependentConstants();
 
         void WritecachedFile(const std::string& file) const;
-        bool ReadcachedFile(const std::string& file) const;
+        bool ReadcachedFile(const std::string& file);
         bool LoadfilesintoRam();
 
             // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //

@@ -292,19 +292,19 @@ namespace openspace {
         , _pStreamGroup({ "Streams" })
         , _pNodesamountGroup({ "NodeGroup" })
         , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
-        , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 5.f, 1.f, 10.f)
+        , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
         , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
         , _pColorTableRange(colorTableRangeInfo)
         , _pDomainZ(DomainZInfo)
         , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
-        , _pThresholdFlux(ThresholdFluxInfo, -10.f, -10.f, 10.f)
+        , _pThresholdFlux(ThresholdFluxInfo, -20.f, -20.f, 10.f)
        // , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
        // , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
         , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
         , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
         , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
         , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
-        , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -10, 10)
+        , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
         , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
 
         
@@ -395,19 +395,26 @@ namespace openspace {
        
         extractTriggerTimesFromFileNames();
         computeSequenceEndTime();
+        //std::string filepath = _sourceFiles[0];
+
+        //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
+      //  std::vector<std::string> vec = LoadJsonfile(filepath);
 
         LDEBUG("filepath i init: " + std::to_string(_sourceFiles.size()));
         if (!_loadingStatesDynamically) {
+            if(!_loadingcachedfile){
               LoadfilesintoRam();
+              WritecachedFile("StreamnodesCacheindex");
+            }
+            else {
+                ReadcachedFile("StreamnodesCacheindex");
+            }
                 //when we have got it working we should readcachedfile instead of loadig in files to ram.
-              //ReadcachedFile("StreamnodesCachePos2");
+            
         }
         //we should writecachedfile if we loadintoram and need a new cache file. 
-       // WritecachedFile("StreamnodesCachePos2");
-        std::string filepath = _sourceFiles[0];
+        
        
-        //std::string filepath = "C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
-        //std::vector<std::string> vec = LoadJsonfile(filepath);
         // Setup shader program
         _shaderProgram = global::renderEngine.buildRenderProgram(
             "Streamnodes",
@@ -463,6 +470,9 @@ namespace openspace {
             _vertexRadius.clear();
             _vertexColor.clear();
             _vertexIndex.clear();
+            _vertexposX.clear();
+            _vertexposY.clear();
+            _vertexposZ.clear();
             int counter = 0;
             int NodeIndexCounter = 0;
 
@@ -523,6 +533,9 @@ namespace openspace {
                     //position.x = position.x * AuToMeter;
                     //position.y = position.y * AuToMeter;
                     //position.z = position.z * AuToMeter;
+                    _vertexposX.push_back(position.x);
+                    _vertexposY.push_back(position.y);
+                    _vertexposZ.push_back(position.z);
                     _vertexPositions.push_back(
                         position);
                     ++counter;
@@ -543,17 +556,23 @@ namespace openspace {
                    // }
                 }
             }
-
             LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
-            LDEBUG("counter for how many times we push back" + std::to_string(counter));
+            //LDEBUG("vertPos[0] size:" + std::to_string(_vertexPositions.size()));
 
+            LDEBUG("counter for how many times we push back" + std::to_string(counter));
+            //WritecachedFile("cacheindex" + std::to_string(j));
             _statesPos.push_back(_vertexPositions);
+            _statesPosX.push_back(_vertexposX);
+            _statesPosY.push_back(_vertexposY);
+            _statesPosZ.push_back(_vertexposZ);
             _statesColor.push_back(_vertexColor);
             _statesRadius.push_back(_vertexRadius);
             _statesIndex.push_back(_vertexIndex);
             LDEBUG("_states size: " + std::to_string(_statesPos.size()));
+           
         }
 
+      
         return true;
     }
 
@@ -576,10 +595,18 @@ namespace openspace {
             sizeof(int8_t)
         );
         
+        std::ofstream fileStream2("StreamnodesCacheColor", std::ofstream::binary);
+        std::ofstream fileStream3("StreamnodesCacheRadius", std::ofstream::binary);
+        std::ofstream fileStream4("StreamnodesCachePositionx", std::ofstream::binary);
+        std::ofstream fileStream5("StreamnodesCachePositiony", std::ofstream::binary);
+        std::ofstream fileStream6("StreamnodesCachePositionz", std::ofstream::binary);
+      //  std::ofstream fileStream5("StreamnodesCachePositiony", std::ofstream::binary);
+      //  std::ofstream fileStream6("StreamnodesCachePositionz", std::ofstream::binary);
 
-
+       
         //long long int nValues = static_cast<long long int>(_statesIndex[0].size());
-        int32_t nValues = static_cast<int32_t>(_statesIndex[0].size() * _statesIndex.size());
+        //int32_t nValues = static_cast<int32_t>(_statesIndex[0].size() * _statesIndex.size());
+        int32_t nValues = static_cast<int32_t>(_vertexIndex.size());
         if (nValues == 0) {
             throw ghoul::RuntimeError("Error writing cache: No values were loaded");
             return;
@@ -590,17 +617,28 @@ namespace openspace {
         
         //fileStream.write("34", sizeof(long long int));
         //nValues = nValues * static_cast<int32_t>(_statesColor[0].size());
-        LDEBUG("nvalues statesPos" + std::to_string(_statesPos.size()));
-        LDEBUG("nvalues statesPos2" + std::to_string(_statesColor.size()));
-        LDEBUG("nvalues statesPos3" + std::to_string(_statesRadius.size()));
-        LDEBUG("nvalues statesPos4" + std::to_string(_statesIndex.size()));
-        LDEBUG("nvalues statesPos[0] size" + std::to_string(_statesPos[0].size()));
+       // LDEBUG("nvalues statesPos" + std::to_string(_statesPos.size()));
+       // LDEBUG("nvalues statesPos2" + std::to_string(_statesColor.size()));
+       // LDEBUG("nvalues statesPos3" + std::to_string(_statesRadius.size()));
+        //LDEBUG("nvalues statesPos4" + std::to_string(_statesIndex.size()));
+        LDEBUG("nvalues _vertex index size" + std::to_string(_vertexIndex.size()));
 
+        //int32_t nBytes = static_cast<int32_t>(_vertexIndex.size() * 3);
+        //int32_t nBytes = static_cast<int32_t>(_vertexIndex.size() * 12);
+        //int32_t nValues2 = static_cast<int32_t>(_)
+        size_t nBytes = nValues * sizeof(_vertexPositions[0]);
+        //fileStream4.write(reinterpret_cast<const char*>(&nBytes), sizeof(int32_t));
+
+        //fileStream.write(reinterpret_cast<const char*>(_vertexIndex.data()), nValues);
         for(int i = 0; i < _nStates; ++i){
-            LDEBUG("sizeof" + std::to_string(sizeof(_statesIndex[i])));
-        size_t nBytesIndex = nValues * sizeof(_statesIndex[i]);
-        fileStream.write(reinterpret_cast<const char*>(_statesIndex[i].data()), nBytesIndex);
+        fileStream.write(reinterpret_cast<const char*>(_statesIndex[i].data()), nValues);
+        fileStream2.write(reinterpret_cast<const char*>(_statesColor[i].data()), nValues);
+        fileStream3.write(reinterpret_cast<const char*>(_statesRadius[i].data()), nValues);
+        fileStream4.write(reinterpret_cast<const char*>(_statesPosX[i].data()), nValues);
+        fileStream5.write(reinterpret_cast<const char*>(_statesPosY[i].data()), nValues);
+        fileStream6.write(reinterpret_cast<const char*>(_statesPosZ[i].data()), nValues);
         }
+
         //size_t nBytesPos = nValuesvec * sizeof(_statesIndex[0].size());
         //LDEBUG("nbytesPos " + std::to_string(nBytesPos));
         //fileStream.write(reinterpret_cast<const char*>(_statesIndex.data()), nBytesPos);
@@ -622,9 +660,9 @@ namespace openspace {
 
     }
 
-    bool RenderableStreamNodes::ReadcachedFile(const std::string& file) const {
+    bool RenderableStreamNodes::ReadcachedFile(const std::string& file) {
        // const std::string& file = "StreamnodesCache";
-        std::ifstream fileStream("StreamnodesCachePos2", std::ifstream::binary);
+        std::ifstream fileStream(file, std::ifstream::binary);
         if (fileStream.good()) {
             int8_t version = 0;
             fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
@@ -637,25 +675,123 @@ namespace openspace {
             LDEBUG("testar int8" + std::to_string(version));
             int32_t nValuesvec = 0;
             fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+            
+           // nValues2 = nValues2 * 3;
+
             LDEBUG("testar int32 size" + std::to_string(nValuesvec));
 
-            //    std::ifstream fileStream2("StreamnodesCacheColor", std::ifstream::binary);
-            //    std::ifstream fileStream3("StreamnodesCacheRadius", std::ifstream::binary);
+                std::ifstream fileStream2("StreamnodesCacheColor", std::ifstream::binary);
+                std::ifstream fileStream3("StreamnodesCacheRadius", std::ifstream::binary);
+                std::ifstream fileStream4("StreamnodesCachePositionx", std::ifstream::binary);
+                std::ifstream fileStream5("StreamnodesCachePositiony", std::ifstream::binary);
+                std::ifstream fileStream6("StreamnodesCachePositionz", std::ifstream::binary);
+
             //    std::ifstream fileStream4("StreamnodesCacheIndex", std::ifstream::binary);
-            //    fileStream2.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-            //    fileStream3.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+              //  fileStream2.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+              //  fileStream3.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
             //    fileStream4.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
             //    int32_t nValuesvec = 0;
             //    fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
             //    int32_t nValues = 0;
-            //    fileStream2.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-            //    fileStream3.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+             //   fileStream2.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+              //  fileStream3.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
             //    fileStream4.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
 
             //    _statesPos.resize(nValuesvec);
             //    _statesColor.resize(nValues);
             //    _statesRadius.resize(nValues);
-            //    _statesIndex.resize(nValues);
+                 //_statesIndex[0].resize(nValuesvec);
+            //_vertexIndex.resize(nValuesvec);
+            //_vertexIndex.resize(nValuesvec);
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexIndex.resize(nValuesvec);
+                fileStream.read(reinterpret_cast<char*>(
+                    _vertexIndex.data()),
+                    nValuesvec);
+
+                _statesIndex.push_back(_vertexIndex);
+               // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexIndex.clear();
+            }
+            LDEBUG("First entry in first timestep:" + std::to_string(_statesIndex[0][0]));
+            LDEBUG("_statesindex size: " + std::to_string(_statesIndex.size()));
+            LDEBUG("_statesindex[0] size" + std::to_string(_statesIndex[0].size()));
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexColor.resize(nValuesvec);
+                fileStream2.read(reinterpret_cast<char*>(
+                    _vertexColor.data()),
+                    nValuesvec);
+
+                _statesColor.push_back(_vertexColor);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexColor.clear();
+            }
+            LDEBUG("First entry in first timestep:" + std::to_string(_statesColor[0][0]));
+            LDEBUG("_statesColor size: " + std::to_string(_statesColor.size()));
+            LDEBUG("_statesColor[0] size" + std::to_string(_statesColor[0].size()));
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexRadius.resize(nValuesvec);
+                fileStream3.read(reinterpret_cast<char*>(
+                    _vertexRadius.data()),
+                    nValuesvec);
+
+                _statesRadius.push_back(_vertexRadius);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexRadius.clear();
+            }
+            LDEBUG("First entry in first timestep:" + std::to_string(_statesRadius[0][0]));
+            LDEBUG("_statesindex size: " + std::to_string(_statesRadius.size()));
+            LDEBUG("_statesindex[0] size" + std::to_string(_statesRadius[0].size()));
+            //int32_t nBytes = 0;
+            //fileStream4.read(reinterpret_cast<char*>(&nBytes), sizeof(int32_t));
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexposX.resize(nValuesvec);
+                fileStream4.read(reinterpret_cast<char*>(
+                    _vertexposX.data()),
+                    nValuesvec);
+
+                _statesPosX.push_back(_vertexposX);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexposX.clear();
+            }
+            //LDEBUG("First entry in first timestep pos x:" + std::to_string(_statesPos[0][0].x));
+           // LDEBUG("_statesindex size: " + std::to_string(_statesPos.size()));
+           // LDEBUG("_statesindex[0] size" + std::to_string(_statesPos[0].size()));
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexposY.resize(nValuesvec);
+                fileStream5.read(reinterpret_cast<char*>(
+                    _vertexposY.data()),
+                    nValuesvec);
+
+                _statesPosY.push_back(_vertexposY);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexposY.clear();
+            }
+
+            for (int i = 0; i < _nStates; ++i) {
+                _vertexposZ.resize(nValuesvec);
+                fileStream6.read(reinterpret_cast<char*>(
+                    _vertexposZ.data()),
+                    nValuesvec);
+
+                _statesPosZ.push_back(_vertexposZ);
+                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
+                _vertexposZ.clear();
+            }
+
+            for (int i = 0; i < _nStates; ++i) {
+                for (int k = 0; k < nValuesvec; ++k) {
+
+                    glm::vec3 temp = glm::vec3(_statesPosX[i][k], _statesPosY[i][k], _statesPosZ[i][k]);
+                    _vertexPositions.push_back(temp);
+                   // _statesPos[i].push_back(temp);
+                }
+                _statesPos.push_back(_vertexPositions);
+                _vertexPositions.clear();
+            }
             //    
             //    fileStream.read(reinterpret_cast<char*>(
             //        _statesPos.data()),
@@ -1005,7 +1141,7 @@ namespace openspace {
             glDrawArrays(
                 GL_POINTS,
                 temp,
-                static_cast<GLsizei>(_lineCount.size())
+                static_cast<GLsizei>(_vertexPositions.size())
             );
 
             glBindVertexArray(0);
