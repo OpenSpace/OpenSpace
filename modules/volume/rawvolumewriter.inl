@@ -88,7 +88,7 @@ void RawVolumeWriter<VoxelType>::write(
     }
     file.close();
 }
-#pragma optimize( "", off )
+
 template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     setDimensions(volume.dimensions());
@@ -107,5 +107,5 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.write(buffer, length);
     file.close();
 }
-#pragma optimize( "", on ) 
+
 } // namespace openspace::volume

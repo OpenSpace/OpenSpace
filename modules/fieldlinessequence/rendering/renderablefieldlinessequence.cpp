@@ -243,7 +243,7 @@ namespace {
             return backupValue;
         }
         return tmp;
-    }   
+    }
 } // namespace
 
 namespace openspace {
@@ -478,14 +478,13 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
 {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
-    bool flowEnabledValue;
-    if (_dictionary->getValue(KeyFlowEnabled, flowEnabledValue)) {
-        _pFlowEnabled = flowEnabledValue;
+    if (_dictionary->hasKey(KeyFlowEnabled)) {
+        _pFlowEnabled = _dictionary->value<bool>(KeyFlowEnabled);
     }
 
-    float lineWidthValue;
-    if (_dictionary->getValue(KeyLineWidth, lineWidthValue)) {
-        _pLineWidth = lineWidthValue;
+
+    if (_dictionary->hasKey(KeyLineWidth)) {
+        _pLineWidth = static_cast<float>(_dictionary->value<double>(KeyLineWidth));
     }
     
     if (_dictionary->getValue(KeyOutputFolder, outputFolderPath)) {
