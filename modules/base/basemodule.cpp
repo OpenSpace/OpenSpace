@@ -203,6 +203,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
         RenderableSphere::Documentation(),
+        RenderableSphericalGrid::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
 
