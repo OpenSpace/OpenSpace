@@ -38,6 +38,7 @@
 #include <modules/base/lightsource/scenegraphlightsource.h>
 #include <modules/base/rendering/grids/renderableboxgrid.h>
 #include <modules/base/rendering/grids/renderablegrid.h>
+#include <modules/base/rendering/grids/renderableradialgrid.h>
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderablelabels.h>
@@ -132,6 +133,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
+    fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
@@ -202,6 +204,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableModel::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
+        RenderableRadialGrid::Documentation(),
         RenderableSphere::Documentation(),
         RenderableSphericalGrid::Documentation(),
         RenderableTrailOrbit::Documentation(),

@@ -41,6 +41,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableboxgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablegrid.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableradialgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablesphericalgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.h
@@ -92,6 +93,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableboxgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablegrid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableradialgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablesphericalgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecartesianaxes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelabels.cpp
