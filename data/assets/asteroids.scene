@@ -18,6 +18,7 @@ asset.require('scene/solarsystem/sssb/mars-crossing_asteroid')
 asset.require('scene/solarsystem/sssb/outer_main_belt_asteroid')
 asset.require('scene/solarsystem/sssb/transneptunian_object_asteroid')
 asset.require('scene/solarsystem/sssb/pha')
+asset.require('scene/solarsystem/sssb/c2019y4atlas')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
@@ -27,6 +28,7 @@ asset.onInitialize(function ()
     openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 2.7e12)
 
     openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
+    openspace.setPropertyValue('Scene.C2019Y4AtlasTrail.Renderable.Enabled', false)
 end)
 
 asset.onDeinitialize(function ()
