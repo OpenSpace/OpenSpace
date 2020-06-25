@@ -38,6 +38,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
 
+#include <cmath>
+
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
     constexpr const char* KeyRenderable = "Renderable";

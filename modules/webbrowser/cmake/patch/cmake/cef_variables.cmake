@@ -305,7 +305,7 @@ if(OS_MACOSX)
   endforeach()
 
   # Target SDK.
-  set(CEF_TARGET_SDK               "10.14")
+  set(CEF_TARGET_SDK               "10.15")
   list(APPEND CEF_COMPILER_FLAGS
     -mmacosx-version-min=${CEF_TARGET_SDK}
   )

@@ -43,7 +43,11 @@
 #include <ghoul/misc/boolean.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
+#else
+#define GLFW_INCLUDE_NONE
+#endif
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
@@ -1294,7 +1298,7 @@ int main(int argc, char** argv) {
         Engine::create(cluster, callbacks, config);
     }
     catch (const std::runtime_error& e) {
-        LFATAL("main", e.what());
+        LFATALC("main", e.what());
         Engine::destroy();
         global::openSpaceEngine.deinitialize();
         ghoul::deinitialize();
