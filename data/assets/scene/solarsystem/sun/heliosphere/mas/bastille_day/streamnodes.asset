@@ -9,6 +9,8 @@ asset.info = {
 
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
 openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 --openspace.setPropertyValueSingle("Scene.NeptuneTrail.Renderable.Enabled", false)
 --openspace.setPropertyValueSingle("Scene.UranusTrail.Renderable.Enabled", false)
@@ -33,8 +35,9 @@ local sunRadius = 6.957E8
 -- Streamnodes from binaries
 local Streamnodes = {
     Identifier = "MAS_MHD_StreamNodes",
-    Parent = transforms.HNMReferenceFrame.Identifier,
-	--transforms.asset, referens till suntransforms.solarsystemBarycenter.identifier
+    --wrong Parent = transforms.HNMReferenceFrame.Identifier,
+    Parent = sunTransforms.SunIAU.Identifier,
+    --transforms.asset, referens till suntransforms.solarsystemBarycenter.identifier
     Renderable = {
         Type = "RenderableStreamNodes",
         SourceFolder = streamnodesDirectory,
