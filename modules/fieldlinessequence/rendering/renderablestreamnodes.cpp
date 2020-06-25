@@ -659,11 +659,7 @@ namespace openspace {
             }
             LDEBUG("testar int8" + std::to_string(version));
             int32_t nValuesvec = 0;
-            fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
-            
-            LDEBUG("Testar int64_t number of values: " + std::to_string(nValuesvec));
-        
-
+            fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));   
            
             for (int i = 0; i < _nStates; ++i) {
                 _vertexIndex.resize(nValuesvec);
@@ -672,13 +668,8 @@ namespace openspace {
                     nValuesvec * sizeof(_vertexIndex[0]));
 
                 _statesIndex.push_back(_vertexIndex);
-               // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
                 _vertexIndex.clear();
             }
-            LDEBUG("First entry in first timestep:" + std::to_string(_statesIndex[0][0]));
-            LDEBUG("_statesindex size: " + std::to_string(_statesIndex.size()));
-            LDEBUG("_statesindex[0] size" + std::to_string(_statesIndex[0].size()));
-
             for (int i = 0; i < _nStates; ++i) {
                 _vertexColor.resize(nValuesvec);
                 fileStream2.read(reinterpret_cast<char*>(
@@ -686,12 +677,8 @@ namespace openspace {
                     nValuesvec * sizeof(_vertexColor[0]));
 
                 _statesColor.push_back(_vertexColor);
-                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
                 _vertexColor.clear();
             }
-            LDEBUG("First entry in first timestep Color(FLUX):" + std::to_string(_statesColor[0][0]));
-            LDEBUG("_statesColor size: " + std::to_string(_statesColor.size()));
-            LDEBUG("_statesColor[0] size" + std::to_string(_statesColor[0].size()));
 
             for (int i = 0; i < _nStates; ++i) {
                 _vertexRadius.resize(nValuesvec);
@@ -700,14 +687,8 @@ namespace openspace {
                     nValuesvec * sizeof(_vertexColor[0]));
 
                 _statesRadius.push_back(_vertexRadius);
-                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
                 _vertexRadius.clear();
             }
-            LDEBUG("First entry in first timestep RADIUS:" + std::to_string(_statesRadius[0][0]));
-            LDEBUG("_statesRadius size: " + std::to_string(_statesRadius.size()));
-            LDEBUG("_statesRadius[0] size" + std::to_string(_statesRadius[0].size()));
-            
-
             for (int i = 0; i < _nStates; ++i) {
                 _vertexPositions.resize(nValuesvec);
                 fileStream4.read(reinterpret_cast<char*>(
@@ -715,7 +696,6 @@ namespace openspace {
                     nValuesvec * sizeof(_vertexPositions[0]));
 
                 _statesPos.push_back(_vertexPositions);
-                // LDEBUG("number" + std::to_string(i) + "vertexindex:" + std::to_string(_vertexIndex[i]));
                 _vertexPositions.clear();
             }
 
