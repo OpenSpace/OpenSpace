@@ -13,17 +13,18 @@ local textures = asset.require('./streamnodes_textures').TexturesPath
 
 local legend = {
     Identifier = "Legendstreamnodes",	
-Renderable = {
+    --Type = "ScreenSpaceRenderable",
     Type = "ScreenSpaceImageLocal",
-    -- RenderableType = "ScreenSpaceImageLocal",
-    TexturePath = textures .. "/legend.png"
-},
+    TexturePath = textures .. "/legend.png",
     GUI = {
         Name = "Flux Legend",
         Path = "/Solar System/Heliosphere"
-    }
+		}
 };
 
--- openspace.addScreenSpaceRenderable(legend)
+openspace.addScreenSpaceRenderable(legend)
+openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.CartesianPosition', {-1.457630,-0.033900,-2.000000});
+openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Scale', 0.037560);
+openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', false);
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { legend })

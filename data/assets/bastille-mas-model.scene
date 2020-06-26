@@ -7,7 +7,7 @@ local sceneHelper = asset.require('util/scene_helper')
 asset.require('util/default_dashboard')
 
 asset.require('scene/solarsystem/sun/magnetogram_textures')
--- asset.require('scene/solarsystem/sun/streamnodeslegend')
+asset.require('scene/solarsystem/sun/streamnodeslegend')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 
 -- must be >0
@@ -34,15 +34,17 @@ local Keybindings = {
     {
         Key = "F2",
         Name = "Show Flux Value Legend",
-        Command = "openspace.asset.add('C:/Users/emiho502/Desktop/OpenSpace/data/assets/scene/solarsystem/sun/streamnodeslegend')",
-        Documentation = "Shows or hides the legend image",
+        --Command = "openspace.asset.add('C:/Users/chrad171/openspace/OpenSpace/data/assets/scene/solarsystem/sun/streamnodeslegend')",
+        Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);",
+		Documentation = "Shows or hides the legend image",
         Local = true
     },
     {
         Key = "F3",
         Name = "Show Flux Value Legend",
-        Command = "openspace.asset.remove('C:/Users/emiho502/Desktop/OpenSpace/data/assets/scene/solarsystem/sun/streamnodeslegend')",
-        Documentation = "Shows or hides the legend image",
+        --Command = "openspace.asset.remove('C:/Users/chrad171/openspace/OpenSpace/data/assets/scene/solarsystem/sun/streamnodeslegend')",
+        Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', false);",
+		Documentation = "Shows or hides the legend image",
         Local = true
     },
 	{
@@ -60,6 +62,7 @@ local Keybindings = {
 		"openspace.setPropertyValueSingle(script10, 0.000000);" ..
 		"openspace.setPropertyValueSingle(script11, 0.000000);" ..
 		"openspace.setPropertyValueSingle(script12, 5.000000);",
+		--"Todo, fix the last one which is on the z axis"
 		--"openspace.setPropertyValueSingle(script13, {--358139527168.969971,953488375808.000000});",
 		Documentation = "Resets the visualisation of streamnodes",
 	    Name = "Reset Streamnodes Vis back",
