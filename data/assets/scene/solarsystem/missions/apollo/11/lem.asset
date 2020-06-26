@@ -45,7 +45,6 @@ local Apollo11LemModel = {
         LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
     },
     GUI = {
-        Hidden = false,
         Name = "Apollo 11 Lem",
         Path = "/Solar System/Missions/Apollo/11"
     }

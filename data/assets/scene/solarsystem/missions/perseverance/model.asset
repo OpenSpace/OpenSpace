@@ -49,7 +49,8 @@ local PerseveranceModel = {
     Parent = Perseverance.Identifier,
     GUI = {
         Name = "Perseverance Model",
-        Path = "/Solar System/Missions/Perseverance"
+        Path = "/Solar System/Missions/Perseverance",
+        Hidden = true,
     }
 }
 
@@ -67,12 +68,13 @@ local Body = {
         ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
         PerformShading = false,
-        GUI = {
-            Name = "Perseverance Model Body",
-            Hidden = false,
-            Path = "/Solar System/Missions/Perseverance/Model"
-        }
+    },
+    GUI = {
+        Name = "Perseverance Model Body",
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true,
     }
+
 }
 
 local Body_detail = {
@@ -88,11 +90,11 @@ local Body_detail = {
         ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
         PerformShading = false,
-        GUI = {
-            Name = "Body Detail",
-            Hidden = true,
-            Path = "/Solar System/Missions/Perseverance/Model"
-        }
+    },
+    GUI = {
+        Name = "Body Detail",
+        Hidden = true,
+        Path = "/Solar System/Missions/Perseverance/Model"
     }
 }
 
@@ -108,11 +110,11 @@ local Body_staticParts_1 = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -128,11 +130,11 @@ local Body_staticParts_2 = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -148,11 +150,11 @@ local Body_staticParts_3 = {
         },
         ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -168,11 +170,11 @@ local Body_staticParts_4 = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -188,11 +190,11 @@ local Body_staticParts_5 = {
         },
         ColorTexture = textures .. "/parts_AO.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -209,11 +211,11 @@ local RA_Shoulder_AZ = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -229,11 +231,11 @@ local RA_Shoulder_AZ_detail_1 = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -249,11 +251,11 @@ local RA_Shoulder_AZ_detail_2 = {
         },
         ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -270,11 +272,11 @@ local RA_Shoulder_EL_1 = {
         },
         ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -291,11 +293,11 @@ local RA_Shoulder_EL_detail_1 = {
         },
         ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -311,11 +313,11 @@ local RA_Shoulder_EL_detail_2 = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -333,11 +335,11 @@ local RA_Shoulder_EL_2 = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -354,11 +356,11 @@ local RA_Elbow_1 = {
         },
         ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -374,11 +376,11 @@ local RA_Elbow_detail_1 = {
         },
         ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -394,11 +396,11 @@ local RA_Elbow_detail_2 = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -415,11 +417,11 @@ local RA_Elbow_2 = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -437,11 +439,11 @@ local RA_Wrist = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -457,11 +459,11 @@ local RA_Wrist_details = {
         },
         ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -478,11 +480,11 @@ local RA_Turret = {
         },
         ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -499,11 +501,11 @@ local RA_Turret_details_1 = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -519,11 +521,11 @@ local RA_Turret_details_2 = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -541,11 +543,11 @@ local RSM_root = {
         },
         ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -561,11 +563,11 @@ local RSM_AZ = {
         },
         ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -581,11 +583,11 @@ local RSM_EL = {
         },
         ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -602,11 +604,11 @@ local HGA_AZ = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -622,11 +624,11 @@ local HGA_EL = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -643,11 +645,11 @@ local SAM_Cover_1 = {
         },
         ColorTexture = textures .. "/MSLTextureTest.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -663,11 +665,11 @@ local SAM_Cover_2 = {
         },
         ColorTexture = textures .. "/MSLTextureTest.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -683,11 +685,11 @@ local CHEMIN_Bottom = {
         },
         ColorTexture = textures .. "/MSLTextureTest.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -704,11 +706,11 @@ local Wheel_Base = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 local Wheel_Base_2 = {
@@ -723,11 +725,11 @@ local Wheel_Base_2 = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -744,11 +746,11 @@ local Wheel_Leg_1_L = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -764,11 +766,11 @@ local Wheel_Leg_1A_L_detail = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -784,11 +786,11 @@ local Wheel_Leg_1B_L_detail = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -804,11 +806,11 @@ local Wheel_Leg_2_L = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -824,11 +826,11 @@ local Wheel_Wrist_F_L = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -844,11 +846,11 @@ local Wheel_Wrist_hub_F_L = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -864,11 +866,11 @@ local Wheel_F_L = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -884,11 +886,11 @@ local Wheel_C_L = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -904,11 +906,11 @@ local Wheel_Wrist_B_L = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -925,10 +927,11 @@ local Wheel_Wrist_hub_B_L = {
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
         PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+    },
+    GUI = {
+        Name = "Perseverance Wheel Wrist hub B L",
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -944,11 +947,11 @@ local Wheel_B_L = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -965,11 +968,11 @@ local Wheel_Leg_1_R = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -985,11 +988,11 @@ local Wheel_Leg_1A_R_detail = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1005,11 +1008,11 @@ local Wheel_Leg_1B_R_detail = {
         },
         ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1025,11 +1028,11 @@ local Wheel_Leg_2_R = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1046,11 +1049,11 @@ local Wheel_Wrist_F_R = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1066,11 +1069,11 @@ local Wheel_Wrist_hub_F_R = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1086,11 +1089,11 @@ local Wheel_F_R = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1106,11 +1109,11 @@ local Wheel_C_R = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1126,11 +1129,11 @@ local Wheel_Wrist_B_R = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1146,11 +1149,11 @@ local Wheel_Wrist_hub_B_R = {
         },
         ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1166,11 +1169,11 @@ local Wheel_B_R = {
         },
         ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
