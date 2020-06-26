@@ -299,7 +299,7 @@ namespace openspace {
         , _pColorTableRange(colorTableRangeInfo)
         , _pDomainZ(DomainZInfo)
         , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
-        , _pThresholdFlux(ThresholdFluxInfo, -20.f, -20.f, 10.f)
+        , _pThresholdFlux(ThresholdFluxInfo, 0.f, -20.f, 20.f)
        // , _pFiltering(FilteringInfo, 100000.f, 10000000.f, 1000000000000.f)
        // , _pFilteringUpper(FilteringUpperInfo, 600000000000.f, 1000000.f, 1000000000000.f)
         , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
