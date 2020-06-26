@@ -13,8 +13,23 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 -- must be >0
 -- the textureIndex variable is used to select a texture from a list of textures 
 textureIndex = 2;
+Endtime1 = "2000 JUL 14 19:00:00";
+Starttimescript = "openspace.time.setTime('2000 JUL 14 08:34:00')";
+Endtime2 = "2000 JUL 14 14:00:00";
 
 local Keybindings = {
+	
+	{
+	Key = "Shift+r",
+	    Command = 
+            "openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
+            "openspace.setPropertyValueSingle('Scene.Sun.Renderable.Enabled', false);" ..
+            "openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);" ..
+            "openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);",
+	    Documentation = "Resets the subscene for showing the Sun volume rendering + fieldlines",
+	    Name = "Reset Streamnodes back",
+	    GuiPath = "/CCMC/MHD",
+	    Local = false
 	{
 	    Key = "Shift+s",
 	    Command = 
@@ -34,21 +49,27 @@ local Keybindings = {
         Local = false
     },
     {
-        Key = "F7",
-        Command = propertyHelper.invert('Scene.MAS_MHD_Fieldlines.Renderable.Enabled'),
-        Documentation = "Toggle fieldlines",
-        Local = false
-    },
-	{
-        Key = "F8",
-        Command = propertyHelper.invert('Scene.SunGlare.Renderable.Enabled'),
-        Documentation = "Toggle sun glare",
+	Key = "F7",
+		Command = Command = "openspace.scriptScheduler.loadScheduledScript(Endtime2, Starttimescript)",
+		Documentation = "Loop time 08:34- 14:00",
+		Name = "Loop Nodedata time 08:34 - 14:00",
+		GuiPath = "/CCMC/Nodes",
         Local = false
     },
     {
-        Key = "F9",
-        Command = propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
-        Documentation = "Toggle sun",
+	Key = "F8",
+        Command = "openspace.scriptScheduler.loadScheduledScript(Endtime1, Starttimescript)",
+        Documentation = "Loop time 08:34- 19:34",
+		Name = "Loop Nodedata time 08:34 - 19:34",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+	Key = "F9",
+        Command = "openspace.scriptScheduler.clear()",
+        Documentation = "Clear scriptScheduler",
+		Name = "Clear loopscripts",
+		GuiPath = "/CCMC/Nodes",
         Local = false
     },
     {
