@@ -47,10 +47,11 @@ namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
 
-    constexpr const std::array<const char*, 11> UniformNames = {
+    constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "projectionTransform", "performShading", "texture1",
-        "ambientIntensity", "diffuseIntensity", "specularIntensity"
+        "modelViewTransform", "crippedModelViewTransform", "projectionTransform", 
+        "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
+        "specularIntensity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -380,6 +381,16 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelViewTransform,
         glm::mat4(modelViewTransform)
     );
+
+    glm::dmat4 crippedModelViewTransform = glm::transpose(glm::inverse(
+            glm::dmat4(glm::inverse(data.camera.sgctInternal.viewMatrix())) * modelViewTransform
+    ));
+
+    _program->setUniform(
+        _uniformCache.crippedModelViewTransform,
+        glm::mat4(crippedModelViewTransform)
+    );
+
     _program->setUniform(
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
