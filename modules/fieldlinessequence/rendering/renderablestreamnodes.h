@@ -77,6 +77,12 @@ namespace openspace {
             Flux = 1,
             Radius = 2
         };
+        enum class DistanceMethod : int {
+            Eucledian = 0,
+            x = 1,
+            y = 2,
+            z = 3
+        };
 
         UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
             _uniformCache;
@@ -97,8 +103,6 @@ namespace openspace {
         // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.
         // False => the previous frame's state should still be shown
         bool _needsUpdate = false;
-        //
-        bool _loadingcachedfile = true;
 
         // --------------------------------- NUMERICALS ----------------------------------- //
         // Active index of _states. If(==-1)=>no state available for current time. Always the
@@ -108,7 +112,7 @@ namespace openspace {
         // Active index of _startTimes
         int _activeTriggerTimeIndex = -1;
         // Number of states in the sequence
-        size_t _nStates = 4;
+        size_t _nStates = 274;
         // In setup it is used to scale JSON coordinates. During runtime it is used to scale
         // domain limits.
         float _scalingFactor = 1.f;
@@ -166,6 +170,8 @@ namespace openspace {
         properties::Vec4Property _pStreamColor;
         // Index of the flux value to color lines by
         properties::OptionProperty _pColorFlux;
+        // Chose different distant measurements:
+        properties::OptionProperty _pDistancemethod;
         // Color table/transfer function for "By Flux value" coloring
         properties::StringProperty _pColorTablePath;
         // Valid range for the color table
@@ -199,11 +205,13 @@ namespace openspace {
         properties::IntProperty _pAmountofNodes;
         // Nodeskipping options
         properties::OptionProperty _pNodeskipMethod;
-        //
+        // amount of nodes to show outside of filterrange
         properties::IntProperty _pDefaultNodeSkip;
-        //
+        // The Flux threshold to decide the line between
+        //_pDefaultNodeSkip and _pAmountofNodes
         properties::FloatProperty _pFluxNodeskipThreshold;
-        //
+        // The Radius threshold to decide the line between 
+        //_pDefaultNodeSkip and _pAmountofNodes
         properties::FloatProperty _pRadiusNodeSkipThreshold;
 
         // initialization

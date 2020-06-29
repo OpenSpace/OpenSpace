@@ -188,8 +188,18 @@ namespace {
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
     };
+    constexpr openspace::properties::Property::PropertyInfo DistanceMethodInfo = {
+        "DistanceMethod",
+        "Decide how to check distance",
+        "Deciding how to check distance."
+    };
+    constexpr openspace::properties::Property::PropertyInfo DistanceplanetInfo = {
+        "Distanceplanet",
+        "Decide what planet to check distance to",
+        "Deciding what planet to check distance to."
+    };
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
-        "Slider for distance to another planet",
+        "distancePlanetThreshold",
         "Deciding how far the values will start to ",
         "Enhance the size of nodes dependent on distance to planet"
     };
@@ -251,6 +261,7 @@ namespace openspace {
         , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
         , _pNodeskipMethod(NodeskipMethodInfo, OptionProperty::DisplayType::Radio)
         , _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
+        , _pDistancemethod(DistanceMethodInfo, OptionProperty::DisplayType::Dropdown)
         , _pColorTablePath(ColorTablePathInfo)
         , _pStreamColor(StreamColorInfo,
             glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
@@ -779,7 +790,9 @@ namespace openspace {
 
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pLineWidth);
+        addProperty(_pDistancemethod);
         addProperty(_pDistanceThreshold);
+        
         //addProperty(_pDomainZ);
         
         // ----------------------------- Add Property Groups ----------------------------- //
@@ -821,6 +834,12 @@ namespace openspace {
         _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Uniform), "Uniform");
         _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Flux), "Flux");
         _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Radius), "Radius");
+
+        _pDistancemethod.addOption(static_cast<int>(DistanceMethod::Eucledian), "Eucledian");
+        _pDistancemethod.addOption(static_cast<int>(DistanceMethod::x), "x");
+        _pDistancemethod.addOption(static_cast<int>(DistanceMethod::y), "y");
+        _pDistancemethod.addOption(static_cast<int>(DistanceMethod::z), "z");
+
         definePropertyCallbackFunctions();
 
         // Set default
@@ -920,10 +939,17 @@ namespace openspace {
 
             _shaderProgram->setUniform("modelViewProjection",
                 data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
-            const std::string earth = "Earth";
+        const std::string earth = "Earth";
         SceneGraphNode* earthnode = sceneGraphNode(earth);
-        glm::dvec3 earthpos = earthnode->worldPosition();
-       // LDEBUG("earthpos x: " + std::to_string(earthpos.x));
+        glm::vec3 earthpos = earthnode->worldPosition();
+
+        //const std::string Sun = "Sun";
+        //SceneGraphNode* SunNode = sceneGraphNode(Sun);
+        //glm::dvec3 Sunpos = SunNode->worldPosition();
+       // earthpos = earthpos - Sunpos;
+        //LDEBUG("Suns position: " + std::to_string(Sunpos.x) + ", " + std::to_string(Sunpos.x) + ", " + std::to_string(Sunpos.x));
+
+       // LDEBUG("earthpos x: " + std::to_string(earthpos.x) + " ," + std::to_string(earthpos.y) + ", " + std::to_string(earthpos.z));
         // Flow/Particles
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
@@ -943,6 +969,7 @@ namespace openspace {
         _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
         _shaderProgram->setUniform("earthPos", earthpos);
         _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
+        _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
 
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;

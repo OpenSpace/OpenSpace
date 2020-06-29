@@ -68,6 +68,7 @@ uniform float NodeskipRadiusThreshold;
 uniform float fluxColorAlpha;
 uniform vec3 earthPos;
 uniform float DistanceThreshold;
+uniform int DistanceMethod;
 
 // Inputs
 // Should be provided in meters
@@ -207,9 +208,35 @@ void main() {
     else{
         gl_PointSize = nodeSizeLargerFlux;
     }
-    if(distance(earthPos, in_position) < DistanceThreshold){
+        
+        vec3 vertexPosRelativetoEarth;
+        vertexPosRelativetoEarth.x = in_position.x; // + earthPos.x;
+        vertexPosRelativetoEarth.y = in_position.y;// + earthPos.y;
+        vertexPosRelativetoEarth.z = in_position.z;// + earthPos.z; 
+        // + in_position;
+        if(DistanceMethod == 0){
+        if(distance(earthPos, vertexPosRelativetoEarth) < DistanceThreshold){
+        //if(earthPos.x - vertexPosRelativetoEarth.x < DistanceThreshold){
         gl_PointSize = 10;
-    }
+        }
+        }
+        else if(DistanceMethod == 1){
+        if(abs(earthPos.x - vertexPosRelativetoEarth.x) < DistanceThreshold){
+        gl_PointSize = 10;
+        }
+        }
+        
+        else if(DistanceMethod == 2){
+        if(abs(earthPos.y - vertexPosRelativetoEarth.y) < DistanceThreshold){
+        gl_PointSize = 10;
+        }
+        }
+
+        else if(DistanceMethod == 3){
+        if(abs(earthPos.z - vertexPosRelativetoEarth.z) < DistanceThreshold){
+        gl_PointSize = 10;
+        }
+        }
 
         vec4 position_in_meters = vec4(in_position, 1);
         vec4 positionClipSpace = modelViewProjection * position_in_meters;
@@ -217,6 +244,6 @@ void main() {
         
         //gl_PointSize = nodeSize;
         gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
-
+          
         vs_depth = gl_Position.w;
 }
