@@ -134,8 +134,8 @@ glm::vec3 SceneGraphLightSource::directionViewSpace(const RenderData& renderData
 
     const glm::dvec3 renderNodePosition = renderData.modelTransform.translation;
 
-    const glm::dvec3 lightDirectionViewSpace = renderData.camera.viewRotationMatrix() *
-        glm::dvec4((lightPosition - renderNodePosition), 1.0);
+    const glm::dvec3 lightDirectionViewSpace = glm::dvec3(renderData.camera.combinedViewMatrix() *
+        glm::dvec4((lightPosition - renderNodePosition), 1.0));
 
     return glm::normalize(lightDirectionViewSpace);
 }

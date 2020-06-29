@@ -49,7 +49,7 @@ namespace {
 
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "crippedModelViewTransform", "projectionTransform", 
+        "modelViewTransform", "normalTransform", "projectionTransform", 
         "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
         "specularIntensity"
     };
@@ -382,13 +382,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glm::mat4(modelViewTransform)
     );
 
-    glm::dmat4 crippedModelViewTransform = glm::transpose(glm::inverse(
-            glm::dmat4(glm::inverse(data.camera.sgctInternal.viewMatrix())) * modelViewTransform
-    ));
+    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
     _program->setUniform(
-        _uniformCache.crippedModelViewTransform,
-        glm::mat4(crippedModelViewTransform)
+        _uniformCache.normalTransform,
+        glm::mat4(normalTransform)
     );
 
     _program->setUniform(
