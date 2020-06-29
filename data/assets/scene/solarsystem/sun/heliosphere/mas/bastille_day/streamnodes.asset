@@ -27,12 +27,6 @@ local streamnodesDirectory = asset.syncedResource({
     Identifier = "bastille_day_streamnodes",
     Version = 3
 })
- local streamnodesDirectory_cache = asset.syncedResource({
-    Name = "Bastille Day Stream nodes",
-    Type = "HttpSynchronization",
-    Identifier = "bastille_day_streamnodes",
-    Version = 4
-})
 
 
 
@@ -47,7 +41,6 @@ local Streamnodes = {
     Renderable = {
         Type = "RenderableStreamNodes",
         SourceFolder = streamnodesDirectory,
-	CacheSourceFolder = streamnodesDirectory_cache, 
         -- StreamsEnabled = false,
         -- LineWidth = 1.0;
         -- AlphaBlendlingEnabled = false,
