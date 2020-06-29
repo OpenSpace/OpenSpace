@@ -183,7 +183,10 @@ namespace openspace {
         properties::FloatProperty _pNodeSize;
         // Size of nodes for larger flux
         properties::FloatProperty _pNodeSizeLargerFlux;
-        // Line width for the line rendering part
+
+        properties::FloatProperty _pDistanceThreshold;
+
+        /// Line width for the line rendering part
         properties::FloatProperty _pLineWidth;
         // Valid range along the Z-axis
         properties::Vec2Property _pDomainZ;

@@ -21,13 +21,19 @@ local transferFunctions = asset.localResource("transferfunctions")
 -- local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
 local streamnodeDensityColorTable = transferFunctions .. "/stream_nodes.txt"
 
- local streamnodesDirectory = asset.syncedResource({
+local streamnodesDirectory = asset.syncedResource({
     Name = "Bastille Day Stream nodes",
     Type = "HttpSynchronization",
     Identifier = "bastille_day_streamnodes",
-   -- Identifier = "bastille_day_mas_fieldlines",
     Version = 3
 })
+ local streamnodesDirectory_cache = asset.syncedResource({
+    Name = "Bastille Day Stream nodes",
+    Type = "HttpSynchronization",
+    Identifier = "bastille_day_streamnodes",
+    Version = 4
+})
+
 
 
 local sunRadius = 6.957E8
@@ -41,6 +47,7 @@ local Streamnodes = {
     Renderable = {
         Type = "RenderableStreamNodes",
         SourceFolder = streamnodesDirectory,
+	CacheSourceFolder = streamnodesDirectory_cache, 
         -- StreamsEnabled = false,
         -- LineWidth = 1.0;
         -- AlphaBlendlingEnabled = false,

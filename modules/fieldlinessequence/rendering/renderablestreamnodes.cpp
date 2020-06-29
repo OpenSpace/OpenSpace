@@ -47,6 +47,7 @@
 #include <fstream>
 #include <thread>
 #include <openspace/json.h>
+#include <openspace/query/query.h>
 
 // This is a call to use the nlohmann json file
 using json = nlohmann::json;
@@ -187,6 +188,12 @@ namespace {
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
     };
+    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+        "Slider for distance to another planet",
+        "Deciding how far the values will start to ",
+        "Enhance the size of nodes dependent on distance to planet"
+    };
+    
     enum class SourceFileType : int {
         Json = 0,
         Invalid
@@ -263,7 +270,10 @@ namespace openspace {
         , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
         , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
         , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
-        , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f) 
+        , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
+        , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1000000000000.0f)
+
+        
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -742,6 +752,8 @@ namespace openspace {
 
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pLineWidth);
+        addProperty(_pDistanceThreshold);
+        //addProperty(_pDomainZ);
         
         // ----------------------------- Add Property Groups ----------------------------- //
         addPropertySubOwner(_pColorGroup);
@@ -881,8 +893,11 @@ namespace openspace {
 
             _shaderProgram->setUniform("modelViewProjection",
                 data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
-
-        // Decided if we want to use uniformCache or not
+            const std::string earth = "Earth";
+        SceneGraphNode* earthnode = sceneGraphNode(earth);
+        glm::dvec3 earthpos = earthnode->worldPosition();
+        LDEBUG("earthpos x: " + std::to_string(earthpos.x));
+        // Flow/Particles
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
         _shaderProgram->setUniform(_uniformCache.nodeSizeLargerFlux, _pNodeSizeLargerFlux);
@@ -899,6 +914,8 @@ namespace openspace {
         _shaderProgram->setUniform("NodeskipFluxThreshold", _pFluxNodeskipThreshold);
         _shaderProgram->setUniform("NodeskipRadiusThreshold", _pRadiusNodeSkipThreshold);
         _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
+        _shaderProgram->setUniform("earthPos", earthpos);
+        _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
 
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;

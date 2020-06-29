@@ -66,6 +66,8 @@ uniform int Nodeskipdefault;
 uniform float NodeskipFluxThreshold;
 uniform float NodeskipRadiusThreshold;
 uniform float fluxColorAlpha;
+uniform vec3 earthPos;
+uniform float DistanceThreshold;
 
 // Inputs
 // Should be provided in meters
@@ -92,6 +94,7 @@ const int colorByFluxValue  = 1;
 const int uniformskip = 0;
 const int Fluxskip = 1;
 const int Radiusskip = 2;
+
 
 const int Fluxmode = 0;
 const int RFlux = 1;
@@ -203,6 +206,9 @@ void main() {
     }
     else{
         gl_PointSize = nodeSizeLargerFlux;
+    }
+    if(distance(earthPos, in_position) < DistanceThreshold){
+        gl_PointSize = 10;
     }
 
         vec4 position_in_meters = vec4(in_position, 1);
