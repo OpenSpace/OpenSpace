@@ -84,14 +84,13 @@ namespace openspace {
         // ------------------------------------ STRINGS ------------------------------------//
         // Name of the Node
         std::string _identifier;    
-
         // ------------------------------------- FLAGS -------------------------------------//
         // Used for 'runtime-states'. True when loading a new state from disk on another
         // thread.
         bool _isLoadingStateFromDisk = false;
         // False => states are stored in RAM (using 'in-RAM-states'), True => states are
         // loaded from disk during runtime (using 'runtime-states')
-        bool _loadingStatesDynamically = true;
+        bool _loadingStatesDynamically = false;
         // Used for 'runtime-states': True if new 'runtime-state' must be loaded from disk.
         // False => the previous frame's state should still be shown
         bool _mustLoadNewStateFromDisk = true;
@@ -109,7 +108,7 @@ namespace openspace {
         // Active index of _startTimes
         int _activeTriggerTimeIndex = -1;
         // Number of states in the sequence
-        size_t _nStates = 274;
+        size_t _nStates = 4;
         // In setup it is used to scale JSON coordinates. During runtime it is used to scale
         // domain limits.
         float _scalingFactor = 1.f;

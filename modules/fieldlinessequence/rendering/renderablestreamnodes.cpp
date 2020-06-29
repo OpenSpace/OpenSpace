@@ -62,7 +62,7 @@ namespace {
     constexpr const GLuint VaFiltering  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaIndex      = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
 
-    constexpr int8_t CurrentCacheVersion = 1;
+    constexpr int8_t CurrentCacheVersion = 2;
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
@@ -361,6 +361,32 @@ namespace openspace {
         if (!_loadingStatesDynamically) {
           
             std::string _file = "StreamnodesCacheindex";
+            //if the files doesn't exist we create them, this is just so that we then can cache the actual binary files
+            if (!FileSys.fileExists(_file)) {
+                std::ofstream fileStream(_file, std::ofstream::binary);
+                std::ofstream fileStream2("StreamnodesCacheColor", std::ofstream::binary);
+                std::ofstream fileStream3("StreamnodesCacheRadius", std::ofstream::binary);
+                std::ofstream fileStream4("StreamnodesCachePosition", std::ofstream::binary);
+                
+                fileStream.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+                fileStream2.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+                fileStream3.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+                fileStream4.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+
+
+            }
             std::string cachedFile = FileSys.cacheManager()->cachedFilename(
                 _file,
                 ghoul::filesystem::CacheManager::Persistent::Yes
@@ -681,6 +707,7 @@ namespace openspace {
             return false;
         }
 
+       
         // Ensure that the source folder exists and then extract
         // the files with the same extension as <inputFileTypeString>
         ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
@@ -896,7 +923,7 @@ namespace openspace {
             const std::string earth = "Earth";
         SceneGraphNode* earthnode = sceneGraphNode(earth);
         glm::dvec3 earthpos = earthnode->worldPosition();
-        LDEBUG("earthpos x: " + std::to_string(earthpos.x));
+       // LDEBUG("earthpos x: " + std::to_string(earthpos.x));
         // Flow/Particles
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
