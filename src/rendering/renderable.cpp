@@ -235,7 +235,7 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
 }
 
 void Renderable::setRenderBinFromOpacity() {
-    if (_opacity > 0.f && _opacity < 1.f) {
+    if (_opacity >= 0.f && _opacity < 1.f) {
         setRenderBin(Renderable::RenderBin::Transparent);
     }
     else {
@@ -245,7 +245,7 @@ void Renderable::setRenderBinFromOpacity() {
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this](){
-        if (_opacity > 0.f && _opacity < 1.f) {
+        if (_opacity >= 0.f && _opacity < 1.f) {
             setRenderBin(Renderable::RenderBin::Transparent);
         }
         else {
