@@ -34,7 +34,6 @@
 #include <openspace/rendering/transferfunction.h>
 #include <atomic>
 
-
 #include <modules/base/rendering/renderabletrail.h>
 
 namespace { enum class SourceFileType; }
@@ -45,9 +44,9 @@ namespace openspace {
     public:
         RenderableStreamNodes(const ghoul::Dictionary& dictionary);
 
-        //these two are needed for startup and close i think. 
         void initializeGL() override;
         void deinitializeGL() override;
+
         const std::vector<GLsizei>& lineCount() const;
         const std::vector<GLint>& lineStart() const;
 
@@ -57,14 +56,11 @@ namespace openspace {
         void update(const UpdateData& data) override;
         void updateActiveTriggerTimeIndex(double currentTime);
 
-        //const std::vector<GLsizei>& lineCount() const;
-        //const std::vector<GLint>& lineStart() const;
-
     private:
         std::vector<GLsizei> _lineCount;
         std::vector<GLint> _lineStart;
         // ------------------------------------- ENUMS -------------------------------------//
-        // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
+        // Used to determine if lines should be colored UNIFORMLY or by Flux Value
         enum class ColorMethod : int {
             Uniform = 0,
             ByFluxValue = 1
@@ -82,42 +78,44 @@ namespace openspace {
             Radius = 2
         };
 
-        UniformCache(streamColor, usingParticles, nodeSize, nodeSizeLargerFlux, thresholdFlux)
+        UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
             _uniformCache;
 
         // ------------------------------------ STRINGS ------------------------------------//
-        std::string _identifier;    /// Name of the Nod
+        // Name of the Node
+        std::string _identifier;    
 
-    // ------------------------------------- FLAGS -------------------------------------//
-    // False => states are stored in RAM (using 'in-RAM-states'), True => states are
-    // loaded from disk during runtime (using 'runtime-states')
-        bool _loadingStatesDynamically = false;
-
+        // ------------------------------------- FLAGS -------------------------------------//
+        // Used for 'runtime-states'. True when loading a new state from disk on another
+        // thread.
+        bool _isLoadingStateFromDisk = false;
+        // False => states are stored in RAM (using 'in-RAM-states'), True => states are
+        // loaded from disk during runtime (using 'runtime-states')
+        bool _loadingStatesDynamically = true;
+        // Used for 'runtime-states': True if new 'runtime-state' must be loaded from disk.
+        // False => the previous frame's state should still be shown
+        bool _mustLoadNewStateFromDisk = true;
+        // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.
         // False => the previous frame's state should still be shown
         bool _needsUpdate = false;
-        // Used for 'runtime-states'. True when finished loading a new state from disk on
-        // another thread.
-        std::atomic_bool _newStateIsReady = false;
-        bool _isLoadingStateFromDisk = false;
-        bool _mustLoadNewStateFromDisk = true;
+        //
         bool _loadingcachedfile = true;
-        // --------------------------------- NUMERICALS ----------------------------------- //
-        // In setup it is used to scale JSON coordinates. During runtime it is used to scale
-        // domain limits.
-        float _scalingFactor = 1.f;
 
+        // --------------------------------- NUMERICALS ----------------------------------- //
         // Active index of _states. If(==-1)=>no state available for current time. Always the
         // same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else
         // always = 0
         int _activeStateIndex = -1;
-        
         // Active index of _startTimes
         int _activeTriggerTimeIndex = -1;
-        // Estimated end of sequence.
-        double _sequenceEndTime;
         // Number of states in the sequence
         size_t _nStates = 274;
-
+        // In setup it is used to scale JSON coordinates. During runtime it is used to scale
+        // domain limits.
+        float _scalingFactor = 1.f;
+        // Estimated end of sequence.
+        double _sequenceEndTime;
+        // OpenGL Vertex Array Object
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions
         GLuint _vertexPositionBuffer = 0;
@@ -128,64 +126,16 @@ namespace openspace {
         GLuint _vertexFilteringBuffer = 0;
         // OpenGL Vertex Buffer Object containing the index of nodes
         GLuint _vertexindexBuffer = 0;
-        // ---------------------------------- Properties ---------------------------------- //
-        // Group to hold the color properties
-        properties::PropertyOwner _pColorGroup;
-        // Uniform/transfer function/topology? //////////////////////?
-        properties::OptionProperty _pColorMode;
-        // Scaling options
-        properties::OptionProperty _pScalingmethod;
-        // Nodeskipping options
-        properties::OptionProperty _pNodeskipMethod;
-        // Uniform stream Color
-        properties::Vec4Property _pStreamColor;
-        // Index of the flux value to color lines by
-        properties::OptionProperty _pColorFlux;
-        // Color table/transfer function min
-        //properties::StringProperty _pColorFluxMin;
-        // Color table/transfer function max
-        //properties::StringProperty _pColorFluxMax;
-        // Color table/transfer function for "By Flux value" coloring
-        properties::StringProperty _pColorTablePath;
-        // Toggle flow [ON/OFF]
-        properties::BoolProperty _pStreamsEnabled;
-        // Group to hold the flow/particle properties
-        properties::PropertyOwner _pStreamGroup;
 
-        properties::PropertyOwner _pNodesamountGroup;
-        // Size of simulated node particles
-        properties::FloatProperty _pNodeSize;
-
-        properties::FloatProperty _pNodeSizeLargerFlux;
-
-        /// Line width for the line rendering part
-        properties::FloatProperty _pLineWidth;
-        ////////////////
-        properties::Vec2Property _pColorTableRange;
-        ////////////////
-        properties::Vec2Property _pDomainZ;
-        /// ///////////
-        properties::FloatProperty _pThresholdFlux;
-        // Filtering nodes within a range
-        properties::FloatProperty _pFiltering;
-        // Filtering nodes with a upper range
-        properties::FloatProperty _pFilteringUpper;
-        //Amount of nodes to show
-        properties::IntProperty _pAmountofNodes;
-        ////////////////
-        properties::FloatProperty _pFluxColorAlpha;
-
-        properties::FloatProperty _pFluxNodeskipThreshold;
-
-        properties::FloatProperty _pRadiusNodeSkipThreshold;
-
-        properties::IntProperty _pDefaultNodeSkip;
-
-        // initialization
-        std::vector<std::string> _sourceFiles;
+        // ----------------------------------- POINTERS ------------------------------------//
+        // The Lua-Modfile-Dictionary used during initialization
+        std::unique_ptr<ghoul::Dictionary> _dictionary;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+        // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
+        std::unique_ptr<TransferFunction> _transferFunction;
 
         // ------------------------------------ VECTORS ----------------------------------- //
-        // Paths to color tables. One for each 'extraQuantity'
+        // Paths to color tables. One for each 'ColorFlux'
         std::vector<std::string> _colorTablePaths;
         // Values represents min & max values represented in the color table
         std::vector<glm::vec2> _colorTableRanges;
@@ -193,59 +143,89 @@ namespace openspace {
         std::vector<double> _startTimes;
         // Contains vertexPositions
         std::vector<glm::vec3> _vertexPositions;
-        ///////
-        std::vector<float> _vertexposX;
-        std::vector<float> _vertexposY;
-        std::vector<float> _vertexposZ;
         // Contains vertex flux values for color
         std::vector<float> _vertexColor;
-        // Contains vertexRedius
+        // Contains radius of vertices
         std::vector<float> _vertexRadius;
-        // Contains VertexIndex
+        // Contains index of vertices
         std::vector<int> _vertexIndex;
-
+        // Stores the states position
         std::vector<std::vector<glm::vec3>> _statesPos;
-        std::vector<std::vector<float>> _statesPosX;
-        std::vector<std::vector<float>> _statesPosY;
-        std::vector<std::vector<float>> _statesPosZ;
+        // Stores the states color
         std::vector<std::vector<float>> _statesColor;
+        // Stores the states radius
         std::vector<std::vector<float>> _statesRadius;
+        // Stores the states index
         std::vector<std::vector<int>> _statesIndex;
-        // ----------------------------------- POINTERS ------------------------------------//
-        // The Lua-Modfile-Dictionary used during initialization
-        std::unique_ptr<ghoul::Dictionary> _dictionary;
 
-        std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
-        // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
-        std::unique_ptr<TransferFunction> _transferFunction;
+        // ---------------------------------- Properties ---------------------------------- //
+        // Group to hold the color properties
+        properties::PropertyOwner _pColorGroup;
+        // Uniform/transfer function
+        properties::OptionProperty _pColorMode;
+        // Uniform stream Color
+        properties::Vec4Property _pStreamColor;
+        // Index of the flux value to color lines by
+        properties::OptionProperty _pColorFlux;
+        // Color table/transfer function for "By Flux value" coloring
+        properties::StringProperty _pColorTablePath;
+        // Valid range for the color table
+        properties::Vec2Property _pColorTableRange;
+        // The value of alpha for the flux color mode
+        properties::FloatProperty _pFluxColorAlpha;
+        // Group to hold the particle properties
+        properties::PropertyOwner _pStreamGroup;
+        // Scaling options
+        properties::OptionProperty _pScalingmethod;
+        // 
+        properties::PropertyOwner _pNodesamountGroup;
+        // Size of simulated node particles
+        properties::FloatProperty _pNodeSize;
+        // Size of nodes for larger flux
+        properties::FloatProperty _pNodeSizeLargerFlux;
+        // Line width for the line rendering part
+        properties::FloatProperty _pLineWidth;
+        // Valid range along the Z-axis
+        properties::Vec2Property _pDomainZ;
+        // Threshold flux value
+        properties::FloatProperty _pThresholdFlux;
+        // Filtering nodes within a range
+        properties::FloatProperty _pFiltering;
+        // Filtering nodes with a upper range
+        properties::FloatProperty _pFilteringUpper;
+        // Amount of nodes to show
+        properties::IntProperty _pAmountofNodes;
+        // Nodeskipping options
+        properties::OptionProperty _pNodeskipMethod;
+        //
+        properties::IntProperty _pDefaultNodeSkip;
+        //
+        properties::FloatProperty _pFluxNodeskipThreshold;
+        //
+        properties::FloatProperty _pRadiusNodeSkipThreshold;
+
+        // initialization
+        std::vector<std::string> _sourceFiles;
 
         // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
         bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
-        //void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
         void definePropertyCallbackFunctions();
         bool loadJsonStatesIntoRAM(const std::string& outputFolder);
         bool extractJsonInfoFromDictionary(fls::Model& model);
-        void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
-        //std::vector<std::string> LoadJsonfile(const std::string& filename);
         std::vector<std::string> LoadJsonfile(std::string filepath);
+        void extractTriggerTimesFromFileNames();
+        void computeSequenceEndTime();
+        void setModelDependentConstants();
         void setupProperties();
+
+        void writeCachedFile(const std::string& file) const;
+        bool readCachedFile(const std::string& file);
+        bool loadFilesIntoRam();
+
+        // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
         void updatePositionBuffer();
         void updateVertexColorBuffer();
         void updateVertexFilteringBuffer();
         void updateVertexIndexBuffer();
-        void extractTriggerTimesFromFileNames();
-        void computeSequenceEndTime();
-        void setModelDependentConstants();
-
-        void WritecachedFile(const std::string& file) const;
-        bool ReadcachedFile(const std::string& file);
-        bool LoadfilesintoRam();
-
-            // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-  
     };
-
-
-
-
 }
