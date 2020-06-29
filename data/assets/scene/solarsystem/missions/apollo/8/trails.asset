@@ -22,7 +22,8 @@ local LaunchTrail = {
         Color = { 0.70, 0.50, 0.20 },
         StartTime = "1968 DEC 21 12:51:00",
         EndTime = "1968 DEC 21 23:23:22",
-        SampleInterval = 30
+        SampleInterval = 30,
+        RenderBinMode = "SuperTransparent"
     },
     GUI = {
         Name = "Apollo 8 Launch Trail",

@@ -1265,9 +1265,15 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         }
         performDeferredTasks(tasks.deferredcasterTasks);
     }
-
+    
     glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
+
+    {
+        GLDebugGroup group("SuperTransparent");
+        data.renderBinMask = static_cast<int>(Renderable::RenderBin::SuperTransparent);
+        scene->render(data, tasks);
+    }
 
     {
         GLDebugGroup group("Overlay");
