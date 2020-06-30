@@ -19,6 +19,14 @@ local radio = {
             -- First TV signals strong enough to leave the ionosphere
             ReferenceDate = "1936 AUG 01 12:00:00",
             Speed = 299792458 -- c
+        }, 
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
         }
     },
     Renderable = {
@@ -26,11 +34,7 @@ local radio = {
         Enabled = false,
         Opacity = 1.0,
         GridColor = { 0.3, 0.84, 1.0 },
-        LineWidth = 2.0,
-        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
-                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
-                        0.0       ,  0.0      ,  0.0         , 1.0 }
+        LineWidth = 2.0
     },
     GUI = {
         Name = "Radio Sphere",
@@ -44,7 +48,15 @@ local oort = {
     Transform = {
         Scale = {
             Type = "StaticScale",
-            Scale = 7.47989845E15;
+            Scale = 7.47989845E15
+        }, 
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
         }
     },
     Renderable = {
@@ -52,11 +64,7 @@ local oort = {
         Enabled = false,
         Opacity = 0.8,
         GridColor = { 0.8, 0.4, 0.4 },
-        LineWidth = 2.0,
-        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
-                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
-                        0.0       ,  0.0      ,  0.0         , 1.0 }
+        LineWidth = 2.0
     },
     GUI = {
         Name = "Oort Sphere",
@@ -70,7 +78,15 @@ local ecliptic = {
     Transform = {
         Scale = {
             Type = "StaticScale",
-            Scale = 9.46377307652E17;
+            Scale = 9.46377307652E17
+        }, 
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
         }
     },
     Renderable = {
@@ -78,11 +94,7 @@ local ecliptic = {
         Enabled = false,
         Opacity = 1.0,
         GridColor = { 0.74, 0.26, 0.26 },
-        LineWidth = 2.0,
-        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
-                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
-                        0.0       ,  0.0      ,  0.0         , 1.0 }
+        LineWidth = 2.0
     },
     GUI = {
         Name = "Ecliptic Sphere",
@@ -125,6 +137,14 @@ local equatorial = {
         Scale = {
             Type = "StaticScale",
             Scale = 4.28601E17;
+        }, 
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.8734371 , -0.4448296, -0.1980764,
+                -0.483835  ,  0.7469823,  0.4559838
+            }
         }
     },
     Renderable = {
@@ -132,11 +152,7 @@ local equatorial = {
         Enabled = false,
         Opacity = 0.8,
         GridColor = { 0.69, 0.68, 0.29 },
-        LineWidth = 2.0,
-        GridMatrix = { -0.05487554,  0.4941095, -0.8676661, 0.0,
-                       -0.8734371 , -0.4448296, -0.1980764, 0.0,
-                       -0.483835  ,  0.7469823,  0.4559838, 0.0,
-                        0.0       ,  0.0      ,  0.0      , 1.0 },
+        LineWidth = 2.0
     },
     GUI = {
         Name = "Equatorial Sphere",

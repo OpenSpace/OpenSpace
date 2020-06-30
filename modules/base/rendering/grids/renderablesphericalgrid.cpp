@@ -43,13 +43,6 @@ namespace {
         "This value determines the color of the grid lines that are rendered."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GridMatrixInfo = {
-        "GridMatrix",
-        "Grid Matrix",
-        "This value specifies the local transformation matrix that defines the "
-        "orientation of this grid relative to the parent's rotation."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
@@ -72,12 +65,6 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
         "RenderableSphericalGrid",
         "base_renderable_sphericalgrid",
         {
-            {
-                GridMatrixInfo.identifier,
-                new DoubleMatrix4x4Verifier,
-                Optional::Yes,
-                GridMatrixInfo.description
-            },
             {
                 GridColorInfo.identifier,
                 new DoubleVector3Verifier,
@@ -104,7 +91,6 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
     , _gridColor(
         GridColorInfo,
         glm::vec3(0.5f, 0.5, 0.5f),
@@ -122,11 +108,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
-
-    if (dictionary.hasKey(GridMatrixInfo.identifier)) {
-        _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);
-    }
-    addProperty(_gridMatrix);
 
     if (dictionary.hasKey(GridColorInfo.identifier)) {
         _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
@@ -316,7 +297,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                     glm::half_pi<float>(),
                     glm::vec3(1, 0, 0)
                 );
-                tmp = glm::vec4(_gridMatrix.value() * glm::dmat4(rot) * glm::dvec4(tmp));
+                tmp = glm::vec4(glm::dmat4(rot) * glm::dvec4(tmp));
 
                 for (int i = 0; i < 3; i++) {
                     _varray[nr].location[i] = tmp[i];
