@@ -118,7 +118,6 @@ private:
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
 
-    properties::FloatProperty _alphaValue;
     //properties::FloatProperty _scaleFactor;
     //properties::Vec3Property _pointColor;
     properties::Vec4Property _textColor;

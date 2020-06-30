@@ -51,7 +51,7 @@ namespace {
 
     constexpr const double LabelFadeRangeConst = 1500.0;
     constexpr const double RangeAngularCoefConst = 0.8;
-    constexpr const float MinTransparencyValueConst = 0.009f;
+    constexpr const float MinOpacityValueConst = 0.009f;
 
     enum LabelRenderingAlignmentType {
         Horizontally = 0,
@@ -642,7 +642,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < MinTransparencyValueConst) {
+        if (varyingOpacity < MinOpacityValueConst) {
             return;
         }
     }
@@ -657,7 +657,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < MinTransparencyValueConst) {
+        if (varyingOpacity < MinOpacityValueConst) {
             return;
         }
     }

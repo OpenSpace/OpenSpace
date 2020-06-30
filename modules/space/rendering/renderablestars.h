@@ -104,7 +104,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
-    properties::FloatProperty _alphaValue;
     properties::OptionProperty _psfMethodOption;
     properties::OptionProperty _psfMultiplyOption;
     properties::FloatProperty _lumCent;

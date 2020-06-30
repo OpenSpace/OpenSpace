@@ -70,13 +70,6 @@ namespace {
     constexpr const int8_t CurrentCacheVersion = 1;
     constexpr const double PARSEC = 0.308567756E17;
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all point."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
@@ -173,12 +166,6 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 Optional::Yes,
                 "Astronomical Object Color (r,g,b)."
             },
-            {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TransparencyInfo.description
-            },
             /*{
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
@@ -246,7 +233,6 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _textColor(TextColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
@@ -262,6 +248,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableDUMeshes"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
@@ -313,13 +302,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _pointColor = dictionary.value<glm::vec3>(keyColor);
     }
     addProperty(_pointColor);*/
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
 
     /*if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
@@ -385,8 +367,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             );
         }
     }
-
-    setRenderBin(Renderable::RenderBin::Opaque);
 }
 
 bool RenderableDUMeshes::isReady() const {
@@ -482,7 +462,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     //_program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {

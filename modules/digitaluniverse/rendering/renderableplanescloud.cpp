@@ -68,13 +68,6 @@ namespace {
         BlendModeAdditive
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
@@ -201,12 +194,6 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 "astronomical object being rendered."
             },
             {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
-            },
-            {
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -297,7 +284,6 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10000.f)
     , _textColor(
         TextColorInfo,
@@ -323,6 +309,8 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         dictionary,
         "RenderablePlanesCloud"
     );
+
+    addProperty(_opacity);
 
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
@@ -370,13 +358,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         LWARNING("No unit given for RenderablePlanesCloud. Using meters as units.");
         _unit = Meter;
     }
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
@@ -580,7 +561,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         _uniformCache.modelViewProjectionTransform,
         modelViewProjectionMatrix
     );
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];

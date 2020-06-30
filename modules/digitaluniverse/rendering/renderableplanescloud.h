@@ -116,7 +116,6 @@ private:
     int _planeStartingIndexPos = 0;
     int _textureVariableIndex = 0;
 
-    properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     properties::Vec4Property _textColor;
     properties::FloatProperty _textSize;
