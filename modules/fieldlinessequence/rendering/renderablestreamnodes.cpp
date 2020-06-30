@@ -1077,8 +1077,16 @@ namespace openspace {
             _lineCount.data(),
             static_cast<GLsizei>(_lineStart.size())
         );*/
-
+            
+            _shaderProgram->setUniform("firstrender", true);
             GLint temp = 0;
+            glDrawArrays(
+                GL_POINTS,
+                temp,
+                static_cast<GLsizei>(_vertexPositions.size())
+            );
+
+            _shaderProgram->setUniform("firstrender", false);
             glDrawArrays(
                 GL_POINTS,
                 temp,

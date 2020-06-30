@@ -70,6 +70,7 @@ uniform vec3 earthPos;
 uniform float DistanceThreshold;
 uniform int DistanceMethod;
 uniform int activestreamnumber;
+uniform bool firstrender;
 
 // Inputs
 // Should be provided in meters
@@ -224,7 +225,11 @@ void main() {
         if(DistanceMethod == 0){
         if(distance(earthPos, vertexPosRelativetoEarth) < DistanceThreshold){
         //if(earthPos.x - vertexPosRelativetoEarth.x < DistanceThreshold){
-        gl_PointSize = 10;
+        //gl_PointSize = 10;
+        if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
+        gl_PointSize = gl_PointSize + 2;
+        vs_color = vec4(1,1,1,fluxColorAlpha);
+        }
         }
         }
         else if(DistanceMethod == 1){
