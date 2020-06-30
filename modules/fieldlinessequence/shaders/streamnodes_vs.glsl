@@ -69,6 +69,7 @@ uniform float fluxColorAlpha;
 uniform vec3 earthPos;
 uniform float DistanceThreshold;
 uniform int DistanceMethod;
+uniform int activestreamnumber;
 
 // Inputs
 // Should be provided in meters
@@ -87,6 +88,10 @@ in float rValue;
 // _VA_INDEX in renderableStreamNodes.h
 layout(location = 3)
 in int nodeIndex;
+// The vertex streamnumber of every node. Location must correspond to 
+// VaStreamnumber in renderableStreamNodes.h
+layout(location = 4)
+in int Streamnumber;
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
 const int uniformColor     = 0;
@@ -198,16 +203,18 @@ void main() {
         vs_color = vec4(0);
     }
 
-    //if(rValue > thresholdFlux){
-    //  vs_color = vec4(0);
-    //}
-
     if(fluxValue < thresholdFlux){
         gl_PointSize = nodeSize;
     }
     else{
         gl_PointSize = nodeSizeLargerFlux;
     }
+    if(Streamnumber != activestreamnumber && NodeskipMethod == 3){
+        vs_color = vec4(0);
+    }
+  
+
+    
         
         vec3 vertexPosRelativetoEarth;
         vertexPosRelativetoEarth.x = in_position.x; // + earthPos.x;
@@ -238,6 +245,7 @@ void main() {
         }
         }
 
+        
         vec4 position_in_meters = vec4(in_position, 1);
         vec4 positionClipSpace = modelViewProjection * position_in_meters;
         //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
