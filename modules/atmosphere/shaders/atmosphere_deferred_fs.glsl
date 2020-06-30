@@ -621,7 +621,7 @@ void main() {
             // All calculations are done in Km:
             pixelDepth                *= 0.001;
             positionObjectsCoords.xyz *= 0.001;
-            
+
             if (pixelDepth < offset) {
                 // ATM Occluded - Something in fron of ATM.
                 atmosphereFinalColor += color;
