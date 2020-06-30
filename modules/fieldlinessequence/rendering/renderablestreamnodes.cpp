@@ -61,6 +61,7 @@ namespace {
     constexpr const GLuint VaColor      = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaFiltering  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaIndex      = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaStreamnumber = 4; // MUST CORRESPOND TO THE SHADER PROGRAM
 
     constexpr int8_t CurrentCacheVersion = 2;
 
@@ -289,6 +290,7 @@ namespace openspace {
         , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
         , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
         , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1000000000000.0f)
+        , _pActiveStreamNumber(FluxNodeskipThresholdInfo, 0, 0, 383)
 
         
     {
@@ -479,6 +481,7 @@ namespace openspace {
                 writeCachedFile("StreamnodesCacheindex");
             }
         }
+        createStreamnumberVector();
         // If we are loading in states dynamically we would read new states during runtime, parsing json files pretty slowly.
        
         // Setup shader program
@@ -498,6 +501,16 @@ namespace openspace {
         glGenBuffers(1, &_vertexColorBuffer);
         glGenBuffers(1, &_vertexFilteringBuffer);
         glGenBuffers(1, &_vertexindexBuffer);
+        glGenBuffers(1, &_vertexStreamNumberBuffer);
+    }
+
+    void RenderableStreamNodes::createStreamnumberVector() {
+        int numberofStreams = 383;
+        for (int i = 0; i < 383; ++i) {
+            for (int k = 0; k < 1999; ++k) {
+                _vertexStreamnumber.push_back(i);
+            }
+        }
     }
 
     bool RenderableStreamNodes::loadFilesIntoRam() {
@@ -860,6 +873,7 @@ namespace openspace {
         addProperty(_pLineWidth);
         addProperty(_pDistancemethod);
         addProperty(_pDistanceThreshold);
+        addProperty(_pActiveStreamNumber);
         
         //addProperty(_pDomainZ);
         
@@ -904,6 +918,7 @@ namespace openspace {
         _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Uniform), "Uniform");
         _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Flux), "Flux");
         _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Radius), "Radius");
+        _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Streamnumber), "Streamnumber");
 
         _pDistancemethod.addOption(static_cast<int>(DistanceMethod::Eucledian), "Eucledian");
         _pDistancemethod.addOption(static_cast<int>(DistanceMethod::x), "x");
@@ -930,6 +945,8 @@ namespace openspace {
         _vertexFilteringBuffer = 0;
         glDeleteBuffers(1, &_vertexindexBuffer);
         _vertexindexBuffer = 0;
+        glDeleteBuffers(1, &_vertexStreamNumberBuffer);
+        _vertexStreamNumberBuffer = 0;
 
         if (_shaderProgram) {
             global::renderEngine.removeRenderProgram(_shaderProgram.get());
@@ -1041,7 +1058,7 @@ namespace openspace {
         _shaderProgram->setUniform("earthPos", earthpos2);
         _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
         _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
-
+        _shaderProgram->setUniform("activestreamnumber", _pActiveStreamNumber);
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;
             textureUnit.activate();
@@ -1160,43 +1177,20 @@ namespace openspace {
                     updateVertexColorBuffer();
                     updateVertexFilteringBuffer();
                     updateVertexIndexBuffer();
+                    updateVertexStreamNumberBuffer();
                 }
             }
     }
 
     std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepath) {
        
-        //'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
-        //C:\Users\Chrad171\openspace\
-        
-        //std::ifstream streamdata("C:/Users/emiho502/desktop/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
-        //std::ifstream streamdata("C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json");
         std::ifstream streamdata(filepath);
-        //std::ifstream streamdata("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/2/datawithoutprettyprint_newmethod.json");
         if (!streamdata.is_open())
         {
             LDEBUG("did not read the data.json file");
         }
         json jsonobj = json::parse(streamdata);
-        //json jsonobj;
-        //streamdata >> jsonobj;
-        
-        //printDebug(jsonobj["stream0"]);
-        //LDEBUG(jsonobj["stream0"]);
-       // std::ofstream o("C:/Users/chris/Documents/openspace/Openspace_ourbranch/OpenSpace/sync/http/bastille_day_streamnodes/1/newdata2.json");
-        //o << jsonobj << std::endl;
-        LDEBUG("vi callade på loadJSONfile med  " + filepath);
-        const char* sNode = "node0";
-        const char* sStream = "stream0";
-        const char* sData = "data";
 
-        const json& jTmp = *(jsonobj.begin()); // First node in the file
-        const char* sTime = "time";
-        //double testtime = jTmp[sTime];
-        std::string testtime = jsonobj["time"];
-        //double testtime = Time::now();
-        //const json::value_type& variableNameVec = jTmp[sStream][sNode][sData];
-        //const size_t nVariables = variableNameVec.size();
 
         size_t lineStartIdx = 0;
 
@@ -1218,20 +1212,6 @@ namespace openspace {
             
             for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
                 lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
-              //  for (size_t k = 0; k < 1999; ++k) {
-               //     json::iterator lineIter = jsonobj["stream" + std::to_string(i)][std::to_string(k)].begin();
-                
-                //lineIter += 20;
-                //const size_t Nodesamount = 
-                //LDEBUG("testar debuggen");
-                //log(ghoul::logging::LogLevel::Debug, _loggerCat, lineIter.key());
-                //LDEBUG("stream" + std::to_string(i));
-                //LDEBUG("Phi value: " + (*lineIter)["Phi"].get<std::string>());
-                //LDEBUG("Theta value: " + (*lineIter)["Theta"].get<std::string>());
-                //LDEBUG("R value: " + (*lineIter)["R"].get<std::string>());
-                //LDEBUG("Flux value: " + (*lineIter)["Flux"].get<std::string>());
-
-                // Probably needs some work with types, not loading in strings. 
                 std::string r = (*lineIter)["R"].get<std::string>();
                 std::string phi = (*lineIter)["Phi"].get<std::string>();
                 std::string theta = (*lineIter)["Theta"].get<std::string>();
@@ -1253,56 +1233,24 @@ namespace openspace {
                 glm::vec3 sphericalcoordinates =
                     glm::vec3(rValue, phiValue, thetaValue);
 
-                //glm::dvec3 sphericalcoordinates =
-                //    glm::dvec3(stringToDouble((*lineIter)["R"].get<std::string>()),
-                  //      stringToDouble((*lineIter)["Phi"].get<std::string>()),
-                   //     stringToDouble((*lineIter)["Theta"].get<std::string>()));
-
-                //precision issue, right now rounding up at around 7th decimal. Probably 
-                //around conversion with string to Double.
-                //LDEBUG("R value after string to Float: " + std::to_string(stringToDouble
-                //((*lineIter)["R"].get<std::string>())));
-                //sphericalcoordinates.x = sphericalcoordinates.x * AuToMeter;
                 glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
 
                 _vertexPositions.push_back(position);
                 ++counter;
-                //   coordToMeters * glm::vec3(
-                  //     stringToFloat((*lineIter)["Phi"].get<std::string>(), 0.0f),
-                   //    ,
-
-                    //   )
-                   //);
+        
 
                 _lineCount.push_back(static_cast<GLsizei>(nPoints));
                 _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
                 lineStartIdx += nPoints;
 
-                //_vertexColor.push_back(rTimesFluxValue);
-                //_vertexRadius.push_back(rValue);
-
-                //skipping nodes
-               // int skipcounter = 0;
-               // int nodeskipn = 10;
-                //while (skipcounter < nodeskipn && lineIter != jsonobj["stream" + std::to_string(i)].end() - 1) {
-                //    ++lineIter;
-                //    ++skipcounter;
-               // }
-                //}
             }
         }
 
         LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
         LDEBUG("counter for how many times we push back" + std::to_string(counter));
 
-        LDEBUG("Time:" + testtime);
-        //openspace::printDebug("testar json"):
-        //for 
-        //LWARNING(fmt::format("Testar json", data));
-
-        //LWARNING(fmt::format("Testar json"));
         _isLoadingStateFromDisk = false;
-        //streamdata.close();
+
         return std::vector<std::string>();
     }
     void RenderableStreamNodes::updatePositionBuffer() {
@@ -1375,6 +1323,24 @@ namespace openspace {
 
         glEnableVertexAttribArray(VaIndex);
         glVertexAttribPointer(VaIndex, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+    }
+    void RenderableStreamNodes::updateVertexStreamNumberBuffer() {
+        glBindVertexArray(_vertexArrayObject);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexStreamNumberBuffer);
+
+        const std::vector<int>& vertexStreamnumber = _vertexStreamnumber;
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertexStreamnumber.size() * sizeof(float),
+            vertexStreamnumber.data(),
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(VaStreamnumber);
+        glVertexAttribPointer(VaStreamnumber, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
         unbindGL();
     }

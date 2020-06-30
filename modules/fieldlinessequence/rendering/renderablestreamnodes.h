@@ -79,7 +79,8 @@ namespace openspace {
         enum class NodeskipMethod : int {
             Uniform = 0,
             Flux = 1,
-            Radius = 2
+            Radius = 2,
+            Streamnumber = 3
         };
         enum class DistanceMethod : int {
             Eucledian = 0,
@@ -111,6 +112,7 @@ namespace openspace {
         // Used for changing energybins during runtime, as to prevent loading and update issue in render. 
         bool _isLoadingNewEnergyBin = false;
 
+        //can be used when loading in emin03 files for the first time. 
         bool shouldwritecacheforemin03 = false;
 
         // --------------------------------- NUMERICALS ----------------------------------- //
@@ -138,6 +140,8 @@ namespace openspace {
         GLuint _vertexFilteringBuffer = 0;
         // OpenGL Vertex Buffer Object containing the index of nodes
         GLuint _vertexindexBuffer = 0;
+        // OpenGL Vertex Buffer Object containing the stream number for every node. 
+        GLuint _vertexStreamNumberBuffer = 0;
 
         // ----------------------------------- POINTERS ------------------------------------//
         // The Lua-Modfile-Dictionary used during initialization
@@ -169,6 +173,8 @@ namespace openspace {
         std::vector<std::vector<float>> _statesRadius;
         // Stores the states index
         std::vector<std::vector<int>> _statesIndex;
+
+        std::vector<int> _vertexStreamnumber;
 
         // ---------------------------------- Properties ---------------------------------- //
         
@@ -225,6 +231,8 @@ namespace openspace {
         // The Radius threshold to decide the line between 
         //_pDefaultNodeSkip and _pAmountofNodes
         properties::FloatProperty _pRadiusNodeSkipThreshold;
+        //The active stream that we want to look at
+        properties::IntProperty _pActiveStreamNumber;
 
         // initialization
         std::vector<std::string> _sourceFiles;
@@ -243,11 +251,12 @@ namespace openspace {
         void writeCachedFile(const std::string& file) const;
         bool readCachedFile(const std::string& file, const std::string& energybin);
         bool loadFilesIntoRam();
-
+        void createStreamnumberVector();
         // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
         void updatePositionBuffer();
         void updateVertexColorBuffer();
         void updateVertexFilteringBuffer();
         void updateVertexIndexBuffer();
+        void updateVertexStreamNumberBuffer();
     };
 }
