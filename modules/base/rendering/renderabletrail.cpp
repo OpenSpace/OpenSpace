@@ -72,8 +72,8 @@ namespace {
     const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
         { "Background", openspace::Renderable::RenderBin::Background },
         { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        { "Transparent", openspace::Renderable::RenderBin::Transparent},
-        { "SuperTransparent", openspace::Renderable::RenderBin::SuperTransparent}
+        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
+        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo

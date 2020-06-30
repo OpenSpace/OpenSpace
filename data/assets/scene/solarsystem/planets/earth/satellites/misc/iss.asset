@@ -91,7 +91,8 @@ local initializeAndAddNodes = function()
           Body = identifier,
           Observer = transforms.EarthInertial.Identifier,
           File = path,
-          LineNumber = 1
+          LineNumber = 1,
+          RenderBinMode = "PostDeferredTransparent"
         },
         Color = { 0.9, 0.6715, 0.0 },
         Fade = 1.5,

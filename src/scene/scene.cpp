@@ -57,9 +57,12 @@ namespace {
             return "Opaque";
         }
         else if (renderBin == 4) {
-            return "Transparent";
+            return "PreDeferredTransparent";
         }
         else if (renderBin == 8) {
+            return "PostDeferredTransparent";
+        }
+        else if (renderBin == 16) {
             return "Overlay";
         }
         else {

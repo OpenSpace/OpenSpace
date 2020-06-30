@@ -699,7 +699,7 @@ void RenderableBillboardsCloud::initialize() {
         _colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
     }
 
-    setRenderBin(Renderable::RenderBin::Transparent);
+    setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }
 
 void RenderableBillboardsCloud::initializeGL() {
