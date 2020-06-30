@@ -91,6 +91,11 @@ namespace {
     constexpr const char* ValueInputFileTypeJson = "json";
 
     // --------------------------------- Property Info -------------------------------- //
+    constexpr openspace::properties::Property::PropertyInfo GoesEnergyBinsInfo = {
+        "GoesEnergy",
+        "Goes Energy",
+        "Select which energy bin you want to show. Emin01 is values > 10 Mev, Emin03 is values > 100 Mev."
+    };
     constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
         "colorMode",
         "Color Mode",
@@ -256,6 +261,7 @@ namespace openspace {
     RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary)
 
         : Renderable(dictionary)
+        , _pGoesEnergyBins(GoesEnergyBinsInfo, OptionProperty::DisplayType::Radio)
         , _pColorGroup({ "Color" })
         , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
         , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
@@ -299,6 +305,34 @@ namespace openspace {
             _transferFunction->setPath(_pColorTablePath);
             _colorTablePaths[_pColorFlux] = _pColorTablePath;
         });
+        _pGoesEnergyBins.onChange([this] {
+            if (_pGoesEnergyBins == 1) {
+                _isLoadingNewEnergyBin = true;
+                std::string _file = "StreamnodesCacheindex_emin03";
+                std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+                    _file,
+                    ghoul::filesystem::CacheManager::Persistent::Yes
+                );
+                // Check if we have a cached binary file for the data
+                bool hasCachedFile = FileSys.fileExists(cachedFile);
+                if (hasCachedFile) {
+                    readCachedFile(cachedFile, "_emin03");
+                }
+            }
+            else {
+                _isLoadingNewEnergyBin = true;
+                std::string _file = "StreamnodesCacheindex";
+                std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+                    _file,
+                    ghoul::filesystem::CacheManager::Persistent::Yes
+                );
+                // Check if we have a cached binary file for the data
+                bool hasCachedFile = FileSys.fileExists(cachedFile);
+                if(hasCachedFile){
+                readCachedFile(cachedFile, "");
+                }
+            }
+            });
     }
 
     void RenderableStreamNodes::setModelDependentConstants() {
@@ -378,6 +412,10 @@ namespace openspace {
                 std::ofstream fileStream2("StreamnodesCacheColor", std::ofstream::binary);
                 std::ofstream fileStream3("StreamnodesCacheRadius", std::ofstream::binary);
                 std::ofstream fileStream4("StreamnodesCachePosition", std::ofstream::binary);
+                std::ofstream fileStream5("StreamnodesCacheindex_emin03", std::ofstream::binary);
+                std::ofstream fileStream6("StreamnodesCacheColor_emin03", std::ofstream::binary);
+                std::ofstream fileStream7("StreamnodesCacheRadius_emin03", std::ofstream::binary);
+                std::ofstream fileStream8("StreamnodesCachePosition_emin03", std::ofstream::binary);
                 
                 fileStream.write(
                     reinterpret_cast<const char*>(&CurrentCacheVersion),
@@ -392,6 +430,22 @@ namespace openspace {
                     sizeof(int8_t)
                 );
                 fileStream4.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+                fileStream5.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+                fileStream6.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+                fileStream7.write(
+                    reinterpret_cast<const char*>(&CurrentCacheVersion),
+                    sizeof(int8_t)
+                );
+                fileStream8.write(
                     reinterpret_cast<const char*>(&CurrentCacheVersion),
                     sizeof(int8_t)
                 );
@@ -410,7 +464,7 @@ namespace openspace {
                     cachedFile, _file
                 ));
                 // Read in the data from the cached file
-                bool success = readCachedFile(cachedFile);
+                bool success = readCachedFile(cachedFile, "");
                 if (!success) {
                     // If something went wrong it is probably because we changed the cache version or some file was not found.
                     LWARNING("Cache file removed, something went wrong loading it.");
@@ -543,8 +597,17 @@ namespace openspace {
 
     void RenderableStreamNodes::writeCachedFile(const std::string& file) const {
         // Todo, write all of the vertexobjects into here 
-       
         std::string _file = "StreamnodesCacheindex";
+        std::string _file2 = "StreamnodesCacheColor";
+        std::string _file3 = "StreamnodesCacheRadius";
+        std::string _file4 = "StreamnodesCachePosition";
+
+        if(shouldwritecacheforemin03){
+         _file = "StreamnodesCacheindex_emin03";
+         _file2 = "StreamnodesCacheColor_emin03";
+         _file3 = "StreamnodesCacheRadius_emin03";
+         _file4 = "StreamnodesCachePosition_emin03";
+        }
         std::string cachedFile = FileSys.cacheManager()->cachedFilename(
             _file,
             ghoul::filesystem::CacheManager::Persistent::Yes
@@ -552,7 +615,7 @@ namespace openspace {
        std::ofstream fileStream(cachedFile, std::ofstream::binary);
 
         if (!fileStream.good()) {
-            LERROR(fmt::format("Error opening file '{}' for save cache file"), "StreamnodesCache");
+            LERROR(fmt::format("Error opening file '{}' for save cache file"), "StreamnodesCache_emin03");
             return;
         }
 
@@ -561,9 +624,7 @@ namespace openspace {
             sizeof(int8_t)
         );
         
-        std::string _file2 = "StreamnodesCacheColor";
-        std::string _file3 = "StreamnodesCacheRadius";
-        std::string _file4 = "StreamnodesCachePosition";
+        
         std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(
             _file2,
             ghoul::filesystem::CacheManager::Persistent::Yes
@@ -598,13 +659,13 @@ namespace openspace {
         }
     }
 
-    bool RenderableStreamNodes::readCachedFile(const std::string& file) {
+    bool RenderableStreamNodes::readCachedFile(const std::string& file, const std::string& energybin) {
        // const std::string& file = "StreamnodesCache";
         std::ifstream fileStream(file, std::ifstream::binary);
 
-        std::string _file2 = "StreamnodesCacheColor";
-        std::string _file3 = "StreamnodesCacheRadius";
-        std::string _file4 = "StreamnodesCachePosition";
+        std::string _file2 = "StreamnodesCacheColor" + energybin;
+        std::string _file3 = "StreamnodesCacheRadius" + energybin;
+        std::string _file4 = "StreamnodesCachePosition" + energybin;
         std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(
             _file2,
             ghoul::filesystem::CacheManager::Persistent::Yes
@@ -636,7 +697,11 @@ namespace openspace {
             LDEBUG("testar int8" + std::to_string(version));
             int32_t nValuesvec = 0;
             fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));   
-           
+
+            _statesIndex.clear();
+            _statesColor.clear();
+            _statesPos.clear();
+            _statesRadius.clear();
             for (int i = 0; i < _nStates; ++i) {
                 _vertexIndex.resize(nValuesvec);
                 fileStream.read(reinterpret_cast<char*>(
@@ -674,10 +739,12 @@ namespace openspace {
                 _statesPos.push_back(_vertexPositions);
                 _vertexPositions.clear();
             }
+                _isLoadingNewEnergyBin = false;
                 bool success = fileStream.good();
-        
+              
                 return success;
         }
+        _isLoadingNewEnergyBin = false;
         return false;
     }
     /**
@@ -789,6 +856,7 @@ namespace openspace {
     void RenderableStreamNodes::setupProperties() {
 
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
+        addProperty(_pGoesEnergyBins);
         addProperty(_pLineWidth);
         addProperty(_pDistancemethod);
         addProperty(_pDistanceThreshold);
@@ -822,6 +890,8 @@ namespace openspace {
         _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
 
         // --------------------- Add Options to OptionProperties --------------------- //
+        _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
+        _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
         _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
         _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
 
@@ -943,13 +1013,14 @@ namespace openspace {
         SceneGraphNode* earthnode = sceneGraphNode(earth);
         glm::vec3 earthpos = earthnode->worldPosition();
 
-        //const std::string Sun = "Sun";
-        //SceneGraphNode* SunNode = sceneGraphNode(Sun);
-        //glm::dvec3 Sunpos = SunNode->worldPosition();
+        const std::string Sun = "Sun";
+        SceneGraphNode* SunNode = sceneGraphNode(Sun);
+        glm::dvec3 Sunpos = SunNode->worldPosition();
+        //LDEBUG("Sunsposx: " + std::to_string(Sunpos.x) + "earthpos x: " + std::to_string(earthpos.x));
        // earthpos = earthpos - Sunpos;
-        //LDEBUG("Suns position: " + std::to_string(Sunpos.x) + ", " + std::to_string(Sunpos.x) + ", " + std::to_string(Sunpos.x));
-
-       // LDEBUG("earthpos x: " + std::to_string(earthpos.x) + " ," + std::to_string(earthpos.y) + ", " + std::to_string(earthpos.z));
+        //LDEBUG("Suns position: " + std::to_string(Sunpos.x) + ", " + std::to_string(Sunpos.y) + ", " + std::to_string(Sunpos.z));
+        glm::vec3 earthpos2 = glm::vec3(94499869340.f, -115427843118.f, 11212075887.f);
+        //LDEBUG("earthpos x: " + std::to_string(earthpos.x) + " ," + std::to_string(earthpos.y) + ", " + std::to_string(earthpos.z));
         // Flow/Particles
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
@@ -967,7 +1038,7 @@ namespace openspace {
         _shaderProgram->setUniform("NodeskipFluxThreshold", _pFluxNodeskipThreshold);
         _shaderProgram->setUniform("NodeskipRadiusThreshold", _pRadiusNodeSkipThreshold);
         _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
-        _shaderProgram->setUniform("earthPos", earthpos);
+        _shaderProgram->setUniform("earthPos", earthpos2);
         _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
         _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
 
@@ -1079,7 +1150,7 @@ namespace openspace {
         }
             }
                 // Needs fix, right now it stops cuz it cant find the states
-                else if(!_statesPos[_activeTriggerTimeIndex].empty()){
+                else if(!_statesPos[_activeTriggerTimeIndex].empty()) { //&& !_isLoadingNewEnergyBin){
                     _vertexPositions = _statesPos[_activeTriggerTimeIndex];
                     _vertexColor = _statesColor[_activeTriggerTimeIndex];
                     _vertexRadius = _statesRadius[_activeTriggerTimeIndex];

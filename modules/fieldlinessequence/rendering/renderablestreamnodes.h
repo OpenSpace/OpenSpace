@@ -65,6 +65,10 @@ namespace openspace {
             Uniform = 0,
             ByFluxValue = 1
         };
+        enum class GoesEnergyBins : int {
+            Emin01 = 0,
+            Emin03 = 1
+        };
         enum class ScalingMethod : int {
             Flux = 0,
             RFlux = 1,
@@ -103,6 +107,11 @@ namespace openspace {
         // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.
         // False => the previous frame's state should still be shown
         bool _needsUpdate = false;
+
+        // Used for changing energybins during runtime, as to prevent loading and update issue in render. 
+        bool _isLoadingNewEnergyBin = false;
+
+        bool shouldwritecacheforemin03 = false;
 
         // --------------------------------- NUMERICALS ----------------------------------- //
         // Active index of _states. If(==-1)=>no state available for current time. Always the
@@ -162,6 +171,9 @@ namespace openspace {
         std::vector<std::vector<int>> _statesIndex;
 
         // ---------------------------------- Properties ---------------------------------- //
+        
+        //Property to show different energybins
+        properties::OptionProperty _pGoesEnergyBins;
         // Group to hold the color properties
         properties::PropertyOwner _pColorGroup;
         // Uniform/transfer function
@@ -182,13 +194,13 @@ namespace openspace {
         properties::PropertyOwner _pStreamGroup;
         // Scaling options
         properties::OptionProperty _pScalingmethod;
-        // 
+        // Group for how many nodes to render dependent on radius and flux
         properties::PropertyOwner _pNodesamountGroup;
         // Size of simulated node particles
         properties::FloatProperty _pNodeSize;
         // Size of nodes for larger flux
         properties::FloatProperty _pNodeSizeLargerFlux;
-
+        // Threshold from earth to decide the distance for which the nodesize gets larger.
         properties::FloatProperty _pDistanceThreshold;
 
         /// Line width for the line rendering part
@@ -229,7 +241,7 @@ namespace openspace {
         void setupProperties();
 
         void writeCachedFile(const std::string& file) const;
-        bool readCachedFile(const std::string& file);
+        bool readCachedFile(const std::string& file, const std::string& energybin);
         bool loadFilesIntoRam();
 
         // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
