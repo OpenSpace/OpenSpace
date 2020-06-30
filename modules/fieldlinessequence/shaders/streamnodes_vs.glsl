@@ -210,11 +210,19 @@ void main() {
     else{
         gl_PointSize = nodeSizeLargerFlux;
     }
+       if(Streamnumber != activestreamnumber && NodeskipMethod == 3){
+        vs_color = vec4(0);
+    }
 
         if(DistanceMethod == 0){
             if(distance(earthPos, in_position) < DistanceThreshold){
-                gl_PointSize = 10;
+                //gl_PointSize = 10;
+        if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
+        gl_PointSize = gl_PointSize + 2;
+        vs_color = vec4(1,1,1,fluxColorAlpha);
+        }
             }
+            
         }
         else if(DistanceMethod == 1){
             if(distance(earthPos.x, in_position.x) < DistanceThreshold){
