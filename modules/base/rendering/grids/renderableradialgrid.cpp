@@ -139,7 +139,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     )
     , _gridSegments(
         GridSegmentsInfo, 
-        glm::ivec2(1, 1),  // TODO: better default
+        glm::ivec2(1, 1),  
         glm::ivec2(1),
         glm::ivec2(200)
     )
@@ -235,8 +235,6 @@ void RenderableRadialGrid::initializeGL() {
             );
         }
     );
-
-    _lines = std::make_unique<LineData>();
 }
 
 void RenderableRadialGrid::deinitializeGL() {
@@ -301,11 +299,11 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
     
-    for (std::unique_ptr<CircleData>& c : _circles) {
-        c->render();
+    for (GeometryData &c : _circles) {
+        c.render();
     }
 
-    _lines->render();
+    _lines.render();
 
     _gridProgram->deactivate();
 
@@ -327,26 +325,6 @@ void RenderableRadialGrid::update(const UpdateData&) {
     if (_gridIsDirty) {
 
         // Circles
-        auto createRing = [](int nSegments, float radius) {
-            const int nVertices = nSegments + 1;
-            std::vector<Vertex> vertices(nVertices);
-
-            const float fsegments = static_cast<float>(nSegments);
-
-            for (int i = 0; i <= nSegments; ++i) {
-                const float fi = static_cast<float>(i);
-
-                const float theta = fi * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
-
-                const float x = radius * cos(theta);
-                const float y = radius * sin(theta);
-                const float z = 0.0f;
-
-                vertices[i] = { x, y, z };
-            }
-            return vertices;
-        };
-
         const int nRadialSegments = _gridSegments.value()[0];
         const float fnCircles = static_cast<float>(nRadialSegments);
         const float deltaRadius = (_maxRadius - _minRadius) / fnCircles;
@@ -357,26 +335,33 @@ void RenderableRadialGrid::update(const UpdateData&) {
         _circles.clear();
         _circles.reserve(nCircles);
 
+        auto addRing = [&](int nSegments, float radius) {
+            std::vector<rendering::helper::Vertex> vertices =
+                rendering::helper::createRing(nSegments, radius);
+
+            _circles.push_back(GeometryData(GL_LINE_STRIP));
+            _circles.back().varray = rendering::helper::convert(vertices);
+            _circles.back().update();
+        };
+
         // add an extra inmost circle
         if (hasInnerRadius) {
-            _circles.push_back(std::make_unique<CircleData>());
-            _circles.back()->varray = createRing(_circleSegments, _minRadius);
-            _circles.back()->update();
+            addRing(_circleSegments, _minRadius);
         }
 
         for (int i = 0; i < nRadialSegments; ++i) {
             float ri = static_cast<float>(i + 1) * deltaRadius;
             ri += _minRadius;
-            _circles.push_back(std::make_unique<CircleData>());
-            _circles.back()->varray = createRing(_circleSegments, ri);
-            _circles.back()->update();
+            addRing(_circleSegments, ri);
         }
 
         // Lines
         const int nLines = _gridSegments.value()[1];
+        const int nVertices = 2 * nLines;
         const float fsegments = static_cast<float>(nLines);
 
-        _lines->varray.clear();
+        _lines.varray.clear();
+        _lines.varray.reserve(nVertices);
 
         if (nLines > 1) {
             for (int i = 0; i < nLines; ++i) {
@@ -388,15 +373,15 @@ void RenderableRadialGrid::update(const UpdateData&) {
                 float y = _maxRadius * sin(theta);
                 float z = 0.0f;
 
-                _lines->varray.push_back({ x, y, z });
+                _lines.varray.push_back({ x, y, z });
 
                 x = _minRadius * cos(theta);
                 y = _minRadius * sin(theta);
 
-                _lines->varray.push_back({ x, y, z });
+                _lines.varray.push_back({ x, y, z });
             }
         }
-        _lines->update();
+        _lines.update();
 
         _gridIsDirty = false;
     }
@@ -414,6 +399,31 @@ RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
     glBindVertexArray(0);
 }
 
+RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept {
+    if (this == &other) return;
+    vao = other.vao;
+    vbo = other.vbo;
+    varray = std::move(other.varray);
+    mode = other.mode;
+
+    other.vao = 0;
+    other.vbo = 0;
+}
+
+RenderableRadialGrid::GeometryData& 
+RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept {
+    if (this != &other) {
+        vao = other.vao;
+        vbo = other.vbo;
+        varray = std::move(other.varray);
+        mode = other.mode;
+
+        other.vao = 0;
+        other.vbo = 0;
+    }
+    return *this;
+}
+
 RenderableRadialGrid::GeometryData::~GeometryData() {
     glDeleteVertexArrays(1, &vao);
     vao = 0;
@@ -427,12 +437,19 @@ void RenderableRadialGrid::GeometryData::update() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        varray.size() * sizeof(Vertex),
+        varray.size() * sizeof(rendering::helper::VertexXYZ),
         varray.data(),
         GL_STATIC_DRAW
     );
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexAttribPointer(
+        0, 
+        3, 
+        GL_FLOAT, 
+        GL_FALSE, 
+        sizeof(rendering::helper::VertexXYZ), 
+        nullptr
+    );
 }
 
 void RenderableRadialGrid::GeometryData::render() {

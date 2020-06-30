@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/rendering/helper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -56,28 +57,20 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    struct Vertex {
-        float location[3];
-    };
-
     struct GeometryData {
         GeometryData(GLenum renderMode);
+        GeometryData(GeometryData&& other) noexcept;
+        GeometryData& operator=(const GeometryData& other) = delete;
+        GeometryData& operator=(GeometryData&& other) noexcept;
         ~GeometryData();
+
         void update();
         void render();
 
-        std::vector<Vertex> varray;
+        std::vector<rendering::helper::VertexXYZ> varray;
         GLuint vao = 0;
         GLuint vbo = 0;
         GLenum mode = GL_LINE_STRIP;
-    };
-
-    struct CircleData : public GeometryData {
-        CircleData() : GeometryData(GL_LINE_STRIP) {}
-    };
-
-    struct LineData : public GeometryData {
-        LineData() : GeometryData(GL_LINES) {}
     };
 
     ghoul::opengl::ProgramObject* _gridProgram;
@@ -91,8 +84,8 @@ protected:
 
     bool _gridIsDirty = true;
 
-    std::vector<std::unique_ptr<CircleData>> _circles;
-    std::unique_ptr<LineData> _lines;
+    std::vector<GeometryData> _circles;
+    GeometryData _lines{GL_LINES};
 };
 
 }// namespace openspace
