@@ -194,19 +194,19 @@ namespace {
         "Select nodes to skip depending on Radius."
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceMethodInfo = {
-        "DistanceMethod",
-        "Decide how to check distance",
+        "distanceMethod",
+        "Distance Method",
         "Deciding how to check distance."
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceplanetInfo = {
-        "Distanceplanet",
-        "Decide what planet to check distance to",
+        "distanceplanet",
+        "Distance Planet",
         "Deciding what planet to check distance to."
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "distancePlanetThreshold",
-        "Deciding how far the values will start to ",
-        "Enhance the size of nodes dependent on distance to planet"
+        "Threshold for distance between planet",
+        "Enhance the size of nodes dependent on distance to planet."
     };
     
     enum class SourceFileType : int {
@@ -288,7 +288,7 @@ namespace openspace {
         , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
         , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
         , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
-        , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1000000000000.0f)
+        , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
 
         
     {
@@ -976,7 +976,6 @@ namespace openspace {
             const double triggerTime = Time::convertTime(timeString);
             LDEBUG("timestring " + timeString);
             _startTimes.push_back(triggerTime);
-
         }
     }
     void RenderableStreamNodes::updateActiveTriggerTimeIndex(double currentTime) {
@@ -1009,19 +1008,12 @@ namespace openspace {
 
             _shaderProgram->setUniform("modelViewProjection",
                 data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
-        const std::string earth = "Earth";
-        SceneGraphNode* earthnode = sceneGraphNode(earth);
-        glm::vec3 earthpos = earthnode->worldPosition();
 
-        const std::string Sun = "Sun";
-        SceneGraphNode* SunNode = sceneGraphNode(Sun);
-        glm::dvec3 Sunpos = SunNode->worldPosition();
-        //LDEBUG("Sunsposx: " + std::to_string(Sunpos.x) + "earthpos x: " + std::to_string(earthpos.x));
-       // earthpos = earthpos - Sunpos;
-        //LDEBUG("Suns position: " + std::to_string(Sunpos.x) + ", " + std::to_string(Sunpos.y) + ", " + std::to_string(Sunpos.z));
-        glm::vec3 earthpos2 = glm::vec3(94499869340.f, -115427843118.f, 11212075887.f);
-        //LDEBUG("earthpos x: " + std::to_string(earthpos.x) + " ," + std::to_string(earthpos.y) + ", " + std::to_string(earthpos.z));
-        // Flow/Particles
+
+        glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
+        //earthPos : 136665866240.000000, 44111921152.000000, -49989160960.000000
+        //     Jon : 94499869340,         -115427843118,       11212075887.3 
+
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
         _shaderProgram->setUniform(_uniformCache.nodeSizeLargerFlux, _pNodeSizeLargerFlux);
@@ -1038,7 +1030,7 @@ namespace openspace {
         _shaderProgram->setUniform("NodeskipFluxThreshold", _pFluxNodeskipThreshold);
         _shaderProgram->setUniform("NodeskipRadiusThreshold", _pRadiusNodeSkipThreshold);
         _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
-        _shaderProgram->setUniform("earthPos", earthpos2);
+        _shaderProgram->setUniform("earthPos", earthPos);
         _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
         _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
 

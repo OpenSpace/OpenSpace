@@ -200,7 +200,7 @@ namespace openspace {
         properties::FloatProperty _pNodeSize;
         // Size of nodes for larger flux
         properties::FloatProperty _pNodeSizeLargerFlux;
-        // Threshold from earth to decide the distance for which the nodesize gets larger.
+        // Threshold from earth to decide the distance for which the nodeSize gets larger.
         properties::FloatProperty _pDistanceThreshold;
 
         /// Line width for the line rendering part

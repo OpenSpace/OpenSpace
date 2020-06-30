@@ -34,17 +34,15 @@ local Keybindings = {
     {
         Key = "F2",
         Name = "Show Flux Value Legend",
-        --Command = "openspace.asset.add('C:/Users/chrad171/openspace/OpenSpace/data/assets/scene/solarsystem/sun/streamnodeslegend')",
         Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);",
-		Documentation = "Shows or hides the legend image",
+		Documentation = "Show the legend image",
         Local = true
     },
     {
         Key = "F3",
         Name = "Show Flux Value Legend",
-        --Command = "openspace.asset.remove('C:/Users/chrad171/openspace/OpenSpace/data/assets/scene/solarsystem/sun/streamnodeslegend')",
         Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', false);",
-		Documentation = "Shows or hides the legend image",
+		Documentation = "Hides the legend image",
         Local = true
     },
 	{
