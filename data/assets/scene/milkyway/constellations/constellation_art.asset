@@ -1,0 +1,105 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local images = asset.syncedResource({
+    Name = "Constellation Images",
+    Type = "HttpSynchronization",
+    Identifier = "constellation_images",
+    Version = 1
+})
+
+--function that reads the file
+local createConstellations = function (guiPath, constellationfile)
+  local genConstellations = {};
+  --skip the first line
+  local notFirstLine = false;
+  -- define parsec to meters
+  local PARSEC_CONSTANT = 3.0856776E16;
+  -- how many parsecs away do you want the images to be?
+  -- this setting puts the billboards at the location of the constellation bounds grid from DU.
+  -- but they can really be anywhere since the billboard size will scale with distance.
+  local distanceMultiplier = 3.2;
+  local baseScale = 1e17;
+  for line in io.lines(openspace.absPath(constellationfile)) do
+      if (notFirstLine) then
+        -- describes the data
+        local matchstring = '(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$'
+        local group, abbreviation, name, x, y, z, scale, imageName, rotX, rotY, rotZ, centerStar = line:match(matchstring)
+        local magVec = math.sqrt(x*x + y*y + z*z)
+        local normx = x/magVec
+        local normy = y/magVec
+        local normz = z/magVec
+
+        group = (group == '' and globe or group)
+
+        local aconstellation = {
+          Identifier = guiPath .. '-' .. name,
+          Parent = transforms.SolarSystemBarycenter.Identifier,
+          Transform = {
+              Translation = {
+                  Type = "StaticTranslation",
+                  -- position is in parsecs from the SolarSystemBarycenter, so convert to meters
+                  Position = {
+                    normx * PARSEC_CONSTANT * distanceMultiplier,
+                    normy * PARSEC_CONSTANT * distanceMultiplier,
+                    normz * PARSEC_CONSTANT * distanceMultiplier
+                  }
+              },
+              Rotation = {
+                  Type = "StaticRotation",
+                  Rotation = { tonumber(rotX), tonumber(rotY), tonumber(rotZ) }
+              }
+
+          },
+          Renderable = {
+              Type = "RenderablePlaneImageLocal",
+              Size = tonumber(baseScale * scale * distanceMultiplier / 10),
+              Enabled = false,
+              Origin = "Center",
+              Billboard = false,
+              LazyLoading = true,
+              Texture = images .. "/" .. imageName,
+              BlendMode = "Additive",
+              Opacity = 0.1
+          },
+          Tag = { "ConstellationArtImage", group },
+          GUI = {
+              Name = name .. ' Image',
+              Path = '/Milky Way/' .. guiPath
+          }
+        }
+        table.insert(genConstellations, aconstellation);
+
+      else
+        notFirstLine = true
+      end
+  end
+  return genConstellations
+end
+
+
+local nodes = {}
+
+asset.onInitialize(function ()
+  local constellationsCSV = images .. "/constellation_data.csv"
+
+  nodes = createConstellations('Constellation Art', constellationsCSV)
+  for _, n in ipairs(nodes) do
+    openspace.addSceneGraphNode(n);
+  end
+end)
+
+asset.onDeinitialize(function ()
+  for _, n in ipairs(nodes) do
+    openspace.removeSceneGraphNode(n.Identifier);
+  end
+end)
+
+
+asset.meta = {
+    Name = "Constellation Images",
+    Version = "1.0",
+    Description = "Artistic images depicting the constellations",
+    Author = "James Hedberg",
+    URL = "jameshedberg.com",
+    License = "CC-BY"
+}

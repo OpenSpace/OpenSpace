@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,6 +64,7 @@
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
+#define SHADOW_MAPPING_ENABLED #{enableShadowMapping}
 
 const vec3 DefaultLevelWeights = vec3(1.0, 0.0, 0.0);
 
@@ -376,16 +377,16 @@ vec4 calculateShadedColor(vec4 currentColor, vec3 ellipsoidNormalCameraSpace,
     vec3 shadedColor = currentColor.rgb * 0.05;
 
     vec3 n = normalize(ellipsoidNormalCameraSpace);
-    vec3 l = lightDirectionCameraSpace;
-        
+
     float power = orenNayarDiffuse(
         -lightDirectionCameraSpace,
-        viewDirectionCameraSpace, 
+        viewDirectionCameraSpace,
         ellipsoidNormalCameraSpace,
         roughness);
 
+    vec3 l = lightDirectionCameraSpace;
     power = max(smoothstep(0.0f, 0.1f, max(dot(-l, n), 0.0f)) * power, 0.0f);
-    
+
     vec4 color = vec4(shadedColor + currentColor.rgb * power, currentColor.a);
     return color;
 }

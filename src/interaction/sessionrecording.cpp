@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <iomanip>
 
 namespace {
@@ -586,6 +587,8 @@ void SessionRecording::saveScriptKeyframeAscii(timestamps times,
 }
 
 void SessionRecording::preSynchronization() {
+    ZoneScoped
+
     if (_state == SessionState::Recording) {
         saveCameraKeyframe();
         if (UsingTimeKeyframes) {
@@ -1054,7 +1057,7 @@ void SessionRecording::moveAheadInTime() {
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            global::renderEngine.takeScreenShot();
+            global::renderEngine.takeScreenshot();
         }
     }
 }
@@ -1126,7 +1129,8 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
                     _idxTimeline_cameraPtrNext = seekAheadIndex;
                 }
                 break;
-            } else {
+            }
+            else {
                 // Force interpolation between consecutive keyframes
                 _idxTimeline_cameraPtrPrev = seekAheadIndex;
             }
@@ -1457,8 +1461,10 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "enableTakeScreenShotDuringPlayback",
                 &luascriptfunctions::enableTakeScreenShotDuringPlayback,
                 {},
-                "int",
-                "Enables that rendered frames should be saved during playback."
+                "[int]",
+                "Enables that rendered frames should be saved during playback. The "
+                "parameter determines the number of frames that are exported per second "
+                "if this value is not provided, 60 frames per second will be exported."
             },
             {
                 "disableTakeScreenShotDuringPlayback",

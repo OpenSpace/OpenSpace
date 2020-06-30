@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace {
 
@@ -130,50 +131,48 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     });
 
     global::callback::deinitialize.emplace_back([&]() {
+        ZoneScopedN("ImGUI")
+
         LDEBUGC("ImGui", "Deinitialize GUI");
         gui.deinitialize();
     });
 
     global::callback::initializeGL.emplace_back([&]() {
+        ZoneScopedN("ImGUI")
+
         LDEBUGC("ImGui", "Initializing GUI OpenGL");
         gui.initializeGL();
     });
 
     global::callback::deinitializeGL.emplace_back([&]() {
+        ZoneScopedN("ImGUI")
+
         LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
         gui.deinitializeGL();
     });
 
     global::callback::draw2D.emplace_back([&]() {
-        // TODO emiax: Make sure this is only called for one of the eyes, in the case
-        // of side-by-side / top-bottom stereo.
+        ZoneScopedN("ImGUI")
 
         WindowDelegate& delegate = global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
-            const glm::ivec2 windowSize = delegate.currentWindowSize();
-            const glm::ivec2 resolution = delegate.currentWindowResolution();
+            const glm::ivec2 windowSize = delegate.currentSubwindowSize();
+            const glm::ivec2 resolution = delegate.currentDrawBufferResolution();
 
             if (windowSize.x <= 0 || windowSize.y <= 0) {
                 return;
             }
 
-            glm::vec2 mousePosition = delegate.mousePosition();
-            uint32_t mouseButtons = delegate.mouseButtons(2);
-
             const double dt = std::max(delegate.averageDeltaTime(), 0.0);
-            if (touchInput.active && mouseButtons == 0) {
-                mouseButtons = touchInput.action;
-                mousePosition = touchInput.pos;
-            }
             // We don't do any collection of immediate mode user interface, so it
             // is fine to open and close a frame immediately
             gui.startFrame(
                 static_cast<float>(dt),
                 glm::vec2(windowSize),
                 resolution / windowSize,
-                mousePosition,
-                mouseButtons
+                _mousePosition,
+                _mouseButtons
             );
 
             gui.endFrame();
@@ -182,6 +181,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::keyboard.emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+            ZoneScopedN("ImGUI")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -196,6 +197,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::character.emplace_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
+            ZoneScopedN("ImGUI")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -208,8 +211,23 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
+    global::callback::mousePosition.emplace_back(
+        [&](double x, double y) {
+            _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
+        }
+    );
+
     global::callback::mouseButton.emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
+            ZoneScopedN("ImGUI")
+
+            if (action == MouseAction::Press) {
+                _mouseButtons |= (1 << static_cast<int>(button));
+            }
+            else if (action == MouseAction::Release) {
+                _mouseButtons &= ~(1 << static_cast<int>(button));
+            }
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -224,6 +242,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     global::callback::mouseScrollWheel.emplace_back(
         [&](double, double posY) -> bool {
+            ZoneScopedN("ImGUI")
+
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
@@ -233,6 +253,24 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             else {
                 return false;
             }
+        }
+    );
+
+    global::callback::touchDetected.emplace_back(
+        [&](TouchInput input) -> bool {
+            return gui.touchDetectedCallback(input);
+        }
+    );
+
+    global::callback::touchUpdated.emplace_back(
+        [&](TouchInput input) -> bool {
+            return gui.touchUpdatedCallback(input);
+        }
+    );
+
+    global::callback::touchExit.emplace_back(
+        [&](TouchInput input) {
+            gui.touchExitCallback(input);
         }
     );
 }

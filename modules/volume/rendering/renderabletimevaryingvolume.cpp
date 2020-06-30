@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "gridType",
         "Grid Type",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
@@ -451,7 +452,8 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
                 modelTransform = modelTransform * scaleMatrix;
                 _raycaster->setModelTransform(glm::mat4(modelTransform));
-            } else {
+            }
+            else {
                 // The diameter is two times the maximum radius.
                 // No translation: the sphere is always centered in (0, 0, 0)
                 _raycaster->setModelTransform(
@@ -462,7 +464,8 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
-        } else {
+        }
+        else {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);

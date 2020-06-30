@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,66 +30,65 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 
 #include "assetmanager_lua.inl"
 
 namespace openspace {
 
-AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader,
-                           std::unique_ptr<SynchronizationWatcher> syncWatcher)
-    : _synchronizationWatcher(std::move(syncWatcher))
-    , _assetLoader(std::move(loader))
+AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDirectory)
+    : _assetLoader(state, &_synchronizationWatcher, std::move(assetRootDirectory))
 {}
 
 void AssetManager::initialize() {
-    _assetLoader->addAssetListener(this);
-    std::shared_ptr<Asset> rootAsset = _assetLoader->rootAsset();
-    rootAsset->initialize();
+    _assetLoader.addAssetListener(this);
+    _assetLoader.rootAsset().initialize();
 }
 
 void AssetManager::deinitialize() {
-    _assetLoader->rootAsset()->deinitialize();
-    _assetLoader->rootAsset()->unload();
-    _assetLoader->removeAssetListener(this);
-    _assetLoader = nullptr;
+    _assetLoader.rootAsset().deinitialize();
+    _assetLoader.rootAsset().unload();
+    _assetLoader.removeAssetListener(this);
 }
 
 bool AssetManager::update() {
+    ZoneScoped
+
     // Add assets
     for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const bool add = c.second;
         if (add) {
-            std::shared_ptr<Asset> asset = _assetLoader->add(path);
+            _assetLoader.add(path);
         }
     }
     // Remove assets
     for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const bool remove = !c.second;
-        if (remove && _assetLoader->has(path)) {
-            _assetLoader->remove(path);
+        if (remove && _assetLoader.has(path)) {
+            _assetLoader.remove(path);
         }
     }
     _pendingStateChangeCommands.clear();
 
     // Change state based on synchronizations
-    _synchronizationWatcher->notify();
+    _synchronizationWatcher.notify();
 
     return false;
 }
 
-void AssetManager::assetStateChanged(std::shared_ptr<Asset>, Asset::State) {
+void AssetManager::assetStateChanged(Asset*, Asset::State) {
     // Potential todo: notify user about asset stage change
     //LINFO(asset->id() << " changed state to " << static_cast<int>(state));
 }
 
-void AssetManager::assetRequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) {
+void AssetManager::assetRequested(Asset*, std::shared_ptr<Asset>) {
     // Potential todo: notify user about asset request
     //LINFO(parent->id() << " requested " << child->id());
 }
 
-void AssetManager::assetUnrequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) {
+void AssetManager::assetUnrequested(Asset*, std::shared_ptr<Asset>) {
     // Potential todo: notify user about asset unrequest
     //LINFO(parent->id() << " unrequested " << child->id());
 }
@@ -103,17 +102,20 @@ void AssetManager::remove(const std::string& path) {
 }
 
 void AssetManager::removeAll() {
-    _pendingStateChangeCommands.clear();
-    std::vector<std::shared_ptr<Asset>> allAssets =
-        _assetLoader->rootAsset()->requestedAssets();
+    ZoneScoped
 
-    for (const std::shared_ptr<Asset>& a : allAssets) {
+    _pendingStateChangeCommands.clear();
+    for (const Asset* a : _assetLoader.rootAsset().requestedAssets()) {
         _pendingStateChangeCommands[a->assetFilePath()] = false;
     }
 }
 
-std::shared_ptr<Asset> AssetManager::rootAsset() {
-    return _assetLoader->rootAsset();
+const Asset& AssetManager::rootAsset() const {
+    return _assetLoader.rootAsset();
+}
+
+Asset& AssetManager::rootAsset() {
+    return _assetLoader.rootAsset();
 }
 
 scripting::LuaLibrary AssetManager::luaLibrary() {
@@ -139,4 +141,4 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
     };
 }
 
-}
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,13 @@
 
 #include <modules/touch/touchmodule.h>
 
-#include <modules/webgui/webguimodule.h>
+#include <modules/touch/include/tuioear.h>
+#include <modules/touch/include/win32_touch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
@@ -36,74 +38,82 @@
 #include <ghoul/logging/logmanager.h>
 #include <sstream>
 #include <string>
-#include <iostream>
-
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-#include <modules/webbrowser/webbrowsermodule.h>
-#endif
 
 using namespace TUIO;
 
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo TouchActiveInfo = {
+        "TouchActive",
+        "True if we want to use touch input as 3d navigation",
+        "Use this if we want to turn on or off Touch input navigation. "
+        "Disabling this will reset all current touch inputs to the navigation. "
+    };
+}
 namespace openspace {
 
-bool TouchModule::hasNewInput() {
+bool TouchModule::processNewInput() {
     // Get new input from listener
-    listOfContactPoints = ear.getInput();
-    ear.clearInput();
+    std::vector<TouchInput> earInputs = _ear->takeInput();
+    std::vector<TouchInput> earRemovals = _ear->takeRemovals();
+
+    for(const TouchInput& input : earInputs) {
+        updateOrAddTouchInput(input);
+    }
+    for(const TouchInput& removal : earRemovals) {
+        removeTouchInput(removal);
+    }
+
      // Set touch property to active (to void mouse input, mainly for mtdev bridges)
-    touch.touchActive(!listOfContactPoints.empty());
+    _touch.touchActive(!_touchPoints.empty());
+
+    if (!_touchPoints.empty()) {
+        global::interactionMonitor.markInteraction();
+    }
 
     // Erase old input id's that no longer exists
-    lastProcessed.erase(
+    _lastTouchInputs.erase(
         std::remove_if(
-            lastProcessed.begin(),
-            lastProcessed.end(),
-            [this](const Point& point) {
-        return std::find_if(
-            listOfContactPoints.begin(),
-            listOfContactPoints.end(),
-            [&point](const TuioCursor& c) {
-            return point.first == c.getSessionID();
-        }
-        ) == listOfContactPoints.end(); }),
-        lastProcessed.end());
+            _lastTouchInputs.begin(),
+            _lastTouchInputs.end(),
+            [this](const TouchInput& input) {
+                return !std::any_of(
+                    _touchPoints.cbegin(),
+                    _touchPoints.cend(),
+                    [&input](const TouchInputHolder& holder) {
+                        return holder.holdsInput(input);
+                    }
+                );
+            }
+        ),
+        _lastTouchInputs.end()
+    );
 
-    // if tap occured, we have new input
-    if (listOfContactPoints.empty() && lastProcessed.empty() && ear.tap()) {
-        TuioCursor c = ear.getTap();
-        listOfContactPoints.push_back(c);
-        lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
-        touch.tap();
+    if (_tap) {
+        _touch.tap();
+        _tap = false;
         return true;
     }
 
-    // Check if we need to parse touchevent to the webgui
-    hasNewWebInput(listOfContactPoints);
-
     // Return true if we got new input
-    if (listOfContactPoints.size() == lastProcessed.size() &&
-        !listOfContactPoints.empty())
+    if (_touchPoints.size() == _lastTouchInputs.size() &&
+        !_touchPoints.empty())
     {
         bool newInput = true;
         // go through list and check if the last registrered time is newer than the one in
         // lastProcessed (last frame)
         std::for_each(
-            lastProcessed.begin(),
-            lastProcessed.end(),
-            [this, &newInput](Point& p) {
-                std::vector<TuioCursor>::iterator cursor = std::find_if(
-                    listOfContactPoints.begin(),
-                    listOfContactPoints.end(),
-                    [&p](const TuioCursor& c) { return c.getSessionID() == p.first; }
+            _lastTouchInputs.begin(),
+            _lastTouchInputs.end(),
+            [this, &newInput](TouchInput& input) {
+                std::vector<TouchInputHolder>::iterator holder = std::find_if(
+                    _touchPoints.begin(),
+                    _touchPoints.end(),
+                    [&input](const TouchInputHolder& inputHolder) {
+                        return inputHolder.holdsInput(input);
+                    }
             );
-            double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
-            if (!cursor->isMoving()) {
-                 // if current cursor isn't moving, we want to interpret that as new input
-                 // for interaction purposes
+            if (!holder->isMoving()) {
                 newInput = true;
-            }
-            else if (p.second.getTuioTime().getTotalMilliseconds() == now) {
-                newInput = false;
             }
         });
         return newInput;
@@ -113,76 +123,137 @@ bool TouchModule::hasNewInput() {
     }
 }
 
-void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoints) {
-    // If one point input and no data in webPosition callback send mouse click to webgui
-    bool isWebPositionCallbackZero =
-        (webPositionCallback.x == 0 && webPositionCallback.y == 0);
-    bool isSingleContactPoint = (listOfContactPoints.size() == 1);
-    if (isSingleContactPoint && isWebPositionCallbackZero) {
-        glm::ivec2 res = global::windowDelegate.currentWindowSize();
-        glm::dvec2 pos = glm::vec2(
-            listOfContactPoints.at(0).getScreenX(res.x),
-            listOfContactPoints.at(0).getScreenY(res.y)
-        );
-
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-        WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
-        if (module.eventHandler().hasContentCallback(pos.x, pos.y)) {
-            webPositionCallback = glm::vec2(pos.x, pos.y);
-            module.eventHandler().touchPressCallback(pos.x, pos.y);
+void TouchModule::clearInputs() {
+    for (const TouchInput& input : _deferredRemovals) {
+        for (TouchInputHolder& inputHolder : _touchPoints) {
+            if (inputHolder.holdsInput(input)) {
+                inputHolder = std::move(_touchPoints.back());
+                _touchPoints.pop_back();
+                break;
+            }
         }
     }
-    // Send mouse release if not same point input
-    else if (!isSingleContactPoint && !isWebPositionCallbackZero) {
-        WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
-        module.eventHandler().touchReleaseCallback(webPositionCallback.x,
-            webPositionCallback.y);
-        webPositionCallback = glm::vec2(0, 0);
-#endif
+    _deferredRemovals.clear();
+}
+
+void TouchModule::addTouchInput(TouchInput input) {
+    _touchPoints.emplace_back(input);
+}
+
+void TouchModule::updateOrAddTouchInput(TouchInput input) {
+    for (TouchInputHolder& inputHolder : _touchPoints) {
+        if (inputHolder.holdsInput(input)){
+            inputHolder.tryAddInput(input);
+            return;
+        }
+    }
+    _touchPoints.emplace_back(input);
+}
+
+void TouchModule::removeTouchInput(TouchInput input) {
+    _deferredRemovals.emplace_back(input);
+    //Check for "tap" gesture:
+    for (TouchInputHolder& inputHolder : _touchPoints) {
+        if (inputHolder.holdsInput(input)) {
+            inputHolder.tryAddInput(input);
+            const double totalTime = inputHolder.gestureTime();
+            const float totalDistance = inputHolder.gestureDistance();
+            //Magic values taken from tuioear.cpp:
+            const bool isWithinTapTime = totalTime < 0.18;
+            const bool wasStationary = totalDistance < 0.0004f;
+            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&
+                _deferredRemovals.size() == 1)
+            {
+                _tap = true;
+            }
+            return;
+        }
     }
 }
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
+    , _touchActive(TouchActiveInfo, true)
 {
-    addPropertySubOwner(touch);
-    addPropertySubOwner(markers);
+    addPropertySubOwner(_touch);
+    addPropertySubOwner(_markers);
+    addProperty(_touchActive);
+    _touchActive.onChange([&] {
+        _touch.resetAfterInput();
+        _lastTouchInputs.clear();
+    });
+}
+
+TouchModule::~TouchModule() {
+    // intentionally left empty
+}
+
+void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
+    _ear.reset(new TuioEar());
 
     global::callback::initializeGL.push_back([&]() {
         LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
-        markers.initialize();
+        _markers.initialize();
+#ifdef WIN32
+        // We currently only support one window of touch input internally
+        // so here we grab the first window-handle and use it.
+        void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
+        if (nativeWindowHandle) {
+            _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
+        }
+#endif
     });
 
     global::callback::deinitializeGL.push_back([&]() {
         LDEBUGC("TouchMarker", "Deinitialize TouchMarker OpenGL");
-        markers.deinitialize();
+        _markers.deinitialize();
     });
 
-    global::callback::preSync.push_back([&]() {
-        touch.setCamera(global::navigationHandler.camera());
-        touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
-
-        if (hasNewInput() && global::windowDelegate.isMaster()) {
-            touch.updateStateFromInput(listOfContactPoints, lastProcessed);
+    // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
+    // thread so we don't need a mutex here
+    global::callback::touchDetected.push_back(
+        [this](TouchInput i) {
+            addTouchInput(i);
+            return true;
         }
-        else if (listOfContactPoints.empty()) {
-            touch.resetAfterInput();
+    );
+
+    global::callback::touchUpdated.push_back(
+        [this](TouchInput i) {
+            updateOrAddTouchInput(i);
+            return true;
+        }
+    );
+
+    global::callback::touchExit.push_back(
+        std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1)
+    );
+
+
+    global::callback::preSync.push_back([&]() {
+        _touch.setCamera(global::navigationHandler.camera());
+        _touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
+
+        if (processNewInput() && global::windowDelegate.isMaster() && _touchActive) {
+            _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
+        }
+        else if (_touchPoints.empty()) {
+            _touch.resetAfterInput();
         }
 
         // update lastProcessed
-        lastProcessed.clear();
-        for (const TuioCursor& c : listOfContactPoints) {
-            lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
+        _lastTouchInputs.clear();
+        for (const TouchInputHolder& points : _touchPoints) {
+            _lastTouchInputs.emplace_back(points.latestInput());
         }
-        // used to save data from solver, only calculated for one frame when user chooses
-        // in GUI
-        touch.unitTest();
         // calculate the new camera state for this frame
-        touch.step(global::windowDelegate.deltaTime());
+        _touch.step(global::windowDelegate.deltaTime());
+        clearInputs();
     });
 
-    global::callback::render.push_back([&]() { markers.render(listOfContactPoints); });
-
+    global::callback::render.push_back([&]() {
+        _markers.render(_touchPoints);
+    });
 }
 
 } // namespace openspace

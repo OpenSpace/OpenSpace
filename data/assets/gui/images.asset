@@ -1,0 +1,48 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SYNC enabled
+
+local assetHelper = asset.require("util/asset_helper")
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Icons",
+    Identifier = "planet_icons",
+    Url = {
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/earth.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/moon.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/jupiter.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/mars.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/mercury.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/neptune.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/saturn.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/uranus.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/venus.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/callisto.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/europa.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/ganymede.png",
+        "http://data.openspaceproject.com/files/webgui/assets/icons/solarsystem/io.png",
+    },
+    UseHash = false
+})
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Stories",
+    Identifier = "story_images",
+    Url = {
+        "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_solarsystem.png",
+        "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_jupitermoons.png",
+        "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_earthweather.png",
+        "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_mars.png",
+        "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_galaxies.png",
+        "http://data.openspaceproject.com/files/webgui/assets/images/stories/story_example.png",
+    },
+    UseHash = false
+})
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Instructions",
+    Identifier = "images",
+    Url = "http://data.openspaceproject.com/files/webgui/assets/images/instructions.png",
+    UseHash = false
+})

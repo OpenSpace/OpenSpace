@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,9 @@ uniform float opacityCoefficient;
 Fragment getFragment() {
     Fragment frag;
 
-    float multipliedOpacityCoefficient = clamp(opacityCoefficient*opacityCoefficient*20.0, 0.0, 1.0);
-    vec3 extinction = exp(vec3(0.6, 0.2, 0.3)-vs_color);
-    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*multipliedOpacityCoefficient, 1.0);
+    float multipliedOpacityCoefficient = opacityCoefficient*opacityCoefficient;
+    vec3 extinction = exp(vec3(0.6, 0.2, 0.3) - vs_color);
+    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*multipliedOpacityCoefficient, opacityCoefficient);
     frag.color = fullColor;
 
     frag.depth = vs_screenSpaceDepth;

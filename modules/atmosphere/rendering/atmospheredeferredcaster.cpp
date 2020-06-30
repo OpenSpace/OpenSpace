@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,6 @@
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderable.h>
@@ -115,58 +114,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-AtmosphereDeferredcaster::AtmosphereDeferredcaster()
-    : _transmittanceProgramObject(nullptr)
-    , _irradianceProgramObject(nullptr)
-    , _irradianceSupTermsProgramObject(nullptr)
-    , _irradianceFinalProgramObject(nullptr)
-    , _inScatteringProgramObject(nullptr)
-    , _inScatteringSupTermsProgramObject(nullptr)
-    , _deltaEProgramObject(nullptr)
-    , _deltaSProgramObject(nullptr)
-    , _deltaSSupTermsProgramObject(nullptr)
-    , _deltaJProgramObject(nullptr)
-    , _atmosphereProgramObject(nullptr)
-    , _transmittanceTableTexture(0)
-    , _irradianceTableTexture(0)
-    , _inScatteringTableTexture(0)
-    , _deltaETableTexture(0)
-    , _deltaSRayleighTableTexture(0)
-    , _deltaSMieTableTexture(0)
-    , _deltaJTableTexture(0)
-    , _atmosphereTexture(0)
-    , _atmosphereCalculated(false)
-    , _ozoneEnabled(false)
-    , _sunFollowingCameraEnabled(false)
-    , _atmosphereRadius(0.f)
-    , _atmospherePlanetRadius(0.f)
-    , _planetAverageGroundReflectance(0.f)
-    , _planetGroundRadianceEmittion(0.f)
-    , _rayleighHeightScale(0.f)
-    , _ozoneHeightScale(0.f)
-    , _mieHeightScale(0.f)
-    , _miePhaseConstant(0.f)
-    , _sunRadianceIntensity(5.f)
-    , _rayleighScatteringCoeff(glm::vec3(0.f))
-    , _ozoneExtinctionCoeff(glm::vec3(0.f))
-    , _mieScatteringCoeff(glm::vec3(0.f))
-    , _mieExtinctionCoeff(glm::vec3(0.f))
-    , _ellipsoidRadii(glm::dvec3(0.0))
-    , _transmittance_table_width(256)
-    , _transmittance_table_height(64)
-    , _irradiance_table_width(64)
-    , _irradiance_table_height(16)
-    , _delta_e_table_width(64)
-    , _delta_e_table_height(16)
-    , _r_samples(32)
-    , _mu_samples(128)
-    , _mu_s_samples(32)
-    , _nu_samples(8)
-    , _hardShadowsEnabled(false)
-    , _calculationTextureScale(1.0)
-    , _saveCalculationTextures(false)
-{}
 
 void AtmosphereDeferredcaster::initialize() {
     if (!_atmosphereCalculated) {

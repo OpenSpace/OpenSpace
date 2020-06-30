@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,6 +63,12 @@ namespace {
         "full opacity."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "The line width of the constellation bounds"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
@@ -99,6 +105,12 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
                 ColorInfo.description
             },
             {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LineWidthInfo.description
+            },
+            {
                 SelectionInfo.identifier,
                 new StringListVerifier,
                 Optional::Yes,
@@ -115,6 +127,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     , _vertexFilename(VertexInfo)
     , _constellationFilename(ConstellationInfo)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _lineWidth(LineWidthInfo, 2.f, 1.f, 32.f)
     , _constellationSelection(SelectionInfo)
 {
     documentation::testSpecificationAndThrow(
@@ -139,6 +152,13 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     addProperty(_color);
     if (dictionary.hasKey(ColorInfo.identifier)) {
         _color = glm::vec3(dictionary.value<glm::dvec3>(ColorInfo.identifier));
+    }
+
+    addProperty(_lineWidth);
+    if (dictionary.hasKey(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
+        );
     }
 
     fillSelectionProperty();
@@ -243,6 +263,8 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("ModelTransform", glm::mat4(modelTransform));
     _program->setUniform("color", _color);
+
+    glLineWidth(_lineWidth);
 
     glBindVertexArray(_vao);
     for (const ConstellationBound& bound : _constellationBounds) {

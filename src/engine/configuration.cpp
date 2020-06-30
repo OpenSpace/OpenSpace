@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,7 @@ namespace {
     // These are also used in the _doc include file
     constexpr const char* KeySGCTConfig = "SGCTConfig";
     constexpr const char* KeyAsset = "Asset";
+    constexpr const char* KeyProfile = "Profile";
     constexpr const char* KeyGlobalCustomizationScripts = "GlobalCustomizationScripts";
     constexpr const char* KeyPaths = "Paths";
     constexpr const char* KeyFonts = "Fonts";
@@ -277,6 +278,7 @@ void parseLuaState(Configuration& configuration) {
 
     getValue(s, KeySGCTConfig, c.windowConfiguration);
     getValue(s, KeyAsset, c.asset);
+    getValue(s, KeyProfile, c.profile);
     getValue(s, KeyGlobalCustomizationScripts, c.globalCustomizationScripts);
     getValue(s, KeyPaths, c.pathTokens);
     getValue(s, KeyFonts, c.fonts);
@@ -296,7 +298,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyMasterRotation, c.masterRotation);
     getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
-
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);
     getValue(s, KeyLoadingScreen, c.loadingScreen);

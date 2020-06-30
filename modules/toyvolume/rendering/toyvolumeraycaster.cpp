@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
 #include <vector>
@@ -49,7 +48,7 @@ namespace {
 namespace openspace {
 
 ToyVolumeRaycaster::ToyVolumeRaycaster(glm::vec4 color)
-    : _boundingBox(glm::vec3(1.0))
+    : _boundingBox(glm::vec3(1.f))
     , _color(std::move(color))
 {}
 
@@ -63,7 +62,7 @@ void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data,
                                            ghoul::opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -78,7 +77,7 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
 {
     // Uniforms
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
     glEnable(GL_CULL_FACE);
@@ -119,7 +118,7 @@ bool ToyVolumeRaycaster::isCameraInside(const RenderData& data, glm::vec3& local
     glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
                          glm::vec4(0.f, 0.f, 0.f, 1.f);
 
-    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
+    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 
     return (localPosition.x > 0 && localPosition.x < 1 &&
             localPosition.y > 0 && localPosition.y < 1 &&

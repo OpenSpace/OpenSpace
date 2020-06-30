@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2019                                                               *
+* Copyright (c) 2014-2020                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,25 +29,21 @@ uniform float absorptionMultiply#{id} = 50.0;
 uniform float emissionMultiply#{id} = 1500.0;
 uniform sampler3D galaxyTexture#{id};
 
-void sample#{id}(vec3 samplePos,
+void sample#{id}(
+  vec3 samplePos,
   vec3 dir,
   inout vec3 accumulatedColor,
   inout vec3 accumulatedAlpha,
-  inout float maxStepSize)
-  {
+  inout float stepSize
+  ) {
     vec3 aspect = aspect#{id};
-    maxStepSize = maxStepSize#{id} / length(dir / aspect);
+    stepSize = maxStepSize#{id} / length(dir / aspect);
 
     //Early ray termination on black parts of the data
-    vec3 normalizedPos = (samplePos*2.0)-1.0;
-    if(abs(normalizedPos.x) > 0.8 || abs(normalizedPos.y) > 0.8){
+    vec3 normalizedPos = samplePos * 2.f - 1.f;
+    if (normalizedPos.x * normalizedPos.x + normalizedPos.y * normalizedPos.y > 0.7) {
         return;
     }
-
-    float STEP_SIZE = maxStepSize#{id}*0.5;
-    //float STEP_SIZE = 1 / 256.0;
-
-    vec3 alphaTint = vec3(0.3, 0.54, 0.85);
 
     vec4 sampledColor = texture(galaxyTexture#{id}, samplePos.xyz);
 
@@ -55,26 +51,27 @@ void sample#{id}(vec3 samplePos,
     // So square them back
     sampledColor = sampledColor*sampledColor;
 
-    // fudge for the dust "spreading"
-    sampledColor.a = clamp(sampledColor.a, 0.0, 1.0) * opacityCoefficient#{id};
-    sampledColor.a = pow(sampledColor.a, 0.7);
+    // Fudge for the dust "spreading"
+    sampledColor.a = clamp(sampledColor.a, 0.f, 1.f);
+    sampledColor.a = pow(sampledColor.a, 0.7f);
 
-    // absorption probability
-    float scaled_density = sampledColor.a * STEP_SIZE * absorptionMultiply#{id};
-    vec3 absorption = alphaTint * scaled_density;
+    // Absorption probability
+    float scaledDensity = sampledColor.a * stepSize * absorptionMultiply#{id};
+    vec3 alphaTint = vec3(0.3f, 0.54f, 0.85f);
+    vec3 absorption = alphaTint * scaledDensity;
 
-    // extinction
+    // Extinction
     vec3 extinction = exp(-absorption);
     accumulatedColor.rgb *= extinction;
 
-    // emission
-    accumulatedColor.rgb += sampledColor.rgb * STEP_SIZE * emissionMultiply#{id};
+    // Emission
+    accumulatedColor.rgb +=
+        sampledColor.rgb * stepSize * emissionMultiply#{id} * opacityCoefficient#{id};
 
-    vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-    //accumulatedColor += oneMinusFrontAlpha * sampledColor.rgb;
-    accumulatedAlpha += oneMinusFrontAlpha * sampledColor.rgb;
+    vec3 oneMinusFrontAlpha = vec3(1.f) - accumulatedAlpha;
+    accumulatedAlpha += oneMinusFrontAlpha * sampledColor.rgb  * opacityCoefficient#{id};
   }
 
   float stepSize#{id}(vec3 samplePos, vec3 dir) {
-    return maxStepSize#{id} * length(dir * 1.0 / aspect#{id});
+    return maxStepSize#{id} * length(dir * 1.f / aspect#{id});
   }

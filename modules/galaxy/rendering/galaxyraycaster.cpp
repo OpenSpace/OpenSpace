@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,7 @@ void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
                                         ghoul::opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -71,7 +71,7 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
 {
     // Uniforms
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
     glEnable(GL_CULL_FACE);

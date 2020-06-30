@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -128,6 +128,7 @@ private:
     //properties::OptionProperty _blendMode;
     properties::FloatProperty _textMinSize;
     properties::FloatProperty _textMaxSize;
+    properties::FloatProperty _lineWidth;
 
     // DEBUG:
     properties::OptionProperty _renderOption;
@@ -146,7 +147,7 @@ private:
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     int _nValuesPerAstronomicalObject = 0;
 
-    glm::dmat4 _transformationMatrix;
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;

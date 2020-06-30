@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/assetlistener.h>
 #include <openspace/scene/assetloader.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
@@ -74,21 +73,6 @@ documentation::Documentation SyncAssetTask::documentation() {
     };
 }
 
-class RequestListener : public AssetListener {
-public:
-    virtual ~RequestListener() = default;
-    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override {
-        if (state == Asset::State::LoadingFailed) {
-            LERROR(fmt::format("Failed to load asset: {}", asset->id()));
-        }
-        if (state == Asset::State::SyncRejected) {
-            LERROR(fmt::format("Failed to sync asset: {}", asset->id()));
-        }
-    }
-    void assetRequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
-    void assetUnrequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
-};
-
 SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(
         documentation(),
@@ -123,20 +107,16 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
     ghoul::lua::LuaState luaState;
     scriptEngine.initializeLuaState(luaState);
 
-    AssetLoader loader(luaState, &watcher, "${ASSETS}");
-
-    RequestListener listener;
-    loader.addAssetListener(&listener);
+    AssetLoader loader(&luaState, &watcher, "${ASSETS}");
 
     loader.add(_asset);
-    loader.rootAsset()->startSynchronizations();
+    loader.rootAsset().startSynchronizations();
 
-    std::vector<std::shared_ptr<const Asset>> allAssets =
-        loader.rootAsset()->subTreeAssets();
+    std::vector<const Asset*> allAssets = loader.rootAsset().subTreeAssets();
 
     while (true) {
         bool inProgress = false;
-        for (const std::shared_ptr<const Asset>& asset : allAssets) {
+        for (const Asset* asset : allAssets) {
             Asset::State state = asset->state();
             if (state == Asset::State::Unloaded ||
                 state == Asset::State::Loaded ||
@@ -145,7 +125,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
                 inProgress = true;
             }
         }
-        progressCallback(loader.rootAsset()->requestedSynchronizationProgress());
+        progressCallback(loader.rootAsset().requestedSynchronizationProgress());
         std::this_thread::sleep_for(ProgressPollInterval);
         watcher.notify();
         if (!inProgress) {

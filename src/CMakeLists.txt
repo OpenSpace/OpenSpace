@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -44,6 +44,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
@@ -156,7 +157,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/scenelicense.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
@@ -176,11 +176,10 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
   ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
   ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/sphere.cpp
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
@@ -195,6 +194,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/touch.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
@@ -228,6 +228,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmonitor.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
@@ -344,7 +345,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneinitializer.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicense.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/timeframe.h
@@ -369,11 +369,10 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledcoordinate.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledsphere.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/sphere.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
@@ -389,6 +388,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h

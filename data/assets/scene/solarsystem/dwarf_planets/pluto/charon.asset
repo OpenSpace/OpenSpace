@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.request('./trail')
-local labelsPath = asset.require('./pluto_labels').LabelsPath
+local labelsPath = asset.require('./pluto_globelabels').LabelsPath
 
 
 
@@ -20,10 +20,6 @@ local Charon = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_CHARON",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {

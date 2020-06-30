@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -338,7 +338,7 @@ void GUI::initializeGL() {
 
     {
         unsigned char* texData;
-        glm::ivec2 texSize;
+        glm::ivec2 texSize = glm::ivec2(0);
         for (int i = 0; i < nWindows; ++i) {
             //_contexts[i] = ImGui::CreateContext();
             ImGui::SetCurrentContext(_contexts[i]);
@@ -636,6 +636,77 @@ bool GUI::charCallback(unsigned int character, KeyModifier) {
 
     return consumeEvent;
 }
+
+bool GUI::touchDetectedCallback(TouchInput input) {
+    ImGuiIO& io = ImGui::GetIO();
+    const glm::vec2 windowPos = input.currentWindowCoordinates();
+    const bool consumeEvent = ImGui::IsPosHoveringAnyWindow({ windowPos.x, windowPos.y });
+
+    if (!consumeEvent) {
+        return false;
+    }
+    if (_validTouchStates.empty()) {
+        io.MousePos = {windowPos.x, windowPos.y};
+        io.MouseClicked[0] = true;
+    }
+    _validTouchStates.push_back(input);
+    return true;
+}
+
+bool GUI::touchUpdatedCallback(TouchInput input) {
+    if (_validTouchStates.empty()) {
+        return false;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+
+    auto it = std::find_if(
+        _validTouchStates.cbegin(),
+        _validTouchStates.cend(),
+        [&](const TouchInput& state){
+            return state.fingerId == input.fingerId &&
+            state.touchDeviceId == input.touchDeviceId;
+        }
+    );
+
+    if (it == _validTouchStates.cbegin()) {
+        glm::vec2 windowPos = input.currentWindowCoordinates();
+        io.MousePos = {windowPos.x, windowPos.y};
+        io.MouseClicked[0] = true;
+        return true;
+    }
+    else if (it != _validTouchStates.cend()){
+        return true;
+    }
+    return false;
+}
+
+void GUI::touchExitCallback(TouchInput input) {
+    if (_validTouchStates.empty()) {
+        return;
+    }
+
+    const auto found = std::find_if(
+        _validTouchStates.cbegin(),
+        _validTouchStates.cend(),
+        [&](const TouchInput& state){
+            return state.fingerId == input.fingerId &&
+            state.touchDeviceId == input.touchDeviceId;
+        }
+    );
+
+    if (found == _validTouchStates.cend()) {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    _validTouchStates.erase(found);
+    if (_validTouchStates.empty()) {
+        glm::vec2 windowPos = input.currentWindowCoordinates();
+        io.MousePos = {windowPos.x, windowPos.y};
+        io.MouseClicked[0] = false;
+    }
+}
+
 
 void GUI::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);

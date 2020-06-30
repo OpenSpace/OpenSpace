@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
@@ -64,6 +65,8 @@ public:
     void setCamera(Camera* camera);
     void clearPreviousState();
 
+    SceneGraphNode* focusNode() const;
+    void setFocusNode(const SceneGraphNode* focusNode);
     void setFocusNode(const std::string& focusNode);
     void setAnchorNode(const std::string& anchorNode);
     void setAimNode(const std::string& aimNode);
@@ -76,10 +79,10 @@ public:
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
-    
+
     WebsocketCameraStates& websocketStates();
     const WebsocketCameraStates& websocketStates() const;
-    
+
     ScriptCameraStates& scriptStates();
     const ScriptCameraStates& scriptStates() const;
 
@@ -97,13 +100,13 @@ public:
 
 private:
     struct CameraRotationDecomposition {
-        glm::dquat localRotation;
-        glm::dquat globalRotation;
+        glm::dquat localRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
+        glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
     struct CameraPose {
-        glm::dvec3 position;
-        glm::dquat rotation;
+        glm::dvec3 position = glm::dvec3(0.0);
+        glm::dquat rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
@@ -118,7 +121,6 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setFocusNode(const SceneGraphNode* focusNode);
     void setAnchorNode(const SceneGraphNode* anchorNode);
     void setAimNode(const SceneGraphNode* aimNode);
 
@@ -141,7 +143,11 @@ private:
 
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
+    properties::FloatProperty _flightDestinationDistance;
+    properties::DoubleProperty _flightDestinationFactor;
+    properties::BoolProperty _applyLinearFlight;
 
+    properties::FloatProperty _velocitySensitivity;
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
@@ -153,6 +159,8 @@ private:
     properties::FloatProperty _retargetInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
     properties::FloatProperty _followRotationInterpolationTime;
+
+    properties::BoolProperty _invertMouseButtons;
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
@@ -240,23 +248,40 @@ private:
      * Translates the horizontal direction. If far from the anchor object, this will
      * result in an orbital rotation around the object. This function does not affect the
      * rotation but only the position.
-     * \returns a position vector adjusted in the horizontal direction.
+     *
+     * \return a position vector adjusted in the horizontal direction.
      */
     glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
+    /**
+    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the
+    * focusLimit. The velocity of the zooming depend on distFromCameraToFocus and the
+    * final frame where the camera stops moving depends on the distance set in the
+    * variable focusLimit. The bool determines whether to move/fly towards the focus node
+    * or away from it.
+    *
+    * \return a new position of the camera, closer to the focusLimit than the previous
+    *         position
+    */
+    glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
+        double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
+        double destination) const;
+
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor
      * node defined by the differential anchorNodeRotationDiff.
-     * \returns a position updated with the rotation defined by anchorNodeRotationDiff
+     *
+     * \return a position updated with the rotation defined by anchorNodeRotationDiff
      */
     glm::dvec3 followAnchorNodeRotation(const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition, const glm::dquat& anchorNodeRotationDiff) const;
 
     /**
      * Updates the global rotation so that it points towards the anchor node.
-     * \returns a global rotation quaternion defining a rotation towards the anchor node.
+     *
+     * \return a global rotation quaternion defining a rotation towards the anchor node
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
         const glm::dquat& aimNodeRotationDiff,
@@ -272,7 +297,8 @@ private:
 
     /**
      * Rotates the camera around the out vector of the surface.
-     * \returns a quaternion adjusted to rotate around the out vector of the surface.
+     *
+     * \return a quaternion adjusted to rotate around the out vector of the surface
      */
     glm::dquat rotateHorizontally(double deltaTime,
         const glm::dquat& globalCameraRotation,
@@ -280,8 +306,9 @@ private:
 
     /**
      * Push the camera out to the surface of the object.
-     * \returns a position vector adjusted to be at least minHeightAboveGround meters
-     * above the actual surface of the object
+     *
+     * \return a position vector adjusted to be at least minHeightAboveGround meters
+     *         above the actual surface of the object
      */
     glm::dvec3 pushToSurface(double minHeightAboveGround,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,

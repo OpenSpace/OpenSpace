@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,6 @@ uniform float Hue;
 uniform float Saturation;
 uniform float Value;
 uniform float Lightness;
-uniform int nAaSamples;
 
 uniform sampler2D hdrFeedingTexture;
 
@@ -53,9 +52,12 @@ void main() {
     
     // Color control
     vec3 hsvColor = rgb2hsv(tColor);
-    hsvColor.x = (hsvColor.x * Hue) > 360.f ? 360.f : (hsvColor.x * Hue);
-    hsvColor.y = (hsvColor.y * Saturation) > 1.f ? 1.f : (hsvColor.y * Saturation);
-    hsvColor.z = (hsvColor.z * Value) > 1.f ? 1.f : (hsvColor.z * Value);
+    hsvColor.x = (hsvColor.x + Hue);
+    if (hsvColor.x > 360.0) {
+        hsvColor -= 360.0;
+    }
+    hsvColor.y = clamp(hsvColor.y * Saturation, 0.0, 1.0);
+    hsvColor.z = clamp(hsvColor.z * Value, 0.0, 1.0);
 
     // Gamma Correction
     finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,8 @@
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/ringscomponent.h>
+#include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -127,23 +129,28 @@ private:
         properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
-        properties::IntProperty modelSpaceRenderingCutoffLevel;
-        properties::IntProperty dynamicLodIterationCount;
+        properties::IntProperty  modelSpaceRenderingCutoffLevel;
+        properties::IntProperty  dynamicLodIterationCount;
     } _debugProperties;
 
     struct {
-        properties::BoolProperty performShading;
-        properties::BoolProperty useAccurateNormals;
-        properties::BoolProperty eclipseShadowsEnabled;
-        properties::BoolProperty eclipseHardShadows;
+        properties::BoolProperty  performShading;
+        properties::BoolProperty  useAccurateNormals;
+        properties::BoolProperty  eclipseShadowsEnabled;
+        properties::BoolProperty  eclipseHardShadows;
+        properties::BoolProperty  shadowMapping;
+        properties::FloatProperty zFightingPercentage;
+        properties::IntProperty   nShadowSamples;
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
-        properties::IntProperty nActiveLayers;
+        properties::IntProperty   nActiveLayers;
     } _generalProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
+
+    properties::PropertyOwner _shadowMappingPropertyOwner;
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered
@@ -181,7 +188,9 @@ private:
      */
     float getHeight(const glm::dvec3& position) const;
 
-    void renderChunks(const RenderData& data, RendererTasks& rendererTask);
+    void renderChunks(const RenderData& data, RendererTasks& rendererTask,
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+    );
 
     /**
      * Chunks can be rendered either globally or locally. Global rendering is performed
@@ -191,7 +200,9 @@ private:
      * point precision by doing this which means that the camera too close to a global
      * tile will lead to jagging. We only render global chunks for lower chunk levels.
      */
-    void renderChunkGlobally(const Chunk& chunk, const RenderData& data);
+    void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+    );
 
     /**
      * Local rendering of chunks are done using linear interpolation in camera space.
@@ -204,7 +215,9 @@ private:
      * levels) the better the approximation becomes. This is why we only render local
      * chunks for higher chunk levels.
      */
-    void renderChunkLocally(const Chunk& chunk, const RenderData& data);
+    void renderChunkLocally(const Chunk& chunk, const RenderData& data,
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+    );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
         bool renderBounds, bool renderAABB) const;
@@ -240,8 +253,8 @@ private:
     SkirtedGrid _grid;
     LayerManager _layerManager;
 
-    glm::dmat4 _cachedModelTransform;
-    glm::dmat4 _cachedInverseModelTransform;
+    glm::dmat4 _cachedModelTransform = glm::dmat4(1.0);
+    glm::dmat4 _cachedInverseModelTransform = glm::dmat4(1.0);
 
     ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
 
@@ -275,13 +288,15 @@ private:
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
 
+    // Components
+    RingsComponent _ringsComponent;
+    ShadowComponent _shadowComponent;
+    bool _hasRings = false;
+    bool _hasShadows = false;
+
     // Labels
     GlobeLabelsComponent _globeLabelsComponent;
     ghoul::Dictionary _labelsDictionary;
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    int _nUploadedTiles = 0;
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 };
 
 } // namespace openspace::globebrowsing

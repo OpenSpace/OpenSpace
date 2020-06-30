@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,8 +48,8 @@ public:
 
     virtual bool initialize();
 
-    double scaleValue() const;
-    virtual double scaleValue(const UpdateData& data) const = 0;
+    glm::dvec3 scaleValue() const;
+    virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
     virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
@@ -60,7 +60,7 @@ protected:
 private:
     bool _needsUpdate = true;
     double _cachedTime = -std::numeric_limits<double>::max();
-    double _cachedScale = 1.0;
+    glm::dvec3 _cachedScale = glm::dvec3(1.0);
 };
 
 }  // namespace openspace

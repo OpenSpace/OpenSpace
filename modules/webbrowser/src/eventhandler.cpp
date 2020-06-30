@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/inputstate.h>
+#include <openspace/interaction/interactionmonitor.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 
@@ -36,12 +38,12 @@ namespace {
     constexpr const char* _loggerCat = "WebBrowser:EventHandler";
 
     /**
-    * Map from GLFW key codes to windows key codes, supported by JS and CEF.
-    * See http://keycode.info/ for lookup
-    *
-    * \param key
-    * \return the key code, if mapped or the GLFW key code
-    */
+     * Map from GLFW key codes to windows key codes, supported by JS and CEF.
+     * See http://keycode.info/ for lookup
+     *
+     * \param key
+     * \return the key code, if mapped or the GLFW key code
+     */
     int mapFromGlfwToWindows(openspace::Key key) {
         switch (key) {
             case openspace::Key::BackSpace:   return 8;
@@ -191,40 +193,146 @@ void EventHandler::initialize() {
             return false;
         }
     );
+
+    global::callback::touchDetected.emplace_back(
+        [&](TouchInput input) -> bool {
+            if (!_browserInstance) {
+                return false;
+            }
+
+            const glm::vec2 windowPos = input.currentWindowCoordinates();
+            const bool hasContent = _browserInstance->hasContent(
+                static_cast<int>(windowPos.x),
+                static_cast<int>(windowPos.y)
+            );
+            if (!hasContent) {
+                return false;
+            }
+
+            if (_validTouchStates.empty()) {
+#ifdef WIN32
+                CefTouchEvent event = touchEvent(
+                    input,
+                    cef_touch_event_type_t::CEF_TET_PRESSED
+                );
+                _browserInstance->sendTouchEvent(event);
+#else
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = true;
+                _browserInstance->sendMouseClickEvent(
+                    mouseEvent(),
+                    MBT_LEFT,
+                    false,
+                    BrowserInstance::SingleClick
+                );
+#endif
+                _validTouchStates.emplace_back(input);
+            }
+            else {
+                _validTouchStates.emplace_back(input);
+            }
+            return true;
+        }
+    );
+
+    global::callback::touchUpdated.emplace_back(
+        [&](TouchInput input) -> bool {
+            if (!_browserInstance) {
+                return false;
+            }
+            if (_validTouchStates.empty()) {
+                return false;
+            }
+
+            auto it = std::find_if(
+                _validTouchStates.cbegin(),
+                _validTouchStates.cend(),
+                [&](const TouchInput& state){
+                    return state.fingerId == input.fingerId &&
+                    state.touchDeviceId == input.touchDeviceId;
+                }
+            );
+
+            if (it == _validTouchStates.cbegin()) {
+#ifdef WIN32
+
+                CefTouchEvent event = touchEvent(
+                    input,
+                    cef_touch_event_type_t::CEF_TET_MOVED
+                );
+                _browserInstance->sendTouchEvent(event);
+#else
+                glm::vec2 windowPos = input.currentWindowCoordinates();
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = true;
+                _browserInstance->sendMouseMoveEvent(mouseEvent());
+#endif
+                return true;
+            }
+            else if (it != _validTouchStates.cend()){
+                return true;
+            }
+            return false;
+        }
+    );
+
+    global::callback::touchExit.emplace_back(
+        [&](TouchInput input) {
+            if (!_browserInstance) {
+                return;
+            }
+            if (_validTouchStates.empty()) {
+                return;
+            }
+
+            const auto found = std::find_if(
+                _validTouchStates.cbegin(),
+                _validTouchStates.cend(),
+                [&](const TouchInput& state){
+                    return state.fingerId == input.fingerId &&
+                    state.touchDeviceId == input.touchDeviceId;
+                }
+            );
+
+            if (found == _validTouchStates.cend()) {
+                return;
+            }
+#ifdef WIN32
+            CefTouchEvent event = touchEvent(
+                input,
+                cef_touch_event_type_t::CEF_TET_RELEASED
+            );
+            _browserInstance->sendTouchEvent(event);
+#endif
+            _validTouchStates.erase(found);
+#ifndef WIN32
+            if (_validTouchStates.empty()) {
+                glm::vec2 windowPos = input.currentWindowCoordinates();
+                _mousePosition.x = windowPos.x;
+                _mousePosition.y = windowPos.y;
+                _leftButton.down = false;
+                _browserInstance->sendMouseClickEvent(
+                    mouseEvent(),
+                    MBT_LEFT,
+                    true,
+                    BrowserInstance::SingleClick
+                );
+            }
+#endif
+        }
+    );
 }
 
-void EventHandler::touchPressCallback(const double x, const double y) {
-    if (_browserInstance) {
-        _mousePosition.x = static_cast<float>(x);
-        _mousePosition.y = static_cast<float>(y);
-
-        int clickCount = BrowserInstance::SingleClick;
-        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false, clickCount);
-    }
-}
-
-void EventHandler::touchReleaseCallback(const double x, const double y) {
-    if (_browserInstance) {
-        _mousePosition.x = static_cast<float>(x);
-        _mousePosition.y = static_cast<float>(y);
-
-        int clickCount = BrowserInstance::SingleClick;
-        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true, clickCount);
-    }
-}
-
-bool EventHandler::hasContentCallback(const double x, const double y) {
-    return _browserInstance->hasContent(static_cast<int>(x), static_cast<int>(y));
-}
-
-bool EventHandler::mouseButtonCallback(MouseButton button,
-                                       MouseAction action,
+bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
                                        KeyModifier mods)
 {
     if (button != MouseButton::Left && button != MouseButton::Right) {
         return false;
     }
 
+    global::interactionMonitor.markInteraction();
     MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
@@ -232,10 +340,12 @@ bool EventHandler::mouseButtonCallback(MouseButton button,
     // click or release?
     if (action == MouseAction::Release) {
         state.down = false;
-    } else {
+    }
+    else {
         if (isDoubleClick(state)) {
             ++clickCount;
-        } else {
+        }
+        else {
             state.lastClickTime = std::chrono::high_resolution_clock::now();
         }
 
@@ -254,6 +364,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button,
 bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     // check time
     using namespace std::chrono;
+
     auto now = high_resolution_clock::now();
     milliseconds maxTimeDifference(doubleClickTime());
     auto requiredTime = button.lastClickTime + maxTimeDifference;
@@ -274,6 +385,8 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
     _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
+    global::interactionMonitor.markInteraction();
+
     // Let the mouse event trickle on
     return false;
 }
@@ -332,11 +445,7 @@ bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction) {
 }
 
 cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
-    if (action == KeyAction::Release) {
-        return KEYEVENT_KEYUP;
-    } else {
-        return KEYEVENT_KEYDOWN;
-    }
+    return action == KeyAction::Release ? KEYEVENT_KEYUP : KEYEVENT_KEYDOWN;
 }
 
 CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
@@ -355,6 +464,27 @@ CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
     event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
     return event;
 }
+
+#ifdef WIN32
+CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
+    const cef_touch_event_type_t eventType) const
+{
+    const glm::vec2 windowPos = input.currentWindowCoordinates();
+    CefTouchEvent event = {};
+    event.id = static_cast<int>(input.fingerId);
+    event.x = windowPos.x;
+    event.y = windowPos.y;
+    event.type = eventType;
+    const std::vector<std::pair<Key, KeyModifier>>& keyModVec =
+        global::navigationHandler.inputState().pressedKeys();
+    for (const std::pair<Key, KeyModifier>& keyModPair : keyModVec) {
+        const KeyModifier mods = keyModPair.second;
+        event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
+    }
+    event.pointer_type = cef_pointer_type_t::CEF_POINTER_TYPE_TOUCH;
+    return event;
+}
+#endif
 
 void EventHandler::setBrowserInstance(BrowserInstance* browserInstance) {
     LDEBUG("Setting browser instance.");

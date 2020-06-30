@@ -1,8 +1,8 @@
-/****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
 #define __OPENSPACE_MODULE_SPACE___RENDERABLESATELLITES___H__
 
+#include <modules/space/rendering/renderableorbitalkepler.h>
 #include <openspace/rendering/renderable.h>
 
 #include <modules/base/rendering/renderabletrail.h>
@@ -37,90 +38,16 @@
 
 namespace openspace {
 
-class RenderableSatellites : public Renderable {
+class RenderableSatellites : public RenderableOrbitalKepler {
 public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-
+    void readDataFile(const std::string& filename);
     static documentation::Documentation Documentation();
-    /**
-        * Reads the provided TLE file and calls the KeplerTranslation::setKeplerElments
-        * method with the correct values. If \p filename is a valid TLE file but contains
-        * disallowed values (see KeplerTranslation::setKeplerElements), a
-        * KeplerTranslation::RangeError is thrown.
-        *
-        * \param filename The path to the file that contains the TLE file.
-        *
-        * \throw ghoul::RuntimeError if the TLE file does not exist or there is a 
-        *        problem with its format.
-        * \pre The \p filename must exist
-        */
-    void readTLEFile(const std::string& filename);
+    void initializeFileReading();
 
 private:
-    struct Vertex {
-        glm::vec3 position;
-        glm::vec3 color;
-        glm::vec2 texcoord;
-    };
-
-    struct KeplerParameters {
-        double inclination = 0.0;
-        double semiMajorAxis = 0.0;
-        double ascendingNode = 0.0;
-        double eccentricity = 0.0;
-        double argumentOfPeriapsis = 0.0;
-        double meanAnomaly = 0.0;
-        double meanMotion = 0.0;
-        double epoch = 0.0;
-        double period = 0.0;
-    };
-
-    /// The layout of the VBOs
-    struct TrailVBOLayout {
-        float x, y, z, time;
-        double epoch, period; 
-    };
-
-    KeplerTranslation _keplerTranslator;
-    std::vector<KeplerParameters> _TLEData;
-
-    /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
-    std::vector<TrailVBOLayout> _vertexBufferData;
-
-    /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
-    std::vector<unsigned int> _indexBufferData;
-
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
-    GLuint _indexBuffer;
-
-    //GLuint _vaoTest; // vertexArrayObject
-    //GLuint _vboTest; // vertextBufferObject
-    //GLuint _eboTest; // elementBufferObject/ indexBufferObject       
-
-    void updateBuffers();
-
-    ghoul::opengl::ProgramObject* _programObject;
-
-    properties::StringProperty _path;
-    properties::UIntProperty _nSegments;
-
-    properties::DoubleProperty _lineFade;
-
-    RenderableTrail::Appearance _appearance;
-
-    glm::vec3 _position;
-
-    UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
-        numberOfSegments) _uniformCache;
+    void skipSingleEntryInFile(std::ifstream& file);
+    const unsigned int nLineEntriesPerSatellite = 3;
 };
 
 } // namespace openspace

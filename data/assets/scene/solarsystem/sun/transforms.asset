@@ -42,6 +42,26 @@ local SunIAU = {
     }
 }
 
+local SunECLIPJ2000 = {
+    Identifier = "SunECLIPJ2000",
+    Parent = SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "SUN",
+            Observer = "SSB"
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "ECLIPJ2000",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    GUI = {
+        Name = "SUN J2000",
+        Path = "/Solar System/Sun",
+        Hidden = true
+    }
+}
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU })
+assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU, SunECLIPJ2000 })

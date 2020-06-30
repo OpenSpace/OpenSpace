@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     // Properties for time interpolation
@@ -129,6 +130,8 @@ void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) 
 }
 
 void TimeManager::preSynchronization(double dt) {
+    ZoneScoped
+
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
 
@@ -190,7 +193,8 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
             *firstFutureKeyframe,
             applicationTime
         );
-    } else if (hasPastKeyframes) {
+    }
+    else if (hasPastKeyframes) {
         // Extrapolate based on last past keyframe
         const double deltaApplicationTime = applicationTime - lastPastKeyframe->timestamp;
         Time predictedTime(
@@ -268,9 +272,11 @@ void TimeManager::progressTime(double dt) {
 
         _currentTime.data().setTime(interpolated.time.j2000Seconds());
         _deltaTime = interpolated.delta;
-    } else if (!hasConsumedLastPastKeyframe) {
+    }
+    else if (!hasConsumedLastPastKeyframe) {
         applyKeyframeData(lastPastKeyframe->data);
-    } else if (!isPaused()) {
+    }
+    else if (!isPaused()) {
         // If there are no keyframes to consider
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;

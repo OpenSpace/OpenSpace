@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,15 +34,24 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
+#include <cmath>
+
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
-
+#ifdef __APPLE__
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase"
     };
+#else
+    constexpr const std::array<const char*, 14> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
+        "renderPhase", "resolution", "lineWidth"
+    };
+#endif
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -175,10 +184,10 @@ documentation::Documentation RenderableTrail::Documentation() {
 
 RenderableTrail::Appearance::Appearance()
     : properties::PropertyOwner(AppearanceInfo)
-    , lineColor(LineColorInfo, glm::vec3(1.0f, 1.0f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,
@@ -249,6 +258,18 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
+#ifdef __APPLE__
+    _programObject = BaseModule::ProgramObjectManager.request(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine.buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
+            );
+        }
+    );
+#else
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -259,6 +280,7 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
+#endif
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 }
@@ -294,6 +316,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     }
 
+    /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
+    _programObject->setUniform(_uniformCache.resolution, resolution);*/
+
     static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
         // Fragile! Keep in sync with shader
         { RenderInformation::VertexSorting::NewestFirst, 0 },
@@ -317,7 +342,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-        glLineWidth(_appearance.lineWidth);
+#ifdef __APPLE__
+        glLineWidth(1);
+#else
+        glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+#endif
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
@@ -325,7 +354,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     auto render = [renderLines, renderPoints, p = _programObject, &data,
                    &modelTransform, pointSize = _appearance.pointSize.value(),
-                   c = _uniformCache]
+                   c = _uniformCache, lw = _appearance.lineWidth]
                   (RenderInformation& info, int nVertices, int offset)
     {
         // We pass in the model view transformation matrix as double in order to maintain
@@ -346,6 +375,12 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
+#if !defined(__APPLE__)
+        glm::ivec2 resolution = global::renderEngine.renderingResolution();
+        p->setUniform(c.resolution, resolution);
+        p->setUniform(c.lineWidth, std::ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+#endif
+
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and
             // smaller ones
@@ -361,8 +396,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         glBindVertexArray(info._vaoID);
         if (renderLines) {
-            glEnable(GL_LINE_SMOOTH);
-            glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
             p->setUniform(c.renderPhase, RenderPhaseLines);
             // Subclasses of this renderer might be using the index array or might now be
             // so we check if there is data available and if there isn't, we use the
@@ -382,7 +415,6 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                     reinterpret_cast<void*>(info.first * sizeof(unsigned int))
                 );
             }
-            glDisable(GL_LINE_SMOOTH);
         }
         if (renderPoints) {
             // Subclasses of this renderer might be using the index array or might now be
@@ -412,6 +444,24 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     const int primaryOffset = (_primaryRenderInformation._iBufferID == 0) ?
         0 :
         _primaryRenderInformation.first;
+
+    // Culling
+    const double scaledRadius = glm::length(
+        glm::dmat3(modelTransform) * glm::dvec3(_boundingSphere, 0.0, 0.0)
+    );
+
+    glm::dvec3 trailPosWorld = glm::dvec3(
+        modelTransform * _primaryRenderInformation._localTransform *
+        glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    const double distance = glm::distance(
+        trailPosWorld,
+        data.camera.eyePositionVec3()
+    );
+
+    if (distance > scaledRadius * DISTANCE_CULLING_RADII) {
+        return;
+    }
 
     // Render the primary batch of vertices
     render(_primaryRenderInformation, totalNumber, primaryOffset);

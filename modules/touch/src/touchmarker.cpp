@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     constexpr const std::array<const char*, 4> UniformNames = {
@@ -63,6 +62,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "MarkerColor", "Marker color", "" // @TODO Missing documentation
     };
+
 } // namespace
 
 namespace openspace {
@@ -73,13 +73,7 @@ TouchMarker::TouchMarker()
     , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
     , _transparency(TransparencyInfo, 0.8f, 0.f, 1.f)
     , _thickness(ThicknessInfo, 2.f, 0.f, 4.f )
-    , _color(
-        ColorInfo,
-        glm::vec3(204.f / 255.f, 51.f / 255.f, 51.f / 255.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _shader(nullptr)
+    , _color(ColorInfo, glm::vec3(0.96f, 0.2f, 0.2f), glm::vec3(0.f), glm::vec3(1.f))
 {
     addProperty(_visible);
     addProperty(_radiusSize);
@@ -117,7 +111,7 @@ void TouchMarker::deinitialize() {
     }
 }
 
-void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
+void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
     if (_visible && !list.empty()) {
         createVertexList(list);
         _shader->activate();
@@ -131,7 +125,6 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
         glBindVertexArray(_quad);
         glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
 
@@ -139,13 +132,13 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
     }
 }
 
-void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor>& list) {
+void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder>& list) {
     _vertexData.resize(list.size() * 2);
 
     int i = 0;
-    for (const TUIO::TuioCursor& c : list) {
-        _vertexData[i] = 2 * (c.getX() - 0.5f);
-        _vertexData[i + 1] = -2 * (c.getY() - 0.5f);
+    for (const openspace::TouchInputHolder& inputHolder : list) {
+        _vertexData[i] = 2 * (inputHolder.latestInput().x - 0.5f);
+        _vertexData[i + 1] = -2 * (inputHolder.latestInput().y - 0.5f);
         i += 2;
     }
 

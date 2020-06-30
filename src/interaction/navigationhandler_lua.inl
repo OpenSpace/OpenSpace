@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,6 +44,77 @@ int loadNavigationState(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
+}
+
+int getNavigationState(lua_State* L) {
+    const int n = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 0, 1 },
+        "lua::getNavigationState"
+    );
+
+    interaction::NavigationHandler::NavigationState state;
+    if (n == 1) {
+        const std::string referenceFrameIdentifier = ghoul::lua::value<std::string>(L, 1);
+        const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
+        if (!referenceFrame) {
+            LERROR(fmt::format(
+                "Could not find node '{}' to use as reference frame",
+                referenceFrameIdentifier
+            ));
+            lua_settop(L, 0);
+            return 0;
+        }
+        state = global::navigationHandler.navigationState(*referenceFrame);
+    }
+    else {
+        state = global::navigationHandler.navigationState();
+    }
+
+    lua_settop(L, 0);
+
+    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
+        lua_newtable(L);
+        ghoul::lua::push(L, 1, v.x);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, v.y);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 3, v.z);
+        lua_rawset(L, -3);
+    };
+
+    lua_newtable(L);
+    ghoul::lua::push(L, "Anchor", state.anchor);
+    lua_rawset(L, -3);
+
+    if (!state.aim.empty()) {
+        ghoul::lua::push(L, "Aim", state.aim);
+        lua_rawset(L, -3);
+    }
+    if (!state.referenceFrame.empty()) {
+        ghoul::lua::push(L, "ReferenceFrame", state.referenceFrame);
+        lua_rawset(L, -3);
+    }
+    ghoul::lua::push(L, "Position");
+    pushVector(L, state.position);
+    lua_rawset(L, -3);
+
+    if (state.up.has_value()) {
+        ghoul::lua::push(L, "Up");
+        pushVector(L, *state.up);
+        lua_rawset(L, -3);
+    }
+    if (state.yaw != 0) {
+        ghoul::lua::push(L, "Yaw", state.yaw);
+        lua_rawset(L, -3);
+    }
+    if (state.pitch != 0) {
+        ghoul::lua::push(L, "Pitch", state.pitch);
+        lua_rawset(L, -3);
+    }
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
 }
 
 int setNavigationState(lua_State* L) {

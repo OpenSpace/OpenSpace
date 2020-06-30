@@ -1,0 +1,46 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local trajectory = asset.syncedResource({
+    Name = "C-2019 Q4 Borisov Trajectory",
+    Type = "HttpSynchronization",
+    Identifier = "borisov_horizons",
+    Version = 1
+})
+
+local C2019Q4BorisovTrail = {
+    Identifier = "C2019Q4BorisovTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
+        },
+        Color = { 0.9, 0.9, 0.0 },
+        StartTime = "2015 JAN 01 00:00:00",
+        EndTime = "2024 JAN 01 00:00:00",
+        SampleInterval = 60 * 60 * 24 * 7
+    },
+    GUI = {
+        Name = "C-2019 Q4 Borisov Trail",
+        Path = "/Solar System/Interstellar"
+    }
+}
+
+local C2019Q4BorisovPosition = {
+    Identifier = "C2019Q4BorisovPosition",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
+        },
+    },
+    GUI = {
+        Name = "C-2019 Q4 Borisov",
+        Path = "/Solar System/Interstellar"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { C2019Q4BorisovPosition, C2019Q4BorisovTrail })

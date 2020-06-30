@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,11 +84,9 @@ public:
     void draw();
     void close(bool force = false);
 
-    void sendTouchPressEvent(const CefMouseEvent & event,
-        CefBrowserHost::MouseButtonType button, const int clickCount);
-
-    void sendResleasePressEvent(const CefMouseEvent & event,
-        CefBrowserHost::MouseButtonType button, const int clickCount);
+#ifdef WIN32
+    void sendTouchEvent(const CefTouchEvent& event) const;
+#endif
 
     bool sendKeyEvent(const CefKeyEvent& event);
     bool sendMouseClickEvent(const CefMouseEvent& event,
@@ -119,6 +117,8 @@ public:
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
     bool hasContent(int x, int y);
+
+    bool _shouldReshape = false;
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;

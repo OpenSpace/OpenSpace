@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,9 +33,11 @@ T nextKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer,
             finishedCallback();
         }
         return keyframeContainer.back();
-    } else if (index < keyframeContainer.size()) {
+    }
+    else if (index < keyframeContainer.size()) {
         return keyframeContainer[index];
-    } else {
+    }
+    else {
         return keyframeContainer.back();
     }
 }
@@ -44,9 +46,11 @@ template <class T>
 T prevKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer) {
     if (index >= keyframeContainer.size()) {
         return keyframeContainer.back();
-    } else if (index > 0) {
+    }
+    else if (index > 0) {
         return keyframeContainer[index - 1];
-    } else {
+    }
+    else {
         return keyframeContainer.front();
     }
 }

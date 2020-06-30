@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
@@ -48,6 +49,8 @@ ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectMa
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
+    ZoneScoped
+
     ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory(
@@ -92,6 +95,33 @@ SpacecraftInstrumentsModule::documentations() const
         RenderablePlanetProjection::Documentation(),
         ProjectionComponent::Documentation()
     };
+}
+
+bool SpacecraftInstrumentsModule::addFrame(std::string body, std::string frame) {
+    if (body.empty() || frame.empty()) {
+        return false;
+    }
+    else {
+        _frameByBody.emplace_back(body, frame);
+        return true;
+    }
+}
+
+std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) {
+    for (const std::pair<std::string, std::string>& pair : _frameByBody) {
+        if (pair.first == body) {
+            return pair.second;
+        }
+    }
+
+    constexpr const char* unionPrefix = "IAU_";
+
+    if (body.find(unionPrefix) == std::string::npos) {
+        return unionPrefix + body;
+    }
+    else {
+        return body;
+    }
 }
 
 } // namespace openspace

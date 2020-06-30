@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,6 +53,7 @@ namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
+    class InteractionMonitor;
     class KeybindingManager;
     class NavigationHandler;
     class SessionRecording;
@@ -87,6 +88,7 @@ VersionChecker& gVersionChecker();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
 configuration::Configuration& gConfiguration();
+interaction::InteractionMonitor& gInteractionMonitor();
 interaction::JoystickInputStates& gJoystickInputStates();
 interaction::WebsocketInputStates& gWebsocketInputStates();
 interaction::KeybindingManager& gKeybindingManager();
@@ -120,6 +122,8 @@ static VersionChecker& versionChecker = detail::gVersionChecker();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static configuration::Configuration& configuration = detail::gConfiguration();
+static interaction::InteractionMonitor& interactionMonitor =
+    detail::gInteractionMonitor();
 static interaction::JoystickInputStates& joystickInputStates =
     detail::gJoystickInputStates();
 static interaction::WebsocketInputStates& websocketInputStates =

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,16 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <vector>
+#include <chrono>
 
  //#define Debugging_Core_SceneGraphNode_Indices
 
@@ -118,13 +122,13 @@ public:
 
     glm::dvec3 position() const;
     const glm::dmat3& rotationMatrix() const;
-    double scale() const;
+    glm::dvec3 scale() const;
 
     glm::dvec3 worldPosition() const;
     const glm::dmat3& worldRotationMatrix() const;
     glm::dmat4 modelTransform() const;
     glm::dmat4 inverseModelTransform() const;
-    double worldScale() const;
+    glm::dvec3 worldScale() const;
     bool isTimeFrameActive(const Time& time) const;
 
     SceneGraphNode* parent() const;
@@ -148,7 +152,8 @@ public:
 private:
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
-    double calculateWorldScale() const;
+    glm::dvec3 calculateWorldScale() const;
+    void computeScreenSpaceData(RenderData& newData);
 
     std::atomic<State> _state = State::Loaded;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
@@ -178,14 +183,25 @@ private:
     std::unique_ptr<TimeFrame> _timeFrame;
 
     // Cached transform data
-    glm::dvec3 _worldPositionCached;
-    glm::dmat3 _worldRotationCached;
-    double _worldScaleCached = 1.0;
+    glm::dvec3 _worldPositionCached = glm::dvec3(0.0);
+    glm::dmat3 _worldRotationCached = glm::dmat3(1.0);
+    glm::dvec3 _worldScaleCached = glm::dvec3(1.0);
 
     float _fixedBoundingSphere = 0.f;
 
-    glm::dmat4 _modelTransformCached;
-    glm::dmat4 _inverseModelTransformCached;
+    glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
+    glm::dmat4 _inverseModelTransformCached = glm::dmat4(1.0);
+
+    properties::BoolProperty _computeScreenSpaceValues;
+    properties::IVec2Property _screenSpacePosition;
+    properties::BoolProperty _screenVisibility;
+    properties::DoubleProperty _distFromCamToNode;
+    properties::DoubleProperty _screenSizeRadius;
+    properties::FloatProperty _visibilityDistance;
+
+    // This variable is used for the rate-limiting of the screenspace positions (if they
+    // are calculated when _computeScreenSpaceValues is true)
+    std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     int index = 0;

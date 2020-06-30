@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "CEF BrowserInstance";
@@ -74,18 +75,24 @@ BrowserInstance::~BrowserInstance() {
 
 void BrowserInstance::initialize() {
     reshape(static_cast<glm::ivec2>(
-        static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+        static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
         global::windowDelegate.dpiScaling()
     ));
     _isInitialized = true;
+    _shouldReshape = true;
 }
 
 void BrowserInstance::loadUrl(std::string url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
-    LDEBUG(fmt::format("Loading URL: {}", url));
-    CefString cefUrl = std::move(url);
-    _browser->GetMainFrame()->LoadURL(cefUrl);
+    if (!url.empty()) {
+        LDEBUG(fmt::format("Loading URL: {}", url));
+        CefString cefUrl = std::move(url);
+        _browser->GetMainFrame()->LoadURL(cefUrl);
+    }
+    else {
+        LWARNING("Provided browser URL is empty");
+    }
 }
 
 bool BrowserInstance::loadLocalPath(std::string path) {
@@ -99,11 +106,15 @@ bool BrowserInstance::loadLocalPath(std::string path) {
 }
 
 void BrowserInstance::reshape(const glm::ivec2& windowSize) {
+    ZoneScoped
+
     _renderHandler->reshape(windowSize.x, windowSize.y);
     _browser->GetHost()->WasResized();
 }
 
 void BrowserInstance::draw() {
+    ZoneScoped
+
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);
     }
@@ -138,19 +149,11 @@ bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
     return hasContent(event.x, event.y);
 }
 
-void BrowserInstance::sendTouchPressEvent(const CefMouseEvent& event,
-                                          CefBrowserHost::MouseButtonType button,
-                                          const int clickCount)
-{
-    _browser->GetHost()->SendMouseClickEvent(event, button, false, clickCount);
+#ifdef WIN32
+void BrowserInstance::sendTouchEvent(const CefTouchEvent& event) const{
+    _browser->GetHost()->SendTouchEvent(event);
 }
-
-void BrowserInstance::sendResleasePressEvent(const CefMouseEvent& event,
-                                             CefBrowserHost::MouseButtonType button,
-                                             const int clickCount)
-{
-    _browser->GetHost()->SendMouseClickEvent(event, button, true, clickCount);
-}
+#endif
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent& event) {
     constexpr const bool DidNotLeaveWindow = false;

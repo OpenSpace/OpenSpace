@@ -1,8 +1,8 @@
-/*****************************************************************************************
+    /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,6 +110,12 @@ namespace {
         "objects being rendered."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "If the DU mesh is of wire type, this value determines the width of the lines"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -164,7 +170,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             {
                 keyColor,
                 new Vector3Verifier<float>,
-                Optional::No,
+                Optional::Yes,
                 "Astronomical Object Color (r,g,b)."
             },
             {
@@ -216,6 +222,12 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 LabelMaxSizeInfo.description
             },
             {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LineWidthInfo.description
+            },
+            {
                 TransformationMatrixInfo.identifier,
                 new Matrix4x4Verifier<double>,
                 Optional::Yes,
@@ -236,17 +248,13 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-    , _textColor(
-        TextColorInfo,
-        glm::vec4(1.0f, 1.0, 1.0f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _textColor(TextColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
     , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
+    , _lineWidth(LineWidthInfo, 2.f, 0.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     documentation::testSpecificationAndThrow(
@@ -319,6 +327,13 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         );
     }
     addProperty(_scaleFactor);*/
+
+    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
+        );
+    }
+    addProperty(_lineWidth);
 
     if (dictionary.hasKey(DrawLabelInfo.identifier)) {
         _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
@@ -478,7 +493,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Solid:
                     break;
                 case Wire:
-                    glLineWidth(2.0);
+                    glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
                     glLineWidth(lineWidth);
                     break;
@@ -715,9 +730,11 @@ bool RenderableDUMeshes::readSpeckFile() {
         //if (line.substr(0, 4) != "mesh") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
-            file.seekg(position);
-            break;
-        } else {
+            //file.seekg(position);
+            //break;
+            continue;
+        }
+        else {
 
         //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
@@ -865,7 +882,7 @@ bool RenderableDUMeshes::readLabelFile() {
 
         std::stringstream str(line);
 
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }

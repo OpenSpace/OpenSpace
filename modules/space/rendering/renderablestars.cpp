@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,12 +53,12 @@ namespace {
     constexpr const char* KeyStaticFilterValue = "StaticFilter";
     constexpr const char* KeyStaticFilterReplacement = "StaticFilterReplacement";
 
-    constexpr const std::array<const char*, 16> UniformNames = {
+    constexpr const std::array<const char*, 17> UniformNames = {
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
         "colorOption", "magnitudeExponent", "eyePosition", "psfParamConf",
         "lumCent", "radiusCent", "brightnessCent", "colorTexture",
         "alphaValue", "psfTexture", "otherDataTexture", "otherDataRange",
-        "filterOutOfRange"
+        "filterOutOfRange", "fixedColor"
     };
 
     constexpr int8_t CurrentCacheVersion = 3;
@@ -68,6 +68,8 @@ namespace {
 
     constexpr const int PsfMethodSpencer = 0;
     constexpr const int PsfMethodMoffat = 1;
+
+    constexpr double PARSEC = 0.308567756E17;
 
     struct CommonDataLayout {
         std::array<float, 3> position;
@@ -122,6 +124,12 @@ namespace {
         "Range of the other data values",
         "This value is the min/max value range that is used to normalize the other data "
         "values so they can be used by the specified color map."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
+        "FixedColorValue",
+        "Color used for fixed star colors",
+        "The color that should be used if the 'Fixed Color' value is used."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
@@ -276,6 +284,20 @@ namespace {
         "Beta",
         "Moffat's Beta Constant."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+        "FadeInDistances",
+        "Fade-In Start and End Distances",
+        "These values determine the initial and final distances from the center of "
+        "our galaxy from which the astronomical object will start and end "
+        "fading-in."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+        "DisableFadeIn",
+        "Disable Fade-in effect",
+        "Enables/Disables the Fade-in effect."
+    };
 }  // namespace
 
 namespace openspace {
@@ -312,7 +334,9 @@ documentation::Documentation RenderableStars::Documentation() {
             },*/
             {
                 ColorOptionInfo.identifier,
-                new StringInListVerifier({ "Color", "Velocity", "Speed", "Other Data" }),
+                new StringInListVerifier({
+                    "Color", "Velocity", "Speed", "Other Data", "Fixed Color"
+                }),
                 Optional::Yes,
                 ColorOptionInfo.description
             },
@@ -374,6 +398,18 @@ documentation::Documentation RenderableStars::Documentation() {
                 Optional::No,
                 SizeCompositionOptionInfo.description
             },
+            {
+                FadeInDistancesInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FadeInDistancesInfo.description
+            },
+            {
+                DisableFadeInInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInInfo.description
+            },
         }
     };
 }
@@ -395,6 +431,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(-10.f, -10.f),
         glm::vec2(10.f, 10.f)
     )
+    , _fixedColor(FixedColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
@@ -425,6 +462,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
     , _parametersOwner(ParametersOwnerOptionInfo)
     , _moffatMethodOwner(MoffatMethodOptionInfo)
+    , _fadeInDistance(
+        FadeInDistancesInfo,
+        glm::vec2(0.f),
+        glm::vec2(0.f),
+        glm::vec2(100.f)
+    )
+    , _disableFadeInDistance(DisableFadeInInfo, true)
 {
     using File = ghoul::filesystem::File;
 
@@ -454,11 +498,15 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         );
     }
 
+    _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
+    addProperty(_fixedColor);
+
     _colorOption.addOptions({
         { ColorOption::Color, "Color" },
         { ColorOption::Velocity, "Velocity" },
         { ColorOption::Speed, "Speed" },
-        { ColorOption::OtherData, "Other Data" }
+        { ColorOption::OtherData, "Other Data" },
+        { ColorOption::FixedColor, "Fixed Color" }
     });
     if (dictionary.hasKey(ColorOptionInfo.identifier)) {
         const std::string colorOption = dictionary.value<std::string>(
@@ -473,8 +521,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         else if (colorOption == "Speed") {
             _colorOption = ColorOption::Speed;
         }
-        else {
+        else if (colorOption == "OtherData") {
             _colorOption = ColorOption::OtherData;
+        }
+        else {
+            _colorOption = ColorOption::FixedColor;
         }
     }
     _colorOption.onChange([&] { _dataIsDirty = true; });
@@ -580,7 +631,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
         if (sizeCompositionOption == "App Brightness") {
             _psfMultiplyOption = 0;
-        } else if (sizeCompositionOption == "Lum and Size") {
+        }
+        else if (sizeCompositionOption == "Lum and Size") {
             _psfMultiplyOption = 1;
         }
         else if (sizeCompositionOption == "Lum, Size and App Brightness") {
@@ -634,6 +686,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_userProvidedTextureOwner);
     addPropertySubOwner(_parametersOwner);
     addPropertySubOwner(_moffatMethodOwner);
+
+    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        _fadeInDistance = v;
+        _disableFadeInDistance = false;
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
+    }
 }
 
 RenderableStars::~RenderableStars() {}
@@ -673,7 +733,7 @@ void RenderableStars::initializeGL() {
     glBindVertexArray(_psfVao);
     glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
 
-    const GLfloat vertex_data[] = {
+    const GLfloat vertexData[] = {
         //x      y     s     t
         -1.f, -1.f, 0.f, 0.f,
          1.f,  1.f, 1.f, 1.f,
@@ -683,7 +743,7 @@ void RenderableStars::initializeGL() {
          1.f,  1.f, 1.f, 1.f
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glVertexAttribPointer(
         0,
         4,
@@ -944,7 +1004,27 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.radiusCent, _radiusCent);
     _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
 
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    if (_colorOption == ColorOption::FixedColor) {
+        if (_uniformCache.fixedColor == -1) {
+            _uniformCache.fixedColor = _program->uniformLocation("fixedColor");
+        }
+        _program->setUniform(_uniformCache.fixedColor, _fixedColor);
+    }
+
+    float fadeInVariable = 1.f;
+    if (!_disableFadeInDistance) {
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        const glm::vec2 fadeRange = _fadeInDistance;
+        const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
+        const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        const double funcValue = a * distCamera + b;
+        fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
+
+        _program->setUniform(_uniformCache.alphaValue, _alphaValue * fadeInVariable);
+    }
+    else {
+        _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    }
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
@@ -1049,6 +1129,7 @@ void RenderableStars::update(const UpdateData&) {
         const int colorOption = _colorOption;
         switch (colorOption) {
             case ColorOption::Color:
+            case ColorOption::FixedColor:
                 glVertexAttribPointer(
                     positionAttrib,
                     3,
@@ -1326,7 +1407,7 @@ void RenderableStars::readSpeckFile() {
     std::string line;
     while (true) {
         std::streampos position = file.tellg();
-        std::getline(file, line);
+        std::getline(file, line, '\n');
 
         if (line[0] == '#' || line.empty()) {
             continue;
@@ -1340,9 +1421,6 @@ void RenderableStars::readSpeckFile() {
             // before the beginning of the current line
             if (_enableTestGrid) {
                 file.seekg(position - std::streamoff(8));
-            }
-            else {
-                file.seekg(position);
             }
             break;
         }
@@ -1394,13 +1472,12 @@ void RenderableStars::readSpeckFile() {
 
     do {
         std::vector<float> values(_nValuesPerStar);
-
-        std::getline(file, line);
         std::stringstream str(line);
 
         for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
         }
+
         bool nullArray = true;
         for (float v : values) {
             if (v != 0.0) {
@@ -1415,6 +1492,9 @@ void RenderableStars::readSpeckFile() {
         if (!nullArray) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         }
+
+        std::getline(file, line, '\n');
+
     } while (!file.eof());
 
     // Normalize Luminosity:
@@ -1529,6 +1609,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
 
         switch (option) {
             case ColorOption::Color:
+            case ColorOption::FixedColor:
             {
                 union {
                     ColorVBOLayout value;

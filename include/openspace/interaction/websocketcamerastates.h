@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,7 +106,8 @@ private:
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::WebsocketCameraStates::AxisType& type);
+std::string to_string(
+    const openspace::interaction::WebsocketCameraStates::AxisType& type);
 
 template <>
 openspace::interaction::WebsocketCameraStates::AxisType

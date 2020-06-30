@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -295,6 +295,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
             setRenderBin(Renderable::RenderBin::Background);
         }
     }
+
+    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {
@@ -302,7 +304,7 @@ bool RenderableSphere::isReady() const {
 }
 
 void RenderableSphere::initializeGL() {
-    _sphere = std::make_unique<PowerScaledSphere>(_size, _segments);
+    _sphere = std::make_unique<Sphere>(_size, _segments);
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -360,48 +362,49 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     float adjustedTransparency = _opacity;
 
-    if (_fadeInThreshold > -1.0) {
-        const float logDistCamera = glm::log(static_cast<float>(
-            glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-        ));
-        const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
-        const float stopLogFadeDistance = startLogFadeDistance + 1.f;
+    if (!_disableFadeInDistance) {
+        if (_fadeInThreshold > -1.0) {
+            const float logDistCamera = glm::log(static_cast<float>(
+                glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
+                ));
+            const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
+            const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-        if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
-            const float fadeFactor = glm::clamp(
-                (logDistCamera - startLogFadeDistance) /
-                (stopLogFadeDistance - startLogFadeDistance),
-                0.f,
-                1.f
-            );
-            adjustedTransparency *= fadeFactor;
+            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+                const float fadeFactor = glm::clamp(
+                    (logDistCamera - startLogFadeDistance) /
+                    (stopLogFadeDistance - startLogFadeDistance),
+                    0.f,
+                    1.f
+                );
+                adjustedTransparency *= fadeFactor;
+            }
+            else if (logDistCamera <= startLogFadeDistance) {
+                adjustedTransparency = 0.f;
+            }
         }
-        else if (logDistCamera <= startLogFadeDistance) {
-            adjustedTransparency = 0.f;
+
+        if (_fadeOutThreshold > -1.0) {
+            const float logDistCamera = glm::log(static_cast<float>(
+                glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
+                ));
+            const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
+            const float stopLogFadeDistance = startLogFadeDistance + 1.f;
+
+            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+                const float fadeFactor = glm::clamp(
+                    (logDistCamera - startLogFadeDistance) /
+                    (stopLogFadeDistance - startLogFadeDistance),
+                    0.f,
+                    1.f
+                );
+                adjustedTransparency *= (1.f - fadeFactor);
+            }
+            else if (logDistCamera >= stopLogFadeDistance) {
+                adjustedTransparency = 0.f;
+            }
         }
     }
-
-    if (_fadeOutThreshold > -1.0) {
-        const float logDistCamera = glm::log(static_cast<float>(
-            glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-        ));
-        const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
-        const float stopLogFadeDistance = startLogFadeDistance + 1.f;
-
-        if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
-            const float fadeFactor = glm::clamp(
-                (logDistCamera - startLogFadeDistance) /
-                (stopLogFadeDistance - startLogFadeDistance),
-                0.f,
-                1.f
-            );
-            adjustedTransparency *= (1.f - fadeFactor);
-        }
-        else if (logDistCamera >= stopLogFadeDistance) {
-            adjustedTransparency = 0.f;
-        }
-    }
-
     // Performance wise
     if (adjustedTransparency < 0.01f) {
         return;
@@ -422,7 +425,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_FRONT);
-    } else if (orientation == Orientation::Both) {
+    }
+    else if (orientation == Orientation::Both) {
         glDisable(GL_CULL_FACE);
     }
 
@@ -453,7 +457,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (orientation == Orientation::Inside) {
         glCullFace(GL_BACK);
-    } else if (orientation == Orientation::Both) {
+    }
+    else if (orientation == Orientation::Both) {
         glEnable(GL_CULL_FACE);
     }
 }
@@ -465,7 +470,7 @@ void RenderableSphere::update(const UpdateData&) {
     }
 
     if (_sphereIsDirty) {
-        _sphere = std::make_unique<PowerScaledSphere>(_size, _segments);
+        _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
         _sphereIsDirty = false;
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 namespace {
 
 glm::bvec4 fromLuaConversion(lua_State* state, bool& success) {
-    glm::bvec4 result;
+    glm::bvec4 result = glm::bvec4(false);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec4>::value; ++i) {
         int hasNext = lua_next(state, -2);
@@ -69,7 +69,7 @@ bool toLuaConversion(lua_State* state, glm::bvec4 val) {
 }
 
 glm::bvec4 fromStringConversion(const std::string& val, bool& success) {
-    glm::bvec4 result;
+    glm::bvec4 result = glm::bvec4(false);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {
         success = false;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -142,9 +142,14 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-     * Mark that one screenshot should be taken
+     * Take a screenshot and store in the ${SCREENSHOTS} directory
      */
-    void takeScreenShot();
+    void takeScreenshot();
+
+    /**
+     * Get the filename of the latest screenshot
+     */
+    unsigned int latestScreenshotNumber() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -184,11 +189,10 @@ private:
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
+    properties::FloatProperty _verticalLogOffset;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
-    properties::TriggerProperty _takeScreenshot;
-    bool _shouldTakeScreenshot = false;
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showFrameInformation;
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
@@ -208,7 +212,7 @@ private:
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
-    
+
     properties::BoolProperty _enableFXAA;
 
     properties::BoolProperty _disableHDRPipeline;
@@ -218,14 +222,15 @@ private:
     properties::FloatProperty _hue;
     properties::FloatProperty _saturation;
     properties::FloatProperty _value;
-    
+
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
-    
+
     uint64_t _frameNumber = 0;
+    unsigned int _latestScreenshotNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
@@ -235,9 +240,9 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
-        glm::ivec4 rotation;
-        glm::ivec4 zoom;
-        glm::ivec4 roll;
+        glm::ivec4 rotation = glm::ivec4(0);
+        glm::ivec4 zoom = glm::ivec4(0);
+        glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
 };
 

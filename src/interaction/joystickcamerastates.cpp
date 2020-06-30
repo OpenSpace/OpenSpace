@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,8 @@
 #include <openspace/scripting/scriptengine.h>
 #include <utility>
 
+#include <cmath>
+
 namespace openspace::interaction {
 
 JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocityScaleFactor)
@@ -53,7 +55,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
         bool hasValue = true;
         float value = inputState.joystickAxis(i);
 
-        if (abs(value) <= t.deadzone) {
+        if (std::fabs(value) <= t.deadzone) {
             value = 0.f;
             hasValue = false;
         }

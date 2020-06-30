@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,8 +68,6 @@ void PerformanceManager::CreateGlobalSharedMemory() {
         sizeof(GlobalMemory) == GlobalSharedMemorySize,
         "The global memory struct does not fit the allocated global memory space"
     );
-
-    ghoul::SharedMemory::remove(GlobalSharedMemoryName);
 
     if (ghoul::SharedMemory::exists(GlobalSharedMemoryName)) {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);

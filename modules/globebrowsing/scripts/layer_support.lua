@@ -49,6 +49,16 @@ openspace.globebrowsing.documentation = {
             ")"
     },
     {
+        Name = "addGibsLayer",
+        Arguments = "string, string, string, string, string",
+        Documentation = "Adds a new layer from NASA GIBS to the Earth globe. Arguments " ..
+            "are: imagery layer name, imagery resolution, start date, end date, format. " ..
+             "For all specifications, see " ..
+            "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products" ..
+            "Usage:" ..
+            "openspace.globebrowsing.addGibsLayer('AIRS_Temperature_850hPa_Night', '2km', '2013-07-15', 'Present', 'png')"
+    },
+    {
         Name = "parseInfoFile",
         Arguments = "string",
         Documentation =
@@ -96,6 +106,14 @@ openspace.globebrowsing.documentation = {
             "'openspace.globebrowsing.loadWMSCapabilities' file."
     }
 }
+
+openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, startDate, endDate)
+    if endDate == 'Present' then
+        endDate = ''
+    end
+    local xml = openspace.globebrowsing.createTemporalGibsGdalXml(layer, startDate, endDate, '1d', resolution, format)
+    openspace.globebrowsing.addLayer('Earth', 'ColorLayers', { Identifier = layer,  Type = "TemporalTileLayer", FilePath = xml })
+end
 
 openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format)
     temporalTemplate =
@@ -229,7 +247,13 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     -- to be walked recursively. This is probably not what the users expects (and it is
     -- also one of the default values in the globebrowsing customization script), so we
     -- ignore the empty string here
-    if dir == '' then
+
+    if dir == nil or dir == '' then
+        openspace.printError("No directory specified")
+        return
+    end
+    if node_name == nil or node_name == '' then
+        openspace.printError("No node name specified")
         return
     end
 
@@ -332,5 +356,4 @@ openspace.globebrowsing.loadWMSServersFromFile = function (file_path)
             )
         end
     end
-
 end

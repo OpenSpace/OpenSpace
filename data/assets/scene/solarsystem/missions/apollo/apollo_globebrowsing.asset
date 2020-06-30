@@ -1,5 +1,5 @@
 --apollo_globebrowsing.asset
-
+local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
 
 local heightmaps = asset.syncedResource({
     Name = "Apollo Globebrowsing Heightmaps",
@@ -30,8 +30,8 @@ local stations = asset.syncedResource({
 })
 
 asset.onInitialize(function ()
-    openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, "Moon")
-    openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps, "Moon")
-    openspace.globebrowsing.addBlendingLayersFromDirectory(naclighting, "Moon")
-    openspace.globebrowsing.addBlendingLayersFromDirectory(stations, "Moon")
+    openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, moon_transforms.Moon.Identifier)
+    openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps, moon_transforms.Moon.Identifier)
+    openspace.globebrowsing.addBlendingLayersFromDirectory(naclighting, moon_transforms.Moon.Identifier)
+    openspace.globebrowsing.addBlendingLayersFromDirectory(stations, moon_transforms.Moon.Identifier)
 end)

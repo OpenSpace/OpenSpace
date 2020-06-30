@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,21 +63,32 @@ Fragment getFragment() {
         vertexDistance_f += 1.0;
     }
 
-    float invert = 1.0 - vertexDistance_f;
-    float fade = clamp(invert * lineFade, 0.0, 1.0);
+    float invert = pow((1.0 - vertexDistance_f), lineFade);
+    float fade = clamp(invert, 0.0, 1.0);
 
+    // Currently even fully transparent lines can occlude other lines, thus we discard
+    // these fragments since debris and satellites are rendered so close to each other
+    if (fade < 0.05) {
+        discard;
+    }
     Fragment frag;
+
+    // Use additive blending for some values to make the discarding less abrupt
+    if (fade < 0.15) {
+        frag.blend = BLEND_MODE_ADDITIVE;
+    }
+
     frag.color = vec4(color, fade * opacity);
     frag.depth = vs_position_w;
     frag.gPosition = viewSpacePosition;
     frag.gNormal = vec4(1, 1, 1, 0);
-    // frag.blend = BLEND_MODE_ADDITIVE;
 
 
     // to debug using colors use this if-statment.
     // float ep = 0.01;
-    // if( fract(vertexID_f) < ep ){ //periodFraction < ep
-    //      frag.color = vec4(1, 0, 0, 1);
+    // if (fract(vertexID_f) < ep) {
+    //     periodFraction < ep
+    //     frag.color = vec4(1, 0, 0, 1);
     // }
 
     return frag;

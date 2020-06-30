@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ namespace {
 
 template <class T>
 properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
-                                                            const std::string& tagToMatch)
+    const std::string& tagToMatch)
 {
     properties::PropertyOwner* tagMatchOwner = nullptr;
     properties::PropertyOwner* owner = prop->owner();
@@ -59,10 +59,10 @@ properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
 }
 
 void applyRegularExpression(lua_State* L, const std::string& regex,
-                            const std::vector<properties::Property*>& properties,
-                            double interpolationDuration,
-                            const std::string& groupName,
-                            ghoul::EasingFunction easingFunction)
+    const std::vector<properties::Property*>& properties,
+    double interpolationDuration,
+    const std::string& groupName,
+    ghoul::EasingFunction easingFunction)
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -105,7 +105,8 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                         luaTypeToString(prop->typeLua())
                     )
                 );
-            } else {
+            }
+            else {
                 foundMatching = true;
 
                 if (interpolationDuration == 0.0) {
@@ -143,7 +144,8 @@ bool doesUriContainGroupTag(const std::string& command, std::string& groupName) 
     if (name.front() == '{' && name.back() == '}') {
         groupName = name.substr(1, name.length() - 2);
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
@@ -164,8 +166,8 @@ std::string extractUriWithoutGroupName(std::string uri) {
 namespace openspace::luascriptfunctions {
 
 int setPropertyCall_single(properties::Property& prop, const std::string& uri,
-                          lua_State* L, double duration,
-                          ghoul::EasingFunction eastingFunction)
+    lua_State* L, double duration,
+    ghoul::EasingFunction easingFunction)
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -194,7 +196,7 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
             global::renderEngine.scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
-                eastingFunction
+                easingFunction
             );
         }
     }
@@ -387,7 +389,7 @@ int property_getValue(lua_State* L) {
         L,
         1,
         ghoul::lua::PopValue::Yes
-    );
+        );
 
     openspace::properties::Property* prop = property(uri);
     if (!prop) {
@@ -401,7 +403,8 @@ int property_getValue(lua_State* L) {
         );
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
-    } else {
+    }
+    else {
         prop->getLuaValue(L);
     }
 
@@ -410,16 +413,22 @@ int property_getValue(lua_State* L) {
 }
 
 /**
- * \ingroup LuaScripts
- * getProperty
- * Returns a list of property identifiers that match the passed regular expression
- */
+* \ingroup LuaScripts
+* getProperty
+* Returns a list of property identifiers that match the passed regular expression
+*/
 int property_getProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getProperty");
 
     std::string regex = ghoul::lua::value<std::string>(L, 1);
     lua_pop(L, 1);
 
+    std::string groupName;
+    if (doesUriContainGroupTag(regex, groupName)) {
+        std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
+        // Remove group name from start of regex and replace with '.*'
+        regex = replaceUriWithGroupName(regex, ".*");
+    }
 
     // Replace all wildcards * with the correct regex (.*)
     size_t startPos = regex.find("*");
@@ -429,8 +438,7 @@ int property_getProperty(lua_State* L) {
         startPos = regex.find("*", startPos);
     }
 
-
-
+    // Get all matching property uris and save to res
     std::regex r(regex);
     std::vector<properties::Property*> props = allProperties();
     std::vector<std::string> res;
@@ -439,7 +447,21 @@ int property_getProperty(lua_State* L) {
         const std::string& id = prop->fullyQualifiedIdentifier();
 
         if (std::regex_match(id, r)) {
-            res.push_back(id);
+            // Filter on the groupname if there was one
+            if (!groupName.empty()) {
+                properties::PropertyOwner* matchingTaggedOwner =
+                    findPropertyOwnerWithMatchingGroupTag(
+                        prop,
+                        groupName
+                    );
+                if (!matchingTaggedOwner) {
+                    continue;
+                }
+                res.push_back(id);
+            }
+            else {
+                res.push_back(id);
+            }
         }
     }
 
@@ -454,12 +476,6 @@ int property_getProperty(lua_State* L) {
     return 1;
 }
 
-/**
- * \ingroup LuaScripts
- * getPropertyValue(string):
- * Returns the value of the property identified by the passed URI as a Lua object that can
- * be passed to the setPropertyValue method.
- */
 int loadScene(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
 
@@ -497,7 +513,8 @@ int addSceneGraphNode(lua_State* L) {
             fmt::format("Error loading scene graph node: {}: {}",
                 e.what(), ghoul::to_string(e.result))
         );
-    } catch (const ghoul::RuntimeError& e) {
+    }
+    catch (const ghoul::RuntimeError& e) {
         return ghoul::lua::luaError(
             L,
             fmt::format("Error loading scene graph node: {}", e.what())
@@ -610,7 +627,7 @@ int hasSceneGraphNode(lua_State* L) {
         L,
         1,
         ghoul::lua::PopValue::Yes
-    );
+        );
     SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
 
     ghoul::lua::push(L, node != nullptr);
@@ -626,7 +643,9 @@ int addInterestingTime(lua_State* L) {
     std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
     lua_pop(L, 2);
 
-    global::renderEngine.scene()->addInterestingTime({std::move(name), std::move(time)});
+    global::renderEngine.scene()->addInterestingTime(
+        { std::move(name), std::move(time) }
+    );
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

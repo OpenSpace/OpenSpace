@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <chrono>
 
@@ -60,10 +61,6 @@ public:
     void setBrowserInstance(BrowserInstance* browserInstance);
     void resetBrowserInstance();
 
-    void touchPressCallback(const double x, const double y);
-    void touchReleaseCallback(const double x, const double y);
-    bool hasContentCallback(const double, const double);
-
 private:
     bool mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     bool mousePositionCallback(double x, double y);
@@ -87,6 +84,19 @@ private:
      */
     CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
 
+#ifdef WIN32
+    /**
+     * Build a CEF touch event based on our internal structure
+     *
+     * Note: as of 02/21/2020 we are using an older version of CEF on OSX
+     * than WIN32.
+     * This version does not handle the CefTouchEvent type and does
+     * not have any internal touch handling.
+     */
+    CefTouchEvent touchEvent(const TouchInput& input,
+        const cef_touch_event_type_t eventType) const;
+#endif
+
     /**
      * Find the CEF key event to use for a given action.
      *
@@ -96,16 +106,19 @@ private:
     cef_key_event_type_t keyEventType(KeyAction action);
 
     BrowserInstance* _browserInstance = nullptr;
-    glm::vec2 _mousePosition = { 0.f, 0.f };
+    glm::vec2 _mousePosition = glm::vec2(0.f);
 
     struct MouseButtonState {
         bool down = false;
-        glm::vec2 lastClickPosition = { 0.f, 0.f };
+        glm::vec2 lastClickPosition = glm::vec2(0.f);
         std::chrono::high_resolution_clock::time_point lastClickTime;
     };
 
     MouseButtonState _leftButton;
     MouseButtonState _rightButton;
+
+    //This vector assumes first element to be the active one:
+    std::vector<TouchInput> _validTouchStates;
 
     /**
      * determines if a click should be sent as a double click or not

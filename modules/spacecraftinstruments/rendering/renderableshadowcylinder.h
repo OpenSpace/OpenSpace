@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,10 +60,10 @@ public:
 
 private:
     struct CylinderVBOLayout {
-        float x;
-        float y;
-        float z;
-        float e;
+        float x = 0.f;
+        float y = 0.f;
+        float z = 0.f;
+        float e = 0.f;
     };
 
     void createCylinder(double time);
@@ -81,7 +81,7 @@ private:
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor) _uniformCache;
 
-    glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

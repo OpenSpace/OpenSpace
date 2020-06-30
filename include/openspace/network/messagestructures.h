@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,8 +47,8 @@ struct CameraKeyframe {
         deserialize(buffer);
     }
 
-    glm::dvec3 _position;
-    glm::dquat _rotation;
+    glm::dvec3 _position = glm::dvec3(0.0);
+    glm::dquat _rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     bool _followNodeRotation;
     std::string _focusNode;
     float _scale;
