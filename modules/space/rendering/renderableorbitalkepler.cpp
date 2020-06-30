@@ -415,8 +415,6 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
-    //setRenderBin(Renderable::RenderBin::Overlay);
-
     if (dict.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
         openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
             dict.value<std::string>(RenderBinModeInfo.identifier)
