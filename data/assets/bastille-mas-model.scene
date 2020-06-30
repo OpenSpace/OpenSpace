@@ -8,6 +8,7 @@ asset.require('util/default_dashboard')
 
 asset.require('scene/solarsystem/sun/magnetogram_textures')
 asset.require('scene/solarsystem/sun/streamnodeslegend')
+asset.require('scene/solarsystem/sun/streamnodescutplane')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 
 -- must be >0
