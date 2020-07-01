@@ -34,6 +34,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/renderengine.h>
@@ -518,8 +520,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
         IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
     })
-    , _shadowMappingPropertyOwner({ "ShadowMapping" })
     , _debugPropertyOwner({ "Debug" })
+    , _shadowMappingPropertyOwner({ "ShadowMapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
@@ -774,7 +776,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     if (distanceToCamera < distance) {
         try {
             // Before Shadows
-            //renderChunks(data, rendererTask);
             _globeLabelsComponent.draw(data);
 
             if (_hasShadows && _shadowComponent.isEnabled()) {
@@ -2058,25 +2059,50 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             lt
         );
         casterPos *= KM_TO_M; // converting to meters
-        // psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-        //     casterPos.x,
-        //     casterPos.y,
-        //     casterPos.z
-        // );
 
+        openspace::SceneGraphNode *sourceNode =
+                global::renderEngine.scene()->sceneGraphNode(shadowConf.source.first);
+        openspace::SceneGraphNode *casterNode =
+                global::renderEngine.scene()->sceneGraphNode(shadowConf.caster.first);
+
+        double sourceRadiusScale = std::max(
+                    std::max(
+                        std::max(sourceNode->scale().x, sourceNode->scale().y),
+                        sourceNode->scale().z
+                    ),
+                    1.0
+        );
+
+        double casterRadiusScale = std::max(
+                    std::max(
+                        std::max(casterNode->scale().x, casterNode->scale().y),
+                        casterNode->scale().z
+                    ),
+                    1.0
+        );
+
+        if ((sourceNode == nullptr) || (casterNode == nullptr)) {
+            LERRORC("Renderableglobe",
+                    "Invalid scenegraph node for the shadow's caster or shadow's receiver."
+                    );
+            return;
+        }
 
         // First we determine if the caster is shadowing the current planet (all
         // calculations in World Coordinates):
         const glm::dvec3 planetCasterVec = casterPos - data.modelTransform.translation;
         const glm::dvec3 sourceCasterVec = casterPos - sourcePos;
+
         const double sc_length = glm::length(sourceCasterVec);
         const glm::dvec3 planetCaster_proj =
             (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) *
             sourceCasterVec;
-        const double d_test = glm::length(planetCasterVec - planetCaster_proj);
-        const double xp_test = shadowConf.caster.second * sc_length /
-            (shadowConf.source.second + shadowConf.caster.second);
-        const double rp_test = shadowConf.caster.second *
+
+        const double d_test  = glm::length(planetCasterVec - planetCaster_proj);
+        const double xp_test = shadowConf.caster.second * casterRadiusScale *
+                sc_length / (shadowConf.source.second * sourceRadiusScale +
+                             shadowConf.caster.second * casterRadiusScale);
+        const double rp_test = shadowConf.caster.second * casterRadiusScale *
             (glm::length(planetCaster_proj) + xp_test) / xp_test;
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
@@ -2099,13 +2125,13 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             (casterDistSun < planetDistSun))
         {
             // The current caster is shadowing the current planet
-            shadowData.isShadowing = true;
-            shadowData.rs = shadowConf.source.second;
-            shadowData.rc = shadowConf.caster.second;
-            shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
-            shadowData.xp = xp_test;
-            shadowData.xu = shadowData.rc * sc_length /
-                (shadowData.rs - shadowData.rc);
+            shadowData.isShadowing       = true;
+            shadowData.rs                = shadowConf.source.second * sourceRadiusScale;
+            shadowData.rc                = shadowConf.caster.second * casterRadiusScale;
+            shadowData.sourceCasterVec   = glm::normalize(sourceCasterVec);
+            shadowData.xp                = xp_test;
+            shadowData.xu                = shadowData.rc * sc_length /
+                                          (shadowData.rs - shadowData.rc);
             shadowData.casterPositionVec = casterPos;
         }
         shadowDataArray.push_back(shadowData);
@@ -2115,15 +2141,16 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     unsigned int counter = 0;
     for (const ShadowRenderingStruct& sd : shadowDataArray) {
         constexpr const char* NameIsShadowing = "shadowDataArray[{}].isShadowing";
-        constexpr const char* NameXp = "shadowDataArray[{}].xp";
-        constexpr const char* NameXu = "shadowDataArray[{}].xu";
-        constexpr const char* NameRc = "shadowDataArray[{}].rc";
-        constexpr const char* NameSource = "shadowDataArray[{}].sourceCasterVec";
-        constexpr const char* NamePos = "shadowDataArray[{}].casterPositionVec";
+        constexpr const char* NameXp          = "shadowDataArray[{}].xp";
+        constexpr const char* NameXu          = "shadowDataArray[{}].xu";
+        constexpr const char* NameRc          = "shadowDataArray[{}].rc";
+        constexpr const char* NameSource      = "shadowDataArray[{}].sourceCasterVec";
+        constexpr const char* NamePos         = "shadowDataArray[{}].casterPositionVec";
 
         programObject.setUniform(
             fmt::format(NameIsShadowing, counter), sd.isShadowing
         );
+
         if (sd.isShadowing) {
             programObject.setUniform(fmt::format(NameXp, counter), sd.xp);
             programObject.setUniform(fmt::format(NameXu, counter), sd.xu);

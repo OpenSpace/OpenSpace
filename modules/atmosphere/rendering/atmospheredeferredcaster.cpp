@@ -60,6 +60,9 @@
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderable.h>
@@ -290,6 +293,34 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     );
                     casterPos *= KM_TO_M; // converting to meters
 
+                    openspace::SceneGraphNode *sourceNode =
+                            global::renderEngine.scene()->sceneGraphNode(shadowConf.source.first);
+                    openspace::SceneGraphNode *casterNode =
+                            global::renderEngine.scene()->sceneGraphNode(shadowConf.caster.first);
+
+                    double sourceRadiusScale = std::max(
+                                std::max(
+                                    std::max(sourceNode->scale().x, sourceNode->scale().y),
+                                    sourceNode->scale().z
+                                ),
+                                1.0
+                    );
+
+                    double casterRadiusScale = std::max(
+                                std::max(
+                                    std::max(casterNode->scale().x, casterNode->scale().y),
+                                    casterNode->scale().z
+                                ),
+                                1.0
+                    );
+
+                    if ((sourceNode == nullptr) || (casterNode == nullptr)) {
+                        LERRORC("Atmospheredeferredcaster",
+                                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
+                                );
+                        return;
+                    }
+
                     // First we determine if the caster is shadowing the current planet
                     // (all calculations in World Coordinates):
                     glm::dvec3 planetCasterVec =
@@ -300,9 +331,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                         glm::dot(planetCasterVec, sourceCasterVec) /
                         (sc_length*sc_length)) * sourceCasterVec;
                     double d_test = glm::length(planetCasterVec - planetCaster_proj);
-                    double xp_test = shadowConf.caster.second *
-                        sc_length / (shadowConf.source.second + shadowConf.caster.second);
-                    double rp_test = shadowConf.caster.second *
+                    double xp_test = shadowConf.caster.second * casterRadiusScale *
+                        sc_length /
+                        (shadowConf.source.second * sourceRadiusScale +
+                         shadowConf.caster.second * casterRadiusScale);
+                    double rp_test = shadowConf.caster.second * casterRadiusScale *
                         (glm::length(planetCaster_proj) + xp_test) / xp_test;
 
                     double casterDistSun = glm::length(casterPos - sunPosWorld);
@@ -314,12 +347,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     shadowData.isShadowing = false;
 
                     if (((d_test - rp_test) < (_atmospherePlanetRadius * KM_TO_M)) &&
-                    //if (((d_test - rp_test) < (_atmosphereRadius * KM_TO_M)) &&
                         (casterDistSun < planetDistSun)) {
                         // The current caster is shadowing the current planet
                         shadowData.isShadowing = true;
-                        shadowData.rs = shadowConf.source.second;
-                        shadowData.rc = shadowConf.caster.second;
+                        shadowData.rs = shadowConf.source.second * sourceRadiusScale;
+                        shadowData.rc = shadowConf.caster.second * casterRadiusScale;
                         shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
                         shadowData.xp = xp_test;
                         shadowData.xu = shadowData.rc * sc_length /
