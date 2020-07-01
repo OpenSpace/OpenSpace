@@ -88,6 +88,11 @@ namespace openspace {
             y = 2,
             z = 3
         };
+        enum class EnhanceMethod : int {
+            Sizescaling = 0,
+            Colortables = 1,
+            Outline = 2
+        };
 
         UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
             _uniformCache;
@@ -182,6 +187,9 @@ namespace openspace {
 
         // ---------------------------------- Properties ---------------------------------- //
         
+        // Group to hold properties regarding distance to earth
+        properties::PropertyOwner _pEarthdistGroup;
+
         //Property to show different energybins
         properties::OptionProperty _pGoesEnergyBins;
         // Group to hold the color properties
@@ -192,6 +200,8 @@ namespace openspace {
         properties::Vec4Property _pStreamColor;
         // Chose different distant measurements:
         properties::OptionProperty _pDistancemethod;
+        // Choose different distant to earth enhanchement method. 
+        properties::OptionProperty _pEnhancemethod;
         // Color table/transfer function for "By Flux value" coloring
         properties::StringProperty _pColorTablePath;
         // Color table/transfer function for Earth
@@ -262,5 +272,12 @@ namespace openspace {
         void updateVertexFilteringBuffer();
         void updateVertexIndexBuffer();
         void updateVertexStreamNumberBuffer();
+
+        // ----------------------TEMPORARY VARIABLES ------------------
+        //properties::StringProperty _spriteTexturePath;
+
+        //std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
+        //std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
+
     };
 }

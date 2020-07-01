@@ -199,6 +199,11 @@ namespace {
         "Distance Method",
         "Deciding how to check distance."
     };
+    constexpr openspace::properties::Property::PropertyInfo EnhanceMethodInfo = {
+        "enhanceMethod",
+        "Enhance Method",
+        "Deciding what method to use for nodes close to earth"
+    };
     constexpr openspace::properties::Property::PropertyInfo DistanceplanetInfo = {
         "distanceplanet",
         "Distance Planet",
@@ -208,6 +213,11 @@ namespace {
         "distancePlanetThreshold",
         "Threshold for distance between planet",
         "Enhance the size of nodes dependent on distance to planet."
+    };
+    constexpr openspace::properties::Property::PropertyInfo ActiveStreamNumberInfo = {
+        "activeStreamNumber",
+        "activeStream",
+        "The active stream to show"
     };
     
     enum class SourceFileType : int {
@@ -268,6 +278,7 @@ namespace openspace {
         , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
         , _pNodeskipMethod(NodeskipMethodInfo, OptionProperty::DisplayType::Radio)
         , _pDistancemethod(DistanceMethodInfo, OptionProperty::DisplayType::Dropdown)
+        , _pEnhancemethod(EnhanceMethodInfo, OptionProperty::DisplayType::Dropdown)
         , _pColorTablePath(ColorTablePathInfo)
         , _pColorTablePathEarth(ColorTablePathEarthInfo)
         , _pStreamColor(StreamColorInfo,
@@ -289,8 +300,9 @@ namespace openspace {
         , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
         , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
         , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
+        , _pEarthdistGroup({"Earthfocus"})
         , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
-        , _pActiveStreamNumber(FluxNodeskipThresholdInfo, 0, 0, 383)
+        , _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, 383)
         
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -876,10 +888,9 @@ namespace openspace {
 
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pGoesEnergyBins);
-        addProperty(_pLineWidth);
-        addProperty(_pDistancemethod);
-        addProperty(_pDistanceThreshold);
-        addProperty(_pActiveStreamNumber);
+        //we are not using _pLineWidth at the moment
+        //addProperty(_pLineWidth);
+
         
         //addProperty(_pDomainZ);
         
@@ -887,6 +898,7 @@ namespace openspace {
         addPropertySubOwner(_pColorGroup);
         addPropertySubOwner(_pStreamGroup);
         addPropertySubOwner(_pNodesamountGroup);
+        addPropertySubOwner(_pEarthdistGroup);
 
         // ------------------------- Add Properties to the groups ------------------------ //
         _pColorGroup.addProperty(_pColorMode);
@@ -909,6 +921,12 @@ namespace openspace {
         _pNodesamountGroup.addProperty(_pNodeSizeLargerFlux);
         _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
         _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
+        _pNodesamountGroup.addProperty(_pActiveStreamNumber);
+
+        _pEarthdistGroup.addProperty(_pDistancemethod);
+        _pEarthdistGroup.addProperty(_pDistanceThreshold);
+        _pEarthdistGroup.addProperty(_pEnhancemethod);
+
 
         // --------------------- Add Options to OptionProperties --------------------- //
         _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
@@ -931,6 +949,10 @@ namespace openspace {
         _pDistancemethod.addOption(static_cast<int>(DistanceMethod::x), "x");
         _pDistancemethod.addOption(static_cast<int>(DistanceMethod::y), "y");
         _pDistancemethod.addOption(static_cast<int>(DistanceMethod::z), "z");
+
+        _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
+        _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
+        _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
 
         definePropertyCallbackFunctions();
 
@@ -1059,7 +1081,7 @@ namespace openspace {
         _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
         _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
         _shaderProgram->setUniform("activestreamnumber", _pActiveStreamNumber);
-
+        _shaderProgram->setUniform("EnhanceMethod", _pEnhancemethod);
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;
             textureUnit.activate();
@@ -1074,7 +1096,7 @@ namespace openspace {
 
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBindVertexArray(_vertexArrayObject);
-        glLineWidth(_pLineWidth);
+        //glLineWidth(_pLineWidth);
         //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
         
         /*glMultiDrawArrays(
@@ -1092,12 +1114,23 @@ namespace openspace {
                 static_cast<GLsizei>(_vertexPositions.size())
             );
 
-            _shaderProgram->setUniform("firstrender", false);
-            glDrawArrays(
-                GL_POINTS,
-                temp,
-                static_cast<GLsizei>(_vertexPositions.size())
-            );
+            if (_pEnhancemethod == 2) {
+                LDEBUG("Vi borde rendera vita punkter");
+                _shaderProgram->setUniform("firstrender", false);
+                GLint temp = 0;
+                glDrawArrays(
+                    GL_POINTS,
+                    temp,
+                    static_cast<GLsizei>(_vertexPositions.size())
+                );
+            
+            }
+           // _shaderProgram->setUniform("firstrender", false);
+           // glDrawArrays(
+           //     GL_POINTS,
+           //     temp,
+           //     static_cast<GLsizei>(_vertexPositions.size())
+           // );
 
             glBindVertexArray(0);
             _shaderProgram->deactivate();

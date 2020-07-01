@@ -72,6 +72,7 @@ uniform float DistanceThreshold;
 uniform int DistanceMethod;
 uniform int activestreamnumber;
 uniform bool firstrender;
+uniform int EnhanceMethod;
 
 // Inputs
 // Should be provided in meters
@@ -94,6 +95,8 @@ in int nodeIndex;
 // VaStreamnumber in renderableStreamNodes.h
 layout(location = 4)
 in int Streamnumber;
+layout(location = 5) 
+in vec2 in_st;
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
 const int uniformColor     = 0;
@@ -111,6 +114,7 @@ const int log10RFlux = 3;
 const int lnRFlux = 4;
 out vec4 vs_color;
 out float vs_depth;
+out vec2 vs_st;
 //out vec4 vs_gPosition;
 
 vec4 getTransferFunctionColor() {
@@ -183,7 +187,7 @@ bool CheckvertexIndex(){
 }
 
 void main() {
-
+ 
     //vs_color = streamColor;
     if(CheckvertexIndex()){
     if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
@@ -223,13 +227,29 @@ void main() {
        if(Streamnumber != activestreamnumber && NodeskipMethod == 3){
         vs_color = vec4(0);
     }
-
+        
+        if(EnhanceMethod == 1){
+             vec4 fluxColor2 = getTransferFunctionColor2();
+             vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
+        }
         if(DistanceMethod == 0){
-            if(distance(earthPos, in_position) < DistanceThreshold){
-                vec4 fluxColor2 = getTransferFunctionColor2();
-                vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
-                //gl_PointSize = 1;
-            }
+        
+         if(distance(earthPos, in_position) < DistanceThreshold && rValue < 1.2 ){
+        if(EnhanceMethod == 0){
+        float tempR = rValue + 0.3;       
+        gl_PointSize = tempR * tempR * tempR * tempR * gl_PointSize * 5;
+        }
+        if(EnhanceMethod == 1){
+         vec4 fluxColor = getTransferFunctionColor();
+         vs_color = vec4(fluxColor.xyz, fluxColor.w);
+        }
+         if(EnhanceMethod == 2){
+        if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
+        gl_PointSize = gl_PointSize + 1;
+        vs_color = vec4(1,1,1,fluxColorAlpha);
+        }
+        }
+        }
         }
         else if(DistanceMethod == 1){
             if(distance(earthPos.x, in_position.x) < DistanceThreshold){
@@ -246,7 +266,14 @@ void main() {
                 gl_PointSize = 10;
             }
         }
-        
+
+      /*  if(!firstrender && vs_color.w != 0){
+            vs_st = in_st;
+        }
+        else{
+        vs_st = vec2(-1);
+        }
+        */
         vec4 position_in_meters = vec4(in_position, 1);
         vec4 positionClipSpace = modelViewProjection * position_in_meters;
         //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));

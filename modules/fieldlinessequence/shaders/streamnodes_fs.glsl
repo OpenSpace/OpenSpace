@@ -24,6 +24,8 @@
 
 #include "fragment.glsl"
 
+uniform sampler2D texture1;
+in vec2 vs_st;
 in vec4 vs_color;
 in float vs_depth;
 
@@ -37,6 +39,14 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_depth;
     frag.color = fragColor;
+    //if(vs_st.x != -1){
+    //if (gl_FrontFacing) {
+    //    frag.color = texture(texture1, vs_st);
+   // }
+   // else {
+   //     frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+   // }
+   // }
 
     // G-Buffer
     frag.gPosition = vec4(0.0); //vs_gPosition;
