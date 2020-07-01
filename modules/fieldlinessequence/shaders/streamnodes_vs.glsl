@@ -185,18 +185,18 @@ bool CheckvertexIndex(){
 
 void Decidehowtoshow(){
      if(EnhanceMethod == 0){
-        float tempR = rValue + 0.3;       
-        gl_PointSize = tempR * tempR * tempR * tempR * gl_PointSize * 5;
+            float tempR = rValue + 0.3;       
+            gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
         }
         if(EnhanceMethod == 1){
-         vec4 fluxColor = getTransferFunctionColor();
-         vs_color = vec4(fluxColor.xyz, fluxColor.w);
+             vec4 fluxColor = getTransferFunctionColor();
+             vs_color = vec4(fluxColor.xyz, fluxColor.w);
         }
          if(EnhanceMethod == 2){
         if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
-        gl_PointSize = gl_PointSize + 1;
-        vs_color = vec4(1,1,1,fluxColorAlpha);
-        }
+            gl_PointSize = gl_PointSize + 1;
+            vs_color = vec4(1,1,1,fluxColorAlpha);
+            }
         }
      
 }
@@ -251,17 +251,17 @@ void main() {
        
         }
         else if(DistanceMethod == 1){
-            if(distance(earthPos.x, in_position.x) < DistanceThreshold){
+            if(distance(earthPos.x, in_position.x) < DistanceThreshold && rValue < 1.2){
                 Decidehowtoshow();
             }
         }
         else if(DistanceMethod == 2){
-            if(distance(earthPos.y, in_position.y) < DistanceThreshold){
+            if(distance(earthPos.y, in_position.y) < DistanceThreshold && rValue < 1.2){
                 Decidehowtoshow();
             }
         }
         else if(DistanceMethod == 3){
-            if(distance(earthPos.z, in_position.z) < DistanceThreshold){
+            if(distance(earthPos.z, in_position.z) < DistanceThreshold && rValue < 1.2){
                 Decidehowtoshow();
             }
         }

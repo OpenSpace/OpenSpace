@@ -16,10 +16,6 @@ local legend = {
     --Type = "ScreenSpaceRenderable",
     Type = "ScreenSpaceImageLocal",
     TexturePath = textures .. "/legend.png",
-    GUI = {
-        Name = "Flux Legend",
-        Path = "/Solar System/Heliosphere"
-		}
 };
 
 openspace.addScreenSpaceRenderable(legend)
