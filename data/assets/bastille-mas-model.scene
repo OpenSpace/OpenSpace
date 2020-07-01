@@ -9,6 +9,7 @@ asset.require('util/default_dashboard')
 asset.require('scene/solarsystem/sun/magnetogram_textures')
 asset.require('scene/solarsystem/sun/streamnodeslegend')
 asset.require('scene/solarsystem/sun/streamnodescutplane')
+local sunAsset = asset.require('scene/solarsystem/sun/sun');    --heliosphere/mas/bastille_day/
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 
 -- must be >0
@@ -30,7 +31,14 @@ script10 = "Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux";
 script11 = "Scene.MAS_MHD_StreamNodes.Renderable.Streams.filteringlower";
 script12 = "Scene.MAS_MHD_StreamNodes.Renderable.Streams.filteringupper";
 script13 = "Scene.MAS_MHD_StreamNodes.Renderable.Streams.limitsZLower"
-
+script14 = "Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold";
+script15 = "Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod";
+script16 = "NavigationHandler.OrbitalNavigator.Aim";
+script17 = "NavigationHandler.OrbitalNavigator.Anchor";
+script18 = "NavigationHandler.OrbitalNavigator.RetargetAnchor";
+script19 = "Root";
+script20 = "Sun";
+script21 = "Earth";
 local Keybindings = {
     {
         Key = "F2",
@@ -43,9 +51,24 @@ local Keybindings = {
         Key = "F3",
         Name = "Show Flux Value Legend",
         Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', false);",
-		Documentation = "Hides the legend image",
+	Documentation = "Hides the legend image",
         Local = true
     },
+    {
+	Key = "F4",
+	Name = "Change to Earth focus",
+	Command = 
+		"openspace.setPropertyValueSingle(script14, 155022826061.149994);"..
+		"openspace.setPropertyValueSingle(script15, 0.000000);"..
+		"openspace.setPropertyValueSingle(script16, '');"..
+		"openspace.setPropertyValueSingle(script17, 'Earth');"..
+		"openspace.navigation.loadNavigationState(script21);"..
+		"openspace.setPropertyValueSingle(script18, nil);",
+	Documentation = "Start to focus on Earth",
+	Name = "Focus on Earth",
+	GuiPath = "/CCMC/Nodes",
+	Local = false
+	},
 	{
 	Key = "Shift+r",
 	Command =
@@ -60,6 +83,11 @@ local Keybindings = {
 		"openspace.setPropertyValueSingle(script9, 0.000000);" ..
 		"openspace.setPropertyValueSingle(script10, 0.000000);" ..
 		"openspace.setPropertyValueSingle(script11, 0.000000);" ..
+		"openspace.setPropertyValueSingle(script14, 0.000000);"..
+		"openspace.setPropertyValueSingle(script16, '');"..
+		"openspace.setPropertyValueSingle(script17, 'Sun');"..
+		"openspace.setPropertyValueSingle(script18, nil);"..
+		"openspace.navigation.loadNavigationState(script20);"..
 		"openspace.setPropertyValueSingle(script12, 5.000000);",
 		--"Todo, fix the last one which is on the z axis"
 		--"openspace.setPropertyValueSingle(script13, {--358139527168.969971,953488375808.000000});",
@@ -141,7 +169,7 @@ local Keybindings = {
     }
 }
 
-local sunAsset = asset.require('scene/solarsystem/sun/sun');    --heliosphere/mas/bastille_day/
+
 
 asset.onInitialize(function ()
     openspace.time.setTime("2000 JUL 14 08:33:37.100")
