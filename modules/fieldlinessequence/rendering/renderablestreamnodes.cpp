@@ -426,8 +426,10 @@ namespace openspace {
 
         // Either we load in the data dynamically or statically at the start. /If we should load in everything to Ram this if statement is true.
         if (!_loadingStatesDynamically) {
-          
             std::string _file = "StreamnodesCacheindex";
+            if(shouldwritecacheforemin03){
+                _file = "StreamnodesCacheindex_emin03";
+            }
             //if the files doesn't exist we create them, this is just so that we then can cache the actual binary files
             if (!FileSys.fileExists(_file)) {
                 std::ofstream fileStream(_file, std::ofstream::binary);
