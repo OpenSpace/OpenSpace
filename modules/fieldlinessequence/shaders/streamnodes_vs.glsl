@@ -31,6 +31,7 @@ uniform mat4      modelViewProjection;
 // Uniforms needed to color by quantity
 uniform int       colorMode;
 uniform sampler1D colorTable;
+uniform sampler1D colorTableEarth;
 uniform vec2      colorTableRange;
 
 // Uniforms needed for Particle Flow
@@ -133,11 +134,20 @@ vec4 getTransferFunctionColor() {
         scalevalue = rValue * rValue * fluxValue;
     }
 
-    //if(scalevalue > thresholdFlux){
-        float lookUpVal = (scalevalue - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
-        return texture(colorTable, lookUpVal);
-    //}
-   // return vec4(0);
+    float lookUpVal = (scalevalue - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
+    return texture(colorTable, lookUpVal);
+}
+
+vec4 getTransferFunctionColor2() {
+
+    // Remap the color scalar to a [0,1] range
+    float scalevalueEarth = 0;
+    if(ScalingMode == Fluxmode){
+        scalevalueEarth = fluxValue;
+    }
+
+    float lookUpValEarth = (scalevalueEarth - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
+    return texture(colorTableEarth, lookUpValEarth);
 }
 
 bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
@@ -149,24 +159,24 @@ bool CheckvertexIndex(){
     if(NodeskipMethod == uniformskip){
         
         if(mod(nodeIndex, Nodeskip) == 0){
-        return true;
+            return true;
         }
     }
     else if(NodeskipMethod == Fluxskip){
         
         if(fluxValue > NodeskipFluxThreshold && mod(nodeIndex, Nodeskip) == 0){
-        return true;
+            return true;
         }
         if(fluxValue < NodeskipFluxThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
-        return true;
+            return true;
         }
     }
     else if(NodeskipMethod == Radiusskip){
         if(rValue < NodeskipRadiusThreshold && mod(nodeIndex, Nodeskip) == 0){
-        return true;
+            return true;
         }
         if(rValue > NodeskipRadiusThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
-        return true;
+            return true;
         }
     }
     return false;
@@ -181,14 +191,14 @@ void main() {
             if(colorMode == 0){
                 vs_color = streamColor;
             }
-            else{ //else if (colorMode == 1){
+            else{
                 vec4 fluxColor = getTransferFunctionColor();
 
                 if(fluxValue > thresholdFlux){
-                    vs_color = vec4(fluxColor.xyz, fluxColor.w);                
+                    vs_color = vec4(fluxColor.xyz, fluxColor.w);        
                 }
                 else{
-                    vs_color = vec4(fluxColor.xyz, fluxColorAlpha);   
+                    vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
                 }
             }
         }
@@ -216,13 +226,10 @@ void main() {
 
         if(DistanceMethod == 0){
             if(distance(earthPos, in_position) < DistanceThreshold){
-                //gl_PointSize = 10;
-        if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
-        gl_PointSize = gl_PointSize + 2;
-        vs_color = vec4(1,1,1,fluxColorAlpha);
-        }
+                vec4 fluxColor2 = getTransferFunctionColor2();
+                vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
+                //gl_PointSize = 1;
             }
-            
         }
         else if(DistanceMethod == 1){
             if(distance(earthPos.x, in_position.x) < DistanceThreshold){

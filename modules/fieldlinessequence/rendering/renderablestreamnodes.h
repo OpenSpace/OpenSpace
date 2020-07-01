@@ -149,10 +149,14 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
         // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
         std::unique_ptr<TransferFunction> _transferFunction;
+        // Transfer function used to color lines /////////////
+        std::unique_ptr<TransferFunction> _transferFunctionEarth;
 
         // ------------------------------------ VECTORS ----------------------------------- //
         // Paths to color tables. One for each 'ColorFlux'
         std::vector<std::string> _colorTablePaths;
+        // Paths to Earth color tables
+        std::vector<std::string> _colorTablePathsEarth;
         // Values represents min & max values represented in the color table
         std::vector<glm::vec2> _colorTableRanges;
         // Contains the _triggerTimes for all FieldlineStates in the sequence
@@ -186,12 +190,12 @@ namespace openspace {
         properties::OptionProperty _pColorMode;
         // Uniform stream Color
         properties::Vec4Property _pStreamColor;
-        // Index of the flux value to color lines by
-        properties::OptionProperty _pColorFlux;
         // Chose different distant measurements:
         properties::OptionProperty _pDistancemethod;
         // Color table/transfer function for "By Flux value" coloring
         properties::StringProperty _pColorTablePath;
+        // Color table/transfer function for Earth
+        properties::StringProperty _pColorTablePathEarth;
         // Valid range for the color table
         properties::Vec2Property _pColorTableRange;
         // The value of alpha for the flux color mode

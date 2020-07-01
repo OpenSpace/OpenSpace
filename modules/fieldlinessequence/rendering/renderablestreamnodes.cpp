@@ -103,15 +103,15 @@ namespace {
         "Color lines uniformly or using color tables based on specific values on nodes,"
         "for examples flux values."
     };
-    constexpr openspace::properties::Property::PropertyInfo ColorFluxInfo = {
-        "colorFlux",
-        "Flux value to Color By",
-        "Flux values used to color lines if the 'By Flux value' color method is selected."
-    };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "colorTablePath",
         "Path to Color Table",
         "Color Table/Transfer Function to use for 'By Flux Value' coloring."
+    };
+    constexpr openspace::properties::Property::PropertyInfo ColorTablePathEarthInfo = {
+        "colorTablePathEarth",
+        "Path to Color Table for nodes close to Earth",
+        "Color Table/Transfer Function for nodes around Earth."
     };
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
         "color",
@@ -267,9 +267,9 @@ namespace openspace {
         , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
         , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
         , _pNodeskipMethod(NodeskipMethodInfo, OptionProperty::DisplayType::Radio)
-        , _pColorFlux(ColorFluxInfo, OptionProperty::DisplayType::Dropdown)
         , _pDistancemethod(DistanceMethodInfo, OptionProperty::DisplayType::Dropdown)
         , _pColorTablePath(ColorTablePathInfo)
+        , _pColorTablePathEarth(ColorTablePathEarthInfo)
         , _pStreamColor(StreamColorInfo,
             glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
             glm::vec4(0.f),
@@ -291,7 +291,6 @@ namespace openspace {
         , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
         , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
         , _pActiveStreamNumber(FluxNodeskipThresholdInfo, 0, 0, 383)
-
         
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -299,14 +298,18 @@ namespace openspace {
 
     void RenderableStreamNodes::definePropertyCallbackFunctions() {
     // Add Property Callback Functions
-        _pColorFlux.onChange([this] {
-            _pColorTablePath = _colorTablePaths[_pColorFlux];
-        });
 
         _pColorTablePath.onChange([this] {
             _transferFunction->setPath(_pColorTablePath);
-            _colorTablePaths[_pColorFlux] = _pColorTablePath;
-        });
+            _colorTablePaths[0] = _pColorTablePath;
+            });
+
+
+        _pColorTablePathEarth.onChange([this] {
+            _transferFunctionEarth->setPath(_pColorTablePathEarth);
+            _colorTablePathsEarth[0] = _pColorTablePathEarth;
+            });
+
         _pGoesEnergyBins.onChange([this] {
             if (_pGoesEnergyBins == 1) {
                 _isLoadingNewEnergyBin = true;
@@ -360,11 +363,13 @@ namespace openspace {
         if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
             return;
         }
-
+        
         // Set a default color table, just in case the (optional) user defined paths are
         // corrupt or not provided!
         _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
+        _colorTablePathsEarth.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
         _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
+        _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePathsEarth[0]));
 
         // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
         std::string outputFolderPath;
@@ -383,10 +388,13 @@ namespace openspace {
             if (nProvidedPaths > 0) {
                 // Clear the default! It is already specified in the transferFunction
                 _colorTablePaths.clear();
-                for (size_t i = 1; i <= nProvidedPaths; ++i) {
-                    _colorTablePaths.push_back(
-                        colorTablesPathsDictionary.value<std::string>(std::to_string(i)));
-                }
+                _colorTablePathsEarth.clear();
+
+                _colorTablePaths.push_back(
+                    colorTablesPathsDictionary.value<std::string>(std::to_string(1)));
+
+                _colorTablePathsEarth.push_back(
+                    colorTablesPathsDictionary.value<std::string>(std::to_string(2)));
             }
         }
 
@@ -451,8 +459,6 @@ namespace openspace {
                     reinterpret_cast<const char*>(&CurrentCacheVersion),
                     sizeof(int8_t)
                 );
-
-
             }
             std::string cachedFile = FileSys.cacheManager()->cachedFilename(
                 _file,
@@ -887,6 +893,7 @@ namespace openspace {
         _pColorGroup.addProperty(_pScalingmethod);
         _pColorGroup.addProperty(_pColorTableRange);
         _pColorGroup.addProperty(_pColorTablePath);
+        _pColorGroup.addProperty(_pColorTablePathEarth);
         _pColorGroup.addProperty(_pStreamColor);
         _pColorGroup.addProperty(_pFluxColorAlpha);
 
@@ -929,6 +936,7 @@ namespace openspace {
 
         // Set default
         _pColorTablePath = _colorTablePaths[0];
+        _pColorTablePathEarth = _colorTablePathsEarth[0];
     }
 
     void RenderableStreamNodes::deinitializeGL() {
@@ -1051,11 +1059,17 @@ namespace openspace {
         _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
         _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
         _shaderProgram->setUniform("activestreamnumber", _pActiveStreamNumber);
+
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;
             textureUnit.activate();
             _transferFunction->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTable", textureUnit);
+
+            ghoul::opengl::TextureUnit textureUnitEarth;
+            textureUnitEarth.activate();
+            _transferFunctionEarth->bind(); // Calls update internally
+            _shaderProgram->setUniform("colorTableEarth", textureUnitEarth);
         }
 
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
