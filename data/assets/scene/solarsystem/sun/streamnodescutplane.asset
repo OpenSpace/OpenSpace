@@ -15,7 +15,7 @@ local transforms = asset.require("./transforms")
 local Cutplane = {
     Identifier = "Cutplane", 
     Renderable = {
-    --Parent = transform.SunIAU.Identifier,
+    Parent = transforms.SunIAU.Identifier,
     --Type = "ScreenSpaceRenderable",
     Type = "RenderablePlaneImageLocal",
     Size = 1.3*10^10.5,
@@ -23,19 +23,12 @@ local Cutplane = {
     Texture = textures .. "/cutplane1.png",
     BlendMode = "Additive",
     Opacity = 0.65,
-    RenderableType = "Overlay"
+    RenderableType = "Background"
 	},
     GUI = {
         Name = "Cutplane",
         Path = "/Solar System/Heliosphere"
 		},
-Transform = {
-Translation = {
-            Type = "SpiceTranslation",
-            Target = "SUN BARYCENTER",
-            Observer = "SSB"
-        }
-    } 
 };
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane })
