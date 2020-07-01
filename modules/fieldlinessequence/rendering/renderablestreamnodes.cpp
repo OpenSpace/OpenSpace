@@ -1268,7 +1268,6 @@ namespace openspace {
                 float phiValue = stringToFloat(phi);
                 float thetaValue = stringToFloat(theta);
                 float fluxValue = stringToFloat(flux);
-                float ninetyDeToRad = 1.57079633f * 2;
                 const float pi = 3.14159265359f;
                 float rTimesFluxValue = fluxValue;
                 _vertexColor.push_back(rTimesFluxValue);

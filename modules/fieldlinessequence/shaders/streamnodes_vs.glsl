@@ -154,11 +154,7 @@ vec4 getTransferFunctionColor2() {
     return texture(colorTableEarth, lookUpValEarth);
 }
 
-bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
-                      const int particleSpeed, const int particleSpacing) {
-    int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
-    return modulusResult > 0 && modulusResult <= particleSize;
-}
+
 bool CheckvertexIndex(){
     if(NodeskipMethod == uniformskip){
         
@@ -184,6 +180,25 @@ bool CheckvertexIndex(){
         }
     }
     return false;
+}
+
+
+void Decidehowtoshow(){
+     if(EnhanceMethod == 0){
+        float tempR = rValue + 0.3;       
+        gl_PointSize = tempR * tempR * tempR * tempR * gl_PointSize * 5;
+        }
+        if(EnhanceMethod == 1){
+         vec4 fluxColor = getTransferFunctionColor();
+         vs_color = vec4(fluxColor.xyz, fluxColor.w);
+        }
+         if(EnhanceMethod == 2){
+        if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
+        gl_PointSize = gl_PointSize + 1;
+        vs_color = vec4(1,1,1,fluxColorAlpha);
+        }
+        }
+     
 }
 
 void main() {
@@ -224,49 +239,37 @@ void main() {
     else{
         gl_PointSize = nodeSizeLargerFlux;
     }
-       if(Streamnumber != activestreamnumber && NodeskipMethod == 3){
-        vs_color = vec4(0);
-    }
         
         if(EnhanceMethod == 1){
              vec4 fluxColor2 = getTransferFunctionColor2();
              vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
         }
         if(DistanceMethod == 0){
-        
-         if(distance(earthPos, in_position) < DistanceThreshold && rValue < 1.2 ){
-        if(EnhanceMethod == 0){
-        float tempR = rValue + 0.3;       
-        gl_PointSize = tempR * tempR * tempR * tempR * gl_PointSize * 5;
-        }
-        if(EnhanceMethod == 1){
-         vec4 fluxColor = getTransferFunctionColor();
-         vs_color = vec4(fluxColor.xyz, fluxColor.w);
-        }
-         if(EnhanceMethod == 2){
-        if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
-        gl_PointSize = gl_PointSize + 1;
-        vs_color = vec4(1,1,1,fluxColorAlpha);
-        }
-        }
-        }
+             if(distance(earthPos, in_position) < DistanceThreshold && rValue < 1.2 ){
+                Decidehowtoshow();
+             }
+       
         }
         else if(DistanceMethod == 1){
             if(distance(earthPos.x, in_position.x) < DistanceThreshold){
-                gl_PointSize = 10;
+                Decidehowtoshow();
             }
         }
         else if(DistanceMethod == 2){
             if(distance(earthPos.y, in_position.y) < DistanceThreshold){
-                gl_PointSize = 10;
+                Decidehowtoshow();
             }
         }
         else if(DistanceMethod == 3){
             if(distance(earthPos.z, in_position.z) < DistanceThreshold){
-                gl_PointSize = 10;
+                Decidehowtoshow();
             }
         }
+    if(Streamnumber != activestreamnumber && NodeskipMethod == 3){
+        vs_color = vec4(0);
+    }
 
+    //temporary things for trying out point sprites. 
       /*  if(!firstrender && vs_color.w != 0){
             vs_st = in_st;
         }
