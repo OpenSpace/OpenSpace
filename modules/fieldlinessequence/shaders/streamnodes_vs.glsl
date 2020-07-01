@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
-
+//TODO, Check that everything works accordingly
 // General Uniforms that's always needed
 uniform vec4      lineColor;
 uniform mat4      modelViewProjection;
