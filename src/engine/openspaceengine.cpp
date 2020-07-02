@@ -1250,6 +1250,8 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine.renderOverlays(_shutdown);
         global::luaConsole.render();
+        global::sessionRecording.render();
+
     }
 
     for (const std::function<void()>& func : global::callback::draw2D) {
