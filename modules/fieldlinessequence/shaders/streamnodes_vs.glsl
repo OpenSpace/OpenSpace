@@ -200,14 +200,19 @@ void DecidehowtoshowClosetoEarth(){
             float tempR = rValue + 0.4;       
             gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
         }
-        if(EnhanceMethod == 1){
+      if(EnhanceMethod == 1){
              vec4 fluxColor = getTransferFunctionColor(colorTable);
              vs_color = vec4(fluxColor.xyz, fluxColor.w);
         }
-         if(EnhanceMethod == 2){
-        if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
-            gl_PointSize = gl_PointSize + 1;
-            vs_color = vec4(1,1,1,fluxColorAlpha);
+      if(EnhanceMethod == 2){
+            if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
+                 gl_PointSize = gl_PointSize + 1;
+                 vs_color = vec4(streamColor.xyz, fluxColorAlpha);
+            }
+        }
+      if(EnhanceMethod == 3){
+            if(!firstrender){
+                vs_color = vec4(streamColor.xyz, fluxColorAlpha);
             }
         }
      

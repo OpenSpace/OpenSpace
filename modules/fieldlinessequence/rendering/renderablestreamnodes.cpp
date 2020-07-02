@@ -289,7 +289,7 @@ namespace openspace {
         , _pNodesamountGroup({ "NodeGroup" })
         , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
         , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
-        , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+        , _pLineWidth(LineWidthInfo, 4.f, 1.f, 20.f)
         , _pColorTableRange(colorTableRangeInfo)
         , _pDomainZ(DomainZInfo)
         , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
@@ -525,12 +525,21 @@ namespace openspace {
     }
 
     void RenderableStreamNodes::createStreamnumberVector() {
+        int nPoints = 1999;
+        int lineStartIdx = 0;
         int numberofStreams = 383;
         for (int i = 0; i < 383; ++i) {
             for (int k = 0; k < 1999; ++k) {
+                
                 _vertexStreamnumber.push_back(i);
+                lineStartIdx++;
             }
+            
+            _lineCount.push_back(static_cast<GLsizei>(nPoints));
+            _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+            lineStartIdx += nPoints;
         }
+       
     }
 
     bool RenderableStreamNodes::loadFilesIntoRam() {
@@ -890,8 +899,8 @@ namespace openspace {
 
         // -------------- Add non-grouped properties (enablers and buttons) -------------- //
         addProperty(_pGoesEnergyBins);
-        //we are not using _pLineWidth at the moment
-        //addProperty(_pLineWidth);
+        //we are using _pLineWidth at the moment
+        addProperty(_pLineWidth);
 
         
         //addProperty(_pDomainZ);
@@ -955,6 +964,7 @@ namespace openspace {
         _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
         _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
         _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
+        _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Lines), "Lines");
 
         definePropertyCallbackFunctions();
 
@@ -1098,7 +1108,7 @@ namespace openspace {
 
         const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBindVertexArray(_vertexArrayObject);
-        //glLineWidth(_pLineWidth);
+     
         //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
         
         /*glMultiDrawArrays(
@@ -1117,7 +1127,7 @@ namespace openspace {
             );
 
             if (_pEnhancemethod == 2) {
-                LDEBUG("Vi borde rendera vita punkter");
+                //LDEBUG("Vi borde rendera vita punkter");
                 _shaderProgram->setUniform("firstrender", false);
                 GLint temp = 0;
                 glDrawArrays(
@@ -1125,7 +1135,16 @@ namespace openspace {
                     temp,
                     static_cast<GLsizei>(_vertexPositions.size())
                 );
-            
+            }
+            if (_pEnhancemethod == 3) {
+                //LDEBUG("Vi borde rendera linjer");
+                _shaderProgram->setUniform("firstrender", false);
+                glLineWidth(_pLineWidth);
+                glMultiDrawArrays(
+                    GL_LINE_STRIP, //_drawingOutputType,
+                    _lineStart.data(),
+                    _lineCount.data(),
+                    static_cast<GLsizei>(_lineStart.size()));
             }
            // _shaderProgram->setUniform("firstrender", false);
            // glDrawArrays(
@@ -1133,6 +1152,7 @@ namespace openspace {
            //     temp,
            //     static_cast<GLsizei>(_vertexPositions.size())
            // );
+            
 
             glBindVertexArray(0);
             _shaderProgram->deactivate();

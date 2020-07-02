@@ -91,7 +91,8 @@ namespace openspace {
         enum class EnhanceMethod : int {
             Sizescaling = 0,
             Colortables = 1,
-            Outline = 2
+            Outline = 2,
+            Lines = 3
         };
 
         UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
