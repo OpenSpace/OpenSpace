@@ -66,10 +66,10 @@ private:
     properties::FloatProperty _size;
     properties::Vec2Property _offset;
     properties::FloatProperty _nightFactor;
-    properties::FloatProperty _transparency;
+    properties::FloatProperty _colorFilter;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(modelViewProjection, textureOffset, transparency, nightFactor,
+    UniformCache(modelViewProjection, textureOffset, colorFilterValue, nightFactor,
         sunPosition, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;

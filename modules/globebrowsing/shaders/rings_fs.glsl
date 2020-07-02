@@ -35,7 +35,7 @@ in vec4 shadowCoords;
 uniform sampler2DShadow shadowMapTexture;
 uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
-uniform float transparency;
+uniform float colorFilterValue;
 
 uniform vec3 sunPosition;
 uniform float _nightFactor;
@@ -67,12 +67,11 @@ Fragment getFragment() {
     }
 
     vec4 diffuse = texture(ringTexture, texCoord);
-    float colorValue = length(diffuse.rgb);
-    // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
-    // to normalize the transparency value to [0,1]
-    if (colorValue < 3.0 * transparency) {
-        diffuse.a = pow(colorValue / (3.0 * transparency), 1);
-        //diffuse.a = (colorValue / 3.0) * transparency;
+    // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
+    // to normalize the alpha value to [0,1]
+    float colorValue = length(diffuse.rgb) / 3.0;
+    if (colorValue < colorFilterValue) {
+        diffuse.a = colorValue * colorFilterValue;
         if (diffuse.a < 0.65)
             discard;
     }
