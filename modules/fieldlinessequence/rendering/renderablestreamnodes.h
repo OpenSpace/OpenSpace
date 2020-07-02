@@ -47,10 +47,7 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    const std::vector<GLsizei>& lineCount() const;
-    const std::vector<GLint>& lineStart() const;
-
-    bool isReady() const override;
+        bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
@@ -255,7 +252,6 @@ private:
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
     bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
     void definePropertyCallbackFunctions();
-    bool loadJsonStatesIntoRAM(const std::string& outputFolder);
     bool extractJsonInfoFromDictionary(fls::Model& model);
     std::vector<std::string> LoadJsonfile(std::string filepath);
     void extractTriggerTimesFromFileNames();
@@ -266,6 +262,7 @@ private:
     void writeCachedFile(const std::string& file) const;
     bool readCachedFile(const std::string& file, const std::string& energybin);
     bool loadFilesIntoRam();
+    void loadNodeData();
     void createStreamnumberVector();
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void updatePositionBuffer();

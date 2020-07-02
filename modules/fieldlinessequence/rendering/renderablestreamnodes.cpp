@@ -387,12 +387,6 @@ void RenderableStreamNodes::initializeGL() {
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
     //extractOptionalInfoFromDictionary(outputFolderPath);
-
-    // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM
-    // SOURCE
-    if (!loadJsonStatesIntoRAM(outputFolderPath)) {
-        return;
-    }
     
     ghoul::Dictionary colorTablesPathsDictionary;
     if (_dictionary->getValue(KeyColorTablePaths, colorTablesPathsDictionary)) {
@@ -428,86 +422,8 @@ void RenderableStreamNodes::initializeGL() {
     // Either we load in the data dynamically or statically at the start. 
     // If we should load in everything to Ram this if statement is true.
     if (!_loadingStatesDynamically) {
-        std::string _file = "StreamnodesCacheindex";
-        if(shouldwritecacheforemin03){
-            _file = "StreamnodesCacheindex_emin03";
-        }
-        //if the files doesn't exist we create them, this is just so that we then can 
-        // cache the actual binary files
-        if (!FileSys.fileExists(_file)) {
-            std::ofstream fileStream(_file, std::ofstream::binary);
-            std::ofstream fileStream2("StreamnodesCacheColor", std::ofstream::binary);
-            std::ofstream fileStream3("StreamnodesCacheRadius", std::ofstream::binary);
-            std::ofstream fileStream4("StreamnodesCachePosition", std::ofstream::binary);
-            std::ofstream fileStream5("StreamnodesCacheindex_emin03", std::ofstream::binary);
-            std::ofstream fileStream6("StreamnodesCacheColor_emin03", std::ofstream::binary);
-            std::ofstream fileStream7("StreamnodesCacheRadius_emin03", std::ofstream::binary);
-            std::ofstream fileStream8("StreamnodesCachePosition_emin03", std::ofstream::binary);
-                
-            fileStream.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-            fileStream2.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-            fileStream3.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-            fileStream4.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-            fileStream5.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-            fileStream6.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-            fileStream7.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-            fileStream8.write(
-                reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t)
-            );
-        }
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _file,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
-        // Check if we have a cached binary file for the data
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-
-        if (hasCachedFile) {
-            LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
-                cachedFile, _file
-            ));
-            // Read in the data from the cached file
-            bool success = readCachedFile(cachedFile, "");
-            if (!success) {
-                // If something went wrong it is probably because we changed 
-                // the cache version or some file was not found.
-                LWARNING("Cache file removed, something went wrong loading it.");
-                // If thats the case we want to load in the files from json format 
-                // and then write new cached files. 
-                loadFilesIntoRam();
-                writeCachedFile("StreamnodesCacheindex");
-            }
-        }
-        else {
-            // We could not find the cachedfiles, parse the data statically 
-            // instead and write it to binary format.
-            loadFilesIntoRam();
-            writeCachedFile("StreamnodesCacheindex");
-        }
+        loadNodeData();
     }
-    createStreamnumberVector();
     // If we are loading in states dynamically we would read new states during runtime, 
     // parsing json files pretty slowly.
        
@@ -531,6 +447,88 @@ void RenderableStreamNodes::initializeGL() {
     glGenBuffers(1, &_vertexStreamNumberBuffer);
 }
 
+void RenderableStreamNodes::loadNodeData() {
+    std::string _file = "StreamnodesCacheindex";
+    if (shouldwritecacheforemin03) {
+        _file = "StreamnodesCacheindex_emin03";
+    }
+    //if the files doesn't exist we create them, this is just so that we then can 
+    // cache the actual binary files
+    if (!FileSys.fileExists(_file)) {
+        std::ofstream fileStream(_file, std::ofstream::binary);
+        std::ofstream fileStream2("StreamnodesCacheColor", std::ofstream::binary);
+        std::ofstream fileStream3("StreamnodesCacheRadius", std::ofstream::binary);
+        std::ofstream fileStream4("StreamnodesCachePosition", std::ofstream::binary);
+        std::ofstream fileStream5("StreamnodesCacheindex_emin03", std::ofstream::binary);
+        std::ofstream fileStream6("StreamnodesCacheColor_emin03", std::ofstream::binary);
+        std::ofstream fileStream7("StreamnodesCacheRadius_emin03", std::ofstream::binary);
+        std::ofstream fileStream8("StreamnodesCachePosition_emin03", std::ofstream::binary);
+
+        fileStream.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream2.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream3.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream4.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream5.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream6.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream7.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+        fileStream8.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
+    }
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        _file,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+    // Check if we have a cached binary file for the data
+    bool hasCachedFile = FileSys.fileExists(cachedFile);
+
+    if (hasCachedFile) {
+        LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
+            cachedFile, _file
+        ));
+        // Read in the data from the cached file
+        bool success = readCachedFile(cachedFile, "");
+        if (!success) {
+            // If something went wrong it is probably because we changed 
+            // the cache version or some file was not found.
+            LWARNING("Cache file removed, something went wrong loading it.");
+            // If thats the case we want to load in the files from json format 
+            // and then write new cached files. 
+            loadFilesIntoRam();
+            writeCachedFile("StreamnodesCacheindex");
+        }
+    }
+    else {
+        // We could not find the cachedfiles, parse the data statically 
+        // instead and write it to binary format.
+        loadFilesIntoRam();
+        writeCachedFile("StreamnodesCacheindex");
+    }
+createStreamnumberVector();
+
+}
 void RenderableStreamNodes::createStreamnumberVector() {
     int nPoints = 1999;
     int lineStartIdx = 0;
@@ -1421,17 +1419,6 @@ void RenderableStreamNodes::updateVertexStreamNumberBuffer() {
     glVertexAttribPointer(VaStreamnumber, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
     unbindGL();
-}
-
-const std::vector<GLsizei>& RenderableStreamNodes::lineCount() const {
-    return _lineCount;
-}
-
-const std::vector<GLint>& RenderableStreamNodes::lineStart() const {
-    return _lineStart;
-}
-bool RenderableStreamNodes::loadJsonStatesIntoRAM(const std::string& outputFolder) {
-    return true;
 }
 
 } // namespace openspace
