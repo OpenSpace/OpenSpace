@@ -139,7 +139,8 @@ vec4 getTransferFunctionColor(sampler1D InColorTable) {
         scalevalue = rValue * rValue * fluxValue;
     }
 
-    float lookUpVal = (scalevalue - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
+    float lookUpVal = (scalevalue - colorTableRange.x)
+        /(colorTableRange.y - colorTableRange.x);
     return texture(InColorTable, lookUpVal);
 }
 
@@ -156,7 +157,6 @@ vec4 getTransferFunctionColor2() {
     return texture(colorTableEarth, lookUpValEarth);
 }
 */
-
 
 bool CheckvertexIndex(){
     if(NodeskipMethod == uniformskip){
@@ -188,8 +188,7 @@ bool CheckvertexIndex(){
     if(Streamnumber == activestreamnumber){
         //vs_color = vec4(0);
         return true;
-    }
-
+        }
     }
     return false;
 }
@@ -215,12 +214,9 @@ void DecidehowtoshowClosetoEarth(){
                 vs_color = vec4(streamColor.xyz, fluxColorAlpha);
             }
         }
-     
 }
 
-void CheckdistanceMethod() {
-    
-           
+void CheckdistanceMethod() { 
         //Enhance by distance to Earth
         if(EnhanceMethod == 1){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
@@ -247,18 +243,14 @@ void CheckdistanceMethod() {
                 DecidehowtoshowClosetoEarth();
             }
         }
-
 }
 
-
-
-
 void main() {
- 
     //vs_color = streamColor;
-    //Default gl_PointSize if it is not set anywhere else.
+    // Default gl_PointSize if it is not set anywhere else.
     gl_PointSize = 2;
-    //checking if we should render the vertex dependent on the vertexindex, by using modulus.
+    // Checking if we should render the vertex dependent on the vertexindex, 
+    // by using modulus.
     if(CheckvertexIndex()){
     //Filtering by radius and z-axis
     if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
@@ -267,7 +259,7 @@ void main() {
             if(colorMode == 0){
                 vs_color = streamColor;
             }
-            //we should color it by flux. 
+            // We should color it by flux. 
             else{
                 vec4 fluxColor = getTransferFunctionColor(colorTable);
 
