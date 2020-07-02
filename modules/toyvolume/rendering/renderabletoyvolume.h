@@ -30,7 +30,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
 
@@ -54,7 +53,7 @@ private:
     properties::FloatProperty _stepSize;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
-    properties::Vec4Property _color;
+    properties::Vec3Property _color;
     properties::FloatProperty _downScaleVolumeRendering;
 
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;

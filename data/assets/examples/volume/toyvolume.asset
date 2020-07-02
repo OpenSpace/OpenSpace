@@ -11,7 +11,7 @@ local ToyVolume = {
         Size = {5, 5, 5},
         ScalingExponent = 11,
         StepSize = 0.01,
-        Color = {1, 0, 0, 1}
+        Color = {1, 0, 0}
     },
     GUI = {
         Path = "/Examples"

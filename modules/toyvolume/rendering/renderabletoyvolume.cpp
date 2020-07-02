@@ -92,7 +92,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         glm::vec3(0.f),
         glm::vec3(glm::two_pi<float>())
     )
-    , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
+    , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
 {
     if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
@@ -113,8 +113,8 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec4>(ColorInfo.identifier)) {
-        _color = dictionary.value<glm::vec4>(ColorInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
     }
 
     if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
@@ -141,7 +141,8 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
-    _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
+    glm::vec4 color{ glm::vec3(_color), _opacity };
+    _raycaster = std::make_unique<ToyVolumeRaycaster>(color);
     _raycaster->initialize();
 
     global::raycasterManager.attachRaycaster(*_raycaster.get());
@@ -163,6 +164,7 @@ void RenderableToyVolume::initializeGL() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_color);
+    addProperty(_opacity);
     addProperty(_downScaleVolumeRendering);
 }
 
@@ -196,7 +198,9 @@ void RenderableToyVolume::update(const UpdateData& data) {
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );
 
-        _raycaster->setColor(_color);
+        glm::vec4 color{ glm::vec3(_color), _opacity };
+
+        _raycaster->setColor(color);
         _raycaster->setStepSize(_stepSize);
         _raycaster->setModelTransform(transform);
         _raycaster->setTime(data.time.j2000Seconds());

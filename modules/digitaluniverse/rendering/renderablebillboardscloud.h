@@ -33,7 +33,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <functional>
@@ -115,7 +114,7 @@ private:
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
-    properties::Vec4Property _textColor;
+    properties::Vec3Property _textColor;
     properties::FloatProperty _textSize;
     properties::FloatProperty _textMinSize;
     properties::FloatProperty _textMaxSize;

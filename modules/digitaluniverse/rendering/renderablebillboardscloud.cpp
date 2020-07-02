@@ -308,7 +308,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             },
             {
                 TextColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 TextColorInfo.description
             },
@@ -413,9 +413,9 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _spriteTexturePath(SpriteTextureInfo)
     , _textColor(
         TextColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(1.f, 1.f, 1.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
@@ -610,7 +610,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -911,7 +911,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = _textColor;
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), 1.f);
     textColor.a *= fadeInVariable;
     textColor.a *= _opacity;
 

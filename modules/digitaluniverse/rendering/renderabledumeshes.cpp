@@ -180,7 +180,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             },
             {
                 TextColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 TextColorInfo.description
             },
@@ -234,7 +234,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-    , _textColor(TextColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
@@ -327,7 +327,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -542,6 +542,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     labelInfo.scale = pow(10.f, _textSize);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
+   
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _opacity);
 
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
@@ -551,7 +553,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
             *_font,
             scaledPos,
             pair.second,
-            _textColor,
+            textColor,
             labelInfo
         );
     }

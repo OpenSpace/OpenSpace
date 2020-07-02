@@ -256,13 +256,48 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _drawSolid(DrawSolidInfo, false)
     , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
     , _colors({
-        { DefaultStartColorInfo, glm::vec4(0.4f) },
-        { DefaultEndColorInfo, glm::vec4(0.85f, 0.85f, 0.85f, 1.f) },
-        { ActiveColorInfo, glm::vec4(0.f, 1.f, 0.f, 1.f) },
-        { TargetInFovInfo, glm::vec4(0.f, 0.5f, 0.7f, 1.f) },
-        { IntersectionStartInfo, glm::vec4(1.f, 0.89f, 0.f, 1.f) },
-        { IntersectionEndInfo, glm::vec4(1.f, 0.29f, 0.f, 1.f) },
-        { SquareColorInfo, glm::vec4(0.85f, 0.85f, 0.85f, 1.f) }
+        { 
+            DefaultStartColorInfo, 
+            glm::vec3(0.4f), 
+            glm::vec3(0.f), 
+            glm::vec3(1.f)
+        },
+        { 
+            DefaultEndColorInfo, 
+            glm::vec3(0.85f, 0.85f, 0.85f), 
+            glm::vec3(0.f), 
+            glm::vec3(1.f)
+        },
+        { 
+            ActiveColorInfo, 
+            glm::vec3(0.f, 1.f, 0.f), 
+            glm::vec3(0.f), 
+            glm::vec3(1.f) 
+        },
+        { 
+            TargetInFovInfo, 
+            glm::vec3(0.f, 0.5f, 0.7f), 
+            glm::vec3(0.f), 
+            glm::vec3(1.f) 
+        },
+        { 
+            IntersectionStartInfo, 
+            glm::vec3(1.f, 0.89f, 0.f), 
+            glm::vec3(0.f),
+            glm::vec3(1.f) 
+        },
+        { 
+            IntersectionEndInfo, 
+            glm::vec3(1.f, 0.29f, 0.f), 
+            glm::vec3(0.f), 
+            glm::vec3(1.f)
+        },
+        { 
+            SquareColorInfo, 
+            glm::vec3(0.85f, 0.85f, 0.85f), 
+            glm::vec3(0.f), 
+            glm::vec3(1.f)
+        }
     })
 {
     documentation::testSpecificationAndThrow(

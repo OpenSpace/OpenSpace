@@ -201,7 +201,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
             },
             {
                 TextColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 TextColorInfo.description
             },
@@ -285,12 +285,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10000.f)
-    , _textColor(
-        TextColorInfo,
-        glm::vec4(1.0f, 1.0, 1.0f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -374,7 +369,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -632,7 +627,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = _textColor;
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), 1.f);
     textColor.a *= fadeInVariable * _opacity;
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;

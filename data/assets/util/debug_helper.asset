@@ -84,9 +84,9 @@ local addCartesianAxes = function (specification)
         Renderable = {
             Type = "RenderableCartesianAxes",
             Enabled = true,
-            XColor = {1.0, 0.0, 0.0, 1.0},
-            YColor = {0.0, 1.0, 0.0, 1.0},
-            ZColor = {0.0, 0.0, 1.0, 1.0}
+            XColor = {1.0, 0.0, 0.0},
+            YColor = {0.0, 1.0, 0.0},
+            ZColor = {0.0, 0.0, 1.0}
         },
         GUI = {
             Name = name,

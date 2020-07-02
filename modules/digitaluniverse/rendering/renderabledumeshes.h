@@ -32,7 +32,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
@@ -120,7 +119,7 @@ private:
 
     //properties::FloatProperty _scaleFactor;
     //properties::Vec3Property _pointColor;
-    properties::Vec4Property _textColor;
+    properties::Vec3Property _textColor;
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;

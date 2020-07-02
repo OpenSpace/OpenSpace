@@ -33,7 +33,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -117,7 +116,7 @@ private:
     int _textureVariableIndex = 0;
 
     properties::FloatProperty _scaleFactor;
-    properties::Vec4Property _textColor;
+    properties::Vec3Property _textColor;
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::OptionProperty _blendMode;
