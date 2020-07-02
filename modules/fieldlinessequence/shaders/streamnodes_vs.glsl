@@ -105,6 +105,7 @@ const int colorByFluxValue  = 1;
 const int uniformskip = 0;
 const int Fluxskip = 1;
 const int Radiusskip = 2;
+const int Streamnumberskip = 3;
 
 
 const int Fluxmode = 0;
@@ -117,7 +118,7 @@ out float vs_depth;
 out vec2 vs_st;
 //out vec4 vs_gPosition;
 
-vec4 getTransferFunctionColor() {
+vec4 getTransferFunctionColor(sampler1D InColorTable) {
     // Remap the color scalar to a [0,1] range
     float scalevalue = 0;
     if(ScalingMode == Fluxmode){
@@ -139,9 +140,10 @@ vec4 getTransferFunctionColor() {
     }
 
     float lookUpVal = (scalevalue - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
-    return texture(colorTable, lookUpVal);
+    return texture(InColorTable, lookUpVal);
 }
 
+/*
 vec4 getTransferFunctionColor2() {
 
     // Remap the color scalar to a [0,1] range
@@ -153,6 +155,7 @@ vec4 getTransferFunctionColor2() {
     float lookUpValEarth = (scalevalueEarth - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
     return texture(colorTableEarth, lookUpValEarth);
 }
+*/
 
 
 bool CheckvertexIndex(){
@@ -179,17 +182,26 @@ bool CheckvertexIndex(){
             return true;
         }
     }
+    else if(NodeskipMethod == Streamnumberskip){
+        //return true;
+        
+    if(Streamnumber == activestreamnumber){
+        //vs_color = vec4(0);
+        return true;
+    }
+
+    }
     return false;
 }
 
-
-void Decidehowtoshow(){
+//function for showing nodes different depending on distance to earth
+void DecidehowtoshowClosetoEarth(){
      if(EnhanceMethod == 0){
-            float tempR = rValue + 0.3;       
+            float tempR = rValue + 0.4;       
             gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
         }
         if(EnhanceMethod == 1){
-             vec4 fluxColor = getTransferFunctionColor();
+             vec4 fluxColor = getTransferFunctionColor(colorTable);
              vs_color = vec4(fluxColor.xyz, fluxColor.w);
         }
          if(EnhanceMethod == 2){
@@ -201,23 +213,66 @@ void Decidehowtoshow(){
      
 }
 
+void CheckdistanceMethod() {
+    
+           
+        //Enhance by distance to Earth
+        if(EnhanceMethod == 1){
+             vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
+             vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
+        }
+        if(DistanceMethod == 0){
+             if(distance(earthPos, in_position) < DistanceThreshold && rValue < 1.1 ){
+                DecidehowtoshowClosetoEarth();
+             }
+       
+        }
+        else if(DistanceMethod == 1){
+            if(distance(earthPos.x, in_position.x) < DistanceThreshold && rValue < 1.1){
+                DecidehowtoshowClosetoEarth();
+            }
+        }
+        else if(DistanceMethod == 2){
+            if(distance(earthPos.y, in_position.y) < DistanceThreshold && rValue < 1.1){
+                DecidehowtoshowClosetoEarth();
+            }
+        }
+        else if(DistanceMethod == 3){
+            if(distance(earthPos.z, in_position.z) < DistanceThreshold && rValue < 1.1){
+                DecidehowtoshowClosetoEarth();
+            }
+        }
+
+}
+
+
+
+
 void main() {
  
     //vs_color = streamColor;
+    //Default gl_PointSize if it is not set anywhere else.
+    gl_PointSize = 2;
+    //checking if we should render the vertex dependent on the vertexindex, by using modulus.
     if(CheckvertexIndex()){
+    //Filtering by radius and z-axis
     if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
         if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
+            //Uniform coloring
             if(colorMode == 0){
                 vs_color = streamColor;
             }
+            //we should color it by flux. 
             else{
-                vec4 fluxColor = getTransferFunctionColor();
+                vec4 fluxColor = getTransferFunctionColor(colorTable);
 
                 if(fluxValue > thresholdFlux){
-                    vs_color = vec4(fluxColor.xyz, fluxColor.w);        
+                    vs_color = vec4(fluxColor.xyz, fluxColor.w);  
+                    gl_PointSize = nodeSizeLargerFlux;
                 }
                 else{
                     vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
+                    gl_PointSize = nodeSize;
                 }
             }
         }
@@ -233,42 +288,8 @@ void main() {
         vs_color = vec4(0);
     }
 
-    if(fluxValue < thresholdFlux){
-        gl_PointSize = nodeSize;
-    }
-    else{
-        gl_PointSize = nodeSizeLargerFlux;
-    }
-        
-        if(EnhanceMethod == 1){
-             vec4 fluxColor2 = getTransferFunctionColor2();
-             vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
-        }
-        if(DistanceMethod == 0){
-             if(distance(earthPos, in_position) < DistanceThreshold && rValue < 1.2 ){
-                Decidehowtoshow();
-             }
-       
-        }
-        else if(DistanceMethod == 1){
-            if(distance(earthPos.x, in_position.x) < DistanceThreshold && rValue < 1.2){
-                Decidehowtoshow();
-            }
-        }
-        else if(DistanceMethod == 2){
-            if(distance(earthPos.y, in_position.y) < DistanceThreshold && rValue < 1.2){
-                Decidehowtoshow();
-            }
-        }
-        else if(DistanceMethod == 3){
-            if(distance(earthPos.z, in_position.z) < DistanceThreshold && rValue < 1.2){
-                Decidehowtoshow();
-            }
-        }
-    if(Streamnumber != activestreamnumber && NodeskipMethod == 3){
-        vs_color = vec4(0);
-    }
-
+    CheckdistanceMethod();
+    
     //temporary things for trying out point sprites. 
       /*  if(!firstrender && vs_color.w != 0){
             vs_st = in_st;
