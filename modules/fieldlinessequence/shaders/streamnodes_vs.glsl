@@ -159,13 +159,11 @@ vec4 getTransferFunctionColor2() {
 
 bool CheckvertexIndex(){
     if(NodeskipMethod == uniformskip){
-        
         if(mod(nodeIndex, Nodeskip) == 0){
             return true;
         }
     }
     else if(NodeskipMethod == Fluxskip){
-        
         if(fluxValue > NodeskipFluxThreshold && mod(nodeIndex, Nodeskip) == 0){
             return true;
         }
@@ -182,8 +180,7 @@ bool CheckvertexIndex(){
         }
     }
     else if(NodeskipMethod == Streamnumberskip){
-        //return true;
-        
+        //return true;  
     if(Streamnumber == activestreamnumber){
         //vs_color = vec4(0);
         return true;
@@ -195,7 +192,10 @@ bool CheckvertexIndex(){
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
      if(EnhanceMethod == 0){
-            float tempR = rValue + 0.4;       
+            float tempR = rValue + 0.4; 
+            if(tempR > 1.5){
+                tempR = 1.5;
+            }
             gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
         }
       if(EnhanceMethod == 1){
@@ -213,32 +213,41 @@ void DecidehowtoshowClosetoEarth(){
                 vs_color = vec4(streamColor.xyz, fluxColorAlpha);
             }
         }
+    if(EnhanceMethod == 4){
+             vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+             vs_color = vec4(fluxColor3.xyz, fluxColor3.w);
+
+            float tempR2 = rValue + 0.4; 
+            if(tempR2 > 1.5){
+                tempR2 = 1.5;
+            }
+            gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
+    }
 }
 
 void CheckdistanceMethod() { 
         //Enhance by distance to Earth
-        if(EnhanceMethod == 1){
+        if(EnhanceMethod == 1 || EnhanceMethod == 4){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
              vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
         }
         if(DistanceMethod == 0){
-             if(distance(earthPos, in_position) < DistanceThreshold && rValue < 1.1 ){
+             if(distance(earthPos, in_position) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
              }
-       
         }
         else if(DistanceMethod == 1){
-            if(distance(earthPos.x, in_position.x) < DistanceThreshold && rValue < 1.1){
+            if(distance(earthPos.x, in_position.x) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
         else if(DistanceMethod == 2){
-            if(distance(earthPos.y, in_position.y) < DistanceThreshold && rValue < 1.1){
+            if(distance(earthPos.y, in_position.y) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
         else if(DistanceMethod == 3){
-            if(distance(earthPos.z, in_position.z) < DistanceThreshold && rValue < 1.1){
+            if(distance(earthPos.z, in_position.z) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
@@ -271,6 +280,7 @@ void main() {
                     gl_PointSize = nodeSize;
                 }
             }
+        CheckdistanceMethod();
         }
         else{
             vs_color = vec4(0);
@@ -284,7 +294,6 @@ void main() {
         vs_color = vec4(0);
     }
 
-    CheckdistanceMethod();
     
     //temporary things for trying out point sprites. 
       /*  if(!firstrender && vs_color.w != 0){

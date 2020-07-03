@@ -299,7 +299,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pColorTableRange(colorTableRangeInfo)
     , _pDomainZ(DomainZInfo)
     , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
-    , _pThresholdFlux(ThresholdFluxInfo, 0.f, -20.f, 20.f)
+    , _pThresholdFlux(ThresholdFluxInfo, 0.f, -50.f, 10.f)
     , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
     , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
@@ -979,6 +979,7 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Lines), "Lines");
+    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
 
     definePropertyCallbackFunctions();
 
@@ -1167,7 +1168,6 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         //     static_cast<GLsizei>(_vertexPositions.size())
         // );
             
-
         glBindVertexArray(0);
         _shaderProgram->deactivate();
     }

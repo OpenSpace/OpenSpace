@@ -89,7 +89,8 @@ private:
         Sizescaling = 0,
         Colortables = 1,
         Outline = 2,
-        Lines = 3
+        Lines = 3,
+        Sizeandcolor = 4
     };
 
     UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
