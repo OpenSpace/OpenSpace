@@ -38,7 +38,6 @@ uniform vec4      flowColor;
 uniform int       particleSize;
 uniform int       particleSpeed;
 uniform int       particleSpacing;
-uniform double    time;
 uniform bool      usingParticles;
 
 // Masking Uniforms
@@ -72,6 +71,7 @@ uniform int DistanceMethod;
 uniform int activestreamnumber;
 uniform bool firstrender;
 uniform int EnhanceMethod;
+uniform double    time;
 
 // Inputs
 // Should be provided in meters
@@ -143,21 +143,9 @@ vec4 getTransferFunctionColor(sampler1D InColorTable) {
     return texture(InColorTable, lookUpVal);
 }
 
-/*
-vec4 getTransferFunctionColor2() {
-
-    // Remap the color scalar to a [0,1] range
-    float scalevalueEarth = 0;
-    if(ScalingMode == Fluxmode){
-        scalevalueEarth = fluxValue;
-    }
-
-    float lookUpValEarth = (scalevalueEarth - colorTableRange.x)/(colorTableRange.y - colorTableRange.x);
-    return texture(colorTableEarth, lookUpValEarth);
-}
-*/
 
 bool CheckvertexIndex(){
+    if(EnhanceMethod == 3) return false;
     if(NodeskipMethod == uniformskip){
         
         if(mod(nodeIndex, Nodeskip) == 0){
@@ -182,7 +170,6 @@ bool CheckvertexIndex(){
         }
     }
     else if(NodeskipMethod == Streamnumberskip){
-        //return true;
         
     if(Streamnumber == activestreamnumber){
         //vs_color = vec4(0);
@@ -191,7 +178,17 @@ bool CheckvertexIndex(){
     }
     return false;
 }
+//todo fix gl_VertexID
 
+//is Particle?: 
+bool isParticle(){
+    
+    int modulusResult = int(double(particleSpeed) * time + nodeIndex) % particleSpacing;
+    return modulusResult > 0 && modulusResult <= particleSize;
+
+return false;
+
+}
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
      if(EnhanceMethod == 0){
@@ -210,19 +207,33 @@ void DecidehowtoshowClosetoEarth(){
         }
       if(EnhanceMethod == 3){
             if(!firstrender){
-                vs_color = vec4(streamColor.xyz, fluxColorAlpha);
+               // vs_color = vec4(streamColor.xyz, fluxColorAlpha);
+               if(usingParticles && isParticle()){
+               vs_color = flowColor;
+               }
+               else{
+               vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+                vs_color = vec4(fluxColor3.xyz, fluxColor3.w);
+                }
             }
+        }
+        if(EnhanceMethod == 4){
+             vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+             vs_color = vec4(fluxColor3.xyz, fluxColor3.w);
+
+            float tempR = rValue + 0.4;       
+            gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
         }
 }
 
 void CheckdistanceMethod() { 
         //Enhance by distance to Earth
-        if(EnhanceMethod == 1){
+        if(EnhanceMethod == 1 || EnhanceMethod == 4){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
              vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
         }
         if(DistanceMethod == 0){
-             if(distance(earthPos, in_position) < DistanceThreshold && rValue < 1.1 ){
+             if(distance(earthPos, in_position) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
              }
        
@@ -271,6 +282,7 @@ void main() {
                     gl_PointSize = nodeSize;
                 }
             }
+             CheckdistanceMethod();
         }
         else{
             vs_color = vec4(0);
@@ -283,8 +295,10 @@ void main() {
     else{
         vs_color = vec4(0);
     }
-
+    if(!firstrender){
     CheckdistanceMethod();
+    }
+   
     
     //temporary things for trying out point sprites. 
       /*  if(!firstrender && vs_color.w != 0){

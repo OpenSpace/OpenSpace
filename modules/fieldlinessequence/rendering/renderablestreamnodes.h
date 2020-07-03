@@ -89,7 +89,9 @@ private:
         Sizescaling = 0,
         Colortables = 1,
         Outline = 2,
-        Lines = 3
+        Lines = 3,
+        Sizeandcolor = 4
+
     };
 
     UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
@@ -249,6 +251,21 @@ private:
     //Misaligned index for fieldlines vs Streamnodes
     properties::IntProperty _pMisalignedIndex;
 
+    // Flow Properties
+    // Simulated particles' color
+    properties::Vec4Property _pFlowColor;
+    // Toggle flow [ON/OFF]
+    properties::BoolProperty _pFlowEnabled;
+    // Group to hold the flow/particle properties
+    properties::PropertyOwner _pFlowGroup;
+    // Size of simulated flow particles
+    properties::IntProperty _pFlowParticleSize;
+    // Size of simulated flow particles
+    properties::IntProperty _pFlowParticleSpacing;
+    // Toggle flow direction [FORWARDS/BACKWARDS]
+    //properties::BoolProperty _pFlowReversed;
+    // Speed of simulated flow
+    properties::IntProperty _pFlowSpeed;
     // initialization
     std::vector<std::string> _sourceFiles;
 
@@ -267,6 +284,7 @@ private:
     bool loadFilesIntoRam();
     void loadNodeData();
     void createStreamnumberVector();
+    void ExtractandwriteInterestingStreams(int distanceThreshold);
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void updatePositionBuffer();
     void updateVertexColorBuffer();

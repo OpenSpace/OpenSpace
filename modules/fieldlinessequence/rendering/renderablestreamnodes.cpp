@@ -225,6 +225,32 @@ namespace {
         "Index to shift sequence number",
         "The misalignement number for sequence for streamnodes vs Fieldlines"
     };
+    constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
+       "color",
+       "Color",
+       "Color of particles."
+    };
+    constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
+        "flowEnabled",
+        "Flow Direction",
+        "Toggles the rendering of moving particles along the lines. Can, for example, "
+        "illustrate magnetic flow."
+    };
+    constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
+        "particleSize",
+        "Particle Size",
+        "Size of the particles."
+    };
+    constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
+        "particleSpacing",
+        "Particle Spacing",
+        "Spacing inbetween particles."
+    };
+    constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
+        "speed",
+        "Speed",
+        "Speed of the flow."
+    };
     
     enum class SourceFileType : int {
         Json = 0,
@@ -310,6 +336,17 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
     , _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, 383)
     , _pMisalignedIndex(MisalignedIndexInfo, 5, -5, 20)
+    , _pFlowColor(
+        FlowColorInfo,
+        glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _pFlowEnabled(FlowEnabledInfo, false)
+    , _pFlowGroup({ "Flow" })
+    , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
+    , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
+    , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
         
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -430,6 +467,12 @@ void RenderableStreamNodes::initializeGL() {
     if (!_loadingStatesDynamically) {
         loadNodeData();
     }
+
+   // int distanceThreshold = 65525112832;
+    int distanceThreshold = 33561643008;
+    ExtractandwriteInterestingStreams(distanceThreshold);
+    
+
     // If we are loading in states dynamically we would read new states during runtime, 
     // parsing json files pretty slowly.
        
@@ -533,6 +576,7 @@ void RenderableStreamNodes::loadNodeData() {
         writeCachedFile("StreamnodesCacheindex");
     }
 createStreamnumberVector();
+
 
 }
 void RenderableStreamNodes::createStreamnumberVector() {
@@ -925,6 +969,7 @@ void RenderableStreamNodes::setupProperties() {
     addPropertySubOwner(_pStreamGroup);
     addPropertySubOwner(_pNodesamountGroup);
     addPropertySubOwner(_pEarthdistGroup);
+    _pEarthdistGroup.addPropertySubOwner(_pFlowGroup);
 
     // ------------------------- Add Properties to the groups ------------------------ //
     _pColorGroup.addProperty(_pColorMode);
@@ -953,6 +998,12 @@ void RenderableStreamNodes::setupProperties() {
     _pEarthdistGroup.addProperty(_pDistanceThreshold);
     _pEarthdistGroup.addProperty(_pEnhancemethod);
 
+    _pFlowGroup.addProperty(_pFlowEnabled);
+    _pFlowGroup.addProperty(_pFlowColor);
+    _pFlowGroup.addProperty(_pFlowParticleSize);
+    _pFlowGroup.addProperty(_pFlowParticleSpacing);
+    _pFlowGroup.addProperty(_pFlowSpeed);
+
     // --------------------- Add Options to OptionProperties --------------------- //
     _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
     _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
@@ -979,6 +1030,7 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Lines), "Lines");
+    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "SIZEANDCOLOR");
 
     definePropertyCallbackFunctions();
 
@@ -1108,6 +1160,15 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
     _shaderProgram->setUniform("activestreamnumber", _pActiveStreamNumber);
     _shaderProgram->setUniform("EnhanceMethod", _pEnhancemethod);
+    _shaderProgram->setUniform("flowColor", _pFlowColor);
+    _shaderProgram->setUniform("usingParticles", _pFlowEnabled);
+    _shaderProgram->setUniform("particleSize", _pFlowParticleSize);
+    _shaderProgram->setUniform("particleSpacing", _pFlowParticleSpacing);
+    _shaderProgram->setUniform("particleSpeed", _pFlowSpeed);
+    _shaderProgram->setUniform(
+        "time",
+        global::windowDelegate.applicationTime() * -1
+    );
     if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
         ghoul::opengl::TextureUnit textureUnit;
         textureUnit.activate();
@@ -1139,7 +1200,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
             temp,
             static_cast<GLsizei>(_vertexPositions.size())
         );
-
+        
         if (_pEnhancemethod == 2) {
             //LDEBUG("Vi borde rendera vita punkter");
             _shaderProgram->setUniform("firstrender", false);
@@ -1160,6 +1221,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
                 _lineCount.data(),
                 static_cast<GLsizei>(_lineStart.size()));
         }
+        
         // _shaderProgram->setUniform("firstrender", false);
         // glDrawArrays(
         //     GL_POINTS,
@@ -1189,6 +1251,42 @@ void RenderableStreamNodes::computeSequenceEndTime() {
         // If there's just one state it should never disappear!
         _sequenceEndTime = DBL_MAX;
     }
+}
+void RenderableStreamNodes::ExtractandwriteInterestingStreams(int distanceThreshold) {
+    glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
+    //65525112832
+    std::vector<std::string> interestingStreams;
+    //for (int i = 0; i < _nStates; i++) {
+    _vertexPositions = _statesPos[100];
+        //for(int j = 0; j < 383; j++){
+    int counter = 0;
+    int streamnumber = 0;
+        for (int k = 0; k < _vertexPositions.size(); k++) {
+            if (counter > 1999) {
+                counter = 0;
+                streamnumber++;
+            }
+            if (glm::distance(_vertexPositions[k], earthPos) < distanceThreshold) {
+               // k++;
+                interestingStreams.push_back(std::to_string(streamnumber));
+                LDEBUG("Vi pushade bak " + std::to_string(streamnumber));
+
+                k = k + (1999 - counter);
+                streamnumber++;
+                //break;
+            }
+            counter++;
+        }
+
+        std::string fileoutputpath = absPath("${ASSETS}") + 
+        "/scene/solarsystem/sun/heliosphere/mas/bastille_day/StreamSelection/streamSelection2.json";
+        std::ofstream streamdata(fileoutputpath);
+        json jsonobj;
+        jsonobj["test"] = interestingStreams;
+        //interestingStreams << jsonobj;
+        streamdata << jsonobj << std::endl;
+
+    
 }
 
 void RenderableStreamNodes::update(const UpdateData& data) {
