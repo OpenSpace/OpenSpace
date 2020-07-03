@@ -147,13 +147,11 @@ vec4 getTransferFunctionColor(sampler1D InColorTable) {
 bool CheckvertexIndex(){
     if(EnhanceMethod == 3) return false;
     if(NodeskipMethod == uniformskip){
-        
         if(mod(nodeIndex, Nodeskip) == 0){
             return true;
         }
     }
     else if(NodeskipMethod == Fluxskip){
-        
         if(fluxValue > NodeskipFluxThreshold && mod(nodeIndex, Nodeskip) == 0){
             return true;
         }
@@ -192,7 +190,10 @@ return false;
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
      if(EnhanceMethod == 0){
-            float tempR = rValue + 0.4;       
+            float tempR = rValue + 0.4; 
+            if(tempR > 1.5){
+                tempR = 1.5;
+            }
             gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
         }
       if(EnhanceMethod == 1){
@@ -217,13 +218,16 @@ void DecidehowtoshowClosetoEarth(){
                 }
             }
         }
-        if(EnhanceMethod == 4){
+    if(EnhanceMethod == 4){
              vec4 fluxColor3 = getTransferFunctionColor(colorTable);
              vs_color = vec4(fluxColor3.xyz, fluxColor3.w);
 
-            float tempR = rValue + 0.4;       
-            gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
-        }
+            float tempR2 = rValue + 0.4; 
+            if(tempR2 > 1.5){
+                tempR2 = 1.5;
+            }
+            gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
+    }
 }
 
 void CheckdistanceMethod() { 
@@ -236,20 +240,19 @@ void CheckdistanceMethod() {
              if(distance(earthPos, in_position) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
              }
-       
         }
         else if(DistanceMethod == 1){
-            if(distance(earthPos.x, in_position.x) < DistanceThreshold && rValue < 1.1){
+            if(distance(earthPos.x, in_position.x) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
         else if(DistanceMethod == 2){
-            if(distance(earthPos.y, in_position.y) < DistanceThreshold && rValue < 1.1){
+            if(distance(earthPos.y, in_position.y) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
         else if(DistanceMethod == 3){
-            if(distance(earthPos.z, in_position.z) < DistanceThreshold && rValue < 1.1){
+            if(distance(earthPos.z, in_position.z) < DistanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
