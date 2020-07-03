@@ -220,6 +220,11 @@ namespace {
         "activeStream",
         "The active stream to show"
     };
+    constexpr openspace::properties::Property::PropertyInfo MisalignedIndexInfo = {
+        "MisalignedIndex",
+        "Index to shift sequence number",
+        "The misalignement number for sequence for streamnodes vs Fieldlines"
+    };
     
     enum class SourceFileType : int {
         Json = 0,
@@ -301,9 +306,10 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
     , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
     , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
-    , _pEarthdistGroup({"Earthfocus"})
+    , _pEarthdistGroup({ "Earthfocus" })
     , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
     , _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, 383)
+    , _pMisalignedIndex(MisalignedIndexInfo, 5, -5, 20)
         
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -912,6 +918,7 @@ void RenderableStreamNodes::setupProperties() {
     addProperty(_pGoesEnergyBins);
     //we are using _pLineWidth at the moment
     addProperty(_pLineWidth);
+    addProperty(_pMisalignedIndex);
         
     // ----------------------------- Add Property Groups ----------------------------- //
     addPropertySubOwner(_pColorGroup);
@@ -1223,8 +1230,12 @@ void RenderableStreamNodes::update(const UpdateData& data) {
         if (_needsUpdate) {
             if(_loadingStatesDynamically){
             if (!_isLoadingStateFromDisk) {
-                _isLoadingStateFromDisk = true;
-                LDEBUG("triggertime: " + std::to_string(_activeTriggerTimeIndex));
+            _isLoadingStateFromDisk = true;
+            if (_activeTriggerTimeIndex > _pMisalignedIndex) {
+                _activeTriggerTimeIndex += -_pMisalignedIndex;
+            }
+            LDEBUG("triggertime: " + std::to_string(_activeTriggerTimeIndex));
+
             std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
             // auto vec = LoadJsonfile(filePath);
             std::thread readBinaryThread([this, f = std::move(filePath)]{
@@ -1245,6 +1256,9 @@ void RenderableStreamNodes::update(const UpdateData& data) {
             // Needs fix, right now it stops cuz it cant find the states
             else if(!_statesPos[_activeTriggerTimeIndex].empty()) { 
                 //&& !_isLoadingNewEnergyBin){
+                if (_activeTriggerTimeIndex > _pMisalignedIndex) {
+                    _activeTriggerTimeIndex += -_pMisalignedIndex;
+                }
                 _vertexPositions = _statesPos[_activeTriggerTimeIndex];
                 _vertexColor = _statesColor[_activeTriggerTimeIndex];
                 _vertexRadius = _statesRadius[_activeTriggerTimeIndex];

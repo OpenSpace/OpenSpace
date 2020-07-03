@@ -246,6 +246,9 @@ private:
     //The active stream that we want to look at
     properties::IntProperty _pActiveStreamNumber;
 
+    //Misaligned index for fieldlines vs Streamnodes
+    properties::IntProperty _pMisalignedIndex;
+
     // initialization
     std::vector<std::string> _sourceFiles;
 
