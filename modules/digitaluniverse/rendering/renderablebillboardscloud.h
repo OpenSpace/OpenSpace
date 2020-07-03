@@ -115,6 +115,7 @@ private:
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
     properties::Vec3Property _textColor;
+    properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
     properties::FloatProperty _textMinSize;
     properties::FloatProperty _textMaxSize;

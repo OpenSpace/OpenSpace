@@ -81,6 +81,13 @@ namespace {
         "The text color for the astronomical object."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+        "TextOpacity",
+        "Text Opacity",
+        "Determines the transparency of the text label, where 1 is completely opaque "
+        "and 0 fully transparent."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
@@ -206,6 +213,12 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 TextColorInfo.description
             },
             {
+                TextOpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TextOpacityInfo.description
+            },
+            {
                 TextSizeInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -286,6 +299,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     : Renderable(dictionary)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10000.f)
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -376,6 +390,10 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
+        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
+            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+        }
+        addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
             _textSize = dictionary.value<float>(TextSizeInfo.identifier);
@@ -627,8 +645,8 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), 1.f);
-    textColor.a *= fadeInVariable * _opacity;
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+    textColor.a *= fadeInVariable;
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;

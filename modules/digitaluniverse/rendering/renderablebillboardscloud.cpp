@@ -131,6 +131,13 @@ namespace {
         "The text color for the astronomical object."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+        "TextOpacity",
+        "Text Opacity",
+        "Determines the transparency of the text label, where 1 is completely opaque "
+        "and 0 fully transparent."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
@@ -313,6 +320,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 TextColorInfo.description
             },
             {
+                TextOpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TextOpacityInfo.description
+            },
+            {
                 TextSizeInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -417,6 +430,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         glm::vec3(0.f),
         glm::vec3(1.f)
     )
+    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
     , _textMaxSize(LabelMaxSizeInfo, 20.f, 0.5f, 100.f)
@@ -617,6 +631,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
+        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
+            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+        }
+        addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
             _textSize = dictionary.value<float>(TextSizeInfo.identifier);
@@ -911,9 +929,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), 1.f);
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
     textColor.a *= fadeInVariable;
-    textColor.a *= _opacity;
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;

@@ -120,6 +120,7 @@ private:
     //properties::FloatProperty _scaleFactor;
     //properties::Vec3Property _pointColor;
     properties::Vec3Property _textColor;
+    properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
