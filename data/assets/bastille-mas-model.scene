@@ -9,7 +9,10 @@ asset.require('util/default_dashboard')
 asset.require('scene/solarsystem/sun/magnetogram_textures')
 asset.require('scene/solarsystem/sun/streamnodeslegend')
 asset.require('scene/solarsystem/sun/streamnodescutplane')
+local suncameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Earthpos');
+local earthcameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/SunPos');
 local sunAsset = asset.require('scene/solarsystem/sun/sun');    --heliosphere/mas/bastille_day/
+--local streamnodesAsset = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/streamnodes');
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 
 -- must be >0
@@ -38,6 +41,8 @@ script17 = "NavigationHandler.OrbitalNavigator.Anchor";
 script18 = "NavigationHandler.OrbitalNavigator.RetargetAnchor";
 script19 = "Root";
 script20 = "Sun";
+--script20 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Sun";
+--script21 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Earth";
 script21 = "Earth";
 local Keybindings = {
     {
@@ -192,7 +197,9 @@ asset.onInitialize(function ()
         ReferenceFrame = "Root",
         Position = { -15016171000, 30814181000, -4218126500}
     })
-
+	openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'MAS_MHD_StreamNodes')
+	openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
+	openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
 end)
 
 asset.onDeinitialize(function ()
