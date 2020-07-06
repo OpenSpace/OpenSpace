@@ -353,7 +353,6 @@ void mainInitFunc(GLFWwindow*) {
     //
     //  Screenshots
     //
-
     std::string screenshotPath = "${SCREENSHOTS}";
     if (global::configuration.shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
