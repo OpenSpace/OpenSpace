@@ -48,6 +48,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/versionchecker.h>
@@ -182,7 +183,6 @@ interaction::SessionRecording& gSessionRecording() {
     return g;
 }
 
-
 interaction::ShortcutManager& gShortcutManager() {
     static interaction::ShortcutManager g;
     return g;
@@ -210,6 +210,11 @@ scripting::ScriptEngine& gScriptEngine() {
 
 scripting::ScriptScheduler& gScriptScheduler() {
     static scripting::ScriptScheduler g;
+    return g;
+}
+
+Profile& gProfile() {
+    static Profile g;
     return g;
 }
 
