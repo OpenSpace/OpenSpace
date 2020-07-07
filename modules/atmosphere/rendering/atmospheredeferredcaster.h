@@ -79,12 +79,12 @@ public:
     void setMieHeightScale(float mieHeightScale);
     void setMiePhaseConstant(float miePhaseConstant);
     void setSunRadianceIntensity(float sunRadiance);
-    void setRayleighScatteringCoefficients(const glm::vec3& rayScattCoeff);
-    void setOzoneExtinctionCoefficients(const glm::vec3& ozoneExtCoeff);
-    void setMieScatteringCoefficients(const glm::vec3& mieScattCoeff);
-    void setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff);
-    void setEllipsoidRadii(const glm::dvec3& radii);
-    void setShadowConfigArray(const std::vector<ShadowConfiguration>& shadowConfigArray);
+    void setRayleighScatteringCoefficients(glm::vec3 rayScattCoeff);
+    void setOzoneExtinctionCoefficients(glm::vec3 ozoneExtCoeff);
+    void setMieScatteringCoefficients(glm::vec3 mieScattCoeff);
+    void setMieExtinctionCoefficients(glm::vec3 mieExtCoeff);
+    void setEllipsoidRadii(glm::dvec3 radii);
+    void setShadowConfigArray(std::vector<ShadowConfiguration> shadowConfigArray);
     void setHardShadows(bool enabled);
     void enableSunFollowing(bool enable);
 
@@ -99,7 +99,6 @@ private:
     void deleteUnusedComputationTextures();
     void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
         GLsizei vertexSize);
-    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size);
     void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
         int layer, bool doCalculation = true);
     void checkFrameBufferState(const std::string& codePosition) const;
