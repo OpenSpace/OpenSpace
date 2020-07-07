@@ -31,7 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
 
@@ -89,7 +89,8 @@ private:
     properties::IntProperty _labelsMinSize;
     properties::FloatProperty _labelsSize;
     properties::FloatProperty _labelsMinHeight;
-    properties::Vec4Property _labelsColor;
+    properties::Vec3Property _labelsColor;
+    properties::FloatProperty _labelsOpacity;
     properties::FloatProperty _labelsFadeInDist;
     properties::FloatProperty _labelsFadeOutDist;
     properties::BoolProperty _labelsFadeInEnabled;
