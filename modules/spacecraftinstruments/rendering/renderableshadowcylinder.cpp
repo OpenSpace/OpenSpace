@@ -38,8 +38,8 @@ namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
 
-    constexpr const std::array<const char*, 2> UniformNames = {
-        "modelViewProjectionTransform", "shadowColor"
+    constexpr const std::array<const char*, 3> UniformNames = {
+        "modelViewProjectionTransform", "shadowColor", "opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
@@ -135,7 +135,7 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
             },
             {
                 ShadowColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 ShadowColorInfo.description
             },
@@ -189,11 +189,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     : Renderable(dictionary)
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
-    , _shadowColor(
-        ShadowColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 0.25f),
-        glm::vec4(0.f), glm::vec4(1.f)
-    )
+    , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _terminatorType(
         TerminatorTypeInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -209,6 +205,10 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         dictionary,
         "RenderableShadowCylinder"
     );
+
+    _opacity.setValue(0.25f);
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKey(NumberPointsInfo.identifier)) {
         _numberOfPoints = static_cast<int>(
@@ -227,7 +227,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 
 
     if (dictionary.hasKey(ShadowColorInfo.identifier)) {
-        _shadowColor = dictionary.value<glm::vec4>(ShadowLengthInfo.identifier);
+        _shadowColor = dictionary.value<glm::vec3>(ShadowLengthInfo.identifier);
     }
     _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_shadowColor);
@@ -306,6 +306,8 @@ bool RenderableShadowCylinder::isReady() const {
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
+    glDisable(GL_CULL_FACE);
+
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
@@ -321,6 +323,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     );
 
     _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
@@ -328,6 +331,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
+    glDisable(GL_CULL_FACE);
     glDepthMask(true);
 }
 

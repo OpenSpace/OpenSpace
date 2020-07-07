@@ -26,15 +26,14 @@
 #include "fragment.glsl"
 
 in vec4 vs_positionScreenSpace;
-in vec4 vs_point_velocity;
-in vec4 vs_color;
+in vec3 vs_color;
 
-uniform vec3 color;
-
+uniform float opacity;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vs_color;
+    frag.color = vec4(vs_color, 1.0);
+    frag.color.a *= opacity;
     frag.depth = vs_positionScreenSpace.w;
 
     return frag;
