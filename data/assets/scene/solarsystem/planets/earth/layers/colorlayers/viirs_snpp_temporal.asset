@@ -1,0 +1,15 @@
+local layer = {
+    Identifier = "VIIRS_SNPP_Temporal",
+    Name = "VIIRS SNPP (Temporal)",
+    Type = "TemporalTileLayer",
+    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+        "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+        "2015-11-24",
+        "Yesterday",
+        "1d",
+        "250m",
+        "jpg"
+    )
+}
+
+asset.export("layer", layer)

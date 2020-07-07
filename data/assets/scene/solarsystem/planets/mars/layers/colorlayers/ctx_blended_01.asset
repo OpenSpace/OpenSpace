@@ -1,0 +1,14 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "CTX_blended_01",
+    Name = "CTX Blended beta01",
+    FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
+    BlendMode = "Color",
+    Settings = {
+        Gamma = 2.14,
+        Multiplier = 1.54
+    }
+}
+
+asset.export("layer", layer)

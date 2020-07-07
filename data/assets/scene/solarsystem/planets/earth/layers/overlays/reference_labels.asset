@@ -1,0 +1,9 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Reference_Labels",
+    Name = "Reference Labels",
+    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
+}
+
+asset.export("layer", layer)

@@ -4,15 +4,6 @@ local kernel = asset.require('../kernels').sat375
 asset.request('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Dione textures",
-    Type = "HttpSynchronization",
-    Identifier = "dione_textures",
-    Version = 1
-})
-
 local Dione = {
     Identifier = "Dione",
     Parent = transforms.SaturnBarycenter.Identifier,
@@ -33,15 +24,7 @@ local Dione = {
         Type = "RenderableGlobe",
         Radii = 561400,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/dione.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/dione.labels",

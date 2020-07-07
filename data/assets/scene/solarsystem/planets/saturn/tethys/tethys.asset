@@ -4,15 +4,6 @@ local kernel = asset.require('../kernels').sat375
 asset.request('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Tethys textures",
-    Type = "HttpSynchronization",
-    Identifier = "tethys_textures",
-    Version = 1
-})
-
 local Tethys = {
     Identifier = "Tethys",
     Parent = transforms.SaturnBarycenter.Identifier,
@@ -33,15 +24,7 @@ local Tethys = {
         Type = "RenderableGlobe",
         Radii = 531100,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/tethys.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/tethys.labels",

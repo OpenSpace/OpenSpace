@@ -1,0 +1,13 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "UvvisHybrid_Sweden",
+    Name = "Uvvis Hybrid [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Uvvis_Hybrid.wms",
+    Settings = {
+        Gamma = 0.52,
+        Multiplier = 0.65
+    }
+}
+
+asset.export("layer", layer)

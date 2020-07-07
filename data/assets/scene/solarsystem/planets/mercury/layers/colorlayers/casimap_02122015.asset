@@ -1,0 +1,9 @@
+local texturesPath = asset.require("./../../mercury_textures").TexturesPath
+
+local layer = {
+    Identifier = "casimap_02122015",
+    FilePath = texturesPath .. "/casimap_02122015.png",
+    BlendMode = "Multiply",
+}
+
+asset.export("layer", layer)

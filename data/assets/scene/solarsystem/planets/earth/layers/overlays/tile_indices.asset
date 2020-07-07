@@ -1,0 +1,9 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Tile_Indices",
+    Name = "Tile Indices",
+    Type = "TileIndexTileLayer"
+}
+
+asset.export("layer", layer)

@@ -1,0 +1,9 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Cassini_ISS_Global_Mosaic_4km_LiU",
+    Name = "Cassini ISS Global Mosaic [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/ISS_P19658_Mosaic_Global_4km.wms",
+}
+
+asset.export("layer", layer)

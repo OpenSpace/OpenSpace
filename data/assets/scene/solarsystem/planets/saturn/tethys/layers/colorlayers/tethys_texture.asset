@@ -1,0 +1,8 @@
+local texturesPath = asset.require("./../../tethys_textures").TexturesPath
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/tethys.jpg",
+}
+
+asset.export("layer", layer)

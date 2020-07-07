@@ -21,6 +21,11 @@ asset.request('scene/milkyway/constellations/constellation_keybinds')
 
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
+-- Set enabled layers for globes
+asset.require('scene/solarsystem/planets/add_all_planets_default_layers')
+asset.require('scene/solarsystem/sun/add_sun_default_layers')
+asset.require('scene/solarsystem/dwarf_planets/add_all_dwarf_planets_default_layers')
+
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')

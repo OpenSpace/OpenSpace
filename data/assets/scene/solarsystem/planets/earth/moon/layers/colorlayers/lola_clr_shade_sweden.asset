@@ -1,0 +1,9 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Lola_Clr_Shade_Sweden",
+    Name = "Lola Color Shade [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Lola_Clr_Shade.wms"
+}
+
+asset.export("layer", layer)
