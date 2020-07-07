@@ -24,21 +24,21 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 
+#include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider.h>
-#include <modules/debugging/rendering/debugrenderer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -2060,31 +2060,26 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         );
         casterPos *= KM_TO_M; // converting to meters
 
-        openspace::SceneGraphNode *sourceNode =
-                global::renderEngine.scene()->sceneGraphNode(shadowConf.source.first);
-        openspace::SceneGraphNode *casterNode =
-                global::renderEngine.scene()->sceneGraphNode(shadowConf.caster.first);
+        const std::string source = shadowConf.source.first;
+        SceneGraphNode* sourceNode = global::renderEngine.scene()->sceneGraphNode(source);
+        const std::string caster = shadowConf.caster.first;
+        SceneGraphNode* casterNode = global::renderEngine.scene()->sceneGraphNode(caster);
 
-        double sourceRadiusScale = std::max(
-                    std::max(
-                        std::max(sourceNode->scale().x, sourceNode->scale().y),
-                        sourceNode->scale().z
-                    ),
-                    1.0
+        const double sourceRadiusScale = std::max(
+            glm::compMax(sourceNode->scale()),
+            1.0
         );
 
-        double casterRadiusScale = std::max(
-                    std::max(
-                        std::max(casterNode->scale().x, casterNode->scale().y),
-                        casterNode->scale().z
-                    ),
-                    1.0
+        const double casterRadiusScale = std::max(
+            glm::compMax(casterNode->scale()),
+            1.0
         );
 
         if ((sourceNode == nullptr) || (casterNode == nullptr)) {
-            LERRORC("Renderableglobe",
-                    "Invalid scenegraph node for the shadow's caster or shadow's receiver."
-                    );
+            LERRORC(
+                "Renderableglobe",
+                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
+            );
             return;
         }
 

@@ -61,13 +61,13 @@
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 #include <openspace/engine/globals.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderer.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderer.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -114,6 +114,37 @@ namespace {
 
     constexpr const float ATM_EPS = 2.f;
     constexpr const float KM_TO_M = 1000.f;
+
+
+    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) {
+        glGenVertexArrays(1, vao);
+        glGenBuffers(1, vbo);
+        glBindVertexArray(*vao);
+        glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+
+        const GLfloat vertex_data[] = {
+            //      x      y     z     w
+            -size, -size, 0.0f, 1.0f,
+            size,    size, 0.0f, 1.0f,
+            -size,  size, 0.0f, 1.0f,
+            -size, -size, 0.0f, 1.0f,
+            size, -size, 0.0f, 1.0f,
+            size,    size, 0.0f, 1.0f
+        };
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+        glVertexAttribPointer(
+            0,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(GLfloat) * 4,
+            nullptr
+        );
+        glEnableVertexAttribArray(0);
+
+        glBindVertexArray(0);
+    }
 } // namespace
 
 namespace openspace {
@@ -172,12 +203,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             renderData.camera.sgctInternal.projectionMatrix()
         ) * renderData.camera.combinedViewMatrix();
 
-        if (!isAtmosphereInFrustum(
-            MV,
-            tPlanetPosWorld,
-            (_atmosphereRadius + ATM_EPS)*KM_TO_M)
-            )
-        {
+        const float totalAtmosphere = (_atmosphereRadius + ATM_EPS)* KM_TO_M;
+        if (!isAtmosphereInFrustum(MV, tPlanetPosWorld, totalAtmosphere)) {
             program.setUniform(_uniformCache.cullAtmosphere, 1);
         }
         else {
@@ -293,31 +320,29 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     );
                     casterPos *= KM_TO_M; // converting to meters
 
-                    openspace::SceneGraphNode *sourceNode =
-                            global::renderEngine.scene()->sceneGraphNode(shadowConf.source.first);
-                    openspace::SceneGraphNode *casterNode =
-                            global::renderEngine.scene()->sceneGraphNode(shadowConf.caster.first);
+                    const std::string source = shadowConf.source.first;
+                    SceneGraphNode* sourceNode =
+                        global::renderEngine.scene()->sceneGraphNode(source);
+                    const std::string caster = shadowConf.caster.first;
+                    SceneGraphNode* casterNode =
+                        global::renderEngine.scene()->sceneGraphNode(caster);
 
-                    double sourceRadiusScale = std::max(
-                                std::max(
-                                    std::max(sourceNode->scale().x, sourceNode->scale().y),
-                                    sourceNode->scale().z
-                                ),
-                                1.0
+                    const double sourceRadiusScale = std::max(
+                        glm::compMax(sourceNode->scale()),
+                        1.0
                     );
 
-                    double casterRadiusScale = std::max(
-                                std::max(
-                                    std::max(casterNode->scale().x, casterNode->scale().y),
-                                    casterNode->scale().z
-                                ),
-                                1.0
+                    const double casterRadiusScale = std::max(
+                        glm::compMax(casterNode->scale()),
+                        1.0
                     );
 
                     if ((sourceNode == nullptr) || (casterNode == nullptr)) {
-                        LERRORC("Atmospheredeferredcaster",
-                                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
-                                );
+                        LERRORC(
+                            "AtmosphereDeferredcaster",
+                            "Invalid scenegraph node for the shadow's caster or shadow's "
+                            "receiver."
+                        );
                         return;
                     }
 
@@ -347,7 +372,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     shadowData.isShadowing = false;
 
                     if (((d_test - rp_test) < (_atmospherePlanetRadius * KM_TO_M)) &&
-                        (casterDistSun < planetDistSun)) {
+                        (casterDistSun < planetDistSun))
+                    {
                         // The current caster is shadowing the current planet
                         shadowData.isShadowing = true;
                         shadowData.rs = shadowConf.source.second * sourceRadiusScale;
@@ -363,7 +389,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
                 const std::string uniformVarName("shadowDataArray[");
                 unsigned int counter = 0;
-                for (const ShadowRenderingStruct & sd : shadowDataArray) {
+                for (const ShadowRenderingStruct& sd : shadowDataArray) {
                     std::stringstream ss;
                     ss << uniformVarName << counter << "].isShadowing";
                     program.setUniform(ss.str(), sd.isShadowing);
@@ -496,30 +522,24 @@ void AtmosphereDeferredcaster::setSunRadianceIntensity(float sunRadiance) {
     _sunRadianceIntensity = sunRadiance;
 }
 
-void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(
-                                                           const glm::vec3& rayScattCoeff)
+void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(glm::vec3 rayScattCoeff)
 {
     _rayleighScatteringCoeff = std::move(rayScattCoeff);
 }
 
-void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(
-                                                           const glm::vec3& ozoneExtCoeff)
-{
+void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(glm::vec3 ozoneExtCoeff) {
     _ozoneExtinctionCoeff = std::move(ozoneExtCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieScatteringCoefficients(
-                                                           const glm::vec3& mieScattCoeff)
-{
+void AtmosphereDeferredcaster::setMieScatteringCoefficients(glm::vec3 mieScattCoeff) {
     _mieScatteringCoeff = std::move(mieScattCoeff);
 }
 
-void AtmosphereDeferredcaster::setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff)
-{
+void AtmosphereDeferredcaster::setMieExtinctionCoefficients(glm::vec3 mieExtCoeff) {
     _mieExtinctionCoeff = std::move(mieExtCoeff);
 }
 
-void AtmosphereDeferredcaster::setEllipsoidRadii(const glm::dvec3& radii) {
+void AtmosphereDeferredcaster::setEllipsoidRadii(glm::dvec3 radii) {
     _ellipsoidRadii = std::move(radii);
 }
 
@@ -528,7 +548,7 @@ void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
 }
 
 void AtmosphereDeferredcaster::setShadowConfigArray(
-                                const std::vector<ShadowConfiguration>& shadowConfigArray)
+                                       std::vector<ShadowConfiguration> shadowConfigArray)
 {
     _shadowConfArray = std::move(shadowConfigArray);
 }
@@ -1240,36 +1260,6 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     glDeleteFramebuffers(1, &calcFBO);
 
     LDEBUG("Ended precalculations for Atmosphere effects...");
-}
-
-void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) {
-    glGenVertexArrays(1, vao);
-    glGenBuffers(1, vbo);
-    glBindVertexArray(*vao);
-    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
-
-    const GLfloat vertex_data[] = {
-        //      x      y     z     w
-        -size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f,
-        -size,  size, 0.0f, 1.0f,
-        -size, -size, 0.0f, 1.0f,
-        size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(0);
 }
 
 void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
