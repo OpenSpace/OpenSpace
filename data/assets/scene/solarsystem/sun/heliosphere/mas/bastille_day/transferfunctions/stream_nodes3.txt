@@ -1,5 +1,5 @@
 
-width 5
+width 7
 lower 0.0
 upper 1.0
 
