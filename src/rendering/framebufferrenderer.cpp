@@ -1226,8 +1226,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     {
-        GLDebugGroup group("Transparent");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::Transparent);
+        GLDebugGroup group("PreDeferredTransparent");
+        data.renderBinMask = static_cast<int>(Renderable::RenderBin::PreDeferredTransparent);
         scene->render(data, tasks);
     }
 
@@ -1265,9 +1265,15 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         }
         performDeferredTasks(tasks.deferredcasterTasks);
     }
-
+    
     glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
+
+    {
+        GLDebugGroup group("PostDeferredTransparent");
+        data.renderBinMask = static_cast<int>(Renderable::RenderBin::PostDeferredTransparent);
+        scene->render(data, tasks);
+    }
 
     {
         GLDebugGroup group("Overlay");

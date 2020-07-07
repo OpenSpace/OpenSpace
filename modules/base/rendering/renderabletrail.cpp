@@ -34,15 +34,24 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
+#include <cmath>
+
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
-
+#ifdef __APPLE__
+    constexpr const std::array<const char*, 12> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
+        "renderPhase"
+    };
+#else
     constexpr const std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase", "resolution", "lineWidth"
     };
+#endif
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -57,6 +66,14 @@ namespace {
         { "Points", RenderingModePoints },
         { "Lines+Points", RenderingModeLinesPoints },
         { "Points+Lines", RenderingModeLinesPoints }
+    };
+
+    // Fragile! Keep in sync with documentation
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+        { "Background", openspace::Renderable::RenderBin::Background },
+        { "Opaque", openspace::Renderable::RenderBin::Opaque },
+        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
+        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
@@ -111,6 +128,13 @@ namespace {
         "Determines how the trail should be rendered to the screen.If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
         "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
+        "RenderBinMode",
+        "RenderBin Mode",
+        "Determines if the trails will be rendered after all other elements, including"
+        "atmospheres if needed."
     };
 
 } // namespace
@@ -246,6 +270,13 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     }
 
     addPropertySubOwner(_appearance);
+
+    if (dictionary.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
+        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+            dictionary.value<std::string>(RenderBinModeInfo.identifier)
+        );
+        setRenderBin(cfgRenderBin);
+    }
 }
 
 void RenderableTrail::initializeGL() {
@@ -334,7 +365,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     if (renderLines) {
 #ifdef __APPLE__
-        glLineWidth(1.f);
+        glLineWidth(1);
 #else
         glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
 #endif
@@ -366,12 +397,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         p->setUniform(c.nVertices, nVertices);
 
-        #ifndef __APPLE__
-                glm::ivec2 resolution = global::renderEngine.renderingResolution();
-                p->setUniform(c.resolution, resolution);
-
-                p->setUniform(c.lineWidth, ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
-        #endif
+#if !defined(__APPLE__)
+        glm::ivec2 resolution = global::renderEngine.renderingResolution();
+        p->setUniform(c.resolution, resolution);
+        p->setUniform(c.lineWidth, std::ceil((2.f * 1.f + lw) * std::sqrt(2.f)));
+#endif
 
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and

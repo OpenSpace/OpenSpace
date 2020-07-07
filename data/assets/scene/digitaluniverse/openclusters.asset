@@ -28,17 +28,17 @@ local object = {
         PolygonSides = 12,
         TextColor = { 0.05, 0.4, 0.2, 1.0 },
         LabelFile = speck .. "/oc.label",
-        ScaleFactor = 418.33,
-        TextSize = 16.68,
+        ScaleFactor = 405.75,
+        TextSize = 15.5,
         TextMinSize = 4.5,
         TextMaxSize = 30.0,
         Unit = "pc",
-        BillboardMaxSize = 20.22,
+        BillboardMaxSize = 604,
         EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Open Star Clusters",
-        Path = "/Milky Way/Open Clusters"
+        Path = "/Milky Way"
     }
 }
 

@@ -32,9 +32,10 @@ local tullyPoints = {
         ColorOption = { "prox5Mpc" },
         ColorRange = { { 1.0, 30.0 } },
         LabelFile = speck .. "/tully.label",
+        DrawLabels = true,
         TextColor = { 0.7, 0.7, 0.7, 1.0 },
-        TextSize = 20.50,
-        TextMinSize = 16.0,
+        TextSize = 19.36,
+        TextMinSize = 8.2,
         TransformationMatrix = {
             -0.7357425748,    0.67726129641,  0.0,           0.0,
             -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
@@ -43,10 +44,10 @@ local tullyPoints = {
         },
         Unit = "Mpc",
         -- Fade in value in the same unit as "Unit"
-        FadeInDistances = { 0.05, 1.0 },
+        FadeInDistances = { 0.001, 1.0 },
         -- Max size in pixels
-        BillboardMaxSize = 8.22,
-        BillboardMinSize = 0.0,
+        BillboardMaxSize = 5,
+        BillboardMinSize = 0,
         --CorrectionSizeEndDistance = 22.0,
         --CorrectionSizeFactor = 10.45
         EnablePixelSizeControl = true
@@ -61,7 +62,7 @@ local tullyImages = {
     Identifier = "TullyGalaxiesImages",
     Renderable = {
         Type = "RenderablePlanesCloud",
-        Enabled = false,
+        Enabled = true,
         Color = { 1.0, 1.0, 1.0 },
         Transparency = 0.99,
         ScaleFactor = 1.0,
@@ -77,8 +78,8 @@ local tullyImages = {
         },
         Unit = "Mpc",
         -- Fade in value in the same unit as "Unit"
-        FadeInDistances = {0.001, 0.05010},
-        PlaneMinSize = 5.0
+        FadeInDistances = {0.0005, 0.003},
+        PlaneMinSize = 1.0
     },
     GUI = {
         Name = "Tully Galaxies Images",

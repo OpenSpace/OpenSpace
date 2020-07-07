@@ -29,6 +29,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/stringconversion.h>
 #include <utility>
+#include <cmath>
 
 namespace openspace::interaction {
 
@@ -54,7 +55,7 @@ void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
             }
 
             float value = inputState.websocketAxis(i);
-            bool hasValue = abs(value) > t.deadzone;
+            bool hasValue = std::fabs(value) > t.deadzone;
 
             if (!hasValue) {
                 value = 0.f;

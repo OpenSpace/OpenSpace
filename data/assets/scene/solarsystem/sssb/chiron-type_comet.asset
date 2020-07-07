@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'chiron-type_comet', 'sssb_data_chiron-type_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_chiron-type_comet.csv', "Chiron-type Comets", filepath, { 0.69 ,0.47 ,0.8 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_chiron-type_comet.csv', "Chiron-type Comets", filepath, { 0.15 ,0.1 ,1.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 10
 object.Renderable.TrailFade = 25
