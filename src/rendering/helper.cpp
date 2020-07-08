@@ -374,14 +374,14 @@ std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors) {
     for (int i = 0; i <= nSegments; ++i) {
         const float fi = static_cast<float>(i);
 
-        const float theta = fi * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
+        const float theta = fi * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
 
-        const float x = radius * cos(theta);
-        const float y = radius * sin(theta);
-        const float z = 0.0f;
+        const float x = radius * std::cos(theta);
+        const float y = radius * std::sin(theta);
+        const float z = 0.f;
 
-        const float u = cos(theta);
-        const float v = sin(theta);
+        const float u = std::cos(theta);
+        const float v = std::sin(theta);
 
         vertices[i] = { x, y, z, u, v, colors.r, colors.g, colors.b, colors.a };
     }

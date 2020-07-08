@@ -62,7 +62,6 @@ namespace {
         "Grid Size",
         "This value species the size of each dimensions of the grid"
     };
-
 } // namespace
 
 namespace openspace {
@@ -81,7 +80,7 @@ documentation::Documentation RenderableGrid::Documentation() {
             },
             {
                 SegmentsInfo.identifier,
-                new DoubleVector2Verifier, // TODO: Should be Int, but specification test fails...
+                new DoubleVector2Verifier, // @TODO (emmbr 2020-07-07): should be Int, but specification test fails...
                 Optional::Yes,
                 SegmentsInfo.description
             },
@@ -103,13 +102,8 @@ documentation::Documentation RenderableGrid::Documentation() {
 
 RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridColor(
-        GridColorInfo,
-        glm::vec3(0.5f, 0.5, 0.5f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200)) // TODO: review range
+    , _gridColor(GridColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _size(SizeInfo, glm::vec2(1e20f), glm::vec2(1.f), glm::vec2(1e35f))
 {
@@ -257,64 +251,66 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 }
 
 void RenderableGrid::update(const UpdateData&) {
-    if (_gridIsDirty) {
-        const glm::vec2 halfSize = _size.value() / 2.f;
-        const glm::uvec2 nSegments = _segments.value();
-        const glm::vec2 step = _size.value() / static_cast<glm::vec2>(nSegments); 
-
-        const int nLines = (2 * nSegments.x * nSegments.y) + nSegments.x + nSegments.y;
-        const int nVertices = 2 * nLines;
-        _varray.resize(nVertices);
-        // OBS! Could be optimized further by removing duplicate vertices
-       
-        int nr = 0;
-        for (unsigned int i = 0; i < nSegments.x; ++i) {
-            for (unsigned int j = 0; j < nSegments.y; ++j) {
-                float y0 = -halfSize.y + j * step.y;
-                float y1 = y0 + step.y;
-
-                float x0 = -halfSize.x + i * step.x;
-                float x1 = x0 + step.x;
-
-                _varray[nr++] = { x0, y0, 0.f };
-                _varray[nr++] = { x0, y1, 0.f };
-
-                _varray[nr++] = { x0, y0, 0.f };
-                _varray[nr++] = { x1, y0, 0.f };
-            }
-        }
-
-        // last x row
-        for (unsigned int i = 0; i < nSegments.x; ++i) {
-            float x0 = -halfSize.x + i * step.x;
-            float x1 = x0 + step.x;
-            _varray[nr++] = { x0, halfSize.y, 0.f };
-            _varray[nr++] = { x1, halfSize.y, 0.f };
-        }
-
-        // last y col
-        for (unsigned int i = 0; i < nSegments.y; ++i) {
-            float y0 = -halfSize.y + i * step.y;
-            float y1 = y0 + step.y;
-            _varray[nr++] = { halfSize.x, y0, 0.f };
-            _varray[nr++] = { halfSize.x, y1, 0.f };
-        }
-
-        glBindVertexArray(_vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _varray.size() * sizeof(Vertex),
-            _varray.data(),
-            GL_STATIC_DRAW
-        );
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-        glBindVertexArray(0);
-
-        _gridIsDirty = false;
+    if (!_gridIsDirty) {
+        return;
     }
+
+    const glm::vec2 halfSize = _size.value() / 2.f;
+    const glm::uvec2 nSegments = _segments.value();
+    const glm::vec2 step = _size.value() / static_cast<glm::vec2>(nSegments); 
+
+    const int nLines = (2 * nSegments.x * nSegments.y) + nSegments.x + nSegments.y;
+    const int nVertices = 2 * nLines;
+    _varray.resize(nVertices);
+    // OBS! Could be optimized further by removing duplicate vertices
+       
+    int nr = 0;
+    for (unsigned int i = 0; i < nSegments.x; ++i) {
+        for (unsigned int j = 0; j < nSegments.y; ++j) {
+            const float y0 = -halfSize.y + j * step.y;
+            const float y1 = y0 + step.y;
+
+            const float x0 = -halfSize.x + i * step.x;
+            const float x1 = x0 + step.x;
+
+            _varray[nr++] = { x0, y0, 0.f };
+            _varray[nr++] = { x0, y1, 0.f };
+
+            _varray[nr++] = { x0, y0, 0.f };
+            _varray[nr++] = { x1, y0, 0.f };
+        }
+    }
+
+    // last x row
+    for (unsigned int i = 0; i < nSegments.x; ++i) {
+        const float x0 = -halfSize.x + i * step.x;
+        const float x1 = x0 + step.x;
+        _varray[nr++] = { x0, halfSize.y, 0.f };
+        _varray[nr++] = { x1, halfSize.y, 0.f };
+    }
+
+    // last y col
+    for (unsigned int i = 0; i < nSegments.y; ++i) {
+        const float y0 = -halfSize.y + i * step.y;
+        const float y1 = y0 + step.y;
+        _varray[nr++] = { halfSize.x, y0, 0.f };
+        _varray[nr++] = { halfSize.x, y1, 0.f };
+    }
+
+    glBindVertexArray(_vaoID);
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _varray.size() * sizeof(Vertex),
+        _varray.data(),
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+
+    glBindVertexArray(0);
+
+    _gridIsDirty = false;
 }
 
 } // namespace openspace

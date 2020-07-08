@@ -76,7 +76,6 @@ namespace {
         "The inner radius of the circular grid, that is the radius of the inmost ring. "
         "Must be smaller than the outer radius."
     };
-
 } // namespace
 
 namespace openspace {
@@ -127,16 +126,9 @@ documentation::Documentation RenderableRadialGrid::Documentation() {
     };
 }
 
-
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridProgram(nullptr)
-    , _gridColor(
-        GridColorInfo,
-        glm::vec3(0.5f, 0.5, 0.5f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _gridColor(GridColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _gridSegments(
         GridSegmentsInfo, 
         glm::ivec2(1, 1),  
@@ -247,7 +239,7 @@ void RenderableRadialGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableRadialGrid::render(const RenderData& data, RendererTasks&){
+void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
     _gridProgram->setUniform("opacity", _opacity);
@@ -299,7 +291,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
     
-    for (GeometryData &c : _circles) {
+    for (GeometryData& c : _circles) {
         c.render();
     }
 
@@ -322,69 +314,69 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&){
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {
-    if (_gridIsDirty) {
-
-        // Circles
-        const int nRadialSegments = _gridSegments.value()[0];
-        const float fnCircles = static_cast<float>(nRadialSegments);
-        const float deltaRadius = (_maxRadius - _minRadius) / fnCircles;
-
-        const bool hasInnerRadius = _minRadius > 0;
-        const int nCircles = hasInnerRadius ? nRadialSegments : nRadialSegments + 1;
-
-        _circles.clear();
-        _circles.reserve(nCircles);
-
-        auto addRing = [&](int nSegments, float radius) {
-            std::vector<rendering::helper::Vertex> vertices =
-                rendering::helper::createRing(nSegments, radius);
-
-            _circles.push_back(GeometryData(GL_LINE_STRIP));
-            _circles.back().varray = rendering::helper::convert(vertices);
-            _circles.back().update();
-        };
-
-        // add an extra inmost circle
-        if (hasInnerRadius) {
-            addRing(_circleSegments, _minRadius);
-        }
-
-        for (int i = 0; i < nRadialSegments; ++i) {
-            float ri = static_cast<float>(i + 1) * deltaRadius;
-            ri += _minRadius;
-            addRing(_circleSegments, ri);
-        }
-
-        // Lines
-        const int nLines = _gridSegments.value()[1];
-        const int nVertices = 2 * nLines;
-        const float fsegments = static_cast<float>(nLines);
-
-        _lines.varray.clear();
-        _lines.varray.reserve(nVertices);
-
-        if (nLines > 1) {
-            for (int i = 0; i < nLines; ++i) {
-                const float fi = static_cast<float>(i);
-
-                const float theta = fi * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
-
-                float x = _maxRadius * cos(theta);
-                float y = _maxRadius * sin(theta);
-                float z = 0.0f;
-
-                _lines.varray.push_back({ x, y, z });
-
-                x = _minRadius * cos(theta);
-                y = _minRadius * sin(theta);
-
-                _lines.varray.push_back({ x, y, z });
-            }
-        }
-        _lines.update();
-
-        _gridIsDirty = false;
+    if (!_gridIsDirty) {
+        return;
     }
+
+    // Circles
+    const int nRadialSegments = _gridSegments.value()[0];
+    const float fnCircles = static_cast<float>(nRadialSegments);
+    const float deltaRadius = (_maxRadius - _minRadius) / fnCircles;
+
+    const bool hasInnerRadius = _minRadius > 0;
+    const int nCircles = hasInnerRadius ? nRadialSegments : nRadialSegments + 1;
+
+    _circles.clear();
+    _circles.reserve(nCircles);
+
+    auto addRing = [this](int nSegments, float radius) {
+        std::vector<rendering::helper::Vertex> vertices =
+            rendering::helper::createRing(nSegments, radius);
+
+        _circles.push_back(GeometryData(GL_LINE_STRIP));
+        _circles.back().varray = rendering::helper::convert(vertices);
+        _circles.back().update();
+    };
+
+    // add an extra inmost circle
+    if (hasInnerRadius) {
+        addRing(_circleSegments, _minRadius);
+    }
+
+    for (int i = 0; i < nRadialSegments; ++i) {
+        const float ri = static_cast<float>(i + 1) * deltaRadius + _minRadius;
+        addRing(_circleSegments, ri);
+    }
+
+    // Lines
+    const int nLines = _gridSegments.value()[1];
+    const int nVertices = 2 * nLines;
+    const float fsegments = static_cast<float>(nLines);
+
+    _lines.varray.clear();
+    _lines.varray.reserve(nVertices);
+
+    if (nLines > 1) {
+        std::vector<rendering::helper::Vertex> outerVertices =
+            rendering::helper::createRing(nLines, _maxRadius);
+
+        std::vector<rendering::helper::Vertex> innerVertices =
+            rendering::helper::createRing(nLines, _minRadius);
+
+        for (int i = 0; i < nLines; ++i) {
+            const rendering::helper::VertexXYZ vOut = 
+                rendering::helper::convertToXYZ(outerVertices[i]);
+            
+            const rendering::helper::VertexXYZ vIn =
+                rendering::helper::convertToXYZ(innerVertices[i]);
+
+            _lines.varray.push_back(vOut);
+            _lines.varray.push_back(vIn);
+        }
+    }
+    _lines.update();
+
+    _gridIsDirty = false;
 }
 
 RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode) 
@@ -411,7 +403,8 @@ RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept 
 }
 
 RenderableRadialGrid::GeometryData& 
-RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept {
+RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept 
+{
     if (this != &other) {
         vao = other.vao;
         vbo = other.vbo;
