@@ -748,6 +748,13 @@ Profile::Profile(const std::vector<std::string>& content) {
                         )
                     );
                 }
+
+                if (currentSection == Section::Meta && foundMeta) {
+                    throw ProfileParsingError(
+                        lineNum,
+                        "Meta section can only appear once per profile"
+                    );
+                }
                 break;
             case Section::Version:
                 if (foundVersion) {
@@ -762,13 +769,6 @@ Profile::Profile(const std::vector<std::string>& content) {
                 break;
             case Section::Meta:
             {
-                if (foundMeta) {
-                    throw ProfileParsingError(
-                        lineNum,
-                        "Meta section can only appear once per profile"
-                    );
-                }
-
                 if (!meta.has_value()) {
                     meta = Meta();
                 }
