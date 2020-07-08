@@ -72,6 +72,7 @@ uniform int activestreamnumber;
 uniform bool firstrender;
 uniform int EnhanceMethod;
 uniform double    time;
+//uniform float interestingStreams[4];
 
 // Inputs
 // Should be provided in meters
@@ -146,6 +147,8 @@ vec4 getTransferFunctionColor(sampler1D InColorTable) {
 
 bool CheckvertexIndex(){
     if(EnhanceMethod == 3) return false;
+    int nodeIndex = gl_VertexID;
+    //if(EnhanceMethod == 3) return false;
     if(NodeskipMethod == uniformskip){
         if(mod(nodeIndex, Nodeskip) == 0){
             return true;
@@ -181,7 +184,7 @@ bool CheckvertexIndex(){
 //is Particle?: 
 bool isParticle(){
     
-    int modulusResult = int(double(particleSpeed) * time + nodeIndex) % particleSpacing;
+    int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
     return modulusResult > 0 && modulusResult <= particleSize;
 
 return false;
@@ -206,18 +209,29 @@ void DecidehowtoshowClosetoEarth(){
                  vs_color = vec4(streamColor.xyz, fluxColorAlpha);
             }
         }
+        //lines
       if(EnhanceMethod == 3){
-            if(!firstrender){
+     // float interestingStreams[4] = float[](154, 156, 153, 163);
+      float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
+      168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
+        for(int i = 0; i < interestingStreams.length(); i++){
+            if(Streamnumber == interestingStreams[i]){
+        
+           // if(!firstrender){
                // vs_color = vec4(streamColor.xyz, fluxColorAlpha);
                if(usingParticles && isParticle()){
                vs_color = flowColor;
+               gl_PointSize = 1;
                }
                else{
                vec4 fluxColor3 = getTransferFunctionColor(colorTable);
                 vs_color = vec4(fluxColor3.xyz, fluxColor3.w);
                 }
             }
+            }
+        //    }
         }
+        //SizeandColor
     if(EnhanceMethod == 4){
              vec4 fluxColor3 = getTransferFunctionColor(colorTable);
              vs_color = vec4(fluxColor3.xyz, fluxColor3.w);

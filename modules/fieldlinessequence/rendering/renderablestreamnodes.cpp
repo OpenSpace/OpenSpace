@@ -1192,45 +1192,45 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _lineCount.data(),
         static_cast<GLsizei>(_lineStart.size())
     );*/
-            
-        _shaderProgram->setUniform("firstrender", true);
-        GLint temp = 0;
-        glDrawArrays(
-            GL_POINTS,
-            temp,
-            static_cast<GLsizei>(_vertexPositions.size())
-        );
-        
-        if (_pEnhancemethod == 2) {
-            //LDEBUG("Vi borde rendera vita punkter");
-            _shaderProgram->setUniform("firstrender", false);
-            GLint temp = 0;
-            glDrawArrays(
-                GL_POINTS,
-                temp,
-                static_cast<GLsizei>(_vertexPositions.size())
-            );
-        }
-        if (_pEnhancemethod == 3) {
-            //LDEBUG("Vi borde rendera linjer");
-            _shaderProgram->setUniform("firstrender", false);
-            glLineWidth(_pLineWidth);
-            glMultiDrawArrays(
-                GL_LINE_STRIP, //_drawingOutputType,
-                _lineStart.data(),
-                _lineCount.data(),
-                static_cast<GLsizei>(_lineStart.size()));
-        }
-        
-        // _shaderProgram->setUniform("firstrender", false);
-        // glDrawArrays(
-        //     GL_POINTS,
-        //     temp,
-        //     static_cast<GLsizei>(_vertexPositions.size())
-        // );
-            
-        glBindVertexArray(0);
-        _shaderProgram->deactivate();
+
+_shaderProgram->setUniform("firstrender", true);
+GLint temp = 0;
+glDrawArrays(
+    GL_POINTS,
+    temp,
+    static_cast<GLsizei>(_vertexPositions.size())
+);
+
+if (_pEnhancemethod == 2) {
+    //LDEBUG("Vi borde rendera vita punkter");
+    _shaderProgram->setUniform("firstrender", false);
+    GLint temp = 0;
+    glDrawArrays(
+        GL_POINTS,
+        temp,
+        static_cast<GLsizei>(_vertexPositions.size())
+    );
+}
+if (_pEnhancemethod == 3) {
+    //LDEBUG("Vi borde rendera linjer");
+    _shaderProgram->setUniform("firstrender", false);
+    glLineWidth(_pLineWidth);
+    glMultiDrawArrays(
+        GL_LINE_STRIP, //_drawingOutputType,
+        _lineStart.data(),
+        _lineCount.data(),
+        static_cast<GLsizei>(_lineStart.size()));
+}
+
+// _shaderProgram->setUniform("firstrender", false);
+// glDrawArrays(
+//     GL_POINTS,
+//     temp,
+//     static_cast<GLsizei>(_vertexPositions.size())
+// );
+
+glBindVertexArray(0);
+_shaderProgram->deactivate();
     }
 }
 inline void unbindGL() {
