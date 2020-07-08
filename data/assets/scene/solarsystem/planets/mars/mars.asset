@@ -196,7 +196,7 @@ local Mars = {
             FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },

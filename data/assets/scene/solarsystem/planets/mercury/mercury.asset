@@ -214,7 +214,7 @@ local Mercury = {
             FadeOutStartingDistance = 80000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1500000.0,
-            LabelsColor = {1.0, 1.0, 0.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },

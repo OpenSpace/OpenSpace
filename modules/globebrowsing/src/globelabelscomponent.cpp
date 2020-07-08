@@ -688,8 +688,10 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         float distToCamera,
                                         float fadeInVariable
 ) {
-    glm::vec4 textColor = glm::vec4(glm::vec3(_labelsColor), _labelsOpacity);
-    textColor.a *= fadeInVariable;
+    glm::vec4 textColor = glm::vec4(
+        glm::vec3(_labelsColor), 
+        _labelsOpacity * fadeInVariable
+    );
 
     glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
 

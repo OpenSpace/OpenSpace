@@ -117,14 +117,11 @@ private:
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
 
-    //properties::FloatProperty _scaleFactor;
-    //properties::Vec3Property _pointColor;
     properties::Vec3Property _textColor;
     properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
-    //properties::OptionProperty _blendMode;
     properties::FloatProperty _textMinSize;
     properties::FloatProperty _textMaxSize;
     properties::FloatProperty _lineWidth;
@@ -145,8 +142,6 @@ private:
     std::vector<float> _fullData;
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     int _nValuesPerAstronomicalObject = 0;
-
-    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;

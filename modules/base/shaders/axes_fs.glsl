@@ -38,10 +38,10 @@ Fragment getFragment() {
 
     vec3 colorComponents = step(0.01f, vs_positionModelSpace);
 
-    frag.color.a = 1.0;
     frag.color.rgb = colorComponents.x * xColor +
         colorComponents.y * yColor +
         colorComponents.z * zColor;
+    frag.color.a = 1.0;
 
     frag.depth = vs_screenSpaceDepth;
     frag.gPosition = vs_positionViewSpace;

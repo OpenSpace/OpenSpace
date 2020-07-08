@@ -206,7 +206,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         "RenderableShadowCylinder"
     );
 
-    _opacity.setValue(0.25f);
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 

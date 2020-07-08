@@ -424,12 +424,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
-    , _textColor(
-        TextColorInfo,
-        glm::vec3(1.f, 1.f, 1.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
@@ -929,8 +924,10 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
-    textColor.a *= fadeInVariable;
+    glm::vec4 textColor = glm::vec4(
+        glm::vec3(_textColor), 
+        _textOpacity * fadeInVariable
+    );
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;

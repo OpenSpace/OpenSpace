@@ -141,7 +141,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
-    glm::vec4 color{ glm::vec3(_color), _opacity };
+    glm::vec4 color(glm::vec3(_color), _opacity);
     _raycaster = std::make_unique<ToyVolumeRaycaster>(color);
     _raycaster->initialize();
 
@@ -198,7 +198,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );
 
-        glm::vec4 color{ glm::vec3(_color), _opacity };
+        glm::vec4 color(glm::vec3(_color), _opacity);
 
         _raycaster->setColor(color);
         _raycaster->setStepSize(_stepSize);

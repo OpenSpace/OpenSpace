@@ -264,7 +264,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
         },
         { 
             DefaultEndColorInfo, 
-            glm::vec3(0.85f, 0.85f, 0.85f), 
+            glm::vec3(0.85f), 
             glm::vec3(0.f), 
             glm::vec3(1.f)
         },
@@ -294,7 +294,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
         },
         { 
             SquareColorInfo, 
-            glm::vec3(0.85f, 0.85f, 0.85f), 
+            glm::vec3(0.85f), 
             glm::vec3(0.f), 
             glm::vec3(1.f)
         }

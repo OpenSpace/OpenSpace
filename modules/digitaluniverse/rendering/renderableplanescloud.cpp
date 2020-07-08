@@ -645,8 +645,10 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
-    textColor.a *= fadeInVariable;
+    glm::vec4 textColor = glm::vec4(
+        glm::vec3(_textColor), 
+        _textOpacity * fadeInVariable
+    );
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;

@@ -61,8 +61,8 @@ local addCartesianAxes = function (specification)
     local name = specification.Name or specification.Identifier
     local parent = specification.Parent or "Root"
     local scale = specification.Scale or 1.0
-    local position = specification.Position or {0.0, 0.0, 0.0}
-    local rotation = specification.Rotation or {0.0, 0.0, 0.0}
+    local position = specification.Position or { 0.0, 0.0, 0.0 }
+    local rotation = specification.Rotation or { 0.0, 0.0, 0.0 }
 
     local axes = {
         Identifier = identifier,
@@ -84,9 +84,9 @@ local addCartesianAxes = function (specification)
         Renderable = {
             Type = "RenderableCartesianAxes",
             Enabled = true,
-            XColor = {1.0, 0.0, 0.0},
-            YColor = {0.0, 1.0, 0.0},
-            ZColor = {0.0, 0.0, 1.0}
+            XColor = { 1.0, 0.0, 0.0 },
+            YColor = { 0.0, 1.0, 0.0 },
+            ZColor = { 0.0, 0.0, 1.0 }
         },
         GUI = {
             Name = name,

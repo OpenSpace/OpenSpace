@@ -32,8 +32,7 @@ uniform float opacity;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(vs_color, 1.0);
-    frag.color.a *= opacity;
+    frag.color = vec4(vs_color, opacity);
     frag.depth = vs_positionScreenSpace.w;
 
     return frag;
