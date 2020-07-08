@@ -19,6 +19,7 @@ openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 local transferFunctions = asset.localResource("transferfunctions")
 local streamnodeColorTable = transferFunctions .. "/stream_nodes.txt"
 local streamnodeColorTableEarth = transferFunctions .. "/stream_nodes10.txt"
+local streamnodeColorTableFlow = transferFunctions .. "/stream_nodesFlow.txt"
 
 local streamnodesDirectory = asset.syncedResource({
     Name = "Bastille Day Stream nodes",
@@ -47,6 +48,7 @@ local Streamnodes = {
         ColorTablePaths = {
 	streamnodeColorTable,
 	streamnodeColorTableEarth,
+	streamnodeColorTableFlow,
         },
         --ColorTableMinMax = {
          --   { 0, 1000000 },

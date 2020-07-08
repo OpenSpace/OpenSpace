@@ -156,12 +156,16 @@ private:
     std::unique_ptr<TransferFunction> _transferFunction;
     // Transfer function used to color line near Earth
     std::unique_ptr<TransferFunction> _transferFunctionEarth;
+    // Transfer function used to color line flow
+    std::unique_ptr<TransferFunction> _transferFunctionFlow;
 
     // ------------------------------------ VECTORS ----------------------------------- //
     // Paths to color tables. One for each 'ColorFlux'
     std::vector<std::string> _colorTablePaths;
     // Paths to Earth color tables
     std::vector<std::string> _colorTablePathsEarth;
+    // Paths to Flow color tables
+    std::vector<std::string> _colorTablePathsFlow;
     // Values represents min & max values represented in the color table
     std::vector<glm::vec2> _colorTableRanges;
     // Contains the _triggerTimes for all FieldlineStates in the sequence
@@ -205,6 +209,8 @@ private:
     properties::StringProperty _pColorTablePath;
     // Color table/transfer function for Earth
     properties::StringProperty _pColorTablePathEarth;
+    // Color table/transfer function for Flow
+    properties::StringProperty _pColorTablePathFlow;
     // Valid range for the color table
     properties::Vec2Property _pColorTableRange;
     // The value of alpha for the flux color mode

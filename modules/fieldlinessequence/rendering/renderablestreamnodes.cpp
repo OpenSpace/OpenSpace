@@ -114,6 +114,11 @@ namespace {
         "Path to Color Table for nodes close to Earth",
         "Color Table/Transfer Function for nodes around Earth."
     };
+    constexpr openspace::properties::Property::PropertyInfo ColorTablePathFlowInfo = {
+        "colorTablePathFlow",
+        "Path to Color Table for nodes to show the flow",
+        "Color Table/Transfer Function for flow."
+    };
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
         "color",
         "Color",
@@ -313,6 +318,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pEnhancemethod(EnhanceMethodInfo, OptionProperty::DisplayType::Dropdown)
     , _pColorTablePath(ColorTablePathInfo)
     , _pColorTablePathEarth(ColorTablePathEarthInfo)
+    , _pColorTablePathFlow(ColorTablePathFlowInfo)
     , _pStreamColor(StreamColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
         glm::vec4(0.f),
@@ -364,6 +370,12 @@ void RenderableStreamNodes::definePropertyCallbackFunctions() {
     _pColorTablePathEarth.onChange([this] {
         _transferFunctionEarth->setPath(_pColorTablePathEarth);
         _colorTablePathsEarth[0] = _pColorTablePathEarth;
+        });
+
+
+    _pColorTablePathFlow.onChange([this] {
+        _transferFunctionFlow->setPath(_pColorTablePathFlow);
+        _colorTablePathsFlow[0] = _pColorTablePathFlow;
         });
 
     _pGoesEnergyBins.onChange([this] {
@@ -424,8 +436,10 @@ void RenderableStreamNodes::initializeGL() {
     // corrupt or not provided!
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     _colorTablePathsEarth.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
+    _colorTablePathsFlow.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
     _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePathsEarth[0]));
+    _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePathsFlow[0]));
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
@@ -439,12 +453,16 @@ void RenderableStreamNodes::initializeGL() {
             // Clear the default! It is already specified in the transferFunction
             _colorTablePaths.clear();
             _colorTablePathsEarth.clear();
+            _colorTablePathsFlow.clear();
 
             _colorTablePaths.push_back(
                 colorTablesPathsDictionary.value<std::string>(std::to_string(1)));
 
             _colorTablePathsEarth.push_back(
                 colorTablesPathsDictionary.value<std::string>(std::to_string(2)));
+
+            _colorTablePathsFlow.push_back(
+                colorTablesPathsDictionary.value<std::string>(std::to_string(3)));
         }
     }
 
@@ -979,6 +997,7 @@ void RenderableStreamNodes::setupProperties() {
     _pColorGroup.addProperty(_pColorTableRange);
     _pColorGroup.addProperty(_pColorTablePath);
     _pColorGroup.addProperty(_pColorTablePathEarth);
+    _pColorGroup.addProperty(_pColorTablePathFlow);
     _pColorGroup.addProperty(_pStreamColor);
     _pColorGroup.addProperty(_pFluxColorAlpha);
 
@@ -1039,6 +1058,7 @@ void RenderableStreamNodes::setupProperties() {
     // Set default
     _pColorTablePath = _colorTablePaths[0];
     _pColorTablePathEarth = _colorTablePathsEarth[0];
+    _pColorTablePathFlow = _colorTablePathsFlow[0];
 }
 
 void RenderableStreamNodes::deinitializeGL() {
@@ -1181,6 +1201,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         textureUnitEarth.activate();
         _transferFunctionEarth->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTableEarth", textureUnitEarth);
+
+        ghoul::opengl::TextureUnit textureUnitFlow;
+        textureUnitFlow.activate();
+        _transferFunctionFlow->bind(); // Calls update internally
+        _shaderProgram->setUniform("colorTableFlow", textureUnitFlow);
     }
 
     const std::vector<glm::vec3>& vertPos = _vertexPositions;
