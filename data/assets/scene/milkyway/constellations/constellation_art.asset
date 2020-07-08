@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+local constellationsCSV = asset.localResource('constellation_data.csv')
+=======
+>>>>>>> master
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local images = asset.syncedResource({
@@ -80,8 +84,11 @@ end
 local nodes = {}
 
 asset.onInitialize(function ()
+<<<<<<< HEAD
+=======
   local constellationsCSV = images .. "/constellation_data.csv"
 
+>>>>>>> master
   nodes = createConstellations('Constellation Art', constellationsCSV)
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);

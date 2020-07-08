@@ -130,7 +130,7 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], co
                   return vec4(0.2, 0.2, 0.2, 1.0);
               }
               else {
-                  return butterworthFunc(length_d, r_u_pi, 4.0);
+                  return butterworthFunc(length_d, r_u_pi, 2.0);
               }
             }
             else {
@@ -138,7 +138,8 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], co
                   return vec4(0.5, 0.5, 0.5, 1.0);
               }
               else {
-                  return vec4(vec3(length_d/r_p_pi), 1.0);
+                  //return vec4(vec3(length_d/r_p_pi), 1.0);
+                  return butterworthFunc(length_d, r_u_pi, 2.0);
               }
             }
         }
@@ -621,7 +622,7 @@ void main() {
             // All calculations are done in Km:
             pixelDepth                *= 0.001;
             positionObjectsCoords.xyz *= 0.001;
-            
+
             if (pixelDepth < offset) {
                 // ATM Occluded - Something in fron of ATM.
                 atmosphereFinalColor += color;

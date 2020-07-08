@@ -190,16 +190,13 @@ GUI::GUI()
 
 GUI::~GUI() {} // NOLINT
 
-void GUI::initialize() {
-
-}
+void GUI::initialize() {}
 
 void GUI::deinitialize() {
     ImGui::Shutdown();
 
-    int nWindows = global::windowDelegate.nWindows();
-    for (int i = 0; i < nWindows; ++i) {
-        ImGui::DestroyContext(_contexts[i]);
+    for (ImGuiContext* ctx : _contexts) {
+        ImGui::DestroyContext(ctx);
     }
 
     for (GuiComponent* comp : _components) {
