@@ -22,91 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___HELPER___H__
-#define __OPENSPACE_CORE___HELPER___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__
 
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/rendering/renderable.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/rendering/helper.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
-namespace openspace::rendering::helper {
+namespace ghoul::opengl { class ProgramObject; }
 
-enum class Anchor {
-    Center,
-    NW,
-    NE,
-    SW,
-    SE
+namespace openspace::documentation { struct Documentation; }
+
+namespace openspace {
+
+class RenderableRadialGrid : public Renderable {
+public:
+    RenderableRadialGrid(const ghoul::Dictionary& dictionary);
+    ~RenderableRadialGrid() = default;
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+protected:
+    struct GeometryData {
+        GeometryData(GLenum renderMode);
+        GeometryData(GeometryData&& other) noexcept;
+        GeometryData& operator=(const GeometryData& other) = delete;
+        GeometryData& operator=(GeometryData&& other) noexcept;
+        ~GeometryData();
+
+        void update();
+        void render();
+
+        std::vector<rendering::helper::VertexXYZ> varray;
+        GLuint vao = 0;
+        GLuint vbo = 0;
+        GLenum mode = GL_LINE_STRIP;
+    };
+
+    ghoul::opengl::ProgramObject* _gridProgram;
+
+    properties::Vec3Property _gridColor;
+    properties::IVec2Property _gridSegments;
+    properties::IntProperty _circleSegments;
+    properties::FloatProperty _lineWidth;
+    properties::FloatProperty _maxRadius;
+    properties::FloatProperty _minRadius;
+
+    bool _gridIsDirty = true;
+
+    std::vector<GeometryData> _circles;
+    GeometryData _lines{GL_LINES};
 };
 
-void initialize();
-void deinitialize();
+}// namespace openspace
 
-glm::mat4 ortho(const glm::vec2& position, const glm::vec2& size,
-    Anchor anchor = Anchor::NW);
-
-void renderBox(ghoul::opengl::ProgramObject& program, GLint orthoLocation,
-    GLint colorLocation, const glm::vec2& position, const glm::vec2& size,
-    const glm::vec4& color, Anchor anchor = Anchor::NW);
-
-void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
-    Anchor anchor = Anchor::NW);
-
-void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
-    const ghoul::opengl::Texture& texture, Anchor anchor = Anchor::NW);
-
-struct Shaders {
-    struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
-        UniformCache(tex, hasTexture, shouldFlipTexture, ortho, color) cache;
-    } xyuvrgba;
-
-    struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
-        UniformCache(tex, hasTexture, shouldFlipTexture, ortho, color) cache;
-    } screenfilling;
-};
-
-struct VertexObjects {
-    struct {
-        GLuint vao;
-        GLuint vbo;
-    } square;
-
-    struct {
-        GLuint vao;
-    } empty;
-};
-
-namespace detail {
-
-Shaders& gShadersConstructor();
-VertexObjects& gVertexObjectsConstructor();
-
-} // namespace detail
-
-static Shaders& shaders = detail::gShadersConstructor();
-static VertexObjects& vertexObjects = detail::gVertexObjectsConstructor();
-
-struct Vertex {
-    GLfloat xyz[3];
-    GLfloat uv[2];
-    GLfloat rgba[4];
-};
-
-struct VertexXYZ {
-    GLfloat xyz[3];
-};
-
-VertexXYZ convertToXYZ(const Vertex& v);
-
-std::vector<VertexXYZ> convert(std::vector<Vertex> v);
-
-std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors = glm::vec4(1.f));
-
-} // namespace openspace::rendering::helper
-
-#endif // __OPENSPACE_CORE___HELPER___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__

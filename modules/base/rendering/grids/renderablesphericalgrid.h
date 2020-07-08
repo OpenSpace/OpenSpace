@@ -28,7 +28,6 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -62,7 +61,6 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram;
 
-    properties::DMat4Property _gridMatrix;
     properties::Vec3Property _gridColor;
     properties::IntProperty _segments;
     properties::FloatProperty _lineWidth;
