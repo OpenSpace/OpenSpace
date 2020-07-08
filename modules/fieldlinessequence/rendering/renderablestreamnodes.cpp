@@ -494,6 +494,9 @@ void RenderableStreamNodes::initializeGL() {
     glGenBuffers(1, &_vertexFilteringBuffer);
     glGenBuffers(1, &_vertexindexBuffer);
     glGenBuffers(1, &_vertexStreamNumberBuffer);
+
+    // Needed for alpha transparency
+    setRenderBin(Renderable::RenderBin::Transparent);
 }
 
 void RenderableStreamNodes::loadNodeData() {
@@ -576,7 +579,6 @@ void RenderableStreamNodes::loadNodeData() {
         writeCachedFile("StreamnodesCacheindex");
     }
 createStreamnumberVector();
-
 
 }
 void RenderableStreamNodes::createStreamnumberVector() {

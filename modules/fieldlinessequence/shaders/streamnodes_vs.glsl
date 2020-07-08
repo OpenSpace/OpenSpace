@@ -201,7 +201,7 @@ void DecidehowtoshowClosetoEarth(){
         }
       if(EnhanceMethod == 1){
              vec4 fluxColor = getTransferFunctionColor(colorTable);
-             vs_color = vec4(fluxColor.xyz, fluxColor.w);
+             vs_color = vec4(fluxColor.xyz, fluxColor.a);
         }
       if(EnhanceMethod == 2){
             if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
@@ -225,7 +225,7 @@ void DecidehowtoshowClosetoEarth(){
                }
                else{
                vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-                vs_color = vec4(fluxColor3.xyz, fluxColor3.w);
+                vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
                 }
             }
             }
@@ -234,7 +234,7 @@ void DecidehowtoshowClosetoEarth(){
         //SizeandColor
     if(EnhanceMethod == 4){
              vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-             vs_color = vec4(fluxColor3.xyz, fluxColor3.w);
+             vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
 
             float tempR2 = rValue + 0.4; 
             if(tempR2 > 1.5){
@@ -248,7 +248,7 @@ void CheckdistanceMethod() {
         //Enhance by distance to Earth
         if(EnhanceMethod == 1 || EnhanceMethod == 4){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
-             vs_color = vec4(fluxColor2.xyz, fluxColor2.w);
+             vs_color = vec4(fluxColor2.xyz, fluxColor2.a);
         }
         if(DistanceMethod == 0){
              if(distance(earthPos, in_position) < DistanceThreshold){
@@ -291,7 +291,7 @@ void main() {
                 vec4 fluxColor = getTransferFunctionColor(colorTable);
 
                 if(fluxValue > thresholdFlux){
-                    vs_color = vec4(fluxColor.xyz, fluxColor.w);  
+                    vs_color = vec4(fluxColor.xyz, fluxColor.a);  
                     gl_PointSize = nodeSizeLargerFlux;
                 }
                 else{

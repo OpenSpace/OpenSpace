@@ -154,7 +154,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
     // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
     std::unique_ptr<TransferFunction> _transferFunction;
-    // Transfer function used to color lines /////////////
+    // Transfer function used to color line near Earth
     std::unique_ptr<TransferFunction> _transferFunctionEarth;
 
     // ------------------------------------ VECTORS ----------------------------------- //
