@@ -47,7 +47,7 @@ void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     //fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
 }
 
-std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
+/*std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
     return {
         
     };
@@ -60,6 +60,6 @@ scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
         absPath("${MODULE_SOFTWAREINTEGRATION}/scripts/filtering.lua")
     };
     return res;
-}
+}*/
 
 } // namespace openspace

@@ -37,8 +37,8 @@ public:
     SoftwareIntegrationModule();
     virtual ~SoftwareIntegrationModule() = default;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    scripting::LuaLibrary luaLibrary() const override;
+    //std::vector<documentation::Documentation> documentations() const override;
+    //scripting::LuaLibrary luaLibrary() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
