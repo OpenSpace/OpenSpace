@@ -130,7 +130,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
                 setRenderBinFromOpacity();
                 break;
             case BlendModeAdditive:
-                setRenderBin(Renderable::RenderBin::Transparent);
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
             default:
                 throw ghoul::MissingCaseException();

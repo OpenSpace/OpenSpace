@@ -350,7 +350,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
                 setRenderBinFromOpacity();
                 break;
             case BlendModeAdditive:
-                setRenderBin(Renderable::RenderBin::Transparent);
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
             default:
                 throw ghoul::MissingCaseException();
@@ -608,7 +608,7 @@ void RenderableLabels::initialize() {
         throw ghoul::RuntimeError("Error loading objects labels data.");
     }
 
-    setRenderBin(Renderable::RenderBin::Transparent);
+    setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }
 
 void RenderableLabels::initializeGL() {

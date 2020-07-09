@@ -115,8 +115,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _renderableType(RenderableTypeInfo, "Renderable")
     , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
+    , _renderableType(RenderableTypeInfo, "Renderable")
 {
     ZoneScoped
 
@@ -235,21 +235,25 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
 }
 
 void Renderable::setRenderBinFromOpacity() {
-    if (_opacity > 0.f && _opacity < 1.f) {
-        setRenderBin(Renderable::RenderBin::Transparent);
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::Opaque);
+    if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
+        if (_opacity >= 0.f && _opacity < 1.f) {
+            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+        }
+        else {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
     }
 }
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this](){
-        if (_opacity > 0.f && _opacity < 1.f) {
-            setRenderBin(Renderable::RenderBin::Transparent);
-        }
-        else {
-            setRenderBin(Renderable::RenderBin::Opaque);
+        if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
+            if (_opacity >= 0.f && _opacity < 1.f) {
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+            }
+            else {
+                setRenderBin(Renderable::RenderBin::Opaque);
+            }
         }
     });
 }

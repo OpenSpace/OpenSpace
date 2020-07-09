@@ -6,7 +6,7 @@
     <Scale value="1.0" />
   </Scene> -->
   <Node address="localhost" port="20401">
-    <Window fullScreen="false" name="OpenSpace">
+    <Window fullScreen="false" name="OpenSpace" draw2d="false">
       <Stereo type="none" />
       <!-- 16:9 aspect ratio -->
       <Size x="1024" y="1024" />
@@ -32,7 +32,7 @@
     </Window>
 
 
-  <Window fullScreen="false" name="GUI" tags="GUI">
+  <Window fullScreen="false" name="GUI" tags="GUI" draw3d="false">
     <Stereo type="none" />
     <Size x="1024" y="1024" />
     <Pos x="50" y="50" />

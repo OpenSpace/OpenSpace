@@ -105,6 +105,9 @@ private:
     /// Determines the color of the constellation lines
     properties::Vec3Property _color;
 
+    // Linewidth for the constellation bounds
+    properties::FloatProperty _lineWidth;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     /// The list of all loaded constellation bounds

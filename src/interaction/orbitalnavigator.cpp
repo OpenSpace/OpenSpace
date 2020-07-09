@@ -29,6 +29,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
+#include <cmath>
+
 namespace {
     constexpr const char* _loggerCat = "OrbitalNavigator";
 
@@ -244,10 +246,10 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-    , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
-    , _applyLinearFlight(ApplyLinearFlightInfo, false)
     , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
+    , _applyLinearFlight(ApplyLinearFlightInfo, false)
+    , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)      
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
@@ -467,7 +469,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Fly towards the flight destination distance. When getting closer than
         // arrivalThreshold terminate the flight
-        if (abs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
+        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
@@ -1080,7 +1082,7 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         // Retrieving the angle of a quaternion uses acos on the w component, which can
         // have numerical instability for values close to 1.0
         constexpr double Epsilon = 1.0e-13;
-        if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
+        if (std::fabs((std::fabs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
             _retargetAnchorInterpolator.end();
         }
         return result;

@@ -37,7 +37,7 @@ out vec4 vs_positionCameraSpace;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
-
+uniform mat4 crippedModelViewTransform;
 
 void main() {
     vs_positionCameraSpace = modelViewTransform * in_position;
@@ -48,6 +48,6 @@ void main() {
     vs_st = in_st;
     vs_screenSpaceDepth = positionScreenSpace.w;
     
-    // The normal transform should be the transposed inverse of the model transform?
-    vs_normalViewSpace = normalize(mat3(modelViewTransform) * in_normal);
+    //vs_normalViewSpace = normalize(transpose(inverse(mat3(crippedModelViewTransform))) * in_normal);
+    vs_normalViewSpace = normalize(mat3(crippedModelViewTransform) * in_normal);
 }

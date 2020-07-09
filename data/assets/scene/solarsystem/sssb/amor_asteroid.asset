@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'amor_asteroid', 'sssb_data_amor_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_amor_asteroid.csv', "Amor Asteroids", filepath, { 0.69, 0.47, 0.0 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_amor_asteroid.csv', "Amor Asteroids", filepath, { 1.0, 1.0, 1.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 4
 object.Renderable.TrailFade = 11

@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'halley-type_comet', 'sssb_data_halley-type_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_halley-type_comet.csv', "Halley-type Comets", filepath, { 0.3, 0.69, 0.67 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_halley-type_comet.csv', "Halley-type Comets", filepath, { 0.66, 0.66, 0.66 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 9
 object.Renderable.TrailFade = 18

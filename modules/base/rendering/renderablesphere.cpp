@@ -264,7 +264,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         _useAdditiveBlending = dictionary.value<bool>(UseAdditiveBlendingInfo.identifier);
 
         if (_useAdditiveBlending) {
-            setRenderBin(Renderable::RenderBin::Transparent);
+            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
         }
     }
 

@@ -53,8 +53,9 @@ public:
     enum class RenderBin : int {
         Background = 1,
         Opaque = 2,
-        Transparent = 4,
-        Overlay = 8
+        PreDeferredTransparent = 4,
+        PostDeferredTransparent = 8,
+        Overlay = 16
     };
 
     static std::unique_ptr<Renderable> createFromDictionary(

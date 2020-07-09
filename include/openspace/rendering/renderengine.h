@@ -189,6 +189,7 @@ private:
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
+    properties::FloatProperty _verticalLogOffset;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 

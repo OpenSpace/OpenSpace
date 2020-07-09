@@ -42,6 +42,7 @@ local PerseveranceNode = {
     GUI = {
         Name = "Perseverance Node",
         Path = "/Solar System/Missions/Perseverance",
+        Hidden = true
     }
 }
 

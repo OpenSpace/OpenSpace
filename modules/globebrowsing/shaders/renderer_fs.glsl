@@ -114,7 +114,7 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows],
                 return vec4(0.2, 0.2, 0.2, 1.0);
 #else
                 // butterworthFunc
-                return vec4(vec3(sqrt(r_u_pi / (r_u_pi + pow(length_d, 8.0)))), 1.0);
+                return vec4(vec3(sqrt(r_u_pi / (r_u_pi + pow(length_d, 2.0)))), 1.0);
 #endif
             }
             else {

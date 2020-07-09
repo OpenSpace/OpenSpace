@@ -82,6 +82,8 @@ asset.onInitialize(function ()
     sceneHelper.bindKeys(Keybindings)
     openspace.setDefaultGuiSorting()
 
+    openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)
+
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
     )

@@ -43,7 +43,11 @@
 #include <ghoul/misc/boolean.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
+#else
+#define GLFW_INCLUDE_NONE
+#endif
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
@@ -349,7 +353,6 @@ void mainInitFunc(GLFWwindow*) {
     //
     //  Screenshots
     //
-
     std::string screenshotPath = "${SCREENSHOTS}";
     if (global::configuration.shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
@@ -516,7 +519,7 @@ void mainPostSyncPreDrawFunc() {
 
 
 
-void mainRenderFunc(const RenderData& data) {
+void mainRenderFunc(const sgct::RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -591,7 +594,7 @@ void mainRenderFunc(const RenderData& data) {
 
 
 
-void mainDraw2DFunc(const RenderData& data) {
+void mainDraw2DFunc(const sgct::RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -854,16 +857,16 @@ void mainLogCallback(Log::Level level, const char* message) {
     // Remove the trailing \n that is passed along
     switch (level) {
         case Log::Level::Debug:
-            LDEBUGC("SGCT", msg.substr(0, msg.size() - 1));
+            LDEBUGC("SGCT", msg);
             break;
         case Log::Level::Info:
-            LINFOC("SGCT", msg.substr(0, msg.size() - 1));
+            LINFOC("SGCT", msg);
             break;
         case Log::Level::Warning:
-            LWARNINGC("SGCT", msg.substr(0, msg.size() - 1));
+            LWARNINGC("SGCT", msg);
             break;
         case Log::Level::Error:
-            LERRORC("SGCT", msg.substr(0, msg.size() - 1));
+            LERRORC("SGCT", msg);
             break;
 }
 
@@ -1272,7 +1275,7 @@ int main(int argc, char** argv) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     Configuration config = parseArguments(arg);
-    config::Cluster cluster = loadCluster(windowConfiguration);
+    config::Cluster cluster = loadCluster(absPath(windowConfiguration));
 
     Engine::Callbacks callbacks;
     callbacks.initOpenGL = mainInitFunc;
@@ -1293,10 +1296,16 @@ int main(int argc, char** argv) {
     try {
         Engine::create(cluster, callbacks, config);
     }
-    catch (...) {
+    catch (const std::runtime_error& e) {
+        LFATALC("main", e.what());
         Engine::destroy();
         global::openSpaceEngine.deinitialize();
         ghoul::deinitialize();
+    }
+    catch (...) {
+        global::openSpaceEngine.deinitialize();
+        ghoul::deinitialize();
+        Engine::destroy();
         throw;
     }
 
