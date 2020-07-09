@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-
 #include <openspace/documentation/documentation.h>
 
 namespace openspace {

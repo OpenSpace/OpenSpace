@@ -24,10 +24,6 @@
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 
-#include <modules/softwareintegration/tasks/constructoctreetask.h>
-//#include <modules/gaia/rendering/renderablegaiastars.h>
-#include <modules/softwareintegration/tasks/readfitstask.h>
-#include <modules/softwareintegration/tasks/readspecktask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
@@ -44,19 +40,16 @@ void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fRenderable, "No renderable factory existed");
     //fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fRenderable, "No task factory existed");
-    fTask->registerClass<ReadFitsTask>("ReadFitsTask");
-    fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
-    fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
+    //auto fTask = FactoryManager::ref().factory<Task>();
+    //ghoul_assert(fRenderable, "No task factory existed");
+    //fTask->registerClass<ReadFitsTask>("ReadFitsTask");
+    //fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
+    //fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
 }
 
 std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
     return {
-        //RenderableGaiaStars::Documentation(),
-        ReadFitsTask::Documentation(),
-        ReadSpeckTask::Documentation(),
-        ConstructOctreeTask::Documentation(),
+        
     };
 }
 
