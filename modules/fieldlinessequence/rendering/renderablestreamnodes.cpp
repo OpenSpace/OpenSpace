@@ -109,16 +109,6 @@ namespace {
         "Path to Color Table",
         "Color Table/Transfer Function to use for 'By Flux Value' coloring."
     };
-    constexpr openspace::properties::Property::PropertyInfo ColorTablePathEarthInfo = {
-        "colorTablePathEarth",
-        "Path to Color Table for nodes close to Earth",
-        "Color Table/Transfer Function for nodes around Earth."
-    };
-    constexpr openspace::properties::Property::PropertyInfo ColorTablePathFlowInfo = {
-        "colorTablePathFlow",
-        "Path to Color Table for nodes to show the flow",
-        "Color Table/Transfer Function for flow."
-    };
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
         "color",
         "Color",
@@ -317,8 +307,6 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDistancemethod(DistanceMethodInfo, OptionProperty::DisplayType::Dropdown)
     , _pEnhancemethod(EnhanceMethodInfo, OptionProperty::DisplayType::Dropdown)
     , _pColorTablePath(ColorTablePathInfo)
-    , _pColorTablePathEarth(ColorTablePathEarthInfo)
-    , _pColorTablePathFlow(ColorTablePathFlowInfo)
     , _pStreamColor(StreamColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
         glm::vec4(0.f),
@@ -364,18 +352,6 @@ void RenderableStreamNodes::definePropertyCallbackFunctions() {
     _pColorTablePath.onChange([this] {
         _transferFunction->setPath(_pColorTablePath);
         _colorTablePaths[0] = _pColorTablePath;
-        });
-
-
-    _pColorTablePathEarth.onChange([this] {
-        _transferFunctionEarth->setPath(_pColorTablePathEarth);
-        _colorTablePathsEarth[0] = _pColorTablePathEarth;
-        });
-
-
-    _pColorTablePathFlow.onChange([this] {
-        _transferFunctionFlow->setPath(_pColorTablePathFlow);
-        _colorTablePathsFlow[0] = _pColorTablePathFlow;
         });
 
     _pGoesEnergyBins.onChange([this] {
@@ -431,40 +407,29 @@ void RenderableStreamNodes::initializeGL() {
     if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
         return;
     }
-        
+
+    ghoul::Dictionary colorTablesPathsDictionary;
+    if (_dictionary->getValue(KeyColorTablePaths, colorTablesPathsDictionary)) {
+        const size_t nProvidedPaths = colorTablesPathsDictionary.size();
+        if (nProvidedPaths > 0) {
+            // Clear the default! It is already specified in the transferFunction
+            _colorTablePaths.clear();
+            for (size_t i = 1; i <= nProvidedPaths; ++i) {
+                _colorTablePaths.push_back(
+                    colorTablesPathsDictionary.value<std::string>(std::to_string(i)));
+            }
+        }
+    }
     // Set a default color table, just in case the (optional) user defined paths are
     // corrupt or not provided!
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-    _colorTablePathsEarth.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-    _colorTablePathsFlow.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
-    _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePathsEarth[0]));
-    _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePathsFlow[0]));
+    _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]));
+    _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]));
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
     //extractOptionalInfoFromDictionary(outputFolderPath);
-    
-    ghoul::Dictionary colorTablesPathsDictionary;
-    if (_dictionary->getValue(KeyColorTablePaths, colorTablesPathsDictionary)) {
-        const size_t nProvidedPaths = colorTablesPathsDictionary.size();
-        LDEBUG("Number of provided Paths: " + std::to_string(nProvidedPaths));
-        if (nProvidedPaths > 0) {
-            // Clear the default! It is already specified in the transferFunction
-            _colorTablePaths.clear();
-            _colorTablePathsEarth.clear();
-            _colorTablePathsFlow.clear();
-
-            _colorTablePaths.push_back(
-                colorTablesPathsDictionary.value<std::string>(std::to_string(1)));
-
-            _colorTablePathsEarth.push_back(
-                colorTablesPathsDictionary.value<std::string>(std::to_string(2)));
-
-            _colorTablePathsFlow.push_back(
-                colorTablesPathsDictionary.value<std::string>(std::to_string(3)));
-        }
-    }
 
     // dictionary is no longer needed as everything is extracted
     _dictionary.reset();
@@ -996,8 +961,6 @@ void RenderableStreamNodes::setupProperties() {
     _pColorGroup.addProperty(_pScalingmethod);
     _pColorGroup.addProperty(_pColorTableRange);
     _pColorGroup.addProperty(_pColorTablePath);
-    _pColorGroup.addProperty(_pColorTablePathEarth);
-    _pColorGroup.addProperty(_pColorTablePathFlow);
     _pColorGroup.addProperty(_pStreamColor);
     _pColorGroup.addProperty(_pFluxColorAlpha);
 
@@ -1057,8 +1020,6 @@ void RenderableStreamNodes::setupProperties() {
 
     // Set default
     _pColorTablePath = _colorTablePaths[0];
-    _pColorTablePathEarth = _colorTablePathsEarth[0];
-    _pColorTablePathFlow = _colorTablePathsFlow[0];
 }
 
 void RenderableStreamNodes::deinitializeGL() {
