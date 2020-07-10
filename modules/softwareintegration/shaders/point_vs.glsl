@@ -22,29 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#version __CONTEXT__
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/documentation/documentation.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace openspace {
+layout(location = 0) in vec3 in_position;
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "SoftwareIntegration";
+out float vs_depthClipSpace;
+out vec4 vs_positionViewSpace;
 
-    SoftwareIntegrationModule();
-    virtual ~SoftwareIntegrationModule() = default;
+uniform dmat4 modelViewTransform;
+uniform dmat4 MVPTransform;
+uniform float size;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    //scripting::LuaLibrary luaLibrary() const override;
-
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+void main() {
+    dvec4 objPosDouble      = dvec4(in_position, 1.0);
+    dvec4 positionViewSpace = modelViewTransform * objPosDouble;
+    dvec4 positionClipSpace = MVPTransform * objPosDouble;
+    
+    positionClipSpace.z = 0.0;
+    
+    vs_depthClipSpace    = float(positionClipSpace.w);
+    vs_positionViewSpace = vec4(positionViewSpace);
+    
+    gl_PointSize = size;
+    gl_Position = vec4(positionClipSpace);
+}

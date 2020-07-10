@@ -26,13 +26,21 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/softwareintegrationmodule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointscloud.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
+
+set(SHADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/point_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/point_fs.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
   "SoftwareIntegration"

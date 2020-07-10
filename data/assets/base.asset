@@ -19,6 +19,9 @@ asset.request('scene/milkyway/milkyway/volume')
 asset.request('scene/milkyway/constellations/constellation_art')
 asset.request('scene/milkyway/constellations/constellation_keybinds')
 
+-- TESTELITEST
+asset.require('examples/pointscloud')
+
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes

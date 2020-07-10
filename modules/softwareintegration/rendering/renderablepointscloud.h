@@ -22,29 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___RENDERABLEPOINTSCLOUD___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___RENDERABLEPOINTSCLOUD___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::opengl {
+    class ProgramObject;
+} // namespace ghoul::opengl
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "SoftwareIntegration";
+    class RenderablePointsCloud : public Renderable {
+    public:
+        RenderablePointsCloud(const ghoul::Dictionary& dictionary);
 
-    SoftwareIntegrationModule();
-    virtual ~SoftwareIntegrationModule() = default;
+        void initializeGL() override;
+        void deinitializeGL() override;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    //scripting::LuaLibrary luaLibrary() const override;
+        bool isReady() const override;
 
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
-};
+        void render(const RenderData& data, RendererTasks& rendererTask) override;
+        void update(const UpdateData& data) override;
 
-} // namespace openspace
+        static documentation::Documentation Documentation();
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+    protected:
+        struct Vertex {
+            float location[3];
+        };
+
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
+
+        properties::Vec3Property _color;
+        properties::FloatProperty _size;
+
+        GLuint _vaoID = 0;
+        GLuint _vBufferID = 0;
+
+        std::vector<Vertex> _varray;
+    };
+
+}// namespace openspace
+
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___RENDERABLEPOINTSCLOUD___H__

@@ -22,29 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/documentation/documentation.h>
+in float vs_depthClipSpace;
+in vec4 vs_positionViewSpace;
 
-namespace openspace {
+uniform vec3 color;
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "SoftwareIntegration";
+Fragment getFragment() {
+    Fragment frag;
+    frag.color.rgb = color;
+    frag.color.a   = 1.0;
+    frag.depth     = vs_depthClipSpace;
+    frag.gPosition = vs_positionViewSpace;
 
-    SoftwareIntegrationModule();
-    virtual ~SoftwareIntegrationModule() = default;
+    // There is no normal here
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
-    std::vector<documentation::Documentation> documentations() const override;
-    //scripting::LuaLibrary luaLibrary() const override;
+    return frag;
 
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+}

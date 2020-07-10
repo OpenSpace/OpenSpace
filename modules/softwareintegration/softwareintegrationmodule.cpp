@@ -24,36 +24,38 @@
 
 #include <modules/softwareintegration/softwareintegrationmodule.h>
 
+#include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-    SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
+SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
 
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    //fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
-    //auto fTask = FactoryManager::ref().factory<Task>();
-    //ghoul_assert(fRenderable, "No task factory existed");
-    //fTask->registerClass<ReadFitsTask>("ReadFitsTask");
-    //fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
-    //fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
+    fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
 }
 
-/*std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
+void SoftwareIntegrationModule::internalDeinitializeGL() {
+
+}
+
+std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
     return {
-        
+        RenderablePointsCloud::Documentation(),
     };
 }
 
-scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
+/*scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "softwareintegration";
     res.scripts = {
