@@ -30,12 +30,15 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
+#include <ghoul/misc/csvreader.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
     constexpr const char* ProgramName = "shaderProgram";
+    constexpr const char* _loggerCat = "PointsCloud";
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -73,7 +76,6 @@ namespace openspace {
             }
         };
     }
-
 
     RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
@@ -156,7 +158,7 @@ namespace openspace {
         _shaderProgram->setUniform("size", _size);
 
         // Changes GL state:
-        glEnable(GL_BLEND);
+        glEnablei(GL_BLEND, 0);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
@@ -171,9 +173,25 @@ namespace openspace {
     }
 
     void RenderablePointsCloud::update(const UpdateData&) {
+        if (!_isDirty) {
+            return;
+        }
+        std::string planets = absPath("${MODULE_SOFTWAREINTEGRATION}/testdata/testPointsCloud.csv");
+        std::vector<std::vector<std::string>> dataString = ghoul::loadCSVFile(planets);
+        //LWARNING(fmt::format("dataString: {}", dataString[0][0]));
 
-        // store data point in _varray
-        _varray.push_back({ 0.f, 0.f, 0.f });
+        for (int i = 0; i < dataString.size(); i++ ) { // rows
+                float x = std::stof(dataString[i][0]) * 3.0857E16;
+                float y = std::stof(dataString[i][1]) * 3.0857E16;
+                float z = std::stof(dataString[i][2]) * 3.0857E16;
+
+                _varray.push_back({ x, y, z });
+        }
+
+        // store data point in _varray dataString[i][j]
+        //_varray.push_back({ 10000000000.f, 0.f, 0.f });
+
+        //_varray.push_back({ dataString.x, v0.y, v0.z });
 
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
@@ -194,6 +212,8 @@ namespace openspace {
         );
 
         glBindVertexArray(0);
+
+        _isDirty = false;
     }
 
 } // namespace openspace

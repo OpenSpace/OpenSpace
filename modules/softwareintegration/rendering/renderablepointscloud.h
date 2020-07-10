@@ -65,6 +65,8 @@ namespace openspace {
         GLuint _vaoID = 0;
         GLuint _vBufferID = 0;
 
+        bool _isDirty = true;
+
         std::vector<Vertex> _varray;
     };
 
