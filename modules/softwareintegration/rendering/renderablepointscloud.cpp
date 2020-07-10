@@ -188,11 +188,6 @@ namespace openspace {
                 _varray.push_back({ x, y, z });
         }
 
-        // store data point in _varray dataString[i][j]
-        //_varray.push_back({ 10000000000.f, 0.f, 0.f });
-
-        //_varray.push_back({ dataString.x, v0.y, v0.z });
-
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
         glBufferData(
