@@ -214,7 +214,7 @@ documentation::Documentation RenderableLabels::Documentation() {
             {
                 LabelTextInfo.identifier,
                 new StringVerifier,
-                Optional::No,
+                Optional::Yes,
                 LabelTextInfo.description
             },
             {
@@ -314,7 +314,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     , _labelMaxSize(LabelMaxSizeInfo, 20.f, 0.5f, 100.f)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _enableFadingEffect(EnableFadingEffectInfo, false)
-    , _labelText(LabelTextInfo)
+    , _labelText(LabelTextInfo, "")
     , _fadeStartDistance(FadeStartDistInfo, 1.f, 0.f, 100.f)
     , _fadeEndDistance(FadeEndDistInfo, 1.f, 0.f, 100.f)
     , _fadeStartSpeed(FadeStartSpeedInfo, 1.f, 1.f, 100.f)
