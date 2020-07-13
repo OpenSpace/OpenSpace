@@ -499,11 +499,11 @@ void RenderableStreamNodes::initializeGL() {
 
 void RenderableStreamNodes::loadNodeData() {
     createStreamnumberVector();
+
     if (shouldreadBinariesDirectly) {
         bool success = loadBinaryfilesDirectly("");
         if(success) return;
     }
-    LDEBUG("Vi reached outside of loadbinariesdirectly");
     std::string _file = "StreamnodesCachePosition";
     std::string _file2 = "StreamnodesCacheColor";
     std::string _file3 = "StreamnodesCacheRadius";
@@ -561,7 +561,6 @@ void RenderableStreamNodes::loadNodeData() {
         loadFilesIntoRam();
         writeCachedFile("StreamnodesCachePosition");
     }
-createStreamnumberVector();
 
 }
 void RenderableStreamNodes::createStreamnumberVector() {
@@ -825,11 +824,11 @@ bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin
     std::string _file = _binarySourceFilePath  + "\\StreamnodesCachePosition" + energybin;
     std::string _file2 = _binarySourceFilePath + "\\StreamnodesCacheColor" + energybin;
     std::string _file3 = _binarySourceFilePath + "\\StreamnodesCacheRadius" + energybin;
-    /*
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         _file,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
+
     std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(
         _file2,
         ghoul::filesystem::CacheManager::Persistent::Yes
@@ -838,16 +837,10 @@ bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin
         _file3,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
-   
-    std::ifstream fileStream(cachedFile, std::ifstream::binary);
-    std::ifstream fileStream2(cachedFile2, std::ifstream::binary);
-    std::ifstream fileStream3(cachedFile3, std::ifstream::binary);
-    */
-     
     std::ifstream fileStream(_file, std::ifstream::binary);
     std::ifstream fileStream2(_file2, std::ifstream::binary);
     std::ifstream fileStream3(_file3, std::ifstream::binary);
-    
+
     if (fileStream.good()) {
         int8_t version = 0;
         fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
@@ -1196,7 +1189,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform("modelViewProjection",
             data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
-    // this is taken by Jons data, each point multiplicated by Au to Meter.
+
     glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
     //SceneGraphNode* earthNode = sceneGraphNode("Earth");
     
@@ -1290,7 +1283,7 @@ if (_pEnhancemethod == 2) {
         static_cast<GLsizei>(_vertexPositions.size())
     );
 }
-if (_pEnhancemethod == 3) {
+/*if (_pEnhancemethod == 3) {
     //LDEBUG("Vi borde rendera linjer");
     _shaderProgram->setUniform("firstrender", false);
     glLineWidth(_pLineWidth);
@@ -1299,7 +1292,7 @@ if (_pEnhancemethod == 3) {
         _lineStart.data(),
         _lineCount.data(),
         static_cast<GLsizei>(_lineStart.size()));
-}
+}*/
 
 // _shaderProgram->setUniform("firstrender", false);
 // glDrawArrays(
@@ -1381,9 +1374,6 @@ void RenderableStreamNodes::ReadInterestingStreamsFromJson() {
         int sn = std::stoi(streamnumber);
         _interestingStreams.push_back(sn);
     }
-
-   
-
 }
 
 void RenderableStreamNodes::update(const UpdateData& data) {
