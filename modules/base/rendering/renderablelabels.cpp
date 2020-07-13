@@ -201,7 +201,7 @@ documentation::Documentation RenderableLabels::Documentation() {
             },
             {
                 LabelColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 LabelColorInfo.description,
             },
@@ -304,9 +304,9 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _labelColor(
         LabelColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(1.f, 1.f, 1.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _labelSize(LabelSizeInfo, 8.f, 0.5f, 30.f)
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
@@ -338,6 +338,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         "RenderableLabels"
     );
 
+    addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
     _blendMode.addOptions({
@@ -691,7 +692,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
                                     const glm::dvec3& orthoRight,
                                     const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    glm::vec4 textColor = _labelColor;
+    glm::vec4 textColor = glm::vec4(glm::vec3(_labelColor), 1.f);
 
     textColor.a *= fadeInVariable;
     textColor.a *= _opacity;

@@ -81,14 +81,14 @@ private:
     properties::FloatProperty _size;
     properties::Vec2Property _offset;
     properties::FloatProperty _nightFactor;
-    properties::FloatProperty _transparency;
+    properties::FloatProperty _colorFilter;
     properties::BoolProperty _enabled;
     properties::FloatProperty _zFightingPercentage;
     properties::IntProperty _nShadowSamples;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
-    UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor,
+    UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture

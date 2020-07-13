@@ -31,7 +31,7 @@
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -61,9 +61,9 @@ protected:
 
     ghoul::opengl::ProgramObject* _program;
 
-    properties::Vec4Property _xColor;
-    properties::Vec4Property _yColor;
-    properties::Vec4Property _zColor;
+    properties::Vec3Property _xColor;
+    properties::Vec3Property _yColor;
+    properties::Vec3Property _zColor;
 
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
