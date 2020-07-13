@@ -21,50 +21,34 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ #include "fragment.glsl"
+in vec4 vs_color;
+in float vs_depth;
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+Fragment getFragment() {
+    if (vs_color.a == 0) {
+        discard;
+    }
 
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/rendering/renderablestreamnodes.h>
-#include <modules/fieldlinessequence/rendering/renderablelighttravel.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+    vec4 fragColor = vs_color;
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+    Fragment frag;
+    frag.depth = vs_depth;
+    frag.color = fragColor;
+    //if(vs_st.x != -1){
+    //if (gl_FrontFacing) {
+    //    frag.color = texture(texture1, vs_st);
+   // }
+   // else {
+   //     frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+   // }
+   // }
 
-namespace openspace {
+    // G-Buffer
+    frag.gPosition = vec4(0.0); //vs_gPosition;
+    // There is no normal here
+    // TODO: Add the correct normal if necessary (JCC)
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
-
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
-
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
+    return frag;
 }
-
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
-    factory->registerClass<RenderableLightTravel>("RenderableLightTravel");
-}
-
-} // namespace openspace

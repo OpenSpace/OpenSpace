@@ -22,49 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#version __CONTEXT__
+uniform mat4      modelViewProjection;
 
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/rendering/renderablestreamnodes.h>
-#include <modules/fieldlinessequence/rendering/renderablelighttravel.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+layout(location = 0) in vec3 in_position;
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+out vec4 vs_color;
+out float vs_depth;
 
-namespace openspace {
+void main() {
+   
+   vs_color = vec4(1.0, 1.0, 1.0, 1.0);
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
-
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
-
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
+   vec4 position_in_meters = vec4(in_position, 1);
+   vec4 positionClipSpace = modelViewProjection * position_in_meters;
+   gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+   vs_depth = gl_Position.w;
 }
-
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
-    factory->registerClass<RenderableLightTravel>("RenderableLightTravel");
-}
-
-} // namespace openspace

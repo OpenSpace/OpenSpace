@@ -74,6 +74,7 @@ uniform int activestreamnumber;
 uniform bool firstrender;
 uniform int EnhanceMethod;
 uniform double    time;
+//uniform vec3 camerapos;
 //uniform float interestingStreams[4];
 
 // Inputs
@@ -359,9 +360,19 @@ void main() {
         vec4 position_in_meters = vec4(in_position, 1);
         vec4 positionClipSpace = modelViewProjection * position_in_meters;
         //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
-        
+       /* if(distance(position_in_meters.xyz, camerapos) < 3000000000.f){
+        vs_color = streamColor;
+        }
+        else{
+        vs_color = vs_color;
+        }
+        */
         //gl_PointSize = nodeSize;
         gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
-          
         vs_depth = gl_Position.w;
+        
+       // if(distance(positionClipSpace.xyz, camerapos) < 0.f){
+       
+        
+        
 }
