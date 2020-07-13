@@ -127,6 +127,14 @@ local Keybindings = {
         Local = false
     },
     {
+	Key = "F10",
+		Command = "openspace.time.setTime('2000-JUL-14 10:03:00.00')",
+		Documentation = "Restart button for CME",
+		Name = "Restart button to start of CME",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
         Key = "i",
         Command = [[
             textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');

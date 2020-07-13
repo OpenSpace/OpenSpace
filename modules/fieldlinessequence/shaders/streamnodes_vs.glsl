@@ -220,8 +220,6 @@ void DecidehowtoshowClosetoEarth(){
         //lines
       if(EnhanceMethod == 3){
       // Draw every other line grey
-      vs_color = vec4(0);
-      if(!firstrender){
       vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
 
       float interestingStreams[4] = float[](154, 156, 153, 163);
@@ -261,7 +259,6 @@ void DecidehowtoshowClosetoEarth(){
                  // vs_color = vec4(0.37, 0.37, 0.37, flowColor.a);
                 }
             }
-        }
        }
         //    }
     }
@@ -276,9 +273,6 @@ void DecidehowtoshowClosetoEarth(){
             }
             gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
     }
- 
-    
-
 }
 
 void CheckdistanceMethod() { 
@@ -353,7 +347,6 @@ void main() {
     //if(!firstrender){
     //CheckdistanceMethod();
    // }
-   
     
     //temporary things for trying out point sprites. 
       /*  if(!firstrender && vs_color.w != 0){
