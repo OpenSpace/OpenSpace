@@ -60,8 +60,7 @@ namespace {
     constexpr const GLuint VaPosition   = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaColor      = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaFiltering  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaIndex      = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaStreamnumber = 4; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaStreamnumber = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
 
     constexpr int8_t CurrentCacheVersion = 2;
 
@@ -71,6 +70,8 @@ namespace {
     constexpr const char* KeyInputFileType = "InputFileType";
     // [STRING] should be path to folder containing the input files
     constexpr const char* KeySourceFolder = "SourceFolder";
+    // [STRING] should be path to folder containing data in binary format
+    constexpr const char* KeyBinarySourceFolder = "BinarySourceFolder";
 
     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
     // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
@@ -246,6 +247,11 @@ namespace {
         "Speed",
         "Speed of the flow."
     };
+    constexpr openspace::properties::Property::PropertyInfo FlowColoringInfo = {
+        "coloring",
+        "Color either by Flowcolor or Flow colortable",
+        "If set to true the flow will be colored by Flowcolor"
+    };
     
     enum class SourceFileType : int {
         Json = 0,
@@ -341,6 +347,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
     , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
     , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
+    , _pFlowColoring(FlowColoringInfo, false)
         
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -356,8 +363,12 @@ void RenderableStreamNodes::definePropertyCallbackFunctions() {
 
     _pGoesEnergyBins.onChange([this] {
         if (_pGoesEnergyBins == 1) {
+            if (shouldreadBinariesDirectly) {
+                bool success = loadBinaryfilesDirectly("_emin03");
+                if (success) return;
+            }
             _isLoadingNewEnergyBin = true;
-            std::string _file = "StreamnodesCacheindex_emin03";
+            std::string _file = "StreamnodesCachePosition_emin03";
             std::string cachedFile = FileSys.cacheManager()->cachedFilename(
                 _file,
                 ghoul::filesystem::CacheManager::Persistent::Yes
@@ -369,8 +380,12 @@ void RenderableStreamNodes::definePropertyCallbackFunctions() {
             }
         }
         else {
+            if (shouldreadBinariesDirectly) {
+                bool success = loadBinaryfilesDirectly("");
+                if (success) return;
+            }
             _isLoadingNewEnergyBin = true;
-            std::string _file = "StreamnodesCacheindex";
+            std::string _file = "StreamnodesCachePosition";
             std::string cachedFile = FileSys.cacheManager()->cachedFilename(
                 _file,
                 ghoul::filesystem::CacheManager::Persistent::Yes
@@ -451,9 +466,10 @@ void RenderableStreamNodes::initializeGL() {
         loadNodeData();
     }
 
-   // int distanceThreshold = 65525112832;
-    int distanceThreshold = 33561643008;
-    ExtractandwriteInterestingStreams(distanceThreshold);
+    //float distanceThreshold = 65525112832.f;
+    //float distanceThreshold = 33561643008.f;
+    //ExtractandwriteInterestingStreams(distanceThreshold);
+    //ReadInterestingStreamsFromJson();
     
 
     // If we are loading in states dynamically we would read new states during runtime, 
@@ -475,7 +491,6 @@ void RenderableStreamNodes::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer);
     glGenBuffers(1, &_vertexColorBuffer);
     glGenBuffers(1, &_vertexFilteringBuffer);
-    glGenBuffers(1, &_vertexindexBuffer);
     glGenBuffers(1, &_vertexStreamNumberBuffer);
 
     // Needed for alpha transparency
@@ -483,21 +498,25 @@ void RenderableStreamNodes::initializeGL() {
 }
 
 void RenderableStreamNodes::loadNodeData() {
-    std::string _file = "StreamnodesCacheindex";
+
+    if (shouldreadBinariesDirectly) {
+        bool success = loadBinaryfilesDirectly("");
+        if(success) return;
+    }
+    std::string _file = "StreamnodesCachePosition";
+    std::string _file2 = "StreamnodesCacheColor";
+    std::string _file3 = "StreamnodesCacheRadius";
     if (shouldwritecacheforemin03) {
-        _file = "StreamnodesCacheindex_emin03";
+        _file = "StreamnodesCachePosition_emin03";
+        _file2 = "StreamnodesCacheColor_emin03";
+        _file3 = "StreamnodesCacheRadius_emin03";
     }
     //if the files doesn't exist we create them, this is just so that we then can 
     // cache the actual binary files
     if (!FileSys.fileExists(_file)) {
         std::ofstream fileStream(_file, std::ofstream::binary);
-        std::ofstream fileStream2("StreamnodesCacheColor", std::ofstream::binary);
-        std::ofstream fileStream3("StreamnodesCacheRadius", std::ofstream::binary);
-        std::ofstream fileStream4("StreamnodesCachePosition", std::ofstream::binary);
-        std::ofstream fileStream5("StreamnodesCacheindex_emin03", std::ofstream::binary);
-        std::ofstream fileStream6("StreamnodesCacheColor_emin03", std::ofstream::binary);
-        std::ofstream fileStream7("StreamnodesCacheRadius_emin03", std::ofstream::binary);
-        std::ofstream fileStream8("StreamnodesCachePosition_emin03", std::ofstream::binary);
+        std::ofstream fileStream2(_file2, std::ofstream::binary);
+        std::ofstream fileStream3(_file3, std::ofstream::binary);
 
         fileStream.write(
             reinterpret_cast<const char*>(&CurrentCacheVersion),
@@ -508,26 +527,6 @@ void RenderableStreamNodes::loadNodeData() {
             sizeof(int8_t)
         );
         fileStream3.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream4.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream5.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream6.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream7.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-        fileStream8.write(
             reinterpret_cast<const char*>(&CurrentCacheVersion),
             sizeof(int8_t)
         );
@@ -552,14 +551,14 @@ void RenderableStreamNodes::loadNodeData() {
             // If thats the case we want to load in the files from json format 
             // and then write new cached files. 
             loadFilesIntoRam();
-            writeCachedFile("StreamnodesCacheindex");
+            writeCachedFile("StreamnodesCachePosition");
         }
     }
     else {
         // We could not find the cachedfiles, parse the data statically 
         // instead and write it to binary format.
         loadFilesIntoRam();
-        writeCachedFile("StreamnodesCacheindex");
+        writeCachedFile("StreamnodesCachePosition");
     }
 createStreamnumberVector();
 
@@ -572,7 +571,7 @@ void RenderableStreamNodes::createStreamnumberVector() {
         for (int k = 0; k < 1999; ++k) {
                 
             _vertexStreamnumber.push_back(i);
-            lineStartIdx++;
+            //lineStartIdx++;
         }
             
         _lineCount.push_back(static_cast<GLsizei>(nPoints));
@@ -613,17 +612,14 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
         _lineStart.clear();
         _vertexRadius.clear();
         _vertexColor.clear();
-        _vertexIndex.clear();
 
         int counter = 0;
-        int NodeIndexCounter = 0;
 
         const size_t nPoints = 1;
 
         // Loop through all the streams
         for (int i = 0; i < numberofStreams; ++i) {
 
-            NodeIndexCounter = 0;
 
             // Make an iterator at stream number i, then loop through that stream 
             // by iterating forward
@@ -649,9 +645,6 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
                 float rTimesFluxValue = fluxValue;
                 _vertexColor.push_back(rTimesFluxValue);
                 _vertexRadius.push_back(rValue);
-                _vertexIndex.push_back(NodeIndexCounter);
-                // NodeIndexcounter is used to decide how many nodes we want to show. 
-                NodeIndexCounter++;
                 rValue = rValue * AuToMeter;
 
                 glm::vec3 sphericalcoordinates =
@@ -674,23 +667,22 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
         _statesPos.push_back(_vertexPositions);     
         _statesColor.push_back(_vertexColor);
         _statesRadius.push_back(_vertexRadius);
-        _statesIndex.push_back(_vertexIndex);
     }    
     return true;
 }
 
 void RenderableStreamNodes::writeCachedFile(const std::string& file) const {
     // Todo, write all of the vertexobjects into here 
-    std::string _file = "StreamnodesCacheindex";
+    std::string _file = "StreamnodesCachePosition";
     std::string _file2 = "StreamnodesCacheColor";
     std::string _file3 = "StreamnodesCacheRadius";
-    std::string _file4 = "StreamnodesCachePosition";
+
 
     if(shouldwritecacheforemin03){
-        _file = "StreamnodesCacheindex_emin03";
+        _file = "StreamnodesCachePosition_emin03";
         _file2 = "StreamnodesCacheColor_emin03";
         _file3 = "StreamnodesCacheRadius_emin03";
-        _file4 = "StreamnodesCachePosition_emin03";
+
     }
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         _file,
@@ -718,15 +710,19 @@ void RenderableStreamNodes::writeCachedFile(const std::string& file) const {
         _file3,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
-    std::string cachedFile4 = FileSys.cacheManager()->cachedFilename(
-        _file4,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
+  
     std::ofstream fileStream2(cachedFile2, std::ofstream::binary);
     std::ofstream fileStream3(cachedFile3, std::ofstream::binary);
-    std::ofstream fileStream4(cachedFile4, std::ofstream::binary);
-
-    int32_t nValues = static_cast<int32_t>(_vertexPositions.size());
+   /* fileStream2.write(
+        reinterpret_cast<const char*>(&CurrentCacheVersion),
+        sizeof(int8_t)
+    );
+    fileStream3.write(
+        reinterpret_cast<const char*>(&CurrentCacheVersion),
+        sizeof(int8_t)
+    );
+    */
+    int32_t nValues = static_cast<int32_t>(_vertexRadius.size());
     if (nValues == 0) {
         throw ghoul::RuntimeError("Error writing cache: No values were loaded");
         return;
@@ -734,17 +730,15 @@ void RenderableStreamNodes::writeCachedFile(const std::string& file) const {
 
     fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-    LDEBUG("nvalues _vertex index size" + std::to_string(_vertexIndex.size()));
 
     for(int i = 0; i < _nStates; ++i){
-    fileStream.write(reinterpret_cast<const char*>(_statesIndex[i].data()), 
-        nValues * sizeof(_vertexIndex[0]));
+    fileStream.write(reinterpret_cast<const char*>(_statesPos[i].data()),
+        nValues * sizeof(_vertexPositions[0]));
     fileStream2.write(reinterpret_cast<const char*>(_statesColor[i].data()), 
         nValues * sizeof(_vertexColor[0]));
     fileStream3.write(reinterpret_cast<const char*>(_statesRadius[i].data()), 
-        nValues * sizeof(_vertexColor[0]));
-    fileStream4.write(reinterpret_cast<const char*>(_statesPos[i].data()), 
-        nValues * sizeof(_vertexPositions[0]));
+        nValues * sizeof(_vertexRadius[0]));
+   
     }
 }
 
@@ -754,7 +748,6 @@ bool RenderableStreamNodes::readCachedFile(const std::string& file, const std::s
 
     std::string _file2 = "StreamnodesCacheColor" + energybin;
     std::string _file3 = "StreamnodesCacheRadius" + energybin;
-    std::string _file4 = "StreamnodesCachePosition" + energybin;
     std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(
         _file2,
         ghoul::filesystem::CacheManager::Persistent::Yes
@@ -763,42 +756,38 @@ bool RenderableStreamNodes::readCachedFile(const std::string& file, const std::s
         _file3,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
-    std::string cachedFile4 = FileSys.cacheManager()->cachedFilename(
-        _file4,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
+
     std::ifstream fileStream2(cachedFile2, std::ifstream::binary);
     std::ifstream fileStream3(cachedFile3, std::ifstream::binary);
-    std::ifstream fileStream4(cachedFile4, std::ifstream::binary);
 
     if (fileStream.good()) {
         int8_t version = 0;
         fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
         if (version != CurrentCacheVersion) {
             LINFO("The format of the cached file has changed: deleting old cache");
+            LDEBUG("Version: " + std::to_string(version));
             fileStream.close();
-            FileSys.deleteFile(file);
-            FileSys.deleteFile(cachedFile2);
-            FileSys.deleteFile(cachedFile3);
-            FileSys.deleteFile(cachedFile4);
+            //FileSys.deleteFile(file);
+            //FileSys.deleteFile(cachedFile2);
+            //FileSys.deleteFile(cachedFile3);
             return false;
         }
         LDEBUG("testar int8" + std::to_string(version));
         int32_t nValuesvec = 0;
         fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));   
 
-        _statesIndex.clear();
         _statesColor.clear();
         _statesPos.clear();
         _statesRadius.clear();
+       
         for (int i = 0; i < _nStates; ++i) {
-            _vertexIndex.resize(nValuesvec);
+            _vertexPositions.resize(nValuesvec);
             fileStream.read(reinterpret_cast<char*>(
-                _vertexIndex.data() ),
-                nValuesvec * sizeof(_vertexIndex[0]));
+                _vertexPositions.data()),
+                nValuesvec * sizeof(_vertexPositions[0]));
 
-            _statesIndex.push_back(_vertexIndex);
-            _vertexIndex.clear();
+            _statesPos.push_back(_vertexPositions);
+            _vertexPositions.clear();
         }
         for (int i = 0; i < _nStates; ++i) {
             _vertexColor.resize(nValuesvec);
@@ -819,15 +808,7 @@ bool RenderableStreamNodes::readCachedFile(const std::string& file, const std::s
             _statesRadius.push_back(_vertexRadius);
             _vertexRadius.clear();
         }
-        for (int i = 0; i < _nStates; ++i) {
-            _vertexPositions.resize(nValuesvec);
-            fileStream4.read(reinterpret_cast<char*>(
-                _vertexPositions.data() ),
-                nValuesvec * sizeof(_vertexPositions[0]));
-
-            _statesPos.push_back(_vertexPositions);
-            _vertexPositions.clear();
-        }
+        
             _isLoadingNewEnergyBin = false;
             bool success = fileStream.good();
               
@@ -835,6 +816,87 @@ bool RenderableStreamNodes::readCachedFile(const std::string& file, const std::s
     }
     _isLoadingNewEnergyBin = false;
     return false;
+}
+
+bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin) {
+    
+    LDEBUG("Loading in binary files directly from sync folder");
+    std::string _file = _binarySourceFilePath  + "\\StreamnodesCachePosition" + energybin;
+    std::string _file2 = _binarySourceFilePath + "\\StreamnodesCacheColor" + energybin;
+    std::string _file3 = _binarySourceFilePath + "\\StreamnodesCacheRadius" + energybin;
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        _file,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+    std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(
+        _file2,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+    std::string cachedFile3 = FileSys.cacheManager()->cachedFilename(
+        _file3,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+    std::ifstream fileStream(cachedFile, std::ifstream::binary);
+    std::ifstream fileStream2(cachedFile2, std::ifstream::binary);
+    std::ifstream fileStream3(cachedFile3, std::ifstream::binary);
+
+    if (fileStream.good()) {
+        int8_t version = 0;
+        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+        if (version != CurrentCacheVersion) {
+            LINFO("The format of the cached file has changed: deleting old cache");
+            LDEBUG("Version: " + std::to_string(version));
+            fileStream.close();
+            //FileSys.deleteFile(file);
+            //FileSys.deleteFile(cachedFile2);
+            //FileSys.deleteFile(cachedFile3);
+            return false;
+        }
+        LDEBUG("testar int8" + std::to_string(version));
+        int32_t nValuesvec = 0;
+        fileStream.read(reinterpret_cast<char*>(&nValuesvec), sizeof(int32_t));
+
+        _statesColor.clear();
+        _statesPos.clear();
+        _statesRadius.clear();
+
+        for (int i = 0; i < _nStates; ++i) {
+            _vertexPositions.resize(nValuesvec);
+            fileStream.read(reinterpret_cast<char*>(
+                _vertexPositions.data()),
+                nValuesvec * sizeof(_vertexPositions[0]));
+
+            _statesPos.push_back(_vertexPositions);
+            _vertexPositions.clear();
+        }
+        for (int i = 0; i < _nStates; ++i) {
+            _vertexColor.resize(nValuesvec);
+            fileStream2.read(reinterpret_cast<char*>(
+                _vertexColor.data()),
+                nValuesvec * sizeof(_vertexColor[0]));
+
+            _statesColor.push_back(_vertexColor);
+            _vertexColor.clear();
+        }
+
+        for (int i = 0; i < _nStates; ++i) {
+            _vertexRadius.resize(nValuesvec);
+            fileStream3.read(reinterpret_cast<char*>(
+                _vertexRadius.data()),
+                nValuesvec * sizeof(_vertexColor[0]));
+
+            _statesRadius.push_back(_vertexRadius);
+            _vertexRadius.clear();
+        }
+
+        _isLoadingNewEnergyBin = false;
+        bool success = fileStream.good();
+
+        return success;
+    }
+    _isLoadingNewEnergyBin = false;
+    return false;
+
 }
 /**
 * Extracts the general information (from the lua modfile) that is mandatory for the class
@@ -873,6 +935,14 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary(
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
         return false;
     }
+    std::string binarySourceFolderPath;
+    if (!_dictionary->getValue(KeyBinarySourceFolder, binarySourceFolderPath)) {
+        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyBinarySourceFolder));
+        return false;
+    }
+    //constexpr const char temp = '\';
+    _binarySourceFilePath = binarySourceFolderPath;
+    LDEBUG(binarySourceFolderPath);
 
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
@@ -900,6 +970,7 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary(
             ));
         return false;
     }
+
     return true;
 }
 
@@ -987,6 +1058,7 @@ void RenderableStreamNodes::setupProperties() {
     _pFlowGroup.addProperty(_pFlowParticleSize);
     _pFlowGroup.addProperty(_pFlowParticleSpacing);
     _pFlowGroup.addProperty(_pFlowSpeed);
+    _pFlowGroup.addProperty(_pFlowColoring);
 
     // --------------------- Add Options to OptionProperties --------------------- //
     _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
@@ -1015,6 +1087,7 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Lines), "Lines");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
+    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::test), "test");
 
     definePropertyCallbackFunctions();
 
@@ -1034,8 +1107,6 @@ void RenderableStreamNodes::deinitializeGL() {
 
     glDeleteBuffers(1, &_vertexFilteringBuffer);
     _vertexFilteringBuffer = 0;
-    glDeleteBuffers(1, &_vertexindexBuffer);
-    _vertexindexBuffer = 0;
     glDeleteBuffers(1, &_vertexStreamNumberBuffer);
     _vertexStreamNumberBuffer = 0;
 
@@ -1119,6 +1190,13 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
 
 
     glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
+    //SceneGraphNode* earthNode = sceneGraphNode("Earth");
+    
+    //Earthnode worldposition, is not aligned with the actual position shown as it seems right now.
+    //glm::vec3 earthPos = earthNode->worldPosition();
+    
+    // this returns a value that goes from the sun, prolly because it is the root node. 
+    //glm::vec3 earthPos = earthNode->position();
     //earthPos : 136665866240.000000, 44111921152.000000, -49989160960.000000
     //     Jon : 94499869340,         -115427843118,       11212075887.3 
 
@@ -1152,6 +1230,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         "time",
         global::windowDelegate.applicationTime() * -1
     );
+    _shaderProgram->setUniform("flowColoring", _pFlowColoring);
+    
+    //_shaderProgram->setUniform("camerapos", data.camera.positionVec3());
+    //glm::vec3 testvec = data.camera.positionVec3();
+    //LDEBUG("test: " + std::to_string(testvec.x));
     if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
         ghoul::opengl::TextureUnit textureUnit;
         textureUnit.activate();
@@ -1239,41 +1322,60 @@ void RenderableStreamNodes::computeSequenceEndTime() {
         _sequenceEndTime = DBL_MAX;
     }
 }
-void RenderableStreamNodes::ExtractandwriteInterestingStreams(int distanceThreshold) {
+void RenderableStreamNodes::ExtractandwriteInterestingStreams(float distanceThreshold) {
     glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
     //65525112832
     std::vector<std::string> interestingStreams;
     //for (int i = 0; i < _nStates; i++) {
     _vertexPositions = _statesPos[100];
-        //for(int j = 0; j < 383; j++){
+    //for(int j = 0; j < 383; j++){
     int counter = 0;
     int streamnumber = 0;
-        for (int k = 0; k < _vertexPositions.size(); k++) {
-            if (counter > 1999) {
-                counter = 0;
-                streamnumber++;
-            }
-            if (glm::distance(_vertexPositions[k], earthPos) < distanceThreshold) {
-               // k++;
-                interestingStreams.push_back(std::to_string(streamnumber));
-                LDEBUG("Vi pushade bak " + std::to_string(streamnumber));
-
-                k = k + (1999 - counter);
-                streamnumber++;
-                //break;
-            }
-            counter++;
+    LDEBUG("Vi kom in i extract function");
+    for (int k = 0; k < _vertexPositions.size(); k++) {
+        if (counter > 1999) {
+            counter = 0;
+            streamnumber++;
         }
+        //LDEBUG("Vi kom in i extract function test2");
+        if (glm::distance(_vertexPositions[k], earthPos) < distanceThreshold) {
+            // k++;
+            interestingStreams.push_back(std::to_string(streamnumber));
+            LDEBUG("Vi pushade bak " + std::to_string(streamnumber));
 
-        std::string fileoutputpath = absPath("${ASSETS}") + 
-        "/scene/solarsystem/sun/heliosphere/mas/bastille_day/StreamSelection/streamSelection2.json";
-        std::ofstream streamdata(fileoutputpath);
-        json jsonobj;
-        jsonobj["test"] = interestingStreams;
-        //interestingStreams << jsonobj;
-        streamdata << jsonobj << std::endl;
+            k = k + (1999 - counter);
+            streamnumber++;
+            //break;
+        }
+        counter++;
+    }
 
-    
+    std::string fileoutputpath = absPath("${ASSETS}") +
+        "/scene/solarsystem/sun/heliosphere/mas/bastille_day/StreamSelection/streamSelection1.json";
+    std::ofstream streamdata(fileoutputpath);
+    json jsonobj;
+    jsonobj["test"] = interestingStreams;
+    //interestingStreams << jsonobj;
+    streamdata << jsonobj << std::endl;
+}
+void RenderableStreamNodes::ReadInterestingStreamsFromJson() {
+
+    std::string fileinputpath = absPath("${ASSETS}") +
+        "/scene/solarsystem/sun/heliosphere/mas/bastille_day/StreamSelection/streamSelection1.json";
+    std::ifstream streamdata(fileinputpath);
+    json jsonobj = json::parse(streamdata);
+    for (json::iterator lineIter = jsonobj["test"].begin();
+        lineIter != jsonobj["test"].end(); ++lineIter) {
+        std::string streamnumber = (*lineIter).get<std::string>();
+        
+        //LDEBUG("interestingstreams: " + std::to_string(_interestingStreams[1]));
+        LDEBUG("Interestingstreams: " + streamnumber);
+        int sn = std::stoi(streamnumber);
+        _interestingStreams.push_back(sn);
+    }
+
+   
+
 }
 
 void RenderableStreamNodes::update(const UpdateData& data) {
@@ -1335,7 +1437,6 @@ void RenderableStreamNodes::update(const UpdateData& data) {
         updatePositionBuffer();
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();
-        updateVertexIndexBuffer();
     }
         }
             // Needs fix, right now it stops cuz it cant find the states
@@ -1347,12 +1448,10 @@ void RenderableStreamNodes::update(const UpdateData& data) {
                 _vertexPositions = _statesPos[_activeTriggerTimeIndex];
                 _vertexColor = _statesColor[_activeTriggerTimeIndex];
                 _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
-                _vertexIndex = _statesIndex[_activeTriggerTimeIndex];
                 _needsUpdate = false;
                 updatePositionBuffer();
                 updateVertexColorBuffer();
                 updateVertexFilteringBuffer();
-                updateVertexIndexBuffer();
                 updateVertexStreamNumberBuffer();
             }
         }
@@ -1378,13 +1477,10 @@ std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepat
         _lineStart.clear();
         _vertexRadius.clear();
         _vertexColor.clear();
-        _vertexIndex.clear();
     int counter = 0;
-    int NodeIndexCounter = 0;
         
     const size_t nPoints = 1;
     for (int i = 0; i < numberofStreams; ++i) {
-        NodeIndexCounter = 0;
             
         for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
             lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
@@ -1401,8 +1497,6 @@ std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepat
             float rTimesFluxValue = fluxValue;
             _vertexColor.push_back(rTimesFluxValue);
             _vertexRadius.push_back(rValue);
-            _vertexIndex.push_back(NodeIndexCounter);
-            NodeIndexCounter = NodeIndexCounter + 1;
             rValue = rValue * AuToMeter;
                 
             glm::vec3 sphericalcoordinates =
@@ -1482,24 +1576,6 @@ void RenderableStreamNodes::updateVertexFilteringBuffer() {
         glVertexAttribPointer(VaFiltering, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
         unbindGL();
-}
-void RenderableStreamNodes::updateVertexIndexBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexindexBuffer);
-
-    const std::vector<int>& vertexIndex = _vertexIndex;
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        vertexIndex.size() * sizeof(float),
-        vertexIndex.data(),
-        GL_STATIC_DRAW
-    );
-
-    glEnableVertexAttribArray(VaIndex);
-    glVertexAttribPointer(VaIndex, 1, GL_FLOAT, GL_FALSE, 0, 0);
-
-    unbindGL();
 }
 void RenderableStreamNodes::updateVertexStreamNumberBuffer() {
     glBindVertexArray(_vertexArrayObject);

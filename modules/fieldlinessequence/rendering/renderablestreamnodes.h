@@ -90,7 +90,8 @@ private:
         Colortables = 1,
         Outline = 2,
         Lines = 3,
-        Sizeandcolor = 4
+        Sizeandcolor = 4,
+        test = 5
     };
 
     UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
@@ -119,6 +120,8 @@ private:
 
     //can be used when loading in emin03 files for the first time. 
     bool shouldwritecacheforemin03 = false;
+    //Used for reading directly from sync-folder
+    bool shouldreadBinariesDirectly = true;
 
     // --------------------------------- NUMERICALS ----------------------------------- //
     // Active index of _states. If(==-1)=>no state available for current time. Always the
@@ -172,18 +175,16 @@ private:
     std::vector<float> _vertexColor;
     // Contains radius of vertices
     std::vector<float> _vertexRadius;
-    // Contains index of vertices
-    std::vector<int> _vertexIndex;
     // Stores the states position
     std::vector<std::vector<glm::vec3>> _statesPos;
     // Stores the states color
     std::vector<std::vector<float>> _statesColor;
     // Stores the states radius
     std::vector<std::vector<float>> _statesRadius;
-    // Stores the states index
-    std::vector<std::vector<int>> _statesIndex;
-
+    //used to show vertexes dependent on specific streams
     std::vector<int> _vertexStreamnumber;
+    // vector storing "interesting streams", read in by a json file.
+    std::vector<int> _interestingStreams;
 
     // ---------------------------------- Properties ---------------------------------- //   
     // Group to hold properties regarding distance to earth
@@ -263,8 +264,12 @@ private:
     //properties::BoolProperty _pFlowReversed;
     // Speed of simulated flow
     properties::IntProperty _pFlowSpeed;
+    //Either use flowcolortable or FlowColor.
+    properties::BoolProperty _pFlowColoring;
     // initialization
     std::vector<std::string> _sourceFiles;
+    // binary files sourcefolder
+    std::string _binarySourceFilePath;
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
     bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
@@ -281,12 +286,13 @@ private:
     bool loadFilesIntoRam();
     void loadNodeData();
     void createStreamnumberVector();
-    void ExtractandwriteInterestingStreams(int distanceThreshold);
+    void ExtractandwriteInterestingStreams(float distanceThreshold);
+    void ReadInterestingStreamsFromJson();
+    bool loadBinaryfilesDirectly(const std::string& energybin);
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void updatePositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexFilteringBuffer();
-    void updateVertexIndexBuffer();
     void updateVertexStreamNumberBuffer();
 
     // ----------------------TEMPORARY VARIABLES ------------------

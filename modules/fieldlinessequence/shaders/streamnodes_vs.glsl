@@ -40,6 +40,7 @@ uniform int       particleSize;
 uniform int       particleSpeed;
 uniform int       particleSpacing;
 uniform bool      usingParticles;
+uniform bool      flowColoring;
 
 // Masking Uniforms
 uniform bool      usingMasking;
@@ -90,13 +91,14 @@ in float rValue;
 
 // The vertex index of every node. Location must correspond to 
 // _VA_INDEX in renderableStreamNodes.h
-layout(location = 3)
-in int nodeIndex;
+//Using built in gl_vertexID in stead. 
+//layout(location = 3)
+//in int nodeIndex;
 // The vertex streamnumber of every node. Location must correspond to 
 // VaStreamnumber in renderableStreamNodes.h
-layout(location = 4)
+layout(location = 3)
 in int Streamnumber;
-layout(location = 5) 
+layout(location = 4) 
 in vec2 in_st;
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
@@ -147,8 +149,9 @@ vec4 getTransferFunctionColor(sampler1D InColorTable) {
 
 
 bool CheckvertexIndex(){
-    if(EnhanceMethod == 3) return false;
+    
     int nodeIndex = gl_VertexID;
+   // nodeIndex = gl_VertexIndex;
     //if(EnhanceMethod == 3) return false;
     if(NodeskipMethod == uniformskip){
         if(mod(nodeIndex, Nodeskip) == 0){
@@ -191,52 +194,75 @@ return false;
 
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
+        //Sizescaling
      if(EnhanceMethod == 0){
             float tempR = rValue + 0.4; 
             if(tempR > 1.5){
                 tempR = 1.5;
             }
             gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
+            return;
         }
+        //Colortables
       if(EnhanceMethod == 1){
              vec4 fluxColor = getTransferFunctionColor(colorTable);
              vs_color = vec4(fluxColor.xyz, fluxColor.a);
+             return;
         }
+        //Outline
       if(EnhanceMethod == 2){
             if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
                  gl_PointSize = gl_PointSize + 1;
                  vs_color = vec4(streamColor.xyz, fluxColorAlpha);
             }
+            return;
         }
         //lines
       if(EnhanceMethod == 3){
       // Draw every other line grey
+      vs_color = vec4(0);
+      if(!firstrender){
       vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
 
-     // float interestingStreams[4] = float[](154, 156, 153, 163);
-      float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
-      168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
-        for(int i = 0; i < interestingStreams.length(); i++){
+      float interestingStreams[4] = float[](154, 156, 153, 163);
+       // vs_color = vec4(0);
+      //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
+      //168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
+      //float interestingStreams[3] = float[](37, 154, 210);
+      
+      for(int i = 0; i < interestingStreams.length(); i++){
             if(Streamnumber == interestingStreams[i]){
         
            // if(!firstrender){
                // vs_color = vec4(streamColor.xyz, fluxColorAlpha);
-               if(usingParticles && isParticle()){
+               if(usingParticles && isParticle() && rValue > 0.f){
                    int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
                    if(modulusResult >= particleSize - 10){
-                        vs_color = vec4(1,1,1,1);
+                        //vs_color = vec4(1,1,1,1);
+                        if(flowColoring){
+                        vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+                        vs_color = vec4(fluxColor3.xyz, flowColor.a * 0.8);
+                         //vs_color = vec4(1,1,1,1);
+                        }
+                        else{
+                        //vs_color = vec4(1,1,1,1);
+                        vs_color = flowColor;
+                        }
                    }
                    else{
                         vec4 fluxColorFlow = getTransferFunctionColor(colorTableFlow);
-                        vs_color = vec4(fluxColorFlow.xyz, fluxColorFlow.a);
-                   }
+                        vs_color = vec4(fluxColorFlow.xyz, flowColor.a);
+                        }
+                        //vs_color = vec4(0.37, 0.37, 0.37, flowColor.a);
                }
                else{
                    vec4 fluxColor3 = getTransferFunctionColor(colorTable);
                    vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
+                 // vs_color = vec4(0.37, 0.37, 0.37, flowColor.a);
                 }
             }
         }
+       }
         //    }
     }
         //SizeandColor
@@ -250,6 +276,9 @@ void DecidehowtoshowClosetoEarth(){
             }
             gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
     }
+ 
+    
+
 }
 
 void CheckdistanceMethod() { 
@@ -305,6 +334,7 @@ void main() {
                 else{
                     vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
                     gl_PointSize = nodeSize;
+                   
                 }
             }
              CheckdistanceMethod();
@@ -320,9 +350,9 @@ void main() {
     else{
         vs_color = vec4(0);
     }
-    if(!firstrender){
-    CheckdistanceMethod();
-    }
+    //if(!firstrender){
+    //CheckdistanceMethod();
+   // }
    
     
     //temporary things for trying out point sprites. 
