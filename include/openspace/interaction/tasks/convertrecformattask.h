@@ -53,20 +53,19 @@ public:
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
     void convert();
-    SessionRecording::RecordedDataMode ConvertRecFormatTask::formatType();
 
 private:
     void convertToAscii();
     void convertToBinary();
+    void determineFormatType();
     std::string addFileSuffix(const std::string& filePath, const std::string& suffix);
     std::string _inFilePath;
     std::string  _outFilePath;
     std::ifstream _iFile;
     std::ofstream _oFile;
+    SessionRecordingDataMode _fileFormatType;
 
     std::string _valueFunctionLua;
-
-    SessionRecording sr;
 };
 
 } // namespace openspace::interaction

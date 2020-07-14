@@ -40,7 +40,7 @@ int startRecording(lua_State* L) {
         return luaL_error(L, "filepath string is empty");
     }
     global::sessionRecording.setRecordDataFormat(
-        openspace::interaction::SessionRecording::RecordedDataMode::Binary
+        openspace::interaction::SessionRecordingDataMode::Binary
     );
     global::sessionRecording.startRecording(recordFilePath);
 
@@ -63,7 +63,7 @@ int startRecordingAscii(lua_State* L) {
         return luaL_error(L, "filepath string is empty");
     }
     global::sessionRecording.setRecordDataFormat(
-        openspace::interaction::SessionRecording::RecordedDataMode::Ascii
+        openspace::interaction::SessionRecordingDataMode::Ascii
     );
     global::sessionRecording.startRecording(recordFilePath);
 

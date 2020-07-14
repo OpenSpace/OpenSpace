@@ -29,6 +29,7 @@
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -36,6 +37,8 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -57,7 +60,11 @@ namespace openspace::interaction {
 
 SessionRecording::SessionRecording()
     : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
-{}
+{
+    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fRenderable, "No task factory existed");
+    fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
+}
 
 SessionRecording::~SessionRecording() {} // NOLINT
 
@@ -66,7 +73,7 @@ void SessionRecording::deinitialize() {
     stopPlayback();
 }
 
-void SessionRecording::setRecordDataFormat(RecordedDataMode dataMode) {
+void SessionRecording::setRecordDataFormat(SessionRecordingDataMode dataMode) {
     _recordingDataMode = dataMode;
 }
 
@@ -102,7 +109,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
     _playbackActive_camera = false;
     _playbackActive_time = false;
     _playbackActive_script = false;
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         _recordFile.open(absFilename, std::ios::binary);
     }
     else {
@@ -115,9 +122,9 @@ bool SessionRecording::startRecording(const std::string& filename) {
         ));
         return false;
     }
-    _recordFile << FileHeaderTitle;
+    _recordFile << SessionRecordingFileHeaderTitle;
     _recordFile.write(FileHeaderVersion, FileHeaderVersionLength);
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         _recordFile << DataFormatBinaryTag;
     }
     else {
@@ -180,9 +187,9 @@ bool SessionRecording::startPlayback(const std::string& filename,
     // Read header
     std::string readBackHeaderString = readHeaderElement(
         _playbackFile,
-        FileHeaderTitle.length()
+        SessionRecordingFileHeaderTitle.length()
     );
-    if (readBackHeaderString != FileHeaderTitle) {
+    if (readBackHeaderString != SessionRecordingFileHeaderTitle) {
         LERROR("Specified playback file does not contain expected header.");
         cleanUpPlayback();
         return false;
@@ -190,10 +197,10 @@ bool SessionRecording::startPlayback(const std::string& filename,
     readHeaderElement(_playbackFile, FileHeaderVersionLength);
     std::string readDataMode = readHeaderElement(_playbackFile, 1);
     if (readDataMode[0] == DataFormatAsciiTag) {
-        _recordingDataMode = RecordedDataMode::Ascii;
+        _recordingDataMode = SessionRecordingDataMode::Ascii;
     }
     else if (readDataMode[0] == DataFormatBinaryTag) {
-        _recordingDataMode = RecordedDataMode::Binary;
+        _recordingDataMode = SessionRecordingDataMode::Binary;
     }
     else {
         LERROR("Unknown data type in header (should be Ascii or Binary)");
@@ -201,13 +208,14 @@ bool SessionRecording::startPlayback(const std::string& filename,
     }
     std::string throwawayNewlineChar = readHeaderElement(_playbackFile, 1);
 
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         //Close & re-open the file, starting from the beginning, and do dummy read
         // past the header, version, and data type
         _playbackFile.close();
         _playbackFile.open(_playbackFilename, std::ifstream::in | std::ios::binary);
-        size_t headerSize = FileHeaderTitle.length() + FileHeaderVersionLength +
-                            sizeof(DataFormatBinaryTag) + sizeof('\n');
+        size_t headerSize = SessionRecordingFileHeaderTitle.length() +
+            FileHeaderVersionLength +
+            sizeof(DataFormatBinaryTag) + sizeof('\n');
         _playbackFile.read(reinterpret_cast<char*>(&_keyframeBuffer), headerSize);
     }
 
@@ -443,7 +451,7 @@ void SessionRecording::saveCameraKeyframe() {
         kf._timestamp - _timestampRecordStarted,
         global::timeManager.time().j2000Seconds()
     };
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         saveCameraKeyframeBinary(times, kf, _keyframeBuffer, _recordFile);
     }
     else {
@@ -479,7 +487,7 @@ void SessionRecording::saveCameraKeyframeBinary(timestamps times,
 {
     // Writing to a binary session recording file
     size_t idx = 0;
-    saveHeaderBinary(times, 'c', kfBuffer, idx);
+    saveHeaderBinary(times, SessionRecordingHeaderCameraBinary, kfBuffer, idx);
     // Writing to internal buffer, and then to file, for performance reasons
     std::vector<char> writeBuffer;
     kf.serialize(writeBuffer);
@@ -492,7 +500,7 @@ void SessionRecording::saveCameraKeyframeAscii(timestamps times,
                                                std::ofstream& file)
 {
     std::stringstream keyframeLine = std::stringstream();
-    saveHeaderAscii(times, "camera", keyframeLine);
+    saveHeaderAscii(times, SessionRecordingHeaderCameraAscii, keyframeLine);
     kf.write(keyframeLine);
     saveKeyframeToFile(keyframeLine.str(), file);
 }
@@ -510,7 +518,7 @@ void SessionRecording::saveTimeKeyframe() {
         kf._timestamp - _timestampRecordStarted,
         global::timeManager.time().j2000Seconds()
     };
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         saveTimeKeyframeBinary(times, kf, _keyframeBuffer, _recordFile);
     } else {
         saveTimeKeyframeAscii(times, kf, _recordFile);
@@ -523,7 +531,7 @@ void SessionRecording::saveTimeKeyframeBinary(timestamps times,
                                               std::ofstream& file)
 {
     size_t idx = 0;
-    saveHeaderBinary(times, 't', kfBuffer, idx);
+    saveHeaderBinary(times, SessionRecordingHeaderTimeBinary, kfBuffer, idx);
     std::vector<char> writeBuffer;
     kf.serialize(writeBuffer);
     writeToFileBuffer(kfBuffer, idx, writeBuffer);
@@ -535,7 +543,7 @@ void SessionRecording::saveTimeKeyframeAscii(timestamps times,
                                              std::ofstream& file)
 {
     std::stringstream keyframeLine = std::stringstream();
-    saveHeaderAscii(times, "time", keyframeLine);
+    saveHeaderAscii(times, SessionRecordingHeaderTimeAscii, keyframeLine);
     kf.write(keyframeLine);
     saveKeyframeToFile(keyframeLine.str(), file);
 }
@@ -554,7 +562,7 @@ void SessionRecording::saveScriptKeyframe(std::string scriptToSave) {
         global::timeManager.time().j2000Seconds()
     };
 
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         saveScriptKeyframeBinary(times, sm, _keyframeBuffer, _recordFile);
     }
     else {
@@ -568,11 +576,12 @@ void SessionRecording::saveScriptKeyframeBinary(timestamps times,
                                                 std::ofstream& file)
 {
     size_t idx = 0;
-    saveHeaderBinary(times, 's', smBuffer, idx);
-    //Write script header to file
+    saveHeaderBinary(times, SessionRecordingHeaderScriptBinary, smBuffer, idx);
+    // Writing to internal buffer, and then to file, for performance reasons
+    std::vector<char> writeBuffer;
+    sm.serialize(writeBuffer);
+    writeToFileBuffer(smBuffer, idx, writeBuffer);
     saveKeyframeToFileBinary(smBuffer, idx, file);
-    //Write script data to file
-    sm.write(smBuffer, idx, file);
 }
 
 void SessionRecording::saveScriptKeyframeAscii(timestamps times,
@@ -581,7 +590,7 @@ void SessionRecording::saveScriptKeyframeAscii(timestamps times,
 {
 
     std::stringstream keyframeLine = std::stringstream();
-    saveHeaderAscii(times, "script", keyframeLine);
+    saveHeaderAscii(times, SessionRecordingHeaderScriptAscii, keyframeLine);
     sm.write(keyframeLine);
     saveKeyframeToFile(keyframeLine.str(), file);
 }
@@ -632,7 +641,7 @@ SessionRecording::SessionState SessionRecording::state() const {
 bool SessionRecording::playbackAddEntriesToTimeline() {
     bool parsingErrorsFound = false;
 
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         unsigned char frameType;
         bool fileReadOk = true;
 
@@ -647,13 +656,13 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
                 fileReadOk = false;
                 break;
             }
-            if (frameType == 'c') {
+            if (frameType == SessionRecordingHeaderCameraBinary) {
                 playbackCamera();
             }
-            else if (frameType == 't') {
+            else if (frameType == SessionRecordingHeaderTimeBinary) {
                 playbackTimeChange();
             }
-            else if (frameType == 's') {
+            else if (frameType == SessionRecordingHeaderScriptBinary) {
                 playbackScript();
             }
             else {
@@ -682,13 +691,13 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
                 break;
             }
 
-            if (entryType == "camera") {
+            if (entryType == SessionRecordingHeaderCameraAscii) {
                 playbackCamera();
             }
-            else if (entryType == "time") {
+            else if (entryType == SessionRecordingHeaderTimeAscii) {
                 playbackTimeChange();
             }
-            else if (entryType == "script") {
+            else if (entryType == SessionRecordingHeaderScriptAscii) {
                 playbackScript();
             }
             else {
@@ -788,7 +797,7 @@ void SessionRecording::playbackCamera() {
     timestamps times;
     datamessagestructures::CameraKeyframe kf;
 
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         readCameraKeyframeBinary(times, kf, _playbackFile, _playbackLineNum);
     }
     else {
@@ -843,16 +852,18 @@ void SessionRecording::readCameraKeyframeBinary(timestamps& times,
 
 void SessionRecording::readCameraKeyframeAscii(timestamps& times,
                                                datamessagestructures::CameraKeyframe& kf,
-                                               std::string filenameRead,
+                                               std::string currentParsingLine,
                                                int lineN)
 {
     std::string rotationFollowing;
     std::string entryType;
 
-    std::istringstream iss(filenameRead);
+    std::istringstream iss(currentParsingLine);
     iss >> entryType;
     iss >> times.timeOs >> times.timeRec >> times.timeSim;
     kf.read(iss);
+    //ASCII format does not contain trailing timestamp so add it here
+    kf._timestamp = times.timeOs;
 
     if (iss.fail() || !iss.eof()) {
         LERROR(fmt::format("Error parsing camera line {} of playback file", lineN));
@@ -864,7 +875,7 @@ void SessionRecording::playbackTimeChange() {
     timestamps times;
     datamessagestructures::TimeKeyframe kf;
 
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         readTimeKeyframeBinary(times, kf, _playbackFile, _playbackLineNum);
     } else {
         readTimeKeyframeAscii(times, kf, _playbackLineParsing, _playbackLineNum);
@@ -913,12 +924,12 @@ void SessionRecording::readTimeKeyframeBinary(timestamps& times,
 
 void SessionRecording::readTimeKeyframeAscii(timestamps& times,
                                              datamessagestructures::TimeKeyframe& kf,
-                                             std::string filenameRead,
+                                             std::string currentParsingLine,
                                              int lineN)
 {
     std::string entryType;
 
-    std::istringstream iss(filenameRead);
+    std::istringstream iss(currentParsingLine);
     iss >> entryType;
     iss >> times.timeOs >> times.timeRec >> times.timeSim;
     kf.read(iss);
@@ -931,8 +942,8 @@ void SessionRecording::readTimeKeyframeAscii(timestamps& times,
     }
 }
 
-static std::string SessionRecording::readHeaderElement(std::ifstream& stream,
-                                                       size_t readLen_chars)
+std::string SessionRecording::readHeaderElement(std::ifstream& stream,
+                                                size_t readLen_chars)
 {
     std::vector<char> readTemp(readLen_chars);
     stream.read(&readTemp[0], readLen_chars);
@@ -943,7 +954,7 @@ void SessionRecording::playbackScript() {
     timestamps times;
     datamessagestructures::ScriptMessage kf;
 
-    if (_recordingDataMode == RecordedDataMode::Binary) {
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         readScriptKeyframeBinary(times, kf, _playbackFile, _playbackLineNum);
     } else {
         readScriptKeyframeAscii(times, kf, _playbackLineParsing, _playbackLineNum);
@@ -990,11 +1001,11 @@ void SessionRecording::readScriptKeyframeBinary(timestamps& times,
 
 void SessionRecording::readScriptKeyframeAscii(timestamps& times,
                                                datamessagestructures::ScriptMessage& kf,
-                                               std::string filenameRead,
+                                               std::string currentParsingLine,
                                                int lineN)
 {
     std::string entryType;
-    std::istringstream iss(filenameRead);
+    std::istringstream iss(currentParsingLine);
     iss >> entryType;
     iss >> times.timeOs >> times.timeRec >> times.timeSim;
     kf.read(iss);
@@ -1156,11 +1167,6 @@ bool SessionRecording::doesTimelineEntryContainCamera(unsigned int index) const 
 }
 
 bool SessionRecording::processNextNonCameraKeyframeAheadInTime() {
-    //LINFO(fmt::format(
-    //    "Keyframe at {} frame={} timelineIndex={}",
-    //    now, global::renderEngine._frameNumber, _idxTimeline
-    //));
-
     switch (getNextKeyframeType()) {
         case RecordedType::Camera:
             // Just return true since this function no longer handles camera keyframes

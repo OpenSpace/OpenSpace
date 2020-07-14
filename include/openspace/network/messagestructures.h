@@ -429,6 +429,12 @@ struct ScriptMessage {
     double _timestamp;
 
     void serialize(std::vector<char> &buffer) const {
+        size_t strLen = _script.size();
+        size_t writeSize_bytes = sizeof(size_t);
+
+        unsigned char const *p = reinterpret_cast<unsigned char const*>(&strLen);
+        buffer.insert(buffer.end(), p, p + writeSize_bytes);
+
         buffer.insert(buffer.end(), _script.begin(), _script.end());
     };
 
@@ -486,6 +492,8 @@ struct ScriptMessage {
         _script.erase();
         for (int i = 0; i < numScriptLines; ++i) {
             std::getline(iss, tmpReadbackScript);
+            size_t start = tmpReadbackScript.find_first_not_of(" ");
+            tmpReadbackScript = tmpReadbackScript.substr(start);
             _script.append(tmpReadbackScript);
             if (i < (numScriptLines - 1)) {
                 _script.append("\n");
