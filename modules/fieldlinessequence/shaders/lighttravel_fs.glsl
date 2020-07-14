@@ -22,9 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  #include "fragment.glsl"
+ #include "floatoperations.glsl"
 in vec4 vs_color;
 in float vs_depth;
 
+
+//float lightSpeed = 299792458.0;
+/*
+in vec4 vs_positionScreenSpace;
+in vec4 vs_gPosition;
+in vec4 vs_color;
+in float distanceFromStart;
+in float timeSinceStart;
+in float transmissionTime;
+in float lightTravelTime;
+*/
 Fragment getFragment() {
     if (vs_color.a == 0) {
         discard;
@@ -34,16 +46,29 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.depth = vs_depth;
-    frag.color = fragColor;
-    //if(vs_st.x != -1){
-    //if (gl_FrontFacing) {
-    //    frag.color = texture(texture1, vs_st);
-   // }
-   // else {
-   //     frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
-   // }
-   // }
+    
+    /*
+     // the distance the first signal transmission has travelled 
+    float distLightTravelStart = lightSpeed * timeSinceStart;
+    // the distance the last signal transmission has travelled 
+    float distLightTravelEnd = lightSpeed * (timeSinceStart-transmissionTime);
 
+    if(distanceFromStart < distLightTravelStart && distanceFromStart > distLightTravelEnd){
+        // calculate how fast the signal segments travel within transmission
+        float distFlowTravelStart = distLightTravelStart * flowSpeedFactor;
+
+        float signalSize = distLightTravelStart-distLightTravelEnd;
+        float signalSegmentSize = pow(lightTravelTime,segmentSizeFactor) * lightSpeed;
+
+        // make the spacing dependent on the segment size
+        float spacing = signalSegmentSize * spacingSizeFactor;
+       // alpha = getSegmentOpacity(signalSegmentSize,spacing, distFlowTravelStart, distLightTravelStart, distLightTravelEnd);
+        alpha = 0.5;
+    }
+   
+    frag.color = vec4(fragColor.xyz, alpha);
+     */
+     frag.color = fragColor;
     // G-Buffer
     frag.gPosition = vec4(0.0); //vs_gPosition;
     // There is no normal here

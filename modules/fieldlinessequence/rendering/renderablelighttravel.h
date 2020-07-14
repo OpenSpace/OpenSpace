@@ -65,6 +65,8 @@ namespace openspace {
         GLuint _vertexindexBuffer = 0;
 
         std::vector<glm::vec3> positions;
+        float _Timesincestart = -1.f;
+        double _triggerTime;
         properties::FloatProperty _lightspeed;
         std::unique_ptr<ghoul::Dictionary> _dictionary;
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;

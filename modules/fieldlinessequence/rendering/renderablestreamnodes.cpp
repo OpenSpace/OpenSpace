@@ -1133,7 +1133,7 @@ bool RenderableStreamNodes::isReady() const {
 }
 
 // Extract J2000 time from file names
-// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
+// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
 void RenderableStreamNodes::extractTriggerTimesFromFileNames() {
     // number of  characters in filename (excluding '.json')
     constexpr const int FilenameSize = 23;

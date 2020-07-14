@@ -87,11 +87,28 @@ namespace openspace {
         
 
         setRenderBin(Renderable::RenderBin::Transparent);
-
-        positions.push_back(glm::vec3(0.0, 0.0, 0.0));
+        glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
+        positions.push_back(currentpos);
+        addProperty(_lightspeed);
+        //_lightspeed = 300 * 10e6;
+        _lightspeed = 299792458.f;
         glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
+        glm::vec3 earthToSun = glm::vec3(earthPos);
+        glm::vec3 newpos = glm::vec3(0.0, 0.0, 0.0);
+        /// should probably be distance from points to earth
+        while(currentpos.x < 94499869340){
+            newpos = currentpos + (_lightspeed / glm::length(earthToSun)) * earthToSun;
+            positions.push_back(newpos);
+            earthToSun = earthPos - newpos;
+            currentpos = newpos;
+        }
         //positions.push_back(glm::vec3(94499869340 / 2, -115427843118 / 2, 11212075887.3 / 2));
         positions.push_back(earthPos);
+
+        _triggerTime = Time::convertTime("20000714T100344000");
+
+
+        LDEBUG("position size:" + std::to_string(positions.size()));
         //Earthnode worldposition, is not aligned with the actual position shown as it seems right now.
         //SceneGraphNode* earthNode = sceneGraphNode("Earth");
         //glm::vec3 earthPos = earthNode->worldPosition();
@@ -134,6 +151,8 @@ namespace openspace {
         positions.push_back(earthPos);
         }
         */
+       
+        
         
         _shaderProgram->activate();
         //LDEBUG("vi kom in i render");
@@ -159,6 +178,8 @@ namespace openspace {
         glBindVertexArray(0);
         _shaderProgram->deactivate();
 
+        
+
     }
     inline void unbindGL() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -169,7 +190,14 @@ namespace openspace {
          if (_shaderProgram->isDirty()) {
               _shaderProgram->rebuildFromFile();
          }
-        
+         /*
+         if (_Timesincestart == -1) {
+             _Timesincestart = 
+        }
+        */
+         const double currentTime = data.time.j2000Seconds();
+         if (_triggerTime < currentTime) {
+
          glBindVertexArray(_vertexArrayObject);
          glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -183,10 +211,37 @@ namespace openspace {
          );
          constexpr const GLuint VaPosition = 0;
          glEnableVertexAttribArray(VaPosition);
-         glEnable(GL_PROGRAM_POINT_SIZE);
          glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+         /*
+        
+         constexpr const GLuint VaDistance = 1;
+         constexpr const GLuint VaTimeSinceStart = 2;
+         constexpr const GLuint VaTransmissionTime = 3;
+         constexpr const GLuint VaLightTravelTime = 4;
+        
+         //glEnable(GL_PROGRAM_POINT_SIZE);
+       
+
+         glVertexAttribPointer(VaDistance, 1, GL_FLOAT, GL_FALSE, 0, 0);
+         glEnableVertexAttribArray(VaDistance);
+
+         glVertexAttribPointer(VaTimeSinceStart, 1, GL_FLOAT, GL_FALSE, 0, 0);
+         glEnableVertexAttribArray(VaTimeSinceStart);
+
+         glVertexAttribPointer(VaTransmissionTime, 1, GL_FLOAT, GL_FALSE, 0, 0);
+         glEnableVertexAttribArray(VaTransmissionTime);
+
+         glVertexAttribPointer(VaLightTravelTime, 1, GL_FLOAT, GL_FALSE, 0, 0);
+         glEnableVertexAttribArray(VaLightTravelTime);
+         */
+
+
+
+
+
 
 
          unbindGL();
+         }
     }
 }
