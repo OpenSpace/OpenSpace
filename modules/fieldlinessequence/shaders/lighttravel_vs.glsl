@@ -34,6 +34,10 @@ uniform float in_dist_from_start;
 uniform float in_transmission_time;
 uniform float in_light_travel_time;
 uniform vec3 normalizedvectorFromSuntoEarth;
+uniform int renderMode;
+uniform float pointSize;
+uniform vec4 defaultColor;
+uniform vec4 LightColor;
 /*
 layout(location = 1) in float in_dist_from_start;
 layout(location = 2) in float in_time_since_start;
@@ -48,16 +52,17 @@ out float lightTravelTime;
 out vec4 vs_positionScreenSpace;
 out vec4 vs_gPosition;
 
+float maxdistance = 5000000000.f;
 const float lightSpeed = 299792458.0;
 
 bool calculateDistance(vec3 inposition) {
  vec3 newpos = vec3(0, 0, 0);
  //float temptime = 200;
- float temptime = in_time_since_start;
- newpos.x = normalizedvectorFromSuntoEarth.x * temptime * lightSpeed;
- newpos.y = normalizedvectorFromSuntoEarth.y * temptime * lightSpeed;
- newpos.z = normalizedvectorFromSuntoEarth.z * temptime * lightSpeed;
- if(distance(newpos, inposition) < 5000000000.f){
+ //float temptime = in_time_since_start;
+ newpos.x = normalizedvectorFromSuntoEarth.x * in_time_since_start * lightSpeed;
+ newpos.y = normalizedvectorFromSuntoEarth.y * in_time_since_start * lightSpeed;
+ newpos.z = normalizedvectorFromSuntoEarth.z * in_time_since_start * lightSpeed;
+ if(distance(newpos, inposition) < maxdistance){
  //if(inposition.x > 50000000000.f){
  return true;
  }
@@ -65,14 +70,36 @@ bool calculateDistance(vec3 inposition) {
  return false;
  
 }
+
+float smoothmotion(){
+    vec3 newpos = vec3(0,0,0);
+    newpos.x = normalizedvectorFromSuntoEarth.x * in_time_since_start * lightSpeed;
+    newpos.y = normalizedvectorFromSuntoEarth.y * in_time_since_start * lightSpeed;
+    newpos.z = normalizedvectorFromSuntoEarth.z * in_time_since_start * lightSpeed; 
+
+    float smoothFront = smoothstep(0.0, maxdistance, distance(newpos, in_position));
+    return smoothFront;
+}
 void main() {
     
-   
+
    if(calculateDistance(in_position)){
-   vs_color = vec4(1.0, 1.0, 1.0, 1.0);
+   //float smoothFront = smoothstep(0, 199999999999.0f, in_position.x);
+  // vs_color = vec4(1.0, 1.0, 1.0, 1.0);
+   vs_color = LightColor;
+   //vs_color.a = vs_color.a * smoothmotion();
+   //vs_color = vec4(0.2, 0.3, 0.4, 1.0);
    }
    else{
-   vs_color = vec4(0.2, 0.3, 0.4, 1.0);
+   //float smoothFront = smoothstep(0, 199999999999.0f, in_position.x);
+   //vs_color = vec4(1.0, 1.0, 1.0, smoothFront*1.0);
+   //vs_color = vec4(0.2, 0.3, 0.4, 1.0);
+   //vs_color = vec4(0);
+   vs_color = defaultColor;
+   }
+ 
+   if(renderMode == 2){
+   gl_PointSize = pointSize;
    }
    
    //vs_color = vec4(1.0, 1.0, 1.0, 1.0);

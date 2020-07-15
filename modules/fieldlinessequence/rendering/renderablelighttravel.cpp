@@ -60,15 +60,48 @@ namespace {
        "speed of light",
        "The speed of light"
     };
-
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+     "lineWidth",
+     "Line Width",
+     "This value specifies the line width of the field lines if the "
+     "selected rendering method includes lines."
+    };
+    constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
+    "RenderingMode",
+    "The draw method",
+    "Can be used to decide what rendering method to use."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LightColorInfo = {
+        "lightColor",
+        "The color of the light particle",
+        "Choose what color to light the particle as it is traversing the line"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DefaultcolorInfo = {
+       "defaultColor",
+       "The color of the lines",
+       "Choose what color each line should have as default value"
+    };
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+      "pointSize",
+      "Size of points",
+      "Change the size of the points"
+    };
 }
 
 namespace openspace {
     using namespace properties;
     RenderableLightTravel::RenderableLightTravel(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        , _lightspeed(LightSpeedInfo, 3000000000)
-
+        , _lightspeed(LightSpeedInfo, 299792458.f, 0, 299792458.f)
+        , _lineWidth(LineWidthInfo, 5, 0, 20)
+        , _rendermode(RenderModeInfo, OptionProperty::DisplayType::Dropdown)
+        , _pDefaultColor(DefaultcolorInfo, glm::vec4(0.3, 0.3, 0.3, 0.5),
+            glm::vec4(0.f),
+            glm::vec4(1.f))
+        , _pLightColor(LightColorInfo, glm::vec4(1,1,1,1),
+            glm::vec4(0.f),
+            glm::vec4(1.f))
+        , _pointSize(PointSizeInfo, 2.f, 0, 20)
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -90,6 +123,7 @@ namespace openspace {
         glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
         //positions.push_back(currentpos);
         addProperty(_lightspeed);
+        addProperty(_lineWidth);
         //_lightspeed = 300 * 10e6;
         _lightspeed = 299792458.f;
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
@@ -122,6 +156,15 @@ namespace openspace {
 
         LDEBUG("vi kom in i init");
 
+        _rendermode.addOption(static_cast<int>(RenderMethod::LineStrip), "LineStrip");
+        _rendermode.addOption(static_cast<int>(RenderMethod::Lines), "Lines");
+        _rendermode.addOption(static_cast<int>(RenderMethod::Points), "Points");
+        addProperty(_rendermode);
+        addProperty(_pLightColor);
+        addProperty(_pDefaultColor);
+        addProperty(_pointSize);
+        
+        
    
 
     }
@@ -145,19 +188,19 @@ namespace openspace {
         glm::vec3 normalizedVector = glm::normalize(endpos);
         _normalizedVector = normalizedVector;
         double endtime = starttime;
-        LDEBUG("distance" + std::to_string(glm::distance(newpos, endpos)));
+        //LDEBUG("distance" + std::to_string(glm::distance(newpos, endpos)));
         int counter = 0;
-        float lightspeed = 299792458;
         positions.clear();
         positions.push_back(startpos);
         //while (glm::distance(newpos, endpos) > 100000) {
+        int interval = 10;
         while(endtime - starttime < 500){
-            newpos.x += 20 * lightspeed * normalizedVector.x;
-            newpos.y += 20 * lightspeed * normalizedVector.y;
-            newpos.z += 20 * lightspeed * normalizedVector.z;
+            newpos.x += interval * _lightspeed * normalizedVector.x;
+            newpos.y += interval * _lightspeed * normalizedVector.y;
+            newpos.z += interval * _lightspeed * normalizedVector.z;
            
             
-            endtime += 20;
+            endtime += interval;
             ++counter;
             //LDEBUG("newpos.y" + std::to_string(newpos.y));
             //LDEBUG("newpos.x" + std::to_string(newpos.x));
@@ -170,10 +213,11 @@ namespace openspace {
             positions.push_back(newpos);
         }
         positions.push_back(endpos);
-        LDEBUG("endtime" + std::to_string(endtime));
-        LDEBUG("newpos.y" + std::to_string(newpos.y));
-        LDEBUG("newpos.x" + std::to_string(newpos.x));
-        LDEBUG("position size" + std::to_string(positions.size()));
+       // LDEBUG("endtime" + std::to_string(endtime));
+       // LDEBUG("newpos.y" + std::to_string(newpos.y));
+        //LDEBUG("newpos.x" + std::to_string(newpos.x));
+        //LDEBUG("position size" + std::to_string(positions.size()));
+        _needPositionUpdate = true;
         return endtime;
     }
     bool RenderableLightTravel::isReady() const
@@ -218,9 +262,14 @@ namespace openspace {
         _shaderProgram->setUniform("in_transmission_time", transmissiontime);
         _shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
         _shaderProgram->setUniform("normalizedvectorFromSuntoEarth", _normalizedVector);
+        _shaderProgram->setUniform("renderMode", _rendermode);
+        _shaderProgram->setUniform("pointSize", _pointSize);
+        _shaderProgram->setUniform("defaultColor", _pDefaultColor);
+        _shaderProgram->setUniform("LightColor", _pLightColor);
         }
 
-        glLineWidth(5.0f);
+        if(_rendermode == 0){
+        glLineWidth(_lineWidth);
         GLint temp = 0;
         glDrawArrays(
             GL_LINE_STRIP,
@@ -228,6 +277,26 @@ namespace openspace {
             temp,
             static_cast<GLsizei>(positions.size())
         );
+        }
+        else if (_rendermode == 1) {
+            glLineWidth(_lineWidth);
+            GLint temp = 0;
+            glDrawArrays(
+                GL_LINES,
+                temp,
+                static_cast<GLsizei>(positions.size())
+            );
+
+        }
+        else if (_rendermode == 2) {
+            GLint temp = 0;
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            glDrawArrays(
+                GL_POINTS,
+                temp,
+                static_cast<GLsizei>(positions.size())
+            );
+        }
         glBindVertexArray(0);
         _shaderProgram->deactivate();
 
@@ -249,7 +318,7 @@ namespace openspace {
         }
         */
          const double currentTime = data.time.j2000Seconds();
-         _needPositionUpdate = true;
+         
          if (_needPositionUpdate) {
              SceneGraphNode* earthNode = sceneGraphNode("Earth");
              glm::vec3 earthPos = earthNode->worldPosition();
@@ -259,8 +328,9 @@ namespace openspace {
              positions.push_back(earthPos);
              _needPositionUpdate = false;
              */
-             _endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
              _needPositionUpdate = false;
+             _endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
+             
          }
          if (_triggerTime < currentTime && _endTime > currentTime) {
          

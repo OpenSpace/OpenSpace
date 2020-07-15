@@ -49,11 +49,11 @@ uniform float spacingSizeFactor;
 uniform float fadeFactor;
 uniform float baseOpacity;
 */
-float flowSpeedFactor = 2;
-float segmentSizeFactor = 2;
-float spacingSizeFactor = 2;
-float fadeFactor = 2;
-float baseOpacity = 1;
+float flowSpeedFactor = 1000000000;
+float segmentSizeFactor = 200;
+float spacingSizeFactor = 2000;
+float fadeFactor = 0.2;
+float baseOpacity = 0.5;
 
 float getSegmentOpacity(const float segmentSize, 
                         const float spacing, 
@@ -128,13 +128,13 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_depth;
     
-    
+    /*
      // the distance the first signal transmission has travelled 
     float distLightTravelStart = lightSpeed * timeSinceStart;
     // the distance the last signal transmission has travelled 
     float distLightTravelEnd = lightSpeed * (timeSinceStart-transmissionTime);
 
-     float alpha = 1.0f;
+     float alpha = 0.0f;
     if(distanceFromStart < distLightTravelStart && distanceFromStart > distLightTravelEnd){
         // calculate how fast the signal segments travel within transmission
         float distFlowTravelStart = distLightTravelStart * flowSpeedFactor;
@@ -147,10 +147,10 @@ Fragment getFragment() {
         alpha = getSegmentOpacity(signalSegmentSize,spacing, distFlowTravelStart, distLightTravelStart, distLightTravelEnd);
        // alpha = 0.5;
     }
-   
-    frag.color = vec4(fragColor.xyz, alpha);
+   */
+    //frag.color = vec4(fragColor.xyz, alpha);
      
-     //frag.color = fragColor;
+    frag.color = fragColor;
     // G-Buffer
     frag.gPosition = vec4(0.0); //vs_gPosition;
     //vec4 depthCorrection = vec4(0.0,0.0,9000,0.0);

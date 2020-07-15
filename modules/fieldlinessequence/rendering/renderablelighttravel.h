@@ -66,12 +66,25 @@ namespace openspace {
         // OpenGL Vertex Buffer Object containing the index of nodes
         GLuint _vertexindexBuffer = 0;
 
+        enum class RenderMethod : int {
+            LineStrip = 0,
+            Lines = 1,
+            Points = 2
+        };
+
         std::vector<glm::vec3> positions;
         float _Timesincestart = -1.f;
         double _triggerTime;
         double _endTime;
         bool _needPositionUpdate = true;
         properties::FloatProperty _lightspeed;
+        properties::FloatProperty _lineWidth;
+        properties::OptionProperty _rendermode;
+        properties::FloatProperty _pointSize;
+        // Uniform stream Color
+        properties::Vec4Property _pDefaultColor;
+        // Uniform stream Color
+        properties::Vec4Property _pLightColor;
         std::unique_ptr<ghoul::Dictionary> _dictionary;
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
