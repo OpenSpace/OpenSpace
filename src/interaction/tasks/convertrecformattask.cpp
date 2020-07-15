@@ -83,6 +83,38 @@ void ConvertRecFormatTask::perform(const Task::ProgressCallback& progressCallbac
 }
 
 void ConvertRecFormatTask::convert() {
+    std::string expectedFileExtension_in, expectedFileExtension_out;
+    std::string currentFormat;
+    if (_fileFormatType == SessionRecordingDataMode::Binary) {
+        currentFormat = "binary";
+        expectedFileExtension_in = SessionRecordingFileExtensionBinary;
+        expectedFileExtension_out = SessionRecordingFileExtensionAscii;
+    }
+    else if (_fileFormatType == SessionRecordingDataMode::Ascii) {
+        currentFormat = "ascii";
+        expectedFileExtension_in = SessionRecordingFileExtensionAscii;
+        expectedFileExtension_out = SessionRecordingFileExtensionBinary;
+    }
+
+    if (!SessionRecording::hasFileExtension(_inFilePath, expectedFileExtension_in)) {
+        LWARNING(fmt::format(
+            "Input filename doesn't have expected {} "
+            "format file extension",
+            currentFormat)
+        );
+    }
+    if (SessionRecording::hasFileExtension(_outFilePath, expectedFileExtension_in)) {
+        LERROR(fmt::format(
+            "Output filename has {} file extension, but is conversion from {}",
+            currentFormat,
+            currentFormat)
+        );
+        return;
+    }
+    else if (!SessionRecording::hasFileExtension(_outFilePath, expectedFileExtension_out)) {
+        _outFilePath += expectedFileExtension_out;
+    }
+
     if (_fileFormatType == SessionRecordingDataMode::Ascii) {
         _oFile.open(_outFilePath);
     }

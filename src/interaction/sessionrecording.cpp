@@ -77,18 +77,41 @@ void SessionRecording::setRecordDataFormat(SessionRecordingDataMode dataMode) {
     _recordingDataMode = dataMode;
 }
 
-bool SessionRecording::startRecording(const std::string& filename) {
-    if (filename.find("/") != std::string::npos) {
+bool SessionRecording::hasFileExtension(std::string filename, std::string extension) {
+    if (filename.length() <= extension.length()) {
+        return false;
+    }
+    else {
+        return (filename.substr(filename.length() - extension.length()) == extension);
+    }
+}
+
+bool SessionRecording::handleRecordingFile(std::string filenameIn) {
+    if (filenameIn.find("/") != std::string::npos) {
         LERROR("Recording filename must not contain path (/) elements");
         return false;
     }
-    if (!FileSys.directoryExists(absPath("${RECORDINGS}"))) {
-        FileSys.createDirectory(
-            absPath("${RECORDINGS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes
-        );
+
+    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
+        if (hasFileExtension(filenameIn, SessionRecordingFileExtensionAscii)) {
+            LERROR("Specified filename for binary recording has ascii file extension");
+            return false;
+        }
+        else if (!hasFileExtension(filenameIn, SessionRecordingFileExtensionBinary)) {
+            filenameIn += SessionRecordingFileExtensionBinary;
+        }
     }
-    const std::string absFilename = absPath("${RECORDINGS}/" + filename);
+    else if (_recordingDataMode == SessionRecordingDataMode::Ascii) {
+        if (hasFileExtension(filenameIn, SessionRecordingFileExtensionBinary)) {
+            LERROR("Specified filename for ascii recording has binary file extension");
+            return false;
+        }
+        else if (!hasFileExtension(filenameIn, SessionRecordingFileExtensionAscii)) {
+            filenameIn += SessionRecordingFileExtensionAscii;
+        }
+    }
+
+    std::string absFilename = absPath("${RECORDINGS}/" + filenameIn);
 
     if (FileSys.fileExists(absFilename)) {
         LERROR(fmt::format(
@@ -96,19 +119,6 @@ bool SessionRecording::startRecording(const std::string& filename) {
         ));
         return false;
     }
-    if (_state == SessionState::Recording) {
-        LERROR("Unable to start recording while already in recording mode");
-        return false;
-    }
-    else if (_state == SessionState::Playback) {
-        LERROR("Unable to start recording while in session playback mode");
-        return false;
-    }
-
-    _state = SessionState::Recording;
-    _playbackActive_camera = false;
-    _playbackActive_time = false;
-    _playbackActive_script = false;
     if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         _recordFile.open(absFilename, std::ios::binary);
     }
@@ -122,27 +132,55 @@ bool SessionRecording::startRecording(const std::string& filename) {
         ));
         return false;
     }
-    _recordFile << SessionRecordingFileHeaderTitle;
-    _recordFile.write(FileHeaderVersion, FileHeaderVersionLength);
-    if (_recordingDataMode == SessionRecordingDataMode::Binary) {
-        _recordFile << DataFormatBinaryTag;
-    }
-    else {
-        _recordFile << DataFormatAsciiTag;
-    }
-    _recordFile << '\n';
-
-    _timestampRecordStarted = global::windowDelegate.applicationTime();
-
-    //Record the current delta time so this is preserved in recording
-    double currentDeltaTime = global::timeManager.deltaTime();
-    std::string scriptCommandForInitializingDeltaTime =
-        "openspace.time.setDeltaTime(" + std::to_string(currentDeltaTime) + ")";
-    saveScriptKeyframe(scriptCommandForInitializingDeltaTime);
-
-    LINFO("Session recording started");
-
     return true;
+}
+
+bool SessionRecording::startRecording(const std::string& filename) {
+    if (_state == SessionState::Recording) {
+        LERROR("Unable to start recording while already in recording mode");
+        return false;
+    }
+    else if (_state == SessionState::Playback) {
+        LERROR("Unable to start recording while in session playback mode");
+        return false;
+    }
+    if (!FileSys.directoryExists(absPath("${RECORDINGS}"))) {
+        FileSys.createDirectory(
+            absPath("${RECORDINGS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes
+        );
+    }
+
+    bool recordingFileOK = handleRecordingFile(filename);
+
+    if (recordingFileOK) {
+        _state = SessionState::Recording;
+        _playbackActive_camera = false;
+        _playbackActive_time = false;
+        _playbackActive_script = false;
+
+        _recordFile << SessionRecordingFileHeaderTitle;
+        _recordFile.write(FileHeaderVersion, FileHeaderVersionLength);
+        if (_recordingDataMode == SessionRecordingDataMode::Binary) {
+            _recordFile << DataFormatBinaryTag;
+        }
+        else {
+            _recordFile << DataFormatAsciiTag;
+        }
+        _recordFile << '\n';
+
+        _timestampRecordStarted = global::windowDelegate.applicationTime();
+
+        //Record the current delta time so this is preserved in recording
+        double currentDeltaTime = global::timeManager.deltaTime();
+        std::string scriptCommandForInitializingDeltaTime =
+            "openspace.time.setDeltaTime(" + std::to_string(currentDeltaTime) + ")";
+        saveScriptKeyframe(scriptCommandForInitializingDeltaTime);
+
+        LINFO("Session recording started");
+    }
+
+    return recordingFileOK;
 }
 
 void SessionRecording::stopRecording() {

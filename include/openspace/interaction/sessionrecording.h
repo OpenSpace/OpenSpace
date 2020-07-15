@@ -41,9 +41,12 @@ static const std::string SessionRecordingFileHeaderTitle = "OpenSpace_record/pla
 static const std::string SessionRecordingHeaderCameraAscii = "camera";
 static const std::string SessionRecordingHeaderTimeAscii = "time";
 static const std::string SessionRecordingHeaderScriptAscii = "script";
+static const std::string SessionRecordingFileExtensionBinary = ".osrec";
+static const std::string SessionRecordingFileExtensionAscii = ".osrectxt";
 static const char SessionRecordingHeaderCameraBinary = 'c';
 static const char SessionRecordingHeaderTimeBinary = 't';
 static const char SessionRecordingHeaderScriptBinary = 's';
+
 
 class SessionRecording : public properties::PropertyOwner {
 public:
@@ -415,6 +418,14 @@ public:
      */
     static void saveKeyframeToFile(std::string entry, std::ofstream& file);
 
+    /**
+     * Checks if a specified recording file ends with a particular file extension
+     *
+     * \param filename the name of the file to record to
+     * \param extension the file extension to check for
+     */
+    static bool hasFileExtension(std::string filename, std::string extension);
+
 private:
     enum class RecordedType {
         Camera = 0,
@@ -436,7 +447,7 @@ private:
     double appropriateTimestamp(double timeOs, double timeRec, double timeSim);
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
-
+    bool handleRecordingFile(std::string filenameIn);
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
