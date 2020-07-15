@@ -49,9 +49,11 @@ namespace openspace {
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
 
+
     private:
         std::string _identifier;
-
+        std::vector<float> _vertexArray;
+        glm::vec3 _normalizedVector;
         // OpenGL Vertex Array Object
         GLuint _vertexArrayObject = 0;
         // OpenGL Vertex Buffer Object containing the vertex positions
@@ -67,8 +69,12 @@ namespace openspace {
         std::vector<glm::vec3> positions;
         float _Timesincestart = -1.f;
         double _triggerTime;
+        double _endTime;
+        bool _needPositionUpdate = true;
         properties::FloatProperty _lightspeed;
         std::unique_ptr<ghoul::Dictionary> _dictionary;
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+
+        double calculateEndTime(const double starttime, const glm::vec3 startpos, const glm::vec3 endpos);
     };
 }

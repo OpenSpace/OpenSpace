@@ -88,30 +88,34 @@ namespace openspace {
 
         setRenderBin(Renderable::RenderBin::Transparent);
         glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
-        positions.push_back(currentpos);
+        //positions.push_back(currentpos);
         addProperty(_lightspeed);
         //_lightspeed = 300 * 10e6;
         _lightspeed = 299792458.f;
+        SceneGraphNode* earthNode = sceneGraphNode("Earth");
+       // glm::vec3 earthPos = earthNode->worldPosition();
         glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
         glm::vec3 earthToSun = glm::vec3(earthPos);
         glm::vec3 newpos = glm::vec3(0.0, 0.0, 0.0);
         /// should probably be distance from points to earth
+        /*
         while(currentpos.x < 94499869340){
             newpos = currentpos + (_lightspeed / glm::length(earthToSun)) * earthToSun;
             positions.push_back(newpos);
             earthToSun = earthPos - newpos;
             currentpos = newpos;
         }
+        */
         //positions.push_back(glm::vec3(94499869340 / 2, -115427843118 / 2, 11212075887.3 / 2));
-        positions.push_back(earthPos);
+       // positions.push_back(earthPos);
 
-        _triggerTime = Time::convertTime("20000714T100344000");
-
-
-        LDEBUG("position size:" + std::to_string(positions.size()));
+        //_triggerTime = Time::convertTime("2000-07-14T10:03:44.00");
+        _triggerTime = -1;
+        //LDEBUG("_triggertime: " + std::to_string(_triggerTime));
+        //_endTime = _triggerTime + 599;
+        
         //Earthnode worldposition, is not aligned with the actual position shown as it seems right now.
-        //SceneGraphNode* earthNode = sceneGraphNode("Earth");
-        //glm::vec3 earthPos = earthNode->worldPosition();
+       
         //glm::vec3 earthPos = earthNode->position();
        // positions.push_back(earthPos);
        // positions.push_back(earthPos);
@@ -136,21 +140,56 @@ namespace openspace {
 
 
     }
+     double RenderableLightTravel::calculateEndTime(const double starttime, const glm::vec3 startpos, const glm::vec3 endpos) {
+        glm::vec3 newpos = glm::vec3(0, 0, 0);
+        glm::vec3 normalizedVector = glm::normalize(endpos);
+        _normalizedVector = normalizedVector;
+        double endtime = starttime;
+        LDEBUG("distance" + std::to_string(glm::distance(newpos, endpos)));
+        int counter = 0;
+        float lightspeed = 299792458;
+        positions.clear();
+        positions.push_back(startpos);
+        //while (glm::distance(newpos, endpos) > 100000) {
+        while(endtime - starttime < 500){
+            newpos.x += 20 * lightspeed * normalizedVector.x;
+            newpos.y += 20 * lightspeed * normalizedVector.y;
+            newpos.z += 20 * lightspeed * normalizedVector.z;
+           
+            
+            endtime += 20;
+            ++counter;
+            //LDEBUG("newpos.y" + std::to_string(newpos.y));
+            //LDEBUG("newpos.x" + std::to_string(newpos.x));
+            //LDEBUG("endtime" + std::to_string(endtime));
+            if (newpos.x > endpos.x) {
+                newpos = endpos;
+                positions.push_back(newpos);
+                break;
+            }
+            positions.push_back(newpos);
+        }
+        positions.push_back(endpos);
+        LDEBUG("endtime" + std::to_string(endtime));
+        LDEBUG("newpos.y" + std::to_string(newpos.y));
+        LDEBUG("newpos.x" + std::to_string(newpos.x));
+        LDEBUG("position size" + std::to_string(positions.size()));
+        return endtime;
+    }
     bool RenderableLightTravel::isReady() const
     {
         return _shaderProgram != nullptr;
     }
     void RenderableLightTravel::render(const RenderData& data, RendererTasks& rendererTask)
     {
-        /*
-        if(positions.size() < 3){
-        SceneGraphNode* earthNode = sceneGraphNode("Earth");
-        glm::vec3 earthPos = earthNode->worldPosition();
-       // glm::vec3 earthPos = 
-       //     global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
-        positions.push_back(earthPos);
+        
+        if (_triggerTime == -1) {
+            _triggerTime = data.time.j2000Seconds();
+            _endTime = _triggerTime + 599;
         }
-        */
+       
+        
+        
        
         
         
@@ -167,11 +206,25 @@ namespace openspace {
         _shaderProgram->setUniform("modelViewProjection",
             data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
         glBindVertexArray(_vertexArrayObject);
+        
+
+        if(positions.size() > 2){
+        const double currentTime = data.time.j2000Seconds();
+        float timeSinceStart = currentTime - _triggerTime;
+        float dist_from_start = glm::distance(positions[0], positions[positions.size()]);
+        float transmissiontime = _endTime - _triggerTime;
+        _shaderProgram->setUniform("in_time_since_start", timeSinceStart);
+        _shaderProgram->setUniform("in_dist_from_start", dist_from_start);
+        _shaderProgram->setUniform("in_transmission_time", transmissiontime);
+        _shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
+        _shaderProgram->setUniform("normalizedvectorFromSuntoEarth", _normalizedVector);
+        }
 
         glLineWidth(5.0f);
         GLint temp = 0;
         glDrawArrays(
             GL_LINE_STRIP,
+            //GL_LINES,
             temp,
             static_cast<GLsizei>(positions.size())
         );
@@ -196,8 +249,28 @@ namespace openspace {
         }
         */
          const double currentTime = data.time.j2000Seconds();
-         if (_triggerTime < currentTime) {
+         _needPositionUpdate = true;
+         if (_needPositionUpdate) {
+             SceneGraphNode* earthNode = sceneGraphNode("Earth");
+             glm::vec3 earthPos = earthNode->worldPosition();
+             glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
+             /*
+             positions.push_back(currentpos);
+             positions.push_back(earthPos);
+             _needPositionUpdate = false;
+             */
+             _endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
+             _needPositionUpdate = false;
+         }
+         if (_triggerTime < currentTime && _endTime > currentTime) {
+         
+         
+         // glm::vec3 earthPos = 
+         //     global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
+         //positions.push_back(earthPos);
+         //_endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
 
+        //LDEBUG("position size:" + std::to_string(positions.size()));
          glBindVertexArray(_vertexArrayObject);
          glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -212,7 +285,7 @@ namespace openspace {
          constexpr const GLuint VaPosition = 0;
          glEnableVertexAttribArray(VaPosition);
          glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-         /*
+         
         
          constexpr const GLuint VaDistance = 1;
          constexpr const GLuint VaTimeSinceStart = 2;
@@ -221,7 +294,7 @@ namespace openspace {
         
          //glEnable(GL_PROGRAM_POINT_SIZE);
        
-
+            /*
          glVertexAttribPointer(VaDistance, 1, GL_FLOAT, GL_FALSE, 0, 0);
          glEnableVertexAttribArray(VaDistance);
 
@@ -242,6 +315,10 @@ namespace openspace {
 
 
          unbindGL();
+         }
+         else {
+             _needPositionUpdate = true;
+             _triggerTime = data.time.j2000Seconds();
          }
     }
 }

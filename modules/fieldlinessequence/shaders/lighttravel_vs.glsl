@@ -29,12 +29,17 @@ layout(location = 0) in vec3 in_position;
 
 out vec4 vs_color;
 out float vs_depth;
+uniform float in_time_since_start;
+uniform float in_dist_from_start;
+uniform float in_transmission_time;
+uniform float in_light_travel_time;
+uniform vec3 normalizedvectorFromSuntoEarth;
 /*
 layout(location = 1) in float in_dist_from_start;
 layout(location = 2) in float in_time_since_start;
 layout(location = 3) in float in_transmission_time;
 layout(location = 4) in float in_light_travel_time;
-
+*/
 
 out float distanceFromStart;
 out float timeSinceStart;
@@ -42,24 +47,42 @@ out float transmissionTime;
 out float lightTravelTime;
 out vec4 vs_positionScreenSpace;
 out vec4 vs_gPosition;
-out vec4 vs_color;
-*/
+
+const float lightSpeed = 299792458.0;
+
+bool calculateDistance(vec3 inposition) {
+ vec3 newpos = vec3(0, 0, 0);
+ //float temptime = 200;
+ float temptime = in_time_since_start;
+ newpos.x = normalizedvectorFromSuntoEarth.x * temptime * lightSpeed;
+ newpos.y = normalizedvectorFromSuntoEarth.y * temptime * lightSpeed;
+ newpos.z = normalizedvectorFromSuntoEarth.z * temptime * lightSpeed;
+ if(distance(newpos, inposition) < 5000000000.f){
+ //if(inposition.x > 50000000000.f){
+ return true;
+ }
+
+ return false;
+ 
+}
 void main() {
+    
    
-   if(gl_VertexID < 50000){
+   if(calculateDistance(in_position)){
    vs_color = vec4(1.0, 1.0, 1.0, 1.0);
    }
    else{
    vs_color = vec4(0.2, 0.3, 0.4, 1.0);
    }
+   
+   //vs_color = vec4(1.0, 1.0, 1.0, 1.0);
    vec4 position_in_meters = vec4(in_position, 1);
    vec4 positionClipSpace = modelViewProjection * position_in_meters;
    gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
    vs_depth = gl_Position.w;
-   /*
+   
    lightTravelTime = in_light_travel_time;
     timeSinceStart = in_time_since_start;   
     transmissionTime = in_transmission_time;
     distanceFromStart = in_dist_from_start;
-*/
 }

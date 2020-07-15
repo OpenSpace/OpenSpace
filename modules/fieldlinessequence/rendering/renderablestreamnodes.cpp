@@ -335,7 +335,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pEarthdistGroup({ "Earthfocus" })
     , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
     , _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, 383)
-    , _pMisalignedIndex(MisalignedIndexInfo, 5, -5, 20)
+    , _pMisalignedIndex(MisalignedIndexInfo, 0, -5, 20)
     , _pFlowColor(
         FlowColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
