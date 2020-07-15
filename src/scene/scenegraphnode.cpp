@@ -56,7 +56,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
     {
         "ComputeScreenSpaceData",
-        "Screen Space Data",
+        "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
         "at regular intervals. If these values are set to 'false', they are not updated."
     };
@@ -64,27 +64,33 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
-        "" // @TODO Missing documentation
+        "The x,y position in screen space. Can be used for placing GUI elements",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
-        "" // @TODO Missing documentation
+        "Determines if the node is currently visible on screen",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
-        "" // @TODO Missing documentation
+        "The distance from the camera to the node surface",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
-        "" // @TODO Missing documentation
+        "The screen size of the radius of the node",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
-        "" // @TODO Missing documentation
+        "The distace in world coordinates between node and camera "
+        "at which the screenspace object will become visible",
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
