@@ -639,13 +639,13 @@ SessionRecording::SessionState SessionRecording::state() const {
 }
 
 bool SessionRecording::playbackAddEntriesToTimeline() {
-    bool parsingErrorsFound = false;
+    bool parsingStatusOk = true;
 
     if (_recordingDataMode == SessionRecordingDataMode::Binary) {
         unsigned char frameType;
         bool fileReadOk = true;
 
-        while (fileReadOk) {
+        while (parsingStatusOk && fileReadOk) {
             frameType = readFromPlayback<unsigned char>(_playbackFile);
             // Check if have reached EOF
             if (!_playbackFile) {
@@ -657,20 +657,20 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
                 break;
             }
             if (frameType == SessionRecordingHeaderCameraBinary) {
-                playbackCamera();
+                parsingStatusOk = playbackCamera();
             }
             else if (frameType == SessionRecordingHeaderTimeBinary) {
-                playbackTimeChange();
+                parsingStatusOk = playbackTimeChange();
             }
             else if (frameType == SessionRecordingHeaderScriptBinary) {
-                playbackScript();
+                parsingStatusOk = playbackScript();
             }
             else {
                 LERROR(fmt::format(
                     "Unknown frame type {} @ index {} of playback file {}",
                     frameType, _playbackLineNum - 1, _playbackFilename
                 ));
-                parsingErrorsFound = true;
+                parsingStatusOk = false;
                 break;
             }
 
@@ -678,7 +678,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
         }
     }
     else {
-        while (std::getline(_playbackFile, _playbackLineParsing)) {
+        while (parsingStatusOk && std::getline(_playbackFile, _playbackLineParsing)) {
             _playbackLineNum++;
 
             std::istringstream iss(_playbackLineParsing);
@@ -692,20 +692,20 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             }
 
             if (entryType == SessionRecordingHeaderCameraAscii) {
-                playbackCamera();
+                parsingStatusOk = playbackCamera();
             }
             else if (entryType == SessionRecordingHeaderTimeAscii) {
-                playbackTimeChange();
+                parsingStatusOk = playbackTimeChange();
             }
             else if (entryType == SessionRecordingHeaderScriptAscii) {
-                playbackScript();
+                parsingStatusOk = playbackScript();
             }
             else {
                 LERROR(fmt::format(
                     "Unknown frame type {} @ line {} of playback file {}",
                     entryType, _playbackLineNum, _playbackFilename
                 ));
-                parsingErrorsFound = true;
+                parsingStatusOk = false;
                 break;
             }
         }
@@ -715,7 +715,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
         ));
     }
 
-    return !parsingErrorsFound;
+    return parsingStatusOk;
 }
 
 double SessionRecording::appropriateTimestamp(double timeOs,
@@ -793,7 +793,7 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     }
 }
 
-void SessionRecording::playbackCamera() {
+bool SessionRecording::playbackCamera() {
     timestamps times;
     datamessagestructures::CameraKeyframe kf;
 
@@ -812,7 +812,7 @@ void SessionRecording::playbackCamera() {
     double timeRef = appropriateTimestamp(times.timeOs, times.timeRec, times.timeSim);
 
     interaction::KeyframeNavigator::CameraPose pbFrame(kf);
-    addKeyframe(timeRef, pbFrame);
+    return addKeyframe(timeRef, pbFrame, _playbackLineNum);
 }
 
 void SessionRecording::readCameraKeyframeBinary(timestamps& times,
@@ -871,7 +871,7 @@ void SessionRecording::readCameraKeyframeAscii(timestamps& times,
     }
 }
 
-void SessionRecording::playbackTimeChange() {
+bool SessionRecording::playbackTimeChange() {
     timestamps times;
     datamessagestructures::TimeKeyframe kf;
 
@@ -885,7 +885,7 @@ void SessionRecording::playbackTimeChange() {
     kf._time = kf._timestamp + _timestampApplicationStarted_simulation;
     //global::timeManager.addKeyframe(timeRef, pbFrame._timestamp);
     //_externInteract.timeInteraction(pbFrame);
-    addKeyframe(kf._timestamp, kf);
+    return addKeyframe(kf._timestamp, kf, _playbackLineNum);
 }
 
 void SessionRecording::readTimeKeyframeBinary(timestamps& times,
@@ -950,7 +950,7 @@ std::string SessionRecording::readHeaderElement(std::ifstream& stream,
     return std::string(readTemp.begin(), readTemp.end());
 }
 
-void SessionRecording::playbackScript() {
+bool SessionRecording::playbackScript() {
     timestamps times;
     datamessagestructures::ScriptMessage kf;
 
@@ -961,7 +961,7 @@ void SessionRecording::playbackScript() {
     }
 
     double timeRef = appropriateTimestamp(times.timeOs, times.timeRec, times.timeSim);
-    addKeyframe(timeRef, kf._script);
+    return addKeyframe(timeRef, kf._script, _playbackLineNum);
 }
 
 void SessionRecording::readScriptKeyframeBinary(timestamps& times,
@@ -1022,38 +1022,69 @@ void SessionRecording::readScriptKeyframeAscii(timestamps& times,
     }
 }
 
-void SessionRecording::addKeyframe(double timestamp,
-                                   interaction::KeyframeNavigator::CameraPose keyframe)
+bool SessionRecording::addKeyframe(double timestamp,
+                                   interaction::KeyframeNavigator::CameraPose keyframe,
+                                   int lineNum)
 {
     size_t indexIntoCameraKeyframesFromMainTimeline = _keyframesCamera.size();
     _keyframesCamera.push_back(std::move(keyframe));
-    _timeline.push_back({
+    return addKeyframeToTimeline(
         RecordedType::Camera,
-        static_cast<unsigned int>(indexIntoCameraKeyframesFromMainTimeline),
-        timestamp
-    });
+        indexIntoCameraKeyframesFromMainTimeline,
+        timestamp,
+        lineNum
+    );
 }
 
-void SessionRecording::addKeyframe(double timestamp,
-                                   datamessagestructures::TimeKeyframe keyframe)
+bool SessionRecording::addKeyframe(double timestamp,
+                                   datamessagestructures::TimeKeyframe keyframe,
+                                   int lineNum)
 {
     size_t indexIntoTimeKeyframesFromMainTimeline = _keyframesTime.size();
     _keyframesTime.push_back(std::move(keyframe));
-    _timeline.push_back({
+    return addKeyframeToTimeline(
         RecordedType::Time,
-        static_cast<unsigned int>(indexIntoTimeKeyframesFromMainTimeline),
-        timestamp
-    });
+        indexIntoTimeKeyframesFromMainTimeline,
+        timestamp,
+        lineNum
+    );
 }
 
-void SessionRecording::addKeyframe(double timestamp, std::string scriptToQueue) {
+bool SessionRecording::addKeyframe(double timestamp,
+                                   std::string scriptToQueue,
+                                   int lineNum)
+{
     size_t indexIntoScriptKeyframesFromMainTimeline = _keyframesScript.size();
     _keyframesScript.push_back(std::move(scriptToQueue));
-    _timeline.push_back({
+    return addKeyframeToTimeline(
         RecordedType::Script,
-        static_cast<unsigned int>(indexIntoScriptKeyframesFromMainTimeline),
-        timestamp
-    });
+        indexIntoScriptKeyframesFromMainTimeline,
+        timestamp,
+        lineNum
+    );
+}
+
+bool SessionRecording::addKeyframeToTimeline(RecordedType type,
+                                             size_t indexIntoTypeKeyframes,
+                                             double timestamp,
+                                             int lineNum)
+{
+    try {
+        _timeline.push_back({
+            type,
+            static_cast<unsigned int>(indexIntoTypeKeyframes),
+            timestamp
+        });
+    }
+    catch(...) {
+        LERROR(fmt::format(
+            "Timeline memory allocation error trying to add keyframe {}. "
+            "The playback file may be too large for system memory.",
+            lineNum - 1
+        ));
+        return false;
+    }
+    return true;
 }
 
 void SessionRecording::moveAheadInTime() {

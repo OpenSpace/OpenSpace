@@ -437,21 +437,24 @@ private:
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
 
-    void playbackCamera();
-    void playbackTimeChange();
-    void playbackScript();
+    bool playbackCamera();
+    bool playbackTimeChange();
+    bool playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
     void findFirstCameraKeyframeInTimeline();
-    static void saveStringToFile(const std::string& s, unsigned char* kfBuffer, size_t& idx,
-        std::ofstream& file);
+    static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
+        size_t& idx, std::ofstream& file);
     static void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
         std::ofstream& file);
 
-    void addKeyframe(double timestamp,
-        interaction::KeyframeNavigator::CameraPose keyframe);
-    void addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe);
-    void addKeyframe(double timestamp, std::string scriptToQueue);
+    bool addKeyframe(double timestamp,
+        interaction::KeyframeNavigator::CameraPose keyframe, int lineNum);
+    bool addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe,
+        int lineNum);
+    bool addKeyframe(double timestamp, std::string scriptToQueue, int lineNum);
+    bool addKeyframeToTimeline(RecordedType type, size_t indexIntoTypeKeyframes,
+        double timestamp, int lineNum);
     void moveAheadInTime();
     void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
