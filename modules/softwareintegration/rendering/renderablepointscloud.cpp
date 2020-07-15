@@ -162,7 +162,6 @@ namespace openspace {
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
-        glEnable(GL_POINT_SMOOTH);
 
         glBindVertexArray(_vaoID);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_varray.size()));

@@ -37,6 +37,10 @@ Fragment getFragment() {
     frag.depth     = vs_depthClipSpace;
     frag.gPosition = vs_positionViewSpace;
 
+    vec2 temp = gl_PointCoord - vec2(0.5);
+    float f = dot(temp, temp);
+    if (f>0.25) discard;
+
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
