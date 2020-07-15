@@ -18,7 +18,7 @@ openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 
 local speedofLight = {
     Identifier = "SpeedofLight",
-    Parent = sunTransforms.SunIAU.Identifier,
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
     Type = "RenderableLightTravel"
 },
