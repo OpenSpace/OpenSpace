@@ -187,11 +187,10 @@ private:
     glm::dmat3 _worldRotationCached = glm::dmat3(1.0);
     glm::dvec3 _worldScaleCached = glm::dvec3(1.0);
 
-    float _fixedBoundingSphere = 0.f;
-
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
     glm::dmat4 _inverseModelTransformCached = glm::dmat4(1.0);
 
+    properties::FloatProperty _boundingSphere;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;
