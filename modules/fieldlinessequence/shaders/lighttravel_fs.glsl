@@ -25,8 +25,11 @@
  #include "floatoperations.glsl"
 in vec4 vs_color;
 in float vs_depth;
+in flat int rendermode;
+in vec2 vs_st;
 
-
+uniform sampler2D spriteTexture;
+//uniform bool additiveBlending;
 float lightSpeed = 299792458.0;
 
 in vec4 vs_positionScreenSpace;
@@ -54,7 +57,7 @@ float segmentSizeFactor = 200;
 float spacingSizeFactor = 2000;
 float fadeFactor = 0.2;
 float baseOpacity = 0.5;
-
+/*
 float getSegmentOpacity(const float segmentSize, 
                         const float spacing, 
                         const float distFlowTravelStart,
@@ -116,7 +119,7 @@ float getSegmentOpacity(const float segmentSize,
     // if within a spacing
     return vs_color.a*baseOpacity;
 }
-
+*/
 
 Fragment getFragment() {
     if (vs_color.a == 0) {
@@ -128,6 +131,35 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_depth;
     
+    /*
+    if(vs_st.x == 0){
+    discard;
+    }
+    else{
+    if(gl_FrontFacing) {
+        frag.color = texture(texture1, vs_st);
+    }
+    else{
+        frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+    }
+    }
+    */
+    if(rendermode == 3){
+    frag.color = texture(spriteTexture, gl_PointCoord) * vec4(1, 1, 1, 0.1);
+    //if(gl_FrontFacing) {
+    //    frag.color = texture(spriteTexture, vs_st);
+       // frag.color = texture(spriteTexture, gl_PointCoord);
+    //}
+   /* else{
+       // frag.color = texture(spriteTexture, vec2(1 - vs_st.s, vs_st.t));
+       frag.color = vec4(0.1, 0.1, 0.1, 1.0);
+    }
+    */
+    //frag.blend = BLEND_MODE_ADDITIVE;
+    }
+    else{
+    frag.color = fragColor;
+    }
     /*
      // the distance the first signal transmission has travelled 
     float distLightTravelStart = lightSpeed * timeSinceStart;
@@ -150,14 +182,16 @@ Fragment getFragment() {
    */
     //frag.color = vec4(fragColor.xyz, alpha);
      
-    frag.color = fragColor;
+    
     // G-Buffer
-    frag.gPosition = vec4(0.0); //vs_gPosition;
+    //frag.gPosition = vec4(0.0); //vs_gPosition;
     //vec4 depthCorrection = vec4(0.0,0.0,9000,0.0);
     //frag.gPosition = vs_gPosition + depthCorrection;
     // There is no normal here
     // TODO: Add the correct normal if necessary (JCC)
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+    //frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+    frag.gPosition  = vs_gPosition;
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
 
     return frag;
 }

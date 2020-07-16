@@ -50,6 +50,9 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+#include <ghoul/io/texture/texturereader.h>
 
 
 namespace {
@@ -91,6 +94,11 @@ namespace {
         "Timestep for light travel",
         "Change the timestep for the points along the line between sun and earth"
     };
+    constexpr openspace::properties::Property::PropertyInfo DistanceFactorInfo = {
+        "distanceFactor",
+        "The distancefactor for what to show as default vs light",
+        "This value is multiplicated by a maximum distance of 1000000000.f meters. "
+    };
 }
 
 namespace openspace {
@@ -108,6 +116,7 @@ namespace openspace {
             glm::vec4(1.f))
         , _pointSize(PointSizeInfo, 2.f, 0, 20)
         , _timeStep(TimeStepInfo, 10, 1, 30)
+        , _distanceFactor(DistanceFactorInfo, 5, 1, 20)
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -121,15 +130,18 @@ namespace openspace {
             absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/lighttravel_fs.glsl")
         );
 
+
+        
         glGenVertexArrays(1, &_vertexArrayObject);
         glGenBuffers(1, &_vertexPositionBuffer);
-        
+        //createPlane();
 
         setRenderBin(Renderable::RenderBin::Transparent);
         glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
         //positions.push_back(currentpos);
         addProperty(_lightspeed);
         addProperty(_lineWidth);
+        addProperty(_distanceFactor);
         //_lightspeed = 300 * 10e6;
         _lightspeed = 299792458.f;
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
@@ -160,11 +172,23 @@ namespace openspace {
        // positions.push_back(earthPos);
        // positions.push_back(earthPos);
 
+         //createPlane();
+        _spriteTexture = nullptr;
+        std::string texturepath = "C:/Users/Chrad171/openspace/OpenSpace/sync/http/stars_textures/1/halo.png";
+        _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
+            texturepath
+        );
+        if (_spriteTexture) {
+            //_spriteTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+            _spriteTexture->uploadTexture();
+        }
+
         LDEBUG("vi kom in i init");
 
         _rendermode.addOption(static_cast<int>(RenderMethod::LineStrip), "LineStrip");
         _rendermode.addOption(static_cast<int>(RenderMethod::Lines), "Lines");
         _rendermode.addOption(static_cast<int>(RenderMethod::Points), "Points");
+        _rendermode.addOption(static_cast<int>(RenderMethod::Sprites), "Sprites");
         addProperty(_rendermode);
         addProperty(_pLightColor);
         addProperty(_pDefaultColor);
@@ -247,6 +271,7 @@ namespace openspace {
         _shaderProgram->activate();
         //LDEBUG("vi kom in i render");
         // Calculate Model View MatrixProjection
+        
         const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
         const glm::dmat4 modelMat =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -256,6 +281,9 @@ namespace openspace {
 
         _shaderProgram->setUniform("modelViewProjection",
             data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+        
+       
+        
         glBindVertexArray(_vertexArrayObject);
         
 
@@ -265,14 +293,15 @@ namespace openspace {
         float dist_from_start = glm::distance(positions[0], positions[positions.size()]);
         float transmissiontime = _endTime - _triggerTime;
         _shaderProgram->setUniform("in_time_since_start", timeSinceStart);
-        _shaderProgram->setUniform("in_dist_from_start", dist_from_start);
-        _shaderProgram->setUniform("in_transmission_time", transmissiontime);
-        _shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
+        //_shaderProgram->setUniform("in_dist_from_start", dist_from_start);
+        //_shaderProgram->setUniform("in_transmission_time", transmissiontime);
+        //_shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
         _shaderProgram->setUniform("normalizedvectorFromSuntoEarth", _normalizedVector);
         _shaderProgram->setUniform("renderMode", _rendermode);
         _shaderProgram->setUniform("pointSize", _pointSize);
         _shaderProgram->setUniform("defaultColor", _pDefaultColor);
         _shaderProgram->setUniform("LightColor", _pLightColor);
+        _shaderProgram->setUniform("DistanceFactor", _distanceFactor);
         }
 
         if(_rendermode == 0){
@@ -304,6 +333,24 @@ namespace openspace {
                 static_cast<GLsizei>(positions.size())
             );
         }
+        else if (_rendermode == 3) {
+            ghoul::opengl::TextureUnit spriteTextureUnit;
+            spriteTextureUnit.activate();
+            _spriteTexture->bind();
+            _shaderProgram->setUniform("spriteTexture", spriteTextureUnit);
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            
+            glDrawArrays(
+                GL_POINTS,
+                0,
+                static_cast<GLsizei>(positions.size())
+            );
+            /*
+            createPlane();
+            glBindVertexArray(_quad);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            */
+        }
         glBindVertexArray(0);
         _shaderProgram->deactivate();
 
@@ -316,86 +363,114 @@ namespace openspace {
     }
     void RenderableLightTravel::update(const UpdateData& data)
     {
-         if (_shaderProgram->isDirty()) {
-              _shaderProgram->rebuildFromFile();
-         }
-         /*
-         if (_Timesincestart == -1) {
-             _Timesincestart = 
+        if (_shaderProgram->isDirty()) {
+            _shaderProgram->rebuildFromFile();
         }
-        */
-         const double currentTime = data.time.j2000Seconds();
-         
-         if (_needPositionUpdate) {
-             SceneGraphNode* earthNode = sceneGraphNode("Earth");
-             glm::vec3 earthPos = earthNode->worldPosition();
-             glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
-             /*
-             positions.push_back(currentpos);
-             positions.push_back(earthPos);
-             _needPositionUpdate = false;
-             */
-             _needPositionUpdate = false;
-             _endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
-             
-         }
-         if (_triggerTime < currentTime && _endTime > currentTime) {
-         
-         
-         // glm::vec3 earthPos = 
-         //     global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
-         //positions.push_back(earthPos);
-         //_endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
+        /*
+        if (_Timesincestart == -1) {
+            _Timesincestart =
+       }
+       */
+        const double currentTime = data.time.j2000Seconds();
 
-        //LDEBUG("position size:" + std::to_string(positions.size()));
-         glBindVertexArray(_vertexArrayObject);
-         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
-         const std::vector<glm::vec3>& vertPos = positions;
-
-         glBufferData(
-             GL_ARRAY_BUFFER,
-             vertPos.size() * sizeof(glm::vec3),
-             vertPos.data(),
-             GL_STATIC_DRAW
-         );
-         constexpr const GLuint VaPosition = 0;
-         glEnableVertexAttribArray(VaPosition);
-         glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-         
-        
-         constexpr const GLuint VaDistance = 1;
-         constexpr const GLuint VaTimeSinceStart = 2;
-         constexpr const GLuint VaTransmissionTime = 3;
-         constexpr const GLuint VaLightTravelTime = 4;
-        
-         //glEnable(GL_PROGRAM_POINT_SIZE);
-       
+        if (_needPositionUpdate) {
+            SceneGraphNode* earthNode = sceneGraphNode("Earth");
+            glm::vec3 earthPos = earthNode->worldPosition();
+            glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
             /*
-         glVertexAttribPointer(VaDistance, 1, GL_FLOAT, GL_FALSE, 0, 0);
-         glEnableVertexAttribArray(VaDistance);
+            positions.push_back(currentpos);
+            positions.push_back(earthPos);
+            _needPositionUpdate = false;
+            */
+            _needPositionUpdate = false;
+            _endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
 
-         glVertexAttribPointer(VaTimeSinceStart, 1, GL_FLOAT, GL_FALSE, 0, 0);
-         glEnableVertexAttribArray(VaTimeSinceStart);
-
-         glVertexAttribPointer(VaTransmissionTime, 1, GL_FLOAT, GL_FALSE, 0, 0);
-         glEnableVertexAttribArray(VaTransmissionTime);
-
-         glVertexAttribPointer(VaLightTravelTime, 1, GL_FLOAT, GL_FALSE, 0, 0);
-         glEnableVertexAttribArray(VaLightTravelTime);
-         */
+        }
+        if (_triggerTime < currentTime && _endTime > currentTime) {
 
 
+            // glm::vec3 earthPos = 
+            //     global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
+            //positions.push_back(earthPos);
+            //_endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
+
+           //LDEBUG("position size:" + std::to_string(positions.size()));
+            /*
+            if (_rendermode == 3) {
+               
+            }
+            */
+            glBindVertexArray(_vertexArrayObject);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+            const std::vector<glm::vec3>& vertPos = positions;
+
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                vertPos.size() * sizeof(glm::vec3),
+                vertPos.data(),
+                GL_STATIC_DRAW
+            );
+            constexpr const GLuint VaPosition = 0;
+            glEnableVertexAttribArray(VaPosition);
+            glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 
+            constexpr const GLuint VaDistance = 1;
+            constexpr const GLuint VaTimeSinceStart = 2;
+            constexpr const GLuint VaTransmissionTime = 3;
+            constexpr const GLuint VaLightTravelTime = 4;
+
+            //glEnable(GL_PROGRAM_POINT_SIZE);
 
 
+            glVertexAttribPointer(VaDistance, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            glEnableVertexAttribArray(VaDistance);
 
-         unbindGL();
-         }
+            glVertexAttribPointer(VaTimeSinceStart, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            glEnableVertexAttribArray(VaTimeSinceStart);
+
+            glVertexAttribPointer(VaTransmissionTime, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            glEnableVertexAttribArray(VaTransmissionTime);
+
+            glVertexAttribPointer(VaLightTravelTime, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            glEnableVertexAttribArray(VaLightTravelTime);
+
+            unbindGL();
+        }
          else {
              _needPositionUpdate = true;
              _triggerTime = data.time.j2000Seconds();
          }
     }
+    /*
+    void RenderableLightTravel::createPlane() {
+        const GLfloat size = 10000000000;
+        const GLfloat vertexData[] = {
+            //      x      y     z     w     s     t
+            -size, -size, 0.f, 0.f, 0.f, 0.f,
+            size, size, 0.f, 0.f, 1.f, 1.f,
+            -size, size, 0.f, 0.f, 0.f, 1.f,
+            -size, -size, 0.f, 0.f, 0.f, 0.f,
+            size, -size, 0.f, 0.f, 1.f, 0.f,
+            size, size, 0.f, 0.f, 1.f, 1.f,
+        };
+
+        glBindVertexArray(_quad);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(
+            1,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(GLfloat) * 6,
+            reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+        );
+    }
+    */
 }

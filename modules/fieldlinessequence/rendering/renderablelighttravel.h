@@ -36,6 +36,8 @@
 #include <atomic>
 
 #include <modules/base/rendering/renderabletrail.h>
+
+
 namespace openspace {
     class RenderableLightTravel : public Renderable {
     public:
@@ -69,7 +71,8 @@ namespace openspace {
         enum class RenderMethod : int {
             LineStrip = 0,
             Lines = 1,
-            Points = 2
+            Points = 2,
+            Sprites = 3
         };
 
         std::vector<glm::vec3> positions;
@@ -82,12 +85,19 @@ namespace openspace {
         properties::OptionProperty _rendermode;
         properties::FloatProperty _pointSize;
         properties::IntProperty _timeStep;
+        properties::FloatProperty _distanceFactor;
         // Uniform stream Color
         properties::Vec4Property _pDefaultColor;
         // Uniform stream Color
         properties::Vec4Property _pLightColor;
         std::unique_ptr<ghoul::Dictionary> _dictionary;
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+
+        std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
+        std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
+
+        GLuint _quad = 0;
+       // void createPlane();
 
         double calculateEndTime(const double starttime, const glm::vec3 startpos, const glm::vec3 endpos);
     };
