@@ -33,7 +33,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <optional>
@@ -98,7 +98,7 @@ private:
     properties::StringProperty _otherDataColorMapPath;
     properties::Vec2Property _otherDataRange;
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
-    properties::Vec4Property _fixedColor;
+    properties::Vec3Property _fixedColor;
     properties::BoolProperty _filterOutOfRange;
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
