@@ -738,6 +738,9 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             else if (entryType == SessionRecordingHeaderScriptAscii) {
                 parsingStatusOk = playbackScript();
             }
+            else if (entryType.substr(0, 1) == SessionRecordingHeaderCommentAscii) {
+                continue;
+            }
             else {
                 LERROR(fmt::format(
                     "Unknown frame type {} @ line {} of playback file {}",

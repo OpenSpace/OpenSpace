@@ -41,6 +41,7 @@ static const std::string SessionRecordingFileHeaderTitle = "OpenSpace_record/pla
 static const std::string SessionRecordingHeaderCameraAscii = "camera";
 static const std::string SessionRecordingHeaderTimeAscii = "time";
 static const std::string SessionRecordingHeaderScriptAscii = "script";
+static const std::string SessionRecordingHeaderCommentAscii = "#";
 static const std::string SessionRecordingFileExtensionBinary = ".osrec";
 static const std::string SessionRecordingFileExtensionAscii = ".osrectxt";
 static const char SessionRecordingHeaderCameraBinary = 'c';

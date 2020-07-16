@@ -268,6 +268,9 @@ void ConvertRecFormatTask::convertToBinary() {
             SessionRecording::saveScriptKeyframeBinary(times, skf, keyframeBuffer,
             _oFile);
         }
+        else if (entryType.substr(0, 1) == SessionRecordingHeaderCommentAscii) {
+            continue;
+        }
         else {
             LERROR(fmt::format(
                 "Unknown frame type {} @ line {} of file {}",
