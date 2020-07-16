@@ -81,6 +81,7 @@ namespace openspace {
         properties::FloatProperty _lineWidth;
         properties::OptionProperty _rendermode;
         properties::FloatProperty _pointSize;
+        properties::IntProperty _timeStep;
         // Uniform stream Color
         properties::Vec4Property _pDefaultColor;
         // Uniform stream Color

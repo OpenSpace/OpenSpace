@@ -86,6 +86,11 @@ namespace {
       "Size of points",
       "Change the size of the points"
     };
+    constexpr openspace::properties::Property::PropertyInfo TimeStepInfo = {
+        "timeStep",
+        "Timestep for light travel",
+        "Change the timestep for the points along the line between sun and earth"
+    };
 }
 
 namespace openspace {
@@ -98,10 +103,11 @@ namespace openspace {
         , _pDefaultColor(DefaultcolorInfo, glm::vec4(0.3, 0.3, 0.3, 0.5),
             glm::vec4(0.f),
             glm::vec4(1.f))
-        , _pLightColor(LightColorInfo, glm::vec4(1,1,1,1),
+        , _pLightColor(LightColorInfo, glm::vec4(1, 1, 1, 1),
             glm::vec4(0.f),
             glm::vec4(1.f))
         , _pointSize(PointSizeInfo, 2.f, 0, 20)
+        , _timeStep(TimeStepInfo, 10, 1, 30)
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -163,6 +169,7 @@ namespace openspace {
         addProperty(_pLightColor);
         addProperty(_pDefaultColor);
         addProperty(_pointSize);
+        addProperty(_timeStep);
         
         
    
@@ -193,7 +200,7 @@ namespace openspace {
         positions.clear();
         positions.push_back(startpos);
         //while (glm::distance(newpos, endpos) > 100000) {
-        int interval = 10;
+        int interval = _timeStep;
         while(endtime - starttime < 500){
             newpos.x += interval * _lightspeed * normalizedVector.x;
             newpos.y += interval * _lightspeed * normalizedVector.y;
