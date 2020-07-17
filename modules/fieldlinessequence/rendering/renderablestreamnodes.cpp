@@ -57,10 +57,11 @@ namespace {
     constexpr const char* _loggerCat = "renderableStreamNodes";
 
     // GL variables for shaders, probably needed some of them atleast
-    constexpr const GLuint VaPosition   = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaColor      = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaFiltering  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
-    constexpr const GLuint VaStreamnumber = 3; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaPosition   = 0;    // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaColor      = 1;    // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaFiltering  = 2;    // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaStreamnumber = 3;  // MUST CORRESPOND TO THE SHADER PROGRAM
+   // constexpr const GLuint Arrow = 4;           // MUST CORRESPOND TO THE SHADER PROGRAM
 
     constexpr int8_t CurrentCacheVersion = 2;
 
@@ -492,6 +493,7 @@ void RenderableStreamNodes::initializeGL() {
     glGenBuffers(1, &_vertexColorBuffer);
     glGenBuffers(1, &_vertexFilteringBuffer);
     glGenBuffers(1, &_vertexStreamNumberBuffer);
+   // glGenBuffers(1, &_arrow);
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::Transparent);
@@ -1109,8 +1111,12 @@ void RenderableStreamNodes::deinitializeGL() {
 
     glDeleteBuffers(1, &_vertexFilteringBuffer);
     _vertexFilteringBuffer = 0;
+
     glDeleteBuffers(1, &_vertexStreamNumberBuffer);
     _vertexStreamNumberBuffer = 0;
+
+    //glDeleteBuffers(1, &_arrow);
+    //_arrow = 0;
 
     if (_shaderProgram) {
         global::renderEngine.removeRenderProgram(_shaderProgram.get());
@@ -1256,6 +1262,55 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
 
     const std::vector<glm::vec3>& vertPos = _vertexPositions;
     glBindVertexArray(_vertexArrayObject);
+
+    /*
+    glBegin(GL_LINE_LOOP);          //start drawing a line loop
+    glVertex3f(-1.0f, 0.0f, 0.0f);  //left of window
+    glVertex3f(0.0f, -1.0f, 0.0f);  //bottom of window
+    glVertex3f(1.0f, 0.0f, 0.0f);   //right of window
+    glVertex3f(0.0f, 1.0f, 0.0f);   //top of window
+    glEnd();                        //end drawing of line loop
+    */
+
+    /*glColor3f(1, 0, 0);
+    glBegin(GL_TRIANGLES);
+        glVertex3f(-0.60, 0.77, 0); // <--- -0.60 instead of -0.68
+        glVertex3f(-0.68, 0.77, 0); // <--- -0.68 instead of -0.60
+        glVertex3f(-0.7, 0.68, 0);
+        glVertex3f(-0.64, 0.63, 0);
+        glVertex3f(-0.58, 0.68, 0);
+    glEnd();*/
+
+    /*glTranslatef(0.0f, 0.0f, -4.0f);//move forward 4 units
+
+    glColor3f(0.0f, 0.0f, 1.0f); //blue color
+
+    glBegin(GL_POLYGON);//begin drawing of polygon
+    glVertex3f(-0.5f, 0.5f, 0.0f);//first vertex
+    glVertex3f(0.5f, 0.5f, 0.0f);//second vertex
+    glVertex3f(1.0f, 0.0f, 0.0f);//third vertex
+    glVertex3f(0.5f, -0.5f, 0.0f);//fourth vertex
+    glVertex3f(-0.5f, -0.5f, 0.0f);//fifth vertex
+    glVertex3f(-1.0f, 0.0f, 0.0f);//sixth vertex
+    glEnd();//end drawing of polygon*/
+
+    /*static float arrowCoordinates[] = {
+       -0.3f,  0.2f, 0.0f,   // left swing
+        0.0f,  0.5f, 0.0f,   // top
+        0.0f, -0.5f, 0.0f,   // bottom
+        0.0f,  0.5f, 0.0f,   // back to top again
+        0.3f,  0.2f, 0.0f    // right swing
+    };
+    */
+
+    /*int COORDS_PER_VERTEX = 3;
+    int vertexCount = 364 * 3 / COORDS_PER_VERTEX;
+    int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    glEnableVertexAttribArray(Arrow);
+    //glVertexAttribPointer(Arrow, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    //glVertexAttribPointer(Arrow, COORDS_PER_VERTEX, GL_FLOAT, GL_FALSE, vertexStride, vertexBuffer);
+    glVertexAttribPointer(Arrow, COORDS_PER_VERTEX, GL_FLOAT, GL_FALSE, vertexStride, 0);
+    glDrawArrays(GL_LINE_STRIP, 0, vertexCount);*/
      
     //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
         
@@ -1436,6 +1491,7 @@ void RenderableStreamNodes::update(const UpdateData& data) {
         updatePositionBuffer();
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();
+        //updateArrow();
     }
         }
             // Needs fix, right now it stops cuz it cant find the states
@@ -1452,6 +1508,7 @@ void RenderableStreamNodes::update(const UpdateData& data) {
                 updateVertexColorBuffer();
                 updateVertexFilteringBuffer();
                 updateVertexStreamNumberBuffer();
+                //updateArrow();
             }
         }
 }
@@ -1594,5 +1651,24 @@ void RenderableStreamNodes::updateVertexStreamNumberBuffer() {
 
     unbindGL();
 }
+/*void RenderableStreamNodes::updateArrow() {
+
+    float positionsForArrow[9] = {
+        -0.5f, -0.5f, 0.0f,
+         0.0f,  0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f
+    };
+
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _arrow);
+    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), positionsForArrow, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(Arrow);
+    glVertexAttribPointer(Arrow, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    unbindGL();
+}*/
+
 
 } // namespace openspace

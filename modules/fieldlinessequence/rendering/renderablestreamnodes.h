@@ -150,6 +150,8 @@ private:
     GLuint _vertexindexBuffer = 0;
     // OpenGL Vertex Buffer Object containing the stream number for every node. 
     GLuint _vertexStreamNumberBuffer = 0;
+    // OpenGL Vertex Buffer Object containing the stream number for every node. 
+    //GLuint _arrow = 0;
 
     // ----------------------------------- POINTERS ------------------------------------//
     // The Lua-Modfile-Dictionary used during initialization
@@ -294,6 +296,7 @@ private:
     void updateVertexColorBuffer();
     void updateVertexFilteringBuffer();
     void updateVertexStreamNumberBuffer();
+    //void updateArrow();
 
     // ----------------------TEMPORARY VARIABLES ------------------
     //properties::StringProperty _spriteTexturePath;
