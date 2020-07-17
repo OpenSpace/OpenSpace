@@ -112,7 +112,8 @@ void main() {
    //float smoothFront = smoothstep(0, 199999999999.0f, in_position.x);
    //vs_color = vec4(1.0, 1.0, 1.0, smoothFront*1.0);
    //vs_color = vec4(0.2, 0.3, 0.4, 1.0);
-   if(rendermode == 3){
+
+   if(renderMode == 3){
    vs_color = vec4(0);
    }
    else{

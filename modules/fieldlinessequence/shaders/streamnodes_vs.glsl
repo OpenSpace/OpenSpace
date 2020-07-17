@@ -267,13 +267,13 @@ void DecidehowtoshowClosetoEarth(){
                    }
                    else{
                         vec4 fluxColorFlow = getTransferFunctionColor(colorTableFlow);
-                        vs_color = vec4(fluxColorFlow.xyz, flowColor.a);
+                        vs_color = vec4(fluxColorFlow.xyz, 1);
                         }
                         //vs_color = vec4(0.37, 0.37, 0.37, flowColor.a);
-               }
-               else{
-                   vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-                   vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
+            //   }
+              // else{
+                //   vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+                 //  vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
                  // vs_color = vec4(0.37, 0.37, 0.37, flowColor.a);
                 }
             }
@@ -327,6 +327,7 @@ void main() {
     gl_PointSize = 2;
     // Checking if we should render the vertex dependent on the vertexindex, 
     // by using modulus.
+    //if(gl_VertexID == 1000){
     if(CheckvertexIndex()){
     //Filtering by radius and z-axis
     if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
@@ -361,6 +362,12 @@ void main() {
     else{
         vs_color = vec4(0);
     }
+   
+   /*}
+    else{
+    vs_color = vec4(0);
+    }
+    */
     //if(!firstrender){
     //CheckdistanceMethod();
    // }

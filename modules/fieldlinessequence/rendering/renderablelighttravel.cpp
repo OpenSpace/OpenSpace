@@ -174,7 +174,9 @@ namespace openspace {
 
          //createPlane();
         _spriteTexture = nullptr;
-        std::string texturepath = "C:/Users/Chrad171/openspace/OpenSpace/sync/http/stars_textures/1/halo.png";
+        //std::string texturepath = "C:/Users/Chrad171/openspace/OpenSpace/sync/http/stars_textures/1/halo.png";
+        std::string texturepath = absPath("${SYNC}/http/stars_textures/1/halo.png");
+        
         _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
             texturepath
         );
