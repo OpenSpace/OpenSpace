@@ -260,9 +260,17 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ));
 
         // If the renderable child has a bounding sphere that is larger, we allow it to override
-        result->_boundingSphere.setValue(std::max(result->_renderable->boundingSphere(),
-            result->_boundingSphere.value()
-        ));
+        if (result->_renderable->boundingSphere() > result->_boundingSphere.value()) {
+            result->_boundingSphere.setValue(result->_renderable->boundingSphere());
+
+            if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
+                LWARNING(fmt::format(
+                    "The specified property 'BoundingSphere' for '{}' was overwritten by a child renderable",
+                    result->_identifier
+                ));
+            }
+        }
+
     }
 
     if (dictionary.hasKey(KeyTag)) {
