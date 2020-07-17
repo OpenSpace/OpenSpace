@@ -98,7 +98,7 @@ namespace {
         "Bounding Sphere",
         "The bounding sphere of the scene graph node. This can be the "
         "bounding sphere of an attached renderable or directly specified to the node. "
-        "If there is a boundingsphere on both the renderable and the ndoe, the largest number will be picked. ",
+        "If there is a boundingsphere on both the renderable and the node, the largest number will be picked. ",
         openspace::properties::Property::Visibility::Hidden
     };
 
