@@ -73,7 +73,7 @@ uniform int DistanceMethod;
 uniform int activestreamnumber;
 uniform bool firstrender;
 uniform int EnhanceMethod;
-uniform double    time;
+uniform double time;
 //uniform vec3 camerapos;
 //uniform float interestingStreams[4];
 
@@ -101,6 +101,9 @@ layout(location = 3)
 in int Streamnumber;
 layout(location = 4) 
 in vec2 in_st;
+
+//layout(location = 5) 
+//in vec2 arrow;
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
 const int uniformColor     = 0;
@@ -148,7 +151,6 @@ vec4 getTransferFunctionColor(sampler1D InColorTable) {
     return texture(InColorTable, lookUpVal);
 }
 
-
 bool CheckvertexIndex(){
     
     int nodeIndex = gl_VertexID;
@@ -186,9 +188,24 @@ bool CheckvertexIndex(){
 }
 //todo fix gl_VertexID
 
-//is Particle?: 
 bool isParticle(){
+
     int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
+    float speedIrregular = 1;
+    if(rValue > 1){
+        //if(Streamnumber % 2 == 1)
+        //{
+            speedIrregular = 4;
+            modulusResult = int(double(particleSpeed)* speedIrregular * time + gl_VertexID) % particleSpacing;
+        //}
+        //else{
+        //    modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
+        //}
+
+    }
+    else{
+            modulusResult = int(double(particleSpeed) * time + gl_VertexID*2) % particleSpacing;
+    }
     return modulusResult > 0 && modulusResult <= particleSize;
 return false;
 }
@@ -223,29 +240,29 @@ void DecidehowtoshowClosetoEarth(){
       // Draw every other line grey
       vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
 
-      float interestingStreams[4] = float[](154, 156, 153, 163);
+      float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
        // vs_color = vec4(0);
       //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
       //168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
       //float interestingStreams[3] = float[](37, 154, 210);
       
+      int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
+
       for(int i = 0; i < interestingStreams.length(); i++){
             if(Streamnumber == interestingStreams[i]){
-        
            // if(!firstrender){
                // vs_color = vec4(streamColor.xyz, fluxColorAlpha);
                if(usingParticles && isParticle() && rValue > 0.f){
-                   int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
-                   if(modulusResult >= particleSize - 10){
-                        //vs_color = vec4(1,1,1,1);
+                   if(modulusResult >= particleSize - 30){
+
                         if(flowColoring){
-                        vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-                        vs_color = vec4(fluxColor3.xyz, flowColor.a * 0.8);
+                            vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+                            vs_color = vec4(fluxColor3.xyz, flowColor.a * 0.8);
                          //vs_color = vec4(1,1,1,1);
                         }
                         else{
-                        //vs_color = vec4(1,1,1,1);
-                        vs_color = flowColor;
+                            vs_color = vec4(0.9,0.9,0.9,0.5);
+                            //vs_color = flowColor;
                         }
                    }
                    else{
@@ -329,7 +346,6 @@ void main() {
                 else{
                     vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
                     gl_PointSize = nodeSize;
-                   
                 }
             }
              CheckdistanceMethod();
