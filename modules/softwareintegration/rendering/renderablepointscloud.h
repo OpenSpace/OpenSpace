@@ -27,9 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
+namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
 } // namespace ghoul::opengl
@@ -42,6 +44,7 @@ namespace openspace {
     public:
         RenderablePointsCloud(const ghoul::Dictionary& dictionary);
 
+        void initialize() override;
         void initializeGL() override;
         void deinitializeGL() override;
 
@@ -53,21 +56,32 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     protected:
-        struct Vertex {
-            float location[3];
-        };
+
+        void createDataSlice();
+        bool loadData();
+        bool loadSpeckData();
+        bool readSpeckFile();
+        bool loadCachedFile(const std::string& file);
+        bool saveCachedFile(const std::string& file) const;
+
+        bool _hasSpeckFile = false;
+        bool _isDirty = true;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
 
         properties::Vec3Property _color;
         properties::FloatProperty _size;
 
+        std::string _speckFile;
+        std::vector<float> _fullData;
+        std::vector<float> _slicedData;
+
+        int _nValuesPerPoints = 0;
+
+        glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
         GLuint _vaoID = 0;
         GLuint _vBufferID = 0;
-
-        bool _isDirty = true;
-
-        std::vector<Vertex> _varray;
     };
 
 }// namespace openspace

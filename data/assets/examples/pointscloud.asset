@@ -2,11 +2,19 @@
 
 local assetHelper = asset.require("util/asset_helper")
 
+local speck = asset.syncedResource({
+    Name = "PointsCloud Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_2mass_speck",
+    Version = 1
+})
+
 local RenderablePointsCloud = {
     Identifier = "RenderablePointsCloud",
     Renderable = {
         Type = "RenderablePointsCloud",
-        Color = {1.0, 1.0, 0.0},
+        File = "", --speck .. "/2MASS.speck"
+        Color = {1.0, 1.0, 0.5},
         Size = 50,
     },
     GUI = {

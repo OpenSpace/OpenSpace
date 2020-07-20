@@ -19,8 +19,9 @@ asset.request('scene/milkyway/milkyway/volume')
 asset.request('scene/milkyway/constellations/constellation_art')
 asset.request('scene/milkyway/constellations/constellation_keybinds')
 
--- TESTELITEST
+--- TESTELITEST ---
 asset.require('examples/pointscloud')
+--- TESTELITEST ---
 
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
