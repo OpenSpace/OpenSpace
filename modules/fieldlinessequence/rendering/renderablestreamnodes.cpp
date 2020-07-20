@@ -254,6 +254,11 @@ namespace {
         "If set to true the flow will be colored by Flowcolor"
     };
     
+    constexpr openspace::properties::Property::PropertyInfo TempInfo1 = {
+        "temp1",
+        "temp",
+        "Temp"
+    };
     enum class SourceFileType : int {
         Json = 0,
         Invalid
@@ -349,6 +354,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
     , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
     , _pFlowColoring(FlowColoringInfo, false)
+    , _scaleFactor(TempInfo1, 150.f, 1.f, 500.f)
         
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -1023,6 +1029,7 @@ void RenderableStreamNodes::setupProperties() {
     //we are using _pLineWidth at the moment
     addProperty(_pLineWidth);
     addProperty(_pMisalignedIndex);
+    addProperty(_scaleFactor);
         
     // ----------------------------- Add Property Groups ----------------------------- //
     addPropertySubOwner(_pColorGroup);
@@ -1240,7 +1247,69 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     );
     _shaderProgram->setUniform("flowColoring", _pFlowColoring);
     
-    //_shaderProgram->setUniform("camerapos", data.camera.positionVec3());
+    //////// test for camera perspective: 
+
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+
+    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+
+    glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+    glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+    glm::dvec3 orthoRight = glm::normalize(
+        glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+    );
+    if (orthoRight == glm::dvec3(0.0)) {
+        glm::dvec3 otherVector(
+            cameraUpDirectionWorld.y,
+            cameraUpDirectionWorld.x,
+            cameraUpDirectionWorld.z
+        );
+        orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+    }
+    glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+    glm::vec3 cameraPos = data.camera.positionVec3();
+    //LDEBUG("camerapos x: " + std::to_string(cameraPos.x));
+    //LDEBUG("camerapos y: " + std::to_string(cameraPos.z));
+    //LDEBUG("camerapos z: " + std::to_string(cameraPos.y));
+    _shaderProgram->setUniform("camerapos", cameraPos);
+
+    _shaderProgram->setUniform("scaleFactor", _scaleFactor);
+    _shaderProgram->setUniform(
+        "up",
+        glm::vec3(data.camera.lookUpVectorWorldSpace())
+    );
+   
+    _shaderProgram->setUniform("modelMatrix", modelMatrix);
+    _shaderProgram->setUniform(
+        "cameraViewProjectionMatrix",
+        glm::mat4(
+            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
+        )
+    );
+    _shaderProgram->setUniform("minPointSize", 1.f); // in pixels
+    _shaderProgram->setUniform("maxPointSize", 100.f); // in pixels
+    
+    _shaderProgram->setUniform("up", glm::vec3(orthoUp));
+    _shaderProgram->setUniform("right", glm::vec3(orthoRight));
+    //_shaderProgram->setUniform(_uniformCache.fadeInValue, fadeInVariable);
+
+    _shaderProgram->setUniform(
+        "correctionSizeEndDistance",
+        17.f
+    );
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    _shaderProgram->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
+
+
+    //_shaderProgram->setUniform("camerapos", data.camera.)
+    //data.camera.
     //glm::vec3 testvec = data.camera.positionVec3();
     //LDEBUG("test: " + std::to_string(testvec.x));
     if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {

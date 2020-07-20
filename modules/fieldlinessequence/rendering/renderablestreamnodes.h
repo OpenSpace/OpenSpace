@@ -273,6 +273,8 @@ private:
     // binary files sourcefolder
     std::string _binarySourceFilePath;
 
+    
+
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
     bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
     void definePropertyCallbackFunctions();
@@ -304,5 +306,6 @@ private:
     //std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     //std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
 
+    properties::FloatProperty _scaleFactor;
 };
 }
