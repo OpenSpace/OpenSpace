@@ -151,7 +151,6 @@ namespace openspace {
         if (dictionary.hasKey(ToggleVisibilityInfo.identifier)) {
             _toggleVisibility = dictionary.value<bool>(ToggleVisibilityInfo.identifier);
         }
-
         _toggleVisibility.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_toggleVisibility);
     }

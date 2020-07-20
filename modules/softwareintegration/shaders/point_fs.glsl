@@ -32,15 +32,15 @@ uniform vec3 color;
 uniform float opacity;
 
 Fragment getFragment() {
-    Fragment frag;
-    frag.color.rgb = color;
-    frag.color.a   = opacity;
-    frag.depth     = vs_depthClipSpace;
-    frag.gPosition = vs_positionViewSpace;
 
     float radius = 0.5;
     float distance = length(gl_PointCoord - vec2(radius));
     if (distance > pow(radius, 2)) discard;
+    
+    Fragment frag;
+    frag.color     = vec4(color, opacity);
+    frag.depth     = vs_depthClipSpace;
+    frag.gPosition = vs_positionViewSpace;
 
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
