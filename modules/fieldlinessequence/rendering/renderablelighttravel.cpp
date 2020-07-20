@@ -53,6 +53,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
+
 
 
 namespace {
@@ -99,6 +102,21 @@ namespace {
         "The distancefactor for what to show as default vs light",
         "This value is multiplicated by a maximum distance of 1000000000.f meters. "
     };
+    constexpr openspace::properties::Property::PropertyInfo LabelInfo = {
+       "distanceFactor3",
+       "LabelRendering",
+       "should we show any label?"
+    };
+    constexpr openspace::properties::Property::PropertyInfo FollowLightInfo = {
+       "distanceFactor2",
+       "Label follow the light",
+       "Changes position of the label "
+    };
+    constexpr openspace::properties::Property::PropertyInfo FadeDistanceInfo = {
+        "fadeDistance",
+        "fadeDistance",
+        "fadeDistance"
+    };
 }
 
 namespace openspace {
@@ -117,6 +135,9 @@ namespace openspace {
         , _pointSize(PointSizeInfo, 2.f, 0, 20)
         , _timeStep(TimeStepInfo, 10, 1, 30)
         , _distanceFactor(DistanceFactorInfo, 5, 1, 20)
+        , _showLabel(LabelInfo, true)
+        , _shouldFollowLight(FollowLightInfo, true)
+        , _fadeDistance(FadeDistanceInfo, 10.f, 1.f, 10000.f)
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -130,8 +151,16 @@ namespace openspace {
             absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/lighttravel_fs.glsl")
         );
 
+        if(_font == nullptr){
+        size_t _fontSize = 50;
+        _font = global::fontManager.font(
+            "Mono",
+            static_cast<float>(_fontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
+        }
 
-        
         glGenVertexArrays(1, &_vertexArrayObject);
         glGenBuffers(1, &_vertexPositionBuffer);
         //createPlane();
@@ -142,6 +171,9 @@ namespace openspace {
         addProperty(_lightspeed);
         addProperty(_lineWidth);
         addProperty(_distanceFactor);
+        addProperty(_showLabel);
+        addProperty(_shouldFollowLight);
+        addProperty(_fadeDistance);
         //_lightspeed = 300 * 10e6;
         _lightspeed = 299792458.f;
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
@@ -174,7 +206,6 @@ namespace openspace {
 
          //createPlane();
         _spriteTexture = nullptr;
-        //std::string texturepath = "C:/Users/Chrad171/openspace/OpenSpace/sync/http/stars_textures/1/halo.png";
         std::string texturepath = absPath("${SYNC}/http/stars_textures/1/halo.png");
         
         _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
@@ -226,11 +257,18 @@ namespace openspace {
         positions.clear();
         positions.push_back(startpos);
         //while (glm::distance(newpos, endpos) > 100000) {
+        glm::vec3 newpos2 = glm::vec3(0, 0, 0);
+        newpos2.x = normalizedVector.x * _Timesincestart * _lightspeed;
+        newpos2.y = normalizedVector.y * _Timesincestart * _lightspeed;
+        newpos2.z = normalizedVector.z * _Timesincestart * _lightspeed;
+        _labelPos = newpos2;
         int interval = _timeStep;
         while(endtime - starttime < 500){
             newpos.x += interval * _lightspeed * normalizedVector.x;
             newpos.y += interval * _lightspeed * normalizedVector.y;
             newpos.z += interval * _lightspeed * normalizedVector.z;
+           
+
            
             
             endtime += interval;
@@ -246,6 +284,8 @@ namespace openspace {
             positions.push_back(newpos);
         }
         positions.push_back(endpos);
+       
+
        // LDEBUG("endtime" + std::to_string(endtime));
        // LDEBUG("newpos.y" + std::to_string(newpos.y));
         //LDEBUG("newpos.x" + std::to_string(newpos.x));
@@ -266,102 +306,162 @@ namespace openspace {
         }
        
         
-        
        
-        
-        
-        _shaderProgram->activate();
-        //LDEBUG("vi kom in i render");
-        // Calculate Model View MatrixProjection
-        
-        const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
-        const glm::dmat4 modelMat =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            rotMat *
-            glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
-        const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
+_shaderProgram->activate();
+//LDEBUG("vi kom in i render");
+// Calculate Model View MatrixProjection
 
-        _shaderProgram->setUniform("modelViewProjection",
-            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
-        
-       
-        
-        glBindVertexArray(_vertexArrayObject);
-        
+const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
+const glm::dmat4 modelMat =
+glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+rotMat *
+glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
-        if(positions.size() > 2){
-        const double currentTime = data.time.j2000Seconds();
-        float timeSinceStart = currentTime - _triggerTime;
-        float dist_from_start = glm::distance(positions[0], positions[positions.size()]);
-        float transmissiontime = _endTime - _triggerTime;
-        _shaderProgram->setUniform("in_time_since_start", timeSinceStart);
-        //_shaderProgram->setUniform("in_dist_from_start", dist_from_start);
-        //_shaderProgram->setUniform("in_transmission_time", transmissiontime);
-        //_shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
-        _shaderProgram->setUniform("normalizedvectorFromSuntoEarth", _normalizedVector);
-        _shaderProgram->setUniform("renderMode", _rendermode);
-        _shaderProgram->setUniform("pointSize", _pointSize);
-        _shaderProgram->setUniform("defaultColor", _pDefaultColor);
-        _shaderProgram->setUniform("LightColor", _pLightColor);
-        _shaderProgram->setUniform("DistanceFactor", _distanceFactor);
-        }
+_shaderProgram->setUniform("modelViewProjection",
+    data.camera.sgctInternal.projectionMatrix()* glm::mat4(modelViewMat));
 
-        if(_rendermode == 0){
-        glLineWidth(_lineWidth);
-        GLint temp = 0;
-        glDrawArrays(
-            GL_LINE_STRIP,
-            //GL_LINES,
-            temp,
-            static_cast<GLsizei>(positions.size())
-        );
-        }
-        else if (_rendermode == 1) {
-            glLineWidth(_lineWidth);
-            GLint temp = 0;
-            glDrawArrays(
-                GL_LINES,
-                temp,
-                static_cast<GLsizei>(positions.size())
-            );
+glm::dmat4 modelMatrix =
+glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-        }
-        else if (_rendermode == 2) {
-            GLint temp = 0;
-            glEnable(GL_PROGRAM_POINT_SIZE);
-            glDrawArrays(
-                GL_POINTS,
-                temp,
-                static_cast<GLsizei>(positions.size())
-            );
-        }
-        else if (_rendermode == 3) {
-            ghoul::opengl::TextureUnit spriteTextureUnit;
-            spriteTextureUnit.activate();
-            _spriteTexture->bind();
-            _shaderProgram->setUniform("spriteTexture", spriteTextureUnit);
-            glEnable(GL_PROGRAM_POINT_SIZE);
-            
-            glDrawArrays(
-                GL_POINTS,
-                0,
-                static_cast<GLsizei>(positions.size())
-            );
-            /*
-            createPlane();
-            glBindVertexArray(_quad);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            */
-        }
-        glBindVertexArray(0);
-        _shaderProgram->deactivate();
+glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-        
+glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
+glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+glm::dvec3 orthoRight = glm::normalize(
+    glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+);
+if (orthoRight == glm::dvec3(0.0)) {
+    glm::dvec3 otherVector(
+        cameraUpDirectionWorld.y,
+        cameraUpDirectionWorld.x,
+        cameraUpDirectionWorld.z
+    );
+    orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+}
+glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+
+
+
+glBindVertexArray(_vertexArrayObject);
+
+
+if (positions.size() > 2) {
+    const double currentTime = data.time.j2000Seconds();
+    _Timesincestart = currentTime - _triggerTime;
+    float dist_from_start = glm::distance(positions[0], positions[positions.size()]);
+    float transmissiontime = _endTime - _triggerTime;
+    _shaderProgram->setUniform("in_time_since_start", _Timesincestart);
+    //_shaderProgram->setUniform("in_dist_from_start", dist_from_start);
+    //_shaderProgram->setUniform("in_transmission_time", transmissiontime);
+    //_shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
+    _shaderProgram->setUniform("normalizedvectorFromSuntoEarth", _normalizedVector);
+    _shaderProgram->setUniform("renderMode", _rendermode);
+    _shaderProgram->setUniform("pointSize", _pointSize);
+    _shaderProgram->setUniform("defaultColor", _pDefaultColor);
+    _shaderProgram->setUniform("LightColor", _pLightColor);
+    _shaderProgram->setUniform("DistanceFactor", _distanceFactor);
+    if(_showLabel){
+    renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, _fadeDistance);
     }
+}
+
+if (_rendermode == 0) {
+    glLineWidth(_lineWidth);
+    GLint temp = 0;
+    glDrawArrays(
+        GL_LINE_STRIP,
+        //GL_LINES,
+        temp,
+        static_cast<GLsizei>(positions.size())
+    );
+}
+else if (_rendermode == 1) {
+    glLineWidth(_lineWidth);
+    GLint temp = 0;
+    glDrawArrays(
+        GL_LINES,
+        temp,
+        static_cast<GLsizei>(positions.size())
+    );
+
+}
+else if (_rendermode == 2) {
+    GLint temp = 0;
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glDrawArrays(
+        GL_POINTS,
+        temp,
+        static_cast<GLsizei>(positions.size())
+    );
+}
+else if (_rendermode == 3) {
+    ghoul::opengl::TextureUnit spriteTextureUnit;
+    spriteTextureUnit.activate();
+    _spriteTexture->bind();
+    _shaderProgram->setUniform("spriteTexture", spriteTextureUnit);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    glDrawArrays(
+        GL_POINTS,
+        0,
+        static_cast<GLsizei>(positions.size())
+    );
+    /*
+    createPlane();
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    */
+}
+glBindVertexArray(0);
+_shaderProgram->deactivate();
+
+
+}
     inline void unbindGL() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+    }
+    void RenderableLightTravel::renderLabels(const RenderData& data,
+        const glm::dmat4& modelViewProjectionMatrix,
+        const glm::dvec3& orthoRight,
+        const glm::dvec3& orthoUp,
+        float fadeInVariable){
+
+
+        glm::vec4 textColor = _pLightColor;
+
+        ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
+        labelInfo.orthoRight = orthoRight;
+        labelInfo.orthoUp = orthoUp;
+        labelInfo.minSize = static_cast<int>(1);
+        labelInfo.maxSize = static_cast<int>(10);
+        labelInfo.cameraPos = data.camera.positionVec3();
+        labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
+        //labelInfo.renderType = _renderOption;
+        labelInfo.mvpMatrix = modelViewProjectionMatrix;
+        labelInfo.scale = pow(10.f, fadeInVariable);
+        labelInfo.enableDepth = true;
+        labelInfo.enableFalseDepth = false;
+
+        if (!_shouldFollowLight) {
+            _labelPos = positions[positions.size() / 2];
+        }
+
+        std::string text = "Speed of Light";
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+            *_font,
+            _labelPos,
+            text,
+            textColor,
+            labelInfo
+        );
     }
     void RenderableLightTravel::update(const UpdateData& data)
     {

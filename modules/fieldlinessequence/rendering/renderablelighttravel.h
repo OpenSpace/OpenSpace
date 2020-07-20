@@ -37,7 +37,7 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
-
+namespace ghoul::fontrendering { class Font; }
 namespace openspace {
     class RenderableLightTravel : public Renderable {
     public:
@@ -86,6 +86,10 @@ namespace openspace {
         properties::FloatProperty _pointSize;
         properties::IntProperty _timeStep;
         properties::FloatProperty _distanceFactor;
+
+        properties::BoolProperty _showLabel;
+        properties::BoolProperty _shouldFollowLight;
+        properties::FloatProperty _fadeDistance;
         // Uniform stream Color
         properties::Vec4Property _pDefaultColor;
         // Uniform stream Color
@@ -95,10 +99,16 @@ namespace openspace {
 
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
-
+        std::shared_ptr<ghoul::fontrendering::Font> _font;
+        
+        glm::vec3 _labelPos;
         GLuint _quad = 0;
        // void createPlane();
-
+        void renderLabels(const RenderData& data,
+            const glm::dmat4& modelViewProjectionMatrix,
+            const glm::dvec3& orthoRight,
+            const glm::dvec3& orthoUp,
+            float fadeInVariable);
         double calculateEndTime(const double starttime, const glm::vec3 startpos, const glm::vec3 endpos);
     };
 }
