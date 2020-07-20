@@ -13,8 +13,9 @@ local RenderablePointsCloud = {
     Identifier = "RenderablePointsCloud",
     Renderable = {
         Type = "RenderablePointsCloud",
-        File = "", --speck .. "/2MASS.speck"
         Color = {1.0, 1.0, 0.5},
+        File = "", --speck .. "/2MASS.speck"
+        Opacity = 1.0,
         Size = 50,
     },
     GUI = {

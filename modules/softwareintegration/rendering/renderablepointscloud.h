@@ -69,8 +69,10 @@ namespace openspace {
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
 
-        properties::Vec3Property _color;
+        properties::BoolProperty _toggleVisibility;
+        properties::FloatProperty _opacity;
         properties::FloatProperty _size;
+        properties::Vec3Property _color;
 
         std::string _speckFile;
         std::vector<float> _fullData;

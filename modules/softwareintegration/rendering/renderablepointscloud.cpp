@@ -52,10 +52,22 @@ namespace {
         "TODO"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Opacity",
+        "TODO"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "TODO"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ToggleVisibilityInfo = {
+        "ToggleVisibility",
+        "Toggle Visibility",
+        "Enables/Disables the drawing of points."
     };
 } // namespace
 
@@ -68,16 +80,22 @@ namespace openspace {
             "softwareintegration_renderable_pointscloud",
             {
                 {
+                    ColorInfo.identifier,
+                    new DoubleVector3Verifier,
+                    Optional::Yes,
+                    ColorInfo.description
+                },
+                {
                     KeyFile,
                     new StringVerifier,
                     Optional::Yes,
                     "TODO"
                 },
                 {
-                    ColorInfo.identifier,
-                    new DoubleVector3Verifier,
+                    OpacityInfo.identifier,
+                    new DoubleVerifier,
                     Optional::Yes,
-                    ColorInfo.description
+                    OpacityInfo.description
                 },
                 {
                     SizeInfo.identifier,
@@ -97,7 +115,9 @@ namespace openspace {
             glm::vec3(0.f),
             glm::vec3(1.f)
         )
+        , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
         , _size(SizeInfo, 1.f, 0.f, 600.f)
+        , _toggleVisibility(ToggleVisibilityInfo, true)
     {
         documentation::testSpecificationAndThrow(
             Documentation(),
@@ -105,23 +125,35 @@ namespace openspace {
             "RenderablePointsCloud"
         );
 
-        if (dictionary.hasKey(KeyFile)) {
-            _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-            _hasSpeckFile = true;
-        }
-
         if (dictionary.hasKey(ColorInfo.identifier)) {
             _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
         }
         _color.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_color);
 
+        if (dictionary.hasKey(KeyFile)) {
+            _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+            _hasSpeckFile = true;
+        }
+
+        if (dictionary.hasKey(OpacityInfo.identifier)) {
+            _opacity = static_cast<float>(
+                dictionary.value<double>(OpacityInfo.identifier));
+        }
+        addProperty(_opacity);
+
         if (dictionary.hasKey(SizeInfo.identifier)) {
             _size = static_cast<float>(
                 dictionary.value<double>(SizeInfo.identifier));
-                //dictionary.value<float>(SizeInfo.identifier);
         }
         addProperty(_size);
+
+        if (dictionary.hasKey(ToggleVisibilityInfo.identifier)) {
+            _toggleVisibility = dictionary.value<bool>(ToggleVisibilityInfo.identifier);
+        }
+
+        _toggleVisibility.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+        addProperty(_toggleVisibility);
     }
 
     bool RenderablePointsCloud::isReady() const {
@@ -160,36 +192,39 @@ namespace openspace {
         if (_fullData.empty()) {
             return;
         }
-        _shaderProgram->activate();
+        if (_hasSpeckFile && _toggleVisibility) {
+            _shaderProgram->activate();
 
-        glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+            glm::dmat4 modelTransform =
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+                glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+                glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-        glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+            glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-        _shaderProgram->setUniform("modelViewTransform", modelViewTransform);
-        _shaderProgram->setUniform(
-            "MVPTransform",
-            glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
-        );
+            _shaderProgram->setUniform("modelViewTransform", modelViewTransform);
+            _shaderProgram->setUniform(
+                "MVPTransform",
+                glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
+            );
 
-        _shaderProgram->setUniform("color", _color);
-        _shaderProgram->setUniform("size", _size);
+            _shaderProgram->setUniform("color", _color);
+            _shaderProgram->setUniform("opacity", _opacity);
+            _shaderProgram->setUniform("size", _size);
 
-        // Changes GL state:
-        glEnablei(GL_BLEND, 0);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
+            // Changes GL state:
+            glEnablei(GL_BLEND, 0);
+            glBlendEquation(GL_FUNC_ADD);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
 
-        glBindVertexArray(_vaoID);
-        const GLsizei nPoints = static_cast<GLsizei>(_fullData.size() / _nValuesPerPoints);
-        glDrawArrays(GL_POINTS, 0, nPoints);
+            glBindVertexArray(_vaoID);
+            const GLsizei nPoints = static_cast<GLsizei>(_fullData.size() / _nValuesPerPoints);
+            glDrawArrays(GL_POINTS, 0, nPoints);
 
-        glBindVertexArray(0);
-        _shaderProgram->deactivate();
+            glBindVertexArray(0);
+            _shaderProgram->deactivate();
+        }
     }
 
     void RenderablePointsCloud::update(const UpdateData&) {

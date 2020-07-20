@@ -29,11 +29,12 @@ in float vs_depthClipSpace;
 in vec4 vs_positionViewSpace;
 
 uniform vec3 color;
+uniform float opacity;
 
 Fragment getFragment() {
     Fragment frag;
     frag.color.rgb = color;
-    frag.color.a   = 1.0;
+    frag.color.a   = opacity;
     frag.depth     = vs_depthClipSpace;
     frag.gPosition = vs_positionViewSpace;
 
