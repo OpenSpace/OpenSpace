@@ -78,10 +78,11 @@ uniform double time;
 
 //uniform float interestingStreams[4];
 
-//speicific uniforms for cameraperspective: 
+// Speicific uniforms for cameraperspective
 uniform float scaleFactor;
-uniform float maxPointSize;
-uniform float minPointSize;
+uniform float minNodeDistanceSize;
+uniform float maxNodeDistanceSize;
+uniform float nodeDistanceThreshold;
 
 uniform mat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
@@ -379,8 +380,7 @@ void main() {
     else{
         vs_color = vec4(0);
     }
-   
-  
+
     /*
     if(distance(in_position, camerapos) < 100000000000.f){
         gl_PointSize = nodeSize * 5;
@@ -395,12 +395,12 @@ void main() {
 
     float scaleMultiply = exp(scaleFactor * 0.10f);
 
-    vec3 scaledRight    = vec3(0.f);
-    vec3 scaledUp       = vec3(0.f);
+    //vec3 scaledRight    = vec3(0.f);
+    //vec3 scaledUp       = vec3(0.f);
 
-    vec3 normal   = vec3(normalize(camerapos - dpos.xyz));
-        vec3 newRight = normalize(cross(cameraLookUp, normal));
-        vec3 newUp    = cross(normal, newRight);
+    /////vec3 normal   = vec3(normalize(camerapos - dpos.xyz));
+    /////vec3 newRight = normalize(cross(cameraLookUp, normal));
+    /////vec3 newUp    = cross(normal, newRight);
 
      double distCamera = length(camerapos - dpos.xyz);
      float expVar = float(-distCamera) / pow(10.f, correctionSizeEndDistance);
@@ -415,9 +415,9 @@ void main() {
         //vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
         //float ta = 1.0f;
     /*
-    if (sizes.x < 2.0f * minPointSize) {
-                float maxVar = 2.0f * minPointSize;
-                float minVar = minPointSize;
+    if (sizes.x < 2.0f * minNodeDistanceSize) {
+                float maxVar = 2.0f * minNodeDistanceSize;
+                float minVar = minNodeDistanceSize;
                 float var    = (sizes.y + sizes.x);
                 ta = ( (var - minVar)/(maxVar - minVar) );
                
@@ -428,8 +428,8 @@ void main() {
         }
         */
        
-    scaledRight = scaleMultiply * right * 0.5f;
-    scaledUp    = scaleMultiply * up * 0.5f;
+    vec3 scaledRight = scaleMultiply * right * 0.5f;
+    vec3 scaledUp    = scaleMultiply * up * 0.5f;
 
     vec4 dposClip = cameraViewProjectionMatrix * vec4(dpos);
     vec4 scaledRightClip = cameraViewProjectionMatrix * vec4(scaledRight, 0.0);
@@ -443,26 +443,23 @@ void main() {
     float distancevec = distance(camerapos, in_position.xyz);
     
      if(distancevec < maxdist){
-     float distScale = 1 - smoothstep(0, maxdist, distancevec);
-    /*
-    if(distScale <= 0.5f){
-     distScale += 0.5f;
+        float distScale = 1 - smoothstep(0, maxdist, distancevec);
+        float factorS = pow(distScale, 9) * 100.f;
+
+       float distMinScale = 1 - smoothstep(nodeDistanceThreshold, nodeDistanceThreshold, distancevec);
+       float factorX = pow(distMinScale, 9) * 80.f;
+
+        if(gl_PointSize * factorS > nodeDistanceThreshold){
+            gl_PointSize = factorS * maxNodeDistanceSize * 0.8;
+         }
+         else{
+            gl_PointSize =  factorS * minNodeDistanceSize; //factorS * (maxNodeDistanceSize - minNodeDistanceSize);
+         }
      }
      else{
-     distScale += -0.5f;
+        gl_PointSize = 1.f;
      }
-     */
-     float factorS = pow(distScale, 9) * 80.f;
-     if(gl_PointSize * factorS > 30){
-        gl_PointSize = 30;
-     }
-     else{
-     gl_PointSize = gl_PointSize * factorS;
-     }
-     }
-     else{
-     gl_PointSize = 2.f;
-     }
+
     //if(!firstrender){
     //CheckdistanceMethod();
    // }
@@ -485,7 +482,4 @@ void main() {
        // vs_depth = gl_Position.w;
         
        // if(distance(positionClipSpace.xyz, camerapos) < 0.f){
-       
-        
-        
 }

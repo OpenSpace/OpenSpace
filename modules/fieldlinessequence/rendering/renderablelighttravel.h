@@ -51,8 +51,8 @@ namespace openspace {
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
 
-
     private:
+
         std::string _identifier;
         std::vector<float> _vertexArray;
         glm::vec3 _normalizedVector;
@@ -86,7 +86,7 @@ namespace openspace {
         properties::FloatProperty _pointSize;
         properties::IntProperty _timeStep;
         properties::FloatProperty _distanceFactor;
-
+        
         properties::BoolProperty _showLabel;
         properties::BoolProperty _shouldFollowLight;
         properties::FloatProperty _fadeDistance;

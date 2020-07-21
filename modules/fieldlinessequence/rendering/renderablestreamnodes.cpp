@@ -259,6 +259,21 @@ namespace {
         "temp",
         "Temp"
     };
+    constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
+        "maxNodeDistanceSize",
+        "Max Node Distance Size",
+        "The maximum size of the nodes at a certin distance"
+    };
+    constexpr openspace::properties::Property::PropertyInfo MinNodeDistanceSizeInfo = {
+        "minNodeDistanceSize",
+        "Min Node Distance Size",
+        "The minimum size of the nodes at a certin distance"
+    };
+    constexpr openspace::properties::Property::PropertyInfo NodeDistanceThresholdInfo = {
+        "NodeDistanceThreshold",
+        "Node Distance Threshold",
+        "Threshold for where to interpolate between the max and min node distance"
+    };
     enum class SourceFileType : int {
         Json = 0,
         Invalid
@@ -325,8 +340,8 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
         glm::vec4(1.f))
     , _pStreamGroup({ "Streams" })
     , _pNodesamountGroup({ "NodeGroup" })
-    , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
-    , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
+    , _pNodeSize(NodeSizeInfo, 1.f, 1.f, 10.f)
+    , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 1.f, 1.f, 10.f)
     , _pLineWidth(LineWidthInfo, 4.f, 1.f, 20.f)
     , _pColorTableRange(colorTableRangeInfo)
     , _pDomainZ(DomainZInfo)
@@ -355,7 +370,10 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
     , _pFlowColoring(FlowColoringInfo, false)
     , _scaleFactor(TempInfo1, 150.f, 1.f, 500.f)
-        
+    , _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 5.f)
+    , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 5.f)
+    , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
+
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
 }
@@ -1059,6 +1077,9 @@ void RenderableStreamNodes::setupProperties() {
     _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
     _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
     _pNodesamountGroup.addProperty(_pActiveStreamNumber);
+    _pNodesamountGroup.addProperty(_pMinNodeDistanceSize);
+    _pNodesamountGroup.addProperty(_pMaxNodeDistanceSize);
+    _pNodesamountGroup.addProperty(_pNodeDistanceThreshold);
 
     _pEarthdistGroup.addProperty(_pDistancemethod);
     _pEarthdistGroup.addProperty(_pDistanceThreshold);
@@ -1246,7 +1267,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         global::windowDelegate.applicationTime() * -1
     );
     _shaderProgram->setUniform("flowColoring", _pFlowColoring);
+    _shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
+    _shaderProgram->setUniform("maxNodeDistanceSize", _pMaxNodeDistanceSize);
+    _shaderProgram->setUniform("nodeDistanceThreshold", _pNodeDistanceThreshold);
     
+
     //////// test for camera perspective: 
 
     glm::dmat4 modelMatrix =
@@ -1292,8 +1317,8 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
             glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
         )
     );
-    _shaderProgram->setUniform("minPointSize", 1.f); // in pixels
-    _shaderProgram->setUniform("maxPointSize", 100.f); // in pixels
+    //_shaderProgram->setUniform("minPointSize", 3.f); // in pixels
+    //_shaderProgram->setUniform("maxPointSize", 30.f); // in pixels
     
     _shaderProgram->setUniform("up", glm::vec3(orthoUp));
     _shaderProgram->setUniform("right", glm::vec3(orthoRight));
