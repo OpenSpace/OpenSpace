@@ -68,8 +68,13 @@ bool calculateDistance(vec3 inposition) {
  newpos.x = normalizedvectorFromSuntoEarth.x * in_time_since_start * lightSpeed;
  newpos.y = normalizedvectorFromSuntoEarth.y * in_time_since_start * lightSpeed;
  newpos.z = normalizedvectorFromSuntoEarth.z * in_time_since_start * lightSpeed;
+
+ if(newpos.y < inposition.y && newpos.x < inposition.x && newpos.z > inposition.z){
+ return false;
+ }
  if(distance(newpos, inposition) < maxdistance){
  //if(inposition.x > 50000000000.f){
+ 
  return true;
  }
 
@@ -83,8 +88,18 @@ float smoothmotion(){
     newpos.y = normalizedvectorFromSuntoEarth.y * in_time_since_start * lightSpeed;
     newpos.z = normalizedvectorFromSuntoEarth.z * in_time_since_start * lightSpeed; 
 
-    float smoothFront = smoothstep(0.0, maxdistance, distance(newpos, in_position));
-    return 1 - smoothFront;
+    
+    float smoothFront = 1 - smoothstep(0, maxdistance, distance(newpos, in_position));
+    //smoothFront = smoothstep(0, 1, smoothFront);
+    //smoothFront = 1 / smoothFront;
+    if(smoothFront < 0.95f){
+    float alphaV = 0.1 * smoothFront * smoothFront;
+    if(alphaV < 0.01){
+    return 0; 
+    }
+    return alphaV;
+    }
+    return smoothFront;
 }
 vec4 z_normalization(vec4 v_in) {
     vec4 v_out = v_in;

@@ -117,6 +117,16 @@ namespace {
         "fadeDistance",
         "fadeDistance"
     };
+    constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
+        "mintextSize",
+        "Min text size",
+        "The lowest value for text size for label"
+    };
+    constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
+      "maxtextSize",
+      "Max text size",
+      "The highest value for text size for label"
+    };
 }
 
 namespace openspace {
@@ -133,11 +143,13 @@ namespace openspace {
             glm::vec4(0.f),
             glm::vec4(1.f))
         , _pointSize(PointSizeInfo, 2.f, 0, 20)
-        , _timeStep(TimeStepInfo, 10, 1, 30)
+        , _timeStep(TimeStepInfo, 1, 1, 30)
         , _distanceFactor(DistanceFactorInfo, 5, 1, 20)
         , _showLabel(LabelInfo, true)
         , _shouldFollowLight(FollowLightInfo, true)
-        , _fadeDistance(FadeDistanceInfo, 10.f, 1.f, 10000.f)
+        , _fadeDistance(FadeDistanceInfo, 10.f, 9.f, 20.f)
+        , _textMinSize(TextMinSizeInfo, 1, 1, 20)
+        , _textMaxSize(TextMaxSizeInfo, 30, 10, 100)
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -174,6 +186,8 @@ namespace openspace {
         addProperty(_showLabel);
         addProperty(_shouldFollowLight);
         addProperty(_fadeDistance);
+        //addProperty(_textMinSize);
+        //addProperty(_textMaxSize);
         //_lightspeed = 300 * 10e6;
         _lightspeed = 299792458.f;
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
@@ -435,13 +449,13 @@ _shaderProgram->deactivate();
         float fadeInVariable){
 
 
-        glm::vec4 textColor = _pLightColor;
-
+        //glm::vec4 textColor = _pLightColor;
+        glm::vec4 textColor = glm::vec4(1.0, 1.0, 1.0, 1.0);
         ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
         labelInfo.orthoRight = orthoRight;
         labelInfo.orthoUp = orthoUp;
         labelInfo.minSize = static_cast<int>(1);
-        labelInfo.maxSize = static_cast<int>(10);
+        labelInfo.maxSize = static_cast<int>(30);
         labelInfo.cameraPos = data.camera.positionVec3();
         labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
         //labelInfo.renderType = _renderOption;
@@ -455,6 +469,7 @@ _shaderProgram->deactivate();
         }
 
         std::string text = "Speed of Light";
+        
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             _labelPos,
@@ -462,6 +477,15 @@ _shaderProgram->deactivate();
             textColor,
             labelInfo
         );
+        /*
+        ghoul::fontrendering::FontRenderer::defaultRenderer().render(
+            *_font,
+            _labelPos,
+            text,
+            textColor,
+            labelInfo
+        );
+        */
     }
     void RenderableLightTravel::update(const UpdateData& data)
     {

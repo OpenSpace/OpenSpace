@@ -94,12 +94,16 @@ namespace openspace {
         properties::Vec4Property _pDefaultColor;
         // Uniform stream Color
         properties::Vec4Property _pLightColor;
+
+        properties::IntProperty _textMinSize;
+        properties::IntProperty _textMaxSize;
         std::unique_ptr<ghoul::Dictionary> _dictionary;
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
+
         
         glm::vec3 _labelPos;
         GLuint _quad = 0;
