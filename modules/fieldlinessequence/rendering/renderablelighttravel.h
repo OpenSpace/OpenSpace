@@ -80,23 +80,23 @@ namespace openspace {
         double _triggerTime;
         double _endTime;
         bool _needPositionUpdate = true;
-        properties::FloatProperty _lightspeed;
-        properties::FloatProperty _lineWidth;
-        properties::OptionProperty _rendermode;
-        properties::FloatProperty _pointSize;
-        properties::IntProperty _timeStep;
-        properties::FloatProperty _distanceFactor;
+        properties::FloatProperty _pLightSpeed;
+        properties::FloatProperty _pLineWidth;
+        properties::OptionProperty _pRenderMode;
+        properties::FloatProperty _pPointSize;
+        properties::IntProperty _pTimeStep;
+        properties::FloatProperty _pDistanceFactor;
         
-        properties::BoolProperty _showLabel;
-        properties::BoolProperty _shouldFollowLight;
-        properties::FloatProperty _fadeDistance;
+        properties::BoolProperty _pShowLabel;
+        properties::BoolProperty _pShouldFollowLight;
+        properties::FloatProperty _pFadeDistance;
         // Uniform stream Color
         properties::Vec4Property _pDefaultColor;
         // Uniform stream Color
         properties::Vec4Property _pLightColor;
 
-        properties::IntProperty _textMinSize;
-        properties::IntProperty _textMaxSize;
+        properties::IntProperty _pTextMinSize;
+        properties::IntProperty _pTextMaxSize;
         std::unique_ptr<ghoul::Dictionary> _dictionary;
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 

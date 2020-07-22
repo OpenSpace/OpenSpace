@@ -80,7 +80,7 @@ uniform double time;
 
 // Speicific uniforms for cameraperspective
 uniform float scaleFactor;
-uniform float minNodeDistanceSize;
+//uniform float minNodeDistanceSize;
 uniform float maxNodeDistanceSize;
 uniform float nodeDistanceThreshold;
 
@@ -438,23 +438,18 @@ void main() {
     vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
     vs_depth = initialPosition.w;
     gl_Position = initialPosition;
+
     float maxdist = 600000000000.f;
-    float maxdist2 = 60000000000.f;
     float distancevec = distance(camerapos, in_position.xyz);
+    float distScale = 1 - smoothstep(0, maxdist, distancevec);
+    float factorS = pow(distScale, 9) * rValue * 15.f;
     
      if(distancevec < maxdist){
-        float distScale = 1 - smoothstep(0, maxdist, distancevec);
-        float factorS = pow(distScale, 9) * 100.f;
+        //if(gl_PointSize * factorS > nodeDistanceThreshold){
+        //if(nodeDistanceThreshold > distancevec){
 
-       float distMinScale = 1 - smoothstep(nodeDistanceThreshold, nodeDistanceThreshold, distancevec);
-       float factorX = pow(distMinScale, 9) * 80.f;
-
-        if(gl_PointSize * factorS > nodeDistanceThreshold){
-            gl_PointSize = factorS * maxNodeDistanceSize * 0.8;
-         }
-         else{
-            gl_PointSize =  factorS * minNodeDistanceSize; //factorS * (maxNodeDistanceSize - minNodeDistanceSize);
-         }
+        gl_PointSize = factorS * maxNodeDistanceSize;
+        //}
      }
      else{
         gl_PointSize = 1.f;

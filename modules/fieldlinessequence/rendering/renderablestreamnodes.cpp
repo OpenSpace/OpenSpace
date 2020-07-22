@@ -264,11 +264,11 @@ namespace {
         "Max Node Distance Size",
         "The maximum size of the nodes at a certin distance"
     };
-    constexpr openspace::properties::Property::PropertyInfo MinNodeDistanceSizeInfo = {
+    /*constexpr openspace::properties::Property::PropertyInfo MinNodeDistanceSizeInfo = {
         "minNodeDistanceSize",
         "Min Node Distance Size",
         "The minimum size of the nodes at a certin distance"
-    };
+    };*/
     constexpr openspace::properties::Property::PropertyInfo NodeDistanceThresholdInfo = {
         "NodeDistanceThreshold",
         "Node Distance Threshold",
@@ -335,7 +335,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pEnhancemethod(EnhanceMethodInfo, OptionProperty::DisplayType::Dropdown)
     , _pColorTablePath(ColorTablePathInfo)
     , _pStreamColor(StreamColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
+        glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f))
     , _pStreamGroup({ "Streams" })
@@ -370,8 +370,8 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
     , _pFlowColoring(FlowColoringInfo, false)
     , _scaleFactor(TempInfo1, 150.f, 1.f, 500.f)
-    , _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 5.f)
-    , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 5.f)
+    //, _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 7.f)
+    , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
 
 {
@@ -421,7 +421,7 @@ void RenderableStreamNodes::definePropertyCallbackFunctions() {
             readCachedFile(cachedFile, "");
             }
         }
-        });
+     });
 }
 
 void RenderableStreamNodes::setModelDependentConstants() {
@@ -605,7 +605,6 @@ void RenderableStreamNodes::createStreamnumberVector() {
         _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
         lineStartIdx += nPoints;
     }
-       
 }
 
 bool RenderableStreamNodes::loadFilesIntoRam() {
@@ -1077,7 +1076,7 @@ void RenderableStreamNodes::setupProperties() {
     _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
     _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
     _pNodesamountGroup.addProperty(_pActiveStreamNumber);
-    _pNodesamountGroup.addProperty(_pMinNodeDistanceSize);
+    //_pNodesamountGroup.addProperty(_pMinNodeDistanceSize);
     _pNodesamountGroup.addProperty(_pMaxNodeDistanceSize);
     _pNodesamountGroup.addProperty(_pNodeDistanceThreshold);
 
@@ -1267,7 +1266,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         global::windowDelegate.applicationTime() * -1
     );
     _shaderProgram->setUniform("flowColoring", _pFlowColoring);
-    _shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
+    //_shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
     _shaderProgram->setUniform("maxNodeDistanceSize", _pMaxNodeDistanceSize);
     _shaderProgram->setUniform("nodeDistanceThreshold", _pNodeDistanceThreshold);
     

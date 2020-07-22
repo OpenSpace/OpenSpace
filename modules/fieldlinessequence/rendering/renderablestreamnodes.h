@@ -223,7 +223,7 @@ private:
     // Threshold from earth to decide the distance for which the nodeSize gets larger
     properties::FloatProperty _pDistanceThreshold;
     // Minimum size of nodes at a certin distance
-    properties::FloatProperty _pMinNodeDistanceSize;
+    //properties::FloatProperty _pMinNodeDistanceSize;
     // Maximum size of nodes at a certin distance
     properties::FloatProperty _pMaxNodeDistanceSize;
     // Threshold for where to interpolate between the max and min node distance

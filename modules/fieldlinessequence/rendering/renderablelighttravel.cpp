@@ -56,26 +56,24 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
-
-
 namespace {
 constexpr const char* _loggerCat = "renderableLightTravel";
 
 constexpr openspace::properties::Property::PropertyInfo LightSpeedInfo = {
-    "lightspeed",
+    "lightSpeed",
     "speed of light",
     "The speed of light"
 };
 constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
     "lineWidth",
-    "Line Width",
+    "Line width",
     "This value specifies the line width of the field lines if the "
     "selected rendering method includes lines."
 };
 constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
-"RenderingMode",
-"The draw method",
-"Can be used to decide what rendering method to use."
+    "RenderingMode",
+    "The draw method",
+    "Can be used to decide what rendering method to use."
 };
 constexpr openspace::properties::Property::PropertyInfo LightColorInfo = {
     "lightColor",
@@ -118,12 +116,12 @@ constexpr openspace::properties::Property::PropertyInfo FadeDistanceInfo = {
     "fadeDistance"
 };
 constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
-    "mintextSize",
+    "minTextSize",
     "Min text size",
     "The lowest value for text size for label"
 };
 constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
-    "maxtextSize",
+    "maxTextSize",
     "Max text size",
     "The highest value for text size for label"
 };
@@ -133,23 +131,23 @@ namespace openspace {
     using namespace properties;
     RenderableLightTravel::RenderableLightTravel(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        , _lightspeed(LightSpeedInfo, 299792458.f, 0, 299792458.f)
-        , _lineWidth(LineWidthInfo, 5, 0, 20)
-        , _rendermode(RenderModeInfo, OptionProperty::DisplayType::Dropdown)
+        , _pLightSpeed(LightSpeedInfo, 299792458.f, 0, 299792458.f)
+        , _pLineWidth(LineWidthInfo, 5, 0, 20)
+        , _pRenderMode(RenderModeInfo, OptionProperty::DisplayType::Dropdown)
         , _pDefaultColor(DefaultcolorInfo, glm::vec4(0.3, 0.3, 0.3, 0),
             glm::vec4(0.f),
             glm::vec4(1.f))
         , _pLightColor(LightColorInfo, glm::vec4(1, 1, 1, 1),
             glm::vec4(0.f),
             glm::vec4(1.f))
-        , _pointSize(PointSizeInfo, 2.f, 0, 20)
-        , _timeStep(TimeStepInfo, 1, 1, 30)
-        , _distanceFactor(DistanceFactorInfo, 5, 1, 20)
-        , _showLabel(LabelInfo, true)
-        , _shouldFollowLight(FollowLightInfo, true)
-        , _fadeDistance(FadeDistanceInfo, 10.f, 9.f, 20.f)
-        , _textMinSize(TextMinSizeInfo, 1, 1, 20)
-        , _textMaxSize(TextMaxSizeInfo, 30, 10, 100)
+        , _pPointSize(PointSizeInfo, 2.f, 0, 20)
+        , _pTimeStep(TimeStepInfo, 1, 1, 30)
+        , _pDistanceFactor(DistanceFactorInfo, 5, 1, 20)
+        , _pShowLabel(LabelInfo, true)
+        , _pShouldFollowLight(FollowLightInfo, true)
+        , _pFadeDistance(FadeDistanceInfo, 10.f, 9.f, 20.f)
+        , _pTextMinSize(TextMinSizeInfo, 1, 1, 20)
+        , _pTextMaxSize(TextMaxSizeInfo, 30, 10, 100)
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -180,16 +178,16 @@ void RenderableLightTravel::initializeGL() {
     setRenderBin(Renderable::RenderBin::Transparent);
     glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
     //positions.push_back(currentpos);
-    addProperty(_lightspeed);
-    addProperty(_lineWidth);
-    addProperty(_distanceFactor);
-    addProperty(_showLabel);
-    addProperty(_shouldFollowLight);
-    addProperty(_fadeDistance);
+    addProperty(_pLightSpeed);
+    addProperty(_pLineWidth);
+    addProperty(_pDistanceFactor);
+    addProperty(_pShowLabel);
+    addProperty(_pShouldFollowLight);
+    addProperty(_pFadeDistance);
     //addProperty(_textMinSize);
     //addProperty(_textMaxSize);
     //_lightspeed = 300 * 10e6;
-    _lightspeed = 299792458.f;
+    _pLightSpeed = 299792458.f;
     SceneGraphNode* earthNode = sceneGraphNode("Earth");
     // glm::vec3 earthPos = earthNode->worldPosition();
     glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
@@ -232,15 +230,15 @@ void RenderableLightTravel::initializeGL() {
 
     LDEBUG("vi kom in i init");
 
-    _rendermode.addOption(static_cast<int>(RenderMethod::LineStrip), "LineStrip");
-    _rendermode.addOption(static_cast<int>(RenderMethod::Lines), "Lines");
-    _rendermode.addOption(static_cast<int>(RenderMethod::Points), "Points");
-    _rendermode.addOption(static_cast<int>(RenderMethod::Sprites), "Sprites");
-    addProperty(_rendermode);
+    _pRenderMode.addOption(static_cast<int>(RenderMethod::LineStrip), "LineStrip");
+    _pRenderMode.addOption(static_cast<int>(RenderMethod::Lines), "Lines");
+    _pRenderMode.addOption(static_cast<int>(RenderMethod::Points), "Points");
+    _pRenderMode.addOption(static_cast<int>(RenderMethod::Sprites), "Sprites");
+    addProperty(_pRenderMode);
     addProperty(_pLightColor);
     addProperty(_pDefaultColor);
-    addProperty(_pointSize);
-    addProperty(_timeStep);
+    addProperty(_pPointSize);
+    addProperty(_pTimeStep);
         
         
    
@@ -258,8 +256,6 @@ void RenderableLightTravel::deinitializeGL()
         global::renderEngine.removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
-
-
 }
 double RenderableLightTravel::calculateEndTime(const double starttime, const glm::vec3 startpos, const glm::vec3 endpos) {
     glm::vec3 newpos = glm::vec3(0, 0, 0);
@@ -272,19 +268,16 @@ double RenderableLightTravel::calculateEndTime(const double starttime, const glm
     positions.push_back(startpos);
     //while (glm::distance(newpos, endpos) > 100000) {
     glm::vec3 newpos2 = glm::vec3(0, 0, 0);
-    newpos2.x = normalizedVector.x * _Timesincestart * _lightspeed;
-    newpos2.y = normalizedVector.y * _Timesincestart * _lightspeed;
-    newpos2.z = normalizedVector.z * _Timesincestart * _lightspeed;
+    newpos2.x = normalizedVector.x * _Timesincestart * _pLightSpeed;
+    newpos2.y = normalizedVector.y * _Timesincestart * _pLightSpeed;
+    newpos2.z = normalizedVector.z * _Timesincestart * _pLightSpeed;
     _labelPos = newpos2;
-    int interval = _timeStep;
+    int interval = _pTimeStep;
     while(endtime - starttime < 500){
-        newpos.x += interval * _lightspeed * normalizedVector.x;
-        newpos.y += interval * _lightspeed * normalizedVector.y;
-        newpos.z += interval * _lightspeed * normalizedVector.z;
-           
+        newpos.x += interval * _pLightSpeed * normalizedVector.x;
+        newpos.y += interval * _pLightSpeed * normalizedVector.y;
+        newpos.z += interval * _pLightSpeed * normalizedVector.z;
 
-           
-            
         endtime += interval;
         ++counter;
         //LDEBUG("newpos.y" + std::to_string(newpos.y));
@@ -299,7 +292,6 @@ double RenderableLightTravel::calculateEndTime(const double starttime, const glm
     }
     positions.push_back(endpos);
        
-
     // LDEBUG("endtime" + std::to_string(endtime));
     // LDEBUG("newpos.y" + std::to_string(newpos.y));
     //LDEBUG("newpos.x" + std::to_string(newpos.x));
@@ -318,8 +310,6 @@ void RenderableLightTravel::render(const RenderData& data, RendererTasks& render
         _triggerTime = data.time.j2000Seconds();
         _endTime = _triggerTime + 599;
     }
-       
-        
        
 _shaderProgram->activate();
 //LDEBUG("vi kom in i render");
@@ -376,18 +366,18 @@ if (positions.size() > 2) {
     //_shaderProgram->setUniform("in_transmission_time", transmissiontime);
     //_shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
     _shaderProgram->setUniform("normalizedvectorFromSuntoEarth", _normalizedVector);
-    _shaderProgram->setUniform("renderMode", _rendermode);
-    _shaderProgram->setUniform("pointSize", _pointSize);
+    _shaderProgram->setUniform("renderMode", _pRenderMode);
+    _shaderProgram->setUniform("pointSize", _pPointSize);
     _shaderProgram->setUniform("defaultColor", _pDefaultColor);
     _shaderProgram->setUniform("LightColor", _pLightColor);
-    _shaderProgram->setUniform("DistanceFactor", _distanceFactor);
-    if(_showLabel){
-    renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, _fadeDistance);
+    _shaderProgram->setUniform("DistanceFactor", _pDistanceFactor);
+    if(_pShowLabel){
+    renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, _pFadeDistance);
     }
 }
 
-if (_rendermode == 0) {
-    glLineWidth(_lineWidth);
+if (_pRenderMode == 0) {
+    glLineWidth(_pLineWidth);
     GLint temp = 0;
     glDrawArrays(
         GL_LINE_STRIP,
@@ -396,8 +386,8 @@ if (_rendermode == 0) {
         static_cast<GLsizei>(positions.size())
     );
 }
-else if (_rendermode == 1) {
-    glLineWidth(_lineWidth);
+else if (_pRenderMode == 1) {
+    glLineWidth(_pLineWidth);
     GLint temp = 0;
     glDrawArrays(
         GL_LINES,
@@ -406,7 +396,7 @@ else if (_rendermode == 1) {
     );
 
 }
-else if (_rendermode == 2) {
+else if (_pRenderMode == 2) {
     GLint temp = 0;
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(
@@ -415,7 +405,7 @@ else if (_rendermode == 2) {
         static_cast<GLsizei>(positions.size())
     );
 }
-else if (_rendermode == 3) {
+else if (_pRenderMode == 3) {
     ghoul::opengl::TextureUnit spriteTextureUnit;
     spriteTextureUnit.activate();
     _spriteTexture->bind();
@@ -464,7 +454,7 @@ void RenderableLightTravel::renderLabels(const RenderData& data,
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    if (!_shouldFollowLight) {
+    if (!_pShouldFollowLight) {
         _labelPos = positions[positions.size() / 2];
     }
 
