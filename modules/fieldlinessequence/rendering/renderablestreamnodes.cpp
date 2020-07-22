@@ -274,6 +274,32 @@ namespace {
         "Node Distance Threshold",
         "Threshold for where to interpolate between the max and min node distance"
     };
+    constexpr openspace::properties::Property::PropertyInfo CameraPerspectiveInfo = {
+        "cameraPerspective",
+        "Use Camera perspective",
+        "Camera perspective changes the size of the nodes dependent on distance from camera."
+    };
+    constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
+        "renderingcircles",
+        "Render as circles",
+        "Using fragment shader to draw nodes as circles instead of squares"
+    };
+    constexpr openspace::properties::Property::PropertyInfo DrawingHollowInfo = {
+        "renderingHollowCircles",
+        "Render as hollow circles",
+        "Using fragment shader to draw nodes as hollow circles"
+    };
+    constexpr openspace::properties::Property::PropertyInfo GaussiandAlphaFilterInfo = {
+        "renderingGaussianAlphaFilter",
+        "Alpha by Gaussian",
+        "Using fragment shader to draw nodes with Gaussian filter for alpha value"
+
+    };
+    constexpr openspace::properties::Property::PropertyInfo RadiusPerspectiveInfo = {
+        "radiusPerspective",
+        "Include radius with cameraperspective",
+        "If false, then nodes closer to the sun will not be larger regardless of distance to camera"
+    };
     enum class SourceFileType : int {
         Json = 0,
         Invalid
@@ -373,6 +399,12 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     //, _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 7.f)
     , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
+    , _pCameraPerspective(CameraPerspectiveInfo, true)
+    , _pDrawingCircles(DrawingCirclesInfo, true)
+    , _pCameraPerspectiveGroup({" CameraPerspective"})
+    , _pDrawingHollow(DrawingHollowInfo, true)
+    , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
+    , _pRadiusPerspective(RadiusPerspectiveInfo, true)
 
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -1053,6 +1085,7 @@ void RenderableStreamNodes::setupProperties() {
     addPropertySubOwner(_pStreamGroup);
     addPropertySubOwner(_pNodesamountGroup);
     addPropertySubOwner(_pEarthdistGroup);
+    addPropertySubOwner(_pCameraPerspectiveGroup);
     _pEarthdistGroup.addPropertySubOwner(_pFlowGroup);
 
     // ------------------------- Add Properties to the groups ------------------------ //
@@ -1120,8 +1153,13 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::test), "test");
 
-    definePropertyCallbackFunctions();
+    _pCameraPerspectiveGroup.addProperty(_pCameraPerspective);
+    _pCameraPerspectiveGroup.addProperty(_pDrawingCircles);
+    _pCameraPerspectiveGroup.addProperty(_pDrawingHollow);
+    _pCameraPerspectiveGroup.addProperty(_pGaussianAlphaFilter);
+    _pCameraPerspectiveGroup.addProperty(_pRadiusPerspective);
 
+    definePropertyCallbackFunctions();
     // Set default
     _pColorTablePath = _colorTablePaths[0];
 }
@@ -1269,7 +1307,12 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("flowColoring", _pFlowColoring);
     //_shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
     _shaderProgram->setUniform("maxNodeDistanceSize", _pMaxNodeDistanceSize);
-    _shaderProgram->setUniform("nodeDistanceThreshold", _pNodeDistanceThreshold);
+    //_shaderProgram->setUniform("nodeDistanceThreshold", _pNodeDistanceThreshold);
+    _shaderProgram->setUniform("usingCameraPerspective", _pCameraPerspective);
+    _shaderProgram->setUniform("drawCircles", _pDrawingCircles);
+    _shaderProgram->setUniform("drawHollow", _pDrawingHollow);
+    _shaderProgram->setUniform("useGaussian", _pGaussianAlphaFilter);
+    _shaderProgram->setUniform("UsingRadiusPerspective", _pRadiusPerspective);
     
 
     //////// test for camera perspective: 

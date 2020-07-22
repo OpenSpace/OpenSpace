@@ -25,6 +25,9 @@
 #include "fragment.glsl"
 
 uniform sampler2D texture1;
+uniform bool drawCircles;
+uniform bool drawHollow;
+uniform bool useGaussian;
 in vec2 vs_st;
 in vec4 vs_color;
 in float vs_depth;
@@ -39,6 +42,51 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_depth;
     frag.color = fragColor;
+    vec2 coord = gl_PointCoord - vec2(0.5);
+    if(drawCircles){
+        if(length(coord) > 0.5){
+            discard;
+        }
+    }
+    
+    if(drawHollow && length(coord) < 0.4){
+    discard;
+    }
+    
+    // outline
+    /*
+    if(length(coord) > 0.4){
+    frag.color = vec4(1, 1, 1, 1);
+    }
+    */
+    /*
+    if(length(coord) < 0.1){
+    frag.color.a = 1.0;
+    }
+    */
+    //float alphaV = 1 - smoothstep(0, 1, length(coord));
+    if(useGaussian){
+    float alphaV = sqrt(pow(1 - length(coord), 3));
+    alphaV = pow(alphaV, 3);
+    if(alphaV < 0.1){
+    discard;
+    }
+    frag.color.a = alphaV;
+    //else{
+    //frag.color.a = alphaV;
+    }
+    frag.color.a = 0.3;
+    
+    
+    
+    //vec2 coord = gl_PointCoord;
+    
+    /*
+    vec2 coord = gl_PointCoord;
+    if(coord.y > 0.5){
+    discard;
+    }
+    */
     //if(vs_st.x != -1){
     //if (gl_FrontFacing) {
     //    frag.color = texture(texture1, vs_st);
@@ -57,4 +105,5 @@ Fragment getFragment() {
     //frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
     return frag;
+
 }

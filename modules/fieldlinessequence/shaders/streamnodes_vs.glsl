@@ -26,7 +26,8 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 // General Uniforms that's always needed
 uniform vec4      lineColor;
-uniform mat4      modelViewProjection;
+//old not in use atm
+//uniform mat4      modelViewProjection;
 
 // Uniforms needed to color by quantity
 uniform int       colorMode;
@@ -82,7 +83,7 @@ uniform double time;
 uniform float scaleFactor;
 //uniform float minNodeDistanceSize;
 uniform float maxNodeDistanceSize;
-uniform float nodeDistanceThreshold;
+//uniform float nodeDistanceThreshold;
 
 uniform mat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
@@ -93,7 +94,9 @@ uniform vec3 camerapos;
 uniform vec3 up;
 uniform vec3 right;
 uniform vec3 cameraLookUp;   // in world space (no SGCT View was considered)
-uniform vec2 screenSize;
+//uniform vec2 screenSize;
+uniform bool usingCameraPerspective;
+uniform bool UsingRadiusPerspective;
 
 // Inputs
 // Should be provided in meters
@@ -436,25 +439,68 @@ void main() {
     vec4 scaledUpClip = cameraViewProjectionMatrix * vec4(scaledUp, 0.0);
 
     vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
-    vs_depth = initialPosition.w;
     gl_Position = initialPosition;
-
+    vs_depth = initialPosition.w;
+    
+    if(usingCameraPerspective){
+     float rtemp = 1.0;
+     if(rValue > 1.0){
+     rtemp = 1.0;
+     }
+     else
+     {
+     rtemp = rValue;
+     }
+    
     float maxdist = 600000000000.f;
     float distancevec = distance(camerapos, in_position.xyz);
     float distScale = 1 - smoothstep(0, maxdist, distancevec);
     float factorS = pow(distScale, 9) * rValue * 15.f;
     
+    //distancevec = distance(newpos, in_position.xyz);
+     
      if(distancevec < maxdist){
-        //if(gl_PointSize * factorS > nodeDistanceThreshold){
-        //if(nodeDistanceThreshold > distancevec){
 
-        gl_PointSize = factorS * maxNodeDistanceSize;
-        //}
+        float distScale = 1 - smoothstep(0, maxdist, distancevec);
+        
+
+       //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distancevec);
+        float factorS = 1.f;
+        if(UsingRadiusPerspective){
+        factorS = pow(distScale, 9) * 100.f * pow(rtemp, 2);
+        }
+        else{
+        factorS = pow(distScale, 9) * 100.f;
+
+        }
+        gl_PointSize = factorS * maxNodeDistanceSize * 0.8;
+         
+        }
+     else{
+        gl_PointSize = nodeSize;
+     }
+     
+     if(gl_PointSize > 40){
+     gl_PointSize = 40;
+     }
+     if(gl_PointSize < nodeSize){
+     gl_PointSize = nodeSize;
+     }
+     }
+    /*
+     
+     float factorS = pow(distScale, 5) * 80.f; //* pow(rValue, 2);
+     if(gl_PointSize * factorS > 30){
+        gl_PointSize = 30;
      }
      else{
-        gl_PointSize = 1.f;
+     gl_PointSize = gl_PointSize * factorS;
      }
-
+     }
+     else{
+     gl_PointSize = 2.f;
+     }
+     */
     //if(!firstrender){
     //CheckdistanceMethod();
    // }
@@ -467,13 +513,13 @@ void main() {
         vs_st = vec2(-1);
         }
         */
-
-        vec4 position_in_meters = vec4(in_position, 1);
-        vec4 positionClipSpace = modelViewProjection * position_in_meters;
+        //old transformation from in position
+        //vec4 position_in_meters = vec4(in_position, 1);
+        //vec4 positionClipSpace = modelViewProjection * position_in_meters;
         //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
       
        // gl_PointSize = nodeSize;
-        //gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+       // gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
        // vs_depth = gl_Position.w;
         
        // if(distance(positionClipSpace.xyz, camerapos) < 0.f){

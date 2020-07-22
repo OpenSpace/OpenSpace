@@ -274,6 +274,14 @@ private:
     properties::IntProperty _pFlowSpeed;
     //Either use flowcolortable or FlowColor.
     properties::BoolProperty _pFlowColoring;
+
+    properties::PropertyOwner _pCameraPerspectiveGroup;
+    properties::BoolProperty _pCameraPerspective;
+    properties::BoolProperty _pDrawingCircles;
+    properties::BoolProperty _pDrawingHollow;
+    properties::BoolProperty _pGaussianAlphaFilter;
+    properties::BoolProperty _pRadiusPerspective;
+
     // initialization
     std::vector<std::string> _sourceFiles;
     // binary files sourcefolder
