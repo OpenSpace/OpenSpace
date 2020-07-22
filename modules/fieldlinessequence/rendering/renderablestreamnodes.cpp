@@ -1220,15 +1220,16 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
             glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
         const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
-        _shaderProgram->setUniform("modelViewProjection",
-            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+        //not in use atm.
+       // _shaderProgram->setUniform("modelViewProjection",
+       //     data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
 
-    glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
-    //SceneGraphNode* earthNode = sceneGraphNode("Earth");
-    
+    //glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
+    SceneGraphNode* earthNode = sceneGraphNode("Earth");
+    //earthNode->position() = 
     //Earthnode worldposition, is not aligned with the actual position shown as it seems right now.
-    //glm::vec3 earthPos = earthNode->worldPosition();
+    glm::vec3 earthPos = earthNode->worldPosition() * data.modelTransform.rotation;
     
     // this returns a value that goes from the sun, prolly because it is the root node. 
     //glm::vec3 earthPos = earthNode->position();
@@ -1298,9 +1299,24 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
     glm::vec3 cameraPos = data.camera.positionVec3();
+    
+    //this gives the same referenceframe as the nodes and makes it possible to see the
+    //the distance between the camera and the nodes. 
+    cameraPos = cameraPos * data.modelTransform.rotation;
+    
+    
+    //glm::vec3 cameraPos = data.camera.unsynchedPositionVec3();
     //LDEBUG("camerapos x: " + std::to_string(cameraPos.x));
     //LDEBUG("camerapos y: " + std::to_string(cameraPos.z));
     //LDEBUG("camerapos z: " + std::to_string(cameraPos.y));
+    
+   // glm::vec4 cameraPostemp = glm::vec4(cameraPos, 1.0) * modelMatrix;
+        
+   // cameraPostemp = cameraPostemp * glm::dmat4(glm::dmat4(glm::inverse(data.camera.projectionMatrix())) * glm::inverse(data.camera.combinedViewMatrix()));
+   // cameraPostemp = cameraPostemp * glm::dmat4(glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix());
+   // cameraPos.x = cameraPostemp.x;
+   // cameraPos.y = cameraPostemp.y;
+   // cameraPos.z = cameraPostemp.z;
     _shaderProgram->setUniform("camerapos", cameraPos);
 
     _shaderProgram->setUniform("scaleFactor", _scaleFactor);
@@ -1329,7 +1345,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     );
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    _shaderProgram->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
+   // _shaderProgram->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
 
 
     //_shaderProgram->setUniform("camerapos", data.camera.)

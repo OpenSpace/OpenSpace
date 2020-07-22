@@ -42,8 +42,8 @@ local sunRadius = 6.957E8
 local Streamnodes = {
     Identifier = "MAS_MHD_StreamNodes",
     --wrong Parent = transforms.HNMReferenceFrame.Identifier,
-    --Parent = sunTransforms.SunIAU.Identifier,
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Parent = sunTransforms.SunIAU.Identifier,
+    --Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     --transforms.asset, referens till suntransforms.solarsystemBarycenter.identifier
     Renderable = {
         Type = "RenderableStreamNodes",
