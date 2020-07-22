@@ -20,7 +20,7 @@ local color_layers = {
     {
         Identifier = "Messenger_MDIS_Utah",
         Name = "Messenger MDIS [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/MessengerMDIS.wms",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMdis.wms",
         Enabled = false
     },
     {
@@ -122,7 +122,7 @@ local color_layers = {
     {
         Identifier = "Messenger_SHADE_Sweden",
         Name = "Messenger SHADE [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/Messenger_SHADE.wms",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_Shade.wms",
         Settings = { 
             Gamma = 1.33,
             Multiplier = 1.15
