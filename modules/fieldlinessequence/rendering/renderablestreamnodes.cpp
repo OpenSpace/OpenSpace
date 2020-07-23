@@ -138,12 +138,12 @@ namespace {
        "This value specifies the threshold that will be changed with the flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
-        "filteringlower",
+        "filteringLower",
         "Filtering Lower Value in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
-        "filteringupper",
+        "filteringUpper",
         "Filtering Upper Value in AU",
         "Use filtering to show nodes within a given range."
     };
@@ -218,14 +218,14 @@ namespace {
         "The active stream to show"
     };
     constexpr openspace::properties::Property::PropertyInfo MisalignedIndexInfo = {
-        "MisalignedIndex",
+        "misalignedIndex",
         "Index to shift sequence number",
         "The misalignement number for sequence for streamnodes vs Fieldlines"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
-       "color",
-       "Color",
-       "Color of particles."
+        "color",
+        "Color",
+        "Color of particles."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "flowEnabled",
@@ -251,9 +251,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlowColoringInfo = {
         "coloring",
         "Color either by Flowcolor or Flow colortable",
-        "If set to true the flow will be colored by Flowcolor"
+        "If set to true the flow will be colored by Flowcolor."
     };
-    
     constexpr openspace::properties::Property::PropertyInfo TempInfo1 = {
         "temp1",
         "temp",
@@ -262,7 +261,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
         "maxNodeDistanceSize",
         "Max Node Distance Size",
-        "The maximum size of the nodes at a certin distance"
+        "The maximum size of the nodes at a certin distance."
     };
     /*constexpr openspace::properties::Property::PropertyInfo MinNodeDistanceSizeInfo = {
         "minNodeDistanceSize",
@@ -270,9 +269,9 @@ namespace {
         "The minimum size of the nodes at a certin distance"
     };*/
     constexpr openspace::properties::Property::PropertyInfo NodeDistanceThresholdInfo = {
-        "NodeDistanceThreshold",
+        "nodeDistanceThreshold",
         "Node Distance Threshold",
-        "Threshold for where to interpolate between the max and min node distance"
+        "Threshold for where to interpolate between the max and min node distance."
     };
     constexpr openspace::properties::Property::PropertyInfo CameraPerspectiveInfo = {
         "cameraPerspective",
@@ -282,23 +281,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
         "renderingcircles",
         "Render as circles",
-        "Using fragment shader to draw nodes as circles instead of squares"
+        "Using fragment shader to draw nodes as circles instead of squares."
     };
     constexpr openspace::properties::Property::PropertyInfo DrawingHollowInfo = {
         "renderingHollowCircles",
         "Render as hollow circles",
-        "Using fragment shader to draw nodes as hollow circles"
+        "Using fragment shader to draw nodes as hollow circles."
     };
     constexpr openspace::properties::Property::PropertyInfo GaussiandAlphaFilterInfo = {
         "renderingGaussianAlphaFilter",
         "Alpha by Gaussian",
-        "Using fragment shader to draw nodes with Gaussian filter for alpha value"
+        "Using fragment shader to draw nodes with Gaussian filter for alpha value."
 
     };
     constexpr openspace::properties::Property::PropertyInfo RadiusPerspectiveInfo = {
         "radiusPerspective",
         "Include radius with cameraperspective",
-        "If false, then nodes closer to the sun will not be larger regardless of distance to camera"
+        "If false, then nodes closer to the sun will not be larger regardless of distance to camera."
     };
     enum class SourceFileType : int {
         Json = 0,
@@ -400,9 +399,9 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
     , _pCameraPerspective(CameraPerspectiveInfo, true)
-    , _pDrawingCircles(DrawingCirclesInfo, true)
+    , _pDrawingCircles(DrawingCirclesInfo, false)
     , _pCameraPerspectiveGroup({" CameraPerspective"})
-    , _pDrawingHollow(DrawingHollowInfo, true)
+    , _pDrawingHollow(DrawingHollowInfo, false)
     , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _pRadiusPerspective(RadiusPerspectiveInfo, true)
 
@@ -1136,10 +1135,10 @@ void RenderableStreamNodes::setupProperties() {
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
         
-    _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Uniform), "Uniform");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Flux), "Flux");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Radius), "Radius");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeskipMethod::Streamnumber), "Streamnumber");
+    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
+    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
+    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
+    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber");
 
     _pDistancemethod.addOption(static_cast<int>(DistanceMethod::Eucledian), "Eucledian");
     _pDistancemethod.addOption(static_cast<int>(DistanceMethod::x), "x");
@@ -1284,17 +1283,17 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("ScalingMode", _pScalingmethod);
     _shaderProgram->setUniform("colorTableRange", _pColorTableRange.value());
     _shaderProgram->setUniform("domainLimZ", _pDomainZ.value());
-    _shaderProgram->setUniform("Nodeskip", _pAmountofNodes);
-    _shaderProgram->setUniform("Nodeskipdefault", _pDefaultNodeSkip);
-    _shaderProgram->setUniform("NodeskipMethod", _pNodeskipMethod);
-    _shaderProgram->setUniform("NodeskipFluxThreshold", _pFluxNodeskipThreshold);
-    _shaderProgram->setUniform("NodeskipRadiusThreshold", _pRadiusNodeSkipThreshold);
+    _shaderProgram->setUniform("nodeSkip", _pAmountofNodes);
+    _shaderProgram->setUniform("nodeSkipdefault", _pDefaultNodeSkip);
+    _shaderProgram->setUniform("nodeSkipMethod", _pNodeskipMethod);
+    _shaderProgram->setUniform("nodeSkipFluxThreshold", _pFluxNodeskipThreshold);
+    _shaderProgram->setUniform("nodeSkipRadiusThreshold", _pRadiusNodeSkipThreshold);
     _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
     _shaderProgram->setUniform("earthPos", earthPos);
-    _shaderProgram->setUniform("DistanceThreshold", _pDistanceThreshold);
-    _shaderProgram->setUniform("DistanceMethod", _pDistancemethod);
-    _shaderProgram->setUniform("activestreamnumber", _pActiveStreamNumber);
-    _shaderProgram->setUniform("EnhanceMethod", _pEnhancemethod);
+    _shaderProgram->setUniform("distanceThreshold", _pDistanceThreshold);
+    _shaderProgram->setUniform("distanceMethod", _pDistancemethod);
+    _shaderProgram->setUniform("activeStreamNumber", _pActiveStreamNumber);
+    _shaderProgram->setUniform("enhanceMethod", _pEnhancemethod);
     _shaderProgram->setUniform("flowColor", _pFlowColor);
     _shaderProgram->setUniform("usingParticles", _pFlowEnabled);
     _shaderProgram->setUniform("particleSize", _pFlowParticleSize);
@@ -1312,11 +1311,9 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("drawCircles", _pDrawingCircles);
     _shaderProgram->setUniform("drawHollow", _pDrawingHollow);
     _shaderProgram->setUniform("useGaussian", _pGaussianAlphaFilter);
-    _shaderProgram->setUniform("UsingRadiusPerspective", _pRadiusPerspective);
+    _shaderProgram->setUniform("usingRadiusPerspective", _pRadiusPerspective);
     
-
     //////// test for camera perspective: 
-
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -1347,7 +1344,6 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     //the distance between the camera and the nodes. 
     cameraPos = cameraPos * data.modelTransform.rotation;
     
-    
     //glm::vec3 cameraPos = data.camera.unsynchedPositionVec3();
     //LDEBUG("camerapos x: " + std::to_string(cameraPos.x));
     //LDEBUG("camerapos y: " + std::to_string(cameraPos.z));
@@ -1361,13 +1357,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
    // cameraPos.y = cameraPostemp.y;
    // cameraPos.z = cameraPostemp.z;
     _shaderProgram->setUniform("camerapos", cameraPos);
-
     _shaderProgram->setUniform("scaleFactor", _scaleFactor);
     _shaderProgram->setUniform(
         "up",
         glm::vec3(data.camera.lookUpVectorWorldSpace())
-    );
-   
+    ); 
     _shaderProgram->setUniform("modelMatrix", modelMatrix);
     _shaderProgram->setUniform(
         "cameraViewProjectionMatrix",
@@ -1377,11 +1371,9 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     );
     //_shaderProgram->setUniform("minPointSize", 3.f); // in pixels
     //_shaderProgram->setUniform("maxPointSize", 30.f); // in pixels
-    
     _shaderProgram->setUniform("up", glm::vec3(orthoUp));
     _shaderProgram->setUniform("right", glm::vec3(orthoRight));
     //_shaderProgram->setUniform(_uniformCache.fadeInValue, fadeInVariable);
-
     _shaderProgram->setUniform(
         "correctionSizeEndDistance",
         17.f
@@ -1389,7 +1381,6 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
    // _shaderProgram->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
-
 
     //_shaderProgram->setUniform("camerapos", data.camera.)
     //data.camera.
@@ -1472,8 +1463,8 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _lineCount.data(),
         static_cast<GLsizei>(_lineStart.size())
     );*/
-
 _shaderProgram->setUniform("firstrender", true);
+
 GLint temp = 0;
 glDrawArrays(
     GL_POINTS,
@@ -1722,7 +1713,6 @@ std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepat
 
         }
     }
-
     LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
     LDEBUG("counter for how many times we push back" + std::to_string(counter));
 
@@ -1821,6 +1811,4 @@ void RenderableStreamNodes::updateVertexStreamNumberBuffer() {
 
     unbindGL();
 }*/
-
-
 } // namespace openspace

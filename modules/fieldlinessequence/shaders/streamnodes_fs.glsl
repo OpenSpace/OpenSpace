@@ -43,6 +43,7 @@ Fragment getFragment() {
     frag.depth = vs_depth;
     frag.color = fragColor;
     vec2 coord = gl_PointCoord - vec2(0.5);
+
     if(drawCircles){
         if(length(coord) > 0.5){
             discard;
@@ -66,18 +67,15 @@ Fragment getFragment() {
     */
     //float alphaV = 1 - smoothstep(0, 1, length(coord));
     if(useGaussian){
-    float alphaV = sqrt(pow(1 - length(coord), 3));
-    alphaV = pow(alphaV, 3);
-    if(alphaV < 0.1){
-    discard;
-    }
+        float alphaV = sqrt(pow(1 - length(coord), 3));
+            alphaV = pow(alphaV, 3);
+        if(alphaV < 0.1){
+            discard;
+        }
     frag.color.a = alphaV;
     //else{
     //frag.color.a = alphaV;
-    }
-    frag.color.a = 0.3;
-    
-    
+    }   
     
     //vec2 coord = gl_PointCoord;
     
@@ -105,5 +103,4 @@ Fragment getFragment() {
     //frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
     return frag;
-
 }

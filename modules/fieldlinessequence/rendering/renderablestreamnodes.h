@@ -73,7 +73,7 @@ private:
         log10RFlux = 3,
         lnRFlux = 4
     };
-    enum class NodeskipMethod : int {
+    enum class NodeSkipMethod : int {
         Uniform = 0,
         Flux = 1,
         Radius = 2,
@@ -286,8 +286,6 @@ private:
     std::vector<std::string> _sourceFiles;
     // binary files sourcefolder
     std::string _binarySourceFilePath;
-
-    
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
     bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);

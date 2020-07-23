@@ -63,18 +63,18 @@ uniform float thresholdFlux;
 uniform float filterRadius;
 uniform float filterUpper;
 uniform int ScalingMode;
-uniform int NodeskipMethod;
-uniform int Nodeskip;
-uniform int Nodeskipdefault;
-uniform float NodeskipFluxThreshold;
-uniform float NodeskipRadiusThreshold;
+uniform int nodeSkipMethod;
+uniform int nodeSkip;
+uniform int nodeSkipdefault;
+uniform float nodeSkipFluxThreshold;
+uniform float nodeSkipRadiusThreshold;
 uniform float fluxColorAlpha;
 uniform vec3 earthPos;
-uniform float DistanceThreshold;
-uniform int DistanceMethod;
-uniform int activestreamnumber;
+uniform float distanceThreshold;
+uniform int distanceMethod;
+uniform int activeStreamNumber;
 uniform bool firstrender;
-uniform int EnhanceMethod;
+uniform int enhanceMethod;
 uniform double time;
 
 //uniform float interestingStreams[4];
@@ -83,7 +83,7 @@ uniform double time;
 uniform float scaleFactor;
 //uniform float minNodeDistanceSize;
 uniform float maxNodeDistanceSize;
-//uniform float nodeDistanceThreshold;
+uniform float nodeDistanceThreshold;
 
 uniform mat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
@@ -96,7 +96,7 @@ uniform vec3 right;
 uniform vec3 cameraLookUp;   // in world space (no SGCT View was considered)
 //uniform vec2 screenSize;
 uniform bool usingCameraPerspective;
-uniform bool UsingRadiusPerspective;
+uniform bool usingRadiusPerspective;
 
 // Inputs
 // Should be provided in meters
@@ -176,31 +176,31 @@ bool CheckvertexIndex(){
     
     int nodeIndex = gl_VertexID;
    // nodeIndex = gl_VertexIndex;
-    //if(EnhanceMethod == 3) return false;
-    if(NodeskipMethod == uniformskip){
-        if(mod(nodeIndex, Nodeskip) == 0){
+    //if(enhanceMethod == 3) return false;
+    if(nodeSkipMethod == uniformskip){
+        if(mod(nodeIndex, nodeSkip) == 0){
             return true;
         }
     }
-    else if(NodeskipMethod == Fluxskip){
-        if(fluxValue > NodeskipFluxThreshold && mod(nodeIndex, Nodeskip) == 0){
+    else if(nodeSkipMethod == Fluxskip){
+        if(fluxValue > nodeSkipFluxThreshold && mod(nodeIndex, nodeSkip) == 0){
             return true;
         }
-        if(fluxValue < NodeskipFluxThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
-            return true;
-        }
-    }
-    else if(NodeskipMethod == Radiusskip){
-        if(rValue < NodeskipRadiusThreshold && mod(nodeIndex, Nodeskip) == 0){
-            return true;
-        }
-        if(rValue > NodeskipRadiusThreshold && mod(nodeIndex, Nodeskipdefault) == 0){
+        if(fluxValue < nodeSkipFluxThreshold && mod(nodeIndex, nodeSkipdefault) == 0){
             return true;
         }
     }
-    else if(NodeskipMethod == Streamnumberskip){
+    else if(nodeSkipMethod == Radiusskip){
+        if(rValue < nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkip) == 0){
+            return true;
+        }
+        if(rValue > nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkipdefault) == 0){
+            return true;
+        }
+    }
+    else if(nodeSkipMethod == Streamnumberskip){
         
-    if(Streamnumber == activestreamnumber){
+    if(Streamnumber == activeStreamNumber){
         //vs_color = vec4(0);
         return true;
         }
@@ -234,7 +234,7 @@ return false;
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
         //Sizescaling
-     if(EnhanceMethod == 0){
+     if(enhanceMethod == 0){
             float tempR = rValue + 0.4; 
             if(tempR > 1.5){
                 tempR = 1.5;
@@ -243,13 +243,13 @@ void DecidehowtoshowClosetoEarth(){
             return;
         }
         //Colortables
-      if(EnhanceMethod == 1){
+      if(enhanceMethod == 1){
              vec4 fluxColor = getTransferFunctionColor(colorTable);
              vs_color = vec4(fluxColor.xyz, fluxColor.a);
              return;
         }
         //Outline
-      if(EnhanceMethod == 2){
+      if(enhanceMethod == 2){
             if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
                  gl_PointSize = gl_PointSize + 1;
                  vs_color = vec4(streamColor.xyz, fluxColorAlpha);
@@ -257,7 +257,7 @@ void DecidehowtoshowClosetoEarth(){
             return;
         }
         //lines
-      if(EnhanceMethod == 3){
+      if(enhanceMethod == 3){
       // Draw every other line grey
       vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
 
@@ -302,7 +302,7 @@ void DecidehowtoshowClosetoEarth(){
         //    }
     }
         //SizeandColor
-    if(EnhanceMethod == 4){
+    if(enhanceMethod == 4){
              vec4 fluxColor3 = getTransferFunctionColor(colorTable);
              vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
 
@@ -316,27 +316,27 @@ void DecidehowtoshowClosetoEarth(){
 
 void CheckdistanceMethod() { 
         //Enhance by distance to Earth
-        if(EnhanceMethod == 1 || EnhanceMethod == 4){
+        if(enhanceMethod == 1 || enhanceMethod == 4){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
              vs_color = vec4(fluxColor2.xyz, fluxColor2.a);
         }
-        if(DistanceMethod == 0){
-             if(distance(earthPos, in_position) < DistanceThreshold){
+        if(distanceMethod == 0){
+             if(distance(earthPos, in_position) < distanceThreshold){
                 DecidehowtoshowClosetoEarth();
              }
         }
-        else if(DistanceMethod == 1){
-            if(distance(earthPos.x, in_position.x) < DistanceThreshold){
+        else if(distanceMethod == 1){
+            if(distance(earthPos.x, in_position.x) < distanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
-        else if(DistanceMethod == 2){
-            if(distance(earthPos.y, in_position.y) < DistanceThreshold){
+        else if(distanceMethod == 2){
+            if(distance(earthPos.y, in_position.y) < distanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
-        else if(DistanceMethod == 3){
-            if(distance(earthPos.z, in_position.z) < DistanceThreshold){
+        else if(distanceMethod == 3){
+            if(distance(earthPos.z, in_position.z) < distanceThreshold){
                 DecidehowtoshowClosetoEarth();
             }
         }
@@ -443,49 +443,43 @@ void main() {
     vs_depth = initialPosition.w;
     
     if(usingCameraPerspective){
-     float rtemp = 1.0;
-     if(rValue > 1.0){
-     rtemp = 1.0;
-     }
-     else
-     {
-     rtemp = rValue;
-     }
+        float rtemp = 1.0;
+        if(rValue > 1.0){
+            rtemp = 1.0;
+         }
+         else{
+            rtemp = rValue;
+         }
     
-    float maxdist = 600000000000.f;
-    float distancevec = distance(camerapos, in_position.xyz);
-    float distScale = 1 - smoothstep(0, maxdist, distancevec);
-    float factorS = pow(distScale, 9) * rValue * 15.f;
-    
-    //distancevec = distance(newpos, in_position.xyz);
-     
-     if(distancevec < maxdist){
-
+        float maxdist = 600000000000.f;
+        float distancevec = distance(camerapos, in_position.xyz);
         float distScale = 1 - smoothstep(0, maxdist, distancevec);
-        
-
-       //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distancevec);
-        float factorS = 1.f;
-        if(UsingRadiusPerspective){
-        factorS = pow(distScale, 9) * 100.f * pow(rtemp, 2);
-        }
-        else{
-        factorS = pow(distScale, 9) * 100.f;
-
-        }
-        gl_PointSize = factorS * maxNodeDistanceSize * 0.8;
-         
-        }
-     else{
-        gl_PointSize = nodeSize;
-     }
+        float factorS = pow(distScale, 9) * rValue * 15.f;
+    
+        //distancevec = distance(newpos, in_position.xyz);
      
-     if(gl_PointSize > 40){
-     gl_PointSize = 40;
-     }
-     if(gl_PointSize < nodeSize){
-     gl_PointSize = nodeSize;
-     }
+         if(distancevec < maxdist){
+            float distScale = 1 - smoothstep(0, maxdist, distancevec);
+           //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distancevec);
+            float factorS = 1.f;
+            if(usingRadiusPerspective){
+                factorS = pow(distScale, 9) * 100.f * pow(rtemp, 2);
+            }
+            else{
+                factorS = pow(distScale, 9) * 100.f;
+            }
+            gl_PointSize = factorS * maxNodeDistanceSize * 0.8; 
+         }
+         else{
+            gl_PointSize = nodeSize;
+         }
+
+         if(gl_PointSize > 40){
+            gl_PointSize = 40;
+         }
+         if(gl_PointSize < nodeSize){
+            gl_PointSize = nodeSize;
+         }
      }
     /*
      
@@ -510,16 +504,16 @@ void main() {
             vs_st = in_st;
         }
         else{
-        vs_st = vec2(-1);
+            vs_st = vec2(-1);
         }
         */
-        //old transformation from in position
-        //vec4 position_in_meters = vec4(in_position, 1);
+
+        vec4 position_in_meters = vec4(in_position, 1);
         //vec4 positionClipSpace = modelViewProjection * position_in_meters;
         //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
       
        // gl_PointSize = nodeSize;
-       // gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+        //gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
        // vs_depth = gl_Position.w;
         
        // if(distance(positionClipSpace.xyz, camerapos) < 0.f){
