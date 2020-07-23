@@ -116,7 +116,7 @@ namespace openspace {
             glm::vec3(1.f)
         )
         , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-        , _size(SizeInfo, 1.f, 0.f, 600.f)
+        , _size(SizeInfo, 1.f, 0.f, 150.f)
         , _toggleVisibility(ToggleVisibilityInfo, true)
     {
         documentation::testSpecificationAndThrow(
