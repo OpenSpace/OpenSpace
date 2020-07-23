@@ -25,7 +25,7 @@
  #include "floatoperations.glsl"
 in vec4 vs_color;
 in float vs_depth;
-in flat int rendermode;
+in flat int render_mode;
 in vec2 vs_st;
 
 uniform sampler2D spriteTexture;
@@ -144,7 +144,7 @@ Fragment getFragment() {
     }
     }
     */
-    if(rendermode == 3){
+    if(render_mode == 3){
     frag.color = texture(spriteTexture, gl_PointCoord) * vec4(1, 1, 1, 0.1);
     //if(gl_FrontFacing) {
     //    frag.color = texture(spriteTexture, vs_st);

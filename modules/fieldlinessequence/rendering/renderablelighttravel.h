@@ -80,6 +80,7 @@ namespace openspace {
         double _triggerTime;
         double _endTime;
         bool _needPositionUpdate = true;
+
         properties::FloatProperty _pLightSpeed;
         properties::FloatProperty _pLineWidth;
         properties::OptionProperty _pRenderMode;
@@ -90,9 +91,8 @@ namespace openspace {
         properties::BoolProperty _pShowLabel;
         properties::BoolProperty _pShouldFollowLight;
         properties::FloatProperty _pFadeDistance;
-        // Uniform stream Color
+
         properties::Vec4Property _pDefaultColor;
-        // Uniform stream Color
         properties::Vec4Property _pLightColor;
 
         properties::IntProperty _pTextMinSize;
@@ -103,7 +103,6 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
-
         
         glm::vec3 _labelPos;
         GLuint _quad = 0;

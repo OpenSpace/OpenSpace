@@ -57,74 +57,74 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-constexpr const char* _loggerCat = "renderableLightTravel";
+    constexpr const char* _loggerCat = "renderableLightTravel";
 
-constexpr openspace::properties::Property::PropertyInfo LightSpeedInfo = {
-    "lightSpeed",
-    "speed of light",
-    "The speed of light"
-};
-constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-    "lineWidth",
-    "Line width",
-    "This value specifies the line width of the field lines if the "
-    "selected rendering method includes lines."
-};
-constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
-    "RenderingMode",
-    "The draw method",
-    "Can be used to decide what rendering method to use."
-};
-constexpr openspace::properties::Property::PropertyInfo LightColorInfo = {
-    "lightColor",
-    "The color of the light particle",
-    "Choose what color to light the particle as it is traversing the line"
-};
-constexpr openspace::properties::Property::PropertyInfo DefaultcolorInfo = {
-    "defaultColor",
-    "The color of the lines",
-    "Choose what color each line should have as default value"
-};
-constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
-    "pointSize",
-    "Size of points",
-    "Change the size of the points"
-};
-constexpr openspace::properties::Property::PropertyInfo TimeStepInfo = {
-    "timeStep",
-    "Timestep for light travel",
-    "Change the timestep for the points along the line between sun and earth"
-};
-constexpr openspace::properties::Property::PropertyInfo DistanceFactorInfo = {
-    "distanceFactor",
-    "The distancefactor for what to show as default vs light",
-    "This value is multiplicated by a maximum distance of 1000000000.f meters. "
-};
-constexpr openspace::properties::Property::PropertyInfo LabelInfo = {
-    "label",
-    "Render label",
-    "Bool property for rendering labels"
-};
-constexpr openspace::properties::Property::PropertyInfo FollowLightInfo = {
-    "followLight",
-    "Light following label",
-    "Changes position of the label with the lights movement"
-};
-constexpr openspace::properties::Property::PropertyInfo FadeDistanceInfo = {
-    "fadeDistance",
-    "fadeDistance",
-    "fadeDistance"
-};
-constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
-    "minTextSize",
-    "Min text size",
-    "The lowest value for text size for label"
-};
-constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
-    "maxTextSize",
-    "Max text size",
-    "The highest value for text size for label"
-};
+    constexpr openspace::properties::Property::PropertyInfo LightSpeedInfo = {
+        "lightSpeed",
+        "Speed of light",
+        "The speed of light."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "lineWidth",
+        "Line width",
+        "This value specifies the line width of the field lines if the "
+        "selected rendering method includes lines."
+    };
+    constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
+        "renderMode",
+        "The draw method",
+        "Can be used to decide what rendering method to use."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LightColorInfo = {
+        "lightColor",
+        "The color of the light particle",
+        "Choose what color to light the particle as it is traversing the line."
+    };
+    constexpr openspace::properties::Property::PropertyInfo DefaultcolorInfo = {
+        "defaultColor",
+        "The color of the lines",
+        "Choose what color each line should have as default value."
+    };
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+        "pointSize",
+        "Size of points",
+        "Change the size of the points."
+    };
+    constexpr openspace::properties::Property::PropertyInfo TimeStepInfo = {
+        "timeStep",
+        "Timestep for light travel",
+        "Change the timestep for the points along the line between sun and earth."
+    };
+    constexpr openspace::properties::Property::PropertyInfo DistanceFactorInfo = {
+        "distanceFactor",
+        "The distance factor for what to show as default vs light",
+        "This value is multiplicated by a maximum distance of 1000000000.f meters."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LabelInfo = {
+        "label",
+        "Render label",
+        "Bool property for rendering labels."
+    };
+    constexpr openspace::properties::Property::PropertyInfo FollowLightInfo = {
+        "followLight",
+        "Light following label",
+        "Changes position of the label with the lights movement."
+    };
+    constexpr openspace::properties::Property::PropertyInfo FadeDistanceInfo = {
+        "fadeDistance",
+        "Fade Distance",
+        "Distance which the nodes fade given with the power of 10."
+    };
+    constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
+        "minTextSize",
+        "Min text size",
+        "The lowest value for text size for label."
+    };
+    constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
+        "maxTextSize",
+        "Max text size",
+        "The highest value for text size for label."
+    };
 }
 
 namespace openspace {
@@ -153,7 +153,6 @@ namespace openspace {
     }
 
 void RenderableLightTravel::initializeGL() {
-
     _dictionary.reset();
     _shaderProgram = global::renderEngine.buildRenderProgram(
         "Lighttravel",
@@ -162,13 +161,13 @@ void RenderableLightTravel::initializeGL() {
     );
 
     if(_font == nullptr){
-    size_t _fontSize = 50;
-    _font = global::fontManager.font(
-        "Mono",
-        static_cast<float>(_fontSize),
-        ghoul::fontrendering::FontManager::Outline::Yes,
-        ghoul::fontrendering::FontManager::LoadGlyphs::No
-    );
+        size_t _fontSize = 50;
+        _font = global::fontManager.font(
+            "Mono",
+            static_cast<float>(_fontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
     }
 
     glGenVertexArrays(1, &_vertexArrayObject);
@@ -216,7 +215,7 @@ void RenderableLightTravel::initializeGL() {
     // positions.push_back(earthPos);
     // positions.push_back(earthPos);
 
-        //createPlane();
+    //createPlane();
     _spriteTexture = nullptr;
     std::string texturepath = absPath("${SYNC}/http/stars_textures/1/halo.png");
         
@@ -292,8 +291,8 @@ double RenderableLightTravel::calculateEndTime(const double starttime, const glm
     }
     positions.push_back(endpos);
        
-    // LDEBUG("endtime" + std::to_string(endtime));
-    // LDEBUG("newpos.y" + std::to_string(newpos.y));
+    //LDEBUG("endtime" + std::to_string(endtime));
+    //LDEBUG("newpos.y" + std::to_string(newpos.y));
     //LDEBUG("newpos.x" + std::to_string(newpos.x));
     //LDEBUG("position size" + std::to_string(positions.size()));
     _needPositionUpdate = true;
@@ -350,11 +349,7 @@ if (orthoRight == glm::dvec3(0.0)) {
 }
 glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
-
-
-
 glBindVertexArray(_vertexArrayObject);
-
 
 if (positions.size() > 2) {
     const double currentTime = data.time.j2000Seconds();
@@ -365,18 +360,18 @@ if (positions.size() > 2) {
     //_shaderProgram->setUniform("in_dist_from_start", dist_from_start);
     //_shaderProgram->setUniform("in_transmission_time", transmissiontime);
     //_shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
-    _shaderProgram->setUniform("normalizedvectorFromSuntoEarth", _normalizedVector);
+    _shaderProgram->setUniform("normalizedVectorFromSunToEarth", _normalizedVector);
     _shaderProgram->setUniform("renderMode", _pRenderMode);
     _shaderProgram->setUniform("pointSize", _pPointSize);
     _shaderProgram->setUniform("defaultColor", _pDefaultColor);
-    _shaderProgram->setUniform("LightColor", _pLightColor);
-    _shaderProgram->setUniform("DistanceFactor", _pDistanceFactor);
+    _shaderProgram->setUniform("lightColor", _pLightColor);
+    _shaderProgram->setUniform("distanceFactor", _pDistanceFactor);
     if(_pShowLabel){
-    renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, _pFadeDistance);
+        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, _pFadeDistance);
     }
 }
 
-if (_pRenderMode == 0) {
+if(_pRenderMode == 0){
     glLineWidth(_pLineWidth);
     GLint temp = 0;
     glDrawArrays(
@@ -386,7 +381,7 @@ if (_pRenderMode == 0) {
         static_cast<GLsizei>(positions.size())
     );
 }
-else if (_pRenderMode == 1) {
+else if(_pRenderMode == 1){
     glLineWidth(_pLineWidth);
     GLint temp = 0;
     glDrawArrays(
@@ -394,9 +389,8 @@ else if (_pRenderMode == 1) {
         temp,
         static_cast<GLsizei>(positions.size())
     );
-
 }
-else if (_pRenderMode == 2) {
+else if(_pRenderMode == 2){
     GLint temp = 0;
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(
@@ -405,7 +399,7 @@ else if (_pRenderMode == 2) {
         static_cast<GLsizei>(positions.size())
     );
 }
-else if (_pRenderMode == 3) {
+else if(_pRenderMode == 3){
     ghoul::opengl::TextureUnit spriteTextureUnit;
     spriteTextureUnit.activate();
     _spriteTexture->bind();
@@ -425,8 +419,6 @@ else if (_pRenderMode == 3) {
 }
 glBindVertexArray(0);
 _shaderProgram->deactivate();
-
-
 }
 inline void unbindGL() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -437,7 +429,6 @@ void RenderableLightTravel::renderLabels(const RenderData& data,
     const glm::dvec3& orthoRight,
     const glm::dvec3& orthoUp,
     float fadeInVariable){
-
 
     //glm::vec4 textColor = _pLightColor;
     glm::vec4 textColor = glm::vec4(1.0, 1.0, 1.0, 1.0);
@@ -531,14 +522,12 @@ void RenderableLightTravel::update(const UpdateData& data)
         glEnableVertexAttribArray(VaPosition);
         glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-
         constexpr const GLuint VaDistance = 1;
         constexpr const GLuint VaTimeSinceStart = 2;
         constexpr const GLuint VaTransmissionTime = 3;
         constexpr const GLuint VaLightTravelTime = 4;
 
         //glEnable(GL_PROGRAM_POINT_SIZE);
-
 
         glVertexAttribPointer(VaDistance, 1, GL_FLOAT, GL_FALSE, 0, 0);
         glEnableVertexAttribArray(VaDistance);

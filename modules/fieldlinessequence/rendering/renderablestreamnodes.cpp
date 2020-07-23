@@ -1280,11 +1280,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("colorMode", _pColorMode);
     _shaderProgram->setUniform("filterRadius", _pFiltering);
     _shaderProgram->setUniform("filterUpper", _pFilteringUpper);
-    _shaderProgram->setUniform("ScalingMode", _pScalingmethod);
+    _shaderProgram->setUniform("scalingMode", _pScalingmethod);
     _shaderProgram->setUniform("colorTableRange", _pColorTableRange.value());
     _shaderProgram->setUniform("domainLimZ", _pDomainZ.value());
     _shaderProgram->setUniform("nodeSkip", _pAmountofNodes);
-    _shaderProgram->setUniform("nodeSkipdefault", _pDefaultNodeSkip);
+    _shaderProgram->setUniform("nodeSkipDefault", _pDefaultNodeSkip);
     _shaderProgram->setUniform("nodeSkipMethod", _pNodeskipMethod);
     _shaderProgram->setUniform("nodeSkipFluxThreshold", _pFluxNodeskipThreshold);
     _shaderProgram->setUniform("nodeSkipRadiusThreshold", _pRadiusNodeSkipThreshold);
@@ -1356,7 +1356,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
    // cameraPos.x = cameraPostemp.x;
    // cameraPos.y = cameraPostemp.y;
    // cameraPos.z = cameraPostemp.z;
-    _shaderProgram->setUniform("camerapos", cameraPos);
+    _shaderProgram->setUniform("cameraPos", cameraPos);
     _shaderProgram->setUniform("scaleFactor", _scaleFactor);
     _shaderProgram->setUniform(
         "up",
@@ -1463,7 +1463,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _lineCount.data(),
         static_cast<GLsizei>(_lineStart.size())
     );*/
-_shaderProgram->setUniform("firstrender", true);
+_shaderProgram->setUniform("firstRender", true);
 
 GLint temp = 0;
 glDrawArrays(
@@ -1474,7 +1474,7 @@ glDrawArrays(
 
 if (_pEnhancemethod == 2) {
     //LDEBUG("Vi borde rendera vita punkter");
-    _shaderProgram->setUniform("firstrender", false);
+    _shaderProgram->setUniform("firstRender", false);
     GLint temp = 0;
     glDrawArrays(
         GL_POINTS,
@@ -1484,7 +1484,7 @@ if (_pEnhancemethod == 2) {
 }
 /*if (_pEnhancemethod == 3) {
     //LDEBUG("Vi borde rendera linjer");
-    _shaderProgram->setUniform("firstrender", false);
+    _shaderProgram->setUniform("firstRender", false);
     glLineWidth(_pLineWidth);
     glMultiDrawArrays(
         GL_LINE_STRIP, //_drawingOutputType,
@@ -1493,7 +1493,7 @@ if (_pEnhancemethod == 2) {
         static_cast<GLsizei>(_lineStart.size()));
 }*/
 
-// _shaderProgram->setUniform("firstrender", false);
+// _shaderProgram->setUniform("firstRender", false);
 // glDrawArrays(
 //     GL_POINTS,
 //     temp,

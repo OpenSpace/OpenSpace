@@ -56,26 +56,26 @@ uniform vec2      domainLimZ;
 uniform vec2      domainLimR;
 
 // Streamnodes specific uniforms
-uniform float nodeSize;
-uniform float nodeSizeLargerFlux;
-uniform vec4 streamColor;
-uniform float thresholdFlux;
-uniform float filterRadius;
-uniform float filterUpper;
-uniform int ScalingMode;
-uniform int nodeSkipMethod;
-uniform int nodeSkip;
-uniform int nodeSkipdefault;
-uniform float nodeSkipFluxThreshold;
-uniform float nodeSkipRadiusThreshold;
-uniform float fluxColorAlpha;
-uniform vec3 earthPos;
-uniform float distanceThreshold;
-uniform int distanceMethod;
-uniform int activeStreamNumber;
-uniform bool firstrender;
-uniform int enhanceMethod;
-uniform double time;
+uniform float   nodeSize;
+uniform float   nodeSizeLargerFlux;
+uniform vec4    streamColor;
+uniform float   thresholdFlux;
+uniform float   filterRadius;
+uniform float   filterUpper;
+uniform int     scalingMode;
+uniform int     nodeSkipMethod;
+uniform int     nodeSkip;
+uniform int     nodeSkipDefault;
+uniform float   nodeSkipFluxThreshold;
+uniform float   nodeSkipRadiusThreshold;
+uniform float   fluxColorAlpha;
+uniform vec3    earthPos;
+uniform float   distanceThreshold;
+uniform int     distanceMethod;
+uniform int     activeStreamNumber;
+uniform bool    firstRender;
+uniform int     enhanceMethod;
+uniform double  time;
 
 //uniform float interestingStreams[4];
 
@@ -88,15 +88,15 @@ uniform float nodeDistanceThreshold;
 uniform mat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
-uniform float correctionSizeFactor;
-uniform float correctionSizeEndDistance;
-uniform vec3 camerapos;
-uniform vec3 up;
-uniform vec3 right;
-uniform vec3 cameraLookUp;   // in world space (no SGCT View was considered)
+uniform float   correctionSizeFactor;
+uniform float   correctionSizeEndDistance;
+uniform vec3    cameraPos;
+uniform vec3    up;
+uniform vec3    right;
+uniform vec3    cameraLookUp;   // in world space (no SGCT View was considered)
 //uniform vec2 screenSize;
-uniform bool usingCameraPerspective;
-uniform bool usingRadiusPerspective;
+uniform bool    usingCameraPerspective;
+uniform bool    usingRadiusPerspective;
 
 // Inputs
 // Should be provided in meters
@@ -131,39 +131,39 @@ const int uniformColor     = 0;
 const int colorByFluxValue  = 1;
 
 const int uniformskip = 0;
-const int Fluxskip = 1;
-const int Radiusskip = 2;
-const int Streamnumberskip = 3;
+const int fluxSkip = 1;
+const int radiusSkip = 2;
+const int streamNumberSkip = 3;
 
-
-const int Fluxmode = 0;
+const int fluxMode = 0;
 const int RFlux = 1;
 const int R2Flux = 2;
 const int log10RFlux = 3;
 const int lnRFlux = 4;
-out vec4 vs_color;
-out float vs_depth;
-out vec2 vs_st;
+
+out vec4    vs_color;
+out float   vs_depth;
+out vec2    vs_st;
 //out vec4 vs_gPosition;
 
 vec4 getTransferFunctionColor(sampler1D InColorTable) {
     // Remap the color scalar to a [0,1] range
     float scalevalue = 0;
-    if(ScalingMode == Fluxmode){
+    if(scalingMode == fluxMode){
         scalevalue = fluxValue;
     }
-    else if(ScalingMode == RFlux){
+    else if(scalingMode == RFlux){
        scalevalue = rValue * fluxValue;
     }
-    else if(ScalingMode == log10RFlux){
+    else if(scalingMode == log10RFlux){
         //conversion from logbase e to log10 since glsl does not support log10. 
         float logtoTen = log(rValue) / log(10);
         scalevalue = logtoTen * fluxValue;
     }
-    else if(ScalingMode == lnRFlux){
+    else if(scalingMode == lnRFlux){
         scalevalue = log(rValue) * fluxValue;
     }
-    else if(ScalingMode == R2Flux){
+    else if(scalingMode == R2Flux){
         scalevalue = rValue * rValue * fluxValue;
     }
 
@@ -182,23 +182,23 @@ bool CheckvertexIndex(){
             return true;
         }
     }
-    else if(nodeSkipMethod == Fluxskip){
+    else if(nodeSkipMethod == fluxSkip){
         if(fluxValue > nodeSkipFluxThreshold && mod(nodeIndex, nodeSkip) == 0){
             return true;
         }
-        if(fluxValue < nodeSkipFluxThreshold && mod(nodeIndex, nodeSkipdefault) == 0){
+        if(fluxValue < nodeSkipFluxThreshold && mod(nodeIndex, nodeSkipDefault) == 0){
             return true;
         }
     }
-    else if(nodeSkipMethod == Radiusskip){
+    else if(nodeSkipMethod == radiusSkip){
         if(rValue < nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkip) == 0){
             return true;
         }
-        if(rValue > nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkipdefault) == 0){
+        if(rValue > nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkipDefault) == 0){
             return true;
         }
     }
-    else if(nodeSkipMethod == Streamnumberskip){
+    else if(nodeSkipMethod == streamNumberSkip){
         
     if(Streamnumber == activeStreamNumber){
         //vs_color = vec4(0);
@@ -250,7 +250,7 @@ void DecidehowtoshowClosetoEarth(){
         }
         //Outline
       if(enhanceMethod == 2){
-            if(!firstrender && vs_color.x != 0 && vs_color.y != 0){
+            if(!firstRender && vs_color.x != 0 && vs_color.y != 0){
                  gl_PointSize = gl_PointSize + 1;
                  vs_color = vec4(streamColor.xyz, fluxColorAlpha);
             }
@@ -271,7 +271,7 @@ void DecidehowtoshowClosetoEarth(){
 
       for(int i = 0; i < interestingStreams.length(); i++){
             if(Streamnumber == interestingStreams[i]){
-           // if(!firstrender){
+           // if(!firstRender){
                // vs_color = vec4(streamColor.xyz, fluxColorAlpha);
                if(usingParticles && isParticle() && rValue > 0.f){
                    if(modulusResult >= particleSize - 30){
@@ -385,7 +385,7 @@ void main() {
     }
 
     /*
-    if(distance(in_position, camerapos) < 100000000000.f){
+    if(distance(in_position, cameraPos) < 100000000000.f){
         gl_PointSize = nodeSize * 5;
      }
     else{
@@ -401,11 +401,11 @@ void main() {
     //vec3 scaledRight    = vec3(0.f);
     //vec3 scaledUp       = vec3(0.f);
 
-    /////vec3 normal   = vec3(normalize(camerapos - dpos.xyz));
+    /////vec3 normal   = vec3(normalize(cameraPos - dpos.xyz));
     /////vec3 newRight = normalize(cross(cameraLookUp, normal));
     /////vec3 newUp    = cross(normal, newRight);
 
-     double distCamera = length(camerapos - dpos.xyz);
+     double distCamera = length(cameraPos - dpos.xyz);
      float expVar = float(-distCamera) / pow(10.f, correctionSizeEndDistance);
      float factorVar = pow(10.f, correctionSizeFactor);
      scaleMultiply *= 1.f / (1.f + factorVar * exp(expVar));
@@ -452,7 +452,7 @@ void main() {
          }
     
         float maxdist = 600000000000.f;
-        float distancevec = distance(camerapos, in_position.xyz);
+        float distancevec = distance(cameraPos, in_position.xyz);
         float distScale = 1 - smoothstep(0, maxdist, distancevec);
         float factorS = pow(distScale, 9) * rValue * 15.f;
     
@@ -495,12 +495,12 @@ void main() {
      gl_PointSize = 2.f;
      }
      */
-    //if(!firstrender){
+    //if(!firstRender){
     //CheckdistanceMethod();
    // }
     
     //temporary things for trying out point sprites. 
-      /*  if(!firstrender && vs_color.w != 0){
+      /*  if(!firstRender && vs_color.w != 0){
             vs_st = in_st;
         }
         else{
@@ -516,5 +516,5 @@ void main() {
         //gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
        // vs_depth = gl_Position.w;
         
-       // if(distance(positionClipSpace.xyz, camerapos) < 0.f){
+       // if(distance(positionClipSpace.xyz, cameraPos) < 0.f){
 }
