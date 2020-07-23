@@ -299,6 +299,11 @@ namespace {
         "Include radius with cameraperspective",
         "If false, then nodes closer to the sun will not be larger regardless of distance to camera."
     };
+    constexpr openspace::properties::Property::PropertyInfo perspectiveDistanceFactorInfo = {
+        "perspectiveDistanceFactor",
+        "Distance factor",
+        "This value decides how far away the camera must be to start impacting the nodesize"
+    };
     enum class SourceFileType : int {
         Json = 0,
         Invalid
@@ -404,6 +409,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDrawingHollow(DrawingHollowInfo, false)
     , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _pRadiusPerspective(RadiusPerspectiveInfo, true)
+    , _pPerspectiveDistanceFactor(perspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
 
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -1153,10 +1159,12 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::test), "test");
 
     _pCameraPerspectiveGroup.addProperty(_pCameraPerspective);
+    _pCameraPerspectiveGroup.addProperty(_pPerspectiveDistanceFactor);
     _pCameraPerspectiveGroup.addProperty(_pDrawingCircles);
     _pCameraPerspectiveGroup.addProperty(_pDrawingHollow);
     _pCameraPerspectiveGroup.addProperty(_pGaussianAlphaFilter);
     _pCameraPerspectiveGroup.addProperty(_pRadiusPerspective);
+    
 
     definePropertyCallbackFunctions();
     // Set default
@@ -1312,6 +1320,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("drawHollow", _pDrawingHollow);
     _shaderProgram->setUniform("useGaussian", _pGaussianAlphaFilter);
     _shaderProgram->setUniform("usingRadiusPerspective", _pRadiusPerspective);
+    _shaderProgram->setUniform("PerspectiveDistanceFactor", _pPerspectiveDistanceFactor);
     
     //////// test for camera perspective: 
     /*
@@ -1340,11 +1349,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
     */
-    glm::vec3 cameraPos = data.camera.positionVec3();
+    glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
     
     //this gives the same referenceframe as the nodes and makes it possible to see the
     //the distance between the camera and the nodes. 
-    cameraPos = cameraPos * data.modelTransform.rotation;
+    //cameraPos = cameraPos * data.modelTransform.rotation;
     
     _shaderProgram->setUniform("cameraPos", cameraPos);
     //glm::vec3 cameraPos = data.camera.unsynchedPositionVec3();

@@ -98,6 +98,7 @@ uniform vec3    cameraPos;
 //uniform vec2 screenSize;
 uniform bool    usingCameraPerspective;
 uniform bool    usingRadiusPerspective;
+uniform float   PerspectiveDistanceFactor;
 
 // Inputs
 // Should be provided in meters
@@ -394,7 +395,7 @@ void main() {
             rtemp = rValue;
          }
     
-        float maxdist = 600000000000.f;
+        float maxdist = 100000000000.f * PerspectiveDistanceFactor;
         float distancevec = distance(cameraPos, in_position.xyz);
 
         if(distancevec < maxdist){

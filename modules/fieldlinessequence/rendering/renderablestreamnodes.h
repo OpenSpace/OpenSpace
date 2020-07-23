@@ -281,6 +281,7 @@ private:
     properties::BoolProperty _pDrawingHollow;
     properties::BoolProperty _pGaussianAlphaFilter;
     properties::BoolProperty _pRadiusPerspective;
+    properties::FloatProperty _pPerspectiveDistanceFactor;
 
     // initialization
     std::vector<std::string> _sourceFiles;
