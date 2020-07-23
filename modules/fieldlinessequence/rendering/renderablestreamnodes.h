@@ -236,7 +236,7 @@ private:
     // Threshold flux value
     properties::FloatProperty _pThresholdFlux;
     // Filtering nodes within a range
-    properties::FloatProperty _pFiltering;
+    properties::FloatProperty _pFilteringLower;
     // Filtering nodes with a upper range
     properties::FloatProperty _pFilteringUpper;
     // Amount of nodes to show
@@ -273,7 +273,7 @@ private:
     // Speed of simulated flow
     properties::IntProperty _pFlowSpeed;
     //Either use flowcolortable or FlowColor.
-    properties::BoolProperty _pFlowColoring;
+    properties::BoolProperty _pUseFlowColor;
 
     properties::PropertyOwner _pCameraPerspectiveGroup;
     properties::BoolProperty _pCameraPerspective;

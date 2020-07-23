@@ -69,13 +69,13 @@ local Keybindings = {
 		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByFlux', 0.000000);" ..
 		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByRadius', 0.000000);" ..
 		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', 0.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filteringlower', 0.000000);" ..
+		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterLower', 0.000000);" ..
 		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000);"..
 		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"..
 		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');"..
 		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"..
 		"openspace.navigation.loadNavigationState('Sun');"..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filteringupper', 5.000000);",
+		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5.000000);",
 		--"Todo, fix the last one which is on the z axis"
 		--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.limitsZLower', {--358139527168.969971,953488375808.000000});",
 		Documentation = "Resets the visualisation of streamnodes",

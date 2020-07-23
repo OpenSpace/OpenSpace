@@ -138,12 +138,12 @@ namespace {
        "This value specifies the threshold that will be changed with the flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
-        "filteringLower",
+        "filterLower",
         "Filtering Lower Value in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
-        "filteringUpper",
+        "filterUpper",
         "Filtering Upper Value in AU",
         "Use filtering to show nodes within a given range."
     };
@@ -223,9 +223,9 @@ namespace {
         "The misalignement number for sequence for streamnodes vs Fieldlines"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
-        "color",
-        "Color",
-        "Color of particles."
+        "flowcolor",
+        "Color of Flow",
+        "Color of Flow."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "flowEnabled",
@@ -248,7 +248,7 @@ namespace {
         "Speed",
         "Speed of the flow."
     };
-    constexpr openspace::properties::Property::PropertyInfo FlowColoringInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseFlowColorInfo = {
         "coloring",
         "Color either by Flowcolor or Flow colortable",
         "If set to true the flow will be colored by Flowcolor."
@@ -372,7 +372,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDomainZ(DomainZInfo)
     , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
     , _pThresholdFlux(ThresholdFluxInfo, 0.f, -50.f, 10.f)
-    , _pFiltering(FilteringInfo, 0.f, 0.f, 5.f)
+    , _pFilteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
     , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
@@ -393,7 +393,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
     , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
     , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    , _pFlowColoring(FlowColoringInfo, false)
+    , _pUseFlowColor(UseFlowColorInfo, false)
     , _scaleFactor(TempInfo1, 150.f, 1.f, 500.f)
     //, _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 7.f)
     , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
@@ -1096,7 +1096,7 @@ void RenderableStreamNodes::setupProperties() {
     _pColorGroup.addProperty(_pFluxColorAlpha);
 
     _pStreamGroup.addProperty(_pThresholdFlux);
-    _pStreamGroup.addProperty(_pFiltering);
+    _pStreamGroup.addProperty(_pFilteringLower);
     _pStreamGroup.addProperty(_pFilteringUpper);
     _pStreamGroup.addProperty(_pDomainZ);
 
@@ -1121,7 +1121,7 @@ void RenderableStreamNodes::setupProperties() {
     _pFlowGroup.addProperty(_pFlowParticleSize);
     _pFlowGroup.addProperty(_pFlowParticleSpacing);
     _pFlowGroup.addProperty(_pFlowSpeed);
-    _pFlowGroup.addProperty(_pFlowColoring);
+    _pFlowGroup.addProperty(_pUseFlowColor);
 
     // --------------------- Add Options to OptionProperties --------------------- //
     _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
@@ -1258,8 +1258,8 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
         //not in use atm.
-       // _shaderProgram->setUniform("modelViewProjection",
-       //     data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+        _shaderProgram->setUniform("modelViewProjection",
+            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
 
     //glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
@@ -1278,7 +1278,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.nodeSizeLargerFlux, _pNodeSizeLargerFlux);
     _shaderProgram->setUniform(_uniformCache.thresholdFlux, _pThresholdFlux);
     _shaderProgram->setUniform("colorMode", _pColorMode);
-    _shaderProgram->setUniform("filterRadius", _pFiltering);
+    _shaderProgram->setUniform("filterLower", _pFilteringLower);
     _shaderProgram->setUniform("filterUpper", _pFilteringUpper);
     _shaderProgram->setUniform("scalingMode", _pScalingmethod);
     _shaderProgram->setUniform("colorTableRange", _pColorTableRange.value());
@@ -1303,7 +1303,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         "time",
         global::windowDelegate.applicationTime() * -1
     );
-    _shaderProgram->setUniform("flowColoring", _pFlowColoring);
+    _shaderProgram->setUniform("flowColoring", _pUseFlowColor);
     //_shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
     _shaderProgram->setUniform("maxNodeDistanceSize", _pMaxNodeDistanceSize);
     //_shaderProgram->setUniform("nodeDistanceThreshold", _pNodeDistanceThreshold);
@@ -1314,6 +1314,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("usingRadiusPerspective", _pRadiusPerspective);
     
     //////// test for camera perspective: 
+    /*
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -1338,12 +1339,14 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
     }
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+    */
     glm::vec3 cameraPos = data.camera.positionVec3();
     
     //this gives the same referenceframe as the nodes and makes it possible to see the
     //the distance between the camera and the nodes. 
     cameraPos = cameraPos * data.modelTransform.rotation;
     
+    _shaderProgram->setUniform("cameraPos", cameraPos);
     //glm::vec3 cameraPos = data.camera.unsynchedPositionVec3();
     //LDEBUG("camerapos x: " + std::to_string(cameraPos.x));
     //LDEBUG("camerapos y: " + std::to_string(cameraPos.z));
@@ -1356,9 +1359,9 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
    // cameraPos.x = cameraPostemp.x;
    // cameraPos.y = cameraPostemp.y;
    // cameraPos.z = cameraPostemp.z;
-    _shaderProgram->setUniform("cameraPos", cameraPos);
-    _shaderProgram->setUniform("scaleFactor", _scaleFactor);
-    _shaderProgram->setUniform(
+   // _shaderProgram->setUniform("scaleFactor", _scaleFactor);
+   /* _shaderProgram->setUniform(
+    
         "up",
         glm::vec3(data.camera.lookUpVectorWorldSpace())
     ); 
@@ -1369,6 +1372,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
             glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
         )
     );
+    
     //_shaderProgram->setUniform("minPointSize", 3.f); // in pixels
     //_shaderProgram->setUniform("maxPointSize", 30.f); // in pixels
     _shaderProgram->setUniform("up", glm::vec3(orthoUp));
@@ -1380,6 +1384,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     );
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
+    */
    // _shaderProgram->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
 
     //_shaderProgram->setUniform("camerapos", data.camera.)
@@ -1406,63 +1411,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     const std::vector<glm::vec3>& vertPos = _vertexPositions;
     glBindVertexArray(_vertexArrayObject);
 
-    /*
-    glBegin(GL_LINE_LOOP);          //start drawing a line loop
-    glVertex3f(-1.0f, 0.0f, 0.0f);  //left of window
-    glVertex3f(0.0f, -1.0f, 0.0f);  //bottom of window
-    glVertex3f(1.0f, 0.0f, 0.0f);   //right of window
-    glVertex3f(0.0f, 1.0f, 0.0f);   //top of window
-    glEnd();                        //end drawing of line loop
-    */
-
-    /*glColor3f(1, 0, 0);
-    glBegin(GL_TRIANGLES);
-        glVertex3f(-0.60, 0.77, 0); // <--- -0.60 instead of -0.68
-        glVertex3f(-0.68, 0.77, 0); // <--- -0.68 instead of -0.60
-        glVertex3f(-0.7, 0.68, 0);
-        glVertex3f(-0.64, 0.63, 0);
-        glVertex3f(-0.58, 0.68, 0);
-    glEnd();*/
-
-    /*glTranslatef(0.0f, 0.0f, -4.0f);//move forward 4 units
-
-    glColor3f(0.0f, 0.0f, 1.0f); //blue color
-
-    glBegin(GL_POLYGON);//begin drawing of polygon
-    glVertex3f(-0.5f, 0.5f, 0.0f);//first vertex
-    glVertex3f(0.5f, 0.5f, 0.0f);//second vertex
-    glVertex3f(1.0f, 0.0f, 0.0f);//third vertex
-    glVertex3f(0.5f, -0.5f, 0.0f);//fourth vertex
-    glVertex3f(-0.5f, -0.5f, 0.0f);//fifth vertex
-    glVertex3f(-1.0f, 0.0f, 0.0f);//sixth vertex
-    glEnd();//end drawing of polygon*/
-
-    /*static float arrowCoordinates[] = {
-       -0.3f,  0.2f, 0.0f,   // left swing
-        0.0f,  0.5f, 0.0f,   // top
-        0.0f, -0.5f, 0.0f,   // bottom
-        0.0f,  0.5f, 0.0f,   // back to top again
-        0.3f,  0.2f, 0.0f    // right swing
-    };
-    */
-
-    /*int COORDS_PER_VERTEX = 3;
-    int vertexCount = 364 * 3 / COORDS_PER_VERTEX;
-    int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
-    glEnableVertexAttribArray(Arrow);
-    //glVertexAttribPointer(Arrow, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    //glVertexAttribPointer(Arrow, COORDS_PER_VERTEX, GL_FLOAT, GL_FALSE, vertexStride, vertexBuffer);
-    glVertexAttribPointer(Arrow, COORDS_PER_VERTEX, GL_FLOAT, GL_FALSE, vertexStride, 0);
-    glDrawArrays(GL_LINE_STRIP, 0, vertexCount);*/
-     
-    //glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-        
-    /*glMultiDrawArrays(
-        GL_LINE_STRIP, //_drawingOutputType,
-        _lineStart.data(),
-        _lineCount.data(),
-        static_cast<GLsizei>(_lineStart.size())
-    );*/
+    
 _shaderProgram->setUniform("firstRender", true);
 
 GLint temp = 0;

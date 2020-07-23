@@ -27,7 +27,7 @@
 // General Uniforms that's always needed
 uniform vec4      lineColor;
 //old not in use atm
-//uniform mat4      modelViewProjection;
+uniform mat4      modelViewProjection;
 
 // Uniforms needed to color by quantity
 uniform int       colorMode;
@@ -60,7 +60,7 @@ uniform float   nodeSize;
 uniform float   nodeSizeLargerFlux;
 uniform vec4    streamColor;
 uniform float   thresholdFlux;
-uniform float   filterRadius;
+uniform float   filterLower;
 uniform float   filterUpper;
 uniform int     scalingMode;
 uniform int     nodeSkipMethod;
@@ -77,23 +77,24 @@ uniform bool    firstRender;
 uniform int     enhanceMethod;
 uniform double  time;
 
+
 //uniform float interestingStreams[4];
 
 // Speicific uniforms for cameraperspective
-uniform float scaleFactor;
+//uniform float scaleFactor;
 //uniform float minNodeDistanceSize;
 uniform float maxNodeDistanceSize;
 uniform float nodeDistanceThreshold;
 
-uniform mat4 cameraViewProjectionMatrix;
-uniform dmat4 modelMatrix;
+//uniform mat4 cameraViewProjectionMatrix;
+//uniform dmat4 modelMatrix;
 
-uniform float   correctionSizeFactor;
-uniform float   correctionSizeEndDistance;
-uniform vec3    cameraPos;
-uniform vec3    up;
-uniform vec3    right;
+uniform float correctionSizeFactor;
+//uniform float correctionSizeEndDistance;
+//uniform vec3 up;
+//uniform vec3 right;
 uniform vec3    cameraLookUp;   // in world space (no SGCT View was considered)
+uniform vec3    cameraPos;
 //uniform vec2 screenSize;
 uniform bool    usingCameraPerspective;
 uniform bool    usingRadiusPerspective;
@@ -351,7 +352,7 @@ void main() {
     
     if(CheckvertexIndex()){
     //Filtering by radius and z-axis
-    if(rValue > filterRadius && rValue < filterUpper){ //if(rValue > filterRadius){
+    if(rValue > filterLower && rValue < filterUpper){ //if(rValue > filterLower){
         if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
             //Uniform coloring
             if(colorMode == 0){
@@ -384,7 +385,53 @@ void main() {
         vs_color = vec4(0);
     }
 
-    /*
+    if(usingCameraPerspective){
+        float rtemp = 1.0;
+        if(rValue > 1.0){
+            rtemp = 1.0;
+         }
+         else{
+            rtemp = rValue;
+         }
+    
+        float maxdist = 600000000000.f;
+        float distancevec = distance(cameraPos, in_position.xyz);
+
+        if(distancevec < maxdist){
+            float distScale = 1 - smoothstep(0, maxdist, distancevec);
+            //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distancevec);
+            float factorS = 1.f;
+            if(usingRadiusPerspective){
+                factorS = pow(distScale, 9) * 100.f * pow(rtemp, 2);
+            }
+            else{
+                factorS = pow(distScale, 9) * 100.f;
+            }
+            gl_PointSize = factorS * maxNodeDistanceSize * 0.8; 
+            }
+           // else{
+           // gl_PointSize = nodeSize;
+           // }
+
+            if(gl_PointSize > 40){
+            gl_PointSize = 40;
+            }
+            if(gl_PointSize < 1.f){
+            gl_PointSize = 1.f;
+            }
+        }
+
+        vec4 position_in_meters = vec4(in_position, 1);
+        vec4 positionClipSpace = modelViewProjection * position_in_meters;
+        //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+      
+        gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+        vs_depth = gl_Position.w;
+        
+}
+
+//------------ OLD CODE, MAYBE USEFUL FOR CAMERAPERSPECTIVE
+ /*
     if(distance(in_position, cameraPos) < 100000000000.f){
         gl_PointSize = nodeSize * 5;
      }
@@ -393,6 +440,7 @@ void main() {
     }
     */
     //test for camera perspective:: 
+    /*
     dvec4 dpos = dvec4(in_position, 1.0);
     dpos = modelMatrix * dpos;
 
@@ -409,7 +457,7 @@ void main() {
      float expVar = float(-distCamera) / pow(10.f, correctionSizeEndDistance);
      float factorVar = pow(10.f, correctionSizeFactor);
      scaleMultiply *= 1.f / (1.f + factorVar * exp(expVar));
-
+     */
     //vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
       //  vec2 topRight = crossCorner.xy/crossCorner.w;
        // vec2 bottomLeft = initialPosition.xy/initialPosition.w;
@@ -430,7 +478,7 @@ void main() {
              gl_PointSize = ta;
         }
         */
-       
+      /* 
     vec3 scaledRight = scaleMultiply * right * 0.5f;
     vec3 scaledUp    = scaleMultiply * up * 0.5f;
 
@@ -441,80 +489,4 @@ void main() {
     vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
     gl_Position = initialPosition;
     vs_depth = initialPosition.w;
-    
-    if(usingCameraPerspective){
-        float rtemp = 1.0;
-        if(rValue > 1.0){
-            rtemp = 1.0;
-         }
-         else{
-            rtemp = rValue;
-         }
-    
-        float maxdist = 600000000000.f;
-        float distancevec = distance(cameraPos, in_position.xyz);
-        float distScale = 1 - smoothstep(0, maxdist, distancevec);
-        float factorS = pow(distScale, 9) * rValue * 15.f;
-    
-        //distancevec = distance(newpos, in_position.xyz);
-     
-         if(distancevec < maxdist){
-            float distScale = 1 - smoothstep(0, maxdist, distancevec);
-           //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distancevec);
-            float factorS = 1.f;
-            if(usingRadiusPerspective){
-                factorS = pow(distScale, 9) * 100.f * pow(rtemp, 2);
-            }
-            else{
-                factorS = pow(distScale, 9) * 100.f;
-            }
-            gl_PointSize = factorS * maxNodeDistanceSize * 0.8; 
-         }
-         else{
-            gl_PointSize = nodeSize;
-         }
-
-         if(gl_PointSize > 40){
-            gl_PointSize = 40;
-         }
-         if(gl_PointSize < nodeSize){
-            gl_PointSize = nodeSize;
-         }
-     }
-    /*
-     
-     float factorS = pow(distScale, 5) * 80.f; //* pow(rValue, 2);
-     if(gl_PointSize * factorS > 30){
-        gl_PointSize = 30;
-     }
-     else{
-     gl_PointSize = gl_PointSize * factorS;
-     }
-     }
-     else{
-     gl_PointSize = 2.f;
-     }
-     */
-    //if(!firstRender){
-    //CheckdistanceMethod();
-   // }
-    
-    //temporary things for trying out point sprites. 
-      /*  if(!firstRender && vs_color.w != 0){
-            vs_st = in_st;
-        }
-        else{
-            vs_st = vec2(-1);
-        }
-        */
-
-        vec4 position_in_meters = vec4(in_position, 1);
-        //vec4 positionClipSpace = modelViewProjection * position_in_meters;
-        //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
-      
-       // gl_PointSize = nodeSize;
-        //gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
-       // vs_depth = gl_Position.w;
-        
-       // if(distance(positionClipSpace.xyz, cameraPos) < 0.f){
-}
+    */
