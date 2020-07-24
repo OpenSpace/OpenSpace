@@ -233,6 +233,11 @@ namespace {
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow."
     };
+    constexpr openspace::properties::Property::PropertyInfo InterestingStreamsInfo = {
+        "interestingStreamsEnabled",
+        "Interesting Streams Enabled",
+        "Toggles the rendering of selected streams."
+    };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "particleSize",
         "Particle Size",
@@ -304,6 +309,11 @@ namespace {
         "Distance factor",
         "This value decides how far away the camera must be to start impacting the nodesize"
     };
+    /*constexpr openspace::properties::Property::PropertyInfo TestChangeInfo = {
+        "testChange",
+        "Test factor",
+        "Test"
+    };*/
     enum class SourceFileType : int {
         Json = 0,
         Invalid
@@ -394,6 +404,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
         glm::vec4(1.f)
     )
     , _pFlowEnabled(FlowEnabledInfo, false)
+    , _pInterestingStreamsEnabled(InterestingStreamsInfo, false)
     , _pFlowGroup({ "Flow" })
     , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
     , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
@@ -410,6 +421,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _pRadiusPerspective(RadiusPerspectiveInfo, true)
     , _pPerspectiveDistanceFactor(perspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
+    //, _pTestChange(TestChangeInfo, 0.5f, 0.0f, 1.f)
 
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -1121,6 +1133,7 @@ void RenderableStreamNodes::setupProperties() {
     _pEarthdistGroup.addProperty(_pDistancemethod);
     _pEarthdistGroup.addProperty(_pDistanceThreshold);
     _pEarthdistGroup.addProperty(_pEnhancemethod);
+    _pEarthdistGroup.addProperty(_pInterestingStreamsEnabled);
 
     _pFlowGroup.addProperty(_pFlowEnabled);
     _pFlowGroup.addProperty(_pFlowColor);
@@ -1128,6 +1141,8 @@ void RenderableStreamNodes::setupProperties() {
     _pFlowGroup.addProperty(_pFlowParticleSpacing);
     _pFlowGroup.addProperty(_pFlowSpeed);
     _pFlowGroup.addProperty(_pUseFlowColor);
+
+   // _pStreamGroup.addProperty(_pTestChange);
 
     // --------------------- Add Options to OptionProperties --------------------- //
     _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
@@ -1154,7 +1169,7 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Lines), "Lines");
+    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Blinking), "Blinking");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::test), "test");
 
@@ -1304,6 +1319,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("enhanceMethod", _pEnhancemethod);
     _shaderProgram->setUniform("flowColor", _pFlowColor);
     _shaderProgram->setUniform("usingParticles", _pFlowEnabled);
+    _shaderProgram->setUniform("usingInterestingStreams", _pInterestingStreamsEnabled);
     _shaderProgram->setUniform("particleSize", _pFlowParticleSize);
     _shaderProgram->setUniform("particleSpacing", _pFlowParticleSpacing);
     _shaderProgram->setUniform("particleSpeed", _pFlowSpeed);
@@ -1320,7 +1336,8 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("drawHollow", _pDrawingHollow);
     _shaderProgram->setUniform("useGaussian", _pGaussianAlphaFilter);
     _shaderProgram->setUniform("usingRadiusPerspective", _pRadiusPerspective);
-    _shaderProgram->setUniform("PerspectiveDistanceFactor", _pPerspectiveDistanceFactor);
+    _shaderProgram->setUniform("perspectiveDistanceFactor", _pPerspectiveDistanceFactor);
+    //_shaderProgram->setUniform("testChange", _pTestChange);
     
     //////// test for camera perspective: 
     /*

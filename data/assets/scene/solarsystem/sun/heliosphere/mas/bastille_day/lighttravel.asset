@@ -25,38 +25,9 @@ local speedofLight = {
 },
  GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "Lighttravel"
+        Name = "Light Travel"
     }
 }
 
-local SpeedOfLightLabel = {
-    Identifier = "LightLabel",
-	Parent = earthTransforms.EarthBarycenter.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Speed of light",
-        FontSize = 80.0,
-        LabelSize = 8.6,
-        LabelMaxSize = 80.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive",
-        --TransformationMatrix = {
-        --    1.0, 0.0, 0.0, 0.0,
-        --    0.0, 0.0, 0.0, 0.0,
-        --    0.0, 0.0, 0.0, 0.0,
-        --    0.0, 0.0, 0.0, 1.0
-        -- },
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Speed of Light Label",
-        Path = "/Solar System/Heliosphere"
-    }
-}
-
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { speedofLight, SpeedOfLightLabel})
+assetHelper.registerSceneGraphNodesAndExport(asset, { speedofLight })
 

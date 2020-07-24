@@ -28,6 +28,7 @@ uniform sampler2D texture1;
 uniform bool drawCircles;
 uniform bool drawHollow;
 uniform bool useGaussian;
+//uniform float testChange;
 in vec2 vs_st;
 in vec4 vs_color;
 in float vs_depth;
@@ -43,6 +44,12 @@ Fragment getFragment() {
     frag.depth = vs_depth;
     frag.color = fragColor;
     vec2 coord = gl_PointCoord - vec2(0.5);
+
+    /*if(length(coord.x) > 0.15){
+        if((coord.y) > 0){
+            discard;
+        }
+    }*/
 
     if(drawCircles){
         if(length(coord) > 0.5){
@@ -73,6 +80,7 @@ Fragment getFragment() {
             discard;
         }
     frag.color.a = alphaV;
+
     //else{
     //frag.color.a = alphaV;
     }   
