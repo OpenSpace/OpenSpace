@@ -32,6 +32,7 @@
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/engine/windowdelegate.h>
 
  //Debug purposes
 #include <iostream>
@@ -1391,11 +1392,10 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 //Project v down to the camera plane, Pplane(v)
                 //Pn(v) is v projected on the normal n of the plane
                 //Pplane(v) = v - Pn(v)
-                glm::dvec3 cameraToProjectedNode = (nodePosition -
-                    glm::proj(cameraToNode, cameraUpVector)) - cameraPosition;
+                glm::dvec3 cameraToProjectedNode = cameraToNode - glm::proj(cameraToNode, cameraUpVector);
 
                 angle = glm::orientedAngle(glm::normalize(cameraDirection),
-                    glm::normalize(cameraToProjectedNode), 
+                    glm::normalize(cameraToProjectedNode),
                     glm::normalize(cameraUpVector));
 
                 //If this planet is in focus then calculate the angle from
@@ -1410,7 +1410,8 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                         //Angle from planet to moon with respect to camera
                         //NOTE: This might not work if the camera is looking straight down on the planet,
                         //weired behaviour when switching from upside to downside vice versa
-                        double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(planetToProjectedMoon), glm::normalize(cameraUpVector));
+                        double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection),
+                            glm::normalize(planetToProjectedMoon), glm::normalize(cameraUpVector));
 
                         //Angle from camera to the moon projected on camera plane
                         //glm::dvec3 cameraToProjectedMoon = (moon->worldPosition() - glm::proj(moon->worldPosition() - cameraPosition, cameraUpVector)) - cameraPosition;
@@ -1431,7 +1432,9 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 //angle = glm::orientedAngle(glm::normalize(nodePosition), glm::normalize(glm::dvec3(1.0, 0.0, 0.0)), glm::normalize(glm::dvec3(0.0, 1.0, 0.0)));
 
                 //angle from sun with respect to the camera
-                angle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(nodePosition - glm::proj(nodePosition, cameraUpVector)), glm::normalize(cameraUpVector));
+                angle = glm::orientedAngle(glm::normalize(cameraDirection),
+                    glm::normalize(nodePosition - glm::proj(nodePosition, cameraUpVector)),
+                    glm::normalize(cameraUpVector));
 
                 //Angle from camera
                 //glm::dvec3 cameraToProjectedNode = (nodePosition - glm::proj(cameraToNode, cameraUpVector)) - cameraPosition;
@@ -1567,8 +1570,11 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 
 void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 {
-    //start a thread to extract data to the sonification
-    _thread = std::thread([this]() { threadMain(std::ref(_isRunning)); });
+    //Mkae sure that only the master computer runs the sonification module
+    if (global::windowDelegate.isMaster()) {
+        //start a thread to extract data to the sonification
+        _thread = std::thread([this]() { threadMain(std::ref(_isRunning)); });
+    }
 }
 
 void SonificationModule::internalDeinitialize() {
