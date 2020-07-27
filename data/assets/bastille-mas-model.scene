@@ -38,51 +38,50 @@ local Keybindings = {
         Key = "F3",
         Name = "Show Flux Value Legend",
         Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', false);",
-	Documentation = "Hides the legend image",
+		Documentation = "Hides the legend image",
         Local = true
     },
     {
-	Key = "F4",
-	Name = "Change to Earth focus",
-	Command = 
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 155022826061.149994);"..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 0.000000);"..
-		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"..
-		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');"..
-		"openspace.navigation.loadNavigationState('Earth');"..
-		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-	Documentation = "Start to focus on Earth",
-	Name = "Focus on Earth",
-	GuiPath = "/CCMC/Nodes",
-	Local = false
+		Key = "F4",
+		Name = "Change to Earth focus",
+		Command = 
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 155022826061.149994);"..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 0.000000);"..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');"..
+			"openspace.navigation.loadNavigationState('Earth');"..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+		Documentation = "Start to focus on Earth",
+		Name = "Focus on Earth",
+		GuiPath = "/CCMC/Nodes",
+		Local = false
 	},
 	{
-	Key = "Shift+r",
-	Command =
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.colorMode', 1.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodes', 1.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlpha', 1.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 1.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 2.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByFlux', 0.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByRadius', 0.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', 0.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterLower', 0.000000);" ..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000);"..
-		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"..
-		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');"..
-		"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"..
-		"openspace.navigation.loadNavigationState('Sun');"..
-		"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5.000000);",
-		--"Todo, fix the last one which is on the z axis"
-		--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.limitsZLower', {--358139527168.969971,953488375808.000000});",
-		Documentation = "Resets the visualisation of streamnodes",
-	    Name = "Reset Streamnodes Vis back",
-	    GuiPath = "/CCMC/Nodes",
-	    Local = false
-	
+		Key = "Shift+r",
+		Command =
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.colorMode', 1.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodes', 1.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlpha', 1.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 1.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 2.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByFlux', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByRadius', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterLower', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000);"..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');"..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"..
+			"openspace.navigation.loadNavigationState('Sun');"..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5.000000);",
+			--"Todo, fix the last one which is on the z axis"
+			--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.limitsZLower', {--358139527168.969971,953488375808.000000});",
+			Documentation = "Resets the visualisation of streamnodes",
+		    Name = "Reset Streamnodes Vis back",
+		    GuiPath = "/CCMC/Nodes",
+		    Local = false
 	},
 	{
 	    Key = "Shift+s",
@@ -135,6 +134,19 @@ local Keybindings = {
         Local = false
     },
     {
+    	Key = "F11",
+	    Command = 
+            "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.SunFollowingCamera', true);" ..
+            "openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', false);" ..
+            "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.EnableFade', false);" ..
+            "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Color', {1.000000,1.000000,1.000000});" ..
+            "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled', false);",
+	    Documentation = "Sun artificially placed, remove shadow on Earth and Moon and show Moon trail",
+	    Name = "Earth and moon without shadow",
+	    GuiPath = "/CCMC/Nodes",
+	    Local = false
+    },
+    {
         Key = "i",
         Command = [[
             textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');
@@ -163,8 +175,6 @@ local Keybindings = {
         Local = false
     }
 }
-
-
 
 asset.onInitialize(function ()
     openspace.time.setTime("2000 JUL 14 08:33:37.100")
