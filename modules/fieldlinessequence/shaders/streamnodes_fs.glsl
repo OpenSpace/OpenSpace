@@ -28,6 +28,7 @@ uniform sampler2D texture1;
 uniform bool drawCircles;
 uniform bool drawHollow;
 uniform bool useGaussian;
+//uniform float testChange;
 uniform bool blinkingAlways;
 uniform bool UseBlinking;
 in vec2 vs_st;
@@ -50,6 +51,13 @@ Fragment getFragment() {
     vec2 coord = gl_PointCoord - vec2(0.5);
    
    if(camera_IsCloseEnough > 0.5){
+
+    /*if(length(coord.x) > 0.15){
+        if((coord.y) > 0){
+            discard;
+        }
+    }*/
+
     if(drawCircles){
       
         if(length(coord) > 0.5){

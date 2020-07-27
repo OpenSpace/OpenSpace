@@ -76,6 +76,7 @@ uniform int     activeStreamNumber;
 uniform bool    firstRender;
 uniform int     enhanceMethod;
 uniform double  time;
+uniform bool    usingInterestingStreams;
 
 
 //uniform float interestingStreams[4];
@@ -98,7 +99,8 @@ uniform vec3    cameraPos;
 //uniform vec2 screenSize;
 uniform bool    usingCameraPerspective;
 uniform bool    usingRadiusPerspective;
-uniform float   PerspectiveDistanceFactor;
+uniform float   perspectiveDistanceFactor;
+
 uniform float   maxNodeSize;
 uniform float   minNodeSize;
 // Inputs
@@ -219,120 +221,62 @@ bool CheckvertexIndex(){
 //todo fix gl_VertexID
 
 bool isParticle(){
-
     int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
-    float speedIrregular = 1;
-    if(rValue > 1){
-        //if(Streamnumber % 2 == 1)
-        //{
-            speedIrregular = 4;
-            modulusResult = int(double(particleSpeed)* speedIrregular * time + gl_VertexID) % particleSpacing;
-        //}
-        //else{
-        //    modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
-        //}
-
-    }
-    else{
-            modulusResult = int(double(particleSpeed) * time + gl_VertexID*2) % particleSpacing;
-    }
     return modulusResult > 0 && modulusResult <= particleSize;
 return false;
 }
 
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
-        //Sizescaling
-     if(enhanceMethod == 0){
-            float tempR = rValue + 0.4; 
-            if(tempR > 1.5){
-                tempR = 1.5;
-            }
+        // SizeScaling
+    if(enhanceMethod == 0){
+        float tempR = rValue + 0.4; 
+        if(tempR > 1.5){
+            tempR = 1.5;
+        }
             gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
             return;
-        }
-        //Colortables
-      if(enhanceMethod == 1){
-             vec4 fluxColor = getTransferFunctionColor(colorTable);
-             vs_color = vec4(fluxColor.xyz, fluxColor.a);
-             return;
-        }
-        //Outline
-      if(enhanceMethod == 2){
-            if(!firstRender && vs_color.x != 0 && vs_color.y != 0){
-                 gl_PointSize = gl_PointSize + 1;
-                 vs_color = vec4(streamColor.xyz, fluxColorAlpha);
-            }
-            return;
-        }
-        //lines
-      if(enhanceMethod == 3){
-      // Draw every other line grey
-      vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
-
-      //float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
-       // vs_color = vec4(0);
-      float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
-      168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
-      //float interestingStreams[3] = float[](37, 154, 210);
-      
-      int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
-
-      for(int i = 0; i < interestingStreams.length(); i++){
-            if(Streamnumber == interestingStreams[i]){
-           // if(!firstRender){
-               // vs_color = vec4(streamColor.xyz, fluxColorAlpha);
-               if(usingParticles && isParticle() && rValue > 0.f){
-                   if(modulusResult >= particleSize - 30){
-
-                        if(flowColoring){
-                            vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-                            vs_color = vec4(fluxColor3.xyz, flowColor.a * 0.8);
-                         //vs_color = vec4(1,1,1,1);
-                        }
-                        else{
-                            vs_color = vec4(0.9,0.9,0.9,0.5);
-                            //vs_color = flowColor;
-                        }
-                   }
-                   else{
-                        vec4 fluxColorFlow = getTransferFunctionColor(colorTableFlow);
-                        vs_color = vec4(fluxColorFlow.xyz, 1);
-                        }
-                        //vs_color = vec4(0.37, 0.37, 0.37, flowColor.a);
-            //   }
-              // else{
-                //   vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-                 //  vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
-                 // vs_color = vec4(0.37, 0.37, 0.37, flowColor.a);
-                }
-            }
-       }
-        //    }
     }
-        //SizeandColor
+    // ColorTables
+    if(enhanceMethod == 1){
+        vec4 fluxColor = getTransferFunctionColor(colorTable);
+        vs_color = vec4(fluxColor.xyz, fluxColor.a);
+        return;
+    }
+    // Outline
+    if(enhanceMethod == 2){
+        if(!firstRender && vs_color.x != 0 && vs_color.y != 0){
+            gl_PointSize = gl_PointSize + 1;
+            vs_color = vec4(streamColor.xyz, fluxColorAlpha);
+        }
+        return;
+    }
+    // Blinking
+      if(enhanceMethod == 3){
+    }
+    //SizeColor
     if(enhanceMethod == 4){
-             vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-             vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
+        vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+        vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
 
-            float tempR2 = rValue + 0.4; 
-            if(tempR2 > 1.5){
-                tempR2 = 1.5;
-            }
-            gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
+        float tempR2 = rValue + 0.4; 
+        if(tempR2 > 1.5){
+            tempR2 = 1.5;
+        }
+        gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
     }
 }
 
 void CheckdistanceMethod() { 
         //Enhance by distance to Earth
-        float maxdist = 10000000000.f * PerspectiveDistanceFactor;
+        float maxdist = 10000000000.f * perspectiveDistanceFactor;
          float distancevec = distance(earthPos, in_position.xyz);
         vs_closeToEarth = 0;
        if(distancevec < maxdist){
       
       if(distancevec < maxdist / 2){
         vs_closeToEarth = 1;
-        //gl_PointSize = 20;
+        gl_PointSize = 20;
         }
         }
         if(enhanceMethod == 1 || enhanceMethod == 4){
@@ -405,6 +349,45 @@ void main() {
         vs_color = vec4(0);
     }
 
+    if(usingInterestingStreams){
+      // Draw every other line grey
+      //vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
+
+      vs_color = vec4(0);
+
+      float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
+      //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
+      //168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
+      //float interestingStreams[3] = float[](37, 154, 210);
+        for(int i = 0; i < interestingStreams.length(); i++){
+            if(Streamnumber == interestingStreams[i]){
+                vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+                vs_color = vec4(fluxColor3.xyz, 1*fluxColorAlpha);
+            }
+        }
+    }
+
+    if(usingParticles && isParticle() && rValue > 0.f){
+        int modulusResult = int(double(particleSpeed) * time + gl_VertexID) 
+        % particleSpacing;
+
+        if(modulusResult >= particleSize - 30){
+            if(flowColoring){
+                vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+                vs_color = vec4(fluxColor3.xyz, flowColor.a * 0.8);
+                //vs_color = vec4(1,1,1,1);
+            }
+            else{
+                vs_color = vec4(0.9,0.9,0.9,0.5);
+                //vs_color = flowColor;
+            }
+        }
+        else{
+            vec4 fluxColorFlow = getTransferFunctionColor(colorTableFlow);
+            vs_color = vec4(fluxColorFlow.xyz, 1);
+        }
+    }
+
     if(usingCameraPerspective){
         float rtemp = 1.0;
         if(rValue > 1.0){
@@ -413,21 +396,20 @@ void main() {
          else{
             rtemp = rValue;
          }
-       
-        float maxdist = 100000000000.f * PerspectiveDistanceFactor;
-        //maxdist = 600000000000.f;
-        float distancevec = distance(cameraPos, in_position.xyz);
+    
+        float maxDistance = 100000000000.f * perspectiveDistanceFactor;
+        float distanceVec = distance(cameraPos, in_position.xyz);
 
-        if(distancevec > maxdist && vs_closeToEarth < 0.5){
+        if(distanceVec > maxDistance && vs_closeToEarth < 0.5){
         camera_IsCloseEnough = 0;
         }
         else{
         camera_IsCloseEnough = 1;
         }
-        if(distancevec < maxdist){
+        if(distanceVec < maxDistance){
         vs_closeToEarth = 0;
-            float distScale = 1 - smoothstep(0, maxdist, distancevec);
-            //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distancevec);
+            float distScale = 1 - smoothstep(0, maxDistance, distanceVec);
+            //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distanceVec);
             float factorS = 1.f;
             if(usingRadiusPerspective){
                 factorS = pow(distScale, 9) * 500.f * pow(rtemp, 2);
@@ -436,21 +418,18 @@ void main() {
                 factorS = pow(distScale, 9) * 500.f;
             }
             gl_PointSize = factorS * maxNodeDistanceSize * 0.8; 
-            }
+        }
            // else{
            // gl_PointSize = nodeSize;
            // }
 
-           
             if(gl_PointSize > maxNodeSize){
-            gl_PointSize = maxNodeSize;
+                gl_PointSize = maxNodeSize;
             }
            
            if(gl_PointSize < minNodeSize){
-            gl_PointSize = minNodeSize;
-            }
-            
-            
+                gl_PointSize = minNodeSize;
+            }           
         }
 
 

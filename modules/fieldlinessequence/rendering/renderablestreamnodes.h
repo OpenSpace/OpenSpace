@@ -89,7 +89,7 @@ private:
         Sizescaling = 0,
         Colortables = 1,
         Outline = 2,
-        Lines = 3,
+        Blinking = 3,
         Sizeandcolor = 4,
         test = 5
     };
@@ -230,6 +230,8 @@ private:
     properties::FloatProperty _pMaxNodeDistanceSize;
     // Threshold for where to interpolate between the max and min node distance
     properties::FloatProperty _pNodeDistanceThreshold;
+    // Toggle selected streams [ON/OFF]
+    properties::BoolProperty _pInterestingStreamsEnabled;
 
     properties::FloatProperty _pMaxNodeSize;
     properties::FloatProperty _pMinNodeSize;
@@ -288,6 +290,8 @@ private:
     properties::FloatProperty _pPerspectiveDistanceFactor;
     properties::BoolProperty _pUseBlinking;
     properties::BoolProperty _pBlinkAlways;
+
+    //properties::FloatProperty _pTestChange;
 
     // initialization
     std::vector<std::string> _sourceFiles;
