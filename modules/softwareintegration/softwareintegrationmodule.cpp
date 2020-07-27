@@ -31,10 +31,13 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 
+
 namespace openspace {
+    constexpr const char* _loggerCat = "SoftwareIntegrationModule";
 
 SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
 
@@ -55,13 +58,13 @@ std::vector<documentation::Documentation> SoftwareIntegrationModule::documentati
     };
 }
 
-/*scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
+scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "softwareintegration";
     res.scripts = {
-        absPath("${MODULE_SOFTWAREINTEGRATION}/scripts/filtering.lua")
+        absPath("${MODULE_SOFTWAREINTEGRATION}/scripts/network.lua")
     };
     return res;
-}*/
 
 } // namespace openspace
+

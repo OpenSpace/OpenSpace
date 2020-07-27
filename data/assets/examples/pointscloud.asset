@@ -19,6 +19,7 @@ local RenderablePointsCloud = {
         Size = 50,
     },
     GUI = {
+        Name = "Points Cloud"
         Path = "/Examples"
     }
 }
