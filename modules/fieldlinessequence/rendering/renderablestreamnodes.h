@@ -132,6 +132,7 @@ private:
     int _activeTriggerTimeIndex = -1;
     // Number of states in the sequence
     size_t _nStates = 274;
+    const int _numberofStreams = 863;
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
     // domain limits.
     float _scalingFactor = 1.f;
@@ -152,6 +153,7 @@ private:
     GLuint _vertexStreamNumberBuffer = 0;
     // OpenGL Vertex Buffer Object containing the stream number for every node. 
     //GLuint _arrow = 0;
+
 
     // ----------------------------------- POINTERS ------------------------------------//
     // The Lua-Modfile-Dictionary used during initialization
@@ -229,6 +231,8 @@ private:
     // Threshold for where to interpolate between the max and min node distance
     properties::FloatProperty _pNodeDistanceThreshold;
 
+    properties::FloatProperty _pMaxNodeSize;
+    properties::FloatProperty _pMinNodeSize;
     /// Line width for the line rendering part
     properties::FloatProperty _pLineWidth;
     // Valid range along the Z-axis
@@ -282,6 +286,8 @@ private:
     properties::BoolProperty _pGaussianAlphaFilter;
     properties::BoolProperty _pRadiusPerspective;
     properties::FloatProperty _pPerspectiveDistanceFactor;
+    properties::BoolProperty _pUseBlinking;
+    properties::BoolProperty _pBlinkAlways;
 
     // initialization
     std::vector<std::string> _sourceFiles;

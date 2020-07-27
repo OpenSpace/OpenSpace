@@ -142,7 +142,7 @@ namespace openspace {
             glm::vec4(1.f))
         , _pPointSize(PointSizeInfo, 2.f, 0, 20)
         , _pTimeStep(TimeStepInfo, 1, 1, 30)
-        , _pDistanceFactor(DistanceFactorInfo, 5, 1, 20)
+        , _pDistanceFactor(DistanceFactorInfo, 20, 1, 30)
         , _pShowLabel(LabelInfo, false)
         , _pShouldFollowLight(FollowLightInfo, false)
         , _pFadeDistance(FadeDistanceInfo, 10.f, 9.f, 20.f)

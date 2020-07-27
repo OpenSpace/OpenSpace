@@ -304,6 +304,26 @@ namespace {
         "Distance factor",
         "This value decides how far away the camera must be to start impacting the nodesize"
     };
+    constexpr openspace::properties::Property::PropertyInfo MinNodeSizeInfo = {
+        "minNodeSize",
+        "Minimum node size",
+        "the minimum node size."
+    };
+    constexpr openspace::properties::Property::PropertyInfo MaxNodeSizeInfo = {
+        "maxNodeSize",
+        "Maximum node size",
+        "the minimum node size."
+    };
+    constexpr openspace::properties::Property::PropertyInfo AlwaysBlinkInfo = {
+        "alwaysBlinking",
+        "Blinking regardless of camera position",
+        "Always have nodes close to earth blinking regardless of position."
+    };
+    constexpr openspace::properties::Property::PropertyInfo UseBlinkInfo = {
+       "blinking",
+       "Nodes close to Earth blinks",
+       "Boolean for blinking."
+    };
     enum class SourceFileType : int {
         Json = 0,
         Invalid
@@ -385,7 +405,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
     , _pEarthdistGroup({ "Earthfocus" })
     , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
-    , _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, 383)
+    , _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, _numberofStreams)
     , _pMisalignedIndex(MisalignedIndexInfo, 0, -5, 20)
     , _pFlowColor(
         FlowColorInfo,
@@ -410,6 +430,10 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _pRadiusPerspective(RadiusPerspectiveInfo, true)
     , _pPerspectiveDistanceFactor(perspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
+    , _pMaxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
+    , _pMinNodeSize(MinNodeSizeInfo, 1.f, 1.f, 10.f)
+    , _pUseBlinking(UseBlinkInfo, true)
+    , _pBlinkAlways(AlwaysBlinkInfo, false)
 
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
@@ -522,12 +546,13 @@ void RenderableStreamNodes::initializeGL() {
     extractTriggerTimesFromFileNames();
     computeSequenceEndTime();
 
+    createStreamnumberVector();
     // Either we load in the data dynamically or statically at the start. 
     // If we should load in everything to Ram this if statement is true.
     if (!_loadingStatesDynamically) {
         loadNodeData();
     }
-
+   
     //float distanceThreshold = 65525112832.f;
     //float distanceThreshold = 33561643008.f;
     //ExtractandwriteInterestingStreams(distanceThreshold);
@@ -561,15 +586,15 @@ void RenderableStreamNodes::initializeGL() {
 }
 
 void RenderableStreamNodes::loadNodeData() {
-    createStreamnumberVector();
+    
 
     if (shouldreadBinariesDirectly) {
         bool success = loadBinaryfilesDirectly("");
         if(success) return;
     }
-    std::string _file = "StreamnodesCachePosition";
-    std::string _file2 = "StreamnodesCacheColor";
-    std::string _file3 = "StreamnodesCacheRadius";
+    std::string _file = "StreamnodesCachePositionv3";
+    std::string _file2 = "StreamnodesCacheColorv3";
+    std::string _file3 = "StreamnodesCacheRadiusv3";
     if (shouldwritecacheforemin03) {
         _file = "StreamnodesCachePosition_emin03";
         _file2 = "StreamnodesCacheColor_emin03";
@@ -615,14 +640,14 @@ void RenderableStreamNodes::loadNodeData() {
             // If thats the case we want to load in the files from json format 
             // and then write new cached files. 
             loadFilesIntoRam();
-            writeCachedFile("StreamnodesCachePosition");
+            writeCachedFile("StreamnodesCachePositionv3");
         }
     }
     else {
         // We could not find the cachedfiles, parse the data statically 
         // instead and write it to binary format.
         loadFilesIntoRam();
-        writeCachedFile("StreamnodesCachePosition");
+        writeCachedFile("StreamnodesCachePositionv3");
     }
 
 
@@ -630,9 +655,9 @@ void RenderableStreamNodes::loadNodeData() {
 void RenderableStreamNodes::createStreamnumberVector() {
     int nPoints = 1999;
     int lineStartIdx = 0;
-    int numberofStreams = 383;
-    for (int i = 0; i < 383; ++i) {
-        for (int k = 0; k < 1999; ++k) {
+    
+    for (int i = 0; i < _numberofStreams; ++i) {
+        for (int k = 0; k < nPoints; ++k) {
                 
             _vertexStreamnumber.push_back(i);
             //lineStartIdx++;
@@ -666,7 +691,8 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
         std::string testtime = jsonobj["time"];
           
         size_t lineStartIdx = 0;
-        const int numberofStreams = 383;
+        //const int _numberofStreams = 383;
+       // const int _numberofStreams = 863;
         constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
             
         // Clear all the vectors in order to not have old states information in them
@@ -681,7 +707,7 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
         const size_t nPoints = 1;
 
         // Loop through all the streams
-        for (int i = 0; i < numberofStreams; ++i) {
+        for (int i = 0; i < _numberofStreams; ++i) {
 
 
             // Make an iterator at stream number i, then loop through that stream 
@@ -736,9 +762,9 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
 
 void RenderableStreamNodes::writeCachedFile(const std::string& file) const {
     // Todo, write all of the vertexobjects into here 
-    std::string _file = "StreamnodesCachePosition";
-    std::string _file2 = "StreamnodesCacheColor";
-    std::string _file3 = "StreamnodesCacheRadius";
+    std::string _file = "StreamnodesCachePositionv3";
+    std::string _file2 = "StreamnodesCacheColorv3";
+    std::string _file3 = "StreamnodesCacheRadiusv3";
 
 
     if(shouldwritecacheforemin03){
@@ -884,9 +910,9 @@ bool RenderableStreamNodes::readCachedFile(const std::string& file, const std::s
 bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin) {
     
     LDEBUG("Loading in binary files directly from sync folder");
-    std::string _file = _binarySourceFilePath  + "\\StreamnodesCachePosition" + energybin;
-    std::string _file2 = _binarySourceFilePath + "\\StreamnodesCacheColor" + energybin;
-    std::string _file3 = _binarySourceFilePath + "\\StreamnodesCacheRadius" + energybin;
+    std::string _file = _binarySourceFilePath  + "\\StreamnodesCachePositionv3" + energybin;
+    std::string _file2 = _binarySourceFilePath + "\\StreamnodesCacheColorv3" + energybin;
+    std::string _file3 = _binarySourceFilePath + "\\StreamnodesCacheRadiusv3" + energybin;
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         _file,
         ghoul::filesystem::CacheManager::Persistent::Yes
@@ -1164,7 +1190,10 @@ void RenderableStreamNodes::setupProperties() {
     _pCameraPerspectiveGroup.addProperty(_pDrawingHollow);
     _pCameraPerspectiveGroup.addProperty(_pGaussianAlphaFilter);
     _pCameraPerspectiveGroup.addProperty(_pRadiusPerspective);
-    
+    _pCameraPerspectiveGroup.addProperty(_pMaxNodeSize);
+    _pCameraPerspectiveGroup.addProperty(_pMinNodeSize);
+    _pCameraPerspectiveGroup.addProperty(_pUseBlinking);
+    _pCameraPerspectiveGroup.addProperty(_pBlinkAlways);
 
     definePropertyCallbackFunctions();
     // Set default
@@ -1321,7 +1350,10 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("useGaussian", _pGaussianAlphaFilter);
     _shaderProgram->setUniform("usingRadiusPerspective", _pRadiusPerspective);
     _shaderProgram->setUniform("PerspectiveDistanceFactor", _pPerspectiveDistanceFactor);
-    
+    _shaderProgram->setUniform("maxNodeSize", _pMaxNodeSize);
+    _shaderProgram->setUniform("minNodeSize", _pMinNodeSize);
+    _shaderProgram->setUniform("UseBlinking", _pUseBlinking);
+    _shaderProgram->setUniform("blinkingAlways", _pBlinkAlways);
     //////// test for camera perspective: 
     /*
     glm::dmat4 modelMatrix =
@@ -1592,6 +1624,7 @@ void RenderableStreamNodes::update(const UpdateData& data) {
         updatePositionBuffer();
         updateVertexColorBuffer();
         updateVertexFilteringBuffer();
+        updateVertexStreamNumberBuffer();
         //updateArrow();
     }
         }
@@ -1627,7 +1660,8 @@ std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepat
     size_t lineStartIdx = 0;
 
     //Loop through all the nodes
-    const int numberofStreams = 383;
+   // const int numberofStreams = 383;
+    //const int numberofStreams = 863;
     constexpr const float AuToMeter = 149597870700.f;
         _vertexPositions.clear();
         _lineCount.clear();
@@ -1637,7 +1671,7 @@ std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepat
     int counter = 0;
         
     const size_t nPoints = 1;
-    for (int i = 0; i < numberofStreams; ++i) {
+    for (int i = 0; i < _numberofStreams; ++i) {
             
         for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
             lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {

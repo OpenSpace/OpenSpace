@@ -9,7 +9,7 @@ asset.require('util/default_dashboard')
 asset.require('scene/solarsystem/sun/magnetogram_textures')
 asset.require('scene/solarsystem/sun/streamnodeslegend')
 asset.require('scene/solarsystem/sun/streamnodescutplane')
-asset.require('examples/debugcoordinateaxes.asset')
+--asset.require('examples/debugcoordinateaxes.asset')
 local suncameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Earthpos');
 local earthcameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/SunPos');
 local sunAsset = asset.require('scene/solarsystem/sun/sun');    --heliosphere/mas/bastille_day/
@@ -20,7 +20,7 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 -- the textureIndex variable is used to select a texture from a list of textures 
 textureIndex = 2;
 Endtime1 = "2000 JUL 14 19:00:00";
-Starttimescript = "openspace.time.setTime('2000 JUL 14 08:34:00')";
+Starttimescript = "openspace.time.setTime('2000 JUL 14 08:38:27')";
 Endtime2 = "2000 JUL 14 14:00:00";
 
 --script20 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Sun";
