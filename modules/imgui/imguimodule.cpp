@@ -154,9 +154,6 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     global::callback::draw2D.emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
-        // TODO emiax: Make sure this is only called for one of the eyes, in the case
-        // of side-by-side / top-bottom stereo.
-
         WindowDelegate& delegate = global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
@@ -167,9 +164,6 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 return;
             }
 
-            glm::vec2 mousePosition = delegate.mousePosition();
-            uint32_t mouseButtons = delegate.mouseButtons(2);
-
             const double dt = std::max(delegate.averageDeltaTime(), 0.0);
             // We don't do any collection of immediate mode user interface, so it
             // is fine to open and close a frame immediately
@@ -177,8 +171,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 static_cast<float>(dt),
                 glm::vec2(windowSize),
                 resolution / windowSize,
-                mousePosition,
-                mouseButtons
+                _mousePosition,
+                _mouseButtons
             );
 
             gui.endFrame();
@@ -217,9 +211,22 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
+    global::callback::mousePosition.emplace_back(
+        [&](double x, double y) {
+            _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
+        }
+    );
+
     global::callback::mouseButton.emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
             ZoneScopedN("ImGUI")
+
+            if (action == MouseAction::Press) {
+                _mouseButtons |= (1 << static_cast<int>(button));
+            }
+            else if (action == MouseAction::Release) {
+                _mouseButtons &= ~(1 << static_cast<int>(button));
+            }
 
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||

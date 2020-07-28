@@ -16,6 +16,8 @@ asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
 asset.request('scene/milkyway/milkyway/volume')
+asset.request('scene/milkyway/constellations/constellation_art')
+asset.request('scene/milkyway/constellations/constellation_keybinds')
 
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
@@ -79,6 +81,8 @@ asset.onInitialize(function ()
 
     sceneHelper.bindKeys(Keybindings)
     openspace.setDefaultGuiSorting()
+
+    openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")

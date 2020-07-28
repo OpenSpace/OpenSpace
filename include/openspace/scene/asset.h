@@ -28,6 +28,7 @@
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/synchronizationwatcher.h>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -37,7 +38,7 @@ class AssetLoader;
 
 class Asset : public std::enable_shared_from_this<Asset> {
 public:
-    enum class State : unsigned int {
+    enum class State {
         Unloaded,
         LoadingFailed,
         Loaded,
@@ -48,8 +49,14 @@ public:
         InitializationFailed
     };
 
-    using StateChangeCallback = std::function<void(State)>;
-    using CallbackHandle = size_t;
+    struct MetaInformation {
+        std::string name;
+        std::string version;
+        std::string description;
+        std::string author;
+        std::string url;
+        std::string license;
+    };
 
     /**
      * Root asset constructor
@@ -69,10 +76,9 @@ public:
     AssetLoader* loader() const;
     State state() const;
 
-    void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
+    void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
-    const std::vector<std::shared_ptr<ResourceSynchronization>>&
-        ownSynchronizations() const;
+    std::vector<ResourceSynchronization*> ownSynchronizations() const;
 
     void syncStateChanged(ResourceSynchronization* sync,
         ResourceSynchronization::State state);
@@ -92,12 +98,6 @@ public:
      * its own synchronizations and required assets' synchronizations could start.
      */
     bool startSynchronizations();
-    bool hasSyncingOrResolvedParent() const;
-    bool isSynchronized() const;
-    bool isSyncingOrResolved() const;
-    bool cancelAllSynchronizations();
-    bool cancelUnwantedSynchronizations();
-    bool restartAllSynchronizations();
     float requiredSynchronizationProgress() const;
     float requestedSynchronizationProgress();
 
@@ -120,21 +120,16 @@ public:
     void request(std::shared_ptr<Asset> child);
     void unrequest(Asset* child);
 
-    const std::vector<std::shared_ptr<Asset>>& requestedAssets() const;
-    std::vector<std::shared_ptr<Asset>> requestingAssets() const;
-    const std::vector<std::shared_ptr<Asset>>& requiredAssets() const;
-    std::vector<std::shared_ptr<Asset>> requiringAssets() const;
+    std::vector<Asset*> requestedAssets() const;
+    std::vector<Asset*> requestingAssets() const;
+    std::vector<Asset*> requiredAssets() const;
+    std::vector<Asset*> requiringAssets() const;
 
-    std::vector<std::shared_ptr<const Asset>> requiredSubTreeAssets() const;
-    std::vector<std::shared_ptr<const Asset>> subTreeAssets() const;
-    std::vector<std::shared_ptr<Asset>> childAssets() const;
-    std::vector<std::shared_ptr<Asset>> parentAssets() const;
+    std::vector<const Asset*> subTreeAssets() const;
+    std::vector<Asset*> childAssets() const;
 
-    bool isRequired() const;
-    bool isRequested() const;
-    bool shouldBeInitialized() const;
-
-    std::string resolveLocalResource(std::string resourceName);
+    void setMetaInformation(MetaInformation metaInformation);
+    std::optional<MetaInformation> metaInformation() const;
 
 private:
     void setState(State state);
@@ -142,7 +137,14 @@ private:
     void requiredAssetChangedState(Asset::State childState);
     void requestedAssetChangedState(Asset* child, Asset::State childState);
 
+    bool isSynchronized() const;
+    bool isSyncingOrResolved() const;
     bool isSyncResolveReady();
+    bool hasSyncingOrResolvedParent() const;
+    bool cancelAllSynchronizations();
+    bool cancelUnwantedSynchronizations();
+
+    std::vector<const Asset*> requiredSubTreeAssets() const;
 
     std::atomic<State> _state;
     AssetLoader* _loader;
@@ -156,6 +158,8 @@ private:
 
     // Absolute path to asset file
     std::string _assetPath;
+
+    std::optional<MetaInformation> _metaInformation;
 
     // Required assets
     std::vector<std::shared_ptr<Asset>> _requiredAssets;

@@ -174,7 +174,7 @@ void RenderableLightTravel::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer);
     //createPlane();
 
-    setRenderBin(Renderable::RenderBin::Transparent);
+    setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
     glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
     //positions.push_back(currentpos);
     addProperty(_pLightSpeed);

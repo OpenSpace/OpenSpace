@@ -3,11 +3,11 @@
 -- This asset exports a function to create an Apollo Lunar Excursion Module (LEM).
 -- Instead of hard-coding the scene graph node parent,
 -- client assets can decide which object that the LEM should be attached to.
--- Usage example: registerLem(asset, Apollo11Lem.Idenfitier)
+-- Usage example: createLem(Apollo11Lem.Idenfitier)
 -- ...where Apollo11Lem is the scene graph node identifier to attach the LEM to.
 
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local asset_helper = asset.require('util/asset_helper')
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
 
 local models = asset.syncedResource({
     Name = "Apollo Models",
@@ -35,17 +35,17 @@ local partsInfo = {
 }
 
 
-asset.export("registerLem", function (asset, parentNodeIdentifier)
+asset.export("createLem", function (parentNodeIdentifier)
     local parts = {}
     for i, info in ipairs(partsInfo) do
-        parts[#parts + 1] = assetHelper.createModelPart(
+        parts[#parts + 1] = asset_helper.createModelPart(
             parentNodeIdentifier,
-            sunTransforms.SolarSystemBarycenter.Identifier,
+            sun_transforms.SolarSystemBarycenter.Identifier,
             models,
             info[1],
             info[2],
             info[3]
         )
     end
-    assetHelper.registerSceneGraphNodesAndExport(asset, parts)
+    return parts
 end)

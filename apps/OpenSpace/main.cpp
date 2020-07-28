@@ -43,7 +43,11 @@
 #include <ghoul/misc/boolean.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
+#else
+#define GLFW_INCLUDE_NONE
+#endif
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
@@ -57,7 +61,6 @@
 #include <sgct/viewport.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <TracyOpenGL.hpp>
 #include <chrono>
 #include <ctime>
 
@@ -350,7 +353,6 @@ void mainInitFunc(GLFWwindow*) {
     //
     //  Screenshots
     //
-
     std::string screenshotPath = "${SCREENSHOTS}";
     if (global::configuration.shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
@@ -517,7 +519,7 @@ void mainPostSyncPreDrawFunc() {
 
 
 
-void mainRenderFunc(const RenderData& data) {
+void mainRenderFunc(const sgct::RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -592,7 +594,7 @@ void mainRenderFunc(const RenderData& data) {
 
 
 
-void mainDraw2DFunc(const RenderData& data) {
+void mainDraw2DFunc(const sgct::RenderData& data) {
     ZoneScoped
 
 #ifdef OPENSPACE_HAS_VTUNE
@@ -855,16 +857,16 @@ void mainLogCallback(Log::Level level, const char* message) {
     // Remove the trailing \n that is passed along
     switch (level) {
         case Log::Level::Debug:
-            LDEBUGC("SGCT", msg.substr(0, msg.size() - 1));
+            LDEBUGC("SGCT", msg);
             break;
         case Log::Level::Info:
-            LINFOC("SGCT", msg.substr(0, msg.size() - 1));
+            LINFOC("SGCT", msg);
             break;
         case Log::Level::Warning:
-            LWARNINGC("SGCT", msg.substr(0, msg.size() - 1));
+            LWARNINGC("SGCT", msg);
             break;
         case Log::Level::Error:
-            LERRORC("SGCT", msg.substr(0, msg.size() - 1));
+            LERRORC("SGCT", msg);
             break;
 }
 
@@ -883,15 +885,6 @@ void setSgctDelegateFunctions() {
         ZoneScoped
 
         sgct::ClusterManager::instance().setUseIgnoreSync(enabled);
-    };
-    sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
-        ZoneScoped
-
-        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
-            glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glfwSwapBuffers(window->windowHandle());
-        }
     };
     sgctDelegate.windowHasResized = []() {
         ZoneScoped
@@ -924,26 +917,6 @@ void setSgctDelegateFunctions() {
         ZoneScoped
 
         return sgct::Engine::getTime();
-    };
-    sgctDelegate.mousePosition = []() {
-        ZoneScoped
-
-        double xPos;
-        double yPos;
-        glfwGetCursorPos(currentWindow->windowHandle(), &xPos, &yPos);
-        return glm::vec2(xPos, yPos);
-    };
-    sgctDelegate.mouseButtons = [](int maxNumber) {
-        ZoneScoped
-
-        uint32_t result = 0;
-        for (int i = 0; i < maxNumber; ++i) {
-            bool button = (glfwGetMouseButton(currentWindow->windowHandle(), i) != 0);
-            if (button) {
-                result |= (1 << i);
-            }
-        }
-        return result;
     };
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped
@@ -979,12 +952,6 @@ void setSgctDelegateFunctions() {
                     currentWindow->resolution().y
                 );
         }
-    };
-    sgctDelegate.currentWindowResolution = []() {
-        ZoneScoped
-
-        ivec2 dim = currentWindow->finalFBODimensions();
-        return glm::ivec2(dim.x, dim.y);
     };
     sgctDelegate.currentDrawBufferResolution = []() {
         ZoneScoped
@@ -1023,11 +990,6 @@ void setSgctDelegateFunctions() {
         vec2 scale = currentWindow->scale();
         return glm::vec2(scale.x, scale.y);
     };
-    sgctDelegate.currentNumberOfAaSamples = []() {
-        ZoneScoped
-
-        return currentWindow->numberOfAASamples();
-    };
     sgctDelegate.hasGuiWindow = []() {
         ZoneScoped
 
@@ -1048,21 +1010,6 @@ void setSgctDelegateFunctions() {
 
         return Engine::instance().isMaster();
     };
-    sgctDelegate.isUsingSwapGroups = []() {
-        ZoneScoped
-
-        return Window::isUsingSwapGroups();
-    };
-    sgctDelegate.isSwapGroupMaster = []() {
-        ZoneScoped
-
-        return Window::isSwapGroupMaster();
-    };
-    sgctDelegate.viewProjectionMatrix = []() {
-        ZoneScoped
-
-        return currentModelViewProjectionMatrix;
-    };
     sgctDelegate.modelMatrix = []() {
         ZoneScoped
 
@@ -1073,31 +1020,6 @@ void setSgctDelegateFunctions() {
 
         Engine::instance().setNearAndFarClippingPlanes(nearPlane, farPlane);
     };
-    sgctDelegate.setEyeSeparationDistance = [](float distance) {
-        ZoneScoped
-
-        Engine::instance().setEyeSeparation(distance);
-    };
-    //sgctDelegate.viewportPixelCoordinates = []() {
-    //    ZoneScoped
-
-    //    if (!currentWindow|| !currentViewport) {
-    //        return glm::ivec4(0);
-    //    }
-    //    else {
-    //        const int* data = cur  sgct::Engine::instance()->getCurrentViewportPixelCoords();
-    //        return glm::ivec4(data[0], data[2], data[1], data[3]);
-    //    }
-    //};
-    //sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
-    //    ZoneScoped
-
-    //        
-    //    sgct::Engine::instance()->sendMessageToExternalControl(
-    //        message.data(),
-    //        static_cast<int>(message.size())
-    //    );
-    //};
     sgctDelegate.isFisheyeRendering = []() {
         ZoneScoped
 
@@ -1353,7 +1275,7 @@ int main(int argc, char** argv) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     Configuration config = parseArguments(arg);
-    config::Cluster cluster = loadCluster(windowConfiguration);
+    config::Cluster cluster = loadCluster(absPath(windowConfiguration));
 
     Engine::Callbacks callbacks;
     callbacks.initOpenGL = mainInitFunc;
@@ -1374,10 +1296,16 @@ int main(int argc, char** argv) {
     try {
         Engine::create(cluster, callbacks, config);
     }
-    catch (...) {
+    catch (const std::runtime_error& e) {
+        LFATALC("main", e.what());
         Engine::destroy();
         global::openSpaceEngine.deinitialize();
         ghoul::deinitialize();
+    }
+    catch (...) {
+        global::openSpaceEngine.deinitialize();
+        ghoul::deinitialize();
+        Engine::destroy();
         throw;
     }
 

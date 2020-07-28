@@ -2,9 +2,19 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'halley-type_comet', 'sssb_data_halley-type_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_halley-type_comet.csv', "Halley-type Comets", filepath, { 0.9, 0.3, 0.1 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_halley-type_comet.csv', "Halley-type Comets", filepath, { 0.66, 0.66, 0.66 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 9
 object.Renderable.TrailFade = 18
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Halley-Type Comets",
+    Version = "1.0",
+    Description = [[ Periodic comets with an orbital period between 20 and 200 years. ]],
+    Author = "JPL Small-Body Database hosted by California Institute of Technology",
+    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+}

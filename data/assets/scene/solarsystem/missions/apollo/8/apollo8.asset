@@ -1,0 +1,3 @@
+asset.require('./model')
+asset.require('./launch_model')
+asset.require('./trails')

@@ -67,13 +67,16 @@ Fragment getFragment() {
     
     if (distanceCenter > dLW) {
         frag.color.a = 0.0;
+        //discard;
     }
     else {
         frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+        // if (frag.color.a < 0.4)
+        //     discard;
     }
 
     frag.gPosition = vs_gPosition;
-
+    
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 

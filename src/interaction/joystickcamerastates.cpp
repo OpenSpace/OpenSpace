@@ -29,6 +29,8 @@
 #include <openspace/scripting/scriptengine.h>
 #include <utility>
 
+#include <cmath>
+
 namespace openspace::interaction {
 
 JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocityScaleFactor)
@@ -53,7 +55,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
         bool hasValue = true;
         float value = inputState.joystickAxis(i);
 
-        if (abs(value) <= t.deadzone) {
+        if (std::fabs(value) <= t.deadzone) {
             value = 0.f;
             hasValue = false;
         }

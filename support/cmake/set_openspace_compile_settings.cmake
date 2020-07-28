@@ -102,7 +102,7 @@ function (set_openspace_compile_settings project)
                 "/ZI"       # Edit and continue support
             )
         endif ()
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    elseif (NOT LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "-Werror")
         endif ()
@@ -111,6 +111,97 @@ function (set_openspace_compile_settings project)
             ${project}
             PRIVATE
             "-stdlib=libc++"
+            "-std=gnu++17"
+            "-Wall"
+            "-Wextra"
+            "-Wabstract-vbase-init"
+            "-Warray-bounds-pointer-arithmetic"
+            "-Wassign-enum"
+            "-Wauto-import"
+            "-Wbad-function-cast"
+            "-Wbitfield-constant-conversion"
+            "-Wcast-calling-convention"
+            "-Wcast-qual"
+            "-Wchar-subscripts"
+            "-Wcomma"
+            "-Wcomment"
+            "-Wcomplex-component-init"
+            "-Wconditional-uninitialized"
+            "-Wdate-time"
+            "-Wdeprecated-implementations"
+            "-Wdollar-in-identifier-extension"
+            "-Wduplicate-enum"
+            "-Wduplicate-method-match"
+            "-Wempty-body"
+            "-Wformat-pedantic"
+            "-Wheader-hygiene"
+            "-Widiomatic-parentheses"
+            "-Wimplicit-fallthrough"
+            "-Wimport-preprocessor-directive-pedantic"
+            "-Winconsistent-missing-override"
+            "-Winfinite-recursion"
+            "-Wkeyword-macro"
+            "-Wlanguage-extension-token"
+            "-Wloop-analysis"
+            "-Wmethod-signatures"
+            "-Wmicrosoft-end-of-file"
+            "-Wmicrosoft-enum-forward-reference"
+            "-Wmicrosoft-fixed-enum"
+            "-Wmicrosoft-flexible-array"
+            "-Wmismatched-tags"
+            "-Wmissing-field-initializers"
+            "-Wmissing-noreturn"
+            "-Wnewline-eof"
+            "-Wnon-virtual-dtor"
+            "-Wold-style-cast"
+            "-Woverloaded-virtual"
+            "-Wpessimizing-move"
+            "-Wpointer-arith"
+            "-Wpragmas"
+            "-Wredundant-move"
+            "-Wreorder"
+            "-Wsemicolon-before-method-body"
+            # "-Wshadow-field"
+            "-Wshadow-field-in-constructor"
+            # "-Wshadow-all"  Add this again once the Properties don't throw warnings --abock
+            "-Wshift-sign-overflow"
+            "-Wshorten-64-to-32"
+            "-Wsign-compare"
+            "-Wstring-conversion"
+            "-Wtautological-compare"
+            "-Wthread-safety"
+            "-Wundef"
+            "-Wundefined-reinterpret-cast"
+            "-Wuninitialized"
+            "-Wunneeded-internal-declaration"
+            "-Wunneeded-member-function"
+            "-Wunreachable-code-break"
+            "-Wunreachable-code-loop-increment"
+            "-Wunreachable-code-return"
+            "-Wunused-exception-parameter"
+            "-Wunused-label"
+            "-Wunused-local-typedef"
+            "-Wunused-macros"
+            "-Wunused-parameter"
+            "-Wunused-private-field"
+            "-Wunused-result"
+            "-Wunused-variable"
+            "-Wused-but-marked-unused"
+            "-Wvariadic-macros"
+            "-Wvla"
+            "-Wzero-length-array"
+            "-Wno-missing-braces"
+        )
+    elseif (LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        if (OPENSPACE_WARNINGS_AS_ERRORS)
+            target_compile_options(${project} PRIVATE "-Werror")
+        endif ()
+
+        target_compile_options(
+            ${project}
+            PRIVATE
+            "-stdlib=libstdc++"
+            "-std=gnu++17"
             "-Wall"
             "-Wextra"
             "-Wabstract-vbase-init"
@@ -215,7 +306,6 @@ function (set_openspace_compile_settings project)
             "-Wuseless-cast"
             "-Wlogical-op"
             "-Wint-in-bool-context"
-
             "-Wno-write-strings"
             "-Wnon-virtual-dtor"
             "-Wold-style-cast"

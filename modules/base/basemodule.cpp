@@ -33,16 +33,18 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
-#include <modules/base/rendering/renderableboxgrid.h>
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
+#include <modules/base/rendering/grids/renderableboxgrid.h>
+#include <modules/base/rendering/grids/renderablegrid.h>
+#include <modules/base/rendering/grids/renderableradialgrid.h>
+#include <modules/base/rendering/grids/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderablelabels.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphere.h>
-#include <modules/base/rendering/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
@@ -59,6 +61,7 @@
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/rotation/timelinerotation.h>
 #include <modules/base/scale/luascale.h>
+#include <modules/base/scale/nonuniformstaticscale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/translation/timelinetranslation.h>
@@ -124,11 +127,13 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
+    fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabels>("RenderableLabels");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
+    fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
@@ -155,6 +160,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fScale, "Scale factory was not created");
 
     fScale->registerClass<LuaScale>("LuaScale");
+    fScale->registerClass<NonUniformStaticScale>("NonUniformStaticScale");
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
 
@@ -193,11 +199,14 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemVelocity::Documentation(),
 
         RenderableBoxGrid::Documentation(),
+        RenderableGrid::Documentation(),
         RenderableLabels::Documentation(),
         RenderableModel::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
+        RenderableRadialGrid::Documentation(),
         RenderableSphere::Documentation(),
+        RenderableSphericalGrid::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
 

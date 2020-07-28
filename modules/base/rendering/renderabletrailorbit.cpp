@@ -184,8 +184,11 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
         else if (renderType == "Opaque") {
             setRenderBin(Renderable::RenderBin::Opaque);
         }
-        else if (renderType == "Transparent") {
-            setRenderBin(Renderable::RenderBin::Transparent);
+        else if (renderType == "PreDeferredTransparent") {
+            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+        }
+        else if (renderType == "PostDeferredTransparent") {
+            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
         }
         else if (renderType == "Overlay") {
             setRenderBin(Renderable::RenderBin::Overlay);

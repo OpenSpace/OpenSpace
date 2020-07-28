@@ -2,9 +2,19 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'atira_asteroid', 'sssb_data_atira_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_atira_asteroid.csv', "Atira Asteroids", filepath, { 0.9, 0.3, 0.1 })
+local object = sharedSssb.createSssbGroupObject('sssb_data_atira_asteroid.csv', "Atira Asteroids", filepath, { 0.5, 0.8, 1.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 2
 object.Renderable.TrailFade = 25
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Atira Asteroids",
+    Version = "1.0",
+    Description = [[ Near-Earth-Asteroids whose orbits are contained entirely within the orbit of the Earth. ]],
+    Author = "JPL Small-Body Database hosted by California Institute of Technology",
+    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+}

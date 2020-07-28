@@ -312,6 +312,14 @@ void Property::notifyDeleteListeners() {
     }
 }
 
+bool Property::hasChanged() const {
+    return _isValueDirty;
+}
+
+void Property::resetToUnchanged() {
+    _isValueDirty = false;
+}
+
 std::string Property::generateBaseJsonDescription() const {
     std::string cName = className();
     std::string cNameSan = sanitizeString(cName);

@@ -32,7 +32,7 @@ in vec4 vs_position;
 
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
-uniform float transparency;
+uniform float colorFilterValue;
 
 uniform bool hasSunPosition;
 uniform vec3 sunPosition;
@@ -60,11 +60,13 @@ Fragment getFragment() {
     }
         
     vec4 diffuse = texture(texture1, texCoord);
-    float colorValue = length(diffuse.rgb);
-    // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
-    // to normalize the transparency value to [0,1]
-    if (colorValue < 3.0 * transparency) {
-        diffuse.a = pow(colorValue / (3.0 * transparency), 1);
+    // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
+    // to normalize the alpha value to [0,1]
+    float colorValue = length(diffuse.rgb) / 3.0;
+    if (colorValue < colorFilterValue) {
+        diffuse.a = colorValue * colorFilterValue;
+        if (diffuse.a < 0.65)
+            discard;
     }
 
     // The normal for the one plane depends on whether we are dealing

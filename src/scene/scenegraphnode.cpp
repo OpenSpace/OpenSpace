@@ -38,6 +38,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
 
+#include <cmath>
+
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
     constexpr const char* KeyRenderable = "Renderable";
@@ -469,14 +471,7 @@ void SceneGraphNode::update(const UpdateData& data) {
         newUpdateData.modelTransform.translation
     );
     glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(
-        glm::dmat4(1.0),
-        glm::dvec3(
-            newUpdateData.modelTransform.scale,
-            newUpdateData.modelTransform.scale,
-            newUpdateData.modelTransform.scale
-        )
-    );
+    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
 
     _modelTransformCached = translation * rotation * scaling;
     _inverseModelTransformCached = glm::inverse(_modelTransformCached);
@@ -742,13 +737,13 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     );
 
     constexpr const double RadiusThreshold = 2.0;
-    const double r = abs(_screenSizeRadius - screenSpaceRadius);
+    const double r = std::fabs(_screenSizeRadius - screenSpaceRadius);
     if (r > RadiusThreshold) {
         _screenSizeRadius = screenSpaceRadius;
     }
 
     constexpr const double ZoomThreshold = 0.1;
-    const double d = abs(_distFromCamToNode - distFromCamToNode);
+    const double d = std::fabs(_distFromCamToNode - distFromCamToNode);
     if (d > (ZoomThreshold * distFromCamToNode)) {
         _distFromCamToNode = distFromCamToNode;
     }
@@ -788,7 +783,7 @@ const glm::dmat3& SceneGraphNode::rotationMatrix() const {
     return _transform.rotation->matrix();
 }
 
-double SceneGraphNode::scale() const {
+glm::dvec3 SceneGraphNode::scale() const {
     return _transform.scale->scaleValue();
 }
 
@@ -808,7 +803,7 @@ glm::dmat4 SceneGraphNode::inverseModelTransform() const {
     return _inverseModelTransformCached;
 }
 
-double SceneGraphNode::worldScale() const {
+glm::dvec3 SceneGraphNode::worldScale() const {
     return _worldScaleCached;
 }
 
@@ -825,10 +820,10 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     if (_parent) {
         const glm::dvec3 wp = _parent->worldPosition();
         const glm::dmat3 wrot = _parent->worldRotationMatrix();
-        const double ws = _parent->worldScale();
+        const glm::dvec3 ws = _parent->worldScale();
         const glm::dvec3 p = position();
 
-        return wp + wrot * ws * p;
+        return wp + wrot * (ws * p);
     }
     else {
         return position();
@@ -859,7 +854,7 @@ glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     }
 }
 
-double SceneGraphNode::calculateWorldScale() const {
+glm::dvec3 SceneGraphNode::calculateWorldScale() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
         return _parent->worldScale() * scale();

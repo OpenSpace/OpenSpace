@@ -95,15 +95,15 @@ ResourceSynchronization::State ResourceSynchronization::state() const {
     return _state;
 }
 
-bool ResourceSynchronization::isResolved() {
+bool ResourceSynchronization::isResolved() const {
     return _state == State::Resolved;
 }
 
-bool ResourceSynchronization::isRejected() {
+bool ResourceSynchronization::isRejected() const {
     return _state == State::Rejected;
 }
 
-bool ResourceSynchronization::isSyncing() {
+bool ResourceSynchronization::isSyncing() const {
     return _state == State::Syncing;
 }
 

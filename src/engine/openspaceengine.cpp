@@ -51,6 +51,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -99,8 +100,6 @@
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const int CacheVersion = 1;
-    constexpr const char* ProfileToSceneConverter
-                                         = "${BASE}/scripts/convert_profile_to_scene.lua";
 
 } // namespace
 
@@ -300,58 +299,57 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration.profile.empty()) {
-        LINFO(
-            fmt::format("Run Lua script to convert {}.profile to scene",
-            global::configuration.profile)
-        );
-        ghoul::lua::LuaState lState;
+        std::string inputProfilePath = absPath("${PROFILES}");
+        std::string outputScenePath = absPath("${TEMPORARY}");
+        std::string inputProfile = inputProfilePath + "/" + global::configuration.profile
+            + ".profile";
+        std::string outputAsset = outputScenePath + "/" + global::configuration.profile
+            + ".asset";
 
-        // We can't use the absPath function here because we pass the path into the Lua
-        // function, which requires additional escaping
-        std::string inputProfilePath = generateFilePath("${ASSETS}");
-        std::string outputScenePath = generateFilePath("${TEMPORARY}");
+        if (!FileSys.fileExists(inputProfile)) {
+            LERROR(fmt::format(
+                "Could not load profile '{}': File does not exist", inputProfile)
+            );
+        }
+        else {
+            // Load the profile
+            std::ifstream inFile;
+            try {
+                inFile.open(inputProfile, std::ifstream::in);
+            }
+            catch (const std::ifstream::failure& e) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Exception opening profile file for read: {} ({})",
+                    inputProfile, e.what())
+                );
+            }
 
-        std::string setProfileFilenameInLuaState = fmt::format(R"(
-            openspace = {{}}
-            openspace.profile = {{}}
-            function openspace.profile.getFilename()
-              return "{}.profile"
-            end
-            function openspace.profile.getProfileInputPath()
-              return "{}"
-            end
-            function openspace.profile.getSceneOutputPath()
-              return "{}"
-            end
-            )",
-            global::configuration.profile,
-            inputProfilePath,
-            outputScenePath
-        );
+            std::vector<std::string> content;
+            std::string line;
+            while (std::getline(inFile, line)) {
+                content.push_back(std::move(line));
+            }
 
-        ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
-        ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
+            global::profile = Profile(content);
 
+            // Then save the profile to a scene so that we can load it with the
+            // existing infrastructure
+            std::ofstream scene(outputAsset);
+            std::string sceneContent = global::profile.convertToScene();
+            scene << sceneContent;
 
-        // Set asset name to that of the profile because a new scene file will be
-        // created with that name, and also because the profile name will override
-        // an asset name if both are provided.
-        global::configuration.asset =
-            absPath("${TEMPORARY}/") + global::configuration.profile;
+            // Set asset name to that of the profile because a new scene file will be
+            // created with that name, and also because the profile name will override
+            // an asset name if both are provided.
+            global::configuration.asset = outputAsset;
+            global::configuration.usingProfile = true;
+        }
     }
 
     // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w =
-        std::make_unique<SynchronizationWatcher>();
-    SynchronizationWatcher* rawWatcher = w.get();
-
     global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(
-            global::scriptEngine.luaState(),
-            rawWatcher,
-            FileSys.absPath("${ASSETS}")
-        ),
-        std::move(w)
+        global::scriptEngine.luaState(),
+        FileSys.absPath("${ASSETS}")
     );
 
     global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
@@ -419,11 +417,6 @@ void OpenSpaceEngine::initializeGL() {
     //glbinding::Binding::useCurrentContext();
 
     rendering::helper::initialize();
-
-    // clear the screen so the user doesn't have to see old buffer contents left on the
-    // graphics card
-    LDEBUG("Clearing all Windows");
-    global::windowDelegate.clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
@@ -759,15 +752,13 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
     _loadingScreen->postMessage("Synchronizing assets");
 
-    std::vector<std::shared_ptr<const Asset>> allAssets =
-        _assetManager->rootAsset()->subTreeAssets();
+    std::vector<const Asset*> allAssets = _assetManager->rootAsset().subTreeAssets();
 
-    std::unordered_set<std::shared_ptr<ResourceSynchronization>> resourceSyncs;
-    for (const std::shared_ptr<const Asset>& a : allAssets) {
-        std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-            a->ownSynchronizations();
+    std::unordered_set<ResourceSynchronization*> resourceSyncs;
+    for (const Asset* a : allAssets) {
+        std::vector<ResourceSynchronization*> syncs = a->ownSynchronizations();
 
-        for (const std::shared_ptr<ResourceSynchronization>& s : syncs) {
+        for (ResourceSynchronization* s : syncs) {
             ZoneScopedN("Update resource synchronization")
 
             if (s->state() == ResourceSynchronization::State::Syncing) {
@@ -1035,7 +1026,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         _documentationJson += "{\"name\":\"Scene License Information\",";
         _documentationJson += "\"identifier\":\"sceneLicense";
         _documentationJson += "\",\"data\":";
-        _documentationJson += _scene->generateSceneLicenseDocumentationJson();
+        _documentationJson += SceneLicenseWriter().generateJson();
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Properties\",";
         _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
@@ -1050,8 +1041,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         DocEng.addHandlebarTemplates(global::keybindingManager.templatesToRegister());
         //TODO this is in efficaiant, here i am just instaning the class to get
         //at a member variable which is staticly defined. How do i just get that
-        const std::vector<SceneLicense> licenses;
-        SceneLicenseWriter writer(licenses);
+        SceneLicenseWriter writer;
         DocEng.addHandlebarTemplates(writer.templatesToRegister());
         DocEng.addHandlebarTemplates(global::rootPropertyOwner.templatesToRegister());
 
@@ -1083,7 +1073,10 @@ void OpenSpaceEngine::preSynchronization() {
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
+        global::profile.setIgnoreUpdates(true);
         loadSingleAsset(_scheduledAssetPathToLoad);
+        global::profile.setIgnoreUpdates(false);
+        resetPropertyChangeFlagsOfSubowners(&global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
     }
@@ -1266,6 +1259,8 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine.renderOverlays(_shutdown);
         global::luaConsole.render();
+        global::sessionRecording.render();
+
     }
 
     for (const std::function<void()>& func : global::callback::draw2D) {
@@ -1299,10 +1294,30 @@ void OpenSpaceEngine::postDraw() {
 
     if (_isFirstRenderingFirstFrame) {
         global::windowDelegate.setSynchronization(true);
+        resetPropertyChangeFlags();
         _isFirstRenderingFirstFrame = false;
     }
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
+}
+
+void OpenSpaceEngine::resetPropertyChangeFlags() {
+    ZoneScoped
+
+    std::vector<SceneGraphNode*> nodes =
+            global::renderEngine.scene()->allSceneGraphNodes();
+    for (SceneGraphNode* n : nodes) {
+        resetPropertyChangeFlagsOfSubowners(n);
+    }
+}
+
+void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(properties::PropertyOwner* po) {
+    for (properties::PropertyOwner* subOwner : po->propertySubOwners()) {
+        resetPropertyChangeFlagsOfSubowners(subOwner);
+    }
+    for (properties::Property* p : po->properties()) {
+        p->resetToUnchanged();
+    }
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
@@ -1378,10 +1393,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
 
     // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing
     if (action == MouseAction::Press) {
-        bool isConsumed = global::renderEngine.mouseActivationCallback(
-            global::windowDelegate.mousePosition()
-        );
-
+        bool isConsumed = global::renderEngine.mouseActivationCallback(_mousePosition);
         if (isConsumed) {
             return;
         }
@@ -1401,6 +1413,8 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 
     global::navigationHandler.mousePositionCallback(x, y);
     global::interactionMonitor.markInteraction();
+
+    _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
@@ -1547,15 +1561,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Returns whether the current OpenSpace instance is the master node of a "
                 "cluster configuration. If this instance is not part of a cluster, this "
                 "function also returns 'true'."
-            },
-            {
-                "clusterId",
-                &luascriptfunctions::clusterId,
-                {},
-                "",
-                "Returns the zero-based identifier for this OpenSpace instance in a "
-                "cluster configuration. If this instance is not part of a cluster, this "
-                "identifier is always 0."
             }
         },
         {

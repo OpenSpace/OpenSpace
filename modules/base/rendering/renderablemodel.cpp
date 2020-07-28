@@ -47,10 +47,11 @@ namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
 
-    constexpr const std::array<const char*, 11> UniformNames = {
+    constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "projectionTransform", "performShading", "texture1",
-        "ambientIntensity", "diffuseIntensity", "specularIntensity"
+        "modelViewTransform", "crippedModelViewTransform", "projectionTransform", 
+        "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
+        "specularIntensity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -262,6 +263,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+
     addPropertySubOwner(_lightSourcePropertyOwner);
     addPropertySubOwner(_geometry.get());
 
@@ -278,14 +280,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_rotationVec);
 
     _rotationVec.onChange([this]() {
-        glm::vec3 degreeVector = _rotationVec;
-        glm::vec3 radianVector = glm::vec3(
-            glm::radians(degreeVector.x),
-            glm::radians(degreeVector.y),
-            glm::radians(degreeVector.z)
-        );
-        _modelTransform = glm::mat4_cast(glm::quat(radianVector));
+        _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));
     });
+
+
+    if (dictionary.hasKey(RotationVecInfo.identifier)) {
+        _rotationVec = dictionary.value<glm::vec3>(RotationVecInfo.identifier);
+    }
 }
 
 bool RenderableModel::isReady() const {
@@ -380,6 +381,16 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelViewTransform,
         glm::mat4(modelViewTransform)
     );
+
+    glm::dmat4 crippedModelViewTransform = glm::transpose(glm::inverse(
+            glm::dmat4(glm::inverse(data.camera.sgctInternal.viewMatrix())) * modelViewTransform
+    ));
+
+    _program->setUniform(
+        _uniformCache.crippedModelViewTransform,
+        glm::mat4(crippedModelViewTransform)
+    );
+
     _program->setUniform(
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()

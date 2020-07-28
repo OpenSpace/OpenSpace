@@ -180,15 +180,6 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
         return;
     }
 
-    // HACK: This hack is required as long as our GLFW version is based on the touch
-    // branch. There is no convenient way to set a GLFWBool (uint32_t) which sets the
-    // state of touch-to-mouseinput interpretation. It happens to be 116 bytes into an
-    // internal glfw struct...
-    uint32_t* HACKY_PTR = (uint32_t *)GetPropW(hWnd, L"GLFW");
-    HACKY_PTR += 116/sizeof(uint32_t);
-    *HACKY_PTR = 1;
-
-
     // Test for touch:
     int value = GetSystemMetrics(SM_DIGITIZER);
     if ((value & NID_READY) == 0) {

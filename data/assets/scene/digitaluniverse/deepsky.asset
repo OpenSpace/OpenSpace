@@ -30,7 +30,7 @@ local deepSkyPoints = {
         --ColorOption = { "prox5Mpc" },
         --ColorRange = { { 1.0, 30.0 } },
         LabelFile = speck .. "/dso.label",
-        TextColor = { 0.1, 0.4, 0.6, 1.0 },
+        TextColor = { 0.1, 0.4, 0.6 },
         TextSize = 20.50,
         TextMinSize = 16.0,
         Unit = "Mpc",
@@ -42,6 +42,12 @@ local deepSkyPoints = {
         --CorrectionSizeEndDistance = 22.0,
         --CorrectionSizeFactor = 10.45
         EnablePixelSizeControl = true
+    },
+    Transform = {
+        Rotation = {
+        Type = "StaticRotation",
+            Rotation = { 0, 0, 3.14159265359 }
+        }
     },
     GUI = {
         Name = "Deep Sky Objects Points",
@@ -55,7 +61,7 @@ local deepSkyImages = {
         Type = "RenderablePlanesCloud",
         Enabled = false,
         Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.99,
+        Opacity = 0.99,
         ScaleFactor = 1.0,
         File = speck .. "/dso.speck",
         TexturePath = textures,
@@ -65,6 +71,12 @@ local deepSkyImages = {
         -- Fade in value in the same unit as "Unit"
         --FadeInDistances = {0.001, 0.05010},
         PlaneMinSize = 5.0
+    },
+    Transform = {
+        Rotation = {
+        Type = "StaticRotation",
+            Rotation = {3.14159265359, 3.14159265359, 0 }
+        }
     },
     GUI = {
         Name = "Deep Sky Objects Images",

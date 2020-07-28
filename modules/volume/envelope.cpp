@@ -26,6 +26,8 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
+#include <cmath>
+
 using json = nlohmann::json;
 
 namespace openspace::volume {
@@ -57,8 +59,8 @@ bool Envelope::operator!=(const Envelope& env) const {
          iter != _points.end();
          ++iter, ++envIter)
     {
-        if (abs(iter->position.first - envIter->position.first) > MinDist ||
-            abs(iter->position.second - envIter->position.second) > MinDist ||
+      if (std::fabs(iter->position.first - envIter->position.first) > MinDist ||
+          std::fabs(iter->position.second - envIter->position.second) > MinDist ||
             iter->color != envIter->color)
         {
             return true;
@@ -118,12 +120,12 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
     else {
         return {
             normalizeColor(
-                beforeIter->color * (abs(pos - afterIter->position.first) / dist) +
-                afterIter->color * (abs(pos - beforeIter->position.first) / dist)
+                beforeIter->color * (std::fabs(pos - afterIter->position.first) / dist) +
+                afterIter->color * (std::fabs(pos - beforeIter->position.first) / dist)
             ),
-            beforeIter->position.second * (abs(pos - afterIter->position.first) / dist) +
+            beforeIter->position.second * (std::fabs(pos - afterIter->position.first) / dist) +
                 afterIter->position.second *
-                (abs(pos - beforeIter->position.first) / dist)
+                (std::fabs(pos - beforeIter->position.first) / dist)
         };
     }
 }

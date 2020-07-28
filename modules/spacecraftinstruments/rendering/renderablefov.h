@@ -30,7 +30,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -69,15 +69,15 @@ private:
     void updateGPU();
     void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
 
-    glm::vec4 squareColor(float t) const {
+    glm::vec3 squareColor(float t) const {
         return _colors.active.value() * t + _colors.square.value() * (1 - t);
     }
 
-    glm::vec4 endColor(float t) const {
+    glm::vec3 endColor(float t) const {
         return _colors.active.value() * t + _colors.intersectionEnd.value() * (1 - t);
     }
 
-    glm::vec4 fovColor(float t) const {
+    glm::vec3 fovColor(float t) const {
         return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
     }
 
@@ -150,13 +150,13 @@ private:
     RenderInformation _fieldOfViewBounds;
 
     struct {
-        properties::Vec4Property defaultStart; // Start color for uninteresting times
-        properties::Vec4Property defaultEnd; // End color for uninteresting times
-        properties::Vec4Property active; // Color use when a field-of-view is projecting
-        properties::Vec4Property targetInFieldOfView; // Color to use for target in fov
-        properties::Vec4Property intersectionStart; // Color at the start of intersection
-        properties::Vec4Property intersectionEnd; // Color at the end of intersection
-        properties::Vec4Property square; // Color for the orthogonal square
+        properties::Vec3Property defaultStart; // Start color for uninteresting times
+        properties::Vec3Property defaultEnd; // End color for uninteresting times
+        properties::Vec3Property active; // Color use when a field-of-view is projecting
+        properties::Vec3Property targetInFieldOfView; // Color to use for target in fov
+        properties::Vec3Property intersectionStart; // Color at the start of intersection
+        properties::Vec3Property intersectionEnd; // Color at the end of intersection
+        properties::Vec3Property square; // Color for the orthogonal square
     } _colors;
 };
 

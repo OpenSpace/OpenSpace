@@ -32,7 +32,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -104,7 +104,7 @@ private:
     float linearSmoothStepFunc(float x, float startX, float endX, float sUnit,
         float eUnit) const;
 
-    properties::Vec4Property _labelColor;
+    properties::Vec3Property _labelColor;
     properties::FloatProperty _labelSize;
     properties::FloatProperty _fontSize;
     properties::FloatProperty _labelMinSize;

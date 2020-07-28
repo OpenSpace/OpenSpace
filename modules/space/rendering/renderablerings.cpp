@@ -39,7 +39,7 @@
 
 namespace {
     constexpr const std::array<const char*, 6> UniformNames = {
-        "modelViewProjectionTransform", "textureOffset", "transparency", "_nightFactor",
+        "modelViewProjectionTransform", "textureOffset", "colorFilterValue", "_nightFactor",
         "sunPosition", "texture1"
     };
 
@@ -73,11 +73,11 @@ namespace {
         "of the night side occurs."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value determines the transparency of part of the rings depending on the "
-        "color values. For this value v, the transparency is equal to length(color) / v."
+    constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
+        "ColorFilter",
+        "Color Filter",
+        "This value affects the filtering out of part of the rings depending on the "
+        "color values of the texture. The higher value, the more rings are filtered out."
     };
 } // namespace
 
@@ -119,10 +119,10 @@ documentation::Documentation RenderableRings::Documentation() {
                 NightFactorInfo.description
             },
             {
-                TransparencyInfo.identifier,
+                ColorFilterInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                TransparencyInfo.description
+                ColorFilterInfo.description
             }
         }
     };
@@ -134,7 +134,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
-    , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
+    , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
 {
     using ghoul::filesystem::File;
 
@@ -169,12 +169,12 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     }
     addProperty(_nightFactor);
 
-    if (dictionary.hasKeyAndValue<double>(TransparencyInfo.identifier)) {
-        _transparency = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
+    if (dictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
+        _colorFilter = static_cast<float>(
+            dictionary.value<double>(ColorFilterInfo.identifier)
         );
     }
-    addProperty(_transparency);
+    addProperty(_colorFilter);
 }
 
 bool RenderableRings::isReady() const {
@@ -226,7 +226,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.textureOffset, _offset);
-    _shader->setUniform(_uniformCache.transparency, _transparency);
+    _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
 
     _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
     _shader->setUniform(_uniformCache.sunPosition, _sunPosition);

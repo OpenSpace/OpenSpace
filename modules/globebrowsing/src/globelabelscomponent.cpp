@@ -51,7 +51,7 @@ namespace {
 
     constexpr const double LabelFadeRangeConst = 1500.0;
     constexpr const double RangeAngularCoefConst = 0.8;
-    constexpr const float MinTransparencyValueConst = 0.009f;
+    constexpr const float MinOpacityValueConst = 0.009f;
 
     enum LabelRenderingAlignmentType {
         Horizontally = 0,
@@ -107,6 +107,12 @@ namespace {
         "LabelsColor",
         "Labels Color",
         "Labels Color"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LabelsOpacityInfo = {
+        "LabelsOpacity",
+        "Labels Opacity",
+        "Labels Opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -210,9 +216,15 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
             },
             {
                 LabelsColorInfo.identifier,
-                new Vector4Verifier<float>(),
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 LabelsColorInfo.description
+            },
+            {
+                LabelsOpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsOpacityInfo.description
             },
             {
                 LabelsFadeInStartingDistanceInfo.identifier,
@@ -270,10 +282,11 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _labelsMinHeight(LabelsMinHeightInfo, 100.0, 0.0, 10000.0)
     , _labelsColor(
         LabelsColorInfo,
-        glm::vec4(1.f, 1.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(1.f, 1.f, 0.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
+    , _labelsOpacity(LabelsOpacityInfo, 1.f, 0.f, 1.f)
     , _labelsFadeInDist(LabelsFadeInStartingDistanceInfo, 1e6, 1e3, 1e8)
     , _labelsFadeOutDist(LabelsFadeOutStartingDistanceInfo, 1e4, 1, 1e7)
     , _labelsFadeInEnabled(LabelsFadeInEnabledInfo, false)
@@ -291,6 +304,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_labelsMinHeight);
     _labelsColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_labelsColor);
+    addProperty(_labelsOpacity);
     addProperty(_labelsFadeInDist);
     addProperty(_labelsFadeOutDist);
     addProperty(_labelsMinSize);
@@ -355,7 +369,11 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     }
 
     if (dictionary.hasKey(LabelsColorInfo.identifier)) {
-        _labelsColor = dictionary.value<glm::vec4>(LabelsColorInfo.identifier);
+        _labelsColor = dictionary.value<glm::vec3>(LabelsColorInfo.identifier);
+    }
+
+    if (dictionary.hasKey(LabelsOpacityInfo.identifier)) {
+        _labelsOpacity = dictionary.value<float>(LabelsOpacityInfo.identifier);
     }
 
     if (dictionary.hasKey(LabelsFadeInEnabledInfo.identifier)) {
@@ -642,7 +660,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < MinTransparencyValueConst) {
+        if (varyingOpacity < MinOpacityValueConst) {
             return;
         }
     }
@@ -657,7 +675,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < MinTransparencyValueConst) {
+        if (varyingOpacity < MinOpacityValueConst) {
             return;
         }
     }
@@ -670,8 +688,10 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         float distToCamera,
                                         float fadeInVariable
 ) {
-    glm::vec4 textColor = _labelsColor;
-    textColor.a *= fadeInVariable;
+    glm::vec4 textColor = glm::vec4(
+        glm::vec3(_labelsColor), 
+        _labelsOpacity * fadeInVariable
+    );
 
     glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
 

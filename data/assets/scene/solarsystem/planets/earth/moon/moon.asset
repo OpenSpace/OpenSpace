@@ -100,12 +100,12 @@ local Moon = {
                 },
                 {
                     Identifier = "Lola_Clr_Shade_Utah",
-                    Name = "Lola Clear Shade [Utah]",
+                    Name = "Lola Color Shade [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/LolaClrShade.wms"
                 },
                 {
                     Identifier = "Lola_Clr_Shade_Sweden",
-                    Name = "Lola Clear Shade [Sweden]",
+                    Name = "Lola Color Shade [Sweden]",
                     FilePath = mapServiceConfigs .. "/LiU/Lola_Clr_Shade.wms"
                 },
                 {
@@ -162,7 +162,7 @@ local Moon = {
             FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     GUI = {

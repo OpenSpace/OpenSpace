@@ -434,7 +434,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     //, _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 7.f)
     , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
-    , _pCameraPerspective(CameraPerspectiveInfo, true)
+    , _pCameraPerspective(CameraPerspectiveInfo, false)
     , _pDrawingCircles(DrawingCirclesInfo, false)
     , _pCameraPerspectiveGroup({" CameraPerspective"})
     , _pDrawingHollow(DrawingHollowInfo, false)
@@ -594,7 +594,7 @@ void RenderableStreamNodes::initializeGL() {
    // glGenBuffers(1, &_arrow);
 
     // Needed for alpha transparency
-    setRenderBin(Renderable::RenderBin::Transparent);
+    setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }
 
 void RenderableStreamNodes::loadNodeData() {

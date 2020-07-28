@@ -24,19 +24,21 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 
+#include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider.h>
-#include <modules/debugging/rendering/debugrenderer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -49,13 +51,6 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-#include <openspace/engine/moduleengine.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-openspace::GlobeBrowsingModule* _module = nullptr;
-
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -525,8 +520,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
         IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
     })
-    , _shadowMappingPropertyOwner({ "ShadowMapping" })
     , _debugPropertyOwner({ "Debug" })
+    , _shadowMappingPropertyOwner({ "ShadowMapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
@@ -584,10 +579,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
+    //_debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
+    //_debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
+    //_debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
+    //_debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
@@ -709,10 +704,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _module = global::moduleEngine.module<GlobeBrowsingModule>();
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void RenderableGlobe::initializeGL() {
@@ -785,8 +776,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     if (distanceToCamera < distance) {
         try {
             // Before Shadows
-            //renderChunks(data, rendererTask);
-            //_globeLabelsComponent.draw(data);
+            _globeLabelsComponent.draw(data);
 
             if (_hasShadows && _shadowComponent.isEnabled()) {
                 // Set matrices and other GL states
@@ -897,15 +887,13 @@ void RenderableGlobe::update(const UpdateData& data) {
     }
 
     setBoundingSphere(static_cast<float>(
-        _ellipsoid.maximumRadius() * data.modelTransform.scale
+        _ellipsoid.maximumRadius() * glm::compMax(data.modelTransform.scale)
     ));
 
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
     glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
-    glm::dmat4 scaling =
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale,
-            data.modelTransform.scale, data.modelTransform.scale));
+    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     _cachedModelTransform = translation * rotation * scaling;
     _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
@@ -923,11 +911,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         _shadowComponent.update(data);
     }
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _nUploadedTiles = _layerManager.update();
-#else
     _layerManager.update();
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_nLayersIsDirty) {
         std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
@@ -1118,7 +1102,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         // Apply an extra scaling to the height if the object is scaled
         _globalRenderer.program->setUniform(
             "heightScale",
-            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
+            static_cast<float>(
+                glm::compMax(data.modelTransform.scale) * data.camera.scaling()
+            )
         );
     }
 
@@ -1236,15 +1222,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         renderChunkLocally(*local[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _module->addFrameInfo(
-        this,
-        std::min(localCount, ChunkBufferSize),
-        std::min(globalCount, ChunkBufferSize),
-        _nUploadedTiles
-    );
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
@@ -1461,7 +1438,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         // Apply an extra scaling to the height if the object is scaled
         program.setUniform(
             "heightScale",
-            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
+            static_cast<float>(
+                glm::compMax(data.modelTransform.scale) * data.camera.scaling()
+            )
         );
     }
 
@@ -2080,25 +2059,45 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             lt
         );
         casterPos *= KM_TO_M; // converting to meters
-        // psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-        //     casterPos.x,
-        //     casterPos.y,
-        //     casterPos.z
-        // );
 
+        const std::string source = shadowConf.source.first;
+        SceneGraphNode* sourceNode = global::renderEngine.scene()->sceneGraphNode(source);
+        const std::string caster = shadowConf.caster.first;
+        SceneGraphNode* casterNode = global::renderEngine.scene()->sceneGraphNode(caster);
+
+        const double sourceRadiusScale = std::max(
+            glm::compMax(sourceNode->scale()),
+            1.0
+        );
+
+        const double casterRadiusScale = std::max(
+            glm::compMax(casterNode->scale()),
+            1.0
+        );
+
+        if ((sourceNode == nullptr) || (casterNode == nullptr)) {
+            LERRORC(
+                "Renderableglobe",
+                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
+            );
+            return;
+        }
 
         // First we determine if the caster is shadowing the current planet (all
         // calculations in World Coordinates):
         const glm::dvec3 planetCasterVec = casterPos - data.modelTransform.translation;
         const glm::dvec3 sourceCasterVec = casterPos - sourcePos;
+
         const double sc_length = glm::length(sourceCasterVec);
         const glm::dvec3 planetCaster_proj =
             (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) *
             sourceCasterVec;
-        const double d_test = glm::length(planetCasterVec - planetCaster_proj);
-        const double xp_test = shadowConf.caster.second * sc_length /
-            (shadowConf.source.second + shadowConf.caster.second);
-        const double rp_test = shadowConf.caster.second *
+
+        const double d_test  = glm::length(planetCasterVec - planetCaster_proj);
+        const double xp_test = shadowConf.caster.second * casterRadiusScale *
+                sc_length / (shadowConf.source.second * sourceRadiusScale +
+                             shadowConf.caster.second * casterRadiusScale);
+        const double rp_test = shadowConf.caster.second * casterRadiusScale *
             (glm::length(planetCaster_proj) + xp_test) / xp_test;
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
@@ -2121,13 +2120,13 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             (casterDistSun < planetDistSun))
         {
             // The current caster is shadowing the current planet
-            shadowData.isShadowing = true;
-            shadowData.rs = shadowConf.source.second;
-            shadowData.rc = shadowConf.caster.second;
-            shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
-            shadowData.xp = xp_test;
-            shadowData.xu = shadowData.rc * sc_length /
-                (shadowData.rs - shadowData.rc);
+            shadowData.isShadowing       = true;
+            shadowData.rs                = shadowConf.source.second * sourceRadiusScale;
+            shadowData.rc                = shadowConf.caster.second * casterRadiusScale;
+            shadowData.sourceCasterVec   = glm::normalize(sourceCasterVec);
+            shadowData.xp                = xp_test;
+            shadowData.xu                = shadowData.rc * sc_length /
+                                          (shadowData.rs - shadowData.rc);
             shadowData.casterPositionVec = casterPos;
         }
         shadowDataArray.push_back(shadowData);
@@ -2137,15 +2136,16 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     unsigned int counter = 0;
     for (const ShadowRenderingStruct& sd : shadowDataArray) {
         constexpr const char* NameIsShadowing = "shadowDataArray[{}].isShadowing";
-        constexpr const char* NameXp = "shadowDataArray[{}].xp";
-        constexpr const char* NameXu = "shadowDataArray[{}].xu";
-        constexpr const char* NameRc = "shadowDataArray[{}].rc";
-        constexpr const char* NameSource = "shadowDataArray[{}].sourceCasterVec";
-        constexpr const char* NamePos = "shadowDataArray[{}].casterPositionVec";
+        constexpr const char* NameXp          = "shadowDataArray[{}].xp";
+        constexpr const char* NameXu          = "shadowDataArray[{}].xu";
+        constexpr const char* NameRc          = "shadowDataArray[{}].rc";
+        constexpr const char* NameSource      = "shadowDataArray[{}].sourceCasterVec";
+        constexpr const char* NamePos         = "shadowDataArray[{}].casterPositionVec";
 
         programObject.setUniform(
             fmt::format(NameIsShadowing, counter), sd.isShadowing
         );
+
         if (sd.isShadowing) {
             programObject.setUniform(fmt::format(NameXp, counter), sd.xp);
             programObject.setUniform(fmt::format(NameXu, counter), sd.xu);
