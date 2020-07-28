@@ -22,45 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#ifndef __OPENSPACE_MODULE_STREAMNODES___STREAMNODESMODULE___H__
+#define __OPENSPACE_MODULE_STREAMNODES___STREAMNODESMODULE___H__
 
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
-
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+class StreamNodesModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "StreamNodes";
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
+    StreamNodesModule();
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
-}
+    static std::string DefaultTransferFunctionFile;
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-}
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_STREAMNODES___STREAMNODESMODULE___H__

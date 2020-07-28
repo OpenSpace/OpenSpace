@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  //including our own h file
-#include <modules/fieldlinessequence/rendering/renderablelighttravel.h>
+#include <modules/streamnodes/rendering/renderablelighttravel.h>
 
 // Includes from fieldlinessequence, might not need all of them
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
@@ -156,8 +156,8 @@ void RenderableLightTravel::initializeGL() {
     _dictionary.reset();
     _shaderProgram = global::renderEngine.buildRenderProgram(
         "Lighttravel",
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/lighttravel_vs.glsl"),
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/lighttravel_fs.glsl")
+        absPath("${MODULE_STREAMNODES}/shaders/lighttravel_vs.glsl"),
+        absPath("${MODULE_STREAMNODES}/shaders/lighttravel_fs.glsl")
     );
 
     if(_font == nullptr){

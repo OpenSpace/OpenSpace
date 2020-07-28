@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  //including our own h file
-#include <modules/fieldlinessequence/rendering/renderablestreamnodes.h>
+#include <modules/streamnodes/rendering/renderablestreamnodes.h>
 
 // Includes from fieldlinessequence, might not need all of them
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
@@ -577,8 +577,8 @@ void RenderableStreamNodes::initializeGL() {
     // Setup shader program
     _shaderProgram = global::renderEngine.buildRenderProgram(
         "Streamnodes",
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_vs.glsl"),
-        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/streamnodes_fs.glsl")
+        absPath("${MODULE_STREAMNODES}/shaders/streamnodes_vs.glsl"),
+        absPath("${MODULE_STREAMNODES}/shaders/streamnodes_fs.glsl")
         );
 
     _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");

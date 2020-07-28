@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
-
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/streamnodes/streamnodesmodule.h>
+#include <modules/streamnodes/rendering/renderablestreamnodes.h>
+#include <modules/streamnodes/rendering/renderablelighttravel.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -47,20 +47,21 @@ mappingkey 1.0   255  255  255  255
 
 namespace openspace {
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+std::string StreamNodesModule::DefaultTransferFunctionFile = "";
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
+StreamNodesModule::StreamNodesModule() : OpenSpaceModule(Name) {
     DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
 
     std::ofstream file(DefaultTransferFunctionFile);
     file << DefaultTransferfunctionSource;
 }
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
+void StreamNodesModule::internalInitialize(const ghoul::Dictionary&) {
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "No renderable factory existed");
 
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+    factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
+    factory->registerClass<RenderableLightTravel>("RenderableLightTravel");
 }
 
 } // namespace openspace
