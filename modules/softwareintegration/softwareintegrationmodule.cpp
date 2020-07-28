@@ -39,32 +39,32 @@
 namespace openspace {
     constexpr const char* _loggerCat = "SoftwareIntegrationModule";
 
-SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
+    SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
 
-void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
+        auto fRenderable = FactoryManager::ref().factory<Renderable>();
+        ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
-}
+        fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
+    }
 
-void SoftwareIntegrationModule::internalDeinitializeGL() {
+    void SoftwareIntegrationModule::internalDeinitializeGL() {
 
-}
+    }
 
-std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
-    return {
-        RenderablePointsCloud::Documentation(),
-    };
-}
+    std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
+        return {
+            RenderablePointsCloud::Documentation(),
+        };
+    }
 
-scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "softwareintegration";
-    res.scripts = {
-        absPath("${MODULE_SOFTWAREINTEGRATION}/scripts/network.lua")
-    };
-    return res;
-
+    scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
+        scripting::LuaLibrary res;
+        res.name = "softwareintegration";
+        res.scripts = {
+            absPath("${MODULE_SOFTWAREINTEGRATION}/scripts/network.lua")
+        };
+        return res;
+    }
 } // namespace openspace
 

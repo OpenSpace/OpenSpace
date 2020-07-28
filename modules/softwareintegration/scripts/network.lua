@@ -1,10 +1,5 @@
 openspace.softwareintegration.documentation = {
     {
-        Name = "updateProperties",
-        Arguments = "string, vec3, vec3",
-        Documentation = "TODO"
-    },
-    {
         Name = "addRenderable",
         Arguments = "string, vec3, speckFile, float, float, string",
         Documentation = "TODO"
@@ -14,6 +9,11 @@ openspace.softwareintegration.documentation = {
         Arguments = "string",
         Documentation = "TODO"
     },
+    {
+        Name = "updateProperties",
+        Arguments = "string, vec3, vec3",
+        Documentation = "TODO"
+    }
 }
 
 openspace.softwareintegration.addRenderable = function (id, colors, file, alpha, size, guiName)
