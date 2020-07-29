@@ -400,14 +400,14 @@ void main() {
         float maxDistance = 100000000000.f * perspectiveDistanceFactor;
         float distanceVec = distance(cameraPos, in_position.xyz);
 
-        if(distanceVec > maxDistance && vs_closeToEarth < 0.5){
+        if(distanceVec < maxDistance){
         camera_IsCloseEnough = 0;
         }
         else{
         camera_IsCloseEnough = 1;
         }
         if(distanceVec < maxDistance){
-        vs_closeToEarth = 0;
+        //vs_closeToEarth = 0;
             float distScale = 1 - smoothstep(0, maxDistance, distanceVec);
             //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distanceVec);
             float factorS = 1.f;

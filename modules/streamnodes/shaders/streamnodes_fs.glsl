@@ -50,9 +50,9 @@ Fragment getFragment() {
     frag.color = fragColor;
     vec2 coord = gl_PointCoord - vec2(0.5);
    
-   if(camera_IsCloseEnough > 0.5){
-
-    /*if(length(coord.x) > 0.15){
+  // if(camera_IsCloseEnough > 0.5){
+   /*
+    if(length(coord.x) > 0.15){
         if((coord.y) > 0){
             discard;
         }
@@ -95,14 +95,14 @@ Fragment getFragment() {
     frag.color.a = y;
     }
     
-    }
+    //}
     if(UseBlinking){
     if(vs_closeToEarth > 0.5){
     if(blinkingAlways || camera_IsCloseEnough > 0.5){
     if(length(coord) > 0.46){
-    float speed = 40.f;
+    float speed = 60.f;
     int modulusResult = int(double(speed) * vs_time) % 60;
-    if(modulusResult > 0 && modulusResult < 20){
+    if(modulusResult > 0 && modulusResult < 30){
 
     //frag.color = vec4(1, 1, 1,1);
     discard;
