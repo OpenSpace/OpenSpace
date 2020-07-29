@@ -293,7 +293,7 @@ namespace openspace {
             return true;
         }
         if (!FileSys.fileExists(absPath(_speckFile))) {
-            LERROR(fmt::format("No path to speckFile found'", _speckFile));
+            LERROR(fmt::format("No path to speckFile found {}", _speckFile));
             return false;
         };
 

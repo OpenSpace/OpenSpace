@@ -16,10 +16,10 @@ local RenderablePointsCloud = {
         Color = {1.0, 1.0, 0.5},
         File = speck .. "/2MASS.speck",
         Opacity = 0.0,
-        Size = 0,
+        Size = 0
     },
     GUI = {
-        Name = "Points Cloud"
+        Name = "Points Cloud",
         Path = "/Examples"
     }
 }
