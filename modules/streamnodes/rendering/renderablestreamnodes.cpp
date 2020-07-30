@@ -443,7 +443,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pPerspectiveDistanceFactor(perspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
     , _pMaxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
     , _pMinNodeSize(MinNodeSizeInfo, 1.f, 1.f, 10.f)
-    , _pUsePulse(UsePulseinfo, true)
+    , _pUsePulse(UsePulseinfo, false)
     , _pPulseAlways(AlwaysPulseInfo, false)
     //, _pTestChange(TestChangeInfo, 0.5f, 0.0f, 1.f)
 

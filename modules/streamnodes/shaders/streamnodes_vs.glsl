@@ -277,7 +277,7 @@ void CheckdistanceMethod() {
       
       if(distancevec < maxdist / 2 && usePulse){
         vs_closeToEarth = 1;
-        gl_PointSize = gl_PointSize * 10;
+        gl_PointSize = gl_PointSize * 5;
         }
         }
         if(enhanceMethod == 1 || enhanceMethod == 4){
@@ -356,14 +356,17 @@ void main() {
 
       vs_color = vec4(0);
 
-      float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
+      float interestingStreams[8] = float[](339, 340, 351, 352, 353, 354, 366, 367);
+      //float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
       //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
       //168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
       //float interestingStreams[3] = float[](37, 154, 210);
         for(int i = 0; i < interestingStreams.length(); i++){
             if(Streamnumber == interestingStreams[i]){
+                if(CheckvertexIndex()){
                 vec4 fluxColor3 = getTransferFunctionColor(colorTable);
                 vs_color = vec4(fluxColor3.xyz, 1*fluxColorAlpha);
+                }
             }
         }
     }

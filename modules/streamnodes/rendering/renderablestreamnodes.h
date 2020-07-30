@@ -132,6 +132,8 @@ private:
     int _activeTriggerTimeIndex = -1;
     // Number of states in the sequence
     size_t _nStates = 274;
+    // 383 for lower resolution, 863 for higher resolution.
+    //const int _numberofStreams = 383;
     const int _numberofStreams = 863;
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
     // domain limits.

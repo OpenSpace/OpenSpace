@@ -100,7 +100,7 @@ Fragment getFragment() {
    }
     
     //}
-    if(usePulse){
+    if(usePulse && usingCameraPerspective){
         if(vs_closeToEarth > 0.5){
             if(pulsatingAlways || camera_IsCloseEnough > 0.5){
                 if(length(coord) > 0.46){
