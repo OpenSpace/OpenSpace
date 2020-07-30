@@ -28,9 +28,11 @@ uniform sampler2D texture1;
 uniform bool drawCircles;
 uniform bool drawHollow;
 uniform bool useGaussian;
+uniform bool    usingCameraPerspective;
 //uniform float testChange;
-uniform bool blinkingAlways;
-uniform bool UseBlinking;
+uniform bool pulsatingAlways;
+uniform bool usePulse;
+uniform vec3 cameraPos;
 in vec2 vs_st;
 in vec4 vs_color;
 in float vs_depth;
@@ -69,7 +71,9 @@ Fragment getFragment() {
     }
     // if(vs_closeToEarth > 0.5){
     if(drawHollow && length(coord) < 0.4){
+    if(vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0)) < 500000000000.f){
     discard;
+    }
     }
     //}
     // outline
@@ -88,28 +92,28 @@ Fragment getFragment() {
    
    
    if(useGaussian){
-    float y = 1 * pow(e, - (pow(length(coord), 2)) /( 2 * pow(0.2, 2))); 
-    if(y < 0.05){
-    discard;
-    }
-    frag.color.a = y;
-    }
+       float y = 1 * pow(e, - (pow(length(coord), 2)) /( 2 * pow(0.2, 2))); 
+       if(y < 0.05){
+           discard;
+       }
+   frag.color.a = y;
+   }
     
     //}
-    if(UseBlinking){
-    if(vs_closeToEarth > 0.5){
-    if(blinkingAlways || camera_IsCloseEnough > 0.5){
-    if(length(coord) > 0.46){
-    float speed = 60.f;
-    int modulusResult = int(double(speed) * vs_time) % 60;
-    if(modulusResult > 0 && modulusResult < 30){
+    if(usePulse){
+        if(vs_closeToEarth > 0.5){
+            if(pulsatingAlways || camera_IsCloseEnough > 0.5){
+                if(length(coord) > 0.46){
+                    float speed = 60.f;
+                    int modulusResult = int(double(speed) * vs_time) % 60;
+                    if(modulusResult > 0 && modulusResult < 30){
 
-    //frag.color = vec4(1, 1, 1,1);
-    discard;
-    }
-    }
-    }
-    }
+                        //frag.color = vec4(1, 1, 1,1);
+                        discard;
+                }
+                }
+            }
+        }
     }
     
     //homecooked solution to get similar to normal distribution

@@ -103,6 +103,7 @@ uniform float   perspectiveDistanceFactor;
 
 uniform float   maxNodeSize;
 uniform float   minNodeSize;
+uniform bool    usePulse;
 // Inputs
 // Should be provided in meters
 layout(location = 0) in vec3 in_position;
@@ -274,9 +275,9 @@ void CheckdistanceMethod() {
         vs_closeToEarth = 0;
        if(distancevec < maxdist){
       
-      if(distancevec < maxdist / 2){
+      if(distancevec < maxdist / 2 && usePulse){
         vs_closeToEarth = 1;
-        gl_PointSize = 20;
+        gl_PointSize = gl_PointSize * 10;
         }
         }
         if(enhanceMethod == 1 || enhanceMethod == 4){
