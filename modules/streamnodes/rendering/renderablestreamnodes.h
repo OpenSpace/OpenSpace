@@ -288,8 +288,8 @@ private:
     properties::BoolProperty _pGaussianAlphaFilter;
     properties::BoolProperty _pRadiusPerspective;
     properties::FloatProperty _pPerspectiveDistanceFactor;
-    properties::BoolProperty _pUseBlinking;
-    properties::BoolProperty _pBlinkAlways;
+    properties::BoolProperty _pUsePulse;
+    properties::BoolProperty _pPulseAlways;
 
     //properties::FloatProperty _pTestChange;
 

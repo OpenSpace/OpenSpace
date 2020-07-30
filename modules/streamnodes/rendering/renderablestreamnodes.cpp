@@ -319,15 +319,15 @@ namespace {
         "Maximum node size",
         "the minimum node size."
     };
-    constexpr openspace::properties::Property::PropertyInfo AlwaysBlinkInfo = {
-        "alwaysBlinking",
-        "Blinking regardless of camera position",
-        "Always have nodes close to earth blinking regardless of position."
+    constexpr openspace::properties::Property::PropertyInfo AlwaysPulseInfo = {
+        "alwaysPulsate",
+        "Pulsate regardless of camera position",
+        "Always have nodes close to earth pulsate regardless of position."
     };
-    constexpr openspace::properties::Property::PropertyInfo UseBlinkInfo = {
-       "blinking",
-       "Nodes close to Earth blinks",
-       "Boolean for blinking."
+    constexpr openspace::properties::Property::PropertyInfo UsePulseinfo = {
+       "Pulse",
+       "Nodes close to Earth pulsate",
+       "Boolean for pulse."
     };
     /*constexpr openspace::properties::Property::PropertyInfo TestChangeInfo = {
         "testChange",
@@ -443,8 +443,8 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pPerspectiveDistanceFactor(perspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
     , _pMaxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
     , _pMinNodeSize(MinNodeSizeInfo, 1.f, 1.f, 10.f)
-    , _pUseBlinking(UseBlinkInfo, true)
-    , _pBlinkAlways(AlwaysBlinkInfo, false)
+    , _pUsePulse(UsePulseinfo, true)
+    , _pPulseAlways(AlwaysPulseInfo, false)
     //, _pTestChange(TestChangeInfo, 0.5f, 0.0f, 1.f)
 
 {
@@ -1207,8 +1207,8 @@ void RenderableStreamNodes::setupProperties() {
     _pCameraPerspectiveGroup.addProperty(_pRadiusPerspective);
     _pCameraPerspectiveGroup.addProperty(_pMaxNodeSize);
     _pCameraPerspectiveGroup.addProperty(_pMinNodeSize);
-    _pCameraPerspectiveGroup.addProperty(_pUseBlinking);
-    _pCameraPerspectiveGroup.addProperty(_pBlinkAlways);
+    _pCameraPerspectiveGroup.addProperty(_pUsePulse);
+    _pCameraPerspectiveGroup.addProperty(_pPulseAlways);
 
     definePropertyCallbackFunctions();
     // Set default
@@ -1369,8 +1369,8 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     //_shaderProgram->setUniform("testChange", _pTestChange);
     _shaderProgram->setUniform("maxNodeSize", _pMaxNodeSize);
     _shaderProgram->setUniform("minNodeSize", _pMinNodeSize);
-    _shaderProgram->setUniform("UseBlinking", _pUseBlinking);
-    _shaderProgram->setUniform("blinkingAlways", _pBlinkAlways);
+    _shaderProgram->setUniform("usePulse", _pUsePulse);
+    _shaderProgram->setUniform("pulsatingAlways", _pPulseAlways);
     //////// test for camera perspective: 
     /*
     glm::dmat4 modelMatrix =
