@@ -98,7 +98,8 @@ namespace {
         "Bounding Sphere",
         "The bounding sphere of the scene graph node. This can be the "
         "bounding sphere of an attached renderable or directly specified to the node. "
-        "If there is a boundingsphere on both the renderable and the node, the largest number will be picked. ",
+        "If there is a boundingsphere on both the renderable and the node, the largest "
+        "number will be picked.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -164,7 +165,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
         result->_boundingSphere = dictionary.value<float>(BoundingSphereInfo.identifier);
-        result->_boundingSphere.setVisibility(openspace::properties::Property::Visibility::All);
+        result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
     }
 
     if (dictionary.hasKey(KeyTransformTranslation)) {
@@ -259,18 +260,18 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             "Successfully created renderable for '{}'", result->identifier()
         ));
 
-        // If the renderable child has a bounding sphere that is larger, we allow it to override
-        if (result->_renderable->boundingSphere() > result->_boundingSphere.value()) {
-            result->_boundingSphere.setValue(result->_renderable->boundingSphere());
+        // If the renderable child has a larger bounding sphere, we allow it tooverride
+        if (result->_renderable->boundingSphere() > result->_boundingSphere) {
+            result->_boundingSphere = result->_renderable->boundingSphere();
 
             if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
                 LWARNING(fmt::format(
-                    "The specified property 'BoundingSphere' for '{}' was overwritten by a child renderable",
+                    "The specified property 'BoundingSphere' for '{}' was overwritten "
+                    "by a child renderable",
                     result->_identifier
                 ));
             }
         }
-
     }
 
     if (dictionary.hasKey(KeyTag)) {
@@ -315,7 +316,7 @@ SceneGraphNode::SceneGraphNode()
         std::make_unique<StaticRotation>(),
         std::make_unique<StaticScale>()
     }
-   , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.0f))
+   , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(
         properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
@@ -927,7 +928,7 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
 }
 
 float SceneGraphNode::boundingSphere() const {
-    return _boundingSphere.value();
+    return _boundingSphere;
 }
 
 // renderable
