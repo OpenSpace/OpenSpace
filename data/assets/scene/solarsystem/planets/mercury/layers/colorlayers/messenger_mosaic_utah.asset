@@ -1,0 +1,9 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Messenger_Mosaic_Utah",
+    Name = "Messenger Mosaic [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic.wms"
+}
+
+asset.export("layer", layer)

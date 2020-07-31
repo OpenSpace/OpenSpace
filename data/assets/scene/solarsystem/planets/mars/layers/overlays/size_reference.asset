@@ -1,0 +1,10 @@
+local marsAsset = asset.require("./../../mars")
+
+local layer ={
+    Identifier = "Size_Reference",
+    Name = "Size Reference",
+    Type = "SizeReferenceTileLayer",
+    Radii = marsAsset.Mars.Renderable.Radii
+}
+
+asset.export("layer", layer)

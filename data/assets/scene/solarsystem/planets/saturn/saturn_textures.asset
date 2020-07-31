@@ -1,0 +1,7 @@
+local TexturesPath = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "Saturn textures",
+    Identifier = "saturn_textures",
+    Version = 3
+})
+asset.export("TexturesPath", TexturesPath)

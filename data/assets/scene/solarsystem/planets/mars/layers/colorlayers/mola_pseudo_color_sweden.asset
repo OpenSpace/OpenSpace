@@ -1,0 +1,9 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "MOLA_Pseudo_Color_Sweden",
+    Name = "MOLA Pseudo Color [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Mola_PseudoColor.wms"
+}
+
+asset.export("layer", layer)

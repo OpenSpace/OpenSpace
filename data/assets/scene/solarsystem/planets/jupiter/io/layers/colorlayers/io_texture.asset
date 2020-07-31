@@ -1,0 +1,8 @@
+local texturesPath = asset.require("./../../io_textures").TexturesPath
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/io.jpg",
+}
+
+asset.export("layer", layer)

@@ -1,0 +1,10 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Terrain_tileset",
+    Name = "Terrain tileset",
+    FilePath = mapServiceConfigsPath .. "/ESRI/Terrain.wms",
+    TilePixelSize = 64,
+}
+
+asset.export("layer", layer)

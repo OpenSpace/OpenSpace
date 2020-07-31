@@ -1,0 +1,15 @@
+local layer = {
+    Identifier = "MODIS_Terra_Chlorophyll_A_Temporal",
+    Name = "MODIS Terra Chlorophyll A (Temporal)",
+    Type = "TemporalTileLayer",
+    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+        "MODIS_Terra_Chlorophyll_A",
+        "2013-07-02",
+        "Yesterday",
+        "1d",
+        "1km",
+        "png"
+    )
+}
+
+asset.export("layer", layer)

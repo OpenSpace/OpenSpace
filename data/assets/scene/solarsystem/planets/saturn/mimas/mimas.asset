@@ -4,15 +4,6 @@ local kernel = asset.require('../kernels').sat375
 asset.request('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Mimas textures",
-    Type = "HttpSynchronization",
-    Identifier = "mimas_textures",
-    Version = 1
-})
-
 local Mimas = {
     Identifier = "Mimas",
     Parent = transforms.SaturnBarycenter.Identifier,
@@ -33,15 +24,7 @@ local Mimas = {
         Type = "RenderableGlobe",
         Radii = 198000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/mimas.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = { },
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/mimas.labels",

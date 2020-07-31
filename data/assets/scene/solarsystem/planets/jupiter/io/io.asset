@@ -5,15 +5,6 @@ asset.request('./trail')
 local kernel = asset.require('../kernels').jup310
 local labelsPath = asset.require('../jupiter_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Io Textures",
-    Type = "HttpSynchronization",
-    Identifier = "io_textures",
-    Version = 1
-})
-
 local Io = {
     Identifier = "Io",
     Parent = transforms.JupiterBarycenter.Identifier,
@@ -35,15 +26,7 @@ local Io = {
         Type = "RenderableGlobe",
         Radii = 1821600,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/io.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/io.labels",

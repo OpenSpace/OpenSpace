@@ -1,0 +1,9 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "MOLA_HRSC_Sweden",
+    Name = "MOLA HRSC [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Mola_HRSC.wms"
+}
+
+asset.export("layer", layer)

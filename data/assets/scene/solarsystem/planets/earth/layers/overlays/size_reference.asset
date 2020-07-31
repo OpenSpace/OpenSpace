@@ -1,0 +1,10 @@
+local earthAsset = asset.require("./../../earth")
+
+local layer ={
+    Identifier = "Size_Reference",
+    Name = "Size Reference",
+    Type = "SizeReferenceTileLayer",
+    Radii = earthAsset.Earth.Renderable.Radii
+}
+
+asset.export("layer", layer)

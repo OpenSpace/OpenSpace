@@ -1,0 +1,38 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "ESRI_VIIRS_Combo",
+    Name = "ESRI VIIRS Combo",
+    Type = "ByLevelTileLayer",
+    LevelTileProviders = {
+        {
+            MaxLevel = 4,
+            TileProvider = {
+                Identifier = "Temporal_VIIRS_SNPP",
+                Name = "Temporal VIIRS SNPP",
+                Type = "TemporalTileLayer",
+                FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                    "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                    "2015-11-24",
+                    "Today",
+                    "1d",
+                    "250m",
+                    "jpg"
+                ),
+                PadTiles = false
+            }
+        },
+        {
+            MaxLevel = 22,
+            TileProvider = {
+                Identifier = "ESRI_World_Imagery",
+                Name = "ESRI World Imagery",
+                FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms",
+                PadTiles = false
+            }
+        },
+    },
+    PadTiles = false,
+}
+
+asset.export("layer", layer)

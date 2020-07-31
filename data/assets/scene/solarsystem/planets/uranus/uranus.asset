@@ -3,15 +3,6 @@ local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.request('./trail')
 
-
-
-local textures = asset.syncedResource({
-    Name = "Uranus Textures",
-    Type = "HttpSynchronization",
-    Identifier = "uranus_textures",
-    Version = 1
-})
-
 local Uranus = {
     Identifier = "Uranus",
     Parent = transforms.UranusBarycenter.Identifier,
@@ -26,15 +17,7 @@ local Uranus = {
         Type = "RenderableGlobe",
         Radii = { 25559000, 25559000, 24973000 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/uranus.jpg",
-                    Enabled = true
-                }
-            }
-        }
+        Layers = {}
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {

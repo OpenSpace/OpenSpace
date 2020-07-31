@@ -1,0 +1,14 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Messenger_SHADE_Utah",
+    Name = "Messenger SHADE [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MessengerSHADE.wms",
+    Settings = { 
+        Gamma = 1.33,
+        Multiplier = 1.15
+    },
+    BlendMode = "Multiply",
+}
+
+asset.export("layer", layer)
