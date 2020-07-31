@@ -6,6 +6,8 @@ asset.request('./planets/venus/atmosphere')
 asset.request('./planets/earth/earth')
 asset.request('./planets/earth/atmosphere')
 asset.request('./planets/earth/markers')
+asset.request('./planets/earth/nycmodel/upperMan.asset')
+asset.request('./planets/earth/nycmodel/lowerMan.asset')
 asset.request('./planets/earth/moon/moon')
 
 asset.request('./planets/mars/mars')

@@ -31,7 +31,7 @@ local vrt_folders = {
         -- We recommend using this folder for HiRISE
         openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
         -- if not and you have a custom path for HiRISE layers, enter it below
-        '',
+        '/media/jccosta/Big SSD Data/Pessoal/Work/OpenSpaceData/Mars-Gale-Crater/CTX',
     },
     Moon = {
         -- Add folders here whose contents will be automatically added to the Moon globe

@@ -43,6 +43,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 #include <string>
@@ -474,8 +475,22 @@ void FramebufferRenderer::initialize() {
     global::raycasterManager.addListener(*this);
     global::deferredcasterManager.addListener(*this);
 
+    // Set Default Rendering OpenGL State
+
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+
+    glEnable(GL_DEPTH_TEST);
+
     // Default GL State for Blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Save State in Cache
+    global::renderEngine.openglStateCache().loadCurrentGLState();
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -1159,22 +1174,14 @@ void FramebufferRenderer::updateDownscaledVolume() {
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     ZoneScoped
 
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+
     GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    global::renderEngine.openglStateCache().viewPort(viewport);
 
-    {
-        // Set OpenGL default rendering state
-        ZoneScopedN("Setting OpenGL state")
+    // Set Render Pipeline State
+    global::renderEngine.openglStateCache().setCachedStates();
 
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-        glEnablei(GL_BLEND, 0);
-        glDisablei(GL_BLEND, 1);
-        glDisablei(GL_BLEND, 2);
-
-        glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-
-        glEnable(GL_DEPTH_TEST);
-    }
     _pingPongIndex = 0;
 
     // Measurements cache variable
@@ -1531,6 +1538,9 @@ void FramebufferRenderer::performDeferredTasks(
 void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _resolution = std::move(res);
     _dirtyResolution = true;
+    GLint newViewPortCoors[4];
+    glGetIntegerv(GL_VIEWPORT, newViewPortCoors);
+    global::renderEngine.openglStateCache().setViewPortState(newViewPortCoors);
 }
 
 void FramebufferRenderer::setDisableHDR(bool disable) {

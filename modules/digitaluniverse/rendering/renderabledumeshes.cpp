@@ -38,6 +38,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -448,30 +449,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                                       const glm::dmat4& modelViewMatrix,
                                       const glm::dmat4& projectionMatrix)
 {
-    // Saving current OpenGL state
-    GLfloat lineWidth = 1.0f;
-    glGetFloatv(GL_LINE_WIDTH, &lineWidth);
-
-    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
-
-    GLenum blendEquationRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-
-    GLenum blendEquationAlpha;
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-
-    GLenum blendDestAlpha;
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-
-    GLenum blendDestRGB;
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-
-    GLenum blendSrcAlpha;
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-
-    GLenum blendSrcRGB;
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -495,7 +472,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Wire:
                     glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                    glLineWidth(lineWidth);
+                    global::renderEngine.openglStateCache().setLineState();
                     break;
                 case Point:
                     glDrawArrays(GL_POINTS, 0, pair.second.numV);
@@ -509,15 +486,9 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-
-    glDepthMask(true);
-
-    if (!blendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
+    // Restores GL State
+    global::renderEngine.openglStateCache().setDepthState();
+    global::renderEngine.openglStateCache().setBlendState();
 }
 
 void RenderableDUMeshes::renderLabels(const RenderData& data,
