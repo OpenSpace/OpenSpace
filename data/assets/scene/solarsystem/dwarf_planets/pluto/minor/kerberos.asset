@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./../transforms')
-local kernels = asset.require('./../kernels').PlutoKernels
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels').PlutoKernels
 
 
 

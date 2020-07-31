@@ -1,2 +1,0 @@
-asset.require('./pluto/add_pluto_default_layers')
-asset.require('./pluto/charon/add_charon_default_layers')

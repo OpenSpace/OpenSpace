@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./../transforms')
+local transforms = asset.require('../transforms')
 asset.require("spice/base")
 
 

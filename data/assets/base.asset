@@ -11,20 +11,19 @@ asset.require('spice/base')
 
 asset.require('scene/solarsystem/sun/sun')
 asset.require('scene/solarsystem/sun/glare')
-asset.require('scene/solarsystem/planets')
+asset.require('scene/solarsystem/sun/default_layers')
+asset.require('scene/solarsystem/planets/planets')
+asset.require('scene/solarsystem/planets/default_layers')
 asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
+asset.require('scene/solarsystem/dwarf_planets/pluto/default_layers')
+asset.require('scene/solarsystem/dwarf_planets/pluto/charon/default_layers')
 asset.request('scene/milkyway/milkyway/volume')
 asset.request('scene/milkyway/constellations/constellation_art')
 asset.request('scene/milkyway/constellations/constellation_keybinds')
 
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
-
--- Set enabled layers for globes
-asset.require('scene/solarsystem/planets/add_all_planets_default_layers')
-asset.require('scene/solarsystem/sun/add_sun_default_layers')
-asset.require('scene/solarsystem/dwarf_planets/add_all_dwarf_planets_default_layers')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
