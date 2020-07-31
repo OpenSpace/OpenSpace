@@ -58,10 +58,12 @@ asset.onInitialize(function ()
     -- Add local patches described at the top of this file
     for obj, list in pairs(vrt_folders) do
         for _, dir in pairs(list) do
-            openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+            if (dir ~= '') then
+                openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
 
-            if CreateFocusNodes then
-                openspace.globebrowsing.addFocusNodesFromDirectory(dir, obj)
+                if CreateFocusNodes then
+                    openspace.globebrowsing.addFocusNodesFromDirectory(dir, obj)
+                end
             end
         end
     end
