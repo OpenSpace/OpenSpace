@@ -70,7 +70,7 @@ FactoryManager& FactoryManager::ref() {
     return *_manager;
 }
 
-void FactoryManager::addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> f,
+void FactoryManager::addFactory(std::unique_ptr<ghoul::TemplateFactoryBase<>> f,
                                 std::string name)
 {
     ghoul_assert(f, "Factory must not be nullptr");
@@ -87,7 +87,7 @@ std::string FactoryManager::generateJson() const {
         json << "\"name\": \"" << factoryInfo.name << "\",";
         json << "\"classes\": [";
 
-        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
+        ghoul::TemplateFactoryBase<>* f = factoryInfo.factory.get();
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
             json << "\"" << c << "\"";
