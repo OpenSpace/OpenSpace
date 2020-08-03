@@ -355,12 +355,18 @@ void main() {
       //vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
 
       vs_color = vec4(0);
-
-      float interestingStreams[8] = float[](339, 340, 351, 352, 353, 354, 366, 367);
+      
+      // Close to Earth (384 nodes)
+      //float interestingStreams[8] = float[](339, 340, 351, 352, 353, 354, 366, 367);
       //float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
-      //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 
-      //168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
+      //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
       //float interestingStreams[3] = float[](37, 154, 210);
+
+      // Close to Earth (863 nodes)
+      //float interestingStreams[7] = float[](340, 350, 351, 352, 353, 363, 364);
+      //float interestingStreams[10] = float[](339, 340, 350, 351, 352, 353, 362, 363, 364, 365);
+      float interestingStreams[20] = float[](326, 327, 328, 329, 338, 339, 340, 341, 350, 351, 352, 353, 362, 363, 364, 365, 374, 375, 376, 377);
+
         for(int i = 0; i < interestingStreams.length(); i++){
             if(Streamnumber == interestingStreams[i]){
                 if(CheckvertexIndex()){
