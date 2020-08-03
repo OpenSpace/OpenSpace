@@ -140,7 +140,8 @@ local Keybindings = {
             "openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', false);" ..
             "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.EnableFade', false);" ..
             "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Color', {1.000000,1.000000,1.000000});" ..
-            "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled', false);",
+            "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled', false);" ..
+            "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.SunIntensity', 15.000000);",
 	    Documentation = "Sun artificially placed, remove shadow on Earth and Moon and show Moon trail",
 	    Name = "Earth and moon without shadow",
 	    GuiPath = "/CCMC/Nodes",
