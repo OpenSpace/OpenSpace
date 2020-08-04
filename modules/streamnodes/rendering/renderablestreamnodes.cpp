@@ -304,28 +304,28 @@ namespace {
         "Include radius with cameraperspective",
         "If false, then nodes closer to the sun will not be larger regardless of distance to camera."
     };
-    constexpr openspace::properties::Property::PropertyInfo perspectiveDistanceFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PerspectiveDistanceFactorInfo = {
         "perspectiveDistanceFactor",
-        "Distance factor",
-        "This value decides how far away the camera must be to start impacting the nodesize"
+        "Perspective Distance factor",
+        "This value decides how far away the camera must be to start impacting the node size."
     };
     constexpr openspace::properties::Property::PropertyInfo MinNodeSizeInfo = {
         "minNodeSize",
         "Minimum node size",
-        "the minimum node size."
+        "The minimum node size."
     };
     constexpr openspace::properties::Property::PropertyInfo MaxNodeSizeInfo = {
         "maxNodeSize",
         "Maximum node size",
-        "the minimum node size."
+        "The minimum node size."
     };
     constexpr openspace::properties::Property::PropertyInfo AlwaysPulseInfo = {
         "alwaysPulsate",
         "Pulsate regardless of camera position",
         "Always have nodes close to earth pulsate regardless of position."
     };
-    constexpr openspace::properties::Property::PropertyInfo UsePulseinfo = {
-       "Pulse",
+    constexpr openspace::properties::Property::PropertyInfo Pulseinfo = {
+       "pulse",
        "Nodes close to Earth pulsate",
        "Boolean for pulse."
     };
@@ -440,10 +440,10 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDrawingHollow(DrawingHollowInfo, false)
     , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _pRadiusPerspective(RadiusPerspectiveInfo, true)
-    , _pPerspectiveDistanceFactor(perspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
+    , _pPerspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
     , _pMaxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
     , _pMinNodeSize(MinNodeSizeInfo, 1.f, 1.f, 10.f)
-    , _pUsePulse(UsePulseinfo, false)
+    , _pUsePulse(Pulseinfo, false)
     , _pPulseAlways(AlwaysPulseInfo, false)
     //, _pTestChange(TestChangeInfo, 0.5f, 0.0f, 1.f)
 
@@ -1195,7 +1195,6 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Blinking), "Blinking");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::test), "test");
 
@@ -1369,7 +1368,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     //_shaderProgram->setUniform("testChange", _pTestChange);
     _shaderProgram->setUniform("maxNodeSize", _pMaxNodeSize);
     _shaderProgram->setUniform("minNodeSize", _pMinNodeSize);
-    _shaderProgram->setUniform("usePulse", _pUsePulse);
+    _shaderProgram->setUniform("usingPulse", _pUsePulse);
     _shaderProgram->setUniform("pulsatingAlways", _pPulseAlways);
     //////// test for camera perspective: 
     /*

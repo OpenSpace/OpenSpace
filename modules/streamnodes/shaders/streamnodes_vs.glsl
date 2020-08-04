@@ -103,7 +103,7 @@ uniform float   perspectiveDistanceFactor;
 
 uniform float   maxNodeSize;
 uniform float   minNodeSize;
-uniform bool    usePulse;
+uniform bool    usingPulse;
 // Inputs
 // Should be provided in meters
 layout(location = 0) in vec3 in_position;
@@ -147,48 +147,52 @@ const int R2Flux = 2;
 const int log10RFlux = 3;
 const int lnRFlux = 4;
 
+const int sizeScaling = 0;
+const int colorTables = 1;
+const int outline = 2;
+const int sizeAndColor = 3;
+const int test = 4;
+
 out vec4    vs_color;
 out float   vs_depth;
 out vec2    vs_st;
 out float   camera_IsCloseEnough;
-out float vs_closeToEarth;
+out float   vs_closeToEarth;
 out double  vs_time;
 out vec3    vs_camerapos;
 //out vec4 vs_gPosition;
 
 vec4 getTransferFunctionColor(sampler1D InColorTable) {
     // Remap the color scalar to a [0,1] range
-    float scalevalue = 0;
+    float scaleValue = 0;
     if(scalingMode == fluxMode){
-        scalevalue = fluxValue;
+        scaleValue = fluxValue;
     }
     else if(scalingMode == RFlux){
-       scalevalue = rValue * fluxValue;
+       scaleValue = rValue * fluxValue;
     }
     else if(scalingMode == log10RFlux){
         //conversion from logbase e to log10 since glsl does not support log10. 
         float logtoTen = log(rValue) / log(10);
-        scalevalue = logtoTen * fluxValue;
+        scaleValue = logtoTen * fluxValue;
     }
     else if(scalingMode == lnRFlux){
-        scalevalue = log(rValue) * fluxValue;
+        scaleValue = log(rValue) * fluxValue;
     }
     else if(scalingMode == R2Flux){
-        scalevalue = rValue * rValue * fluxValue;
+        scaleValue = rValue * rValue * fluxValue;
     }
 
-    float lookUpVal = (scalevalue - colorTableRange.x)
+    float lookUpVal = (scaleValue - colorTableRange.x)
         /(colorTableRange.y - colorTableRange.x);
     return texture(InColorTable, lookUpVal);
 }
 
 bool CheckvertexIndex(){
-    
     int nodeIndex = gl_VertexID;
    // nodeIndex = gl_VertexIndex;
     //if(enhanceMethod == 3) return false;
 
- 
     if(nodeSkipMethod == uniformskip){
         if(mod(nodeIndex, nodeSkip) == 0){
             return true;
@@ -230,7 +234,7 @@ return false;
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
         // SizeScaling
-    if(enhanceMethod == 0){
+    if(enhanceMethod == sizeScaling){
         float tempR = rValue + 0.4; 
         if(tempR > 1.5){
             tempR = 1.5;
@@ -239,24 +243,20 @@ void DecidehowtoshowClosetoEarth(){
             return;
     }
     // ColorTables
-    if(enhanceMethod == 1){
+    if(enhanceMethod == colorTables){
         vec4 fluxColor = getTransferFunctionColor(colorTable);
         vs_color = vec4(fluxColor.xyz, fluxColor.a);
-        return;
     }
     // Outline
-    if(enhanceMethod == 2){
+    if(enhanceMethod == outline){
         if(!firstRender && vs_color.x != 0 && vs_color.y != 0){
             gl_PointSize = gl_PointSize + 1;
             vs_color = vec4(streamColor.xyz, fluxColorAlpha);
         }
         return;
     }
-    // Blinking
-      if(enhanceMethod == 3){
-    }
     //SizeColor
-    if(enhanceMethod == 4){
+    if(enhanceMethod == sizeAndColor){
         vec4 fluxColor3 = getTransferFunctionColor(colorTable);
         vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
 
@@ -271,23 +271,24 @@ void DecidehowtoshowClosetoEarth(){
 void CheckdistanceMethod() { 
         //Enhance by distance to Earth
         float maxdist = 10000000000.f * perspectiveDistanceFactor;
-         float distancevec = distance(earthPos, in_position.xyz);
+        float distancevec = distance(earthPos, in_position.xyz);
+
         vs_closeToEarth = 0;
+
        if(distancevec < maxdist){
-      
-      if(distancevec < maxdist / 2 && usePulse){
-        vs_closeToEarth = 1;
-        gl_PointSize = gl_PointSize * 5;
+          if(distancevec < maxdist / 2 && usingPulse){
+                vs_closeToEarth = 1;
+                gl_PointSize = gl_PointSize * 5;
+                vs_color = vec4(streamColor.xyz, fluxColorAlpha);
+            }
         }
-        }
-        if(enhanceMethod == 1 || enhanceMethod == 4){
+        if(enhanceMethod == colorTables || enhanceMethod == sizeAndColor){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
-             vs_color = vec4(fluxColor2.xyz, fluxColor2.a);
+             vs_color = vec4(fluxColor2.xyz, fluxColorAlpha);
              //vs_color = vec4(0.3, 0.3, 0.3, 1.0);
         }
         if(distanceMethod == 0){
              if(distance(earthPos, in_position) < distanceThreshold){
-              
                 DecidehowtoshowClosetoEarth();
              }
         }
@@ -411,11 +412,12 @@ void main() {
         float distanceVec = distance(cameraPos, in_position.xyz);
 
         if(distanceVec < maxDistance){
-        camera_IsCloseEnough = 0;
+            camera_IsCloseEnough = 0;
         }
         else{
-        camera_IsCloseEnough = 1;
+            camera_IsCloseEnough = 1;
         }
+
         if(distanceVec < maxDistance){
         //vs_closeToEarth = 0;
             float distScale = 1 - smoothstep(0, maxDistance, distanceVec);

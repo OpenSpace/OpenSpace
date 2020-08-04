@@ -28,11 +28,14 @@ uniform sampler2D texture1;
 uniform bool drawCircles;
 uniform bool drawHollow;
 uniform bool useGaussian;
-uniform bool    usingCameraPerspective;
+uniform bool usingCameraPerspective;
 //uniform float testChange;
 uniform bool pulsatingAlways;
-uniform bool usePulse;
+uniform bool usingPulse;
 uniform vec3 cameraPos;
+uniform float distanceThreshold;
+uniform int enhanceMethod;
+
 in vec2 vs_st;
 in vec4 vs_color;
 in float vs_depth;
@@ -61,19 +64,15 @@ Fragment getFragment() {
     }*/
 
     if(drawCircles){
-      
         if(length(coord) > 0.5){
             discard;
         }
-       
-      
-
     }
     // if(vs_closeToEarth > 0.5){
     if(drawHollow && length(coord) < 0.4){
-    if(vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0)) < 500000000000.f){
-    discard;
-    }
+        if(vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0)) < 500000000000.f){
+            discard;
+        }
     }
     //}
     // outline
@@ -89,8 +88,7 @@ Fragment getFragment() {
     */
     //float alphaV = 1 - smoothstep(0, 1, length(coord));
     float e = 2.718055f;
-   
-   
+
    if(useGaussian){
        float y = 1 * pow(e, - (pow(length(coord), 2)) /( 2 * pow(0.2, 2))); 
        if(y < 0.05){
@@ -98,19 +96,18 @@ Fragment getFragment() {
        }
    frag.color.a = y;
    }
-    
     //}
-    if(usePulse && usingCameraPerspective){
+
+    if(usingPulse && usingCameraPerspective){
         if(vs_closeToEarth > 0.5){
             if(pulsatingAlways || camera_IsCloseEnough > 0.5){
-                if(length(coord) > 0.46){
+                if(length(coord) > 0.35){
                     float speed = 60.f;
                     int modulusResult = int(double(speed) * vs_time) % 60;
                     if(modulusResult > 0 && modulusResult < 30){
-
-                        //frag.color = vec4(1, 1, 1,1);
-                        discard;
-                }
+                            //frag.color = vec4(1, 1, 1, 1);
+                            discard;
+                    }
                 }
             }
         }
@@ -124,7 +121,6 @@ Fragment getFragment() {
             discard;
         }
         */
-     
    
     //else{
     //frag.color.a = alphaV;
