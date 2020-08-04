@@ -1,27 +1,27 @@
-asset.request('./planets/mercury/mercury')
+asset.request('./mercury/mercury')
 
-asset.request('./planets/venus/venus')
-asset.request('./planets/venus/atmosphere')
+asset.request('./venus/venus')
+asset.request('./venus/atmosphere')
 
-asset.request('./planets/earth/earth')
-asset.request('./planets/earth/atmosphere')
-asset.request('./planets/earth/markers')
-asset.request('./planets/earth/moon/moon')
+asset.request('./earth/earth')
+asset.request('./earth/atmosphere')
+asset.request('./earth/markers')
+asset.request('./earth/moon/moon')
 
-asset.request('./planets/mars/mars')
-asset.request('./planets/mars/atmosphere')
+asset.request('./mars/mars')
+asset.request('./mars/atmosphere')
 
-asset.request('./planets/jupiter/jupiter')
-asset.request('./planets/jupiter/major_moons')
+asset.request('./jupiter/jupiter')
+asset.request('./jupiter/major_moons')
 
-asset.request('./planets/saturn/saturn')
-asset.request('./planets/saturn/major_moons')
+asset.request('./saturn/saturn')
+asset.request('./saturn/major_moons')
 
-asset.request('./planets/uranus/uranus')
-asset.request('./planets/uranus/major_moons')
+asset.request('./uranus/uranus')
+asset.request('./uranus/major_moons')
 
-asset.request('./planets/neptune/neptune')
-asset.request('./planets/neptune/major_moons')
+asset.request('./neptune/neptune')
+asset.request('./neptune/major_moons')
 
 
 asset.meta = {
