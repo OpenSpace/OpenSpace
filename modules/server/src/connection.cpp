@@ -184,7 +184,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
 
-        std::unique_ptr<Topic> topic = _topicFactory.create(type);
+        std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(_topicFactory.create(type));
         topic->initialize(this, topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {

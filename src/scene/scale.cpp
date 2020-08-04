@@ -26,7 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -64,9 +66,13 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
     std::string scaleType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<Scale>();
-    std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
+    Scale* result = factory->create(
+        scaleType,
+        dictionary/*,
+        &global::memoryManager.PersistentMemory*/
+    );
     result->setIdentifier("Scale");
-    return result;
+    return std::unique_ptr<Scale>(result);
 }
 
 Scale::Scale() : properties::PropertyOwner({ "Scale" }) {}

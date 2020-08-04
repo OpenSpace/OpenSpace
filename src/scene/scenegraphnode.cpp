@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -144,7 +145,10 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         "SceneGraphNode"
     );
 
-    std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
+    //SceneGraphNode* n = global::memoryManager.PersistentMemory.alloc<SceneGraphNode>();
+    SceneGraphNode* n = new SceneGraphNode;
+    std::unique_ptr<SceneGraphNode> result = std::unique_ptr<SceneGraphNode>(n);
+
 #ifdef Debugging_Core_SceneGraphNode_Indices
     result->index = nextIndex++;
 #endif // Debugging_Core_SceneGraphNode_Indices
@@ -312,9 +316,18 @@ SceneGraphNode::SceneGraphNode()
     , _guiPath(GuiPathInfo)
     , _guiDisplayName(GuiNameInfo)
     , _transform {
-        std::make_unique<StaticTranslation>(),
-        std::make_unique<StaticRotation>(),
-        std::make_unique<StaticScale>()
+        std::unique_ptr<StaticTranslation>(
+            new StaticTranslation
+            //global::memoryManager.PersistentMemory.alloc<StaticTranslation>()
+        ),
+        std::unique_ptr<StaticRotation>(
+            new StaticRotation
+            //global::memoryManager.PersistentMemory.alloc<StaticRotation>()
+        ),
+        std::unique_ptr<StaticScale>(
+            new StaticScale
+            //global::memoryManager.PersistentMemory.alloc<StaticScale>()
+        )
     }
    , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)

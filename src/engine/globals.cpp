@@ -51,8 +51,9 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/versionchecker.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -85,6 +86,11 @@ DownloadManager& gDownloadManager() {
 
 LuaConsole& gLuaConsole() {
     static LuaConsole g;
+    return g;
+}
+
+MemoryManager& gMemoryManager() {
+    static MemoryManager g;
     return g;
 }
 

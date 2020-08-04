@@ -30,6 +30,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/memorypool.h>
 #include <mutex>
 #include <set>
 #include <unordered_map>
@@ -262,6 +263,8 @@ private:
         bool isExpired = false;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
+
+    ghoul::MemoryPool<4096> _memoryPool;
 };
 
 } // namespace openspace

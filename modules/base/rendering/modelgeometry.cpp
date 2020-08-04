@@ -81,7 +81,8 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     const std::string& geometryType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
-    return factory->create(geometryType, dictionary);;
+    ModelGeometry* geometry = factory->create(geometryType, dictionary);
+    return std::unique_ptr<ModelGeometry>(geometry);
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)

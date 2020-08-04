@@ -26,7 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
@@ -66,8 +68,12 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(
 
     const std::string& rotationType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<Rotation>();
-    std::unique_ptr<Rotation> result = factory->create(rotationType, dictionary);
-    return result;
+    Rotation* result = factory->create(
+        rotationType,
+        dictionary/*,
+        &global::memoryManager.PersistentMemory*/
+    );
+    return std::unique_ptr<Rotation>(result);
 }
 
 Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}
