@@ -192,11 +192,6 @@ namespace {
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
     };
-    constexpr openspace::properties::Property::PropertyInfo DistanceMethodInfo = {
-        "distanceMethod",
-        "Distance Method",
-        "Deciding how to check distance."
-    };
     constexpr openspace::properties::Property::PropertyInfo EnhanceMethodInfo = {
         "enhanceMethod",
         "Enhance Method",
@@ -391,7 +386,6 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
     , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
     , _pNodeskipMethod(NodeskipMethodInfo, OptionProperty::DisplayType::Radio)
-    , _pDistancemethod(DistanceMethodInfo, OptionProperty::DisplayType::Dropdown)
     , _pEnhancemethod(EnhanceMethodInfo, OptionProperty::DisplayType::Dropdown)
     , _pColorTablePath(ColorTablePathInfo)
     , _pStreamColor(StreamColorInfo,
@@ -1156,7 +1150,6 @@ void RenderableStreamNodes::setupProperties() {
     _pNodesamountGroup.addProperty(_pMaxNodeDistanceSize);
     _pNodesamountGroup.addProperty(_pNodeDistanceThreshold);
 
-    _pEarthdistGroup.addProperty(_pDistancemethod);
     _pEarthdistGroup.addProperty(_pDistanceThreshold);
     _pEarthdistGroup.addProperty(_pEnhancemethod);
     _pEarthdistGroup.addProperty(_pInterestingStreamsEnabled);
@@ -1187,16 +1180,9 @@ void RenderableStreamNodes::setupProperties() {
     _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
     _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber");
 
-    _pDistancemethod.addOption(static_cast<int>(DistanceMethod::Eucledian), "Eucledian");
-    _pDistancemethod.addOption(static_cast<int>(DistanceMethod::x), "x");
-    _pDistancemethod.addOption(static_cast<int>(DistanceMethod::y), "y");
-    _pDistancemethod.addOption(static_cast<int>(DistanceMethod::z), "z");
-
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Outline), "Outline");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::test), "test");
 
     _pCameraPerspectiveGroup.addProperty(_pCameraPerspective);
     _pCameraPerspectiveGroup.addProperty(_pPerspectiveDistanceFactor);
@@ -1342,7 +1328,6 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
     _shaderProgram->setUniform("earthPos", earthPos);
     _shaderProgram->setUniform("distanceThreshold", _pDistanceThreshold);
-    _shaderProgram->setUniform("distanceMethod", _pDistancemethod);
     _shaderProgram->setUniform("activeStreamNumber", _pActiveStreamNumber);
     _shaderProgram->setUniform("enhanceMethod", _pEnhancemethod);
     _shaderProgram->setUniform("flowColor", _pFlowColor);
@@ -1468,43 +1453,12 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     const std::vector<glm::vec3>& vertPos = _vertexPositions;
     glBindVertexArray(_vertexArrayObject);
 
-    
-_shaderProgram->setUniform("firstRender", true);
-
 GLint temp = 0;
 glDrawArrays(
     GL_POINTS,
     temp,
     static_cast<GLsizei>(_vertexPositions.size())
 );
-
-if (_pEnhancemethod == 2) {
-    //LDEBUG("Vi borde rendera vita punkter");
-    _shaderProgram->setUniform("firstRender", false);
-    GLint temp = 0;
-    glDrawArrays(
-        GL_POINTS,
-        temp,
-        static_cast<GLsizei>(_vertexPositions.size())
-    );
-}
-/*if (_pEnhancemethod == 3) {
-    //LDEBUG("Vi borde rendera linjer");
-    _shaderProgram->setUniform("firstRender", false);
-    glLineWidth(_pLineWidth);
-    glMultiDrawArrays(
-        GL_LINE_STRIP, //_drawingOutputType,
-        _lineStart.data(),
-        _lineCount.data(),
-        static_cast<GLsizei>(_lineStart.size()));
-}*/
-
-// _shaderProgram->setUniform("firstRender", false);
-// glDrawArrays(
-//     GL_POINTS,
-//     temp,
-//     static_cast<GLsizei>(_vertexPositions.size())
-// );
 
 glBindVertexArray(0);
 _shaderProgram->deactivate();

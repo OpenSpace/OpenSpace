@@ -33,8 +33,6 @@ uniform bool usingCameraPerspective;
 uniform bool pulsatingAlways;
 uniform bool usingPulse;
 uniform vec3 cameraPos;
-uniform float distanceThreshold;
-uniform int enhanceMethod;
 
 in vec2 vs_st;
 in vec4 vs_color;

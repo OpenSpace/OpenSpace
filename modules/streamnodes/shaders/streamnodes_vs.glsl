@@ -71,7 +71,6 @@ uniform float   nodeSkipRadiusThreshold;
 uniform float   fluxColorAlpha;
 uniform vec3    earthPos;
 uniform float   distanceThreshold;
-uniform int     distanceMethod;
 uniform int     activeStreamNumber;
 uniform bool    firstRender;
 uniform int     enhanceMethod;
@@ -149,9 +148,7 @@ const int lnRFlux = 4;
 
 const int sizeScaling = 0;
 const int colorTables = 1;
-const int outline = 2;
-const int sizeAndColor = 3;
-const int test = 4;
+const int sizeAndColor = 2;
 
 out vec4    vs_color;
 out float   vs_depth;
@@ -247,14 +244,6 @@ void DecidehowtoshowClosetoEarth(){
         vec4 fluxColor = getTransferFunctionColor(colorTable);
         vs_color = vec4(fluxColor.xyz, fluxColor.a);
     }
-    // Outline
-    if(enhanceMethod == outline){
-        if(!firstRender && vs_color.x != 0 && vs_color.y != 0){
-            gl_PointSize = gl_PointSize + 1;
-            vs_color = vec4(streamColor.xyz, fluxColorAlpha);
-        }
-        return;
-    }
     //SizeColor
     if(enhanceMethod == sizeAndColor){
         vec4 fluxColor3 = getTransferFunctionColor(colorTable);
@@ -287,25 +276,8 @@ void CheckdistanceMethod() {
              vs_color = vec4(fluxColor2.xyz, fluxColorAlpha);
              //vs_color = vec4(0.3, 0.3, 0.3, 1.0);
         }
-        if(distanceMethod == 0){
-             if(distance(earthPos, in_position) < distanceThreshold){
-                DecidehowtoshowClosetoEarth();
-             }
-        }
-        else if(distanceMethod == 1){
-            if(distance(earthPos.x, in_position.x) < distanceThreshold){
-                DecidehowtoshowClosetoEarth();
-            }
-        }
-        else if(distanceMethod == 2){
-            if(distance(earthPos.y, in_position.y) < distanceThreshold){
-                DecidehowtoshowClosetoEarth();
-            }
-        }
-        else if(distanceMethod == 3){
-            if(distance(earthPos.z, in_position.z) < distanceThreshold){
-                DecidehowtoshowClosetoEarth();
-            }
+        if(distance(earthPos, in_position) < distanceThreshold){
+            DecidehowtoshowClosetoEarth();
         }
 }
 

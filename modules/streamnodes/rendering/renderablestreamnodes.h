@@ -79,18 +79,10 @@ private:
         Radius = 2,
         Streamnumber = 3
     };
-    enum class DistanceMethod : int {
-        Eucledian = 0,
-        x = 1,
-        y = 2,
-        z = 3
-    };
     enum class EnhanceMethod : int {
         Sizescaling = 0,
         Colortables = 1,
-        Outline = 2,
-        Sizeandcolor = 3,
-        test = 4
+        Sizeandcolor = 2,
     };
 
     UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
@@ -203,8 +195,6 @@ private:
     properties::OptionProperty _pColorMode;
     // Uniform stream Color
     properties::Vec4Property _pStreamColor;
-    // Chose different distant measurements:
-    properties::OptionProperty _pDistancemethod;
     // Choose different distant to earth enhanchement method. 
     properties::OptionProperty _pEnhancemethod;
     // Color table/transfer function for "By Flux value" coloring
