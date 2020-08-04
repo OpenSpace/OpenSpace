@@ -186,8 +186,8 @@ SonificationModule::SonificationModule()
     _stream = osc::OutboundPacketStream(_buffer, BUFFER_SIZE);
     _isRunning = true;
     _GUIState = SonificationModule::GUIMode::Planetary;
-    _previousTimeSpeed = 0.0;
-    _timePrecision = 0.001;
+    _timeSpeed = 0.0;
+    _timePrecision = 0.0001;
 
     if (_thread.joinable())
         _thread.join();
@@ -1366,6 +1366,21 @@ void SonificationModule::setAllPlanetaryProperties(bool value) {
     }
 }
 
+void SonificationModule::checkTimeSpeed(double& ts) {
+    double timeSpeed = global::timeManager.deltaTime() / NUM_SEC_PER_DAY;
+    if (abs(ts - timeSpeed) > _timePrecision) {
+        ts = timeSpeed;
+
+        std::string label = "/Time";
+        UdpTransmitSocket socket = UdpTransmitSocket(
+            IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+        _stream.Clear();
+        _stream << osc::BeginMessage(label.c_str()) << ts << osc::EndMessage;
+        socket.Send(_stream.Data(), _stream.Size());
+    }
+}
+
+
 //Extract the data from the given identifier
 //NOTE: The identifier must start with capital letter,
 //otherwise no match will be found
@@ -1379,10 +1394,12 @@ void SonificationModule::extractData(const std::string& identifier, int i,
         glm::dvec3 nodePosition = node->worldPosition();
 
         if (nodePosition != glm::dvec3(0.0, 0.0, 0.0)) {
+            //Check the time speed in OpenSpace
+            checkTimeSpeed(_timeSpeed);
+
             //Calculate distance to the planet from the camera, convert to km
             glm::dvec3 cameraToNode = nodePosition - cameraPosition;
             double distance = glm::length(cameraToNode)/1000.0;
-            double timeSpeed = global::timeManager.deltaTime() / NUM_SEC_PER_DAY;
             double angle;
             bool updateMoons = false;
 
@@ -1444,13 +1461,11 @@ void SonificationModule::extractData(const std::string& identifier, int i,
             //Check if this data is new, otherwise dont send the data
             if (abs(_planets[i].distance - distance) > _distancePrecision ||
                 abs(_planets[i].angle - angle) > _anglePrecision ||
-                abs(_previousTimeSpeed - timeSpeed) > _timePrecision || updateMoons ||
-                _planets[i].update)
+                updateMoons || _planets[i].update)
             {
                 //Update the saved data for the planet
                 _planets[i].setDistance(distance);
                 _planets[i].setAngle(angle);
-                _previousTimeSpeed = timeSpeed;
 
                 //Send the data to SuperCollider
                 //NOTE: Socket cannot be saved in class, it does not work then,
@@ -1460,7 +1475,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                     IpEndpointName(SC_IP_ADDRESS, SC_PORT));
                 _stream.Clear();
                 osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
-                _stream << osc::BeginMessage(label.c_str()) << distance << angle << timeSpeed << settingsBlob;
+                _stream << osc::BeginMessage(label.c_str()) << distance << angle << settingsBlob;
 
                 //Add the information of the moons if any
                 for (int m = 0; m < _planets[i].moons.size(); ++m) {
@@ -1601,7 +1616,7 @@ void SonificationModule::internalDeinitialize() {
         std::string label = "/" + _planets[i].identifier;
         osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
         _stream << osc::BeginMessage(label.c_str()) <<
-            _planets[i].distance << _planets[i].angle << _previousTimeSpeed << settingsBlob;
+            _planets[i].distance << _planets[i].angle << settingsBlob;
 
         //Add the information of the moons if any
         for (int m = 0; m < _planets[i].moons.size(); ++m) {

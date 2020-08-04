@@ -72,6 +72,7 @@ private:
     void threadMain(std::atomic<bool>& isRunning);
     void setAllSolarProperties(bool value);
     void setAllPlanetaryProperties(bool value);
+    void checkTimeSpeed(double& ts);
 
     //On change methods for each property
     void onEverythingChanged(bool value);
@@ -197,7 +198,7 @@ private:
     std::atomic<bool> _isRunning;
     double _anglePrecision;
     double _distancePrecision;
-    double _previousTimeSpeed;
+    double _timeSpeed;
     double _timePrecision;
     Planet _planets[NUM_PLANETS];
     GUIMode _GUIState;
