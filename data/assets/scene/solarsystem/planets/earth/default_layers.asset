@@ -1,0 +1,33 @@
+local layerHelper = asset.require('util/layer_helper')
+local globeAsset = asset.require('./earth')
+local globeIdentifier = globeAsset.Earth.Identifier
+
+-- set enabled and fallback layers
+local defaultLayers = asset.require('./layers/default_layers')
+local colorFallbackLayer = asset.require('./layers/colorlayers/blue_marble_fallback').layer
+local nightFallbackLayer = asset.require('./layers/nightlayers/earth_night_texture').layer
+local heightFallbackLayer = asset.require('./layers/heightlayers/blue_marble_height_fallback').layer
+
+colorFallbackLayer.Enabled = true
+heightFallbackLayer.Enabled = true
+nightFallbackLayer.Enabled = true
+
+local colorLayer = asset.require('./layers/colorlayers/esri_viirs_combo').layer
+local heightLayer = asset.require('./layers/heightlayers/terrain_tileset').layer
+local nightLayer = asset.require('./layers/nightlayers/earth_at_night_2012').layer
+local waterMask = asset.require('./layers/watermasks/modis_water_mask').layer
+
+colorLayer.Enabled = true
+colorLayer.Fallback = colorFallbackLayer
+
+heightLayer.Enabled = true
+heightLayer.Fallback = heightFallbackLayer
+
+nightLayer.Enabled = true
+nightLayer.Fallback = nightFallbackLayer
+
+waterMask.Enabled = true
+
+asset.onInitialize(function ()
+    layerHelper.addLayersToGlobe(globeIdentifier, defaultLayers)
+end)
