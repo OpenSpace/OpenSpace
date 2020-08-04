@@ -56,6 +56,14 @@ namespace openspace {
         , content(std::move(c))
     {}
 
+    Connection::Message::Message(MessageType t, std::vector<char> r,
+        std::vector<char> f, std::vector<char> i)
+        : type(t)
+        , renderableId(std::move(r))
+        , function(std::move(f))
+        , identifier(std::move(i))
+    {}
+
     Connection::ConnectionLostError::ConnectionLostError()
         : ghoul::RuntimeError("Connection lost", "Connection")
     {}
@@ -98,59 +106,80 @@ namespace openspace {
     // Connection 
     Connection::Message Connection::receiveMessage() {
         // Header consists of...
-        /*constexpr size_t HeaderSize =
-            2 * sizeof(char) + // OS
-            3 * sizeof(uint32_t); // Protocol version, message type and message size*/
+        size_t HeaderSize = 6 * sizeof(char);
 
         // Create basic buffer for receiving first part of messages
-        // std::vector<char> headerBuffer(HeaderSize);
-        std::vector<char> messageBuffer;
+        std::vector<char> headerBuffer(HeaderSize);
+        std::vector<char> renderableBuffer;
+        std::vector<char> identifierBuffer;
+        std::vector<char> nameBuffer;
 
         // Receive the header data
-        /*if (!_socket->get(headerBuffer.data(), HeaderSize)) {
+        if (!_socket->get(headerBuffer.data(), HeaderSize)) {
             LERROR("Failed to read header from socket. Disconnecting.");
             throw ConnectionLostError();
         }
+        
+        std::string type;
+        std::string renderable;
+        std::string identifier;
+        std::string name;
+        std::string ignore;
 
-        // Make sure that header matches this version of OpenSpace
-        if (!(headerBuffer[0] == 'O' && headerBuffer[1] && 'S')) {
-            LERROR("Expected to read message header 'OS' from socket.");
-            throw ConnectionLostError();
+        type.push_back(headerBuffer[0]);
+
+        int t = stoi(type);
+        int renderableLength;
+        int identifierLength;
+        int nameLength;
+
+        switch (t) {
+        case 1:
+            renderable.push_back(headerBuffer[1]);
+            renderable.push_back(headerBuffer[2]);
+            identifier.push_back(headerBuffer[3]);
+            identifier.push_back(headerBuffer[4]);
+            name.push_back(headerBuffer[5]);
+            break;
+        case 2:
+            ignore.push_back(headerBuffer[1]);
+            renderable.push_back(headerBuffer[2]);
+            renderable.push_back(headerBuffer[3]);
+            identifier.push_back(headerBuffer[4]);
+            name.push_back(headerBuffer[5]);
+            break;
         }
+        LERROR(fmt::format("Type: {}", type));
 
-        size_t offset = 2;
-        const uint32_t protocolVersionIn =
-            *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
-        offset += sizeof(uint32_t);
-
-        if (protocolVersionIn != ProtocolVersion) {
-            LERROR(fmt::format(
-                "Protocol versions do not match. Remote version: {}, Local version: {}",
-                protocolVersionIn,
-                ProtocolVersion
-            ));
-            throw ConnectionLostError();
-        }
-
-        const uint32_t messageTypeIn =
-            *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
-        offset += sizeof(uint32_t);
-
-        const uint32_t messageSizeIn =
-            *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
-        offset += sizeof(uint32_t);*/
-
-        const size_t messageSize = 2;
+        renderableLength = stoi(renderable);
+        identifierLength = stoi(identifier);
+        nameLength = stoi(name);
 
         // Receive the payload
-        messageBuffer.resize(messageSize);
-        if (!_socket->get(messageBuffer.data(), messageSize)) {
+        renderableBuffer.resize(renderableLength);
+        if (!_socket->get(renderableBuffer.data(), renderableLength)) {
             LERROR("Failed to read message from socket. Disconnecting.");
             throw ConnectionLostError();
         }
+        LERROR(fmt::format("renderable: {}", renderable));
+
+        identifierBuffer.resize(identifierLength);
+        if (!_socket->get(identifierBuffer.data(), identifierLength)) {
+            LERROR("Failed to read message from socket. Disconnecting.");
+            throw ConnectionLostError();
+        }
+        LERROR(fmt::format("identifier: {}", identifier));
+
+        nameBuffer.resize(nameLength);
+        if (!_socket->get(nameBuffer.data(), nameLength)) {
+            LERROR("Failed to read message from socket. Disconnecting.");
+            throw ConnectionLostError();
+        }
+        LERROR(fmt::format("name: {}", name));
 
         // And delegate decoding depending on type
-        return Message(MessageType::Data, messageBuffer);
+        return Message(MessageType::Data, renderableBuffer, nameBuffer, identifierBuffer);
+
     }
 
     // Server
@@ -245,12 +274,18 @@ namespace openspace {
         std::shared_ptr<Peer>& peer = it->second;
 
         const Connection::MessageType messageType = peerMessage.message.type;
-        std::vector<char>& data = peerMessage.message.content;
-        std::string sData(data.begin(), data.end());
+        std::vector<char>& name = peerMessage.message.function;
+        std::vector<char>& identifier = peerMessage.message.identifier;
+        std::vector<char>& renderable = peerMessage.message.renderableId;
+        std::string sName(name.begin(), name.end());
+        std::string sIdentifier(identifier.begin(), identifier.end());
+        std::string sRenderable(renderable.begin(), renderable.end());
         switch (messageType) {
         case Connection::MessageType::Data:
             //handleData(*peer, std::move(data));
-            LERROR(fmt::format("Peer message: {}", sData));
+            LERROR(fmt::format("Name: {}", sName));
+            LERROR(fmt::format("Identifier: {}", sIdentifier));
+            LERROR(fmt::format("Renderable: {}", sRenderable));
             break;
         case Connection::MessageType::Disconnection:
             disconnect(*peer);

@@ -58,9 +58,14 @@ public:
     struct Message {
         Message() = default;
         Message(MessageType t, std::vector<char> c);
+        Message(MessageType t, std::vector<char> r,
+            std::vector<char> f, std::vector<char> i);
 
         MessageType type;
         std::vector<char> content;
+        std::vector<char> renderableId;
+        std::vector<char> function;
+        std::vector<char> identifier;
     };
 
     class ConnectionLostError : public ghoul::RuntimeError {
