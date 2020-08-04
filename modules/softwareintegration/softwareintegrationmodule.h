@@ -47,12 +47,37 @@ public:
         Connecting
     };
 
+    enum class MessageType : uint32_t {
+        Authentication = 0,
+        Data,
+        ConnectionStatus,
+        NConnections,
+        Disconnection
+    };
+
+    struct Message {
+        Message() = default;
+        Message(MessageType t, std::vector<char> c);
+
+        MessageType type;
+        std::vector<char> content;
+    };
+
+    class ConnectionLostError : public ghoul::RuntimeError {
+    public:
+        explicit ConnectionLostError();
+    };
+
     Connection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
     // Connection
     bool isConnectedOrConnecting() const;
     void disconnect();
     ghoul::io::TcpSocket* socket();
+
+    Connection::Message receiveMessage();
+
+    static const unsigned int ProtocolVersion;
 
 private:
     // Connection
@@ -69,15 +94,12 @@ public:
 
     // Server
     void start(int port);
-    void setDefaultHostAddress(std::string defaultHostAddress);
-    std::string defaultHostAddress() const;
     void stop();
-    //size_t nConnections() const;
+    size_t nConnections() const;
 
     std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;
 
-    static const unsigned int ProtocolVersion;
 private:
     // Server
     struct Peer {
@@ -88,26 +110,28 @@ private:
         std::thread thread;
     };
 
+    struct PeerMessage {
+        size_t peerId;
+        Connection::Message message;
+    };
+
     // Server
     bool isConnected(const Peer& peer) const;
     void disconnect(Peer& peer);
-    //void setName(Peer& peer, std::string name);
-    //void assignHost(std::shared_ptr<Peer> newHost);
-    //void handleDisconnection(std::shared_ptr<Peer> peer);
     void handleNewPeers();
+    void eventLoop();
     std::shared_ptr<Peer> peer(size_t id);
-    //void handlePeer(size_t id);
+    void handlePeer(size_t id);
+    void handlePeerMessage(PeerMessage peerMessage);
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;
     std::thread _serverThread;
+    std::thread _eventLoopThread;
     ghoul::io::TcpSocketServer _socketServer;
     size_t _nextConnectionId = 1;
     std::atomic_bool _shouldStop = false;
     std::atomic_size_t _nConnections = 0;
-    std::atomic_size_t _hostPeerId = 0;
-    mutable std::mutex _hostInfoMutex;
-    std::string _hostName;
-    std::string _defaultHostAddress;
+    ConcurrentQueue<PeerMessage> _incomingMessages;
 
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;
