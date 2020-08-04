@@ -83,8 +83,14 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
 
     _topicFactory.registerClass(
         AuthenticationTopicKey,
-        [password](bool, const ghoul::Dictionary&) {
-            return new AuthorizationTopic(password);
+        [password](bool, const ghoul::Dictionary&, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->alloc(sizeof(AuthorizationTopic));
+                return new (ptr) AuthorizationTopic(password);
+            }
+            else {
+                return new AuthorizationTopic(password);
+            }
         }
     );
 
