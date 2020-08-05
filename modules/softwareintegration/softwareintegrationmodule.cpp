@@ -32,6 +32,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/query/query.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/io/socket/tcpsocket.h>
@@ -51,17 +52,9 @@ namespace openspace {
 
     SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
 
-    Connection::Message::Message(MessageType t, std::vector<char> c)
-        : type(t)
-        , content(std::move(c))
-    {}
-
-    Connection::Message::Message(MessageType t, std::vector<char> r,
-        std::vector<char> f, std::vector<char> i)
-        : type(t)
-        , renderableId(std::move(r))
-        , function(std::move(f))
-        , identifier(std::move(i))
+    Connection::Message::Message(MessageType type, std::vector<char> content)
+        : type(type)
+        , content(std::move(content))
     {}
 
     Connection::ConnectionLostError::ConnectionLostError()
@@ -106,80 +99,64 @@ namespace openspace {
     // Connection 
     Connection::Message Connection::receiveMessage() {
         // Header consists of...
-        size_t HeaderSize = 6 * sizeof(char);
+        size_t HeaderSize = 
+            9 * sizeof(char);
 
         // Create basic buffer for receiving first part of messages
         std::vector<char> headerBuffer(HeaderSize);
-        std::vector<char> renderableBuffer;
-        std::vector<char> identifierBuffer;
-        std::vector<char> nameBuffer;
+        std::vector<char> messageBuffer;
 
         // Receive the header data
         if (!_socket->get(headerBuffer.data(), HeaderSize)) {
             LERROR("Failed to read header from socket. Disconnecting.");
             throw ConnectionLostError();
         }
-        
+
+        std::string version;
+        version.push_back(headerBuffer[0]);
+        const uint32_t protocolVersionIn = std::stoi(version);
+
+        // Make sure that header matches the protocol version
+        if (!(protocolVersionIn == ProtocolVersion)) {
+            LERROR(fmt::format(
+                "Protocol versions do not match. Remote version: {}, Local version: {}",
+                protocolVersionIn,
+                ProtocolVersion
+            ));
+            throw ConnectionLostError();
+        }
+
         std::string type;
-        std::string renderable;
-        std::string identifier;
-        std::string name;
-        std::string ignore;
+        type.push_back(headerBuffer[1]);
+        type.push_back(headerBuffer[2]);
+        type.push_back(headerBuffer[3]);
+        type.push_back(headerBuffer[4]);
 
-        type.push_back(headerBuffer[0]);
+        std::string messageSizeIn;
+        messageSizeIn.push_back(headerBuffer[5]);
+        messageSizeIn.push_back(headerBuffer[6]);
+        messageSizeIn.push_back(headerBuffer[7]);
+        messageSizeIn.push_back(headerBuffer[8]);
 
-        int t = stoi(type);
-        int renderableLength;
-        int identifierLength;
-        int nameLength;
+        const size_t messageSize = stoi(messageSizeIn);
 
-        switch (t) {
-        case 1:
-            renderable.push_back(headerBuffer[1]);
-            renderable.push_back(headerBuffer[2]);
-            identifier.push_back(headerBuffer[3]);
-            identifier.push_back(headerBuffer[4]);
-            name.push_back(headerBuffer[5]);
-            break;
-        case 2:
-            ignore.push_back(headerBuffer[1]);
-            renderable.push_back(headerBuffer[2]);
-            renderable.push_back(headerBuffer[3]);
-            identifier.push_back(headerBuffer[4]);
-            name.push_back(headerBuffer[5]);
-            break;
-        }
-        LERROR(fmt::format("Type: {}", type));
-
-        renderableLength = stoi(renderable);
-        identifierLength = stoi(identifier);
-        nameLength = stoi(name);
-
-        // Receive the payload
-        renderableBuffer.resize(renderableLength);
-        if (!_socket->get(renderableBuffer.data(), renderableLength)) {
+        messageBuffer.resize(messageSize);
+        if (!_socket->get(messageBuffer.data(), messageSize)) {
             LERROR("Failed to read message from socket. Disconnecting.");
             throw ConnectionLostError();
         }
-        LERROR(fmt::format("renderable: {}", renderable));
-
-        identifierBuffer.resize(identifierLength);
-        if (!_socket->get(identifierBuffer.data(), identifierLength)) {
-            LERROR("Failed to read message from socket. Disconnecting.");
-            throw ConnectionLostError();
-        }
-        LERROR(fmt::format("identifier: {}", identifier));
-
-        nameBuffer.resize(nameLength);
-        if (!_socket->get(nameBuffer.data(), nameLength)) {
-            LERROR("Failed to read message from socket. Disconnecting.");
-            throw ConnectionLostError();
-        }
-        LERROR(fmt::format("name: {}", name));
 
         // And delegate decoding depending on type
-        return Message(MessageType::Data, renderableBuffer, nameBuffer, identifierBuffer);
-
+        if( type == "addS")
+            return Message(MessageType::AddSceneGraph, messageBuffer);
+        else if (type == "delS")
+            return Message(MessageType::RemoveSceneGraph, messageBuffer);
+        else if (type == "colo")
+            return Message(MessageType::Color, messageBuffer);
+        else if (type == "opac")
+            return Message(MessageType::Opacity, messageBuffer);
+        else if( type == "size")
+            return Message(MessageType::Size, messageBuffer);
     }
 
     // Server
@@ -273,23 +250,138 @@ namespace openspace {
 
         std::shared_ptr<Peer>& peer = it->second;
 
+        /* LERROR(fmt::format("Name: {}", sName)); */
+
         const Connection::MessageType messageType = peerMessage.message.type;
-        std::vector<char>& name = peerMessage.message.function;
-        std::vector<char>& identifier = peerMessage.message.identifier;
-        std::vector<char>& renderable = peerMessage.message.renderableId;
-        std::string sName(name.begin(), name.end());
-        std::string sIdentifier(identifier.begin(), identifier.end());
-        std::string sRenderable(renderable.begin(), renderable.end());
+        std::vector<char>& message = peerMessage.message.content;
+        std::string ms(message.begin(), message.end());
         switch (messageType) {
-        case Connection::MessageType::Data:
+        case Connection::MessageType::Connection: {
             //handleData(*peer, std::move(data));
-            LERROR(fmt::format("Name: {}", sName));
-            LERROR(fmt::format("Identifier: {}", sIdentifier));
-            LERROR(fmt::format("Renderable: {}", sRenderable));
             break;
-        case Connection::MessageType::Disconnection:
+        }
+        case Connection::MessageType::AddSceneGraph: {
+
+            LERROR("Hej ny scene graph");
+            break;
+        }
+        case Connection::MessageType::RemoveSceneGraph: {
+            std::string identifier(message.begin(), message.end());
+            LERROR(fmt::format("Identifier: {}", identifier));
+            break;
+        }
+        case Connection::MessageType::Color: {
+            std::string length_of_identifier;
+            length_of_identifier.push_back(message[0]);
+            length_of_identifier.push_back(message[1]);
+
+            size_t offset = 2;
+
+            int lengthOfIdentifier = stoi(length_of_identifier);
+            int counter = 0; 
+            std::string identifier;
+            while( counter != lengthOfIdentifier)
+            {
+                identifier.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_value;
+            length_of_value.push_back(message[offset]);
+            length_of_value.push_back(message[offset + 1]);
+            offset += 2;
+
+            int lengthOfValue = stoi(length_of_value);
+            std::string value;
+            counter = 0;
+            while (counter != lengthOfValue)
+            {
+                value.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            LERROR(fmt::format("Identifier: {}", identifier));
+            LERROR(fmt::format("Color: {}", value));
+
+            break;
+        }
+        case Connection::MessageType::Opacity: {
+            std::string length_of_identifier;
+            length_of_identifier.push_back(message[0]);
+            length_of_identifier.push_back(message[1]);
+
+            size_t offset = 2;
+
+            int lengthOfIdentifier = stoi(length_of_identifier);
+            int counter = 0;
+            std::string identifier;
+            while (counter != lengthOfIdentifier)
+            {
+                identifier.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_value;
+            length_of_value.push_back(message[offset]);
+            offset += 1;
+
+            int lengthOfValue = stoi(length_of_value);
+            std::string value;
+            counter = 0;
+            while (counter != lengthOfValue)
+            {
+                value.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            LERROR(fmt::format("Identifier: {}", identifier));
+            LERROR(fmt::format("Opacity: {}", value));
+
+            break;
+        }
+        case Connection::MessageType::Size: {
+            std::string length_of_identifier;
+            length_of_identifier.push_back(message[0]);
+            length_of_identifier.push_back(message[1]);
+
+            size_t offset = 2;
+
+            int lengthOfIdentifier = stoi(length_of_identifier);
+            int counter = 0;
+            std::string identifier;
+            while (counter != lengthOfIdentifier)
+            {
+                identifier.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_value;
+            length_of_value.push_back(message[offset]);
+            offset += 1;
+
+            int lengthOfValue = stoi(length_of_value);
+            std::string value;
+            counter = 0;
+            while (counter != lengthOfValue)
+            {
+                value.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            LERROR(fmt::format("Identifier: {}", identifier));
+            LERROR(fmt::format("Size: {}", value));
+            break;
+        }
+        case Connection::MessageType::Disconnection: {
             disconnect(*peer);
             break;
+        }
         default:
             LERROR(fmt::format(
                 "Unsupported message type: {}", static_cast<int>(messageType)
