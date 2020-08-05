@@ -350,7 +350,6 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     RenderData lightRenderData{
         *_lightCamera,
         data.time,
-        data.doPerformanceMeasurement,
         data.renderBinMask,
         data.modelTransform
     };

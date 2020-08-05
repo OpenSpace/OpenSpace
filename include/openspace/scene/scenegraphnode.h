@@ -72,14 +72,6 @@ public:
 
     BooleanType(UpdateScene);
 
-    struct PerformanceRecord {
-        long long renderTime;  // time in ns
-        long long updateTimeRenderable;  // time in ns
-        long long updateTimeTranslation; // time in ns
-        long long updateTimeRotation;  // time in ns
-        long long updateTimeScaling;  // time in ns
-    };
-
     static constexpr const char* RootNodeIdentifier = "Root";
     static constexpr const char* KeyIdentifier = "Identifier";
     static constexpr const char* KeyParentName = "Parent";
@@ -139,8 +131,6 @@ public:
 
     SceneGraphNode* childNode(const std::string& identifier);
 
-    const PerformanceRecord& performanceRecord() const;
-
     const Renderable* renderable() const;
     Renderable* renderable();
 
@@ -165,8 +155,6 @@ private:
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
     properties::BoolProperty _guiHidden;
-
-    PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
 
     ghoul::mm_unique_ptr<Renderable> _renderable;
 

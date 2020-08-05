@@ -60,7 +60,6 @@ namespace interaction {
     class SessionRecording;
     class ShortcutManager;
 } // namespace interaction
-namespace performance { class PerformanceManager; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
     class ScriptEngine;
@@ -98,7 +97,6 @@ interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 interaction::SessionRecording& gSessionRecording();
 interaction::ShortcutManager& gShortcutManager();
-performance::PerformanceManager& gPerformanceManager();
 properties::PropertyOwner& gRootPropertyOwner();
 properties::PropertyOwner& gScreenSpaceRootPropertyOwner();
 scripting::ScriptEngine& gScriptEngine();
@@ -137,8 +135,6 @@ static interaction::KeybindingManager& keybindingManager = detail::gKeybindingMa
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();
 static interaction::ShortcutManager& shortcutManager = detail::gShortcutManager();
-static performance::PerformanceManager& performanceManager =
-    detail::gPerformanceManager();
 static properties::PropertyOwner& rootPropertyOwner = detail::gRootPropertyOwner();
 static properties::PropertyOwner& screenSpaceRootPropertyOwner =
     detail::gScreenSpaceRootPropertyOwner();

@@ -40,7 +40,6 @@
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -191,11 +190,6 @@ interaction::SessionRecording& gSessionRecording() {
 
 interaction::ShortcutManager& gShortcutManager() {
     static interaction::ShortcutManager g;
-    return g;
-}
-
-performance::PerformanceManager& gPerformanceManager() {
-    static performance::PerformanceManager g;
     return g;
 }
 

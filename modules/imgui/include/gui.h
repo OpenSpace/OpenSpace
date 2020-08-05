@@ -36,7 +36,6 @@
 #include <modules/imgui/include/guimemorycomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
-#include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guishortcutscomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
@@ -64,7 +63,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 17;
+        const int nRegularComponents = 16;
         int totalComponents = nRegularComponents;
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -107,7 +106,6 @@ public:
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
     GuiGlobeBrowsingComponent _globeBrowsing;
-    GuiPerformanceComponent _performance;
 
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _sceneProperty;
@@ -155,8 +153,6 @@ private:
         &_shortcuts,
         &_joystick,
         &_filePath,
-
-        &_performance,
 
         &_help
     };

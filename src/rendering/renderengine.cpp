@@ -32,8 +32,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/performance/performancemanager.h>
-#include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -257,7 +255,6 @@ namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine" })
-    , _doPerformanceMeasurements(PerformanceInfo)
     , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
@@ -297,11 +294,6 @@ RenderEngine::RenderEngine()
         glm::vec3(glm::pi<float>())
     )
 {
-    _doPerformanceMeasurements.onChange([this](){
-        global::performanceManager.setEnabled(_doPerformanceMeasurements);
-    });
-    addProperty(_doPerformanceMeasurements);
-
     addProperty(_showOverlayOnSlaves);
     addProperty(_showLog);
     addProperty(_verticalLogOffset);
@@ -528,8 +520,7 @@ void RenderEngine::updateScene() {
     _scene->update({
         TransformData{ glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
         currentTime,
-        integrateFromTime,
-        _doPerformanceMeasurements
+        integrateFromTime
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -852,13 +843,6 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 void RenderEngine::renderDashboard() {
     ZoneScoped
 
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "Main Dashboard::render"
-        );
-    }
-
     glm::vec2 dashboardStart = global::dashboard.getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
         dashboardStart.x,
@@ -887,12 +871,6 @@ void RenderEngine::postDraw() {
     ZoneScoped
 
     ++_frameNumber;
-
-    if (global::performanceManager.isEnabled()) {
-        global::performanceManager.storeScenePerformanceMeasurements(
-            scene()->allSceneGraphNodes()
-        );
-    }
 
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
     if (_saveFrameInformation) {

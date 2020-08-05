@@ -184,9 +184,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() ||gui._sceneProperty.isEnabled()) {
                 return gui.keyCallback(key, mod, action);
             }
             else {
@@ -200,9 +198,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
                 return gui.charCallback(codepoint, modifier);
             }
             else {
@@ -229,9 +225,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             }
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
                 return gui.mouseButtonCallback(button, action);
             }
             else {
@@ -245,9 +239,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
                 return gui.mouseWheelCallback(posY);
             }
             else {
