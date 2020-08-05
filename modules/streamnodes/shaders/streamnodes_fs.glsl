@@ -66,22 +66,42 @@ Fragment getFragment() {
             discard;
         }
     }
+
     // if(vs_closeToEarth > 0.5){
     if(drawHollow && length(coord) < 0.4){
         if(vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0)) < 500000000000.f){
-            discard;
+            if(usingPulse && usingCameraPerspective){
+                if(vs_closeToEarth > 0.5){
+                    if(length(coord) < 0.3){
+                        if(pulsatingAlways || camera_IsCloseEnough > 0.5){
+                            float e = 2.718055f;
+                            float y = 1 * pow(e, - (pow(length(coord), 2)) /( 2 * pow(0.2, 2))); 
+                            if(y < 0.05){
+                                discard;
+                            }
+                        frag.color.a = y;
+                        }
+                    }
+                }
+                else{
+                    discard;
+                }
+            }
+            else{
+                discard;
+            }   
         }
     }
     //}
     // outline
     /*
     if(length(coord) > 0.4){
-    frag.color = vec4(1, 1, 1, 1);
+        frag.color = vec4(1, 1, 1, 1);
     }
     */
     /*
     if(length(coord) < 0.1){
-    frag.color.a = 1.0;
+        frag.color.a = 1.0;
     }
     */
     //float alphaV = 1 - smoothstep(0, 1, length(coord));
@@ -99,7 +119,7 @@ Fragment getFragment() {
     if(usingPulse && usingCameraPerspective){
         if(vs_closeToEarth > 0.5){
             if(pulsatingAlways || camera_IsCloseEnough > 0.5){
-                if(length(coord) > 0.35){
+                if(length(coord) > 0.4){
                     float speed = 60.f;
                     int modulusResult = int(double(speed) * vs_time) % 60;
                     if(modulusResult > 0 && modulusResult < 30){

@@ -268,7 +268,9 @@ void CheckdistanceMethod() {
           if(distancevec < maxdist / 2 && usingPulse){
                 vs_closeToEarth = 1;
                 gl_PointSize = gl_PointSize * 5;
-                vs_color = vec4(streamColor.xyz, fluxColorAlpha);
+                vec4 fluxColor = getTransferFunctionColor(colorTable);
+                vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
+                //vs_color = vec4(streamColor.xyz, fluxColorAlpha);
             }
         }
         if(enhanceMethod == colorTables || enhanceMethod == sizeAndColor){
@@ -435,7 +437,7 @@ void main() {
         gl_PointSize = nodeSize * 5;
      }
     else{
-    gl_PointSize = nodeSize;
+        gl_PointSize = nodeSize;
     }
     */
     //test for camera perspective:: 
