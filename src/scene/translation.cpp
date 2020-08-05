@@ -60,7 +60,7 @@ documentation::Documentation Translation::Documentation() {
     };
 }
 
-std::unique_ptr<Translation> Translation::createFromDictionary(
+ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Translation");
@@ -70,11 +70,11 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
           = FactoryManager::ref().factory<Translation>();
     Translation* result = factory->create(
         translationType,
-        dictionary/*,
-        &global::memoryManager.PersistentMemory*/
+        dictionary,
+        &global::memoryManager.PersistentMemory
     );
     result->setIdentifier("Translation");
-    return std::unique_ptr<Translation>(result);
+    return ghoul::mm_unique_ptr<Translation>(result);
 }
 
 Translation::Translation() : properties::PropertyOwner({ "Translation" }) {}

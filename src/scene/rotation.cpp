@@ -61,7 +61,7 @@ documentation::Documentation Rotation::Documentation() {
     };
 }
 
-std::unique_ptr<Rotation> Rotation::createFromDictionary(
+ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
@@ -70,10 +70,10 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(
     auto factory = FactoryManager::ref().factory<Rotation>();
     Rotation* result = factory->create(
         rotationType,
-        dictionary/*,
-        &global::memoryManager.PersistentMemory*/
+        dictionary,
+        &global::memoryManager.PersistentMemory
     );
-    return std::unique_ptr<Rotation>(result);
+    return ghoul::mm_unique_ptr<Rotation>(result);
 }
 
 Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}

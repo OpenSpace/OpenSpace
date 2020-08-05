@@ -60,7 +60,7 @@ documentation::Documentation Scale::Documentation() {
     };
 }
 
-std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
+ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
 
     std::string scaleType = dictionary.value<std::string>(KeyType);
@@ -68,11 +68,11 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
     auto factory = FactoryManager::ref().factory<Scale>();
     Scale* result = factory->create(
         scaleType,
-        dictionary/*,
-        &global::memoryManager.PersistentMemory*/
+        dictionary,
+        &global::memoryManager.PersistentMemory
     );
     result->setIdentifier("Scale");
-    return std::unique_ptr<Scale>(result);
+    return ghoul::mm_unique_ptr<Scale>(result);
 }
 
 Scale::Scale() : properties::PropertyOwner({ "Scale" }) {}

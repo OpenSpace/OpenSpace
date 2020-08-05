@@ -60,7 +60,7 @@ documentation::Documentation TimeFrame::Documentation() {
     };
 }
 
-std::unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
+ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "TimeFrame");
@@ -74,7 +74,7 @@ std::unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
         &global::memoryManager.PersistentMemory*/
     );
     result->setIdentifier("TimeFrame");
-    return std::unique_ptr<TimeFrame>(result);
+    return ghoul::mm_unique_ptr<TimeFrame>(result);
 }
 
 TimeFrame::TimeFrame() : properties::PropertyOwner({ "TimeFrame" }) {}

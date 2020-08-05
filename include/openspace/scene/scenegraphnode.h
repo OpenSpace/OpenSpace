@@ -141,7 +141,6 @@ public:
 
     const PerformanceRecord& performanceRecord() const;
 
-    void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
 
@@ -169,19 +168,19 @@ private:
 
     PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
 
-    std::unique_ptr<Renderable> _renderable;
+    ghoul::mm_unique_ptr<Renderable> _renderable;
 
     properties::StringProperty _guiPath;
     properties::StringProperty _guiDisplayName;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {
-        std::unique_ptr<Translation> translation;
-        std::unique_ptr<Rotation> rotation;
-        std::unique_ptr<Scale> scale;
+        ghoul::mm_unique_ptr<Translation> translation;
+        ghoul::mm_unique_ptr<Rotation> rotation;
+        ghoul::mm_unique_ptr<Scale> scale;
     } _transform;
 
-    std::unique_ptr<TimeFrame> _timeFrame;
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
 
     // Cached transform data
     glm::dvec3 _worldPositionCached = glm::dvec3(0.0);

@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -125,7 +126,7 @@ protected:
     std::vector<unsigned int> _indexArray;
 
     /// The Translation object that provides the position of the individual trail points
-    std::unique_ptr<Translation> _translation;
+    ghoul::mm_unique_ptr<Translation> _translation;
 
     /// The RenderInformation contains information filled in by the concrete subclasses to
     /// be used by this class.

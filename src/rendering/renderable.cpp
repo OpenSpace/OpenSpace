@@ -100,7 +100,7 @@ documentation::Documentation Renderable::Documentation() {
     };
 }
 
-std::unique_ptr<Renderable> Renderable::createFromDictionary(
+ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
@@ -111,10 +111,10 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     ghoul_assert(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(
         renderableType,
-        dictionary/*,
-        &global::memoryManager.PersistentMemory*/
+        dictionary,
+        &global::memoryManager.PersistentMemory
     );
-    return std::unique_ptr<Renderable>(result);
+    return ghoul::mm_unique_ptr<Renderable>(result);
 }
 
 

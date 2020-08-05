@@ -146,7 +146,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     );
 
     SceneGraphNode* n = global::memoryManager.PersistentMemory.alloc<SceneGraphNode>();
-    //SceneGraphNode* n = new SceneGraphNode;
     ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
@@ -316,17 +315,14 @@ SceneGraphNode::SceneGraphNode()
     , _guiPath(GuiPathInfo)
     , _guiDisplayName(GuiNameInfo)
     , _transform {
-        std::unique_ptr<StaticTranslation>(
-            new StaticTranslation
-            //global::memoryManager.PersistentMemory.alloc<StaticTranslation>()
+        ghoul::mm_unique_ptr<Translation>(
+            global::memoryManager.PersistentMemory.alloc<StaticTranslation>()
         ),
-        std::unique_ptr<StaticRotation>(
-            new StaticRotation
-            //global::memoryManager.PersistentMemory.alloc<StaticRotation>()
+        ghoul::mm_unique_ptr<Rotation>(
+            global::memoryManager.PersistentMemory.alloc<StaticRotation>()
         ),
-        std::unique_ptr<StaticScale>(
-            new StaticScale
-            //global::memoryManager.PersistentMemory.alloc<StaticScale>()
+        ghoul::mm_unique_ptr<Scale>(
+            global::memoryManager.PersistentMemory.alloc<StaticScale>()
         )
     }
    , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
@@ -942,11 +938,6 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
 
 float SceneGraphNode::boundingSphere() const {
     return _boundingSphere;
-}
-
-// renderable
-void SceneGraphNode::setRenderable(std::unique_ptr<Renderable> renderable) {
-    _renderable = std::move(renderable);
 }
 
 const Renderable* SceneGraphNode::renderable() const {
