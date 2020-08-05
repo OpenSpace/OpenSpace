@@ -90,11 +90,11 @@ Scene::~Scene() {
     _rootDummy.setScene(nullptr);
 }
 
-void Scene::attachNode(std::unique_ptr<SceneGraphNode> node) {
+void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
     _rootDummy.attachChild(std::move(node));
 }
 
-std::unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
+ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootDummy.detachChild(node);
 }
 
@@ -419,7 +419,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         }
     }
 
-    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
+    ghoul::mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         nodeDictionary
     );
     if (!node) {

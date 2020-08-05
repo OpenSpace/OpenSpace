@@ -136,7 +136,7 @@ namespace openspace {
 int SceneGraphNode::nextIndex = 0;
 #endif // Debugging_Core_SceneGraphNode_Indices
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     openspace::documentation::testSpecificationAndThrow(
@@ -145,9 +145,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         "SceneGraphNode"
     );
 
-    //SceneGraphNode* n = global::memoryManager.PersistentMemory.alloc<SceneGraphNode>();
-    SceneGraphNode* n = new SceneGraphNode;
-    std::unique_ptr<SceneGraphNode> result = std::unique_ptr<SceneGraphNode>(n);
+    SceneGraphNode* n = global::memoryManager.PersistentMemory.alloc<SceneGraphNode>();
+    //SceneGraphNode* n = new SceneGraphNode;
+    ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     result->index = nextIndex++;
@@ -420,13 +420,13 @@ void SceneGraphNode::deinitializeGL() {
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
     fn(this);
-    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePreOrder(fn);
     }
 }
 
 void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)>& fn) {
-    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
     fn(this);
@@ -588,7 +588,7 @@ void SceneGraphNode::setParent(SceneGraphNode& parent) {
     parent.attachChild(_parent->detachChild(*this));
 }
 
-void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
+void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
     ghoul_assert(child != nullptr, "Child may not be null");
     ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
 
@@ -601,7 +601,7 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
     childRaw->setScene(_scene);
 }
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
+ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
     ghoul_assert(
         child._dependentNodes.empty(),
         "Nodes cannot depend on a node being detached"
@@ -611,7 +611,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
     const auto iter = std::find_if(
         _children.begin(),
         _children.end(),
-        [&child] (const std::unique_ptr<SceneGraphNode>& c) {
+        [&child] (const ghoul::mm_unique_ptr<SceneGraphNode>& c) {
             return &child == c.get();
         }
     );
@@ -631,7 +631,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
 
     // Remove link between parent and child
     child._parent = nullptr;
-    std::unique_ptr<SceneGraphNode> c = std::move(*iter);
+    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
     _children.erase(iter);
 
     return c;
@@ -641,7 +641,7 @@ void SceneGraphNode::clearChildren() {
     traversePreOrder([](SceneGraphNode* node) {
         node->clearDependencies();
     });
-    for (const std::unique_ptr<SceneGraphNode>& c : _children) {
+    for (const ghoul::mm_unique_ptr<SceneGraphNode>& c : _children) {
         if (_scene) {
             c->setScene(nullptr);
         }
@@ -934,7 +934,7 @@ void SceneGraphNode::setScene(Scene* scene) {
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
-    for (const std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (const ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }
     return nodes;
@@ -962,7 +962,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         return this;
     }
     else {
-        for (std::unique_ptr<SceneGraphNode>& it : _children) {
+        for (ghoul::mm_unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(id);
             if (tmp) {
                 return tmp;

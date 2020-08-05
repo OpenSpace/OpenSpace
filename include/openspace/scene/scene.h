@@ -81,12 +81,12 @@ public:
     /**
      * Attach node to the root
      */
-    void attachNode(std::unique_ptr<SceneGraphNode> node);
+    void attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node);
 
     /**
      * Detach node from the root
      */
-    std::unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
+    ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
 
     /**
      * Set the camera of the scene

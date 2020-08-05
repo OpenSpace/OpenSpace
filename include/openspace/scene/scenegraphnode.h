@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <atomic>
 #include <functional>
 #include <memory>
@@ -88,7 +89,7 @@ public:
     SceneGraphNode();
     ~SceneGraphNode();
 
-    static std::unique_ptr<SceneGraphNode> createFromDictionary(
+    static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     void initialize();
@@ -101,8 +102,8 @@ public:
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
 
-    void attachChild(std::unique_ptr<SceneGraphNode> child);
-    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
+    void attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child);
+    ghoul::mm_unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
     void clearChildren();
     void setParent(SceneGraphNode& parent);
 
@@ -156,7 +157,7 @@ private:
     void computeScreenSpaceData(RenderData& newData);
 
     std::atomic<State> _state = State::Loaded;
-    std::vector<std::unique_ptr<SceneGraphNode>> _children;
+    std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;
     SceneGraphNode* _parent = nullptr;
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;

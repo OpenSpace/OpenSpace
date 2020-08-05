@@ -37,7 +37,14 @@ namespace {
         ImGui::Text("Number of Buckets: %i", p.nBuckets());
         const std::vector<int>& occupancies = p.occupancies();
         for (size_t i = 0; i < occupancies.size(); ++i) {
-            ImGui::Text("  %i: %i/%i", i, occupancies[i], p.BucketSize);
+            ImGui::Text(
+                "  %i: %i/%i (%.2f/%.2f kiB)",
+                i,
+                occupancies[i],
+                p.BucketSize,
+                occupancies[i] / 1024.f,
+                p.BucketSize / 1024.f
+            );
         }
     }
 } // namespace
