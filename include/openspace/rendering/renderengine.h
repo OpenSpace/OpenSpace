@@ -179,8 +179,6 @@ private:
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
 
-    properties::BoolProperty _doPerformanceMeasurements;
-
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
     ghoul::Dictionary _rendererData;

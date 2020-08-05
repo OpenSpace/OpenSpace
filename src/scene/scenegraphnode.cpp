@@ -432,51 +432,15 @@ void SceneGraphNode::update(const UpdateData& data) {
     }
 
     if (_transform.translation) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.translation->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeTranslation = (end - start).count();
-        }
-        else {
-            _transform.translation->update(data);
-        }
+        _transform.translation->update(data);
     }
 
     if (_transform.rotation) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.rotation->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRotation = (end - start).count();
-        }
-        else {
-            _transform.rotation->update(data);
-        }
+        _transform.rotation->update(data);
     }
 
     if (_transform.scale) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.scale->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeScaling = (end - start).count();
-        }
-        else {
-            _transform.scale->update(data);
-        }
+        _transform.scale->update(data);
     }
     UpdateData newUpdateData = data;
 
@@ -500,19 +464,7 @@ void SceneGraphNode::update(const UpdateData& data) {
     _inverseModelTransformCached = glm::inverse(_modelTransformCached);
 
     if (_renderable && _renderable->isReady()) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
-
-            _renderable->update(newUpdateData);
-
-            glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRenderable = (end - start).count();
-        }
-        else {
-            _renderable->update(newUpdateData);
-        }
+        _renderable->update(newUpdateData);
     }
 }
 
@@ -527,7 +479,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     RenderData newData = {
         data.camera,
         data.time,
-        data.doPerformanceMeasurement,
         data.renderBinMask,
         { _worldPositionCached, _worldRotationCached, _worldScaleCached }
     };
@@ -546,20 +497,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
-    if (data.doPerformanceMeasurement) {
-        glFinish();
-        auto start = std::chrono::high_resolution_clock::now();
-
-        _renderable->render(newData, tasks);
-        if (_computeScreenSpaceValues) {
-            computeScreenSpaceData(newData);
-        }
-
-        glFinish();
-        auto end = std::chrono::high_resolution_clock::now();
-        _performanceRecord.renderTime = (end - start).count();
-    }
-    else {
+    {
         TracyGpuZone("Render")
 
         _renderable->render(newData, tasks);
@@ -957,10 +895,6 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         }
     }
     return nullptr;
-}
-
-const SceneGraphNode::PerformanceRecord& SceneGraphNode::performanceRecord() const {
-    return _performanceRecord;
 }
 
 }  // namespace openspace
