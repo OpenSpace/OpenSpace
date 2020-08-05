@@ -30,7 +30,7 @@ local Deimos = {
     },
     Renderable = {
         Type = "RenderableGlobe",
-        Radii = { 15, 12.2, 11 },
+        Radii = { 15000, 12200, 11000 },
         SegmentsPerPatch = 90,
         Layers = {
         }
