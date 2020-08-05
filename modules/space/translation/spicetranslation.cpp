@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyKernels = "Kernels";
@@ -172,6 +173,8 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 }
 
 glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
+    ZoneScoped
+
     double lightTime = 0.0;
     return SpiceManager::ref().targetPosition(
         _target,
@@ -180,7 +183,7 @@ glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
         {},
         data.time.j2000Seconds(),
         lightTime
-    ) * glm::pow(10.0, 3.0);
+    ) * 1000.0;
 }
 
 } // namespace openspace

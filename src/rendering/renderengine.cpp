@@ -1463,24 +1463,20 @@ void RenderEngine::renderScreenLog() {
             white
         );
 
-        glm::vec4 color = glm::vec4(0.f);
-        switch (e->level) {
+        const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
+            switch (level) {
             case ghoul::logging::LogLevel::Debug:
-                color = glm::vec4(0.f, 1.f, 0.f, alpha);
-                break;
+                return glm::vec4(0.f, 1.f, 0.f, alpha);
             case ghoul::logging::LogLevel::Warning:
-                color = glm::vec4(1.f, 1.f, 0.f, alpha);
-                break;
+                return glm::vec4(1.f, 1.f, 0.f, alpha);
             case ghoul::logging::LogLevel::Error:
-                color = glm::vec4(1.f, 0.f, 0.f, alpha);
-                break;
+                return glm::vec4(1.f, 0.f, 0.f, alpha);
             case ghoul::logging::LogLevel::Fatal:
-                color = glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-                break;
+                return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
             default:
-                color = white;
-                break;
-        }
+                return white;
+            }
+        }(e->level);
 
         RenderFont(
             *_fontLog,

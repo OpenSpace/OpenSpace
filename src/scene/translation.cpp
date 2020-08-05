@@ -29,9 +29,9 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
@@ -84,6 +84,8 @@ bool Translation::initialize() {
 }
 
 void Translation::update(const UpdateData& data) {
+    ZoneScoped
+
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }

@@ -303,11 +303,11 @@ void Scene::update(const UpdateData& data) {
     ZoneScoped
 
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
-
     for (SceneGraphNode* node : initializedNodes) {
         try {
             node->initializeGL();
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -316,9 +316,7 @@ void Scene::update(const UpdateData& data) {
     }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::update(begin '" + node->identifier() + "')");
             node->update(data);
-            LTRACE("Scene::update(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -335,9 +333,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::render(begin '" + node->identifier() + "')");
             node->render(data, tasks);
-            LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
