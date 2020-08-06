@@ -45,6 +45,7 @@ namespace {
     constexpr const char* headerProperty = "#Property";
     constexpr const char* headerKeybinding = "#Keybinding";
     constexpr const char* headerTime = "#Time";
+    constexpr const char* headerDeltaTimes = "#DeltaTimes";
     constexpr const char* headerCamera = "#Camera";
     constexpr const char* headerMarkNodes = "#MarkNodes";
     constexpr const char* headerAdditionalScripts = "#AdditionalScripts";
@@ -91,6 +92,7 @@ namespace {
         Property,
         Keybinding,
         Time,
+        DeltaTimes,
         Camera,
         MarkNodes,
         AdditionalScripts
@@ -104,6 +106,7 @@ namespace {
         if (line == headerProperty) { return Section::Property; }
         if (line == headerKeybinding) { return Section::Keybinding; }
         if (line == headerTime) { return Section::Time; }
+        if (line == headerDeltaTimes) { return Section::DeltaTimes; }
         if (line == headerCamera) { return Section::Camera; }
         if (line == headerMarkNodes) { return Section::MarkNodes; }
         if (line == headerAdditionalScripts) { return Section::AdditionalScripts; }
@@ -318,6 +321,10 @@ namespace {
         return time;
     }
 
+    [[ nodiscard ]] std::string parseDeltaTimes(const std::string& line, int) {
+        return line;
+    }
+
     [[ nodiscard ]] Profile::CameraType parseCamera(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         Profile::CameraType camera = [&](const std::string& type) ->
@@ -479,6 +486,8 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     t.time = currentTime;
     t.type = Time::Type::Absolute;
     time = std::move(t);
+
+    // TODO: Set delta time steps
 
     // Camera
 
@@ -645,6 +654,13 @@ std::string Profile::serialize() const {
                 }
             }(time->type);
             output += fmt::format("{}\t{}\n", type, time->time);
+        }
+    }
+
+    if (!deltaTimes.empty()) {
+        output += fmt::format("\n{}\n", headerDeltaTimes);
+        for (const std::string& d : deltaTimes) {
+            output += fmt::format("{}\n", d);
         }
     }
 
@@ -870,6 +886,12 @@ Profile::Profile(const std::vector<std::string>& content) {
                 time = parseTime(line, lineNum);
                 foundTime = true;
                 break;
+            case Section::DeltaTimes:
+            {
+                std::string d = parseDeltaTimes(line, lineNum);
+                deltaTimes.push_back(std::move(d));
+                break;
+            }
             case Section::Camera:
                 if (foundCamera) {
                     throw ProfileParsingError(
@@ -979,6 +1001,15 @@ std::string Profile::convertToScene() const {
             break;
         default:
             throw ghoul::MissingCaseException();
+    }
+
+    // Delta Times
+    {
+        std::string times;
+        for (const std::string& d : deltaTimes) {
+            times += fmt::format("{} ,", d);
+        }
+        output += fmt::format("openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
     }
 
     // Mark Nodes

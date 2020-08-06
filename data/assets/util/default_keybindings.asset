@@ -109,6 +109,22 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Documentation = "Toggles the rendering on master",
         GuiPath = "/Rendering",
         Local = true
+    },
+    {
+        Key = "Right",
+        Name = "Next Delta Time Step (Interpolate)",
+        Command = "openspace.time.interpolateNextDeltaTimeStep()",
+        Documentation = "Smoothly interpolates the simulation speed to the next value in the list of delta time steps, if one exists.",
+        GuiPath = "/Simulation Speed",
+        Local = true
+    },
+    {
+        Key = "Left",
+        Name = "Previous Delta Time Step (Interpolate)",
+        Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
+        Documentation = "Smoothly interpolates the simulation speed to the previous value in the list of delta time steps, if one exists.",
+        GuiPath = "/Simulation Speed",
+        Local = true
     }
 }
 

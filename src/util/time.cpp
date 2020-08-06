@@ -127,6 +127,15 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "in one second of real time"
             },
             {
+                "setDeltaTimeSteps",
+                &luascriptfunctions::time_setDeltaTimeSteps,
+                {},
+                "List of numbers",
+                "Sets the list of discrete delta time steps for the simulation speed "
+                "that can be quickly jumped between. The list will be sorted to be in "
+                "increasing order."
+            },
+            {
                 "deltaTime",
                 &luascriptfunctions::time_deltaTime,
                 {},
@@ -176,6 +185,24 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "number",
                 "Sets the amount of simulation time that happens "
                 "in one second of real time"
+            },
+            {
+                "interpolateNextDeltaTimeStep",
+                &luascriptfunctions::time_interpolateNextDeltaTimeStep,
+                {},
+                "[number]",
+                "Interpolate the simulation speed to the next delta time step in the "
+                "list. If an input value is given, the interpolation is done over the "
+                "specified number of seconds."
+            },
+            {
+                "interpolatePreviousDeltaTimeStep",
+                &luascriptfunctions::time_interpolatePreviousDeltaTimeStep,
+                {},
+                "[number]",
+                "Interpolate the simulation speed to the previous delta time step in "
+                "the list. If an input value is given, the interpolation is done over "
+                "the specified number of seconds."
             },
             {
                 "interpolatePause",

@@ -151,6 +151,7 @@ private:
     std::vector<Property> properties;
     std::vector<Keybinding> keybindings;
     std::optional<Time> time;
+    std::vector<std::string> deltaTimes;
     std::optional<CameraType> camera;
     std::vector<std::string> markNodes;
     std::vector<std::string> additionalScripts;

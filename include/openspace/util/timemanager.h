@@ -80,6 +80,9 @@ public:
     double deltaTime() const;
     bool isPaused() const;
 
+    // TEST: delta time steps
+    void setDeltaTimeSteps(const std::vector<double> deltaTimes);
+
     float defaultTimeInterpolationDuration() const;
     float defaultDeltaTimeInterpolationDuration() const;
     float defaultPauseInterpolationDuration() const;
@@ -89,6 +92,10 @@ public:
     void interpolateTimeRelative(double delta, double durationSeconds);
     void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
     void interpolatePause(bool pause, double durationSeconds);
+
+    // TEST
+    void interpolateNextDeltaTimeStep(double durationSeconds);
+    void interpolatePreviousDeltaTimeStep(double durationSeconds);
 
     void addKeyframe(double timestamp, TimeKeyframeData kf);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
@@ -125,6 +132,9 @@ private:
     bool _lastTimePaused = false;
     double _lastDeltaTime = 0.0;
     double _lastTargetDeltaTime = 0.0;
+
+    // TEST: delta time steps
+    std::vector<double> _deltaTimeSteps;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
     properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
