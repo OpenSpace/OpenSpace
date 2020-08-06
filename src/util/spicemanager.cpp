@@ -324,8 +324,6 @@ void SpiceManager::unloadKernel(std::string filePath) {
 }
 
 bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
-    ZoneScoped
-
     ghoul_assert(!target.empty(), "Empty target");
 
     const int id = naifId(target);
@@ -509,8 +507,6 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
                                         AberrationCorrection aberrationCorrection,
                                         double ephemerisTime, double& lightTime) const
 {
-    ZoneScoped
-
     ghoul_assert(!target.empty(), "Target is not empty");
     ghoul_assert(!observer.empty(), "Observer is not empty");
     ghoul_assert(!referenceFrame.empty(), "Reference frame is not empty");
