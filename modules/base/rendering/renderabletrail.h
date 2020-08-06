@@ -163,22 +163,11 @@ protected:
     RenderInformation _floatingRenderInformation;
 
 private:
+    void internalRender(bool renderLines, bool renderPoints,
+        const RenderData& data,
+        const glm::dmat4& modelTransform,
+        RenderInformation& info, int nVertices, int offset);
 
-/*
-    /// Specifies the base color of the line before fading
-    properties::Vec3Property _lineColor;
-    /// Settings that enables or disables the line fading
-    properties::BoolProperty _useLineFade;
-    /// Specifies a multiplicative factor that fades out the line
-    properties::FloatProperty _lineFade;
-    /// Line width for the line rendering part
-    properties::FloatProperty _lineWidth;
-    /// Point size for the point rendering part
-    properties::IntProperty _pointSize;
-    /// The option determining which rendering method to use
-    properties::OptionProperty _renderingModes;
-
-    */
    Appearance _appearance;
 
     /// Program object used to render the data stored in RenderInformation
