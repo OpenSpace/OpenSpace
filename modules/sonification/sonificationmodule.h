@@ -91,6 +91,13 @@ private:
     //Compare
     void onFirstCompareChanged(properties::OptionProperty::Option value);
     void onSecondCompareChanged(properties::OptionProperty::Option value);
+    void onCompareAllChanged(bool value);
+    void onCompareSizeDayChanged(bool value);
+    void onCompareGravityChanged(bool value);
+    void onCompareTemperatureChanged(bool value);
+    void onCompareAtmosphereChanged(bool value);
+    void onCompareMoonsChanged(bool value);
+    void onCompareRingsChanged(bool value);
 
     //Planetary
     void onAllEnabledChanged(bool value);
@@ -209,6 +216,7 @@ private:
     //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled,
     //[4] jupiter enabled, [5] saturn enabled, [6] uranus enabled, [7] neptuen enabled
     bool _solarSettings[NUM_PLANETS] = { false, false, false, false, false, false, false, false};
+    bool _compareSettings[NUM_PLANETARY_SETTINGS] = { false, false, false, false, false, false};
 
     //Properties
     //Planetary View
@@ -336,6 +344,14 @@ private:
 
         properties::OptionProperty firstPlanet;
         properties::OptionProperty secondPlanet;
+
+        properties::BoolProperty allEnabled;
+        properties::BoolProperty sizeDayEnabled;
+        properties::BoolProperty gravityEnabled;
+        properties::BoolProperty temperatureEnabled;
+        properties::BoolProperty atmosphereEnabled;
+        properties::BoolProperty moonsEnabled;
+        properties::BoolProperty ringsEnabled;
     };
 
     CompareProperty _compareProperty = CompareProperty();

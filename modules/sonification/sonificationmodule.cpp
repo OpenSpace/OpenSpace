@@ -124,6 +124,48 @@ namespace {
         "Chooses what planets to compare"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CompareAllInfo = {
+        "CompareAllInfo",
+        "All",
+        "Play all sonifications for all the selected planets or turn it off. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareSizeDayInfo = {
+        "CompareSizeDayInfo",
+        "Size/Day",
+        "Play Size/Day sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareGravityInfo = {
+        "CompareGravityInfo",
+        "Gravity",
+        "Play Gravity sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareTemperatureInfo = {
+        "CompareTemperatureInfo",
+        "Temperature",
+        "Play Temperature sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareAtmosphereInfo = {
+        "CompareAtmosphereInfo",
+        "Atmosphere",
+        "Play Atmosphere sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareMoonsInfo = {
+        "CompareMoonsInfo",
+        "Moons",
+        "Play Moons sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CompareRingsInfo = {
+        "CompareRingssInfo",
+        "Rings",
+        "Play Rings sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+    };
+
 
     //Planetary View
     constexpr openspace::properties::Property::PropertyInfo EnableAllPlanetsInfo = {
@@ -254,6 +296,13 @@ SonificationModule::SonificationModule()
     //Compare
     _compareProperty.firstPlanet.onChange([this]() { onFirstCompareChanged(_compareProperty.firstPlanet.option()); });
     _compareProperty.secondPlanet.onChange([this]() { onSecondCompareChanged(_compareProperty.secondPlanet.option()); });
+    _compareProperty.allEnabled.onChange([this]() { onCompareAllChanged(_compareProperty.allEnabled.value()); });
+    _compareProperty.sizeDayEnabled.onChange([this]() { onCompareSizeDayChanged(_compareProperty.sizeDayEnabled.value()); });
+    _compareProperty.gravityEnabled.onChange([this]() { onCompareGravityChanged(_compareProperty.gravityEnabled.value()); });
+    _compareProperty.temperatureEnabled.onChange([this]() { onCompareTemperatureChanged(_compareProperty.temperatureEnabled.value()); });
+    _compareProperty.atmosphereEnabled.onChange([this]() { onCompareAtmosphereChanged(_compareProperty.atmosphereEnabled.value()); });
+    _compareProperty.moonsEnabled.onChange([this]() { onCompareMoonsChanged(_compareProperty.moonsEnabled.value()); });
+    _compareProperty.ringsEnabled.onChange([this]() { onCompareRingsChanged(_compareProperty.ringsEnabled.value()); });
 
     //Planetary View
     _planetsProperty.allEnabled.onChange([this]() { onAllEnabledChanged(_planetsProperty.allEnabled.value()); });
@@ -336,18 +385,17 @@ void SonificationModule::onEverythingChanged(bool value) {
 
         _compareProperty.firstPlanet.setValue(0);
         _compareProperty.secondPlanet.setValue(0);
+        _compareProperty.allEnabled = false;
     }
+
+    else if (_GUIState == SonificationModule::Compare) {
+        //Set all the compare settings
+        _compareProperty.allEnabled = value;
+    }
+
     else {
         //Set all the planetary settings
-        std::vector<properties::PropertyOwner*> planetOwners = _planetsProperty.propertySubOwners();
-
-        for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin(); owner < planetOwners.end(); ++owner) {
-            std::vector<properties::Property*> planetProperties = (*owner)->properties();
-
-            for (std::vector<properties::Property*>::iterator i = planetProperties.begin(); i < planetProperties.end(); ++i) {
-                (*i)->set(value);
-            }
-        }
+        setAllPlanetaryProperties(value);
     }
 }
 
@@ -363,6 +411,10 @@ void SonificationModule::onSolarAllEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[0] = value;
@@ -395,6 +447,10 @@ void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[0] = value;
@@ -419,6 +475,10 @@ void SonificationModule::onSolarVenusEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[1] = value;
@@ -443,6 +503,10 @@ void SonificationModule::onSolarEarthEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[2] = value;
@@ -467,6 +531,10 @@ void SonificationModule::onSolarMarsEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[3] = value;
@@ -491,6 +559,10 @@ void SonificationModule::onSolarJupiterEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[4] = value;
@@ -515,6 +587,10 @@ void SonificationModule::onSolarSaturnEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[5] = value;
@@ -539,6 +615,10 @@ void SonificationModule::onSolarUranusEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[6] = value;
@@ -563,6 +643,10 @@ void SonificationModule::onSolarNeptuneEnabledChanged(bool value) {
         _compareProperty.secondPlanet.setValue(0);
 
         _GUIState = SonificationModule::GUIMode::Solar;
+        if (_everythingEnabled.value()) {
+            setAllSolarProperties(true);
+            _compareProperty.allEnabled = false;
+        }
     }
 
     _solarSettings[7] = value;
@@ -588,6 +672,9 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
         setAllSolarProperties(false);
 
         _GUIState = SonificationModule::GUIMode::Compare;
+        if (_everythingEnabled.value()) {
+            _compareProperty.allEnabled = true;
+        }
     }
 
     if (value.value != 0 && value.value == _compareProperty.secondPlanet.option().value) {
@@ -618,7 +705,8 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
     UdpTransmitSocket socket = UdpTransmitSocket(
         IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
-    _stream << osc::BeginMessage(label.c_str()) << value.value << _compareProperty.secondPlanet.value() << osc::EndMessage;
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << value.value << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
     socket.Send(_stream.Data(), _stream.Size());
 }
 
@@ -632,6 +720,9 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
         setAllSolarProperties(false);
 
         _GUIState = SonificationModule::GUIMode::Compare;
+        if (_everythingEnabled.value()) {
+            _compareProperty.allEnabled = true;
+        }
     }
 
     if (value.value != 0 && value.value == _compareProperty.firstPlanet.option().value) {
@@ -662,7 +753,180 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
     UdpTransmitSocket socket = UdpTransmitSocket(
         IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << value.value << osc::EndMessage;
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << value.value << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onCompareAllChanged(bool value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
+        _compareProperty.allEnabled = false;
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        setAllSolarProperties(false);
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    //Set the array of settings
+    _compareSettings[0] = value;
+    _compareSettings[1] = value;
+    _compareSettings[2] = value;
+    _compareSettings[3] = value;
+    _compareSettings[4] = value;
+    _compareSettings[5] = value;
+
+    _compareProperty.sizeDayEnabled = value;
+    _compareProperty.gravityEnabled = value;
+    _compareProperty.temperatureEnabled = value;
+    _compareProperty.atmosphereEnabled = value;
+    _compareProperty.moonsEnabled = value;
+    _compareProperty.ringsEnabled = value;
+}
+
+void SonificationModule::onCompareSizeDayChanged(bool value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
+        _compareProperty.sizeDayEnabled = false;
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        setAllSolarProperties(false);
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    //Set the array of settings
+    _compareSettings[0] = value;
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onCompareGravityChanged(bool value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
+        _compareProperty.gravityEnabled = false;
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        setAllSolarProperties(false);
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    //Set the array of settings
+    _compareSettings[1] = value;
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onCompareTemperatureChanged(bool value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
+        _compareProperty.temperatureEnabled = false;
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        setAllSolarProperties(false);
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    //Set the array of settings
+    _compareSettings[2] = value;
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onCompareAtmosphereChanged(bool value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
+        _compareProperty.atmosphereEnabled = false;
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        setAllSolarProperties(false);
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    //Set the array of settings
+    _compareSettings[3] = value;
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onCompareMoonsChanged(bool value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
+        _compareProperty.moonsEnabled = false;
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        setAllSolarProperties(false);
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    //Set the array of settings
+    _compareSettings[4] = value;
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+}
+
+void SonificationModule::onCompareRingsChanged(bool value) {
+    if (_GUIState == SonificationModule::Planetary && value) {
+        _compareProperty.ringsEnabled = false;
+        return;
+    }
+
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
+        setAllSolarProperties(false);
+
+        _GUIState = SonificationModule::GUIMode::Compare;
+    }
+
+    //Set the array of settings
+    _compareSettings[5] = value;
+
+    std::string label = "/Compare";
+    UdpTransmitSocket socket = UdpTransmitSocket(
+        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    _stream.Clear();
+    osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
     socket.Send(_stream.Data(), _stream.Size());
 }
 
@@ -1283,7 +1547,14 @@ SonificationModule::SolarProperty::SolarProperty()
 SonificationModule::CompareProperty::CompareProperty()
     : properties::PropertyOwner(CompareInfo),
     firstPlanet(CompareOptionsInfo, properties::OptionProperty::DisplayType::Dropdown),
-    secondPlanet(CompareOptionsInfoT, properties::OptionProperty::DisplayType::Dropdown)
+    secondPlanet(CompareOptionsInfoT, properties::OptionProperty::DisplayType::Dropdown),
+    allEnabled(CompareAllInfo, false),
+    sizeDayEnabled(CompareSizeDayInfo, false),
+    gravityEnabled(CompareGravityInfo, false),
+    temperatureEnabled(CompareTemperatureInfo, false),
+    atmosphereEnabled(CompareAtmosphereInfo, false),
+    moonsEnabled(CompareMoonsInfo, false),
+    ringsEnabled(CompareRingsInfo, false)
 {
     firstPlanet.addOptions({
         { 0, "Choose Planet" },
@@ -1311,6 +1582,14 @@ SonificationModule::CompareProperty::CompareProperty()
 
     addProperty(firstPlanet);
     addProperty(secondPlanet);
+
+    addProperty(allEnabled);
+    addProperty(sizeDayEnabled);
+    addProperty(gravityEnabled);
+    addProperty(temperatureEnabled);
+    addProperty(atmosphereEnabled);
+    addProperty(moonsEnabled);
+    addProperty(ringsEnabled);
 }
 
 
@@ -1543,6 +1822,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 
                             if (_everythingEnabled.value()) {
                                 setAllSolarProperties(true);
+                                _compareProperty.allEnabled = false;
                             }
                         }
                         else {
@@ -1594,26 +1874,17 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 
 void SonificationModule::internalDeinitialize() {
     //Turn off the sonification in SuperCollider
+    UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
+    std::string label = "";
+
     for (int i = 0; i < NUM_PLANETS; ++i) {
         for (int s = 0; s < NUM_PLANETARY_SETTINGS; ++s) {
             _planets[i].settings[s] = false;
+            _compareSettings[s] = false;
         }
 
-        for (int s = 0; s < NUM_PLANETS; ++s) {
-            _solarSettings[s] = false;
-        }
-
-        std::string solarLabel = "/Sun";
-        UdpTransmitSocket solarSocket = UdpTransmitSocket(
-            IpEndpointName(SC_IP_ADDRESS, SC_PORT));
         _stream.Clear();
-        osc::Blob solarSettingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
-        _stream << osc::BeginMessage(solarLabel.c_str()) << solarSettingsBlob << osc::EndMessage;
-        solarSocket.Send(_stream.Data(), _stream.Size());
-
-        UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
-        _stream.Clear();
-        std::string label = "/" + _planets[i].identifier;
+        label = "/" + _planets[i].identifier;
         osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
         _stream << osc::BeginMessage(label.c_str()) <<
             _planets[i].distance << _planets[i].angle << settingsBlob;
@@ -1626,6 +1897,25 @@ void SonificationModule::internalDeinitialize() {
         _stream << osc::EndMessage;
         socket.Send(_stream.Data(), _stream.Size());
     }
+
+    for (int s = 0; s < NUM_PLANETS; ++s) {
+        _solarSettings[s] = false;
+    }
+
+    label = "/Sun";
+    _stream.Clear();
+    osc::Blob solarSettingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
+    _stream << osc::BeginMessage(label.c_str()) << solarSettingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
+
+    _compareProperty.firstPlanet.setValue(0);
+    _compareProperty.secondPlanet.setValue(0);
+
+    label = "/Compare";
+    _stream.Clear();
+    osc::Blob compareSettingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << compareSettingsBlob << osc::EndMessage;
+    socket.Send(_stream.Data(), _stream.Size());
 
     //Clear data
     delete[] _buffer;
