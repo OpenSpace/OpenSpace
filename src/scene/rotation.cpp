@@ -33,7 +33,6 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
@@ -96,8 +95,6 @@ const glm::dmat3& Rotation::matrix() const {
 }
 
 void Rotation::update(const UpdateData& data) {
-    ZoneScoped
-
     if (!_needsUpdate && (data.time.j2000Seconds() == _cachedTime)) {
         return;
     }

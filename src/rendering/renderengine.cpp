@@ -1419,12 +1419,19 @@ void RenderEngine::renderScreenLog() {
         if (alpha <= 0.f) {
             break;
         }
-
-        const std::string lvl = "(" + ghoul::to_string(e->level) + ")";
-        const std::string& message = e->message.substr(0, MessageLength);
+        const std::string_view lvl = ghoul::to_string(e->level);
+        const std::string_view message =
+            std::string_view(e->message).substr(0, MessageLength);
         nr += std::count(message.begin(), message.end(), '\n');
 
         const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
+
+        std::string str = fmt::format(
+            "{:<15} {}{}",
+            e->timeString,
+            e->category.substr(0, CategoryLength),
+            e->category.length() > CategoryLength ? "..." : ""
+        );
 
         RenderFont(
             *_fontLog,
@@ -1432,27 +1439,22 @@ void RenderEngine::renderScreenLog() {
                 10.f,
                 _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
             ),
-            fmt::format(
-                "{:<15} {}{}",
-                e->timeString,
-                e->category.substr(0, CategoryLength),
-                e->category.length() > CategoryLength ? "..." : ""
-            ),
+            str,
             white
         );
 
         const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
             switch (level) {
-            case ghoul::logging::LogLevel::Debug:
-                return glm::vec4(0.f, 1.f, 0.f, alpha);
-            case ghoul::logging::LogLevel::Warning:
-                return glm::vec4(1.f, 1.f, 0.f, alpha);
-            case ghoul::logging::LogLevel::Error:
-                return glm::vec4(1.f, 0.f, 0.f, alpha);
-            case ghoul::logging::LogLevel::Fatal:
-                return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-            default:
-                return white;
+                case ghoul::logging::LogLevel::Debug:
+                    return glm::vec4(0.f, 1.f, 0.f, alpha);
+                case ghoul::logging::LogLevel::Warning:
+                    return glm::vec4(1.f, 1.f, 0.f, alpha);
+                case ghoul::logging::LogLevel::Error:
+                    return glm::vec4(1.f, 0.f, 0.f, alpha);
+                case ghoul::logging::LogLevel::Fatal:
+                    return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
+                default:
+                    return white;
             }
         }(e->level);
 
@@ -1462,7 +1464,7 @@ void RenderEngine::renderScreenLog() {
                 10 + 30 * _fontLog->pointSize(),
                 _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
             ),
-            lvl,
+            fmt::format("({})", lvl),
             color
         );
 

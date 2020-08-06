@@ -1293,8 +1293,6 @@ void reset(TileProvider& tp) {
 
 
 int maxLevel(TileProvider& tp) {
-    ZoneScoped
-
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
