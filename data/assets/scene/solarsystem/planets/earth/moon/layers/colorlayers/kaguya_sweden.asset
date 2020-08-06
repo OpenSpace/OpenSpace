@@ -1,0 +1,13 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Kaguya_Sweden",
+    Name = "Kaguya [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Kaguya.vrt",
+    Settings = {
+        Gamma = 1.0,
+        Multiplier = 1.23
+    }
+}
+
+asset.export("layer", layer)

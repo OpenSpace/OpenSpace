@@ -1,0 +1,55 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./../transforms')
+asset.require("spice/base")
+asset.request('./../trail')
+local labelsPath = asset.require('./../pluto_globelabels').LabelsPath
+
+
+
+local Charon = {
+    Identifier = "Charon",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "CHARON",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = NewHorizonsKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_CHARON",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 6.035E5, 6.035E5, 6.035E5 },
+        SegmentsPerPatch = 64,
+        Layers = {},
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/charon.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 14.0,
+            LabelsSize = 8.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 500000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = { 1.0, 1.0, 0.0 }
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_terrestrial" },
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })

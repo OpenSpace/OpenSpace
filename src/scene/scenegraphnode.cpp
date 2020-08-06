@@ -56,7 +56,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
     {
         "ComputeScreenSpaceData",
-        "Screen Space Data",
+        "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
         "at regular intervals. If these values are set to 'false', they are not updated."
     };
@@ -64,35 +64,43 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
-        "" // @TODO Missing documentation
+        "The x,y position in screen space. Can be used for placing GUI elements",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
-        "" // @TODO Missing documentation
+        "Determines if the node is currently visible on screen",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
-        "" // @TODO Missing documentation
+        "The distance from the camera to the node surface",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
-        "" // @TODO Missing documentation
+        "The screen size of the radius of the node",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
-        "" // @TODO Missing documentation
+        "The distace in world coordinates between node and camera "
+        "at which the screenspace object will become visible",
+        openspace::properties::Property::Visibility::Hidden
     };
-    constexpr const char* KeyFixedBoundingSphere = "FixedBoundingSphere";
 
     constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
         "BoundingSphere",
         "Bounding Sphere",
         "The bounding sphere of the scene graph node. This can be the "
-        "bounding sphere of a renderable or a fixed bounding sphere. "
+        "bounding sphere of an attached renderable or directly specified to the node. "
+        "If there is a boundingsphere on both the renderable and the node, the largest "
+        "number will be picked.",
+        openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
@@ -153,6 +161,11 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (dictionary.hasKey(KeyGuiHidden)) {
         result->_guiHidden = dictionary.value<bool>(KeyGuiHidden);
         result->addProperty(result->_guiHidden);
+    }
+
+    if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
+        result->_boundingSphere = dictionary.value<float>(BoundingSphereInfo.identifier);
+        result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
     }
 
     if (dictionary.hasKey(KeyTransformTranslation)) {
@@ -246,6 +259,19 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()
         ));
+
+        // If the renderable child has a larger bounding sphere, we allow it tooverride
+        if (result->_renderable->boundingSphere() > result->_boundingSphere) {
+            result->_boundingSphere = result->_renderable->boundingSphere();
+
+            if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
+                LWARNING(fmt::format(
+                    "The specified property 'BoundingSphere' for '{}' was overwritten "
+                    "by a child renderable",
+                    result->_identifier
+                ));
+            }
+        }
     }
 
     if (dictionary.hasKey(KeyTag)) {
@@ -273,11 +299,6 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->addProperty(result->_guiPath);
     }
 
-    if (dictionary.hasKey(KeyFixedBoundingSphere)) {
-        result->_fixedBoundingSphere = static_cast<float>(
-            dictionary.value<double>(KeyFixedBoundingSphere)
-        );
-    }
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
@@ -295,6 +316,7 @@ SceneGraphNode::SceneGraphNode()
         std::make_unique<StaticRotation>(),
         std::make_unique<StaticScale>()
     }
+   , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(
         properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
@@ -310,6 +332,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
+    addProperty(_boundingSphere);
 }
 
 SceneGraphNode::~SceneGraphNode() {} // NOLINT
@@ -409,51 +432,15 @@ void SceneGraphNode::update(const UpdateData& data) {
     }
 
     if (_transform.translation) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.translation->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeTranslation = (end - start).count();
-        }
-        else {
-            _transform.translation->update(data);
-        }
+        _transform.translation->update(data);
     }
 
     if (_transform.rotation) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.rotation->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRotation = (end - start).count();
-        }
-        else {
-            _transform.rotation->update(data);
-        }
+        _transform.rotation->update(data);
     }
 
     if (_transform.scale) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.scale->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeScaling = (end - start).count();
-        }
-        else {
-            _transform.scale->update(data);
-        }
+        _transform.scale->update(data);
     }
     UpdateData newUpdateData = data;
 
@@ -477,19 +464,7 @@ void SceneGraphNode::update(const UpdateData& data) {
     _inverseModelTransformCached = glm::inverse(_modelTransformCached);
 
     if (_renderable && _renderable->isReady()) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
-
-            _renderable->update(newUpdateData);
-
-            glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRenderable = (end - start).count();
-        }
-        else {
-            _renderable->update(newUpdateData);
-        }
+        _renderable->update(newUpdateData);
     }
 }
 
@@ -504,7 +479,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     RenderData newData = {
         data.camera,
         data.time,
-        data.doPerformanceMeasurement,
         data.renderBinMask,
         { _worldPositionCached, _worldRotationCached, _worldScaleCached }
     };
@@ -523,20 +497,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
-    if (data.doPerformanceMeasurement) {
-        glFinish();
-        auto start = std::chrono::high_resolution_clock::now();
-
-        _renderable->render(newData, tasks);
-        if (_computeScreenSpaceValues) {
-            computeScreenSpaceData(newData);
-        }
-
-        glFinish();
-        auto end = std::chrono::high_resolution_clock::now();
-        _performanceRecord.renderTime = (end - start).count();
-    }
-    else {
+    {
         TracyGpuZone("Render")
 
         _renderable->render(newData, tasks);
@@ -905,10 +866,7 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
 }
 
 float SceneGraphNode::boundingSphere() const {
-    if (_renderable) {
-        return _renderable->boundingSphere();
-    }
-    return _fixedBoundingSphere;
+    return _boundingSphere;
 }
 
 // renderable
@@ -937,10 +895,6 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         }
     }
     return nullptr;
-}
-
-const SceneGraphNode::PerformanceRecord& SceneGraphNode::performanceRecord() const {
-    return _performanceRecord;
 }
 
 }  // namespace openspace

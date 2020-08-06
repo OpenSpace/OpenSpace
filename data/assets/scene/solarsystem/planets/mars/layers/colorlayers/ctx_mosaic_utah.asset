@@ -1,0 +1,10 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "CTX_Mosaic_Utah",
+    Name = "CTX Mosaic [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
+    BlendMode = "Color"
+}
+
+asset.export("layer", layer)

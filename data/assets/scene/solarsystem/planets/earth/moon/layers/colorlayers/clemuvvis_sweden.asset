@@ -1,0 +1,13 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "ClemUvvis_Sweden",
+    Name = "Clem Uvvis [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Clem_Uvvis.wms",
+    Settings = {
+        Gamma = 1.14,
+        Multiplier = 1.4
+    }
+}
+
+asset.export("layer", layer)

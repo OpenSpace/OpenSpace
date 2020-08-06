@@ -87,7 +87,6 @@ private:
     bool _spriteTextureIsDirty = true;
     bool _hasColorMapFile = false;
 
-    properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;

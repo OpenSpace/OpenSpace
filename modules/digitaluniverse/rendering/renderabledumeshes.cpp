@@ -54,7 +54,6 @@ namespace {
     };
 
     constexpr const char* KeyFile = "File";
-    constexpr const char* keyColor = "Color";
     constexpr const char* keyUnit = "Unit";
     constexpr const char* MeterUnit = "m";
     constexpr const char* KilometerUnit = "Km";
@@ -70,17 +69,17 @@ namespace {
     constexpr const int8_t CurrentCacheVersion = 1;
     constexpr const double PARSEC = 0.308567756E17;
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all point."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
         "The text color for the astronomical object."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+        "TextOpacity",
+        "Text Opacity",
+        "Determines the transparency of the text label, where 1 is completely opaque "
+        "and 0 fully transparent."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
@@ -128,12 +127,6 @@ namespace {
         "Determines whether labels should be drawn or hidden."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
@@ -168,24 +161,6 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 "astronomical object being rendered."
             },
             {
-                keyColor,
-                new Vector3Verifier<float>,
-                Optional::Yes,
-                "Astronomical Object Color (r,g,b)."
-            },
-            {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TransparencyInfo.description
-            },
-            /*{
-                ScaleFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleFactorInfo.description
-            },*/
-            {
                 DrawLabelInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -193,9 +168,15 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             },
             {
                 TextColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 TextColorInfo.description
+            },
+            {
+                TextOpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TextOpacityInfo.description
             },
             {
                 TextSizeInfo.identifier,
@@ -228,12 +209,6 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 LineWidthInfo.description
             },
             {
-                TransformationMatrixInfo.identifier,
-                new Matrix4x4Verifier<double>,
-                Optional::Yes,
-                TransformationMatrixInfo.description
-            },
-            {
                 MeshColorInfo.identifier,
                 new Vector3ListVerifier<float>,
                 Optional::No,
@@ -243,12 +218,10 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
     };
 }
 
-
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-    , _textColor(TextColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
@@ -262,6 +235,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableDUMeshes"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
@@ -309,25 +285,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         }
     }
 
-    /*if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::vec3>(keyColor);
-    }
-    addProperty(_pointColor);*/
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
-
-    /*if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-            dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
-    }
-    addProperty(_scaleFactor);*/
-
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(
             dictionary.value<double>(LineWidthInfo.identifier)
@@ -345,13 +302,17 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
+        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
+            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+        }
+        addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
             _textSize = dictionary.value<float>(TextSizeInfo.identifier);
@@ -369,12 +330,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_textMaxSize);
     }
 
-    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(
-            TransformationMatrixInfo.identifier
-        );
-    }
-
     if (dictionary.hasKey(MeshColorInfo.identifier)) {
         ghoul::Dictionary colorDict = dictionary.value<ghoul::Dictionary>(
             MeshColorInfo.identifier
@@ -385,8 +340,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             );
         }
     }
-
-    setRenderBin(Renderable::RenderBin::Opaque);
 }
 
 bool RenderableDUMeshes::isReady() const {
@@ -482,8 +435,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    //_program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
@@ -562,16 +514,17 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     labelInfo.scale = pow(10.f, _textSize);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
+   
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             pair.second,
-            _textColor,
+            textColor,
             labelInfo
         );
     }
@@ -899,10 +852,7 @@ bool RenderableDUMeshes::readLabelFile() {
             dummy.clear();
         }
 
-        glm::vec3 transformedPos = glm::vec3(
-            _transformationMatrix * glm::dvec4(position, 1.0)
-        );
-        _labelData.emplace_back(std::make_pair(transformedPos, label));
+        _labelData.emplace_back(std::make_pair(position, label));
 
     } while (!file.eof());
 

@@ -72,13 +72,6 @@ namespace {
         "The path to the texture that should be used as the point sprite."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
@@ -132,12 +125,6 @@ documentation::Documentation RenderablePoints::Documentation() {
                 SpriteTextureInfo.description
             },
             {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
-            },
-            {
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -157,7 +144,6 @@ documentation::Documentation RenderablePoints::Documentation() {
 
 RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _pointColor(
         ColorInfo,
@@ -172,6 +158,9 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderablePoints"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     _speckFile = absPath(dictionary.value<std::string>(KeyFile));
 
@@ -232,13 +221,6 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
         ));
         _hasColorMapFile = true;
     }
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
@@ -322,7 +304,7 @@ void RenderablePoints::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.sides, 4);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     if (_hasSpriteTexture) {

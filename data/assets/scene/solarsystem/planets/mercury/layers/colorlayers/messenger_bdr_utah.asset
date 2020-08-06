@@ -1,0 +1,10 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Messenger_BDR_Utah",
+    Name = "Messenger BDR [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MessengerBDR.wms",
+    TilePixelSize = 360,
+}
+
+asset.export("layer", layer)

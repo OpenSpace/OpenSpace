@@ -1,0 +1,48 @@
+local colorLayersPath = "./colorlayers"
+local colorLayers = {
+    asset.require(colorLayersPath .. "/esri_viirs_combo").layer, 
+    asset.require(colorLayersPath .. "/esri_world_imagery").layer, 
+    asset.require(colorLayersPath .. "/esri_imagery_world_2d").layer, 
+    asset.require(colorLayersPath .. "/viirs_snpp_temporal").layer, 
+    asset.require(colorLayersPath .. "/aqua_modis_temporal").layer, 
+    asset.require(colorLayersPath .. "/terra_modis_temporal").layer, 
+    asset.require(colorLayersPath .. "/bmng_utah").layer, 
+    asset.require(colorLayersPath .. "/bmng_sweden").layer, 
+    asset.require(colorLayersPath .. "/amsr2_gcom_w1_sea_ice_concentration_temporal").layer, 
+    asset.require(colorLayersPath .. "/modis_terra_chlorophyll_a_temporal").layer, 
+    asset.require(colorLayersPath .. "/ghrsst_l4_g1sst_sea_surface_temperature_temporal").layer, 
+    asset.require(colorLayersPath .. "/ghrsst_l4_mur_sea_surface_temperature_temporal").layer
+}
+
+local heightLayersPath = "./heightlayers"
+local heightLayers = {
+    asset.require(heightLayersPath .. "/terrain_tileset").layer 
+}
+
+local nightLayersPath = "./nightlayers"
+local nightLayers = {
+    asset.require(nightLayersPath .. "/earth_at_night_2012").layer, 
+    asset.require(nightLayersPath .. "/earth_at_night_temporal").layer 
+}
+
+local overlaysPath = "./overlays"
+local overlays = {
+    asset.require(overlaysPath .. "/coastlines").layer,
+    asset.require(overlaysPath .. "/reference_features").layer,
+    asset.require(overlaysPath .. "/reference_labels").layer,
+    asset.require(overlaysPath .. "/tile_indices").layer,
+    asset.require(overlaysPath .. "/size_reference").layer
+}
+
+local waterMasksPath = "./watermasks"
+local waterMasks = {
+    asset.require(waterMasksPath .. "/gebco_sweden").layer, 
+    asset.require(waterMasksPath .. "/gebco_utah").layer, 
+    asset.require(waterMasksPath .. "/modis_water_mask").layer 
+}
+
+asset.export("colorLayers", colorLayers)
+asset.export("heightLayers", heightLayers)
+asset.export("nightLayers", nightLayers)
+asset.export("overlays", overlays)
+asset.export("waterMasks", waterMasks)

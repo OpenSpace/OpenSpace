@@ -1,0 +1,13 @@
+local layerHelper = asset.require('util/layer_helper')
+local globeAsset = asset.require('./pluto')
+local globeIdentifier = globeAsset.Pluto.Identifier
+
+-- set enabled and fallback layers
+local defaultLayers = asset.require('./layers/default_layers')
+
+local colorLayer = asset.require('./layers/colorlayers/greyscale_usgs').layer
+colorLayer.Enabled = true
+
+asset.onInitialize(function ()
+    layerHelper.addLayersToGlobe(globeIdentifier, defaultLayers)
+end)

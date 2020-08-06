@@ -1,0 +1,15 @@
+local layer = {
+    Identifier = "Terra_Modis_Temporal",
+    Name = "Terra Modis (Temporal)",
+    Type = "TemporalTileLayer",
+    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+        "MODIS_Terra_CorrectedReflectance_TrueColor",
+        "2000-02-24",
+        "Yesterday",
+        "1d",
+        "250m",
+        "jpg"
+    )
+}
+
+asset.export("layer", layer)

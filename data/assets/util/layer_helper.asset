@@ -1,0 +1,18 @@
+local addLayersToGlobeByGroup = function(globeIdentifier, group, layers) 
+    for _, layer in ipairs(layers) do
+        openspace.globebrowsing.addLayer(globeIdentifier, group, layer)
+    end
+end
+
+-- Assumes a table containing tables with the following names as input: 
+-- 'colorLayers', 'heightLayers', 'nightLayers', 'overlays', 'waterMasks'
+local addLayersToGlobe = function(globeIdentifier, layers) 
+    addLayersToGlobeByGroup(globeIdentifier, 'ColorLayers', layers.colorLayers)
+    addLayersToGlobeByGroup(globeIdentifier, 'HeightLayers', layers.heightLayers)
+    addLayersToGlobeByGroup(globeIdentifier, 'NightLayers', layers.nightLayers)
+    addLayersToGlobeByGroup(globeIdentifier, 'Overlays', layers.overlays)
+    addLayersToGlobeByGroup(globeIdentifier, 'WaterMasks', layers.waterMasks)
+end
+
+asset.export("addLayersToGlobeByGroup", addLayersToGlobeByGroup)
+asset.export("addLayersToGlobe", addLayersToGlobe)

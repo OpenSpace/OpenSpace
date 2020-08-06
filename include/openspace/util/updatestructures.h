@@ -45,13 +45,11 @@ struct UpdateData {
     TransformData modelTransform;
     const Time time;
     const Time previousFrameTime;
-    const bool doPerformanceMeasurement;
 };
 
 struct RenderData {
     const Camera& camera;
     const Time time;
-    bool doPerformanceMeasurement = false;
     int renderBinMask = -1;
     TransformData modelTransform;
 };

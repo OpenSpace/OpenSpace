@@ -67,19 +67,19 @@ documentation::Documentation RenderableCartesianAxes::Documentation() {
         {
             {
                 XColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 XColorInfo.description
             },
             {
                 YColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 YColorInfo.description
             },
             {
                 ZColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 ZColorInfo.description
             }
@@ -93,21 +93,21 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     , _program(nullptr)
     , _xColor(
         XColorInfo,
-        glm::vec4(0.f, 0.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(1.f, 0.f, 0.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _yColor(
         YColorInfo,
-        glm::vec4(0.f, 1.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(0.f, 1.f, 0.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _zColor(
         ZColorInfo,
-        glm::vec4(0.f, 0.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(0.f, 0.f, 1.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
 {
     documentation::testSpecificationAndThrow(
@@ -117,19 +117,19 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     );
 
     if (dictionary.hasKey(XColorInfo.identifier)) {
-        _xColor = dictionary.value<glm::vec4>(XColorInfo.identifier);
+        _xColor = dictionary.value<glm::vec3>(XColorInfo.identifier);
     }
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
 
     if (dictionary.hasKey(XColorInfo.identifier)) {
-        _yColor = dictionary.value<glm::vec4>(YColorInfo.identifier);
+        _yColor = dictionary.value<glm::vec3>(YColorInfo.identifier);
     }
     _yColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_yColor);
 
     if (dictionary.hasKey(ZColorInfo.identifier)) {
-        _zColor = dictionary.value<glm::vec4>(ZColorInfo.identifier);
+        _zColor = dictionary.value<glm::vec3>(ZColorInfo.identifier);
     }
     _zColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_zColor);

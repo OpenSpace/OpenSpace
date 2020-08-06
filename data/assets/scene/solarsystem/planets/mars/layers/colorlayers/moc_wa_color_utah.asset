@@ -1,0 +1,15 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local texturesPath = asset.require("./../../mars_textures").TexturesPath
+
+local layer = {
+    Identifier = "MOC_WA_Color_Utah",
+    Name = "MOC WA Color [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/Mars_Color.wms",
+    Settings = {
+        Gamma = 1.6,
+        Multiplier = 1.07
+    }
+}
+
+asset.export("layer", layer)

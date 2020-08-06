@@ -1,0 +1,15 @@
+local layer =  {
+    Identifier = "GHRSST_L4_MUR_Sea_Surface_Temperature_Temporal",
+    Name = "GHRSST L4 MUR Sea Surface Temperature (Temporal)",
+    Type = "TemporalTileLayer",
+    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+        "GHRSST_L4_MUR_Sea_Surface_Temperature",
+        "2002-06-01",
+        "Yesterday",
+        "1d",
+        "1km",
+        "png"
+    )
+}
+
+asset.export("layer", layer)

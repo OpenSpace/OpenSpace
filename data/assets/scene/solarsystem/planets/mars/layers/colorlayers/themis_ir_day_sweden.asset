@@ -1,0 +1,10 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Themis_IR_Day_Sweden",
+    Name = "Themis IR Day [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Themis_IR_Day.wms",
+    BlendMode = "Color"
+}
+
+asset.export("layer", layer)

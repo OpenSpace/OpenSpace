@@ -71,14 +71,6 @@ public:
 
     BooleanType(UpdateScene);
 
-    struct PerformanceRecord {
-        long long renderTime;  // time in ns
-        long long updateTimeRenderable;  // time in ns
-        long long updateTimeTranslation; // time in ns
-        long long updateTimeRotation;  // time in ns
-        long long updateTimeScaling;  // time in ns
-    };
-
     static constexpr const char* RootNodeIdentifier = "Root";
     static constexpr const char* KeyIdentifier = "Identifier";
     static constexpr const char* KeyParentName = "Parent";
@@ -138,8 +130,6 @@ public:
 
     SceneGraphNode* childNode(const std::string& identifier);
 
-    const PerformanceRecord& performanceRecord() const;
-
     void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
@@ -166,8 +156,6 @@ private:
     // might be a node that is not very interesting (for example barycenters)
     properties::BoolProperty _guiHidden;
 
-    PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
-
     std::unique_ptr<Renderable> _renderable;
 
     properties::StringProperty _guiPath;
@@ -187,11 +175,10 @@ private:
     glm::dmat3 _worldRotationCached = glm::dmat3(1.0);
     glm::dvec3 _worldScaleCached = glm::dvec3(1.0);
 
-    float _fixedBoundingSphere = 0.f;
-
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
     glm::dmat4 _inverseModelTransformCached = glm::dmat4(1.0);
 
+    properties::FloatProperty _boundingSphere;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;

@@ -44,8 +44,9 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
-        "Transparency",
-        "This value determines the transparency of this object."
+        "Opacity",
+        "This value determines the opacity of this renderable. A value of 0 means "
+        "completely transparent."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {

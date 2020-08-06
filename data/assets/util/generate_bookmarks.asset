@@ -35,7 +35,8 @@ local getBookmarks = function (guiPath, bookmarkfile)
           Renderable = {
               Type = 'RenderableSphericalGrid',
               Enabled = false,
-              GridColor = { 0.3, 0.84, 1.0, 0.3},
+              Opacity = 0.3,
+              GridColor = { 0.3, 0.84, 1.0},
               LineWidth = linewidth
           },
           GUI = {

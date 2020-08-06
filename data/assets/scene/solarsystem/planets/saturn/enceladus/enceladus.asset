@@ -4,17 +4,6 @@ local kernel = asset.require('../kernels').sat375
 asset.request('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Enceladus textures",
-    Type = "HttpSynchronization",
-    Identifier = "enceladus_textures",
-    Version = 1
-})
-
-local mapServiceConfigsPath = asset.localResource("map_service_configs")
-
 local Enceladus = {
     Identifier = "Enceladus",
     Parent = transforms.SaturnBarycenter.Identifier,
@@ -35,20 +24,7 @@ local Enceladus = {
         Type = "RenderableGlobe",
         Radii = 252000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/enceladus.jpg",
-                },
-                {
-                    Identifier = "Global_Mosaic_100m_HPF",
-                    Name = "Cassini Global Mosaic 100m HPF",
-                    FilePath = mapServiceConfigsPath .. "/Cassini_ISS_Global_Mosaic_100m_HPF.wms",
-                    Enabled = true,
-                },
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/enceladus.labels",
@@ -63,7 +39,7 @@ local Enceladus = {
             FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },

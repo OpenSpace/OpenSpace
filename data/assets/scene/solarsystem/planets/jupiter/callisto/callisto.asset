@@ -5,15 +5,6 @@ asset.request('./trail')
 local kernel = asset.require('../kernels').jup310
 local labelsPath = asset.require('../jupiter_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Callisto Textures",
-    Type = "HttpSynchronization",
-    Identifier = "callisto_textures",
-    Version = 1
-})
-
 local Callisto = {
     Identifier = "Callisto",
     Parent = transforms.JupiterBarycenter.Identifier,
@@ -35,15 +26,7 @@ local Callisto = {
         Type = "RenderableGlobe",
         Radii = 2410000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/callisto.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/callisto.labels",
@@ -58,7 +41,7 @@ local Callisto = {
             FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },

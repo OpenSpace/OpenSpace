@@ -131,6 +131,13 @@ namespace {
         "The text color for the astronomical object."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+        "TextOpacity",
+        "Text Opacity",
+        "Determines the transparency of the text label, where 1 is completely opaque "
+        "and 0 fully transparent."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
@@ -308,9 +315,15 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             },
             {
                 TextColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 TextColorInfo.description
+            },
+            {
+                TextOpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TextOpacityInfo.description
             },
             {
                 TextSizeInfo.identifier,
@@ -411,12 +424,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _spriteTexturePath(SpriteTextureInfo)
-    , _textColor(
-        TextColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
     , _textMaxSize(LabelMaxSizeInfo, 20.f, 0.5f, 100.f)
@@ -610,13 +619,17 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
+        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
+            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+        }
+        addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
             _textSize = dictionary.value<float>(TextSizeInfo.identifier);
@@ -911,9 +924,10 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = _textColor;
-    textColor.a *= fadeInVariable;
-    textColor.a *= _opacity;
+    glm::vec4 textColor = glm::vec4(
+        glm::vec3(_textColor), 
+        _textOpacity * fadeInVariable
+    );
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;

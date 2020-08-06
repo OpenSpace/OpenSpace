@@ -3,15 +3,6 @@ local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
 
-
-
-local textures = asset.syncedResource({
-    Name = "Jupiter Textures",
-    Type = "HttpSynchronization",
-    Identifier = "jupiter_textures",
-    Version = 1
-})
-
 local Jupiter = {
     Identifier = "Jupiter",
     Parent = transforms.JupiterBarycenter.Identifier,
@@ -26,15 +17,7 @@ local Jupiter = {
         Type = "RenderableGlobe",
         Radii = { 71492000.0, 71492000.0, 66854000.0 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/jupiter.jpg",
-                    Enabled = true
-                }
-            }
-        }
+        Layers = {}
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
