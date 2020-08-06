@@ -273,8 +273,8 @@ namespace {
         "Node Distance Threshold",
         "Threshold for where to interpolate between the max and min node distance."
     };
-    constexpr openspace::properties::Property::PropertyInfo CameraPerspectiveInfo = {
-        "cameraPerspective",
+    constexpr openspace::properties::Property::PropertyInfo CameraPerspectiveEnabledInfo = {
+        "cameraPerspectiveEnabled",
         "Use Camera perspective",
         "Camera perspective changes the size of the nodes dependent on distance from camera."
     };
@@ -294,8 +294,8 @@ namespace {
         "Using fragment shader to draw nodes with Gaussian filter for alpha value."
 
     };
-    constexpr openspace::properties::Property::PropertyInfo RadiusPerspectiveInfo = {
-        "radiusPerspective",
+    constexpr openspace::properties::Property::PropertyInfo RadiusPerspectiveEnabledInfo = {
+        "radiusPerspectiveEnabled",
         "Include radius with cameraperspective",
         "If false, then nodes closer to the sun will not be larger regardless of distance to camera."
     };
@@ -319,10 +319,15 @@ namespace {
         "Pulsate regardless of camera position",
         "Always have nodes close to earth pulsate regardless of position."
     };
-    constexpr openspace::properties::Property::PropertyInfo Pulseinfo = {
-       "pulse",
+    constexpr openspace::properties::Property::PropertyInfo pulseEnabledInfo = {
+       "pulseEnabled",
        "Nodes close to Earth pulsate",
-       "Boolean for pulse."
+       "Toggles the pulse for nodes close to Earth."
+    };
+    constexpr openspace::properties::Property::PropertyInfo gaussianPulseEnabledInfo = {
+       "gaussianPulseEnabled",
+       "Nodes close to Earth pulsate with alpha by gaussian",
+       "Toggles the pulse with alpha by gaussian for nodes close to Earth."
     };
     /*constexpr openspace::properties::Property::PropertyInfo TestChangeInfo = {
         "testChange",
@@ -408,7 +413,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
     , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
     , _pEarthdistGroup({ "Earthfocus" })
-    , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 700000000000.0f)
+    , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 500000000000.0f)
     , _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, _numberofStreams)
     , _pMisalignedIndex(MisalignedIndexInfo, 0, -5, 20)
     , _pFlowColor(
@@ -428,16 +433,17 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     //, _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 7.f)
     , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
-    , _pCameraPerspective(CameraPerspectiveInfo, false)
+    , _pCameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
     , _pDrawingCircles(DrawingCirclesInfo, false)
     , _pCameraPerspectiveGroup({" CameraPerspective"})
     , _pDrawingHollow(DrawingHollowInfo, false)
     , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
-    , _pRadiusPerspective(RadiusPerspectiveInfo, true)
+    , _pRadiusPerspectiveEnabled(RadiusPerspectiveEnabledInfo, true)
     , _pPerspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
     , _pMaxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
     , _pMinNodeSize(MinNodeSizeInfo, 1.f, 1.f, 10.f)
-    , _pUsePulse(Pulseinfo, false)
+    , _pPulseEnabled(pulseEnabledInfo, false)
+    , _pGaussianPulseEnabled(gaussianPulseEnabledInfo, false)
     , _pPulseAlways(AlwaysPulseInfo, false)
     //, _pTestChange(TestChangeInfo, 0.5f, 0.0f, 1.f)
 
@@ -1184,15 +1190,16 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
 
-    _pCameraPerspectiveGroup.addProperty(_pCameraPerspective);
+    _pCameraPerspectiveGroup.addProperty(_pCameraPerspectiveEnabled);
     _pCameraPerspectiveGroup.addProperty(_pPerspectiveDistanceFactor);
     _pCameraPerspectiveGroup.addProperty(_pDrawingCircles);
     _pCameraPerspectiveGroup.addProperty(_pDrawingHollow);
     _pCameraPerspectiveGroup.addProperty(_pGaussianAlphaFilter);
-    _pCameraPerspectiveGroup.addProperty(_pRadiusPerspective);
+    _pCameraPerspectiveGroup.addProperty(_pRadiusPerspectiveEnabled);
     _pCameraPerspectiveGroup.addProperty(_pMaxNodeSize);
     _pCameraPerspectiveGroup.addProperty(_pMinNodeSize);
-    _pCameraPerspectiveGroup.addProperty(_pUsePulse);
+    _pCameraPerspectiveGroup.addProperty(_pPulseEnabled);
+    _pCameraPerspectiveGroup.addProperty(_pGaussianPulseEnabled);
     _pCameraPerspectiveGroup.addProperty(_pPulseAlways);
 
     definePropertyCallbackFunctions();
@@ -1344,16 +1351,17 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     //_shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
     _shaderProgram->setUniform("maxNodeDistanceSize", _pMaxNodeDistanceSize);
     //_shaderProgram->setUniform("nodeDistanceThreshold", _pNodeDistanceThreshold);
-    _shaderProgram->setUniform("usingCameraPerspective", _pCameraPerspective);
+    _shaderProgram->setUniform("usingCameraPerspective", _pCameraPerspectiveEnabled);
     _shaderProgram->setUniform("drawCircles", _pDrawingCircles);
     _shaderProgram->setUniform("drawHollow", _pDrawingHollow);
     _shaderProgram->setUniform("useGaussian", _pGaussianAlphaFilter);
-    _shaderProgram->setUniform("usingRadiusPerspective", _pRadiusPerspective);
+    _shaderProgram->setUniform("usingRadiusPerspective", _pRadiusPerspectiveEnabled);
     _shaderProgram->setUniform("perspectiveDistanceFactor", _pPerspectiveDistanceFactor);
     //_shaderProgram->setUniform("testChange", _pTestChange);
     _shaderProgram->setUniform("maxNodeSize", _pMaxNodeSize);
     _shaderProgram->setUniform("minNodeSize", _pMinNodeSize);
-    _shaderProgram->setUniform("usingPulse", _pUsePulse);
+    _shaderProgram->setUniform("usingPulse", _pPulseEnabled);
+    _shaderProgram->setUniform("usingGaussianPulse", _pGaussianPulseEnabled);
     _shaderProgram->setUniform("pulsatingAlways", _pPulseAlways);
     //////// test for camera perspective: 
     /*

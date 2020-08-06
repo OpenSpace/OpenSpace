@@ -273,13 +273,14 @@ private:
     properties::BoolProperty _pUseFlowColor;
 
     properties::PropertyOwner _pCameraPerspectiveGroup;
-    properties::BoolProperty _pCameraPerspective;
+    properties::BoolProperty _pCameraPerspectiveEnabled;
     properties::BoolProperty _pDrawingCircles;
     properties::BoolProperty _pDrawingHollow;
     properties::BoolProperty _pGaussianAlphaFilter;
-    properties::BoolProperty _pRadiusPerspective;
+    properties::BoolProperty _pRadiusPerspectiveEnabled;
     properties::FloatProperty _pPerspectiveDistanceFactor;
-    properties::BoolProperty _pUsePulse;
+    properties::BoolProperty _pPulseEnabled;
+    properties::BoolProperty _pGaussianPulseEnabled;
     properties::BoolProperty _pPulseAlways;
 
     //properties::FloatProperty _pTestChange;

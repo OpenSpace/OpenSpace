@@ -264,15 +264,15 @@ void CheckdistanceMethod() {
 
         vs_closeToEarth = 0;
 
-       if(distancevec < maxdist){
-          if(distancevec < maxdist / 2 && usingPulse){
+       //if(distancevec < maxdist){
+          if(distancevec < distanceThreshold && usingPulse){ 
                 vs_closeToEarth = 1;
                 gl_PointSize = gl_PointSize * 5;
                 vec4 fluxColor = getTransferFunctionColor(colorTable);
                 vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
-                //vs_color = vec4(streamColor.xyz, fluxColorAlpha);
+                //vs_color = vec4(streamColor.xyz, fluxColorAlpha); // HÄR
             }
-        }
+        //}
         if(enhanceMethod == colorTables || enhanceMethod == sizeAndColor){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
              vs_color = vec4(fluxColor2.xyz, fluxColorAlpha);

@@ -32,7 +32,9 @@ uniform bool usingCameraPerspective;
 //uniform float testChange;
 uniform bool pulsatingAlways;
 uniform bool usingPulse;
+uniform bool usingGaussianPulse;
 uniform vec3 cameraPos;
+uniform vec4 streamColor;
 
 in vec2 vs_st;
 in vec4 vs_color;
@@ -69,8 +71,9 @@ Fragment getFragment() {
 
     // if(vs_closeToEarth > 0.5){
     if(drawHollow && length(coord) < 0.4){
+        //frag.color.xyz = streamColor.xyz;
         if(vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0)) < 500000000000.f){
-            if(usingPulse && usingCameraPerspective){
+            if(usingGaussianPulse && usingCameraPerspective){
                 if(vs_closeToEarth > 0.5){
                     if(length(coord) < 0.3){
                         if(pulsatingAlways || camera_IsCloseEnough > 0.5){
@@ -92,6 +95,7 @@ Fragment getFragment() {
             }   
         }
     }
+
     //}
     // outline
     /*
@@ -119,12 +123,12 @@ Fragment getFragment() {
     if(usingPulse && usingCameraPerspective){
         if(vs_closeToEarth > 0.5){
             if(pulsatingAlways || camera_IsCloseEnough > 0.5){
-                if(length(coord) > 0.4){
+                if(length(coord) > 0.46){
                     float speed = 60.f;
                     int modulusResult = int(double(speed) * vs_time) % 60;
                     if(modulusResult > 0 && modulusResult < 30){
-                            //frag.color = vec4(1, 1, 1, 1);
-                            discard;
+                        //frag.color = vec4(1, 1, 1, 1);
+                        discard;
                     }
                 }
             }
