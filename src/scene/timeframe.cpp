@@ -26,7 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -58,7 +60,7 @@ documentation::Documentation TimeFrame::Documentation() {
     };
 }
 
-std::unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
+ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "TimeFrame");
@@ -66,9 +68,13 @@ std::unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
     const std::string timeFrameType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<TimeFrame>();
-    std::unique_ptr<TimeFrame> result = factory->create(timeFrameType, dictionary);
+    TimeFrame* result = factory->create(
+        timeFrameType,
+        dictionary/*,
+        &global::memoryManager.PersistentMemory*/
+    );
     result->setIdentifier("TimeFrame");
-    return result;
+    return ghoul::mm_unique_ptr<TimeFrame>(result);
 }
 
 TimeFrame::TimeFrame() : properties::PropertyOwner({ "TimeFrame" }) {}

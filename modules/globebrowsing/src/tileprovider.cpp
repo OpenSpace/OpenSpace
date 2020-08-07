@@ -519,8 +519,8 @@ std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTyp
 
     const char* type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
-    std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
-    return result;
+    TileProvider* result = factory->create(type, dictionary);
+    return std::unique_ptr<TileProvider>(result);
 }
 
 TileProvider::TileProvider() : properties::PropertyOwner({ "tileProvider" }) {}
@@ -1293,8 +1293,6 @@ void reset(TileProvider& tp) {
 
 
 int maxLevel(TileProvider& tp) {
-    ZoneScoped
-
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);

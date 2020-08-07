@@ -26,8 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
@@ -98,7 +100,7 @@ documentation::Documentation Renderable::Documentation() {
     };
 }
 
-std::unique_ptr<Renderable> Renderable::createFromDictionary(
+ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
@@ -107,8 +109,12 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
 
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
-    std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
-    return result;
+    Renderable* result = factory->create(
+        renderableType,
+        dictionary,
+        &global::memoryManager.PersistentMemory
+    );
+    return ghoul::mm_unique_ptr<Renderable>(result);
 }
 
 

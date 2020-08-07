@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <mutex>
+#include <string_view>
 
 #include "time_lua.inl"
 
@@ -79,50 +80,25 @@ std::string Time::UTC() const {
 
 std::string Time::ISO8601() const {
     std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
-    const std::string& month = datetime.substr(5, 3);
+    std::string_view month = std::string_view(datetime).substr(5, 3);
 
-    std::string MM;
-    if (month == "JAN") {
-        MM = "01";
-    }
-    else if (month == "FEB") {
-        MM = "02";
-    }
-    else if (month == "MAR") {
-        MM = "03";
-    }
-    else if (month == "APR") {
-        MM = "04";
-    }
-    else if (month == "MAY") {
-        MM = "05";
-    }
-    else if (month == "JUN") {
-        MM = "06";
-    }
-    else if (month == "JUL") {
-        MM = "07";
-    }
-    else if (month == "AUG") {
-        MM = "08";
-    }
-    else if (month == "SEP") {
-        MM = "09";
-    }
-    else if (month == "OCT") {
-        MM = "10";
-    }
-    else if (month == "NOV") {
-        MM = "11";
-    }
-    else if (month == "DEC") {
-        MM = "12";
-    }
-    else {
-        ghoul_assert(false, "Bad month");
-    }
+    std::string_view mm = [](std::string_view month) {
+        if (month == "JAN") { return "-01-"; }
+        else if (month == "FEB") { return "-02-"; }
+        else if (month == "MAR") { return "-03-"; }
+        else if (month == "APR") { return "-04-"; }
+        else if (month == "MAY") { return "-05-"; }
+        else if (month == "JUN") { return "-06-"; }
+        else if (month == "JUL") { return "-07-"; }
+        else if (month == "AUG") { return "-08-"; }
+        else if (month == "SEP") { return "-09-"; }
+        else if (month == "OCT") { return "-10-"; }
+        else if (month == "NOV") { return "-11-"; }
+        else if (month == "DEC") { return "-12-"; }
+        else { throw ghoul::MissingCaseException(); }
+    }(month);
 
-    datetime.replace(4, 5, "-" + MM + "-");
+    datetime.replace(4, 5, mm);
     return datetime;
 }
 

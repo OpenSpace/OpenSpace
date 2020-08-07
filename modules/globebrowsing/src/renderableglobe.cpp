@@ -607,6 +607,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
 
+    _traversalMemory.reserve(512);
+
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
@@ -1169,19 +1171,18 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     std::array<const Chunk*, ChunkBufferSize> local;
     int localCount = 0;
 
-    auto traversal = [&global, &globalCount, &local, &localCount,
+    auto traversal = [&global, &globalCount, &local, &localCount, this,
           cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
     {
         ZoneScopedN("traversal")
 
-        std::vector<const Chunk*> Q;
-        Q.reserve(256);
+        _traversalMemory.clear();
 
         // Loop through nodes in breadths first order
-        Q.push_back(&node);
-        while (!Q.empty()) {
-            const Chunk* n = Q.front();
-            Q.erase(Q.begin());
+        _traversalMemory.push_back(&node);
+        while (!_traversalMemory.empty()) {
+            const Chunk* n = _traversalMemory.front();
+            _traversalMemory.erase(_traversalMemory.begin());
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
@@ -1197,7 +1198,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             // Add children to queue, if any
             if (!isLeaf(*n)) {
                 for (int i = 0; i < 4; ++i) {
-                    Q.push_back(n->children[i]);
+                    _traversalMemory.push_back(n->children[i]);
                 }
             }
         }

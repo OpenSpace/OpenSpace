@@ -599,19 +599,12 @@ void LuaConsole::update() {
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
-    const size_t nLines = std::min(
-        static_cast<size_t>(_historyLength),
-        _commandsHistory.size()
-    );
-    const FontRenderer::BoundingBoxInformation& bbox =
-        FontRenderer::defaultRenderer().boundingBox(
-            *_historyFont,
-            std::string(nLines, '\n')
-        );
+
+    const float height = _historyFont->height() * (_commandsHistory.size() + 1);
 
     // Update the full height and the target height.
     // Add the height of the entry line and space for a separator.
-    _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
+    _fullHeight = (height + EntryFontSize + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
     // The first frame is going to be finished in approx 10 us, which causes a floating
@@ -629,7 +622,7 @@ void LuaConsole::update() {
 
     _currentHeight += static_cast<float>(dHeight);
 
-    _currentHeight = std::max(0.0f, _currentHeight);
+    _currentHeight = std::max(0.f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
 }
 

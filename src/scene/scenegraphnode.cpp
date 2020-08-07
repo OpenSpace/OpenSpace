@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -135,7 +136,7 @@ namespace openspace {
 int SceneGraphNode::nextIndex = 0;
 #endif // Debugging_Core_SceneGraphNode_Indices
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     openspace::documentation::testSpecificationAndThrow(
@@ -144,7 +145,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         "SceneGraphNode"
     );
 
-    std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
+    SceneGraphNode* n = global::memoryManager.PersistentMemory.alloc<SceneGraphNode>();
+    ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
+
 #ifdef Debugging_Core_SceneGraphNode_Indices
     result->index = nextIndex++;
 #endif // Debugging_Core_SceneGraphNode_Indices
@@ -312,9 +315,15 @@ SceneGraphNode::SceneGraphNode()
     , _guiPath(GuiPathInfo)
     , _guiDisplayName(GuiNameInfo)
     , _transform {
-        std::make_unique<StaticTranslation>(),
-        std::make_unique<StaticRotation>(),
-        std::make_unique<StaticScale>()
+        ghoul::mm_unique_ptr<Translation>(
+            global::memoryManager.PersistentMemory.alloc<StaticTranslation>()
+        ),
+        ghoul::mm_unique_ptr<Rotation>(
+            global::memoryManager.PersistentMemory.alloc<StaticRotation>()
+        ),
+        ghoul::mm_unique_ptr<Scale>(
+            global::memoryManager.PersistentMemory.alloc<StaticScale>()
+        )
     }
    , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
@@ -407,13 +416,13 @@ void SceneGraphNode::deinitializeGL() {
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
     fn(this);
-    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePreOrder(fn);
     }
 }
 
 void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)>& fn) {
-    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
     fn(this);
@@ -487,11 +496,9 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
-    bool visible = _renderable &&
-                   _renderable->isVisible() &&
-                   _renderable->isReady() &&
-                   _renderable->isEnabled() &&
-                   _renderable->matchesRenderBinMask(data.renderBinMask);
+    const bool visible = _renderable && _renderable->isVisible() &&
+        _renderable->isReady() && _renderable->isEnabled() &&
+        _renderable->matchesRenderBinMask(data.renderBinMask);
 
     if (!visible) {
         return;
@@ -513,7 +520,7 @@ void SceneGraphNode::setParent(SceneGraphNode& parent) {
     parent.attachChild(_parent->detachChild(*this));
 }
 
-void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
+void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
     ghoul_assert(child != nullptr, "Child may not be null");
     ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
 
@@ -526,7 +533,7 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
     childRaw->setScene(_scene);
 }
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
+ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
     ghoul_assert(
         child._dependentNodes.empty(),
         "Nodes cannot depend on a node being detached"
@@ -536,7 +543,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
     const auto iter = std::find_if(
         _children.begin(),
         _children.end(),
-        [&child] (const std::unique_ptr<SceneGraphNode>& c) {
+        [&child] (const ghoul::mm_unique_ptr<SceneGraphNode>& c) {
             return &child == c.get();
         }
     );
@@ -556,7 +563,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
 
     // Remove link between parent and child
     child._parent = nullptr;
-    std::unique_ptr<SceneGraphNode> c = std::move(*iter);
+    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
     _children.erase(iter);
 
     return c;
@@ -566,7 +573,7 @@ void SceneGraphNode::clearChildren() {
     traversePreOrder([](SceneGraphNode* node) {
         node->clearDependencies();
     });
-    for (const std::unique_ptr<SceneGraphNode>& c : _children) {
+    for (const ghoul::mm_unique_ptr<SceneGraphNode>& c : _children) {
         if (_scene) {
             c->setScene(nullptr);
         }
@@ -859,7 +866,7 @@ void SceneGraphNode::setScene(Scene* scene) {
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
-    for (const std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (const ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }
     return nodes;
@@ -867,11 +874,6 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
 
 float SceneGraphNode::boundingSphere() const {
     return _boundingSphere;
-}
-
-// renderable
-void SceneGraphNode::setRenderable(std::unique_ptr<Renderable> renderable) {
-    _renderable = std::move(renderable);
 }
 
 const Renderable* SceneGraphNode::renderable() const {
@@ -887,7 +889,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         return this;
     }
     else {
-        for (std::unique_ptr<SceneGraphNode>& it : _children) {
+        for (ghoul::mm_unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(id);
             if (tmp) {
                 return tmp;

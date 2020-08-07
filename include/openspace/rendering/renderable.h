@@ -30,6 +30,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -58,7 +59,7 @@ public:
         Overlay = 16
     };
 
-    static std::unique_ptr<Renderable> createFromDictionary(
+    static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary);

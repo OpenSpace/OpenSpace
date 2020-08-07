@@ -364,6 +364,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/job.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h

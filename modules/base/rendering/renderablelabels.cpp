@@ -719,7 +719,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
         *_font,
         transformedPos,
-        _labelText,
+        _labelText.value(),
         textColor,
         labelInfo
     );
