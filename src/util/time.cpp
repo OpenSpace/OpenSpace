@@ -79,8 +79,6 @@ std::string Time::UTC() const {
 }
 
 std::string Time::ISO8601() const {
-    ZoneScoped
-
     std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
     std::string_view month = std::string_view(datetime).substr(5, 3);
 

@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/deferredcaster.h>
 
+#include <modules/atmosphere/rendering/renderableatmosphere.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -193,6 +194,12 @@ private:
     // Atmosphere Debugging
     float _calculationTextureScale = 1.f;
     bool _saveCalculationTextures = false;
+
+    std::vector<ShadowRenderingStruct> _shadowDataArrayCache;
+    // Assuming < 1000 shadow casters, the longest uniform name that we are getting is
+    // shadowDataArray[999].casterPositionVec
+    // which needs to fit into the uniform buffer
+    char _uniformNameBuffer[40];
 };
 
 } // openspace
