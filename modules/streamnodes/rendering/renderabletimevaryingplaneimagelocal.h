@@ -22,50 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/streamnodes/streamnodesmodule.h>
-#include <modules/streamnodes/rendering/renderablestreamnodes.h>
-#include <modules/streamnodes/rendering/renderablelighttravel.h>
-#include <modules/streamnodes/rendering/renderabletimevaryingplaneimagelocal.h>
-#include <modules/streamnodes/rendering/renderabletimevaryingsphere.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+#ifndef __OPENSPACE_MODULE_BASE___RenderableTimeVaryingPlaneImageLocal___H__
+#define __OPENSPACE_MODULE_BASE___RenderableTimeVaryingPlaneImageLocal___H__
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+#include <modules/base/rendering/renderableplane.h>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-std::string StreamNodesModule::DefaultTransferFunctionFile = "";
+    struct RenderData;
+    struct UpdateData;
 
-StreamNodesModule::StreamNodesModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
+    namespace documentation { struct Documentation; }
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
-}
+    class RenderableTimeVaryingPlaneImageLocal : public RenderablePlane {
+    public:
+        RenderableTimeVaryingPlaneImageLocal(const ghoul::Dictionary& dictionary);
 
-void StreamNodesModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
+        void initializeGL() override;
+        void deinitializeGL() override;
 
-    factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
-    factory->registerClass<RenderableLightTravel>("RenderableLightTravel");
-    factory->registerClass<RenderableTimeVaryingPlaneImageLocal>("RenderableTimeVaryingPlaneImageLocal");
-    factory->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
-}
+        bool isReady() const override;
+
+        void update(const UpdateData& data) override;
+
+        static documentation::Documentation Documentation();
+
+    protected:
+        virtual void bindTexture() override;
+
+    private:
+        void loadTexture();
+        void extractTriggerTimesFromFileNames();
+        bool extractMandatoryInfoFromDictionary();
+        void updateActiveTriggerTimeIndex(double currenttime);
+        void computeSequenceEndTime();
+        // Estimated end of sequence.
+        double _sequenceEndTime;
+        bool _needsUpdate = false;
+        std::vector<std::string> _sourceFiles;
+        std::vector<double> _startTimes;
+        int _activeTriggerTimeIndex = 0;
+        // Number of states in the sequence
+        size_t _nStates = 274;
+        properties::StringProperty _texturePath;
+        //properties::StringProperty _timestapsPath;
+        ghoul::opengl::Texture* _texture = nullptr;
+        std::unique_ptr<ghoul::filesystem::File> _textureFile;
+        bool _isLoadingTexture = false;
+        bool _isLoadingLazily = false;
+        bool _textureIsDirty = false;
+    };
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___RenderableTimeVaryingPlaneImageLocal___H__

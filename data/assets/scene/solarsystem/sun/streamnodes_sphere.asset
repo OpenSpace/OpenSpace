@@ -1,0 +1,51 @@
+asset.info = {
+    Name = "Predictive Science Inc. Stream nodes Bastille Days",
+    Version = "1.0",
+    Description = " Stream nodes for the bastille day CME events ",
+    Author = "Christian Adamsson, Emilie Ho",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}
+
+asset.require("spice/base")
+local assetHelper = asset.require("util/asset_helper")
+local textures = asset.require('./cutplanes_textures_sphere').TexturesPath
+local textures_smallsphere = asset.require('./cutplanes_textures_sphere_small').TexturesPath
+local transforms = asset.require("./transforms")
+
+local Cutplane_sphere = {
+    Identifier = "Cutplane_sphere",
+    Parent = transforms.SunIAU.Identifier,
+    Renderable = {
+	    Type = "RenderableTimeVaryingSphere",
+	    Size = 1.571*10^11,
+	    Enabled = true,
+	    Texture = textures,
+	    BlendMode = "Additive",
+	    Opacity = 1.0,
+            Segments = 132
+	},
+    GUI = {
+        Name = "Sphere Slice",
+        Path = "/Solar System/Heliosphere"
+		},
+};
+local Cutplane_sphere_small = {
+    Identifier = "Cutplane_sphere_small",
+    Parent = transforms.SunIAU.Identifier,
+    Renderable = {
+	    Type = "RenderableTimeVaryingSphere",
+	    Size = 7.5*10^7,
+	    Enabled = true,
+	    Texture = textures_smallsphere,
+	    BlendMode = "Additive",
+	    Opacity = 1.0,
+            Segments = 132
+	},
+    GUI = {
+        Name = "Sphere Slice Small",
+        Path = "/Solar System/Heliosphere"
+		},
+};
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane_sphere, Cutplane_sphere_small})

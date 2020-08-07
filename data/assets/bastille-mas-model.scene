@@ -9,6 +9,7 @@ asset.require('util/default_dashboard')
 asset.require('scene/solarsystem/sun/magnetogram_textures')
 asset.require('scene/solarsystem/sun/streamnodeslegend')
 asset.require('scene/solarsystem/sun/streamnodescutplane')
+asset.require('scene/solarsystem/sun/streamnodes_sphere')
 --asset.require('examples/debugcoordinateaxes.asset')
 local suncameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Earthpos');
 local earthcameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/SunPos');

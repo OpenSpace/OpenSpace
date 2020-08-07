@@ -1,0 +1,8 @@
+local TexturesPath = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "cutplanes_textures",
+    Identifier = "cutplanes_textures",
+    Version = 4
+})
+
+asset.export("TexturesPath", TexturesPath)

@@ -41,8 +41,8 @@ local sunRadius = 6.957E8
 -- Streamnodes from binaries
 local Streamnodes = {
     Identifier = "MAS_MHD_StreamNodes",
-    --wrong Parent = transforms.HNMReferenceFrame.Identifier,
-    Parent = sunTransforms.SunIAU.Identifier,
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    --Parent = sunTransforms.SunIAU.Identifier,
     --Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     --transforms.asset, referens till suntransforms.solarsystemBarycenter.identifier
     Renderable = {
@@ -80,6 +80,12 @@ local Streamnodes = {
             Type = "StaticScale",
             Scale = 1
         },
+	Rotation = {
+	    Type = "FixedRotation",
+            XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
+            YAxis = {0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0},
+            ZAxis = {0.0, 0.0, 1.0}
+        }
     }
 } 
 

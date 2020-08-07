@@ -9,7 +9,7 @@ asset.info = {
 
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
-local textures = asset.require('./streamnodes_textures').TexturesPath
+local textures = asset.require('./cutplanes_textures').TexturesPath
 local transforms = asset.require("./transforms")
 
 local Cutplane = {
@@ -22,10 +22,10 @@ local Cutplane = {
     	}
     },
     Renderable = {
-	    Type = "RenderablePlaneImageLocal",
+	    Type = "RenderableTimeVaryingPlaneImageLocal",
 	    Size = 1.3*10^11,
-	    Enabled = false,
-	    Texture = textures .. "/cutplane1.png",
+	    Enabled = true,
+	    Texture = textures,
 	    BlendMode = "Additive",
 	    Opacity = 0.65,
 	},
@@ -35,22 +35,22 @@ local Cutplane = {
 		},
 };
 
-local Cutplane2 = {
-    Identifier = "Cutplane2", 
-    Parent = transforms.SunIAU.Identifier,
-    Renderable = {
-	    Type = "RenderablePlaneImageLocal",
-	    Size = 1.3*10^11,
-	    Enabled = false,
-	    Texture = textures .. "/cutplane1.png",
-	    BlendMode = "Additive",
-	    Opacity = 0.65,
-	},
-    GUI = {
-        Name = "Cutplane2",
-        Path = "/Solar System/Heliosphere"
-		},
-};
+--local Cutplane2 = {
+--    Identifier = "Cutplane2", 
+--    Parent = transforms.SunIAU.Identifier,
+ --   Renderable = {
+--	    Type = "RenderablePlaneImageLocal",
+--	    Size = 1.3*10^11,
+--	    Enabled = false,
+--	    Texture = textures .. "/cutplane1.png",
+--	    BlendMode = "Additive",
+--	    Opacity = 0.65,
+--	},
+  --  GUI = {
+    --    Name = "Cutplane2",
+      --  Path = "/Solar System/Heliosphere"
+	--	},
+--};
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane, Cutplane2 })
