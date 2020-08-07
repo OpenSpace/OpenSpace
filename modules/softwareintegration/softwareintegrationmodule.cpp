@@ -396,10 +396,6 @@ namespace openspace {
                 counter++;
             }
 
-            const Renderable* myrenderable = renderable(identifier);
-
-            properties::Property* colorProperty = myrenderable->property("Color");
-
             LERROR(fmt::format("Identifier: {}", identifier));
             LERROR(fmt::format("Color: {}", value));
 
