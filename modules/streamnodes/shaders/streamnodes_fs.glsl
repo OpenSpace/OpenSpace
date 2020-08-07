@@ -49,6 +49,16 @@ Fragment getFragment() {
     }
 
     vec4 fragColor = vs_color;
+    vec2 pos = vec2(0.5)-vs_st;
+
+    float r = length(pos)*2.0;
+    float a = atan(pos.y,pos.x);
+    float f = cos(a*3.);
+
+    vec3 color = vec3(0.0);
+    color = vec3( 1.-smoothstep(f,f, r) );
+
+    //fragColor = vec4(color, 1.0);
 
     Fragment frag;
     frag.depth = vs_depth;
@@ -56,9 +66,8 @@ Fragment getFragment() {
     vec2 coord = gl_PointCoord - vec2(0.5);
    
   // if(camera_IsCloseEnough > 0.5){
-   /*
-    if(length(coord.x) > 0.15){
-        if((coord.y) > 0){
+    /*zif(length(coord.x) > 0.15){
+        if(length(coord.y) > 0.15){
             discard;
         }
     }*/

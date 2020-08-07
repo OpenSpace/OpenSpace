@@ -232,12 +232,14 @@ return false;
 void DecidehowtoshowClosetoEarth(){
         // SizeScaling
     if(enhanceMethod == sizeScaling){
-        float tempR = rValue + 0.4; 
+        vec4 fluxColor = getTransferFunctionColor(colorTable);
+        vs_color = vec4(fluxColor.xyz, fluxColor.a);
+    /*    float tempR = rValue + 0.4; 
         if(tempR > 1.5){
             tempR = 1.5;
         }
             gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
-            return;
+            return;*/
     }
     // ColorTables
     if(enhanceMethod == colorTables){
@@ -276,7 +278,7 @@ void CheckdistanceMethod() {
         if(enhanceMethod == colorTables || enhanceMethod == sizeAndColor){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
              vs_color = vec4(fluxColor2.xyz, fluxColorAlpha);
-             //vs_color = vec4(0.3, 0.3, 0.3, 1.0);
+             //vs_color = vec4(0.3, 0.3, 0.3, fluxColorAlpha);
         }
         if(distance(earthPos, in_position) < distanceThreshold){
             DecidehowtoshowClosetoEarth();
@@ -338,9 +340,9 @@ void main() {
       //float interestingStreams[3] = float[](37, 154, 210);
 
       // Close to Earth (863 nodes)
-      //float interestingStreams[7] = float[](340, 350, 351, 352, 353, 363, 364);
+      float interestingStreams[7] = float[](340, 350, 351, 352, 353, 363, 364);
       //float interestingStreams[10] = float[](339, 340, 350, 351, 352, 353, 362, 363, 364, 365);
-      float interestingStreams[20] = float[](326, 327, 328, 329, 338, 339, 340, 341, 350, 351, 352, 353, 362, 363, 364, 365, 374, 375, 376, 377);
+      //float interestingStreams[20] = float[](326, 327, 328, 329, 338, 339, 340, 341, 350, 351, 352, 353, 362, 363, 364, 365, 374, 375, 376, 377);
 
         for(int i = 0; i < interestingStreams.length(); i++){
             if(Streamnumber == interestingStreams[i]){
