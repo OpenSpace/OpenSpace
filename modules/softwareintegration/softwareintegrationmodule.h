@@ -49,8 +49,8 @@ public:
 
     enum class MessageType : uint32_t {
         Connection = 0,
-        AddSceneGraph,
-        RemoveSceneGraph,
+        AddSceneGraphNode,
+        RemoveSceneGraphNode,
         Color,
         Opacity,
         Size,

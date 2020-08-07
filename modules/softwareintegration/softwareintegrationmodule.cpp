@@ -147,15 +147,15 @@ namespace openspace {
         }
 
         // And delegate decoding depending on type
-        if( type == "addS")
-            return Message(MessageType::AddSceneGraph, messageBuffer);
-        else if (type == "delS")
-            return Message(MessageType::RemoveSceneGraph, messageBuffer);
-        else if (type == "colo")
+        if( type == "ASGN")
+            return Message(MessageType::AddSceneGraphNode, messageBuffer);
+        else if (type == "RSGN")
+            return Message(MessageType::RemoveSceneGraphNode, messageBuffer);
+        else if (type == "UPCO")
             return Message(MessageType::Color, messageBuffer);
-        else if (type == "opac")
+        else if (type == "UPOP")
             return Message(MessageType::Opacity, messageBuffer);
-        else if( type == "size")
+        else if( type == "UPSI")
             return Message(MessageType::Size, messageBuffer);
     }
 
@@ -260,7 +260,7 @@ namespace openspace {
             //handleData(*peer, std::move(data));
             break;
         }
-        case SoftwareConnection::MessageType::AddSceneGraph: {
+        case SoftwareConnection::MessageType::AddSceneGraphNode: {
             std::string length_of_identifier;
             length_of_identifier.push_back(message[0]);
             length_of_identifier.push_back(message[1]);
@@ -359,7 +359,7 @@ namespace openspace {
 
             break;
         }
-        case SoftwareConnection::MessageType::RemoveSceneGraph: {
+        case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
             LERROR(fmt::format("Identifier: {}", identifier));
             break;
@@ -395,6 +395,10 @@ namespace openspace {
                 offset++;
                 counter++;
             }
+
+            const Renderable* myrenderable = renderable(identifier);
+
+            properties::Property* colorProperty = myrenderable->property("Color");
 
             LERROR(fmt::format("Identifier: {}", identifier));
             LERROR(fmt::format("Color: {}", value));
