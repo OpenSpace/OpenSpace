@@ -39,7 +39,7 @@
 
 namespace openspace {
 
-class Connection {
+class SoftwareConnection {
 public:
     // Connection
     enum class Status : uint32_t {
@@ -65,19 +65,19 @@ public:
         std::vector<char> content;
     };
 
-    class ConnectionLostError : public ghoul::RuntimeError {
+    class SoftwareConnectionLostError : public ghoul::RuntimeError {
     public:
-        explicit ConnectionLostError();
+        explicit SoftwareConnectionLostError();
     };
 
-    Connection(std::unique_ptr<ghoul::io::TcpSocket> socket);
+    SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
     // Connection
     bool isConnectedOrConnecting() const;
     void disconnect();
     ghoul::io::TcpSocket* socket();
 
-    Connection::Message receiveMessage();
+    SoftwareConnection::Message receiveMessage();
 
     static const unsigned int ProtocolVersion;
 
@@ -107,14 +107,14 @@ private:
     struct Peer {
         size_t id;
         std::string name;
-        Connection connection;
-        Connection::Status status;
+        SoftwareConnection connection;
+        SoftwareConnection::Status status;
         std::thread thread;
     };
 
     struct PeerMessage {
         size_t peerId;
-        Connection::Message message;
+        SoftwareConnection::Message message;
     };
 
     // Server

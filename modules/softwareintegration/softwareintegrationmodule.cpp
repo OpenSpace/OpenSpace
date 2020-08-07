@@ -48,20 +48,20 @@ namespace {
 
 namespace openspace {
 
-    const unsigned int Connection::ProtocolVersion = 1;
+    const unsigned int SoftwareConnection::ProtocolVersion = 1;
 
     SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
 
-    Connection::Message::Message(MessageType type, std::vector<char> content)
+    SoftwareConnection::Message::Message(MessageType type, std::vector<char> content)
         : type(type)
         , content(std::move(content))
     {}
 
-    Connection::ConnectionLostError::ConnectionLostError()
+    SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError()
         : ghoul::RuntimeError("Connection lost", "Connection")
     {}
 
-    Connection::Connection(std::unique_ptr<ghoul::io::TcpSocket> socket)
+    SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
         : _socket(std::move(socket))
     {}
 
@@ -80,24 +80,24 @@ namespace openspace {
     }
 
     // Connection 
-    bool Connection::isConnectedOrConnecting() const {
+    bool SoftwareConnection::isConnectedOrConnecting() const {
         return _socket->isConnected() || _socket->isConnecting();
     }
 
     // Connection 
-    void Connection::disconnect() {
+    void SoftwareConnection::disconnect() {
         if (_socket) {
             _socket->disconnect();
         }
     }
 
     // Connection 
-    ghoul::io::TcpSocket* Connection::socket() {
+    ghoul::io::TcpSocket* SoftwareConnection::socket() {
         return _socket.get();
     }
 
     // Connection 
-    Connection::Message Connection::receiveMessage() {
+    SoftwareConnection::Message SoftwareConnection::receiveMessage() {
         // Header consists of...
         size_t HeaderSize = 
             9 * sizeof(char);
@@ -109,7 +109,7 @@ namespace openspace {
         // Receive the header data
         if (!_socket->get(headerBuffer.data(), HeaderSize)) {
             LERROR("Failed to read header from socket. Disconnecting.");
-            throw ConnectionLostError();
+            throw SoftwareConnectionLostError();
         }
 
         std::string version;
@@ -123,7 +123,7 @@ namespace openspace {
                 protocolVersionIn,
                 ProtocolVersion
             ));
-            throw ConnectionLostError();
+            throw SoftwareConnectionLostError();
         }
 
         std::string type;
@@ -143,7 +143,7 @@ namespace openspace {
         messageBuffer.resize(messageSize);
         if (!_socket->get(messageBuffer.data(), messageSize)) {
             LERROR("Failed to read message from socket. Disconnecting.");
-            throw ConnectionLostError();
+            throw SoftwareConnectionLostError();
         }
 
         // And delegate decoding depending on type
@@ -186,8 +186,8 @@ namespace openspace {
             std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
                 id,
                 "",
-                Connection(std::move(socket)),
-                Connection::Status::Connecting,
+                SoftwareConnection(std::move(socket)),
+                SoftwareConnection::Status::Connecting,
                 std::thread()
                 });
             auto it = _peers.emplace(p->id, p);
@@ -218,15 +218,15 @@ namespace openspace {
                 return;
             }
             try {
-                Connection::Message m = p->connection.receiveMessage();
+                SoftwareConnection::Message m = p->connection.receiveMessage();
                 _incomingMessages.push({ id, m });
             }
-            catch (const Connection::ConnectionLostError&) {
+            catch (const SoftwareConnection::SoftwareConnectionLostError&) {
                 LERROR(fmt::format("Connection lost to {}", p->id));
                 _incomingMessages.push({
                     id,
-                    Connection::Message(
-                        Connection::MessageType::Disconnection, std::vector<char>()
+                    SoftwareConnection::Message(
+                        SoftwareConnection::MessageType::Disconnection, std::vector<char>()
                     )
                     });
                 return;
@@ -252,25 +252,119 @@ namespace openspace {
 
         /* LERROR(fmt::format("Name: {}", sName)); */
 
-        const Connection::MessageType messageType = peerMessage.message.type;
+        const SoftwareConnection::MessageType messageType = peerMessage.message.type;
         std::vector<char>& message = peerMessage.message.content;
         std::string ms(message.begin(), message.end());
         switch (messageType) {
-        case Connection::MessageType::Connection: {
+        case SoftwareConnection::MessageType::Connection: {
             //handleData(*peer, std::move(data));
             break;
         }
-        case Connection::MessageType::AddSceneGraph: {
+        case SoftwareConnection::MessageType::AddSceneGraph: {
+            std::string length_of_identifier;
+            length_of_identifier.push_back(message[0]);
+            length_of_identifier.push_back(message[1]);
 
-            LERROR("Hej ny scene graph");
+            size_t offset = 2;
+            int counter = 0;
+            
+            int lengthOfIdentifier = stoi(length_of_identifier);
+            std::string identifier;
+            while (counter != lengthOfIdentifier)
+            {
+                identifier.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_color;
+            length_of_color.push_back(message[offset]);
+            length_of_color.push_back(message[offset + 1]);
+            offset += 2;
+
+            int lengthOfColor = stoi(length_of_color);
+            std::string color;
+            counter = 0;
+            while (counter != lengthOfColor)
+            {
+                color.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_file;
+            length_of_file.push_back(message[offset]);
+            length_of_file.push_back(message[offset + 1]);
+            offset += 2;
+
+            int lengthOfFile = stoi(length_of_file);
+            std::string file;
+            counter = 0;
+            while (counter != lengthOfFile)
+            {
+                file.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_opacity;
+            length_of_opacity.push_back(message[offset]);
+            offset += 1;
+
+            int lengthOfOpacity = stoi(length_of_opacity);
+            std::string opacity;
+            counter = 0;
+            while (counter != lengthOfOpacity)
+            {
+                opacity.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_size;
+            length_of_size.push_back(message[offset]);
+            offset += 1;
+
+            int lengthOfSize = stoi(length_of_size);
+            std::string size;
+            counter = 0;
+            while (counter != lengthOfSize)
+            {
+                size.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            std::string length_of_gui;
+            length_of_gui.push_back(message[offset]);
+            length_of_gui.push_back(message[offset + 1]);
+            offset += 2;
+
+            int lengthOfGui = stoi(length_of_gui);
+            std::string gui;
+            counter = 0;
+            while (counter != lengthOfGui)
+            {
+                gui.push_back(message[offset]);
+                offset++;
+                counter++;
+            }
+
+            LERROR(fmt::format("Identifier: {}", identifier));
+            LERROR(fmt::format("Color: {}", color));
+            LERROR(fmt::format("File: {}", file));
+            LERROR(fmt::format("Opacity: {}", opacity));
+            LERROR(fmt::format("Size: {}", size));
+            LERROR(fmt::format("Gui: {}", gui));
+
             break;
         }
-        case Connection::MessageType::RemoveSceneGraph: {
+        case SoftwareConnection::MessageType::RemoveSceneGraph: {
             std::string identifier(message.begin(), message.end());
             LERROR(fmt::format("Identifier: {}", identifier));
             break;
         }
-        case Connection::MessageType::Color: {
+        case SoftwareConnection::MessageType::Color: {
             std::string length_of_identifier;
             length_of_identifier.push_back(message[0]);
             length_of_identifier.push_back(message[1]);
@@ -307,7 +401,7 @@ namespace openspace {
 
             break;
         }
-        case Connection::MessageType::Opacity: {
+        case SoftwareConnection::MessageType::Opacity: {
             std::string length_of_identifier;
             length_of_identifier.push_back(message[0]);
             length_of_identifier.push_back(message[1]);
@@ -343,7 +437,7 @@ namespace openspace {
 
             break;
         }
-        case Connection::MessageType::Size: {
+        case SoftwareConnection::MessageType::Size: {
             std::string length_of_identifier;
             length_of_identifier.push_back(message[0]);
             length_of_identifier.push_back(message[1]);
@@ -378,7 +472,7 @@ namespace openspace {
             LERROR(fmt::format("Size: {}", value));
             break;
         }
-        case Connection::MessageType::Disconnection: {
+        case SoftwareConnection::MessageType::Disconnection: {
             disconnect(*peer);
             break;
         }
@@ -392,8 +486,8 @@ namespace openspace {
 
     // Server
     bool SoftwareIntegrationModule::isConnected(const Peer& peer) const {
-        return peer.status != Connection::Status::Connecting &&
-            peer.status != Connection::Status::Disconnected;
+        return peer.status != SoftwareConnection::Status::Connecting &&
+            peer.status != SoftwareConnection::Status::Disconnected;
     }
 
     // Server
