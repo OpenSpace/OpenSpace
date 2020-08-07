@@ -1544,6 +1544,7 @@ void RenderableStreamNodes::ReadInterestingStreamsFromJson() {
 }
 
 void RenderableStreamNodes::update(const UpdateData& data) {
+    if (!this->_enabled) return;
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
     }

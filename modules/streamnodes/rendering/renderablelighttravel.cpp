@@ -304,7 +304,7 @@ bool RenderableLightTravel::isReady() const
 }
 void RenderableLightTravel::render(const RenderData& data, RendererTasks& rendererTask)
 {
-        
+    if (!this->_enabled) return;
     if (_triggerTime == -1) {
         _triggerTime = data.time.j2000Seconds();
         _endTime = _triggerTime + 599;
@@ -470,6 +470,7 @@ void RenderableLightTravel::renderLabels(const RenderData& data,
 }
 void RenderableLightTravel::update(const UpdateData& data)
 {
+    if (!this->_enabled) return;
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
     }

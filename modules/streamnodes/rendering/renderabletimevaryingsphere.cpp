@@ -538,7 +538,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     if ((_needsUpdate || _sphereIsDirty) && !_isLoadingTexture) {
         _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
-        //_isLoadingTexture = true;
+        _isLoadingTexture = true;
         loadTexture();
         _sphereIsDirty = false;
     }
