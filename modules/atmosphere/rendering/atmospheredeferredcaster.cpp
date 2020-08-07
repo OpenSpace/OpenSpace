@@ -146,7 +146,7 @@ namespace {
         glBindVertexArray(0);
     }
 } // namespace
-#pragma optimize("", off)
+
 namespace openspace {
 
 void AtmosphereDeferredcaster::initialize() {
