@@ -229,10 +229,9 @@ glm::vec2 DashboardItemVelocity::size() const {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Camera velocity: {} {}/s", dist.first, dist.second)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

@@ -676,10 +676,8 @@ void LuaConsole::render() {
         using namespace ghoul::fontrendering;
 
         // Compute the current width of the string and console prefix.
-        const float currentWidth = FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "> " + currentCommand
-        ).boundingBox.x + inputLocation.x;
+        const float currentWidth =
+            _font->boundingBox("> " + currentCommand).x + inputLocation.x;
 
         // Compute the overflow in pixels
         const float overflow = currentWidth - res.x * 0.995f;
@@ -785,13 +783,8 @@ void LuaConsole::render() {
             res.y - _currentHeight + EntryFontSize
         );
 
-        const FontRenderer::BoundingBoxInformation bbox =
-            FontRenderer::defaultRenderer().boundingBox(*_font, text);
-
-        return glm::vec2(
-            loc.x + res.x - bbox.boundingBox.x - 10.f,
-            loc.y
-        );
+        const glm::vec2 bbox = _font->boundingBox(text);
+        return glm::vec2(loc.x + res.x - bbox.x - 10.f, loc.y);
     };
 
     if (_remoteScripting) {

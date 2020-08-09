@@ -208,10 +208,7 @@ glm::vec2 DashboardItemParallelConnection::size() const {
     }
 
     if (!connectionInfo.empty()) {
-        return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            connectionInfo
-        ).boundingBox;
+        return _font->boundingBox(connectionInfo);
     }
     else {
         return { 0.f, 0.f };
