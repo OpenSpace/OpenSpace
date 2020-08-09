@@ -235,6 +235,10 @@ bool Renderable::isEnabled() const {
     return _enabled;
 }
 
+bool Renderable::shouldUpdateIfDisabled() const {
+    return _shouldUpdateIfDisabled;
+}
+
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
     _enabled.onChange([this, c = std::move(callback)]() {
         c(isEnabled());

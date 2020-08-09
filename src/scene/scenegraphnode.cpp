@@ -472,7 +472,9 @@ void SceneGraphNode::update(const UpdateData& data) {
     _modelTransformCached = translation * rotation * scaling;
     _inverseModelTransformCached = glm::inverse(_modelTransformCached);
 
-    if (_renderable && _renderable->isReady()) {
+    if (_renderable && _renderable->isReady() &&
+        (_renderable->isEnabled() || _renderable->shouldUpdateIfDisabled()))
+    {
         _renderable->update(newUpdateData);
     }
 }
