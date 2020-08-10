@@ -1,7 +1,7 @@
 openspace.softwareintegration.documentation = {
     {
         Name = "addRenderable",
-        Arguments = "string, vec3, speckFile, float, float, string",
+        Arguments = "string, vec3, string, float, float, string",
         Documentation = "TODO"
     },
     {
