@@ -22,55 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/rendering/planetgeometry.h>
+#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
+#define __OPENSPACE_CORE___MEMORYMANAGER___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/memorypool.h>
 
-namespace {
-    constexpr const char* KeyType = "Type";
-} // namespace
+namespace openspace {
 
-namespace openspace::planetgeometry {
+class MemoryManager {
+public:
+    ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
+    ghoul::MemoryPool<10 * 1024, false> TemporaryMemory;
+};
 
-documentation::Documentation PlanetGeometry::Documentation() {
-    using namespace documentation;
-    return {
-        "Planet Geometry",
-        "space_geometry_planet",
-        {
-            {
-                KeyType,
-                new StringVerifier,
-                Optional::No,
-                "The type of the PlanetGeometry that will can be constructed."
-            }
-        }
-    };
-}
+} // namespace openspace
 
-std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "PlanetGeometry"
-    );
-
-    std::string geometryType = dictionary.value<std::string>(KeyType);
-    auto factory = FactoryManager::ref().factory<PlanetGeometry>();
-
-    PlanetGeometry* result = factory->create(geometryType, dictionary);
-    return std::unique_ptr<PlanetGeometry>(result);
-}
-
-PlanetGeometry::PlanetGeometry() : properties::PropertyOwner({ "PlanetGeometry" }) {}
-
-void PlanetGeometry::initialize() {}
-
-void PlanetGeometry::deinitialize() {}
-
-}  // namespace openspace::planetgeometry
+#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__

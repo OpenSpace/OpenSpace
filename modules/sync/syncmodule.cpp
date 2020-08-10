@@ -78,22 +78,41 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     fSynchronization->registerClass(
         "HttpSynchronization",
-        [this](bool, const ghoul::Dictionary& dictionary) {
-            return new HttpSynchronization(
-                dictionary,
-                _synchronizationRoot,
-                _synchronizationRepositories
-            );
+        [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->alloc(sizeof(HttpSynchronization));
+                return new (ptr) HttpSynchronization(
+                    dictionary,
+                    _synchronizationRoot,
+                    _synchronizationRepositories
+                );
+            }
+            else {
+                return new HttpSynchronization(
+                    dictionary,
+                    _synchronizationRoot,
+                    _synchronizationRepositories
+                );
+            }
         }
     );
 
     fSynchronization->registerClass(
         "UrlSynchronization",
-        [this](bool, const ghoul::Dictionary& dictionary) {
-            return new UrlSynchronization(
-                dictionary,
-                _synchronizationRoot
-            );
+        [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->alloc(sizeof(UrlSynchronization));
+                return new (ptr) UrlSynchronization(
+                    dictionary,
+                    _synchronizationRoot
+                );
+            }
+            else {
+                return new UrlSynchronization(
+                    dictionary,
+                    _synchronizationRoot
+                );
+            }
         }
     );
 

@@ -42,7 +42,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<std::unique_ptr<TimeFrame>> _timeFrames;
+    std::vector<ghoul::mm_unique_ptr<TimeFrame>> _timeFrames;
 };
 
 } // namespace openspace

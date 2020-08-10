@@ -41,7 +41,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    Timeline<std::unique_ptr<Rotation>> _timeline;
+    Timeline<ghoul::mm_unique_ptr<Rotation>> _timeline;
 };
 
 } // namespace openspace

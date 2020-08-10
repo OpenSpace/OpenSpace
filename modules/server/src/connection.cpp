@@ -83,8 +83,14 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
 
     _topicFactory.registerClass(
         AuthenticationTopicKey,
-        [password](bool, const ghoul::Dictionary&) {
-            return new AuthorizationTopic(password);
+        [password](bool, const ghoul::Dictionary&, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->alloc(sizeof(AuthorizationTopic));
+                return new (ptr) AuthorizationTopic(password);
+            }
+            else {
+                return new AuthorizationTopic(password);
+            }
         }
     );
 
@@ -178,7 +184,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
 
-        std::unique_ptr<Topic> topic = _topicFactory.create(type);
+        std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(_topicFactory.create(type));
         topic->initialize(this, topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {

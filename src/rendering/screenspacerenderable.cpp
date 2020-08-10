@@ -307,10 +307,12 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
     );
 
     const std::string& renderableType = dictionary.value<std::string>(KeyType);
-    return FactoryManager::ref().factory<ScreenSpaceRenderable>()->create(
-        renderableType,
-        dictionary
-    );
+    ScreenSpaceRenderable* ssr =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>()->create(
+            renderableType,
+            dictionary
+        );
+    return std::unique_ptr<ScreenSpaceRenderable>(ssr);
 }
 
 std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {

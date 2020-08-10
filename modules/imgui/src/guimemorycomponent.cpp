@@ -22,55 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/rendering/planetgeometry.h>
+#include <modules/imgui/include/guimemorycomponent.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/templatefactory.h>
+#include <modules/imgui/include/imgui_include.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/memorymanager.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    const ImVec2 Size = ImVec2(350, 500);
+
+    template <typename MemoryPool>
+    void renderMemoryPoolInformation(const MemoryPool& p) {
+        //ImGui::Text("Bucket Size: %i", p.BucketSize);
+        ImGui::Text("Number of Buckets: %i", p.nBuckets());
+        const std::vector<int>& occupancies = p.occupancies();
+        for (size_t i = 0; i < occupancies.size(); ++i) {
+            ImGui::Text(
+                "  %i: %i/%i (%.2f/%.2f kiB)",
+                i,
+                occupancies[i],
+                p.BucketSize,
+                occupancies[i] / 1024.f,
+                p.BucketSize / 1024.f
+            );
+        }
+    }
 } // namespace
 
-namespace openspace::planetgeometry {
+namespace openspace::gui {
 
-documentation::Documentation PlanetGeometry::Documentation() {
-    using namespace documentation;
-    return {
-        "Planet Geometry",
-        "space_geometry_planet",
-        {
-            {
-                KeyType,
-                new StringVerifier,
-                Optional::No,
-                "The type of the PlanetGeometry that will can be constructed."
-            }
-        }
-    };
+GuiMemoryComponent::GuiMemoryComponent()
+    : GuiComponent("memory_information", "Memory Information")
+{}
+
+void GuiMemoryComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
+    bool v = _isEnabled;
+    ImGui::Begin("Memory Information", &v, Size, 0.5f);
+    _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
+
+    ImGui::Text("%s", "Persistent Memory Pool");
+    renderMemoryPoolInformation(global::memoryManager.PersistentMemory);
+
+    ImGui::Text("%s", "Temporary Memory Pool");
+    renderMemoryPoolInformation(global::memoryManager.TemporaryMemory);
+    ImGui::End();
 }
 
-std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "PlanetGeometry"
-    );
-
-    std::string geometryType = dictionary.value<std::string>(KeyType);
-    auto factory = FactoryManager::ref().factory<PlanetGeometry>();
-
-    PlanetGeometry* result = factory->create(geometryType, dictionary);
-    return std::unique_ptr<PlanetGeometry>(result);
-}
-
-PlanetGeometry::PlanetGeometry() : properties::PropertyOwner({ "PlanetGeometry" }) {}
-
-void PlanetGeometry::initialize() {}
-
-void PlanetGeometry::deinitialize() {}
-
-}  // namespace openspace::planetgeometry
+} // namespace openspace::gui

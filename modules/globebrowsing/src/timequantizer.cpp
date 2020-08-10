@@ -33,6 +33,12 @@
 #include <iomanip>
 #include <sstream>
 
+// @TODO (abock, 2020-08-07) All of the time handling in this class should be cleaned up
+//       a bit. There are lots of conversions between ISO strings for time and Time
+//       objects and back which eat up performance.  For example, the TimeRange should
+//       operate on Time objects rather than date strings and the DateTime likewise (if
+//       this class needs to exist at all)
+
 namespace openspace::globebrowsing {
 
 namespace {

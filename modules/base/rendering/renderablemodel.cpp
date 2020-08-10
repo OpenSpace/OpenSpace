@@ -383,7 +383,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     );
 
     glm::dmat4 crippedModelViewTransform = glm::transpose(glm::inverse(
-            glm::dmat4(glm::inverse(data.camera.sgctInternal.viewMatrix())) * modelViewTransform
+        glm::dmat4(glm::inverse(data.camera.sgctInternal.viewMatrix())) * modelViewTransform
     ));
 
     _program->setUniform(
@@ -425,7 +425,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
 
     _geometry->render();
-
+    
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
     }
