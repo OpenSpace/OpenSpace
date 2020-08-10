@@ -1176,7 +1176,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-    GLint viewport[4];
+    GLint viewport[4] = {0};
     global::renderEngine.openglStateCache().viewPort(viewport);
 
     // Set Render Pipeline State
@@ -1203,7 +1203,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         ZoneScopedN("Deferred G-Buffer")
         TracyGpuZone("Deferred G-Buffer")
 
-        glViewport(0, 0, _resolution.x, _resolution.y);
+        //glViewport(0, 0, _resolution.x, _resolution.y);
+        GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
+        //GLint vp[4] = {0, 0, _resolution.x, _resolution.y};
+        global::renderEngine.openglStateCache().setViewPortState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachment012Array);
@@ -1293,8 +1296,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
 
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
     if (_enableFXAA) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
         glDrawBuffers(1, ColorAttachment0Array);
@@ -1329,8 +1330,8 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        GLint viewport[4] = {0};
+        global::renderEngine.openglStateCache().viewPort(viewport);
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1342,12 +1343,14 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         if (raycaster->downscaleRender() < 1.f) {
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
-            glViewport(
+            GLint newVP[4] = {
                 viewport[0],
                 viewport[1],
                 static_cast<GLsizei>(viewport[2] * s),
                 static_cast<GLsizei>(viewport[3] * s)
-            );
+            };
+            global::renderEngine.openglStateCache().setViewPortState(newVP);
+
             if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
                 _downscaleVolumeRendering.currentDownscaleFactor = s;
                 updateDownscaleTextures();
@@ -1443,7 +1446,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+            global::renderEngine.openglStateCache().setViewPortState(viewport);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
         }
@@ -1538,9 +1541,6 @@ void FramebufferRenderer::performDeferredTasks(
 void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _resolution = std::move(res);
     _dirtyResolution = true;
-    GLint newViewPortCoors[4];
-    glGetIntegerv(GL_VIEWPORT, newViewPortCoors);
-    global::renderEngine.openglStateCache().setViewPortState(newViewPortCoors);
 }
 
 void FramebufferRenderer::setDisableHDR(bool disable) {
