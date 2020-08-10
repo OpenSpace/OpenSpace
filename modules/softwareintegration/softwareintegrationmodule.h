@@ -29,6 +29,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/util/concurrentqueue.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/misc/exception.h>
@@ -99,6 +100,8 @@ public:
     void stop();
     size_t nConnections() const;
 
+    size_t messageOffset = 0;
+
     std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;
 
@@ -134,6 +137,11 @@ private:
     std::atomic_bool _shouldStop = false;
     std::atomic_size_t _nConnections = 0;
     ConcurrentQueue<PeerMessage> _incomingMessages;
+
+    std::string readIdentifier(std::vector<char>& message);
+    float readFloatValue(std::vector<char>& message);
+    glm::vec3 readColor(std::vector<char>& message);
+    std::string readString(std::vector<char>& message);
 
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;

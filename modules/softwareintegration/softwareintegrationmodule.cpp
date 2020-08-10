@@ -270,103 +270,12 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
-            std::string length_of_identifier;
-            length_of_identifier.push_back(message[0]);
-            length_of_identifier.push_back(message[1]);
-
-            size_t offset = 2;
-            int counter = 0;
-            
-            int lengthOfIdentifier = stoi(length_of_identifier);
-            std::string identifier;
-            while (counter != lengthOfIdentifier)
-            {
-                identifier.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-
-            std::string length_of_color;
-            length_of_color.push_back(message[offset]);
-            length_of_color.push_back(message[offset + 1]);
-            offset += 2;
-
-            int lengthOfColor = stoi(length_of_color);
-            std::string color;
-            counter = 0;
-            while (counter != lengthOfColor)
-            {
-                color.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-
-            std::string length_of_file;
-            length_of_file.push_back(message[offset]);
-            length_of_file.push_back(message[offset + 1]);
-            offset += 2;
-
-            int lengthOfFile = stoi(length_of_file);
-            std::string file;
-            counter = 0;
-            while (counter != lengthOfFile)
-            {
-                file.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-
-            std::string length_of_opacity;
-            length_of_opacity.push_back(message[offset]);
-            offset += 1;
-
-            int lengthOfOpacity = stoi(length_of_opacity);
-            std::string opacity;
-            counter = 0;
-            while (counter != lengthOfOpacity)
-            {
-                opacity.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-            float floatOpacity = std::stof(opacity);
-
-            std::string length_of_size;
-            length_of_size.push_back(message[offset]);
-            offset += 1;
-
-            int lengthOfSize = stoi(length_of_size);
-            std::string size;
-            counter = 0;
-            while (counter != lengthOfSize)
-            {
-                size.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-            float floatSize = std::stof(size);
-
-            std::string length_of_gui;
-            length_of_gui.push_back(message[offset]);
-            length_of_gui.push_back(message[offset + 1]);
-            offset += 2;
-
-            int lengthOfGui = stoi(length_of_gui);
-            std::string gui;
-            counter = 0;
-            while (counter != lengthOfGui)
-            {
-                gui.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-
-            LERROR(fmt::format("Identifier: {}", identifier));
-            LERROR(fmt::format("Color: {}", color));
-            LERROR(fmt::format("File: {}", file));
-            LERROR(fmt::format("Opacity: {}", opacity));
-            LERROR(fmt::format("Size: {}", size));
-            LERROR(fmt::format("Gui: {}", gui));
+            std::string identifier = readIdentifier(message);
+            glm::vec3 color = readColor(message);
+            std::string file = readString(message);
+            float opacity = readFloatValue(message);
+            float size = readFloatValue(message);
+            std::string guiName = readString(message);
 
             break;
         }
@@ -376,100 +285,21 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Color: {
-            std::string length_of_identifier;
-            length_of_identifier.push_back(message[0]);
-            length_of_identifier.push_back(message[1]);
+            std::string identifier = readIdentifier(message);
 
-            size_t offset = 2;
-
-            int lengthOfIdentifier = stoi(length_of_identifier);
-            int counter = 0; 
-            std::string identifier;
-            while( counter != lengthOfIdentifier)
-            {
-                identifier.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-
-            std::string length_of_value;
-            length_of_value.push_back(message[offset]);
-            length_of_value.push_back(message[offset + 1]);
-            offset += 2;
-
-            // Red
-            std::string red;
-            while (message[offset] != ',')
-            {
-                if (message[offset] == '(')
-                    offset++;
-                else {
-                    red.push_back(message[offset]);
-                    offset++;
-                }
-            }
-
-            // Green
-            std::string green;
-            offset++;
-            while (message[offset] != ',')
-            {
-                green.push_back(message[offset]);
-                offset++;
-            }
-
-            // Blue
-            std::string blue;
-            offset++;
-            while (message[offset] != ')')
-            {
-                blue.push_back(message[offset]);
-                offset++;
-            }
-
-            // Convert rgb string to floats
-            float r = std::stof(red);
-            float g = std::stof(green);
-            float b = std::stof(blue);
+            glm::vec3 color = readColor(message);
 
             // Update color of renderable
             const Renderable* myrenderable = renderable("RenderablePointsCloud");
             properties::Property* colorProperty = myrenderable->property("Color");
-            colorProperty->set(glm::vec3(r, g, b));
+            colorProperty->set(color);
 
             break;
         }
         case SoftwareConnection::MessageType::Opacity: {
-            std::string length_of_identifier;
-            length_of_identifier.push_back(message[0]);
-            length_of_identifier.push_back(message[1]);
+            std::string identifier = readIdentifier(message);
 
-            size_t offset = 2;
-
-            int lengthOfIdentifier = stoi(length_of_identifier);
-            int counter = 0;
-            std::string identifier;
-            while (counter != lengthOfIdentifier)
-            {
-                identifier.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-
-            std::string length_of_value;
-            length_of_value.push_back(message[offset]);
-            offset += 1;
-
-            int lengthOfValue = stoi(length_of_value);
-            std::string value;
-            counter = 0;
-            while (counter != lengthOfValue)
-            {
-                value.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-            float opacity = std::stof(value);
+            float opacity = readFloatValue(message);
 
             // Update opacity of renderable
             const Renderable* myrenderable = renderable("RenderablePointsCloud");
@@ -479,36 +309,9 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Size: {
-            std::string length_of_identifier;
-            length_of_identifier.push_back(message[0]);
-            length_of_identifier.push_back(message[1]);
+            std::string identifier = readIdentifier(message);
 
-            size_t offset = 2;
-
-            int lengthOfIdentifier = stoi(length_of_identifier);
-            int counter = 0;
-            std::string identifier;
-            while (counter != lengthOfIdentifier)
-            {
-                identifier.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-
-            std::string length_of_value;
-            length_of_value.push_back(message[offset]);
-            offset += 1;
-
-            int lengthOfValue = stoi(length_of_value);
-            std::string value;
-            counter = 0;
-            while (counter != lengthOfValue)
-            {
-                value.push_back(message[offset]);
-                offset++;
-                counter++;
-            }
-            float size = std::stof(value);
+            float size = readFloatValue(message);
 
             // Update color of renderable
             const Renderable * myrenderable = renderable("RenderablePointsCloud");
@@ -527,6 +330,118 @@ namespace openspace {
             ));
             break;
         }
+    }
+
+    std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message) {
+
+        std::string length;
+        length.push_back(message[0]);
+        length.push_back(message[1]);
+
+        int lengthOfIdentifier = stoi(length);
+        int counter = 0;
+        messageOffset = 2;
+
+        std::string identifier;
+        while (counter != lengthOfIdentifier)
+        {
+            identifier.push_back(message[messageOffset]);
+            messageOffset++;
+            counter++;
+        }
+
+        return identifier;
+    }
+
+    // Read size value or opacity value
+    float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
+
+        std::string length;
+        length.push_back(message[messageOffset]);
+        messageOffset += 1;
+
+        int lengthOfValue = stoi(length);
+        std::string value;
+        int counter = 0;
+        while (counter != lengthOfValue)
+        {
+            value.push_back(message[messageOffset]);
+            messageOffset++;
+            counter++;
+        }
+        float floatValue = std::stof(value);
+
+        return floatValue;
+    }
+
+    // Read Color value
+    glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
+
+        std::string lengthOfColor; // Not used for now, but sent in message
+        lengthOfColor.push_back(message[messageOffset]);
+        lengthOfColor.push_back(message[messageOffset + 1]);
+        messageOffset += 2;
+
+        // Red
+        std::string red;
+        while (message[messageOffset] != ',')
+        {
+            if (message[messageOffset] == '(')
+                messageOffset++;
+            else {
+                red.push_back(message[messageOffset]);
+                messageOffset++;
+            }
+        }
+
+        // Green
+        std::string green;
+        messageOffset++;
+        while (message[messageOffset] != ',')
+        {
+            green.push_back(message[messageOffset]);
+            messageOffset++;
+        }
+
+        // Blue
+        std::string blue;
+        messageOffset++;
+        while (message[messageOffset] != ')')
+        {
+            blue.push_back(message[messageOffset]);
+            messageOffset++;
+        }
+        messageOffset++;
+
+        // Convert rgb string to floats
+        float r = std::stof(red);
+        float g = std::stof(green);
+        float b = std::stof(blue);
+
+        glm::vec3 color(r, g, b);
+
+        return color;
+    }
+
+    // Read File path or GUI Name
+    std::string SoftwareIntegrationModule::readString(std::vector<char>& message) {
+
+        std::string length;
+        length.push_back(message[messageOffset]);
+        length.push_back(message[messageOffset + 1]);
+        messageOffset += 2;
+
+        int lengthOfString = stoi(length);
+        std::string name;
+        int counter = 0;
+        while (counter != lengthOfString)
+        {
+            name.push_back(message[messageOffset]);
+            messageOffset++;
+            counter++;
+        }
+
+        return name;
     }
 
     // Server
