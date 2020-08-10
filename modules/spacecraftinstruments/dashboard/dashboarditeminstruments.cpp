@@ -337,23 +337,21 @@ glm::vec2 DashboardItemInstruments::size() const {
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(*_font, "Next instrument activity:").boundingBox
+            _font->boundingBox("Next instrument activity:")
         );
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(
-                *_font,
+            _font->boundingBox(
                 fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
-            ).boundingBox
+            )
         );
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(
-                *_font,
+            _font->boundingBox(
                 fmt::format("Data acquisition time: {}", str)
-            ).boundingBox
+            )
         );
     }
     std::pair<double, std::string> nextTarget = sequencer.nextTarget(currentTime);
@@ -362,9 +360,6 @@ glm::vec2 DashboardItemInstruments::size() const {
     if (currentTarget.first <= 0.0) {
         return size;
     }
-
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR& renderer = FR::defaultRenderer();
 
     const int timeleft = static_cast<int>(nextTarget.first - currentTime);
 
@@ -393,20 +388,16 @@ glm::vec2 DashboardItemInstruments::size() const {
 
     size = addToBoundingbox(
         size,
-        renderer.boundingBox(
-            *_font,
+        _font->boundingBox(
             fmt::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
-        ).boundingBox
+        )
     );
 
     size.y += _font->height();
 
     size = addToBoundingbox(
         size,
-        ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "Active Instruments:"
-        ).boundingBox
+        _font->boundingBox("Active Instruments:")
     );
     return size;
 }

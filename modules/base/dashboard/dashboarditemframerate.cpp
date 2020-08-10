@@ -301,21 +301,14 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
-    FrametimeType frametimeType = FrametimeType(_frametimeType.value());
-    const std::string output = format(
-        frametimeType,
-        _minDeltaTimeCache,
-        _maxDeltaTimeCache
-    );
+    const FrametimeType t = FrametimeType(_frametimeType.value());
+    const std::string output = format(t, _minDeltaTimeCache, _maxDeltaTimeCache);
 
     if (output.empty()) {
         return { 0.f, 0.f };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        output
-    ).boundingBox;
+    return _font->boundingBox(output);
 }
 
 } // namespace openspace

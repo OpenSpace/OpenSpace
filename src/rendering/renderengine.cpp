@@ -795,14 +795,10 @@ void RenderEngine::renderEndscreen() {
     glViewport(0, 0, res.x, res.y);
 
     using FR = ghoul::fontrendering::FontRenderer;
-    using BBox = FR::BoundingBoxInformation;
-    BBox size = FR::defaultRenderer().boundingBox(
-        *_fontDate,
-        "Shutting down"
-    );
+    const glm::vec2 size = _fontDate->boundingBox("Shutting down");
     glm::vec2 penPosition = glm::vec2(
-        fontResolution().x / 2 - size.boundingBox.x / 2,
-        fontResolution().y / 2 - size.boundingBox.y / 2
+        fontResolution().x / 2 - size.x / 2,
+        fontResolution().y / 2 - size.y / 2
     );
     RenderFont(*_fontDate, penPosition, "Shutting down");
 }
@@ -812,15 +808,13 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     timer = std::max(timer, 0.f);
 
-    using BBox = ghoul::fontrendering::FontRenderer::BoundingBoxInformation;
-    BBox size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_fontDate,
+    const glm::vec2 size = _fontDate->boundingBox(
         fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
 
     glm::vec2 penPosition = glm::vec2(
-        fontResolution().x - size.boundingBox.x - 10,
-        fontResolution().y - size.boundingBox.y
+        fontResolution().x - size.x - 10,
+        fontResolution().y - size.y
     );
 
     RenderFont(
@@ -1246,13 +1240,9 @@ void RenderEngine::renderCameraInformation() {
     const glm::vec4 EnabledColor  = glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
     const glm::vec4 DisabledColor = glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
 
-    using FR = ghoul::fontrendering::FontRenderer;
-    const FR::BoundingBoxInformation rotationBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Rotation"
-    );
+    const glm::vec2 rotationBox = _fontInfo->boundingBox("Rotation");
 
-    float penPosY = fontResolution().y - rotationBox.boundingBox.y;
+    float penPosY = fontResolution().y - rotationBox.y;
 
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
@@ -1260,53 +1250,49 @@ void RenderEngine::renderCameraInformation() {
     const interaction::OrbitalNavigator& nav =
         global::navigationHandler.orbitalNavigator();
 
+    using FR = ghoul::fontrendering::FontRenderer;
+    
     _cameraButtonLocations.rotation = {
-        fontResolution().x - rotationBox.boundingBox.x - XSeparation,
+        fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,
-        rotationBox.boundingBox.x,
-        rotationBox.boundingBox.y
+        rotationBox.x,
+        rotationBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - rotationBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - rotationBox.x - XSeparation, penPosY),
         "Rotation",
         nav.hasRotationalFriction() ? EnabledColor : DisabledColor
     );
-    penPosY -= rotationBox.boundingBox.y + YSeparation;
+    penPosY -= rotationBox.y + YSeparation;
 
-    FR::BoundingBoxInformation zoomBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Zoom"
-    );
+    const glm::vec2 zoomBox = _fontInfo->boundingBox("Zoom");
 
     _cameraButtonLocations.zoom = {
-        fontResolution().x - zoomBox.boundingBox.x - XSeparation,
+        fontResolution().x - zoomBox.x - XSeparation,
         fontResolution().y - penPosY,
-        zoomBox.boundingBox.x,
-        zoomBox.boundingBox.y
+        zoomBox.x,
+        zoomBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - zoomBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - zoomBox.x - XSeparation, penPosY),
         "Zoom",
         nav.hasZoomFriction() ? EnabledColor : DisabledColor
     );
-    penPosY -= zoomBox.boundingBox.y + YSeparation;
+    penPosY -= zoomBox.y + YSeparation;
 
-    FR::BoundingBoxInformation rollBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Roll"
-    );
+    const glm::vec2 rollBox = _fontInfo->boundingBox("Roll");
 
     _cameraButtonLocations.roll = {
-        fontResolution().x - rollBox.boundingBox.x - XSeparation,
+        fontResolution().x - rollBox.x - XSeparation,
         fontResolution().y - penPosY,
-        rollBox.boundingBox.x,
-        rollBox.boundingBox.y
+        rollBox.x,
+        rollBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - rollBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - rollBox.x - XSeparation, penPosY),
         "Roll",
         nav.hasRollFriction() ? EnabledColor : DisabledColor
     );
@@ -1339,20 +1325,16 @@ void RenderEngine::renderVersionInformation() {
     }
 
     using FR = ghoul::fontrendering::FontRenderer;
-    const FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        versionString
-    );
+    const glm::vec2 versionBox = _fontInfo->boundingBox(versionString);
 
-    const FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
+    const glm::vec2 commitBox = _fontInfo->boundingBox(
         fmt::format("{}@{}", OPENSPACE_GIT_BRANCH, OPENSPACE_GIT_COMMIT)
     );
 
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(
-            fontResolution().x - versionBox.boundingBox.x - 10.f,
+            fontResolution().x - versionBox.x - 10.f,
             5.f
         ),
         versionString,
@@ -1367,10 +1349,7 @@ void RenderEngine::renderVersionInformation() {
         // checking for that is a bit brittle)
         FR::defaultRenderer().render(
             *_fontInfo,
-            glm::vec2(
-                fontResolution().x - commitBox.boundingBox.x - 10.f,
-                versionBox.boundingBox.y + 5.f
-            ),
+            glm::vec2(fontResolution().x - commitBox.x - 10.f, versionBox.y + 5.f),
             OPENSPACE_GIT_FULL,
             glm::vec4(0.5, 0.5, 0.5, 1.f)
         );
