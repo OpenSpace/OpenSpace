@@ -27,20 +27,26 @@
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/query/query.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <functional>
+
+#pragma optimize {"",off}
 
 namespace {
     constexpr const char* _loggerCat = "SoftwareIntegrationModule";
@@ -64,7 +70,6 @@ namespace openspace {
     SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
         : _socket(std::move(socket))
     {}
-
 
     void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
         auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -98,9 +103,8 @@ namespace openspace {
 
     // Connection 
     SoftwareConnection::Message SoftwareConnection::receiveMessage() {
-        // Header consists of...
-        size_t HeaderSize = 
-            9 * sizeof(char);
+        // Header consists of version (1 char), message type (4 char) & message size (4 char)
+        size_t HeaderSize = 9 * sizeof(char);
 
         // Create basic buffer for receiving first part of messages
         std::vector<char> headerBuffer(HeaderSize);
@@ -112,6 +116,7 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
+        // Read and convert version number
         std::string version;
         version.push_back(headerBuffer[0]);
         const uint32_t protocolVersionIn = std::stoi(version);
@@ -126,20 +131,18 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
+        // Read message typ: byte 1-4
         std::string type;
-        type.push_back(headerBuffer[1]);
-        type.push_back(headerBuffer[2]);
-        type.push_back(headerBuffer[3]);
-        type.push_back(headerBuffer[4]);
+        for(int i = 1; i < 5; i++)
+            type.push_back(headerBuffer[i]);
 
+        // Read and convert message size: byte 5-8
         std::string messageSizeIn;
-        messageSizeIn.push_back(headerBuffer[5]);
-        messageSizeIn.push_back(headerBuffer[6]);
-        messageSizeIn.push_back(headerBuffer[7]);
-        messageSizeIn.push_back(headerBuffer[8]);
-
+        for (int i = 5; i < 9; i++)
+            messageSizeIn.push_back(headerBuffer[i]);
         const size_t messageSize = stoi(messageSizeIn);
 
+        // Receive the message data
         messageBuffer.resize(messageSize);
         if (!_socket->get(messageBuffer.data(), messageSize)) {
             LERROR("Failed to read message from socket. Disconnecting.");
@@ -147,7 +150,9 @@ namespace openspace {
         }
 
         // And delegate decoding depending on type
-        if( type == "ASGN")
+        if (type == "CONN")
+            return Message(MessageType::Connection, messageBuffer);
+        else if( type == "ASGN")
             return Message(MessageType::AddSceneGraphNode, messageBuffer);
         else if (type == "RSGN")
             return Message(MessageType::RemoveSceneGraphNode, messageBuffer);
@@ -157,6 +162,12 @@ namespace openspace {
             return Message(MessageType::Opacity, messageBuffer);
         else if( type == "UPSI")
             return Message(MessageType::Size, messageBuffer);
+        else if (type == "DISC")
+            return Message(MessageType::Disconnection, messageBuffer);
+        else {
+            LERROR(fmt::format("Unsupported message type: {}", type));
+            return Message(static_cast<MessageType>(1), messageBuffer);
+        }   
     }
 
     // Server
@@ -250,14 +261,12 @@ namespace openspace {
 
         std::shared_ptr<Peer>& peer = it->second;
 
-        /* LERROR(fmt::format("Name: {}", sName)); */
-
         const SoftwareConnection::MessageType messageType = peerMessage.message.type;
         std::vector<char>& message = peerMessage.message.content;
-        std::string ms(message.begin(), message.end());
         switch (messageType) {
         case SoftwareConnection::MessageType::Connection: {
-            //handleData(*peer, std::move(data));
+            std::string software(message.begin(), message.end());
+            LINFO(fmt::format("OpenSpace has connected with {} through socket.", software));
             break;
         }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
@@ -320,6 +329,7 @@ namespace openspace {
                 offset++;
                 counter++;
             }
+            float floatOpacity = std::stof(opacity);
 
             std::string length_of_size;
             length_of_size.push_back(message[offset]);
@@ -334,6 +344,7 @@ namespace openspace {
                 offset++;
                 counter++;
             }
+            float floatSize = std::stof(size);
 
             std::string length_of_gui;
             length_of_gui.push_back(message[offset]);
@@ -386,18 +397,45 @@ namespace openspace {
             length_of_value.push_back(message[offset + 1]);
             offset += 2;
 
-            int lengthOfValue = stoi(length_of_value);
-            std::string value;
-            counter = 0;
-            while (counter != lengthOfValue)
+            // Red
+            std::string red;
+            while (message[offset] != ',')
             {
-                value.push_back(message[offset]);
-                offset++;
-                counter++;
+                if (message[offset] == '(')
+                    offset++;
+                else {
+                    red.push_back(message[offset]);
+                    offset++;
+                }
             }
 
-            LERROR(fmt::format("Identifier: {}", identifier));
-            LERROR(fmt::format("Color: {}", value));
+            // Green
+            std::string green;
+            offset++;
+            while (message[offset] != ',')
+            {
+                green.push_back(message[offset]);
+                offset++;
+            }
+
+            // Blue
+            std::string blue;
+            offset++;
+            while (message[offset] != ')')
+            {
+                blue.push_back(message[offset]);
+                offset++;
+            }
+
+            // Convert rgb string to floats
+            float r = std::stof(red);
+            float g = std::stof(green);
+            float b = std::stof(blue);
+
+            // Update color of renderable
+            const Renderable* myrenderable = renderable("RenderablePointsCloud");
+            properties::Property* colorProperty = myrenderable->property("Color");
+            colorProperty->set(glm::vec3(r, g, b));
 
             break;
         }
@@ -431,9 +469,12 @@ namespace openspace {
                 offset++;
                 counter++;
             }
+            float opacity = std::stof(value);
 
-            LERROR(fmt::format("Identifier: {}", identifier));
-            LERROR(fmt::format("Opacity: {}", value));
+            // Update opacity of renderable
+            const Renderable* myrenderable = renderable("RenderablePointsCloud");
+            properties::Property* opacityProperty = myrenderable->property("Opacity");
+            opacityProperty->set(opacity);
 
             break;
         }
@@ -467,9 +508,13 @@ namespace openspace {
                 offset++;
                 counter++;
             }
+            float size = std::stof(value);
 
-            LERROR(fmt::format("Identifier: {}", identifier));
-            LERROR(fmt::format("Size: {}", value));
+            // Update color of renderable
+            const Renderable * myrenderable = renderable("RenderablePointsCloud");
+            properties::Property* sizeProperty = myrenderable->property("Size");
+            sizeProperty->set(size);
+
             break;
         }
         case SoftwareConnection::MessageType::Disconnection: {
