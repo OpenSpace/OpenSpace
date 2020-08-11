@@ -233,7 +233,7 @@ namespace openspace {
                     //LDEBUG("Vi borde uppdatera1");
 
                     // _mustLoadNewStateFromDisk = true;
-                    LDEBUG("vi borde uppdatera");
+                    //LDEBUG("vi borde uppdatera");
                     _needsUpdate = true;
 
                 } // else {we're still in same state as previous frame (no changes needed)}
@@ -319,10 +319,10 @@ namespace openspace {
                     std::unique_ptr<ghoul::opengl::Texture> texture =
                         ghoul::io::TextureReader::ref().loadTexture(absPath(path));
 
-                    LDEBUGC(
-                        "RenderableTimeVaryingPlaneImageLocal",
-                        fmt::format("Loaded texture from '{}'", absPath(path))
-                    );
+                   // LDEBUGC(
+                    //    "RenderableTimeVaryingPlaneImageLocal",
+                    //    fmt::format("Loaded texture from '{}'", absPath(path))
+                    //);
                     texture->uploadTexture();
                     texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
                     texture->purgeFromRAM();

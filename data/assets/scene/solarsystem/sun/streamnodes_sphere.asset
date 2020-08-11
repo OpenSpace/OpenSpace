@@ -10,42 +10,110 @@ asset.info = {
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
 local textures = asset.require('./cutplanes_textures_sphere').TexturesPath
-local textures_smallsphere = asset.require('./cutplanes_textures_sphere_small').TexturesPath
+local textures_venussphere = asset.require('./cutplanes_textures_sphere_venus').TexturesPath
+local textures_mercurysphere = asset.require('./cutplanes_textures_sphere_mercury').TexturesPath
+local textures_coronasphere = asset.require('./cutplanes_textures_sphere_corona').TexturesPath
 local transforms = asset.require("./transforms")
+local default_opacity = 0.99
+--textureversion 1 has purple for low flux, 2 has transparent.
+local textureversion = 1
 
-local Cutplane_sphere = {
+local TexturesPathEarth = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "sphereslice_earth_textures",
+    Identifier = "sphereslice_earth_textures",
+    Version = textureversion
+})
+local TexturesPathMercury = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "sphereslice_mercury_textures",
+    Identifier = "sphereslice_mercury_textures",
+    Version = textureversion
+})
+local TexturesPathVenus = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "sphereslice_venus_textures",
+    Identifier = "sphereslice_venus_textures",
+    Version = textureversion
+})
+local TexturesPathCorona = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "sphereslice_corona_textures",
+    Identifier = "sphereslice_corona_textures",
+    Version = textureversion
+})
+
+
+
+
+local Cutplane_sphere_earth = {
     Identifier = "Cutplane_sphere",
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
 	    Type = "RenderableTimeVaryingSphere",
 	    Size = 1.571*10^11,
 	    Enabled = true,
-	    Texture = textures,
-	    BlendMode = "Additive",
-	    Opacity = 1.0,
+	    Texture = TexturesPathEarth, 
+	    --BlendMode = "Additive",
+	    Opacity = default_opacity,
             Segments = 132
 	},
     GUI = {
-        Name = "Sphere Slice",
+        Name = "Sphere Slice Earth",
         Path = "/Solar System/Heliosphere"
 		},
 };
-local Cutplane_sphere_small = {
-    Identifier = "Cutplane_sphere_small",
+local Cutplane_sphere_venus = {
+    Identifier = "Cutplane_sphere_venus",
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
 	    Type = "RenderableTimeVaryingSphere",
-	    Size = 7.5*10^7,
+	    Size = 107710467 * 10^3,
 	    Enabled = true,
-	    Texture = textures_smallsphere,
-	    BlendMode = "Additive",
-	    Opacity = 1.0,
+	    Texture = TexturesPathMercury,
+	    --BlendMode = "Additive",
+	    Opacity = default_opacity,
             Segments = 132
 	},
     GUI = {
-        Name = "Sphere Slice Small",
+        Name = "Sphere Slice Venus",
+        Path = "/Solar System/Heliosphere"
+		},
+};
+local Cutplane_sphere_mercury = {
+    Identifier = "Cutplane_sphere_mercury",
+    Parent = transforms.SunIAU.Identifier,
+    Renderable = {
+	    Type = "RenderableTimeVaryingSphere",
+	    Size = 56847190 * 10^3,
+	    Enabled = true,
+	    Texture = TexturesPathMercury, 
+	    --BlendMode = "Additive",
+	    Opacity = default_opacity,
+            Segments = 132
+	},
+    GUI = {
+        Name = "Sphere Slice Mercury",
+        Path = "/Solar System/Heliosphere"
+		},
+};
+local Cutplane_sphere_corona = {
+    Identifier = "Cutplane_sphere_corona",
+    Parent = transforms.SunIAU.Identifier,
+    Renderable = {
+	    Type = "RenderableTimeVaryingSphere",
+	    Size = 7479893 * 10^3,
+	    Enabled = true,
+	    Texture = TexturesPathCorona, 
+	    --BlendMode = "Additive",
+	    Opacity = default_opacity,
+            Segments = 132
+	},
+    GUI = {
+        Name = "Sphere Slice Corona",
         Path = "/Solar System/Heliosphere"
 		},
 };
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane_sphere, Cutplane_sphere_small})
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane_sphere_earth, Cutplane_sphere_venus, Cutplane_sphere_mercury, Cutplane_sphere_corona})

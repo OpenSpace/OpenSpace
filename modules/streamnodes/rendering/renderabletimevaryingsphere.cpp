@@ -524,7 +524,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             //LDEBUG("Vi borde uppdatera1");
 
             // _mustLoadNewStateFromDisk = true;
-            LDEBUG("vi borde uppdatera");
+            //LDEBUG("vi borde uppdatera");
             _needsUpdate = true;
 
         } // else {we're still in same state as previous frame (no changes needed)}
@@ -623,10 +623,10 @@ void RenderableTimeVaryingSphere::loadTexture() {
             std::unique_ptr<ghoul::opengl::Texture> texture =
                 ghoul::io::TextureReader::ref().loadTexture(absPath(path));
 
-            LDEBUGC(
-                "RenderableTimeVaryingSphere",
-                fmt::format("Loaded texture from '{}'", absPath(path))
-            );
+            //LDEBUGC(
+            //    "RenderableTimeVaryingSphere",
+              //  fmt::format("Loaded texture from '{}'", absPath(path))
+           // );
             texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             texture->purgeFromRAM();
