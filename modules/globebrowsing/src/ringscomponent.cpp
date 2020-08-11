@@ -40,6 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -379,6 +380,8 @@ void RingsComponent::draw(const RenderData& data,
 }
 
 void RingsComponent::update(const UpdateData& data) {
+    ZoneScoped
+
     if (_shader && _shader->isDirty()) {
         compileShadowShader();
     }

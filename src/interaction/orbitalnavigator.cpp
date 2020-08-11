@@ -789,7 +789,7 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
     }
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dmat4 inverseModelTransform = _anchorNode->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
         glm::dvec4(cameraPosition, 1.0));
 
@@ -843,8 +843,8 @@ OrbitalNavigator::CameraRotationDecomposition
     const glm::dvec3 cameraViewDirection =
         cameraPose.rotation * glm::dvec3(0.0, 0.0, -1.0);
 
-    const glm::dmat4 inverseModelTransform = reference.inverseModelTransform();
     const glm::dmat4 modelTransform = reference.modelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
                                                 glm::dvec4(cameraPose.position, 1));
 
@@ -1407,7 +1407,7 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
                                                 const SceneGraphNode& node,
                                                 const glm::dvec3 cameraPositionWorldSpace)
 {
-    const glm::dmat4 inverseModelTransform = node.inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1));
     const SurfacePositionHandle posHandle =

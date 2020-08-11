@@ -153,7 +153,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     }
 
     const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform = n->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(

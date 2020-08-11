@@ -843,6 +843,8 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
+    ZoneScoped
+
     if (_localRenderer.program && _localRenderer.program->isDirty()) {
         _localRenderer.program->rebuildFromFile();
 
