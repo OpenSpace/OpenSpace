@@ -119,10 +119,9 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemDate::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Date: {} UTC", global::timeManager.time().UTC())
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

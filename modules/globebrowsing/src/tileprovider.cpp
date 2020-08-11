@@ -46,8 +46,8 @@
 
 namespace ghoul {
     template <>
-    openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
-        from_string(const std::string& string)
+    constexpr openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
+        from_string(std::string_view string)
     {
         using namespace openspace::globebrowsing::tileprovider;
         if (string == "YYYY-MM-DD") {
@@ -66,7 +66,7 @@ namespace ghoul {
             return TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm;
         }
         else {
-            throw ghoul::RuntimeError("Unknown timeformat " + string);
+            throw ghoul::RuntimeError("Unknown timeformat '" + std::string(string) + "'");
         }
     }
 } // namespace ghoul

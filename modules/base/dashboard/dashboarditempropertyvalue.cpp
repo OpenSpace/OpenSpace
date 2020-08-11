@@ -166,10 +166,7 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemPropertyValue::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        _displayString.value()
-    ).boundingBox;
+    return _font->boundingBox(_displayString.value());
 }
 
 } // namespace openspace
