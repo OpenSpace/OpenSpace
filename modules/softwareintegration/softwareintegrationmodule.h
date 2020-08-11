@@ -77,6 +77,9 @@ public:
     bool isConnectedOrConnecting() const;
     void disconnect();
     ghoul::io::TcpSocket* socket();
+    bool sendMessage(std::string message);
+    //bool sendMessage(const SoftwareConnection::Message& message);
+
 
     SoftwareConnection::Message receiveMessage();
 
