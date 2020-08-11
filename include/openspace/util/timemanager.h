@@ -29,6 +29,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
 #include <functional>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -81,6 +82,7 @@ public:
     bool isPaused() const;
 
     // TEST: delta time steps
+    std::vector<double> deltaTimeSteps() const;
     void setDeltaTimeSteps(const std::vector<double> deltaTimes);
 
     float defaultTimeInterpolationDuration() const;
@@ -94,6 +96,10 @@ public:
     void interpolatePause(bool pause, double durationSeconds);
 
     // TEST
+    std::optional<double> nextDeltaTimeStep();
+    std::optional<double> previousDeltaTimeStep();
+    bool hasNextDeltaTimeStep();
+    bool hasPreviousDeltaTimeStep();
     void interpolateNextDeltaTimeStep(double durationSeconds);
     void interpolatePreviousDeltaTimeStep(double durationSeconds);
 
@@ -106,11 +112,13 @@ public:
 
     CallbackHandle addTimeChangeCallback(TimeChangeCallback cb);
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
+    CallbackHandle addDeltaTimeStepsChangeCallback(TimeChangeCallback cb);
     CallbackHandle addTimeJumpCallback(TimeChangeCallback cb);
     CallbackHandle addTimelineChangeCallback(TimeChangeCallback cb);
 
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+    void removeDeltaTimeStepsChangeCallback(CallbackHandle handle);
     void triggerPlaybackStart();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
@@ -135,6 +143,7 @@ private:
 
     // TEST: delta time steps
     std::vector<double> _deltaTimeSteps;
+    bool _deltaTimeStepsChanged = false;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
     properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
@@ -152,6 +161,7 @@ private:
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
+    std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeStepsChangeCallbacks;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;

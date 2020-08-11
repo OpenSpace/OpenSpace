@@ -155,6 +155,13 @@ void TimeManager::preSynchronization(double dt) {
             it.second();
         }
     }
+    if (_deltaTimeStepsChanged) {
+        using K = const CallbackHandle;
+        using V = TimeChangeCallback;
+        for (const std::pair<K, V>& it : _deltaTimeStepsChangeCallbacks) {
+            it.second();
+        }
+    }
     if (_timelineChanged) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
@@ -167,6 +174,7 @@ void TimeManager::preSynchronization(double dt) {
     _lastDeltaTime = _deltaTime;
     _lastTargetDeltaTime = _targetDeltaTime;
     _lastTimePaused = _timePaused;
+    _deltaTimeStepsChanged = false;
     _timelineChanged = false;
 }
 
@@ -383,6 +391,7 @@ void TimeManager::setDeltaTime(double deltaTime) {
 void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
     std::sort(deltaTimes.begin(), deltaTimes.end());
     _deltaTimeSteps = std::move(deltaTimes);
+    _deltaTimeStepsChanged = true;
 }
 
 size_t TimeManager::nKeyframes() const {
@@ -415,6 +424,14 @@ TimeManager::CallbackHandle TimeManager::addDeltaTimeChangeCallback(TimeChangeCa
 {
     CallbackHandle handle = _nextCallbackHandle++;
     _deltaTimeChangeCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+TimeManager::CallbackHandle 
+TimeManager::addDeltaTimeStepsChangeCallback(TimeChangeCallback cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _deltaTimeStepsChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
@@ -463,6 +480,23 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
     );
 
     _deltaTimeChangeCallbacks.erase(it);
+}
+
+void TimeManager::removeDeltaTimeStepsChangeCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _deltaTimeStepsChangeCallbacks.begin(),
+        _deltaTimeStepsChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _deltaTimeStepsChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _deltaTimeStepsChangeCallbacks.erase(it);
 }
 
 void TimeManager::triggerPlaybackStart() {
@@ -531,6 +565,10 @@ double TimeManager::targetDeltaTime() const {
     return _targetDeltaTime;
 }
 
+std::vector<double> TimeManager::deltaTimeSteps() const {
+    return _deltaTimeSteps;
+}
+
 void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolationDuration)
 {
     if (newDeltaTime == _targetDeltaTime) {
@@ -558,32 +596,66 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
 
-void TimeManager::interpolateNextDeltaTimeStep(double durationSeconds) {
+double TimeManager::nextDeltaTimeStep() {
     std::vector<double>::iterator nextStepIterator = std::upper_bound(
         _deltaTimeSteps.begin(),
         _deltaTimeSteps.end(),
-        _deltaTime
+        _targetDeltaTime
     );
 
     if (nextStepIterator == _deltaTimeSteps.end()) {
-        // Current delta time is larger than last step
-        return;
+        return _targetDeltaTime; // not found, but gotta return something
     }
 
-    interpolateDeltaTime(*nextStepIterator, durationSeconds);
+    return *nextStepIterator;
 }
 
-void TimeManager::interpolatePreviousDeltaTimeStep(double durationSeconds) {
+double TimeManager::previousDeltaTimeStep() {
     std::vector<double>::iterator lowerBoundIterator = std::lower_bound(
         _deltaTimeSteps.begin(),
         _deltaTimeSteps.end(),
-        _deltaTime
-    ); 
+        _targetDeltaTime
+    );
 
     if (lowerBoundIterator == _deltaTimeSteps.begin()) {
-        // Current delta time is smaller than first step
-        return;
+        return _targetDeltaTime; // not found, but gotta return something
     }
+
+    std::vector<double>::iterator prevStepIterator = lowerBoundIterator - 1;
+    return *prevStepIterator;
+}
+
+bool TimeManager::hasNextDeltaTimeStep() {
+    if (_deltaTimeSteps.empty())
+        return false;
+
+    return _targetDeltaTime < _deltaTimeSteps.back();
+}
+
+bool TimeManager::hasPreviousDeltaTimeStep() {
+    if (_deltaTimeSteps.empty())
+        return false;
+
+    return _targetDeltaTime > _deltaTimeSteps.front();
+}
+
+void TimeManager::interpolateNextDeltaTimeStep(double durationSeconds) {
+    if (!hasNextDeltaTimeStep()) 
+        return;
+
+    double nextDeltaTime = nextDeltaTimeStep();
+    interpolateDeltaTime(nextDeltaTime, durationSeconds);
+}
+
+void TimeManager::interpolatePreviousDeltaTimeStep(double durationSeconds) {
+    if (!hasPreviousDeltaTimeStep())
+        return;
+
+    std::vector<double>::iterator lowerBoundIterator = std::lower_bound(
+        _deltaTimeSteps.begin(),
+        _deltaTimeSteps.end(),
+        _targetDeltaTime
+    ); 
 
     std::vector<double>::iterator prevStepIterator = lowerBoundIterator - 1;
     interpolateDeltaTime(*prevStepIterator, durationSeconds);
