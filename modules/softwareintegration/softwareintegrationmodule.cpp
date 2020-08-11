@@ -165,9 +165,9 @@ namespace openspace {
         else if (type == "DISC")
             return Message(MessageType::Disconnection, messageBuffer);
         else {
-            LERROR(fmt::format("Unsupported message type: {}", type));
-            return Message(static_cast<MessageType>(1), messageBuffer);
-        }   
+            LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));
+            return Message(MessageType::Disconnection, messageBuffer);
+        }
     }
 
     // Server
@@ -268,7 +268,7 @@ namespace openspace {
             std::string software(message.begin(), message.end());
             LINFO(fmt::format("OpenSpace has connected with {} through socket.", software));
             break;
-        }
+        } 
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
@@ -277,6 +277,42 @@ namespace openspace {
             float size = readFloatValue(message);
             std::string guiName = readString(message);
 
+            ghoul::Dictionary renderable = {
+                { "Type", "RenderablePointsCloud" },
+                { "Color", static_cast<glm::dvec3>(color)},
+                { "File", file },
+                { "Opacity", static_cast<double>(opacity) },
+                { "Size", static_cast<double>(size)}
+            };
+
+            ghoul::Dictionary gui = {
+                { "Name", guiName },
+                { "Path", "/Examples" }
+            };
+
+            ghoul::Dictionary node = {
+                { "Identifier", identifier },
+                { "Renderable", renderable },
+                { "GUI", gui }
+            };
+
+            try {
+                SceneGraphNode* sgn = global::renderEngine.scene()->loadNode(node);
+                if (!sgn) {
+                    LERROR("Scene", "Could not load scene graph node");
+                }
+                global::renderEngine.scene()->initializeNode(sgn);
+            }
+            catch (const documentation::SpecificationError& e) {
+                return LERROR(fmt::format("Documentation SpecificationError: Error loading scene graph node {}",
+                        e.what())
+                );
+            }
+            catch (const ghoul::RuntimeError& e) {
+                return LERROR(fmt::format("RuntimeError: Error loading scene graph node {}",
+                    e.what())
+                );
+            }
             break;
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
@@ -286,38 +322,32 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Color: {
             std::string identifier = readIdentifier(message);
-
             glm::vec3 color = readColor(message);
 
             // Update color of renderable
-            const Renderable* myrenderable = renderable("RenderablePointsCloud");
+            const Renderable* myrenderable = renderable(identifier);
             properties::Property* colorProperty = myrenderable->property("Color");
             colorProperty->set(color);
-
             break;
         }
         case SoftwareConnection::MessageType::Opacity: {
             std::string identifier = readIdentifier(message);
-
             float opacity = readFloatValue(message);
 
             // Update opacity of renderable
-            const Renderable* myrenderable = renderable("RenderablePointsCloud");
+            const Renderable* myrenderable = renderable(identifier);
             properties::Property* opacityProperty = myrenderable->property("Opacity");
             opacityProperty->set(opacity);
-
             break;
         }
         case SoftwareConnection::MessageType::Size: {
             std::string identifier = readIdentifier(message);
-
             float size = readFloatValue(message);
 
             // Update color of renderable
-            const Renderable * myrenderable = renderable("RenderablePointsCloud");
+            const Renderable * myrenderable = renderable(identifier);
             properties::Property* sizeProperty = myrenderable->property("Size");
             sizeProperty->set(size);
-
             break;
         }
         case SoftwareConnection::MessageType::Disconnection: {
