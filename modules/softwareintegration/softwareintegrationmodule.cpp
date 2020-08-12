@@ -46,6 +46,8 @@
 #include <ghoul/misc/templatefactory.h>
 #include <functional>
 
+using namespace std::string_literals;
+
 #pragma optimize {"",off}
 
 namespace {
@@ -292,7 +294,7 @@ namespace openspace {
             std::string guiName = readString(message);
 
             ghoul::Dictionary renderable = {
-                { "Type", "RenderablePointsCloud" },
+                { "Type", "RenderablePointsCloud"s },
                 { "Color", static_cast<glm::dvec3>(color)},
                 { "File", file },
                 { "Opacity", static_cast<double>(opacity) },
@@ -301,7 +303,7 @@ namespace openspace {
 
             ghoul::Dictionary gui = {
                 { "Name", guiName },
-                { "Path", "/Examples" }
+                { "Path", "/Examples"s }
             };
 
             ghoul::Dictionary node = {
