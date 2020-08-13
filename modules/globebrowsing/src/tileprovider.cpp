@@ -274,6 +274,8 @@ TileProvider* levelProvider(TileProviderByLevel& t, int level) {
 //
 
 std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t) {
+    ZoneScoped
+
     switch (type) {
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DD:
             return t.ISO8601().substr(0, 10);

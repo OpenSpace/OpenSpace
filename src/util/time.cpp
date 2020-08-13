@@ -30,6 +30,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <mutex>
 #include <string_view>
 
@@ -43,6 +44,10 @@ double Time::convertTime(const std::string& time) {
 }
 
 Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
+
+Time::Time(const std::string& time) :
+    _time(SpiceManager::ref().ephemerisTimeFromDate(time))
+{}
 
 Time Time::now() {
     Time now;
@@ -70,8 +75,8 @@ double Time::advanceTime(double delta) {
     return _time;
 }
 
-void Time::setTime(std::string time) {
-    _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
+void Time::setTime(const std::string& time) {
+    _time = SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
 std::string Time::UTC() const {
@@ -79,6 +84,8 @@ std::string Time::UTC() const {
 }
 
 std::string Time::ISO8601() const {
+    ZoneScoped
+
     std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
     std::string_view month = std::string_view(datetime).substr(5, 3);
 

@@ -29,7 +29,10 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <date/date.h>
 #include <algorithm>
+#include <charconv>
 #include <iomanip>
 #include <sstream>
 
@@ -42,74 +45,54 @@
 namespace openspace::globebrowsing {
 
 namespace {
-
-// returns the number of days in a given month and year (takes leap year into account)
-int monthSize(int month, int year) {
-    // A year is a leap year if it is divisible by 4 unless it is also divisible by 100
-    // unless it is divisible by 4 *and* 100
-    const bool leap = ((year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0));
-
-    switch (month) {
-        case 2:
-            return leap ? 29 : 28;
-        case 4:
-        case 6:
-        case 9:
-        case 11:
-            return 30;
-        case 1:
-        case 3:
-        case 5:
-        case 7:
-        case 8:
-        case 10:
-        case 12:
-        default:
-            return 31;
+    // returns the number of days in a given month and year (takes leap year into account)
+    constexpr int monthSize(int month, int year) {
+        date::year_month_day_last d = date::year(year) / date::month(month) / date::last;
+        return static_cast<int>(static_cast<unsigned>(d.day()));
     }
-}
 
-/**
- * singleIncrement is used for any of the date/time types, and handles overflow
- * values using the min/max parameters
- *
- * \param oper the date/time variable to operate on (will be changed)
- * \param val the value of the increment, which may be changed in this function
- *        if an overflow occurs
- * \param min the minimum allowable value
- * \param max the maximum allowable value (determines where overflow occurs)
- */
-bool singleIncrement(int& oper, int& val, int min, int max) {
-    oper += val;
-    if (oper <= max) {
-        return true;
+    /**
+     * singleIncrement is used for any of the date/time types, and handles overflow
+     * values using the min/max parameters
+     *
+     * \param oper the date/time variable to operate on (will be changed)
+     * \param val the value of the increment, which may be changed in this function
+     *        if an overflow occurs
+     * \param min the minimum allowable value
+     * \param max the maximum allowable value (determines where overflow occurs)
+     */
+    bool singleIncrement(int& oper, int& val, int min, int max) {
+        oper += val;
+        if (oper <= max) {
+            return true;
+        }
+        oper = oper - max - (1 - min);
+        // Only single increments for the less-significant units on rollover
+        val = 1;
+        return false;
     }
-    oper = oper - max - (1 - min);
-    // Only single increments for the less-significant units on rollover
-    val = 1;
-    return false;
-}
 
-/**
- * singleDecrement is used for any of the date/time types, and handles underflow
- * values using the min/max parameters
- *
- * \param oper the date/time variable to operate on (will be changed)
- * \param val the value of the decrement, which may be changed in this function
- *        if an underflow occurs
- * \param min the minimum allowable value
- * \param max the maximum allowable value (determines where underflow occurs)
- */
-bool singleDecrement(int& oper, int& val, int min, int max) {
-    oper -= val;
-    if (oper >= min) {
-        return true;
+    /**
+     * singleDecrement is used for any of the date/time types, and handles underflow
+     * values using the min/max parameters
+     *
+     * \param oper the date/time variable to operate on (will be changed)
+     * \param val the value of the decrement, which may be changed in this function
+     *        if an underflow occurs
+     * \param min the minimum allowable value
+     * \param max the maximum allowable value (determines where underflow occurs)
+     */
+    bool singleDecrement(int& oper, int& val, int min, int max) {
+        oper -= val;
+        if (oper >= min) {
+            return true;
+        }
+        oper = oper + max + (1 - min);
+        // Only single increments for the less-significant units on rollover
+        val = 1;
+        return false;
     }
-    oper = oper + max + (1 - min);
-    // Only single increments for the less-significant units on rollover
-    val = 1;
-    return false;
-}
+
 } // namespace
 
 RangedTime::RangedTime(std::string start, std::string end)
@@ -124,20 +107,18 @@ void RangedTime::setStart(std::string start) {
     Time t1;
     t1.setTime(start);
     _startJ2000 = t1.j2000Seconds();
-    _start = start;
+    _start = std::move(start);
 }
 
-void RangedTime::setEnd(const std::string end) {
+void RangedTime::setEnd(std::string end) {
     Time t2;
     t2.setTime(end);
     _endJ2000 = t2.j2000Seconds();
-    _end = end;
+    _end = std::move(end);
 }
 
-bool RangedTime::includes(const std::string& checkTime) {
-    Time t;
-    t.setTime(checkTime);
-    const double tj = t.j2000Seconds();
+bool RangedTime::includes(const Time& checkTime) const {
+    const double tj = checkTime.j2000Seconds();
     return (_startJ2000 <= tj && tj <= _endJ2000);
 }
 
@@ -164,17 +145,25 @@ std::string RangedTime::end() const {
     return _end;
 }
 
-DateTime::DateTime(const std::string& initDateTime) {
+DateTime::DateTime(std::string_view initDateTime) {
     setTime(initDateTime);
 };
 
-void DateTime::setTime(const std::string& input) {
-    _year = std::stoi(input.substr(index_year, len_year));
-    _month = std::stoi(input.substr(index_month, len_nonYear));
-    _day = std::stoi(input.substr(index_day, len_nonYear));
-    _hour = std::stoi(input.substr(index_hour, len_nonYear));
-    _minute = std::stoi(input.substr(index_minute, len_nonYear));
-    _second = std::stoi(input.substr(index_second, len_nonYear));
+void DateTime::setTime(std::string_view input) {
+    // Indices into an ISO8601 YYYY-MM-ddTHH:mm:ss string
+    constexpr const size_t IndexYear = 0;
+    constexpr const size_t IndexMonth = 5;
+    constexpr const size_t IndexDay = 8;
+    constexpr const size_t IndexHour = 11;
+    constexpr const size_t IndexMinute = 14;
+    constexpr const size_t IndexSecond = 17;
+
+    std::from_chars(input.data() + IndexYear, input.data() + 4, _year);
+    std::from_chars(input.data() + IndexMonth, input.data() + 2, _month);
+    std::from_chars(input.data() + IndexDay, input.data() + 2, _day);
+    std::from_chars(input.data() + IndexHour, input.data() + 2, _hour);
+    std::from_chars(input.data() + IndexMinute, input.data() + 2, _minute);
+    std::from_chars(input.data() + IndexSecond, input.data() + 2, _second);
 }
 
 std::string DateTime::ISO8601() const {
@@ -215,31 +204,30 @@ void DateTime::incrementOnce(int value, char unit) {
     bool inBounds = true;
     switch (unit) {
         case 'm':
-            if (singleIncrement(_minute, value, 0, 59))
+            if (singleIncrement(_minute, value, 0, 59)) {
                 break;
-            // else fall-through if overflow...
-
+            }
+            //[[ fallthrough ]]
         case 'h':
-            if (singleIncrement(_hour, value, 0, 23))
+            if (singleIncrement(_hour, value, 0, 23)) {
                 break;
-            // else fall-through if overflow...
-
+            }
+            //[[ fallthrough ]]
         case 'd':
-            if (singleIncrement(_day, value, 1, monthSize(_month, _year)))
+            if (singleIncrement(_day, value, 1, monthSize(_month, _year))) {
                 break;
-            // else fall-through if overflow...
-
+            }
+            //[[ fallthrough ]]
         case 'M':
             inBounds = singleIncrement(_month, value, 1, 12);
             _day = std::clamp(_day, 1, monthSize(_month, _year));
-            if (inBounds)
+            if (inBounds) {
                 break;
-            // else fall-through if overflow...
-
+            }
+            //[[ fallthrough ]]
         case 'y':
             _year += value;
             break;
-
         default:
             throw ghoul::RuntimeError(
                 "Invalid unit format in TQ incrementOnce '" + std::to_string(unit) +
@@ -481,33 +469,43 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 }
 
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
+    ZoneScoped
+
     const std::string unquantizedStr = t.ISO8601();
     DateTime unquantized(unquantizedStr);
-    //resolutionFraction helps to improve iteration performance
-    const double resolutionFraction = 0.7;
-    double error = 0.0;
-    const int iterationLimit = 50;
+    // resolutionFraction helps to improve iteration performance
+    constexpr const double ResolutionFraction = 0.7;
+    constexpr const int IterationLimit = 50;
     int iterations = 0;
     int lastIncr = 0;
     int lastDecr = 0;
 
-    if (_timerange.includes(unquantizedStr)) {
+    if (_timerange.includes(t)) {
+        ZoneScopedN("includes")
         DateTime quantized = DateTime(_timerange.start());
         doFirstApproximation(quantized, unquantized, _resolutionValue, _resolutionUnit);
-        error = diff(quantized, unquantized);
-        while (error > (_resolution * resolutionFraction) || error < 0) {
+        double error = unquantized.J2000() - quantized.J2000();
+        while (error > (_resolution * ResolutionFraction) || error < 0) {
             if (error > 0) {
-                lastIncr = quantized.increment(static_cast<int>(_resolutionValue),
-                    _resolutionUnit, error, _resolution);
+                lastIncr = quantized.increment(
+                    static_cast<int>(_resolutionValue),
+                    _resolutionUnit,
+                    error,
+                    _resolution
+                );
             }
             else if (error < 0) {
-                lastDecr = quantized.decrement(static_cast<int>(_resolutionValue),
-                    _resolutionUnit, error, _resolution);
+                lastDecr = quantized.decrement(
+                    static_cast<int>(_resolutionValue),
+                    _resolutionUnit,
+                    error,
+                    _resolution
+                );
             }
-            error = diff(quantized, unquantized);
+            error = unquantized.J2000() - quantized.J2000();
             bool hasSettled = (lastIncr == 1 && lastDecr == 1 && error >= 0.0);
             iterations++;
-            if (hasSettled || iterations > iterationLimit) {
+            if (hasSettled || iterations > IterationLimit) {
                 break;
             }
         }
@@ -525,50 +523,50 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     }
 }
 
-double TimeQuantizer::diff(DateTime& from, DateTime& to) {
-    return to.J2000() - from.J2000();
-}
-
-void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
-                                         double value, char unit)
+void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, double value,
+                                         char unit)
 {
-    double minYearsToAdjust;
-    double minIncrementsAdjust;
-    bool isSimMonthPastQuantizedMonth;
-    double error = 0.0;
-    int originalHour, originalMinute, originalSecond;
-    Time testDay;
-    double addToTime;
+    ZoneScoped
 
     switch (unit) {
         case 'y':
-            minYearsToAdjust = static_cast<double>(unQ.year()) -
-                static_cast<double>(_start.year());
-            minIncrementsAdjust = minYearsToAdjust / value;
+        {
+            const double minYearsToAdjust = static_cast<double>(
+                unQ.year()) - static_cast<double>(_start.year()
+            );
+            const double minIncrementsAdjust = minYearsToAdjust / value;
             quantized.setYear(
                 _start.year() + static_cast<int>(minIncrementsAdjust * value)
             );
             break;
+        }
         case 'M':
-            isSimMonthPastQuantizedMonth = unQ.month() > static_cast<int>(value);
+        {
+            bool isSimMonthPastQuantizedMonth = unQ.month() > static_cast<int>(value);
             quantized.setYear(
                 (isSimMonthPastQuantizedMonth) ? unQ.year() : unQ.year() - 1
             );
             break;
+        }
         case 'd':
-            error = diff(quantized, unQ) / (60 * 60 * 24);
-            originalHour = quantized.hour();
-            originalMinute = quantized.minute();
-            originalSecond = quantized.second();
-            addToTime = std::round(error) * 86400;
-            testDay.setTime(quantized.J2000() + addToTime);
+        {
+            ZoneScopedN("d")
+            const double error = (unQ.J2000() - quantized.J2000()) / (60 * 60 * 24);
+            const int originalHour = quantized.hour();
+            const int originalMinute = quantized.minute();
+            const int originalSecond = quantized.second();
+            const double addToTime = std::round(error) * 86400;
+            Time testDay(quantized.J2000() + addToTime);
             quantized.setTime(testDay.ISO8601());
             quantized.setHour(originalHour);
             quantized.setMinute(originalMinute);
             quantized.setSecond(originalSecond);
             break;
+        }
         case 'h':
-            quantized = unQ;
+        {
+            ZoneScopedN("h")
+                quantized = unQ;
             quantized.setMinute(0);
             quantized.setSecond(0);
             if (unQ.hour() >= 12) {
@@ -578,6 +576,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
                 quantized.decrementOnce(1, 'd');
             }
             break;
+        }
         case 'm':
             quantized = unQ;
             quantized.setMinute(0);
@@ -591,8 +590,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ,
             break;
         default:
             throw ghoul::RuntimeError(fmt::format(
-                "Invalid unit format in doFirstApproximation '{}'. Expected 'y', 'M', "
-                "d', 'h', or 'm'", unit
+                "Invalid unit '{}'. Expected 'y', 'M', 'd', 'h', or 'm'", unit
             ));
     }
 }
@@ -617,7 +615,7 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
     std::vector<std::string> result;
     DateTime itr = s;
     RangedTime range(start.ISO8601(), end.ISO8601());
-    while (range.includes(itr.ISO8601())) {
+    while (range.includes(Time(itr.ISO8601()))) {
         itr.incrementOnce(static_cast<int>(_resolutionValue), _resolutionUnit);
         result.push_back(itr.ISO8601());
     }

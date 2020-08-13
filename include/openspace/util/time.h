@@ -66,6 +66,7 @@ public:
     static double convertTime(const std::string& time);
 
     explicit Time(double secondsJ2000 = -1);
+    explicit Time(const std::string& time);
     Time(const Time& other) = default;
 
     /**
@@ -98,7 +99,7 @@ public:
      * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
      * \param time The time to be set as a date string
      */
-    void setTime(std::string time);
+    void setTime(const std::string& time);
 
     /**
      * Returns the current time as the number of seconds past the J2000 epoch. If the
