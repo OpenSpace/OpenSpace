@@ -615,6 +615,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
 
+    _globalChunkBuffer.reserve(2048);
+    _localChunkBuffer.reserve(2048);
     _traversalMemory.reserve(512);
 
     //================================================================
@@ -1175,24 +1177,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
-    constexpr const int ChunkBufferSize = 2048;
-    std::array<const Chunk*, ChunkBufferSize> global;
     int globalCount = 0;
-    std::array<const Chunk*, ChunkBufferSize> local;
     int localCount = 0;
 
-    auto traversal = [&global, &globalCount, &local, &localCount, this,
-          cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
+    auto traversal = [](const Chunk& node, std::vector<const Chunk*>& global,
+        int& globalCount, std::vector<const Chunk*>& local, int& localCount, int cutoff,
+        std::vector<const Chunk*>& traversalMemory)
     {
         ZoneScopedN("traversal")
 
-        _traversalMemory.clear();
+        traversalMemory.clear();
 
         // Loop through nodes in breadths first order
-        _traversalMemory.push_back(&node);
-        while (!_traversalMemory.empty()) {
-            const Chunk* n = _traversalMemory.front();
-            _traversalMemory.erase(_traversalMemory.begin());
+        traversalMemory.push_back(&node);
+        while (!traversalMemory.empty()) {
+            const Chunk* n = traversalMemory.front();
+            traversalMemory.erase(traversalMemory.begin());
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
@@ -1208,43 +1208,43 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             // Add children to queue, if any
             if (!isLeaf(*n)) {
                 for (int i = 0; i < 4; ++i) {
-                    _traversalMemory.push_back(n->children[i]);
+                    traversalMemory.push_back(n->children[i]);
                 }
             }
         }
     };
 
-    traversal(_leftRoot);
-    traversal(_rightRoot);
+    traversal(_leftRoot, _globalChunkBuffer, globalCount, _localChunkBuffer, localCount, _debugProperties.modelSpaceRenderingCutoffLevel, _traversalMemory);
+    traversal(_rightRoot, _globalChunkBuffer, globalCount, _localChunkBuffer, localCount, _debugProperties.modelSpaceRenderingCutoffLevel, _traversalMemory);
 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
-    for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
-        renderChunkGlobally(*global[i], data, shadowData, renderGeomOnly);
+    for (int i = 0; i < globalCount; ++i) {
+        renderChunkGlobally(*_globalChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
-    for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
-        renderChunkLocally(*local[i], data, shadowData, renderGeomOnly);
+    for (int i = 0; i < localCount; ++i) {
+        renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
-        for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
+        for (int i = 0; i < globalCount; ++i) {
             debugRenderChunk(
-                *global[i],
+                *_globalChunkBuffer[i],
                 mvp,
                 _debugProperties.showChunkBounds,
                 _debugProperties.showChunkAABB
             );
         }
 
-        for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
+        for (int i = 0; i < localCount; ++i) {
             debugRenderChunk(
-                *local[i],
+                *_localChunkBuffer[i],
                 mvp,
                 _debugProperties.showChunkBounds,
                 _debugProperties.showChunkAABB

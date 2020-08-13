@@ -258,6 +258,8 @@ private:
 
     ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
 
+    std::vector<const Chunk*> _globalChunkBuffer;
+    std::vector<const Chunk*> _localChunkBuffer;
     std::vector<const Chunk*> _traversalMemory;
 
 
