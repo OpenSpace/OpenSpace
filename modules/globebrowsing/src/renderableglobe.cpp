@@ -275,6 +275,8 @@ tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileInde
 }
 
 BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm) {
+    ZoneScoped
+
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
     BoundingHeights boundingHeights { 0.f, 0.f, false, true };
@@ -337,6 +339,8 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
 }
 
 bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
+    ZoneScoped
+
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
     const LayerGroup& colormaps = lm.layerGroup(layergroupid::GroupID::ColorLayers);
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
@@ -359,6 +363,8 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
                                                   const Ellipsoid& ellipsoid,
                                                   const BoundingHeights& heights)
 {
+    ZoneScoped
+
     // assume worst case
     const double patchCenterRadius = ellipsoid.maximumRadius();
 
@@ -2490,6 +2496,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     //         children and then again it self to be processed after the children finish).
     //         In addition, this didn't even improve performance ---  2018-10-04
     if (isLeaf(cn)) {
+        ZoneScopedN("leaf")
         updateChunk(cn, data);
 
         if (cn.status == Chunk::Status::WantSplit) {
@@ -2503,6 +2510,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         return cn.status == Chunk::Status::WantMerge;
     }
     else {
+        ZoneScopedN("!leaf")
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
             if (updateChunkTree(*cn.children[i], data)) {
@@ -2528,6 +2536,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
 }
 
 void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
+    ZoneScoped
+
     const BoundingHeights& heights = boundingHeightsForChunk(chunk, _layerManager);
     chunk.heightTileOK = heights.tileOK;
     chunk.colorTileOK = colorAvailableForChunk(chunk, _layerManager);

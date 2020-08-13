@@ -923,16 +923,17 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                     return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
                 }
                 const cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
-                const Tile tile = t.tileCache->get(key);
+                Tile tile = t.tileCache->get(key);
 
                 if (!tile.texture) {
+                    TracyMessage("Enqueuing tile", 32);
                     t.asyncTextureDataProvider->enqueueTileIO(tileIndex);
                 }
 
                 return tile;
             }
             else {
-                return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+                return Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
             }
         }
         case Type::SingleImageTileProvider: {

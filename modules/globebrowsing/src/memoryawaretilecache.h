@@ -48,8 +48,7 @@ struct ProviderTileKey {
     unsigned int providerID;
 
     bool operator==(const ProviderTileKey& r) const {
-        return (providerID == r.providerID) &&
-            (tileIndex == r.tileIndex);
+        return (providerID == r.providerID) && (tileIndex == r.tileIndex);
     }
 };
 
