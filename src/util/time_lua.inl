@@ -100,9 +100,43 @@ int time_setDeltaTimeSteps(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
+* setNextDeltaTimeStep():
+* Immediately set the simulation speed to the first delta time step in the list that is 
+* larger than the current choice of simulation speed, if any.
+ */
+int time_setNextDeltaTimeStep(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setNextDeltaTimeStep");
+
+    global::timeManager.setNextDeltaTimeStep();
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+* setPreviousDeltaTimeStep():
+* Immediately set the simulation speed to the first delta time step in the list that is
+* smaller than the current choice of simulation speed, if any.
+ */
+int time_setPreviousDeltaTimeStep(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setPreviousDeltaTimeStep");
+
+    global::timeManager.setPreviousDeltaTimeStep();
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
 * interpolateNextDeltaTimeStep([interpolationDuration]):
 * Interpolate the simulation speed to the next delta time step in the list. If an input
 * value is given, the interpolation is done over the specified number of seconds.
+* If interpolationDuration is not provided, the interpolation time will be based on the
+* `defaultDeltaTimeInterpolationDuration` property of the TimeManager.
  */
 int time_interpolateNextDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(
@@ -142,6 +176,8 @@ int time_interpolateNextDeltaTimeStep(lua_State* L) {
 * interpolatePreviousDeltaTimeStep([interpolationDuration]):
 * Interpolate the simulation speed to the previous delta time step in the list. If an 
 * input value is given, the interpolation is done over the specified number of seconds.
+* If interpolationDuration is not provided, the interpolation time will be based on the
+* `defaultDeltaTimeInterpolationDuration` property of the TimeManager.
  */
 int time_interpolatePreviousDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(

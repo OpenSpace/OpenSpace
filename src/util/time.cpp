@@ -187,22 +187,42 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "in one second of real time"
             },
             {
+                "setNextDeltaTimeStep",
+                &luascriptfunctions::time_setNextDeltaTimeStep,
+                {},
+                "",
+                "Immediately set the simulation speed to the first delta time step in "
+                "the list that is larger than the current choice of simulation speed, "
+                "if any."
+            },
+            {
+                "setPreviousDeltaTimeStep",
+                &luascriptfunctions::time_setPreviousDeltaTimeStep,
+                {},
+                "",
+                "Immediately set the simulation speed to the first delta time step in "
+                "the list that is smaller than the current choice of simulation speed. "
+                "if any."
+            },
+            {
                 "interpolateNextDeltaTimeStep",
                 &luascriptfunctions::time_interpolateNextDeltaTimeStep,
                 {},
                 "[number]",
-                "Interpolate the simulation speed to the next delta time step in the "
-                "list. If an input value is given, the interpolation is done over the "
-                "specified number of seconds."
+                "Interpolate the simulation speed to the first delta time step in the "
+                "list that is larger than the current simulation speed, if any. If an "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
             },
             {
                 "interpolatePreviousDeltaTimeStep",
                 &luascriptfunctions::time_interpolatePreviousDeltaTimeStep,
                 {},
                 "[number]",
-                "Interpolate the simulation speed to the previous delta time step in "
-                "the list. If an input value is given, the interpolation is done over "
-                "the specified number of seconds."
+                "Interpolate the simulation speed to the first delta time step in the "
+                "list that is smaller than the current simulation speed, if any. If an "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
             },
             {
                 "interpolatePause",

@@ -596,7 +596,10 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
 
-double TimeManager::nextDeltaTimeStep() {
+std::optional<double> TimeManager::nextDeltaTimeStep() {
+    if (!hasNextDeltaTimeStep()) {
+        return std::nullopt;
+    }
     std::vector<double>::iterator nextStepIterator = std::upper_bound(
         _deltaTimeSteps.begin(),
         _deltaTimeSteps.end(),
@@ -604,13 +607,16 @@ double TimeManager::nextDeltaTimeStep() {
     );
 
     if (nextStepIterator == _deltaTimeSteps.end()) {
-        return _targetDeltaTime; // not found, but gotta return something
+        return std::nullopt; // should not get here
     }
 
     return *nextStepIterator;
 }
 
-double TimeManager::previousDeltaTimeStep() {
+std::optional<double> TimeManager::previousDeltaTimeStep() {
+    if (!hasPreviousDeltaTimeStep()) {
+        return std::nullopt;
+    }
     std::vector<double>::iterator lowerBoundIterator = std::lower_bound(
         _deltaTimeSteps.begin(),
         _deltaTimeSteps.end(),
@@ -618,32 +624,40 @@ double TimeManager::previousDeltaTimeStep() {
     );
 
     if (lowerBoundIterator == _deltaTimeSteps.begin()) {
-        return _targetDeltaTime; // not found, but gotta return something
+        return std::nullopt; // should not get here
     }
 
     std::vector<double>::iterator prevStepIterator = lowerBoundIterator - 1;
     return *prevStepIterator;
 }
 
-bool TimeManager::hasNextDeltaTimeStep() {
+bool TimeManager::hasNextDeltaTimeStep() const {
     if (_deltaTimeSteps.empty())
         return false;
 
     return _targetDeltaTime < _deltaTimeSteps.back();
 }
 
-bool TimeManager::hasPreviousDeltaTimeStep() {
+bool TimeManager::hasPreviousDeltaTimeStep() const {
     if (_deltaTimeSteps.empty())
         return false;
 
     return _targetDeltaTime > _deltaTimeSteps.front();
 }
 
+void TimeManager::setNextDeltaTimeStep() {
+    interpolateNextDeltaTimeStep(0);
+}
+
+void TimeManager::setPreviousDeltaTimeStep() {
+    interpolatePreviousDeltaTimeStep(0);
+}
+
 void TimeManager::interpolateNextDeltaTimeStep(double durationSeconds) {
     if (!hasNextDeltaTimeStep()) 
         return;
 
-    double nextDeltaTime = nextDeltaTimeStep();
+    double nextDeltaTime = nextDeltaTimeStep().value();
     interpolateDeltaTime(nextDeltaTime, durationSeconds);
 }
 
@@ -651,14 +665,8 @@ void TimeManager::interpolatePreviousDeltaTimeStep(double durationSeconds) {
     if (!hasPreviousDeltaTimeStep())
         return;
 
-    std::vector<double>::iterator lowerBoundIterator = std::lower_bound(
-        _deltaTimeSteps.begin(),
-        _deltaTimeSteps.end(),
-        _targetDeltaTime
-    ); 
-
-    std::vector<double>::iterator prevStepIterator = lowerBoundIterator - 1;
-    interpolateDeltaTime(*prevStepIterator, durationSeconds);
+    double previousDeltaTime = previousDeltaTimeStep().value();
+    interpolateDeltaTime(previousDeltaTime, durationSeconds);
 }
 
 void TimeManager::setPause(bool pause) {

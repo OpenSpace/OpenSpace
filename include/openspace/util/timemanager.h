@@ -95,11 +95,12 @@ public:
     void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
     void interpolatePause(bool pause, double durationSeconds);
 
-    // TEST
     std::optional<double> nextDeltaTimeStep();
     std::optional<double> previousDeltaTimeStep();
-    bool hasNextDeltaTimeStep();
-    bool hasPreviousDeltaTimeStep();
+    bool hasNextDeltaTimeStep() const;
+    bool hasPreviousDeltaTimeStep() const;
+    void setNextDeltaTimeStep();
+    void setPreviousDeltaTimeStep();
     void interpolateNextDeltaTimeStep(double durationSeconds);
     void interpolatePreviousDeltaTimeStep(double durationSeconds);
 

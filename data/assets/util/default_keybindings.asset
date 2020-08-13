@@ -114,7 +114,15 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Key = "Right",
         Name = "Next Delta Time Step (Interpolate)",
         Command = "openspace.time.interpolateNextDeltaTimeStep()",
-        Documentation = "Smoothly interpolates the simulation speed to the next value in the list of delta time steps, if one exists.",
+        Documentation = "Smoothly interpolates the simulation speed to the next delta time step, if one exists.",
+        GuiPath = "/Simulation Speed",
+        Local = true
+    },
+    {
+        Key = "Shift+Right",
+        Name = "Next Delta Time Step (Immediate)",
+        Command = "openspace.time.setNextDeltaTimeStep()",
+        Documentation = "Immediately set the simulation speed to the next delta time step, if one exists.",
         GuiPath = "/Simulation Speed",
         Local = true
     },
@@ -122,10 +130,18 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Key = "Left",
         Name = "Previous Delta Time Step (Interpolate)",
         Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
-        Documentation = "Smoothly interpolates the simulation speed to the previous value in the list of delta time steps, if one exists.",
+        Documentation = "Smoothly interpolates the simulation speed to the previous delta time step, if one exists.",
         GuiPath = "/Simulation Speed",
         Local = true
-    }
+    },
+    {
+        Key = "Shift+Left",
+        Name = "Previous Delta Time Step (Immediate)",
+        Command = "openspace.time.setPreviousDeltaTimeStep()",
+        Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists.",
+        GuiPath = "/Simulation Speed",
+        Local = true
+    },
 }
 
 local DeltaTimeKeys
