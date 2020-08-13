@@ -86,27 +86,10 @@ std::string Time::UTC() const {
 std::string Time::ISO8601() const {
     ZoneScoped
 
-    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
-    std::string_view month = std::string_view(datetime).substr(5, 3);
-
-    std::string_view mm = [](std::string_view month) {
-        if (month == "JAN") { return "-01-"; }
-        else if (month == "FEB") { return "-02-"; }
-        else if (month == "MAR") { return "-03-"; }
-        else if (month == "APR") { return "-04-"; }
-        else if (month == "MAY") { return "-05-"; }
-        else if (month == "JUN") { return "-06-"; }
-        else if (month == "JUL") { return "-07-"; }
-        else if (month == "AUG") { return "-08-"; }
-        else if (month == "SEP") { return "-09-"; }
-        else if (month == "OCT") { return "-10-"; }
-        else if (month == "NOV") { return "-11-"; }
-        else if (month == "DEC") { return "-12-"; }
-        else { throw ghoul::MissingCaseException(); }
-    }(month);
-
-    datetime.replace(4, 5, mm);
-    return datetime;
+    return SpiceManager::ref().dateFromEphemerisTime(
+        _time,
+        "YYYY-MM-DDTHR:MN:SC.###"
+    );
 }
 
 scripting::LuaLibrary Time::luaLibrary() {

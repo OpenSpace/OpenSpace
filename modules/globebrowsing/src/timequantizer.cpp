@@ -229,10 +229,10 @@ void DateTime::incrementOnce(int value, char unit) {
             _year += value;
             break;
         default:
-            throw ghoul::RuntimeError(
-                "Invalid unit format in TQ incrementOnce '" + std::to_string(unit) +
-                "'. Expected 'y', 'M', 'd', 'h', or 'm'."
-            );
+            throw ghoul::RuntimeError(fmt::format(
+                "Invalid unit in incrementOnce '{}'. Expected 'y', 'M', 'd', 'h', or 'm'",
+                unit
+            ));
     }
 }
 
@@ -550,7 +550,6 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, dou
         }
         case 'd':
         {
-            ZoneScopedN("d")
             const double error = (unQ.J2000() - quantized.J2000()) / (60 * 60 * 24);
             const int originalHour = quantized.hour();
             const int originalMinute = quantized.minute();
@@ -565,8 +564,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, dou
         }
         case 'h':
         {
-            ZoneScopedN("h")
-                quantized = unQ;
+            quantized = unQ;
             quantized.setMinute(0);
             quantized.setSecond(0);
             if (unQ.hour() >= 12) {
