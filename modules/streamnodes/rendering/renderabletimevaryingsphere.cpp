@@ -495,6 +495,7 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
         ));
         return false;
     }
+    _nStates = _sourceFiles.size();
     LDEBUG("returning true");
     return true;
 }

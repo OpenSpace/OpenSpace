@@ -12,6 +12,13 @@ local assetHelper = asset.require("util/asset_helper")
 local textures = asset.require('./cutplanes_textures').TexturesPath
 local transforms = asset.require("./transforms")
 
+local TexturesPathMeridial = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "cutplane_meridial_textures",
+    Identifier = "cutplane_meridial_textures",
+    Version = 1
+})
+
 local Cutplane = {
     Identifier = "Cutplane",
     Parent = transforms.SunIAU.Identifier,
@@ -35,22 +42,22 @@ local Cutplane = {
 		},
 };
 
---local Cutplane2 = {
---    Identifier = "Cutplane2", 
---    Parent = transforms.SunIAU.Identifier,
- --   Renderable = {
---	    Type = "RenderablePlaneImageLocal",
---	    Size = 1.3*10^11,
---	    Enabled = false,
---	    Texture = textures .. "/cutplane1.png",
---	    BlendMode = "Additive",
---	    Opacity = 0.65,
---	},
-  --  GUI = {
-    --    Name = "Cutplane2",
-      --  Path = "/Solar System/Heliosphere"
-	--	},
---};
+local Cutplane2 = {
+    Identifier = "Cutplane2", 
+    Parent = transforms.SunIAU.Identifier,
+    Renderable = {
+	    Type = "RenderableTimeVaryingPlaneImageLocal",
+	    Size = 1.5*10^11,
+	    Enabled = true,
+	    Texture = TexturesPathMeridial,
+	    BlendMode = "Normal",
+	    Opacity = 1,
+	},
+    GUI = {
+        Name = "Cutplane2",
+        Path = "/Solar System/Heliosphere"
+		},
+};
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane, Cutplane2 })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane })

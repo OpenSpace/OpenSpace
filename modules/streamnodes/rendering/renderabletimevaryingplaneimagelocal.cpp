@@ -155,6 +155,7 @@ namespace openspace {
 
     void RenderableTimeVaryingPlaneImageLocal::initializeGL() {
         RenderablePlane::initializeGL();
+
         LDEBUG("sourcefiles size:" + std::to_string(_sourceFiles.size()));
        
         if (!extractMandatoryInfoFromDictionary()) {
@@ -196,6 +197,7 @@ namespace openspace {
             ));
             return false;
         }
+        _nStates = _sourceFiles.size();
         LDEBUG("returning true");
         return true;
     }
@@ -215,6 +217,7 @@ namespace openspace {
         if (!this->_enabled) {
             return;
         }
+        
             const double currentTime = data.time.j2000Seconds();
             const bool isInInterval = (currentTime >= _startTimes[0]) &&
                 (currentTime < _sequenceEndTime);
@@ -325,6 +328,8 @@ namespace openspace {
                     //);
                     texture->uploadTexture();
                     texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                    texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+                    //texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
                     texture->purgeFromRAM();
 
                     return texture;
@@ -338,6 +343,7 @@ namespace openspace {
                 [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
             );
             _isLoadingTexture = false;
+            //glTexParameterf(_texture, GL_TEXTURE_MIN_FILTER, 0);
         }
     }
 

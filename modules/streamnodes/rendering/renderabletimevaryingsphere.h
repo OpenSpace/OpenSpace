@@ -74,7 +74,7 @@ private:
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
     // Number of states in the sequence
-    size_t _nStates = 272;
+    size_t _nStates = 95;
     bool _isLoadingTexture = false;
 
     properties::StringProperty _texturePath;

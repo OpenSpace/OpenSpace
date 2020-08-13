@@ -16,7 +16,7 @@ local textures_coronasphere = asset.require('./cutplanes_textures_sphere_corona'
 local transforms = asset.require("./transforms")
 local default_opacity = 0.99
 --textureversion 1 has purple for low flux, 2 has transparent.
-local textureversion = 1
+local textureversion = 2
 
 local TexturesPathEarth = asset.syncedResource({
     Type = "HttpSynchronization",
@@ -70,7 +70,7 @@ local Cutplane_sphere_venus = {
 	    Type = "RenderableTimeVaryingSphere",
 	    Size = 107710467 * 10^3,
 	    Enabled = true,
-	    Texture = TexturesPathMercury,
+	    Texture = TexturesPathVenus,
 	    --BlendMode = "Additive",
 	    Opacity = default_opacity,
             Segments = 132
@@ -102,7 +102,7 @@ local Cutplane_sphere_corona = {
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
 	    Type = "RenderableTimeVaryingSphere",
-	    Size = 7479893 * 10^3,
+	    Size = 7479894 * 10^3,
 	    Enabled = true,
 	    Texture = TexturesPathCorona, 
 	    --BlendMode = "Additive",
@@ -115,5 +115,5 @@ local Cutplane_sphere_corona = {
 		},
 };
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane_sphere_earth, Cutplane_sphere_venus, Cutplane_sphere_mercury, Cutplane_sphere_corona})
+--something wrong with Cutplane_sphere_corona.
+assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane_sphere_earth, Cutplane_sphere_venus, Cutplane_sphere_mercury})

@@ -66,7 +66,7 @@ namespace openspace {
         std::vector<double> _startTimes;
         int _activeTriggerTimeIndex = 0;
         // Number of states in the sequence
-        size_t _nStates = 274;
+        size_t _nStates = 90;
         properties::StringProperty _texturePath;
         //properties::StringProperty _timestapsPath;
         ghoul::opengl::Texture* _texture = nullptr;
