@@ -45,7 +45,7 @@ namespace openspace::globebrowsing::cache {
 
 struct ProviderTileKey {
     TileIndex tileIndex;
-    unsigned int providerID;
+    uint16_t providerID;
 
     bool operator==(const ProviderTileKey& r) const {
         return (providerID == r.providerID) && (tileIndex == r.tileIndex);
@@ -127,7 +127,7 @@ private:
         const TileTextureInitData& tileTextureInitData() const;
 
         /**
-         * \returns the number of textures in this TextureContainer
+         * \return the number of textures in this TextureContainer
          */
         size_t size() const;
 

@@ -398,15 +398,11 @@ RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile,
                                          [[ maybe_unused ]] size_t nRasters,
                                          float noDataValue)
 {
-    // This check was implicit before and just made explicit here
-    ghoul_assert(
-        nRasters == rawTile.tileMetaData.maxValues.size(),
-        "Wrong numbers of max values"
-    );
+    ghoul_assert(nRasters == rawTile.tileMetaData.nValues, "Wrong numbers of max values");
 
     const bool hasMissingData = std::any_of(
         rawTile.tileMetaData.maxValues.begin(),
-        rawTile.tileMetaData.maxValues.end(),
+        rawTile.tileMetaData.maxValues.begin() + rawTile.tileMetaData.nValues,
         [noDataValue](float v) { return v == noDataValue; }
     );
 
@@ -935,18 +931,14 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
 {
     const size_t bytesPerLine = _initData.bytesPerPixel * region.numPixels.x;
 
-    TileMetaData preprocessData;
-    preprocessData.maxValues.resize(_initData.nRasters);
-    preprocessData.minValues.resize(_initData.nRasters);
-    preprocessData.hasMissingData.resize(_initData.nRasters);
+    TileMetaData ppData;
+    ghoul_assert(_initData.nRasters <= 4, "Unexpected number of rasters");
+    ppData.nValues = static_cast<uint8_t>(_initData.nRasters);
 
-    std::vector<float> noDataValues(_initData.nRasters);
-    for (size_t raster = 0; raster < _initData.nRasters; ++raster) {
-        preprocessData.maxValues[raster] = -FLT_MAX;
-        preprocessData.minValues[raster] = FLT_MAX;
-        preprocessData.hasMissingData[raster] = false;
-        noDataValues[raster] = noDataValueAsFloat();
-    }
+    std::fill(ppData.maxValues.begin(), ppData.maxValues.end(), -FLT_MAX);
+    std::fill(ppData.minValues.begin(), ppData.minValues.end(), FLT_MAX);
+    std::fill(ppData.hasMissingData.begin(), ppData.hasMissingData.end(), false);
+    std::vector<float> noDataValues(_initData.nRasters, noDataValueAsFloat());
 
     bool allIsMissing = true;
     for (int y = 0; y < region.numPixels.y; ++y) {
@@ -960,18 +952,18 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
                     &(rawTile.imageData.get()[yi + i])
                 );
                 if (val != noDataValue && val == val) {
-                    preprocessData.maxValues[raster] = std::max(
+                    ppData.maxValues[raster] = std::max(
                         val,
-                        preprocessData.maxValues[raster]
+                        ppData.maxValues[raster]
                     );
-                    preprocessData.minValues[raster] = std::min(
+                    ppData.minValues[raster] = std::min(
                         val,
-                        preprocessData.minValues[raster]
+                        ppData.minValues[raster]
                     );
                     allIsMissing = false;
                 }
                 else {
-                    preprocessData.hasMissingData[raster] = true;
+                    ppData.hasMissingData[raster] = true;
                     float& floatToRewrite = reinterpret_cast<float&>(
                         rawTile.imageData[yi + i]
                     );
@@ -986,7 +978,7 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
         rawTile.error = RawTile::ReadError::Failure;
     }
 
-    return preprocessData;
+    return ppData;
 }
 
 int RawTileDataReader::maxChunkLevel() const {

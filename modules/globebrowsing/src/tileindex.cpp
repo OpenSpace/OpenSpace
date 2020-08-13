@@ -30,7 +30,7 @@ bool operator==(const TileIndex& lhs, const TileIndex& rhs) {
     return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.level == rhs.level);
 }
 
-TileIndex::TileIndex(int x_, int y_, int level_)
+TileIndex::TileIndex(uint32_t x_, uint32_t y_, uint8_t level_)
     : x(x_)
     , y(y_)
     , level(level_)

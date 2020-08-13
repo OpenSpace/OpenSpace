@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 
 namespace openspace::globebrowsing::cache {
 
@@ -82,11 +83,11 @@ bool LRUCache<KeyType, ValueType, HasherType>::isEmpty() const {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
-    //ghoul_assert(exist(key), "Key " << key << " must exist");
     const auto it = _itemMap.find(key);
     // Move list iterator pointing to value
     _itemList.splice(_itemList.begin(), _itemList, it->second);
-    return it->second->second;
+    ValueType res = it->second->second;
+    return res;
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>

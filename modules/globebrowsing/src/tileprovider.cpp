@@ -77,7 +77,7 @@ namespace openspace::globebrowsing::tileprovider {
 namespace {
 
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-Tile DefaultTile = Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 
 constexpr const char* KeyFilePath = "FilePath";
 
@@ -926,7 +926,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 Tile tile = t.tileCache->get(key);
 
                 if (!tile.texture) {
-                    TracyMessage("Enqueuing tile", 32);
+                    //TracyMessage("Enqueuing tile", 32);
                     t.asyncTextureDataProvider->enqueueTileIO(tileIndex);
                 }
 
