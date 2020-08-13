@@ -1283,11 +1283,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     ZoneScoped
     TracyGpuZone("renderChunkGlobally")
 
-    //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
 
-    const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
+    std::array<LayerGroup*, LayerManager::NumLayerGroups> layerGroups =
         _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);

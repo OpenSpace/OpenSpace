@@ -168,7 +168,11 @@ struct ChunkTile {
 
 
 
-using ChunkTilePile = std::vector<ChunkTile>;
+//using ChunkTilePile = std::vector<ChunkTile>;
+// The ChunkTilePile either contains 1 or 3 ChunkTile, depending on if layer-blending is
+// enabled. If it is enabled, we need the two adjacent levels, if it is not enabled, only
+// the current layer is needed
+using ChunkTilePile = std::array<std::optional<ChunkTile>, 3>;
 
 } // namespace openspace::globebrowsing
 

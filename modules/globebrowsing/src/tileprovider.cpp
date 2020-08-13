@@ -1436,22 +1436,25 @@ ChunkTilePile chunkTilePile(TileProvider& tp, TileIndex tileIndex, int pileSize)
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
 
-    ChunkTilePile chunkTilePile(pileSize);
+    ChunkTilePile chunkTilePile;
+    std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
     for (int i = 0; i < pileSize; ++i) {
         chunkTilePile[i] = chunkTile(tp, tileIndex, i);
-        if (chunkTilePile[i].tile.status == Tile::Status::Unavailable) {
-            if (i > 0) {
+        if (chunkTilePile[i]->tile.status == Tile::Status::Unavailable) {
+            if (i == 0) {
                 // First iteration
-                chunkTilePile[i].tile = chunkTilePile[i - 1].tile;
-                chunkTilePile[i].uvTransform.uvOffset =
-                    chunkTilePile[i - 1].uvTransform.uvOffset;
-                chunkTilePile[i].uvTransform.uvScale =
-                    chunkTilePile[i - 1].uvTransform.uvScale;
+                chunkTilePile[i]->tile = DefaultTile;
+                chunkTilePile[i]->uvTransform.uvOffset = { 0.f, 0.f };
+                chunkTilePile[i]->uvTransform.uvScale = { 1.f, 1.f };
             }
             else {
-                chunkTilePile[i].tile = DefaultTile;
-                chunkTilePile[i].uvTransform.uvOffset = { 0.f, 0.f };
-                chunkTilePile[i].uvTransform.uvScale = { 1.f, 1.f };
+                // We are iterating through the array one-by-one, so we are guaranteed
+                // that for tile 'i', tile 'i-1' already was initializated
+                chunkTilePile[i]->tile = chunkTilePile[i - 1]->tile;
+                chunkTilePile[i]->uvTransform.uvOffset =
+                    chunkTilePile[i - 1]->uvTransform.uvOffset;
+                chunkTilePile[i]->uvTransform.uvScale =
+                    chunkTilePile[i - 1]->uvTransform.uvScale;
             }
         }
     }

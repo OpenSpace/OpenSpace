@@ -38,7 +38,7 @@ public:
     // Memory pool.  Resetting the monotoic_buffer_resource costs an allocation, that we
     // can prevent
     std::pmr::monotonic_buffer_resource TemporaryMemory =
-        std::pmr::monotonic_buffer_resource(4096);
+        std::pmr::monotonic_buffer_resource(100 * 4096);
 };
 
 } // namespace openspace

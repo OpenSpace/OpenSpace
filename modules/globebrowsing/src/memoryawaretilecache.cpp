@@ -376,6 +376,8 @@ bool MemoryAwareTileCache::exist(const ProviderTileKey& key) const {
 }
 
 Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
+    ZoneScoped
+
     const TextureContainerMap::const_iterator it = std::find_if(
         _textureContainerMap.cbegin(),
         _textureContainerMap.cend(),
