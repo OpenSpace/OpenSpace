@@ -66,8 +66,8 @@ void GuiMemoryComponent::render() {
     ImGui::Text("%s", "Persistent Memory Pool");
     renderMemoryPoolInformation(global::memoryManager.PersistentMemory);
 
-    ImGui::Text("%s", "Temporary Memory Pool");
-    renderMemoryPoolInformation(global::memoryManager.TemporaryMemory);
+    //ImGui::Text("%s", "Temporary Memory Pool");
+    //renderMemoryPoolInformation(global::memoryManager.TemporaryMemory);
     ImGui::End();
 }
 

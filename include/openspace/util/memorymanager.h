@@ -26,13 +26,19 @@
 #define __OPENSPACE_CORE___MEMORYMANAGER___H__
 
 #include <ghoul/misc/memorypool.h>
+#include <memory_resource>
 
 namespace openspace {
 
 class MemoryManager {
 public:
     ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
-    ghoul::MemoryPool<10 * 1024, false> TemporaryMemory;
+
+    // This should be replaced with a std::pmr::memory_resource wrapper around our own
+    // Memory pool.  Resetting the monotoic_buffer_resource costs an allocation, that we
+    // can prevent
+    std::pmr::monotonic_buffer_resource TemporaryMemory =
+        std::pmr::monotonic_buffer_resource(4096);
 };
 
 } // namespace openspace

@@ -37,11 +37,13 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -49,6 +51,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
+#include <memory_resource>
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -258,10 +261,14 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
+std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
 tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
-    std::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings;
+    ZoneScoped
+
+    std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings(
+        &global::memoryManager.TemporaryMemory
+    );
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
@@ -286,10 +293,9 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     // (that is channel 0).
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
-    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
-        heightmaps,
-        chunk.tileIndex
-    );
+
+    std::pmr::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
+        tilesAndSettingsUnsorted(heightmaps, chunk.tileIndex);
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
@@ -341,18 +347,14 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
 bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
     ZoneScoped
 
-    using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
-    const LayerGroup& colormaps = lm.layerGroup(layergroupid::GroupID::ColorLayers);
-    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
-        colormaps,
-        chunk.tileIndex
-    );
+    const LayerGroup& colorLayers = lm.layerGroup(layergroupid::GroupID::ColorLayers);
 
-    for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
-        const ChunkTile& chunkTile = chunkTileSettingsPair.first;
-
-        if (chunkTile.tile.status == Tile::Status::Unavailable) {
-            return false;
+    for (Layer* lyr : colorLayers.activeLayers()) {
+        if (lyr->tileProvider()) {
+            ChunkTile t = tileprovider::chunkTile(*lyr->tileProvider(), chunk.tileIndex);
+            if (t.tile.status == Tile::Status::Unavailable) {
+                return false;
+            }
         }
     }
 

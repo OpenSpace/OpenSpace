@@ -62,6 +62,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
@@ -1058,6 +1059,9 @@ void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
     FileSys.triggerFilesystemEvents();
+
+    // Reset the temporary, frame-based storage
+    global::memoryManager.TemporaryMemory.release();
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));

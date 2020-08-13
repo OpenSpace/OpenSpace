@@ -1404,7 +1404,7 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
         maxParents--;
     }
     if (maxParents < 0) {
-        return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
+        return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
     }
 
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
@@ -1413,16 +1413,16 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
         Tile t = tile(tp, tileIndex);
         if (t.status != Tile::Status::OK) {
             if (--maxParents < 0) {
-                return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
+                return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
             }
             ascendToParent(tileIndex, uvTransform);
         }
         else {
-            return ChunkTile{ std::move(t), uvTransform, TileDepthTransform() };
+            return ChunkTile { std::move(t), uvTransform, TileDepthTransform() };
         }
     }
 
-    return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
+    return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
 }
 
 
