@@ -22,7 +22,8 @@ openspace.addScreenSpaceRenderable(legend)
 openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.CartesianPosition', {0.915250,-0.033900,-1.278690});
 -- openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.CartesianPosition', {0.915250,-0.033900,-1.508200});
 openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Rotation', {0.000000,0.000000,0.5});
-openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Scale', 0.037560);
+openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Scale', 0.056340);
+-- openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Scale', 0.037560);
 -- openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Scale', 0.075120);
 openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', false);
 
