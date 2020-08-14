@@ -158,12 +158,12 @@ void DateTime::setTime(std::string_view input) {
     constexpr const size_t IndexMinute = 14;
     constexpr const size_t IndexSecond = 17;
 
-    std::from_chars(input.data() + IndexYear, input.data() + 4, _year);
-    std::from_chars(input.data() + IndexMonth, input.data() + 2, _month);
-    std::from_chars(input.data() + IndexDay, input.data() + 2, _day);
-    std::from_chars(input.data() + IndexHour, input.data() + 2, _hour);
-    std::from_chars(input.data() + IndexMinute, input.data() + 2, _minute);
-    std::from_chars(input.data() + IndexSecond, input.data() + 2, _second);
+    std::from_chars(input.data() + IndexYear, input.data() + IndexYear + 4, _year);
+    std::from_chars(input.data() + IndexMonth, input.data() + IndexMonth + 2, _month);
+    std::from_chars(input.data() + IndexDay, input.data() + IndexDay + 2, _day);
+    std::from_chars(input.data() + IndexHour, input.data() + IndexHour + 2, _hour);
+    std::from_chars(input.data() + IndexMinute, input.data() + IndexMinute + 2, _minute);
+    std::from_chars(input.data() + IndexSecond, input.data() + IndexSecond + 2, _second);
 }
 
 std::string DateTime::ISO8601() const {

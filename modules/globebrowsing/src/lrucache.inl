@@ -59,8 +59,16 @@ bool LRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
+    ZoneScoped
+
     const auto it = _itemMap.find(key);
-    if (it != _itemMap.end()) { // Found in cache
+    if (it != _itemMap.end()) {
+        // @TODO (abock, 2020-08-14) Instead of removing the iterator from the previous
+        // position and then readding it at the front, it might make more sense to move
+        // them around?  That would prevent the dynamic memoray allocation that is
+        // happening here
+
+        // Found in cache
         ValueType value = it->second->second;
         // Remove from current position
         _itemList.erase(it->second);

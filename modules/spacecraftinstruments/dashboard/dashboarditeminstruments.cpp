@@ -35,6 +35,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 #include <chrono>
 
 namespace {
@@ -178,6 +179,8 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     double currentTime = global::timeManager.time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {

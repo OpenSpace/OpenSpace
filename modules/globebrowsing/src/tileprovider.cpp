@@ -924,7 +924,6 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 }
                 const cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
                 Tile tile = t.tileCache->get(key);
-
                 if (!tile.texture) {
                     //TracyMessage("Enqueuing tile", 32);
                     t.asyncTextureDataProvider->enqueueTileIO(tileIndex);

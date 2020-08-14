@@ -615,9 +615,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
 
-    _globalChunkBuffer.reserve(2048);
-    _localChunkBuffer.reserve(2048);
-    _traversalMemory.reserve(512);
+    _globalChunkBuffer.resize(2048);
+    _localChunkBuffer.resize(2048);
+    _traversalMemory.resize(512);
 
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
@@ -1214,8 +1214,24 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         }
     };
 
-    traversal(_leftRoot, _globalChunkBuffer, globalCount, _localChunkBuffer, localCount, _debugProperties.modelSpaceRenderingCutoffLevel, _traversalMemory);
-    traversal(_rightRoot, _globalChunkBuffer, globalCount, _localChunkBuffer, localCount, _debugProperties.modelSpaceRenderingCutoffLevel, _traversalMemory);
+    traversal(
+        _leftRoot,
+        _globalChunkBuffer,
+        globalCount,
+        _localChunkBuffer,
+        localCount,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _traversalMemory
+    );
+    traversal(
+        _rightRoot,
+        _globalChunkBuffer,
+        globalCount,
+        _localChunkBuffer,
+        localCount,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _traversalMemory
+    );
 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();

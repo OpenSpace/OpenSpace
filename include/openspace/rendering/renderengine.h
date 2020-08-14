@@ -242,6 +242,8 @@ private:
         glm::ivec4 zoom = glm::ivec4(0);
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
+
+    std::string _versionString;
 };
 
 } // namespace openspace
