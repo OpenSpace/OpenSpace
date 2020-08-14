@@ -321,8 +321,16 @@ namespace {
         return time;
     }
 
-    [[ nodiscard ]] std::string parseDeltaTimes(const std::string& line, int) {
-        return line;
+    [[ nodiscard ]] double parseDeltaTime(const std::string& line, int lineNumber) {
+        try {
+            return std::stod(line);
+        }
+        catch (const ghoul::RuntimeError& e) {
+            throw ProfileParsingError(
+                lineNumber,
+                fmt::format("Expected a number for delta time entry, got ", line)
+            );
+        }
     }
 
     [[ nodiscard ]] Profile::CameraType parseCamera(const std::string& line, int lineNumber) {
@@ -487,7 +495,9 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     t.type = Time::Type::Absolute;
     time = std::move(t);
 
-    // TODO: Set delta time steps
+    // Delta times
+    std::vector<double> dts = global::timeManager.deltaTimeSteps();
+    deltaTimes = std::move(dts);
 
     // Camera
 
@@ -659,7 +669,7 @@ std::string Profile::serialize() const {
 
     if (!deltaTimes.empty()) {
         output += fmt::format("\n{}\n", headerDeltaTimes);
-        for (const std::string& d : deltaTimes) {
+        for (const double d : deltaTimes) {
             output += fmt::format("{}\n", d);
         }
     }
@@ -888,8 +898,8 @@ Profile::Profile(const std::vector<std::string>& content) {
                 break;
             case Section::DeltaTimes:
             {
-                std::string d = parseDeltaTimes(line, lineNum);
-                deltaTimes.push_back(std::move(d));
+                const double d = parseDeltaTime(line, lineNum);
+                deltaTimes.push_back(d);
                 break;
             }
             case Section::Camera:
@@ -1006,7 +1016,7 @@ std::string Profile::convertToScene() const {
     // Delta Times
     {
         std::string times;
-        for (const std::string& d : deltaTimes) {
+        for (const double d : deltaTimes) {
             times += fmt::format("{} ,", d);
         }
         output += fmt::format("openspace.time.setDeltaTimeSteps({{ {} }});\n", times);

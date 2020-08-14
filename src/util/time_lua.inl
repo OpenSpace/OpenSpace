@@ -85,9 +85,16 @@ int time_setDeltaTimeSteps(lua_State* L) {
     inputDeltaTimes.reserve(nItems);
 
     for (size_t i = 1; i <= nItems; ++i) {
-        const double time = dict.value<double>(std::to_string(i));
-        // TODO: test valid time? Or interpret non-second values
-        inputDeltaTimes.push_back(time);
+        std::string key = std::to_string(i);
+        if (dict.hasKeyAndValue<double>(key)) {
+            const double time = dict.value<double>(key);
+            inputDeltaTimes.push_back(time);
+        }
+        else {
+            const char* msg = lua_pushfstring(L,
+                "Error setting delta times. Expected list of numbers.");
+            return ghoul::lua::luaError(L, fmt::format("bad argument ({})", msg));
+        }
     }
     lua_pop(L, 1);
 
