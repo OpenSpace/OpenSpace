@@ -6,12 +6,13 @@ openspace.autonavigation.documentation = {
     },
     {
         Name = "renderPath",
-        Arguments = "int, [bool], [bool]",
+        Arguments = "int, [bool], [bool], [number]",
         Documentation = "Render the currently active path, using linear segments. " .. 
             "The first argurment is the number of samples per path segment. " ..
             "The optional second argument can be used to render the points of " ..
             "the path as spheres, if set to true." ..
-            "The optional third argument will visualize camera orientation if set to true"
+            "The optional third argument will visualize camera orientation if set to true."
+            "The optional fourth input affects the size of the points and orientation lines."
     },
     {
         Name = "removeControlPoints",
@@ -20,8 +21,9 @@ openspace.autonavigation.documentation = {
     },
     {
         Name = "renderControlPoints",
-        Arguments = "",
-        Documentation = "Test method for rendering the control points of the camera path spline."
+        Arguments = "[number]",
+        Documentation = "Test method for rendering the control points of the camera " .. 
+            "path spline. The optional input is used to specify the radius of the points."
     },
 }
 
@@ -32,18 +34,22 @@ openspace.autonavigation.removeRenderedPath = function ()
     end
 end
 
-openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints, renderOrientations)
+openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints, renderOrientations, sphereRadius)
     local path_identifier = "Camera_Path"
     local label_point = "Point"
     local label_line = "Line"
     local lineColor = {1.0, 1.0, 0.0}
     local lineWidth = 4
     local sphereTexture = "${MODULES}/autonavigation/textures/red.png" 
-    local sphereRadius = 2000000 
     local sphereSegments = 50
     local label_orientation = "Orientation"
     local orientationLineColor = {1.0, 0.0, 0.0}
     local orientationLineWidth = 2
+
+    if (sphereRadius == nil) then 
+        sphereRadius = 2000000 -- TODO: better default
+    end 
+
     local orientationLineLength = 30 * sphereRadius
 
     if openspace.hasSceneGraphNode(path_identifier) then
@@ -155,12 +161,15 @@ openspace.autonavigation.removeControlPoints = function ()
     end
 end
 
-openspace.autonavigation.renderControlPoints = function ()
+openspace.autonavigation.renderControlPoints = function (sphereRadius)
     local base_identifier = "Path_Control_Points"
     local label_point = "ControlPoint"
     local sphereTexture = "${MODULES}/autonavigation/textures/yellow.png" 
-    local sphereRadius = 2100000 -- TODO: optional input? Not same the other one or interference appears
     local sphereSegments = 50
+
+    if (sphereRadius == nil) then 
+        sphereRadius = 2000000 -- TODO: better default
+    end 
 
     if openspace.hasSceneGraphNode(base_identifier) then
         openspace.removeSceneGraphNode(base_identifier)
@@ -188,7 +197,11 @@ openspace.autonavigation.renderControlPoints = function ()
                 Texture = sphereTexture,
                 Opacity = 1
             },
-            Parent = base_identifier
+            Parent = base_identifier, 
+            GUI = {
+                Name = "Control Point" .. key,
+                Path = "/Camera Paths Debug/",
+            }
         }
         openspace.addSceneGraphNode(node)
     end
