@@ -49,13 +49,14 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
 {
     initCurve();
 
-    // TODO: handle duration better
     if (duration.has_value()) {
         _duration = duration.value();
     }
     else {
         _duration = std::log(pathLength());
-        //LINFO(fmt::format("Default duration: {}", _duration));
+
+        auto module = global::moduleEngine.module<AutoNavigationModule>();
+        _duration /= module->AutoNavigationHandler().speedScale();
     }
 }
 

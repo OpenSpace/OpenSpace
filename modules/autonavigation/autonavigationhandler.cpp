@@ -97,6 +97,12 @@ namespace {
         "increases the precision, at the cost of reduced efficiency."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
+        "SpeedScale",
+        "Speed Scale",
+        "Scale factor that affects the default speed for a camera path."
+    };
+
 } // namespace
 
 namespace openspace::autonavigation {
@@ -111,6 +117,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _relevantNodeTags(RelevantNodeTagsInfo)
     , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.0f, -90.0f, 90.0f)
     , _nrSimulationSteps(NumberSimulationStepsInfo, 5, 2 , 10)
+    , _speedScale(SpeedScaleInfo, 1.0f, 0.01f, 2.0f) 
 {
     addPropertySubOwner(_atNodeNavigator);
 
@@ -144,6 +151,7 @@ AutoNavigationHandler::AutoNavigationHandler()
 
     addProperty(_defaultPositionOffsetAngle);
     addProperty(_nrSimulationSteps);
+    addProperty(_speedScale);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -167,6 +175,10 @@ const std::vector<SceneGraphNode*>& AutoNavigationHandler::relevantNodes() const
 
 int AutoNavigationHandler::nrSimulationStepsPerFrame() const {
     return _nrSimulationSteps;
+}
+
+double AutoNavigationHandler::speedScale() const {
+    return _speedScale;
 }
 
 void AutoNavigationHandler::updateCamera(double deltaTime) {

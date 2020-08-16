@@ -54,6 +54,7 @@ public:
     bool hasFinished() const;
     const std::vector<SceneGraphNode*>& relevantNodes() const;
     int nrSimulationStepsPerFrame() const;
+    double speedScale() const;
 
     void updateCamera(double deltaTime);
     void createPath(PathSpecification& spec);
@@ -117,6 +118,8 @@ private:
 
     properties::FloatProperty _defaultPositionOffsetAngle;
     properties::IntProperty _nrSimulationSteps;
+
+    properties::FloatProperty _speedScale; 
 };
 
 } // namespace openspace::autonavigation

@@ -5,6 +5,11 @@ local sceneHelper = asset.require('util/scene_helper')
 asset.require('scene/solarsystem/planets/earth/earth')
 asset.require('scene/solarsystem/planets/earth/satellites/satellites.asset')
 
+-- Set this flag to true if scene is being done in the dome, to lower the speed scale
+-- per default 
+local domePresentationMode = true
+local domeSpeedScale = 0.7
+
 -- Keybindings that are specific for this scene
 local Keybindings = {
      {
@@ -35,6 +40,10 @@ asset.onInitialize(function ()
     openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
 
     openspace.setPropertyValue("{earth_satellites}.Renderable.Enabled", false)
+
+    if(domePresentationMode) then 
+        openspace.setPropertyValueSingle("Modules.AutoNavigation.AutoNavigationHandler.SpeedScale", domeSpeedScale)
+    end
 end)
 
 asset.onDeinitialize(function ()
