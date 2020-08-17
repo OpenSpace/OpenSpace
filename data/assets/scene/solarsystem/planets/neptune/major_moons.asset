@@ -1,1 +1,1 @@
-asset.request('./triton')
+asset.require('./triton')
