@@ -1,8 +1,13 @@
 local texturesPath = asset.require("./../../ganymede_textures").TexturesPath
+local globeIdentifier = asset.require("./../../ganymede").Ganymede.Identifier
 
 local layer = {
     Identifier = "Texture",
     FilePath = texturesPath .. "/ganymede.jpg",
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

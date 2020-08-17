@@ -1,3 +1,5 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
 local layer = {
     Identifier = "VIIRS_SNPP_Temporal",
     Name = "VIIRS SNPP (Temporal)",
@@ -11,5 +13,9 @@ local layer = {
         "jpg"
     )
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

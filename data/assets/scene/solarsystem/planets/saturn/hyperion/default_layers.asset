@@ -1,12 +1,3 @@
-local layerHelper = asset.require('util/layer_helper')
-local globeAsset = asset.require('./hyperion')
-local globeIdentifier = globeAsset.Hyperion.Identifier
+local colorLayersPath = "./layers/colorlayers"
 
--- set enabled and fallback layers
-local defaultLayers = asset.require('./layers/default_layers')
-
--- @TODO: when we have a working texture, set it to enabled here
-
-asset.onInitialize(function ()
-    layerHelper.addLayersToGlobe(globeIdentifier, defaultLayers)
-end)
+-- @TODO: when we have a working texture, add it here

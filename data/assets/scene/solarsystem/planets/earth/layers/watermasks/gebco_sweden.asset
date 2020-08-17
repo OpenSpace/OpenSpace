@@ -1,9 +1,14 @@
 local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 local layer = {
     Name = "Gebco [Sweden]",
     Identifier = "Gebco_Sweden",
     FilePath = mapServiceConfigsPath .. "/LiU/Gebco.wms"
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "WaterMasks", layer)
+end)
 
 asset.export("layer", layer)
