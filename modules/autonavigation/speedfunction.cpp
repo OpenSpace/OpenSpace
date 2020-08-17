@@ -85,4 +85,30 @@ double SexticDampenedSpeed::value(double t) const {
     return speed;
 }
 
+QuinticDampenedSpeed::QuinticDampenedSpeed() {
+    initIntegratedSum();
+}
+
+double QuinticDampenedSpeed::value(double t) const {
+    ghoul_assert(t >= 0.0 && t <= 1.0, "Variable t out of range [0,1]");
+
+    const double tPeak = 0.5;
+    double speed = 0.0;
+
+    // accelerate
+    if (t <= tPeak) {
+        double tScaled = t / tPeak;
+        speed = ghoul::cubicEaseInOut(ghoul::quadraticEaseInOut(tScaled));
+    }
+    // deaccelerate
+    else if (t <= 1.0) {
+        double tScaled = (t - tPeak) / (1.0 - tPeak);
+        speed = 1.0 - ghoul::cubicEaseInOut(ghoul::quadraticEaseInOut(tScaled));
+    }
+
+    // avoid zero speed
+    speed += 0.00001; // TODO: Minimal speed should depend on size of visible object/node
+    return speed;
+}
+
 } // namespace openspace::autonavigation

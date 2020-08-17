@@ -52,6 +52,12 @@ public:
     double value(double t) const override;
 }; 
 
+class QuinticDampenedSpeed : public SpeedFunction {
+public:
+    QuinticDampenedSpeed();
+    double value(double t) const override;
+};
+
 } // namespace openspace::autonavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___SPEEDFUNCTION___H__

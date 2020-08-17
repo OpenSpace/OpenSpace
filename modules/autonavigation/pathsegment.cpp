@@ -142,7 +142,7 @@ void PathSegment::initCurve() {
             _start.rotation(),
             _end.rotation()
             );
-        _speedFunction = std::make_unique<SexticDampenedSpeed>();
+        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
         break;
 
     case CurveType::Bezier3:
@@ -154,7 +154,7 @@ void PathSegment::initCurve() {
             _end.node()->worldPosition(),
             _curve.get()
         );
-        _speedFunction = std::make_unique<SexticDampenedSpeed>(); 
+        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
         break;
 
     case CurveType::Linear:
@@ -163,7 +163,7 @@ void PathSegment::initCurve() {
             _start.rotation(), 
             _end.rotation()
         );
-        _speedFunction = std::make_unique<SexticDampenedSpeed>();
+        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
         break;
 
     case CurveType::ZoomOutOverview:
@@ -175,7 +175,7 @@ void PathSegment::initCurve() {
             _end.node()->worldPosition(),
             _curve.get()
             );
-        _speedFunction = std::make_unique<SexticDampenedSpeed>();
+        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
         break;
 
     default:
