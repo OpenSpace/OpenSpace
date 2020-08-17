@@ -309,9 +309,9 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
             );
             if (json.find(AnchorKey) == json.end()) {
                 const std::string j = json;
-                LWARNING(
-                    fmt::format("Could not find {} key in JSON. JSON was:\n{}", AnchorKey, j)
-                );
+                LWARNING(fmt::format(
+                    "Could not find {} key in JSON. JSON was:\n{}", AnchorKey, j
+                ));
                 return;
             }
         }
@@ -325,11 +325,15 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
     const bool retargetAnchor = json[RetargetAnchorKey];
     const bool retargetAim = json[RetargetAimKey];
 
-    const SceneGraphNode* focusNode = global::renderEngine.scene()->sceneGraphNode(focus);
-    const SceneGraphNode* aimNode = global::renderEngine.scene()->sceneGraphNode(aim);
-    const SceneGraphNode* anchorNode = global::renderEngine.scene()->sceneGraphNode(anchor);
+    Scene* scene = global::renderEngine.scene();
+    const SceneGraphNode* focusNode = scene->sceneGraphNode(focus);
+    const SceneGraphNode* aimNode = scene->sceneGraphNode(aim);
+    const SceneGraphNode* anchorNode = scene->sceneGraphNode(anchor);
     if (focusNode) {
-        global::navigationHandler.orbitalNavigator().setFocusNode(focusNode, resetVelocities);
+        global::navigationHandler.orbitalNavigator().setFocusNode(
+            focusNode,
+            resetVelocities
+        );
     }
     else {
         if (aimNode) {

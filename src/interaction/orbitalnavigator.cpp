@@ -659,17 +659,21 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
     return centerToActualSurface - posDiff;
 }
 
-void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode, bool resetVelocitiesOnChange) {
+void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
+                                    bool resetVelocitiesOnChange)
+{
     setAnchorNode(focusNode, resetVelocitiesOnChange);
     setAimNode(nullptr);
 }
 
-void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool resetVelocitiesOnChange) {
+void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
     _anchor.set(focusNode);
     _aim.set(std::string(""));
 }
 
-void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode, bool resetVelocitiesOnChange) {
+void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
+                                     bool resetVelocitiesOnChange)
+{
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
     }
