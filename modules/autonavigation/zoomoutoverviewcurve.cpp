@@ -38,7 +38,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "ZoomOutOverviewCurve";
-    const double Epsilon = 1E-7;
+    const double Epsilon = 1E-12;
 
 } // namespace
 
