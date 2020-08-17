@@ -11,7 +11,7 @@ openspace.autonavigation.documentation = {
             "The first argurment is the number of samples per path segment. " ..
             "The optional second argument can be used to render the points of " ..
             "the path as spheres, if set to true." ..
-            "The optional third argument will visualize camera orientation if set to true."
+            "The optional third argument will visualize camera orientation if set to true." ..
             "The optional fourth input affects the size of the points and orientation lines."
     },
     {
