@@ -659,17 +659,21 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
     return centerToActualSurface - posDiff;
 }
 
-void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode) {
-    setAnchorNode(focusNode);
+void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
+                                    bool resetVelocitiesOnChange)
+{
+    setAnchorNode(focusNode, resetVelocitiesOnChange);
     setAimNode(nullptr);
 }
 
-void OrbitalNavigator::setFocusNode(const std::string& focusNode) {
+void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
     _anchor.set(focusNode);
     _aim.set(std::string(""));
 }
 
-void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
+void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
+                                     bool resetVelocitiesOnChange)
+{
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
     }
@@ -679,7 +683,7 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
 
     // Need to reset velocities after the actual switch in anchor node,
     // since the reset behavior depends on the anchor node.
-    if (changedAnchor) {
+    if (changedAnchor && resetVelocitiesOnChange) {
         resetVelocities();
     }
 
