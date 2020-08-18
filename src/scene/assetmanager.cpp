@@ -58,6 +58,7 @@ bool AssetManager::update() {
 
     // Add assets
     for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
+        ZoneScopedN("(add) Pending State Change")
         const std::string& path = c.first;
         const bool add = c.second;
         if (add) {
@@ -67,6 +68,7 @@ bool AssetManager::update() {
     }
     // Remove assets
     for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
+        ZoneScopedN("(remove) Pending State change")
         const std::string& path = c.first;
         const bool remove = !c.second;
         if (remove && _assetLoader.has(path)) {

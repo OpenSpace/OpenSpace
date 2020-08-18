@@ -30,6 +30,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* EventKey = "event";
@@ -97,10 +98,13 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
 }
 
 void TimeTopic::sendCurrentTime() {
+    ZoneScoped
+
     const json timeJson = {
         { "time", global::timeManager.time().ISO8601() }
     };
-    _connection->sendJson(wrappedPayload(timeJson));
+    const json payload = wrappedPayload(timeJson);
+    _connection->sendJson(payload);
     _lastUpdateTime = std::chrono::system_clock::now();
 }
 

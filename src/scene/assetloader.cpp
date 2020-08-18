@@ -35,6 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/profiling.h>
 
 #include "assetloader_lua.inl"
 
@@ -497,11 +498,15 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
 }
 
 std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
+    ZoneScoped
+
     setCurrentAsset(_rootAsset.get());
     return request(identifier);
 }
 
 void AssetLoader::remove(const std::string& identifier) {
+    ZoneScoped
+
     setCurrentAsset(_rootAsset.get());
     unrequest(identifier);
 }
@@ -530,6 +535,8 @@ const std::string& AssetLoader::assetRootDirectory() const {
 }
 
 void AssetLoader::callOnInitialize(Asset* asset) {
+    ZoneScoped
+
     for (int init : _onInitializationFunctionRefs[asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -543,7 +550,9 @@ void AssetLoader::callOnInitialize(Asset* asset) {
     }
 }
 
-void AssetLoader::callOnDeinitialize(Asset * asset) {
+void AssetLoader::callOnDeinitialize(Asset* asset) {
+    ZoneScoped
+
     const std::vector<int>& funs = _onDeinitializationFunctionRefs[asset];
     for (auto it = funs.rbegin(); it != funs.rend(); it++) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
@@ -559,6 +568,8 @@ void AssetLoader::callOnDeinitialize(Asset * asset) {
 }
 
 void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
+    ZoneScoped
+
     for (int init : _onDependencyInitializationFunctionRefs[dependant][asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -577,6 +588,8 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
 }
 
 void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
+    ZoneScoped
+
     const std::vector<int>& funs =
         _onDependencyDeinitializationFunctionRefs[dependant][asset];
 
@@ -595,6 +608,8 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
 }
 
 int AssetLoader::localResourceLua(Asset* asset) {
+    ZoneScoped
+
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::localResourceLua");
 
     std::string name = ghoul::lua::value<std::string>(
@@ -613,6 +628,8 @@ int AssetLoader::localResourceLua(Asset* asset) {
 }
 
 int AssetLoader::syncedResourceLua(Asset* asset) {
+    ZoneScoped
+
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::syncedResourceLua");
 
     ghoul::Dictionary d;
@@ -633,6 +650,8 @@ int AssetLoader::syncedResourceLua(Asset* asset) {
 }
 
 void AssetLoader::setCurrentAsset(Asset* asset) {
+    ZoneScoped
+
     const int top = lua_gettop(*_luaState);
 
     _currentAsset = asset;

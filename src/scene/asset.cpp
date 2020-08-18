@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <unordered_set>
 
@@ -94,6 +95,8 @@ Asset::State Asset::state() const {
 }
 
 void Asset::setState(Asset::State state) {
+    ZoneScoped
+
     if (_state == state) {
         return;
     }
@@ -188,6 +191,7 @@ void Asset::clearSynchronizations() {
 void Asset::syncStateChanged(ResourceSynchronization* sync,
                              ResourceSynchronization::State state)
 {
+    ZoneScoped
 
     if (state == ResourceSynchronization::State::Resolved) {
         if (!isSynchronized() && isSyncResolveReady()) {
@@ -488,6 +492,8 @@ void Asset::unloadIfUnwanted() {
 }
 
 bool Asset::initialize() {
+    ZoneScoped
+
     if (isInitialized()) {
         return true;
     }

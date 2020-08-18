@@ -1400,7 +1400,7 @@ void RenderEngine::renderScreenLog() {
 
         std::array<char, 15 + CategoryLength + 3> buf;
         {
-            std::fill(buf.begin(), buf.end(), 0);
+            std::fill(buf.begin(), buf.end(), char(0));
             char* end = fmt::format_to(
                 buf.data(),
                 "{:<15} {}{}",
@@ -1438,7 +1438,7 @@ void RenderEngine::renderScreenLog() {
             }(it->level);
 
             const std::string_view lvl = ghoul::to_string(it->level);
-            std::fill(buf.begin(), buf.end(), 0);
+            std::fill(buf.begin(), buf.end(), char(0));
             char* end = fmt::format_to(buf.data(), "({})", lvl);
             std::string_view levelText = std::string_view(buf.data(), end - buf.data());
             RenderFont(

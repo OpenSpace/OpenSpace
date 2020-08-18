@@ -262,11 +262,9 @@ void OpenSpaceEngine::initialize() {
 #endif // WIN32
 
 #ifndef GHOUL_LOGGING_ENABLE_TRACE
-    LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
-
     if (level == ghoul::logging::LogLevel::Trace) {
         LWARNING(
-            "Desired logging level is set to 'Trace' but application was " <<
+            "Desired logging level is set to 'Trace' but application was "
             "compiled without Trace support"
         );
     }
@@ -712,8 +710,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration.useMultithreadedInitialization) {
-        unsigned int nAvailableThreads = std::thread::hardware_concurrency();
-        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads - 1;
+        unsigned int nAvailableThreads = std::min(
+            std::thread::hardware_concurrency() - 1,
+            4u
+        );
+        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads;
         sceneInitializer = std::make_unique<MultiThreadedSceneInitializer>(nThreads);
     }
     else {

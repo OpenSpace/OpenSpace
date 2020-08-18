@@ -139,9 +139,11 @@ void TimeManager::preSynchronization(double dt) {
     const double newTime = time().j2000Seconds();
 
     if (newTime != _lastTime) {
+        ZoneScopedN("newTime != _lastTime")
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timeChangeCallbacks) {
+            ZoneScopedN("tcc")
             it.second();
         }
     }
@@ -149,16 +151,20 @@ void TimeManager::preSynchronization(double dt) {
         _timePaused != _lastTimePaused ||
         _targetDeltaTime != _lastTargetDeltaTime)
     {
+        ZoneScopedN("delta time changed")
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
+            ZoneScopedN("dtcc")
             it.second();
         }
     }
     if (_timelineChanged) {
+        ZoneScopedN("timeline changed")
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
+            ZoneScopedN("tlcc")
             it.second();
         }
     }

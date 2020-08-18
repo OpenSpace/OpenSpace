@@ -498,6 +498,8 @@ void Profile::setIgnoreUpdates(bool ignoreUpdates) {
 }
 
 void Profile::addAsset(const std::string& path) {
+    ZoneScoped
+
     if (_ignoreUpdates) {
         return;
     }
@@ -519,13 +521,15 @@ void Profile::addAsset(const std::string& path) {
 }
 
 void Profile::removeAsset(const std::string& path) {
+    ZoneScoped
+
     if (_ignoreUpdates) {
         return;
     }
 
     const auto it = std::find_if(
-        assets.begin(),
-        assets.end(),
+        assets.cbegin(),
+        assets.cend(),
         [path](const Asset& a) { return a.path == path; }
     );
 
