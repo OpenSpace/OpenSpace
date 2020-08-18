@@ -37,6 +37,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -701,6 +702,8 @@ bool RenderableBillboardsCloud::isReady() const {
 }
 
 void RenderableBillboardsCloud::initialize() {
+    ZoneScoped
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -716,6 +719,8 @@ void RenderableBillboardsCloud::initialize() {
 }
 
 void RenderableBillboardsCloud::initializeGL() {
+    ZoneScoped
+
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() {
@@ -1177,6 +1182,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                     ghoul::io::TextureReader::ref().loadTexture(absPath(path));
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                t->purgeFromRAM();
                 return t;
             }
         );
@@ -1714,6 +1720,8 @@ void RenderableBillboardsCloud::createDataSlice() {
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {
+    ZoneScoped
+
     LDEBUG("Creating Polygon Texture");
 
     glGenTextures(1, &_pTexture);
