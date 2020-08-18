@@ -176,16 +176,18 @@ scripting::LuaLibrary Time::luaLibrary() {
                 &luascriptfunctions::time_interpolateTimeRelative,
                 {},
                 "number [, number]",
-                "Increments the current simulation time "
-                "by the specified number of seconds."
+                "Increments the current simulation time by the specified number of "
+                "seconds. If a second input value is given, the interpolation is done "
+                "over the specified number of seconds."
             },
             {
                 "interpolateDeltaTime",
                 &luascriptfunctions::time_interpolateDeltaTime,
                 {},
-                "number",
-                "Sets the amount of simulation time that happens "
-                "in one second of real time"
+                "number [, number]",
+                "Sets the amount of simulation time that happens in one second of real "
+                "time. If a second input value is given, the interpolation is done "
+                "over the specified number of seconds."
             },
             {
                 "setNextDeltaTimeStep",
@@ -229,16 +231,19 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "interpolatePause",
                 &luascriptfunctions::time_interpolatePause,
                 {},
-                "bool",
-                "Pauses the simulation time or restores the delta time"
+                "bool [, number]",
+                "Pauses the simulation time or restores the delta time. If a second "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
             },
             {
                 "interpolateTogglePause",
                 &luascriptfunctions::time_interpolateTogglePause,
                 {},
-                "",
+                "[number]",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
+                " and restoring it afterwards. If an input value is given, the "
+                "interpolation is done over the specified number of seconds."
             },
             {
                 "currentTime",
