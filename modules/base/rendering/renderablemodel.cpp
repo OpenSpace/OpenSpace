@@ -453,6 +453,7 @@ void RenderableModel::loadTexture() {
             );
             _texture->uploadTexture();
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _texture->purgeFromRAM();
         }
     }
 }
