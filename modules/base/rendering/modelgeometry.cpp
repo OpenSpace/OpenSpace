@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <fstream>
 
@@ -118,6 +119,8 @@ void ModelGeometry::changeRenderMode(GLenum mode) {
 }
 
 bool ModelGeometry::initialize(Renderable* parent) {
+    ZoneScoped
+
     float maximumDistanceSquared = 0;
     for (const Vertex& v : _vertices) {
         maximumDistanceSquared = glm::max(

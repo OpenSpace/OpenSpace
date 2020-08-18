@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -423,6 +424,8 @@ RawTileDataReader::RawTileDataReader(std::string filePath,
     , _initData(std::move(initData))
     , _preprocess(preprocess)
 {
+    ZoneScoped
+
     initialize();
 }
 
@@ -435,6 +438,8 @@ RawTileDataReader::~RawTileDataReader() {
 }
 
 void RawTileDataReader::initialize() {
+    ZoneScoped
+
     if (_datasetFilePath.empty()) {
         throw ghoul::RuntimeError("File path must not be empty");
     }
@@ -443,6 +448,7 @@ void RawTileDataReader::initialize() {
 
     std::string content = _datasetFilePath;
     if (module.isWMSCachingEnabled()) {
+        ZoneScopedN("WMS Caching")
         std::string c;
         if (FileSys.fileExists(_datasetFilePath)) {
             // Only replace the 'content' if the dataset is an XML file and we want to do
@@ -511,16 +517,19 @@ void RawTileDataReader::initialize() {
         }
     }
 
-    _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
-    if (!_dataset) {
-        throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
+    {
+        ZoneScopedN("GDALOpen")
+        _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
+        if (!_dataset) {
+            throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
+        }
     }
 
     // Assume all raster bands have the same data type
     _rasterCount = _dataset->GetRasterCount();
 
     // calculateTileDepthTransform
-    unsigned long long maximumValue = [t = _initData.glType]() {
+    unsigned long long maximumValue = [](GLenum t) {
         switch (t) {
             case GL_UNSIGNED_BYTE:  return 1ULL << 8ULL;
             case GL_UNSIGNED_SHORT: return 1ULL << 16ULL;
@@ -530,11 +539,9 @@ void RawTileDataReader::initialize() {
             case GL_HALF_FLOAT:     return 1ULL;
             case GL_FLOAT:          return 1ULL;
             case GL_DOUBLE:         return 1ULL;
-            default:
-                ghoul_assert(false, "Unknown data type");
-                throw ghoul::MissingCaseException();
+            default:                throw ghoul::MissingCaseException();
         }
-    }();
+    }(_initData.glType);
 
 
     _depthTransform.scale = static_cast<float>(
@@ -554,7 +561,8 @@ void RawTileDataReader::initialize() {
     }
 
     double tileLevelDifference = calculateTileLevelDifference(
-        _dataset, _initData.dimensions.x
+        _dataset,
+        _initData.dimensions.x
     );
 
     const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();

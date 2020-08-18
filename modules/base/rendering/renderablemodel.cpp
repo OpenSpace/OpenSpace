@@ -37,8 +37,9 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/invariants.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/invariants.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -294,12 +295,16 @@ bool RenderableModel::isReady() const {
 }
 
 void RenderableModel::initialize() {
+    ZoneScoped
+
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
     }
 }
 
 void RenderableModel::initializeGL() {
+    ZoneScoped
+
     _program = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {

@@ -161,6 +161,8 @@ namespace {
 namespace openspace {
 
 void FramebufferRenderer::initialize() {
+    ZoneScoped
+
     LDEBUG("Initializing FramebufferRenderer");
 
     HasGLDebugInfo = glbinding::Binding::ObjectLabel.isResolved() &&

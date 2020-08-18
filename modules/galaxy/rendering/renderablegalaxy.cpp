@@ -40,6 +40,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -353,6 +354,8 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableGalaxy::initialize() {
+    ZoneScoped
+
     // Aspect is currently hardcoded to cubic voxels.
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect /= std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
@@ -409,6 +412,8 @@ void RenderableGalaxy::initialize() {
 }
 
 void RenderableGalaxy::initializeGL() {
+    ZoneScoped
+
     _texture = std::make_unique<ghoul::opengl::Texture>(
         _volumeDimensions,
         ghoul::opengl::Texture::Format::RGBA,

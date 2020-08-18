@@ -198,6 +198,8 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 }
 
 void RingsComponent::initialize() {
+    ZoneScoped
+
     using ghoul::filesystem::File;
 
     addProperty(_enabled);
@@ -257,6 +259,8 @@ bool RingsComponent::isReady() const {
 }
 
 void RingsComponent::initializeGL() {
+    ZoneScoped
+
     compileShadowShader();
 
     try {

@@ -374,6 +374,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 }
 
 void Layer::initialize() {
+    ZoneScoped
+
     if (_tileProvider) {
         tileprovider::initialize(*_tileProvider);
     }

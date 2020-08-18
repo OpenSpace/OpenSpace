@@ -39,6 +39,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <cstdlib>
 #include <fstream>
@@ -322,6 +323,8 @@ GlobeLabelsComponent::GlobeLabelsComponent()
 void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                                       globebrowsing::RenderableGlobe* globe)
 {
+    ZoneScoped
+
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,

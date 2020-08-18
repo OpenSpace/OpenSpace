@@ -31,6 +31,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace::globebrowsing {
@@ -45,6 +46,8 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
 {
+    ZoneScoped
+
     _globeBrowsingModule = global::moduleEngine.module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
 }
@@ -187,6 +190,8 @@ bool AsyncTileDataProvider::shouldBeDeleted() {
 }
 
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
+    ZoneScoped
+
     ghoul_assert(_enqueuedTileRequests.empty(), "No enqueued requests left");
 
     // Reset raw tile data reader

@@ -227,6 +227,8 @@ bool ShadowComponent::isReady() const {
 }
 
 void ShadowComponent::initializeGL() {
+    ZoneScoped
+
     createDepthTexture();
     createShadowFBO();
 }

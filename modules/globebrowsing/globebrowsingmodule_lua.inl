@@ -44,6 +44,8 @@ namespace openspace::globebrowsing::luascriptfunctions {
  * Adds a layer to the specified globe.
  */
 int addLayer(lua_State* L) {
+    ZoneScoped
+
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::addLayer");
 
     // String arguments

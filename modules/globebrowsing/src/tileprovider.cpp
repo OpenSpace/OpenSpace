@@ -824,6 +824,13 @@ bool initialize(TileProvider& tp) {
 
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
+    if (TileProvider::NumTileProviders > std::numeric_limits<uint16_t>::max()) {
+        LERRORC(
+            "TileProvider",
+            "Number of tile providers exceeds 65535. Something will break soon"
+        );
+        TileProvider::NumTileProviders = 0;
+    }
     tp.uniqueIdentifier = TileProvider::NumTileProviders++;
     if (TileProvider::NumTileProviders == std::numeric_limits<unsigned int>::max()) {
         --TileProvider::NumTileProviders;

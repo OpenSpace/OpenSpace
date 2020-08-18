@@ -43,6 +43,8 @@ AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDir
 {}
 
 void AssetManager::initialize() {
+    ZoneScoped
+
     _assetLoader.addAssetListener(this);
     _assetLoader.rootAsset().initialize();
 }
