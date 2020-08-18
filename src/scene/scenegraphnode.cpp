@@ -489,17 +489,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
-    RenderData newData = {
-        data.camera,
-        data.time,
-        data.renderBinMask,
-        { _worldPositionCached, _worldRotationCached, _worldScaleCached }
-    };
-
-    if (!isTimeFrameActive(data.time)) {
-        return;
-    }
-
     const bool visible = _renderable && _renderable->isVisible() &&
         _renderable->isReady() && _renderable->isEnabled() &&
         _renderable->matchesRenderBinMask(data.renderBinMask);
@@ -508,8 +497,19 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
+    if (!isTimeFrameActive(data.time)) {
+        return;
+    }
+
     {
         TracyGpuZone("Render")
+
+        RenderData newData = {
+            data.camera,
+            data.time,
+            data.renderBinMask,
+            { _worldPositionCached, _worldRotationCached, _worldScaleCached }
+        };
 
         _renderable->render(newData, tasks);
         if (_computeScreenSpaceValues) {

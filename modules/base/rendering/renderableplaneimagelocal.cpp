@@ -32,6 +32,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <fstream>
 
@@ -172,6 +173,8 @@ void RenderablePlaneImageLocal::bindTexture() {
 }
 
 void RenderablePlaneImageLocal::update(const UpdateData& data) {
+    ZoneScoped
+
     RenderablePlane::update(data);
 
     if (_textureIsDirty) {
@@ -181,6 +184,8 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 }
 
 void RenderablePlaneImageLocal::loadTexture() {
+    ZoneScoped
+
     if (!_texturePath.value().empty()) {
         ghoul::opengl::Texture* t = _texture;
 
