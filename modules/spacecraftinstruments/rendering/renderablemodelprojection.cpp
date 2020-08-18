@@ -132,7 +132,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
     _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 
-    addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
     _projectionComponent.initialize(
@@ -198,7 +197,6 @@ void RenderableModelProjection::initializeGL() {
         DepthFboUniformNames
     );
 
-    loadTextures();
     _projectionComponent.initializeGL();
 
     float bs = boundingSphere();
@@ -355,8 +353,6 @@ void RenderableModelProjection::update(const UpdateData& data) {
         data.modelTransform.translation;
 
     _sunPosition = static_cast<glm::vec3>(p);
-
-    _geometry->update();
 }
 
 void RenderableModelProjection::imageProjectGPU(

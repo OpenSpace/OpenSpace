@@ -43,14 +43,8 @@ namespace {
 
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyGeomModelFile = "GeometryFile";
+    constexpr const char* KeyColorTexture = "ColorTexture";
     constexpr const int8_t CurrentCacheVersion = 3;
-
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
-        "ColorTexture",
-        "Color Texture",
-        "This value points to a color texture file that is applied to the geometry "
-        "rendered in this object."
-    };
 } // namespace
 
 namespace openspace::modelgeometry {
@@ -76,10 +70,11 @@ documentation:: Documentation ModelGeometry::Documentation() {
                 "location of the .mod file."
             },
             {
-                TextureInfo.identifier,
+                KeyColorTexture,
                 new StringVerifier,
                 Optional::Yes,
-                TextureInfo.description
+                "This value points to a color texture file that is applied to the "
+                "geometry rendered in this object."
             }
         }
     };
@@ -99,10 +94,7 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     return std::unique_ptr<ModelGeometry>(geometry);
 }
 
-ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "ModelGeometry" })
-    , _colorTexturePath(TextureInfo)
-{
+ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -111,13 +103,8 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 
     _file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
 
-
-    _colorTexturePath.onChange([this]() { _colorTextureDirty = true; });
-    addProperty(_colorTexturePath);
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _colorTexturePath = absPath(dictionary.value<std::string>(
-            TextureInfo.identifier
-        ));
+    if (dictionary.hasKey(KeyColorTexture)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorTexture));
     }
 }
 
@@ -128,28 +115,6 @@ double ModelGeometry::boundingRadius() const {
 void ModelGeometry::bindTexture() {
     if (_texture) {
         _texture->bind();
-    }
-}
-
-void ModelGeometry::update() {
-    if (_colorTextureDirty) {
-        _texture = nullptr;
-        if (!_colorTexturePath.value().empty()) {
-            _texture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath)
-            );
-            if (_texture) {
-                LDEBUGC(
-                    "RenderableModel",
-                    fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath))
-                );
-                _texture->uploadTexture();
-                _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-                _texture->purgeFromRAM();
-            }
-        }
-
-        _colorTextureDirty = false;
     }
 }
 
@@ -229,6 +194,21 @@ bool ModelGeometry::initialize(Renderable* parent) {
     );
 
     glBindVertexArray(0);
+
+    if (!_colorTexturePath.empty()) {
+        _texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
+        if (_texture) {
+            LDEBUGC(
+                "RenderableModel",
+                fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath))
+            );
+            _texture->uploadTexture();
+            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _texture->purgeFromRAM();
+        }
+    }
 
     return true;
 }

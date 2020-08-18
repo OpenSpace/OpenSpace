@@ -66,7 +66,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
+    std::vector<std::unique_ptr<modelgeometry::ModelGeometry>> _geometry;
 
     properties::FloatProperty _ambientIntensity;
 

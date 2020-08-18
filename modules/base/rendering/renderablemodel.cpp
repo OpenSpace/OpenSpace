@@ -114,7 +114,13 @@ documentation::Documentation RenderableModel::Documentation() {
         {
             {
                 KeyGeometry,
-                new ReferencingVerifier("base_geometry_model"),
+                new TableVerifier({
+                    {
+                        "*",
+                        new ReferencingVerifier("base_geometry_model"),
+                        Optional::Yes
+                    }
+                }),
                 Optional::No,
                 "This specifies the model that is rendered by the Renderable."
             },
@@ -204,7 +210,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(KeyGeometry)) {
         ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
-        _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
+        for (int i = 1; i <= dict.size(); ++i) {
+            std::string key = std::to_string(i);
+            ghoul::Dictionary geom = dict.value<ghoul::Dictionary>(key);
+            _geometry.push_back(modelgeometry::ModelGeometry::createFromDictionary(geom));
+        }
     }
 
     if (dictionary.hasKey(ModelTransformInfo.identifier)) {
@@ -244,7 +254,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 
     addPropertySubOwner(_lightSourcePropertyOwner);
-    addPropertySubOwner(_geometry.get());
 
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
@@ -292,14 +301,16 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    _geometry->initialize(this);
+    for (const std::unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
+        geom->initialize(this);
+    }
 }
 
 void RenderableModel::deinitializeGL() {
-    if (_geometry) {
-        _geometry->deinitialize();
-        _geometry = nullptr;
+    for (const std::unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
+        geom->deinitialize();
     }
+    _geometry.clear();
 
     BaseModule::ProgramObjectManager.release(
         ProgramName,
@@ -388,20 +399,18 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _performShading
     );
 
-    _geometry->setUniforms(*_program);
-
-    // Bind texture
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _geometry->bindTexture();
-    _program->setUniform(_uniformCache.texture, unit);
-
     if (_disableFaceCulling) {
         glDisable(GL_CULL_FACE);
     }
 
-    _geometry->render();
-    
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _program->setUniform(_uniformCache.texture, unit);
+    for (const std::unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
+        geom->setUniforms(*_program);
+        geom->bindTexture();
+        geom->render();
+    }
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
     }
@@ -414,7 +423,6 @@ void RenderableModel::update(const UpdateData&) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
-    _geometry->update();
 }
 
 }  // namespace openspace

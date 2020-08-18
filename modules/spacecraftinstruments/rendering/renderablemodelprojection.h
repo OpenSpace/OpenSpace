@@ -65,7 +65,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    bool loadTextures();
     void attitudeParameters(double time);
     void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture);
 

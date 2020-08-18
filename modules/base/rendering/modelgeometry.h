@@ -25,9 +25,6 @@
 #ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 #define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/properties/stringproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <memory>
@@ -40,7 +37,7 @@ namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::modelgeometry {
 
-class ModelGeometry : public properties::PropertyOwner {
+class ModelGeometry {
 public:
     struct Vertex {
         GLfloat location[4];
@@ -58,7 +55,6 @@ public:
     virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
     void bindTexture();
-    void update();
     void render();
 
     virtual bool loadModel(const std::string& filename) = 0;
@@ -77,15 +73,13 @@ protected:
     bool loadCachedFile(const std::string& filename);
     bool saveCachedFile(const std::string& filename);
 
-    properties::StringProperty _colorTexturePath;
-    bool _colorTextureDirty = false;
-
     GLuint _vaoID = 0;
     GLuint _vbo = 0;
     GLuint _ibo = 0 ;
     GLenum _mode = GL_TRIANGLES;
 
     double _boundingRadius = 0.0;
+    std::string _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::vector<Vertex> _vertices;
