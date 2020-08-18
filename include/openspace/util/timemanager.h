@@ -69,6 +69,7 @@ public:
     void setTimeNextFrame(Time t);
     void setDeltaTime(double deltaTime);
     void setPause(bool pause);
+    void setDeltaTimeSteps(const std::vector<double> deltaTimes);
 
     /**
      * Returns the delta time, unaffected by pause
@@ -81,9 +82,7 @@ public:
     double deltaTime() const;
     bool isPaused() const;
 
-    // TEST: delta time steps
     std::vector<double> deltaTimeSteps() const;
-    void setDeltaTimeSteps(const std::vector<double> deltaTimes);
 
     float defaultTimeInterpolationDuration() const;
     float defaultDeltaTimeInterpolationDuration() const;
@@ -142,7 +141,6 @@ private:
     double _lastDeltaTime = 0.0;
     double _lastTargetDeltaTime = 0.0;
 
-    // TEST: delta time steps
     std::vector<double> _deltaTimeSteps;
     bool _deltaTimeStepsChanged = false;
 
