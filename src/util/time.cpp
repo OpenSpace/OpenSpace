@@ -133,7 +133,8 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "List of numbers",
                 "Sets the list of discrete delta time steps for the simulation speed "
                 "that can be quickly jumped between. The list will be sorted to be in "
-                "increasing order."
+                "increasing order. A negative verison of each specified time step will "
+                "be added per default as well."
             },
             {
                 "deltaTime",

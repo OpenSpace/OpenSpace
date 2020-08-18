@@ -389,7 +389,21 @@ void TimeManager::setDeltaTime(double deltaTime) {
 }
 
 void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
+    std::vector<double> negatives;
+    negatives.reserve(deltaTimes.size());
+    std::transform(
+        deltaTimes.begin(), 
+        deltaTimes.end(), 
+        std::back_inserter(negatives),
+        [](double d) { return -d; }
+    );
+
+    deltaTimes.reserve(2 * deltaTimes.size());
+    deltaTimes.insert(deltaTimes.end(), negatives.begin(), negatives.end());
+
     std::sort(deltaTimes.begin(), deltaTimes.end());
+    deltaTimes.erase(std::unique(deltaTimes.begin(), deltaTimes.end()), deltaTimes.end());
+
     _deltaTimeSteps = std::move(deltaTimes);
     _deltaTimeStepsChanged = true;
 }
