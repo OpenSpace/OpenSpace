@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/invariants.h>
@@ -43,6 +44,13 @@ namespace {
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyGeomModelFile = "GeometryFile";
     constexpr const int8_t CurrentCacheVersion = 3;
+
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+        "ColorTexture",
+        "Color Texture",
+        "This value points to a color texture file that is applied to the geometry "
+        "rendered in this object."
+    };
 } // namespace
 
 namespace openspace::modelgeometry {
@@ -66,11 +74,16 @@ documentation:: Documentation ModelGeometry::Documentation() {
                 "The file that should be loaded in this ModelGeometry. The file can "
                 "contain filesystem tokens or can be specified relatively to the "
                 "location of the .mod file."
+            },
+            {
+                TextureInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                TextureInfo.description
             }
         }
     };
 }
-
 
 std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
@@ -88,6 +101,7 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ModelGeometry" })
+    , _colorTexturePath(TextureInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -96,10 +110,47 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     );
 
     _file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
+
+
+    _colorTexturePath.onChange([this]() { _colorTextureDirty = true; });
+    addProperty(_colorTexturePath);
+    if (dictionary.hasKey(TextureInfo.identifier)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(
+            TextureInfo.identifier
+        ));
+    }
 }
 
 double ModelGeometry::boundingRadius() const {
     return _boundingRadius;
+}
+
+void ModelGeometry::bindTexture() {
+    if (_texture) {
+        _texture->bind();
+    }
+}
+
+void ModelGeometry::update() {
+    if (_colorTextureDirty) {
+        _texture = nullptr;
+        if (!_colorTexturePath.value().empty()) {
+            _texture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_colorTexturePath)
+            );
+            if (_texture) {
+                LDEBUGC(
+                    "RenderableModel",
+                    fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath))
+                );
+                _texture->uploadTexture();
+                _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                _texture->purgeFromRAM();
+            }
+        }
+
+        _colorTextureDirty = false;
+    }
 }
 
 void ModelGeometry::render() {
@@ -186,6 +237,8 @@ void ModelGeometry::deinitialize() {
     glDeleteBuffers(1, &_vbo);
     glDeleteVertexArrays(1, &_vaoID);
     glDeleteBuffers(1, &_ibo);
+
+    _texture = nullptr;
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {

@@ -36,12 +36,10 @@
 #include <openspace/scene/lightsource.h>
 
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
@@ -53,13 +51,6 @@ namespace {
         "modelViewTransform", "crippedModelViewTransform", "projectionTransform", 
         "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
         "specularIntensity"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
-        "ColorTexture",
-        "Color Texture",
-        "This value points to a color texture file that is applied to the geometry "
-        "rendered in this object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
@@ -128,12 +119,6 @@ documentation::Documentation RenderableModel::Documentation() {
                 "This specifies the model that is rendered by the Renderable."
             },
             {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureInfo.description
-            },
-            {
                 AmbientIntensityInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -193,7 +178,6 @@ documentation::Documentation RenderableModel::Documentation() {
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath(TextureInfo)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
@@ -221,12 +205,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(KeyGeometry)) {
         ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
         _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
-    }
-
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _colorTexturePath = absPath(dictionary.value<std::string>(
-            TextureInfo.identifier
-        ));
     }
 
     if (dictionary.hasKey(ModelTransformInfo.identifier)) {
@@ -268,10 +246,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_lightSourcePropertyOwner);
     addPropertySubOwner(_geometry.get());
 
-    addProperty(_colorTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
-
-
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
@@ -291,7 +265,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableModel::isReady() const {
-    return _program && _texture;
+    return _program;
 }
 
 void RenderableModel::initialize() {
@@ -318,8 +292,6 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    loadTexture();
-
     _geometry->initialize(this);
 }
 
@@ -328,7 +300,6 @@ void RenderableModel::deinitializeGL() {
         _geometry->deinitialize();
         _geometry = nullptr;
     }
-    _texture = nullptr;
 
     BaseModule::ProgramObjectManager.release(
         ProgramName,
@@ -422,7 +393,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Bind texture
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _texture->bind();
+    _geometry->bindTexture();
     _program->setUniform(_uniformCache.texture, unit);
 
     if (_disableFaceCulling) {
@@ -443,24 +414,7 @@ void RenderableModel::update(const UpdateData&) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
-}
-
-void RenderableModel::loadTexture() {
-    _texture = nullptr;
-    if (!_colorTexturePath.value().empty()) {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_colorTexturePath)
-        );
-        if (_texture) {
-            LDEBUGC(
-                "RenderableModel",
-                fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath))
-            );
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _texture->purgeFromRAM();
-        }
-    }
+    _geometry->update();
 }
 
 }  // namespace openspace

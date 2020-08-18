@@ -218,9 +218,9 @@ local OsirisRex = {
         Body = "OSIRIS-REX",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj"
+            GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj",
+            ColorTexture = textures .. "/osirisTex.png"
         },
-        ColorTexture = textures .. "/osirisTex.png",
         LightSources = LightSources
     },
     GUI = {
@@ -248,9 +248,9 @@ local PolyCam = {
         Body = "OSIRIS-REX",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj"
+            GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj",
+            ColorTexture = textures .. "/osirisTex.png"
         }, 
-        ColorTexture = textures .. "/osirisTex.png",
         LightSources = LightSources
     },
     GUI = {
@@ -267,9 +267,9 @@ local Rexis = {
         Body = "OSIRIS-REX",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj"
+            GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj",
+            ColorTexture = textures .. "/osirisTex.png"
         }, 
-        ColorTexture = textures .. "/osirisTex.png",
         LightSources = LightSources
     },
     Transform = {

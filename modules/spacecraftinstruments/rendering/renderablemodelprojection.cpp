@@ -65,13 +65,6 @@ namespace {
         "ProjectorMatrix", "ModelTransform"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
-        "ColorTexture",
-        "Color Base Texture",
-        "This is the path to a local image file that is used as the base texture for the "
-        "model on which the image projections are layered."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform Shading",
@@ -108,12 +101,6 @@ documentation::Documentation RenderableModelProjection::Documentation() {
                 "Contains information about projecting onto this planet."
             },
             {
-                ColorTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ColorTextureInfo.description
-            },
-            {
                 PerformShadingInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -134,7 +121,6 @@ documentation::Documentation RenderableModelProjection::Documentation() {
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath(ColorTextureInfo)
     , _performShading(PerformShadingInfo, true)
 {
     documentation::testSpecificationAndThrow(
@@ -146,15 +132,8 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
     _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 
-    _colorTexturePath = absPath(dictionary.value<std::string>(
-        ColorTextureInfo.identifier
-    ));
-
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
-
-    addProperty(_colorTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTextures, this));
 
     _projectionComponent.initialize(
         identifier(),
@@ -175,8 +154,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 RenderableModelProjection::~RenderableModelProjection() {} // NOLINT
 
 bool RenderableModelProjection::isReady() const {
-    return (_programObject != nullptr) && (_baseTexture != nullptr) &&
-           _projectionComponent.isReady();
+    return (_programObject != nullptr) && _projectionComponent.isReady();
 }
 
 void RenderableModelProjection::initializeGL() {
@@ -234,7 +212,6 @@ void RenderableModelProjection::deinitializeGL() {
     }
 
     _geometry = nullptr;
-    _baseTexture = nullptr;
 
     _projectionComponent.deinitialize();
 
@@ -301,7 +278,7 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit baseUnit;
     baseUnit.activate();
-    _baseTexture->bind();
+    _geometry->bindTexture();
     _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
 
     ghoul::opengl::TextureUnit projectionUnit;
@@ -378,6 +355,8 @@ void RenderableModelProjection::update(const UpdateData& data) {
         data.modelTransform.translation;
 
     _sunPosition = static_cast<glm::vec3>(p);
+
+    _geometry->update();
 }
 
 void RenderableModelProjection::imageProjectGPU(
@@ -487,22 +466,6 @@ void RenderableModelProjection::project() {
         imageProjectGPU(*projTexture);
     }
     _shouldCapture = false;
-}
-
-bool RenderableModelProjection::loadTextures() {
-    _baseTexture = nullptr;
-    if (!_colorTexturePath.value().empty()) {
-        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_colorTexturePath)
-        );
-        if (_baseTexture) {
-            LDEBUG(fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath)));
-            _baseTexture->uploadTexture();
-            _baseTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-        }
-    }
-
-    return _baseTexture != nullptr;
 }
 
 }  // namespace openspace

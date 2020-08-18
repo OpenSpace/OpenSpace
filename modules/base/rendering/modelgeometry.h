@@ -27,7 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/stringproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -55,6 +57,8 @@ public:
 
     virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
+    void bindTexture();
+    void update();
     void render();
 
     virtual bool loadModel(const std::string& filename) = 0;
@@ -73,12 +77,16 @@ protected:
     bool loadCachedFile(const std::string& filename);
     bool saveCachedFile(const std::string& filename);
 
+    properties::StringProperty _colorTexturePath;
+    bool _colorTextureDirty = false;
+
     GLuint _vaoID = 0;
     GLuint _vbo = 0;
     GLuint _ibo = 0 ;
     GLenum _mode = GL_TRIANGLES;
 
     double _boundingRadius = 0.0;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::vector<Vertex> _vertices;
     std::vector<int> _indices;

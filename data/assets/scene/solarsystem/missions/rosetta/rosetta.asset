@@ -140,9 +140,9 @@ local RosettaBlackFoil = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/black_foil.obj"
+            GeometryFile = models .. "/black_foil.obj",
+            ColorTexture = textures .. "/foil_silver_ramp.png"
         },
-        ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -160,9 +160,9 @@ local RosettaBlackParts = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/black_parts.obj"
+            GeometryFile = models .. "/black_parts.obj",
+            ColorTexture = textures .. "/foil_silver_ramp.png"
         },
-        ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -180,9 +180,9 @@ local RosettaDish = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/dish.obj",
+            ColorTexture = textures .. "/dish_AO.png"
         },
-        ColorTexture = textures .. "/dish_AO.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -200,9 +200,9 @@ local RosettaParts = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/parts.obj"
+            GeometryFile = models .. "/parts.obj",
+            ColorTexture = textures .. "/parts2_AO.png"
         },
-        ColorTexture = textures .. "/parts2_AO.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -220,9 +220,9 @@ local RosettaSilverFoil = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/silver_foil.obj"
+            GeometryFile = models .. "/silver_foil.obj",
+            ColorTexture = textures .. "/foil_silver_ramp.png"
         },
-        ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -240,9 +240,9 @@ local RosettaVents = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/vents.obj"
+            GeometryFile = models .. "/vents.obj",
+            ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -260,9 +260,9 @@ local RosettaWingA = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .."/wingA.obj"
+            GeometryFile = models .."/wingA.obj",
+            ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -280,9 +280,9 @@ local RosettaWingB = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/wingB.obj"
+            GeometryFile = models .. "/wingB.obj",
+            ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -300,9 +300,9 @@ local RosettaYellowFoil = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/yellow_foil.obj"
+            GeometryFile = models .. "/yellow_foil.obj",
+            ColorTexture = textures .. "/foil_gold_ramp.png"
         },
-        ColorTexture = textures .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -349,9 +349,9 @@ local PhilaeFoil = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_foil.obj"
+            GeometryFile = models .. "/lander_foil.obj",
+            ColorTexture = textures .. "/foil_silver_ramp.png"
         },
-        ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -369,9 +369,9 @@ local PhilaeLids = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_lids.obj"
+            GeometryFile = models .. "/lander_lids.obj",
+            ColorTexture = textures .. "/parts2_AO.png"
         },
-        ColorTexture = textures .. "/parts2_AO.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -389,9 +389,9 @@ local PhilaeParts = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_parts.obj"
+            GeometryFile = models .. "/lander_parts.obj",
+            ColorTexture = textures .. "/foil_silver_ramp.png"
         },
-        ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -409,9 +409,9 @@ local PhilaeSolarPanels = {
         Body = "ROSETTA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_solarp.obj"
+            GeometryFile = models .. "/lander_solarp.obj",
+            ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },

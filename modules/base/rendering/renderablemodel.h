@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -35,8 +34,6 @@
 #include <memory>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/vector/vec3property.h>
-
-
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -68,13 +65,8 @@ public:
 
     static documentation::Documentation Documentation();
 
-protected:
-    void loadTexture();
-
 private:
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
-
-    properties::StringProperty _colorTexturePath;
 
     properties::FloatProperty _ambientIntensity;
 
@@ -92,7 +84,6 @@ private:
         performShading, texture, ambientIntensity, diffuseIntensity, 
         specularIntensity) _uniformCache;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 
     // Buffers for uniform uploading

@@ -16,9 +16,9 @@ local Labels = {
         Body = "NEW HORIZONS",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/Labels.obj"
+            GeometryFile = models .. "/Labels.obj",
+            ColorTexture =  textures .. "/labels.png"
         }, 
-        ColorTexture =  textures .. "/labels.png",
         AmbientIntensity = 0.8
     },
     GUI = {

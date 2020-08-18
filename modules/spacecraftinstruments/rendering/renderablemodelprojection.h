@@ -73,8 +73,6 @@ private:
 
     ProjectionComponent _projectionComponent;
 
-    properties::StringProperty _colorTexturePath;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     UniformCache(performShading, directionToSunViewSpace, modelViewTransform,
         projectionTransform, projectionFading, baseTexture,
@@ -85,8 +83,6 @@ private:
         boresight) _fboUniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
-
-    std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
 
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
