@@ -415,7 +415,9 @@ void RenderableGalaxy::initializeGL() {
         GL_RGBA,
         GL_UNSIGNED_BYTE,
         ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+        ghoul::opengl::Texture::AllocateData::No,
+        ghoul::opengl::Texture::TakeOwnership::No
     );
 
     _texture->setPixelData(
