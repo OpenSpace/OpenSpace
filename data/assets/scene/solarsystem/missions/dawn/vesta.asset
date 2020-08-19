@@ -47,10 +47,10 @@ local Vesta = {
         Type = "RenderableModelProjection",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/VestaComet_5000.obj"
+            GeometryFile = models .. "/VestaComet_5000.obj",
+            ColorTexture = textures .. "/dummy.jpg"
         },
         BoundingSphereRadius = 10.0,
-        ColorTexture = textures .. "/dummy.jpg",
         Projection = {
             Sequence   = images,
             SequenceType = "image-sequence",
