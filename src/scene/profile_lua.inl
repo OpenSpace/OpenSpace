@@ -80,7 +80,7 @@ int saveSettingsToProfile(lua_State* L) {
     }
 
     const properties::PropertyOwner& root = global::rootPropertyOwner;
-    std::string currentTime = global::timeManager.time().ISO8601();
+    std::string currentTime = std::string(global::timeManager.time().ISO8601());
     interaction::NavigationHandler::NavigationState navState =
         global::navigationHandler.navigationState();
     global::profile.saveCurrentSettingsToProfile(root, currentTime, navState);

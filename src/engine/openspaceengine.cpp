@@ -1057,6 +1057,8 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
 void OpenSpaceEngine::preSynchronization() {
     ZoneScoped
+    TracyGpuZone("preSynchronization")
+
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
     FileSys.triggerFilesystemEvents();
@@ -1125,6 +1127,7 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     ZoneScoped
+    TracyGpuZone("postSynchronizationPreDraw")
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
 
     bool master = global::windowDelegate.isMaster();
@@ -1196,6 +1199,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
                              const glm::mat4& projectionMatrix)
 {
     ZoneScoped
+    TracyGpuZone("Render")
     LTRACE("OpenSpaceEngine::render(begin)");
 
     const bool isGuiWindow =
@@ -1220,6 +1224,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
 void OpenSpaceEngine::drawOverlays() {
     ZoneScoped
+    TracyGpuZone("Draw2D")
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
 
     const bool isGuiWindow =
@@ -1244,6 +1249,7 @@ void OpenSpaceEngine::drawOverlays() {
 
 void OpenSpaceEngine::postDraw() {
     ZoneScoped
+    TracyGpuZone("postDraw")
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine.postDraw();

@@ -76,14 +76,14 @@ public:
      *
      * \returns The ISO8601 date/time string that defines the start of the range
      */
-    std::string start() const;
+    std::string_view start() const;
 
     /*
      * Get the end date/time of the time range
      *
      * \returns The ISO8601 date/time string that defines the end of the range
      */
-    std::string end() const;
+    std::string_view end() const;
 
     /*
      * Set the start date/time of the time range

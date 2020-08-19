@@ -33,10 +33,14 @@
 #include <string>
 #include <vector>
 #include <set>
+#include "SpiceUsr.h"
+#include "SpiceZpr.h"
 
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
+
+void throwSpiceError(const std::string& errorMessage);
 
 class SpiceManager {
 public:
@@ -462,6 +466,7 @@ public:
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html
      */
     double ephemerisTimeFromDate(const std::string& timeString) const;
+    double ephemerisTimeFromDate(const char* timeString) const;
 
     /**
      * Converts the passed \p ephemerisTime into a human-readable date string with a
@@ -476,11 +481,33 @@ public:
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
      */
+    template <int N = 31>
     std::string dateFromEphemerisTime(double ephemerisTime,
-        std::string_view format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
+        const char (&format)[N] = "YYYY MON DDTHR:MN:SC.### ::RND") const
+    {
+        static_assert(N != 0, "Format must not be empty");
 
+        std::string res;
+        res.resize(N);
+        dateFromEphemerisTime(ephemerisTime, res.data(), N, format);
+        return res;
+    }
+
+    template <int N>
     void dateFromEphemerisTime(double ephemerisTime, char* outBuf, int bufferSize,
-        std::string_view format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
+        const char (&format)[N] = "YYYY MON DDTHR:MN:SC.### ::RND") const
+    {
+        static_assert(N != 0, "Format must not be empty");
+        ghoul_assert(N > bufferSize - 1, "Buffer size too small");
+
+        timout_c(ephemerisTime, format, bufferSize - 1, outBuf);
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error converting ephemeris time '{}' to date with format '{}'",
+                    ephemerisTime, format
+            ));
+        }
+    }
 
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a

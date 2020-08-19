@@ -109,7 +109,7 @@ void TimeTopic::sendCurrentTime() {
 }
 
 void TimeTopic::sendFullTimeData() {
-    const std::string currentTime = global::timeManager.time().ISO8601();
+    std::string_view currentTime = global::timeManager.time().ISO8601();
     const double deltaTime = global::timeManager.deltaTime();
     const double targetDeltaTime = global::timeManager.targetDeltaTime();
     const bool isPaused = global::timeManager.isPaused();

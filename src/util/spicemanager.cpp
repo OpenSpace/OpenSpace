@@ -43,18 +43,6 @@ namespace {
     // as the maximum message length
     constexpr const unsigned SpiceErrorBufferSize = 1841;
 
-    // This method checks if one of the previous SPICE methods has failed. If it has, an
-    // exception with the SPICE error message is thrown
-    // If an error occurred, true is returned, otherwise, false
-    void throwSpiceError(const std::string& errorMessage) {
-        if (openspace::SpiceManager::ref().exceptionHandling()) {
-            char buffer[SpiceErrorBufferSize];
-            getmsg_c("LONG", SpiceErrorBufferSize, buffer);
-            reset_c();
-            throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
-        }
-    }
-
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
         using SM = openspace::SpiceManager;
         switch (m) {
@@ -194,6 +182,18 @@ bool SpiceManager::isInitialized() {
 SpiceManager& SpiceManager::ref() {
     ghoul_assert(isInitialized(), "SpiceManager is not initialized");
     return *_instance;
+}
+
+// This method checks if one of the previous SPICE methods has failed. If it has, an
+// exception with the SPICE error message is thrown
+// If an error occurred, true is returned, otherwise, false
+void throwSpiceError(const std::string& errorMessage) {
+    if (openspace::SpiceManager::ref().exceptionHandling()) {
+        char buffer[SpiceErrorBufferSize];
+        getmsg_c("LONG", SpiceErrorBufferSize, buffer);
+        reset_c();
+        throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
+    }
 }
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
@@ -474,56 +474,18 @@ double SpiceManager::spacecraftClockToET(const std::string& craft, double craftT
 double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const {
     ghoul_assert(!timeString.empty(), "Empty timeString");
 
+    return ephemerisTimeFromDate(timeString.c_str());
+}
+
+double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
+    ghoul_assert(!timeString.empty(), "Empty timeString");
+
     double et;
-    str2et_c(timeString.c_str(), &et);
+    str2et_c(timeString, &et);
     if (failed_c()) {
         throwSpiceError(fmt::format("Error converting date '{}'", timeString));
     }
     return et;
-}
-
-std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
-                                                            std::string_view format) const
-{
-    ghoul_assert(!formatString.empty(), "Format is empty");
-    ghoul_assert(formatString.back() == '\0', "Format string must be null-terminated");
-
-    if (format.size() < 32) {
-        constexpr const int BufferSize = 32;
-        SpiceChar buffer[BufferSize];
-        dateFromEphemerisTime(ephemerisTime, buffer, BufferSize, format);
-        return std::string(buffer);
-    }
-    else if (format.size() < 256) {
-        constexpr const int BufferSize = 256;
-        SpiceChar buffer[BufferSize];
-        dateFromEphemerisTime(ephemerisTime, buffer, BufferSize, format);
-        return std::string(buffer);
-    }
-    else {
-        std::string res;
-        res.resize(format.size() + 1);
-        dateFromEphemerisTime(ephemerisTime, res.data(), format.size(), format);
-        return res;
-    }
-}
-
-void SpiceManager::dateFromEphemerisTime(double ephemerisTime, char* outBuf,
-                                         int bufferSize,
-                                         std::string_view formatString) const
-{
-    ghoul_assert(!formatString.empty(), "Format is empty");
-    ghoul_assert(formatString.back() == '\0', "Format string must be null-terminated");
-    ghoul_assert(formatString.size() > bufferSize - 1, "Buffer size too small");
-
-    timout_c(ephemerisTime, formatString.data(), bufferSize - 1, outBuf);
-    if (failed_c()) {
-        throwSpiceError(
-            fmt::format("Error converting ephemeris time '{}' to date with format '{}'",
-                ephemerisTime, formatString
-            )
-        );
-    }
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,

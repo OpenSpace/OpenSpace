@@ -137,11 +137,11 @@ std::string RangedTime::clamp(const std::string& checkTime) {
     }
 }
 
-std::string RangedTime::start() const {
+std::string_view RangedTime::start() const {
     return _start;
 }
 
-std::string RangedTime::end() const {
+std::string_view RangedTime::end() const {
     return _end;
 }
 
@@ -174,10 +174,14 @@ std::string DateTime::ISO8601() const {
 };
 
 double DateTime::J2000() const {
-    Time t;
-    std::string timeString = ISO8601();
-    t.setTime(timeString);
-    return t.j2000Seconds();
+    char Buffer[20];
+    std::memset(Buffer, 0, 20);
+    fmt::format_to(
+        Buffer,
+        "{:0>4}-{:0>2}-{:0>2}T{:0>2}:{:0>2}:{:0>2}",
+        _year, _month, _day, _hour, _minute, _second
+    );
+    return Time::convertTime(Buffer);
 }
 
 void DateTime::operator=(DateTime& src) {
@@ -471,7 +475,7 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
     ZoneScoped
 
-    const std::string unquantizedStr = t.ISO8601();
+    std::string_view unquantizedStr = t.ISO8601();
     DateTime unquantized(unquantizedStr);
     // resolutionFraction helps to improve iteration performance
     constexpr const double ResolutionFraction = 0.7;
@@ -514,7 +518,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
         return true;
     }
     else if (clamp) {
-        const std::string clampedTime = _timerange.clamp(unquantizedStr);
+        const std::string clampedTime = _timerange.clamp(std::string(unquantizedStr));
         t.setTime(clampedTime);
         return true;
     }
@@ -612,7 +616,7 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
 
     std::vector<std::string> result;
     DateTime itr = s;
-    RangedTime range(start.ISO8601(), end.ISO8601());
+    RangedTime range(std::string(start.ISO8601()), std::string(end.ISO8601()));
     while (range.includes(Time(itr.ISO8601()))) {
         itr.incrementOnce(static_cast<int>(_resolutionValue), _resolutionUnit);
         result.push_back(itr.ISO8601());

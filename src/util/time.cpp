@@ -24,7 +24,9 @@
 
 #include <openspace/util/time.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/timemanager.h>
@@ -40,6 +42,10 @@ namespace openspace {
 
 double Time::convertTime(const std::string& time) {
     ghoul_assert(!time.empty(), "timeString must not be empty");
+    return SpiceManager::ref().ephemerisTimeFromDate(time);
+}
+
+double Time::convertTime(const char* time) {
     return SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
@@ -79,17 +85,26 @@ void Time::setTime(const std::string& time) {
     _time = SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
-std::string Time::UTC() const {
-    return SpiceManager::ref().dateFromEphemerisTime(_time);
+std::string_view Time::UTC() const {
+    constexpr const char Format[] = "YYYY MON DDTHR:MN:SC.### ::RND";
+    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(32));
+    std::memset(b, 0, 32);
+
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, 32, Format);
+
+    return std::string_view(b, 32);
 }
 
-std::string Time::ISO8601() const {
+std::string_view Time::ISO8601() const {
     ZoneScoped
 
-    return SpiceManager::ref().dateFromEphemerisTime(
-        _time,
-        "YYYY-MM-DDTHR:MN:SC.###"
-    );
+    constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
+    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(24));
+    std::memset(b, 0, 24);
+
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, 24, Format);
+ 
+    return std::string_view(b, 24);
 }
 
 scripting::LuaLibrary Time::luaLibrary() {

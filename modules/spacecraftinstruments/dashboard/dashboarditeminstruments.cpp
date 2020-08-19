@@ -230,7 +230,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             ghoul::fontrendering::CrDirection::Down
         );
 
-        std::string str = SpiceManager::ref().dateFromEphemerisTime(
+        std::string_view str = SpiceManager::ref().dateFromEphemerisTime(
             sequencer.nextCaptureTime(global::timeManager.time().j2000Seconds()),
             "YYYY MON DD HR:MN:SC"
         );

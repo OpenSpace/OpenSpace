@@ -278,9 +278,9 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
 
     switch (type) {
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DD:
-            return t.ISO8601().substr(0, 10);
+            return std::string(t.ISO8601().substr(0, 10));
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss: {
-            std::string ts = t.ISO8601().substr(0, 19);
+            std::string ts = std::string(t.ISO8601().substr(0, 19));
 
             // YYYY_MM_DDThh_mm_ss -> YYYYMMDD_hhmmss
             ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
@@ -289,7 +289,7 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
             return ts;
         }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm: {
-            std::string ts = t.ISO8601().substr(0, 16);
+            std::string ts = std::string(t.ISO8601().substr(0, 16));
 
             // YYYY_MM_DDThh_mm -> YYYYMMDD_hhmm
             ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
@@ -298,9 +298,9 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
             return ts;
         }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ:
-            return t.ISO8601().substr(0, 19) + "Z";
+            return std::string(t.ISO8601().substr(0, 19)) + "Z";
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ: {
-            std::string timeString = t.ISO8601().substr(0, 19) + "Z";
+            std::string timeString = std::string(t.ISO8601().substr(0, 19)) + "Z";
             replace(timeString.begin(), timeString.end(), ':', '_');
             return timeString;
         }
@@ -423,7 +423,10 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
 
     try {
-        t.timeQuantizer.setStartEndRange(start.ISO8601(), end.ISO8601());
+        t.timeQuantizer.setStartEndRange(
+            std::string(start.ISO8601()),
+            std::string(end.ISO8601())
+        );
         t.timeQuantizer.setResolution(timeResolution);
     }
     catch (const ghoul::RuntimeError& e) {

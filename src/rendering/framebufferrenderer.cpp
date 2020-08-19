@@ -1132,6 +1132,7 @@ void FramebufferRenderer::updateDownscaledVolume() {
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     ZoneScoped
+    TracyGpuZone("FramebufferRenderer")
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -1177,25 +1178,31 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     RendererTasks tasks;
 
     {
+        TracyGpuZone("Background")
         GLDebugGroup group("Background");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
         scene->render(data, tasks);
     }
 
     {
+        TracyGpuZone("Opaque")
         GLDebugGroup group("Opaque");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
         scene->render(data, tasks);
     }
 
     {
+        TracyGpuZone("PreDeferredTransparent")
         GLDebugGroup group("PreDeferredTransparent");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::PreDeferredTransparent);
+        data.renderBinMask = static_cast<int>(
+            Renderable::RenderBin::PreDeferredTransparent
+        );
         scene->render(data, tasks);
     }
 
     // Run Volume Tasks
     {
+        TracyGpuZone("Raycaster Tasks")
         GLDebugGroup group("Raycaster Tasks");
         performRaycasterTasks(tasks.raycasterTasks);
 
@@ -1205,6 +1212,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
+        TracyGpuZone("Deferred Caster Tasks")
         GLDebugGroup group("Deferred Caster Tasks");
 
         // We use ping pong rendering in order to be able to
@@ -1220,12 +1228,16 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glEnablei(GL_BLEND, 0);
 
     {
+        TracyGpuZone("PostDeferredTransparent")
         GLDebugGroup group("PostDeferredTransparent");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::PostDeferredTransparent);
+        data.renderBinMask = static_cast<int>(
+            Renderable::RenderBin::PostDeferredTransparent
+        );
         scene->render(data, tasks);
     }
 
     {
+        TracyGpuZone("Overlay")
         GLDebugGroup group("Overlay");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
         scene->render(data, tasks);
@@ -1252,12 +1264,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
+        TracyGpuZone("Apply TMO")
         GLDebugGroup group("Apply TMO");
 
         applyTMO(blackoutFactor);
     }
 
     if (_enableFXAA) {
+        TracyGpuZone("Apply FXAA")
         GLDebugGroup group("Apply FXAA");
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
         applyFXAA();
@@ -1268,6 +1282,8 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
     ZoneScoped
 
     for (const RaycasterTask& raycasterTask : tasks) {
+        TracyGpuZone("Raycaster")
+        
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
@@ -1399,6 +1415,8 @@ void FramebufferRenderer::performDeferredTasks(
     ZoneScoped
 
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
+        TracyGpuZone("Deferredcaster")
+            
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
         ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
