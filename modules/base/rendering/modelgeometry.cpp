@@ -25,8 +25,10 @@
 #include <modules/base/rendering/modelgeometry.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -80,7 +82,8 @@ documentation:: Documentation ModelGeometry::Documentation() {
     };
 }
 
-std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
+// Create with ghoul::mm_unique_ptr 
+ghoul::mm_unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     if (!dictionary.hasKeyAndValue<std::string>(KeyType)) {
@@ -90,8 +93,12 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     const std::string& geometryType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
-    ModelGeometry* geometry = factory->create(geometryType, dictionary);
-    return std::unique_ptr<ModelGeometry>(geometry);
+    ModelGeometry* geometry = factory->create(
+        geometryType,
+        dictionary,
+        &global::memoryManager.PersistentMemory
+    );
+    return ghoul::mm_unique_ptr<ModelGeometry>(geometry);
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary) {

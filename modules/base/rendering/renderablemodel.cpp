@@ -301,13 +301,13 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    for (const std::unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
+    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
         geom->initialize(this);
     }
 }
 
 void RenderableModel::deinitializeGL() {
-    for (const std::unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
+    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
         geom->deinitialize();
     }
     _geometry.clear();
@@ -382,22 +382,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
     );
-    _program->setUniform(
-        _uniformCache.ambientIntensity,
-        _ambientIntensity
-    );
-    _program->setUniform(
-        _uniformCache.diffuseIntensity,
-        _diffuseIntensity
-    );
-    _program->setUniform(
-        _uniformCache.specularIntensity,
-        _specularIntensity
-    );
-    _program->setUniform(
-        _uniformCache.performShading,
-        _performShading
-    );
+    _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
+    _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
+    _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+    _program->setUniform(_uniformCache.performShading, _performShading);
 
     if (_disableFaceCulling) {
         glDisable(GL_CULL_FACE);
@@ -406,7 +394,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _program->setUniform(_uniformCache.texture, unit);
-    for (const std::unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
+    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
         geom->setUniforms(*_program);
         geom->bindTexture();
         geom->render();

@@ -27,13 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/vector/vec3property.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -66,7 +67,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<std::unique_ptr<modelgeometry::ModelGeometry>> _geometry;
+    std::vector<ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>> _geometry;
 
     properties::FloatProperty _ambientIntensity;
 

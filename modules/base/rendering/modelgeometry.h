@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 #define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <memory>
@@ -45,7 +46,7 @@ public:
         GLfloat normal[3];
     };
 
-    static std::unique_ptr<ModelGeometry> createFromDictionary(
+    static ghoul::mm_unique_ptr<ModelGeometry> createFromDictionary(
         const ghoul::Dictionary& dictionary
     );
 

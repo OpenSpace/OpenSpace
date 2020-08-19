@@ -31,6 +31,7 @@
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
@@ -83,7 +84,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
-    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
+    ghoul::mm_unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
     glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 
