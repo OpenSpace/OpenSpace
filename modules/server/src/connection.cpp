@@ -85,7 +85,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
         AuthenticationTopicKey,
         [password](bool, const ghoul::Dictionary&, ghoul::MemoryPoolBase* pool) {
             if (pool) {
-                void* ptr = pool->alloc(sizeof(AuthorizationTopic));
+                void* ptr = pool->allocate(sizeof(AuthorizationTopic));
                 return new (ptr) AuthorizationTopic(password);
             }
             else {

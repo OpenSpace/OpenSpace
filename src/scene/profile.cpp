@@ -454,7 +454,7 @@ namespace {
 } // namespace
 
 void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-                                           const std::string& currentTime,
+                                           std::string currentTime,
                                  interaction::NavigationHandler::NavigationState navState)
 {
     version = Profile::CurrentVersion;
@@ -476,7 +476,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     // add current time to profile file
     //
     Time t;
-    t.time = currentTime;
+    t.time = std::move(currentTime);
     t.type = Time::Type::Absolute;
     time = std::move(t);
 

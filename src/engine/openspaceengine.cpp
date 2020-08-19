@@ -1062,7 +1062,7 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
 
     // Reset the temporary, frame-based storage
-    global::memoryManager.TemporaryMemory.release();
+    global::memoryManager.TemporaryMemory.reset();
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
@@ -1259,6 +1259,8 @@ void OpenSpaceEngine::postDraw() {
         resetPropertyChangeFlags();
         _isFirstRenderingFirstFrame = false;
     }
+
+    global::memoryManager.PersistentMemory.housekeeping();
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
 }

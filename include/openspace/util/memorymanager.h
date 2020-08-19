@@ -35,10 +35,8 @@ public:
     ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
 
     // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool.  Resetting the monotoic_buffer_resource costs an allocation, that we
-    // can prevent
-    std::pmr::monotonic_buffer_resource TemporaryMemory =
-        std::pmr::monotonic_buffer_resource(100 * 4096);
+    // Memory pool so that we can get a high-water mark out of it
+    ghoul::MemoryPool<100 * 4096, false> TemporaryMemory;
 };
 
 } // namespace openspace
