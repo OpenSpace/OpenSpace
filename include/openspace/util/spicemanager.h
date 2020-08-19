@@ -469,15 +469,18 @@ public:
      *
      * \param ephemerisTime The ephemeris time, that is the number of TDB seconds past the
      *        J2000 epoch
-     * \param formatString The format string describing the output format
+     * \param format The format string describing the output format
      * \return The destination for the converted date.
      *
-     * \pre \p formatString must not be empty
+     * \pre \p format must not be empty
      *
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
      */
     std::string dateFromEphemerisTime(double ephemerisTime,
-        const std::string& formatString = "YYYY MON DDTHR:MN:SC.### ::RND") const;
+        std::string_view format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
+
+    void dateFromEphemerisTime(double ephemerisTime, char* outBuf, int bufferSize,
+        std::string_view format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
 
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a

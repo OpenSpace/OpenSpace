@@ -483,13 +483,40 @@ double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const 
 }
 
 std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
-                                                    const std::string& formatString) const
+                                                            std::string_view format) const
 {
     ghoul_assert(!formatString.empty(), "Format is empty");
+    ghoul_assert(formatString.back() == '\0', "Format string must be null-terminated");
 
-    constexpr const int BufferSize = 256;
-    SpiceChar buffer[BufferSize];
-    timout_c(ephemerisTime, formatString.c_str(), BufferSize - 1, buffer);
+    if (format.size() < 32) {
+        constexpr const int BufferSize = 32;
+        SpiceChar buffer[BufferSize];
+        dateFromEphemerisTime(ephemerisTime, buffer, BufferSize, format);
+        return std::string(buffer);
+    }
+    else if (format.size() < 256) {
+        constexpr const int BufferSize = 256;
+        SpiceChar buffer[BufferSize];
+        dateFromEphemerisTime(ephemerisTime, buffer, BufferSize, format);
+        return std::string(buffer);
+    }
+    else {
+        std::string res;
+        res.resize(format.size() + 1);
+        dateFromEphemerisTime(ephemerisTime, res.data(), format.size(), format);
+        return res;
+    }
+}
+
+void SpiceManager::dateFromEphemerisTime(double ephemerisTime, char* outBuf,
+                                         int bufferSize,
+                                         std::string_view formatString) const
+{
+    ghoul_assert(!formatString.empty(), "Format is empty");
+    ghoul_assert(formatString.back() == '\0', "Format string must be null-terminated");
+    ghoul_assert(formatString.size() > bufferSize - 1, "Buffer size too small");
+
+    timout_c(ephemerisTime, formatString.data(), bufferSize - 1, outBuf);
     if (failed_c()) {
         throwSpiceError(
             fmt::format("Error converting ephemeris time '{}' to date with format '{}'",
@@ -497,8 +524,6 @@ std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
             )
         );
     }
-
-    return std::string(buffer);
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
