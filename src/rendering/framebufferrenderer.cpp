@@ -98,31 +98,7 @@ namespace {
     constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
-    const GLenum ColorAttachment0Array[1] = {
-        GL_COLOR_ATTACHMENT0
-    };
-
-    const GLenum ColorAttachment1Array[1] = {
-       GL_COLOR_ATTACHMENT1
-    };
-
-    const GLenum ColorAttachment01Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1
-    };
-
-    const GLenum ColorAttachment03Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT3
-    };
-
-    const GLenum ColorAttachment012Array[3] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1,
-       GL_COLOR_ATTACHMENT2
-    };
-
-    const GLenum ColorAttachment0123Array[4] = {
+    const GLenum ColorAttachmentArray[4] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
        GL_COLOR_ATTACHMENT2,
@@ -1203,13 +1179,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         ZoneScopedN("Deferred G-Buffer")
         TracyGpuZone("Deferred G-Buffer")
 
-        //glViewport(0, 0, _resolution.x, _resolution.y);
         GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        //GLint vp[4] = {0, 0, _resolution.x, _resolution.y};
         global::renderEngine.openglStateCache().setViewPortState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-        glDrawBuffers(3, ColorAttachment012Array);
+        glDrawBuffers(3, ColorAttachmentArray);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     Time time = global::timeManager.time();
@@ -1265,7 +1239,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // render to the same final buffer, multiple
         // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-        glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1276,7 +1250,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performDeferredTasks(tasks.deferredcasterTasks);
     }
     
-    glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+    glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
 
     {
@@ -1298,7 +1272,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     if (_enableFXAA) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
-        glDrawBuffers(1, ColorAttachment0Array);
+        glDrawBuffers(1, ColorAttachmentArray);
         glDisable(GL_BLEND);
 
     }
@@ -1472,7 +1446,7 @@ void FramebufferRenderer::performDeferredTasks(
         if (deferredcastProgram) {
             _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
             int fromIndex = _pingPongIndex == 0 ? 1 : 0;
-            glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+            glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
             glDisablei(GL_BLEND, 0);
             glDisablei(GL_BLEND, 1);
 
