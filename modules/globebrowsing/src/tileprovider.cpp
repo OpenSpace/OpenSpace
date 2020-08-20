@@ -34,6 +34,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
@@ -273,36 +274,46 @@ TileProvider* levelProvider(TileProviderByLevel& t, int level) {
 // TemporalTileProvider
 //
 
-std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t) {
+// Buffer needs at least 22 characters space
+int timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t, char* buffer)
+{
     ZoneScoped
+
+    std::memset(buffer, 0, 22);
+    const double time = t.j2000Seconds();
 
     switch (type) {
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DD:
-            return std::string(t.ISO8601().substr(0, 10));
+        {
+            constexpr const char Format[] = "YYYY-MM-DD";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
+        }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss: {
-            std::string ts = std::string(t.ISO8601().substr(0, 19));
-
-            // YYYY_MM_DDThh_mm_ss -> YYYYMMDD_hhmmss
-            ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
-            ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
-            replace(ts.begin(), ts.end(), 'T', '_');
-            return ts;
+            constexpr const char Format[] = "YYYYMMDD_HRMNSC";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
         }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm: {
-            std::string ts = std::string(t.ISO8601().substr(0, 16));
-
-            // YYYY_MM_DDThh_mm -> YYYYMMDD_hhmm
-            ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
-            ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
-            replace(ts.begin(), ts.end(), 'T', '_');
-            return ts;
+            constexpr const char Format[] = "YYYYMMDD_HRMN";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
         }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ:
-            return std::string(t.ISO8601().substr(0, 19)) + "Z";
+        {
+            constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SCZ";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
+        }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ: {
-            std::string timeString = std::string(t.ISO8601().substr(0, 19)) + "Z";
-            replace(timeString.begin(), timeString.end(), ':', '_');
-            return timeString;
+            constexpr const char Format[] = "YYYY-MM-DDTHR_MN_SCZ";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
         }
         default:
             throw ghoul::MissingCaseException();
@@ -310,7 +321,7 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
 }
 
 std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
-                                             const TemporalTileProvider::TimeKey& timekey)
+                                               std::string_view timekey)
 {
     ZoneScoped
 
@@ -339,12 +350,12 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
     return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 
-TileProvider* getTileProvider(TemporalTileProvider& t,
-                              const TemporalTileProvider::TimeKey& timekey)
-{
+TileProvider* getTileProvider(TemporalTileProvider& t, std::string_view timekey) {
     ZoneScoped
 
-    const auto it = t.tileProviderMap.find(timekey);
+    // @TODO (abock, 2020-08-20) This std::string creation can be removed once we switch
+    // to C++20 thanks to P0919R2
+    const auto it = t.tileProviderMap.find(std::string(timekey));
     if (it != t.tileProviderMap.end()) {
         return it->second.get();
     }
@@ -353,7 +364,7 @@ TileProvider* getTileProvider(TemporalTileProvider& t,
         initialize(*tileProvider);
 
         TileProvider* res = tileProvider.get();
-        t.tileProviderMap[timekey] = std::move(tileProvider);
+        t.tileProviderMap[std::string(timekey)] = std::move(tileProvider);
         return res;
     }
 }
@@ -363,9 +374,10 @@ TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
 
     Time tCopy(time);
     if (t.timeQuantizer.quantize(tCopy, true)) {
-        TemporalTileProvider::TimeKey timeKey = timeStringify(t.timeFormat, tCopy);
+        char Buffer[22];
+        const int size = timeStringify(t.timeFormat, tCopy, Buffer);
         try {
-            return getTileProvider(t, timeKey);
+            return getTileProvider(t, std::string_view(Buffer, size));
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC("TemporalTileProvider", e.message);

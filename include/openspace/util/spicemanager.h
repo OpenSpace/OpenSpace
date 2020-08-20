@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
 #include <array>
@@ -500,7 +501,7 @@ public:
         static_assert(N != 0, "Format must not be empty");
         ghoul_assert(N > bufferSize - 1, "Buffer size too small");
 
-        timout_c(ephemerisTime, format, bufferSize - 1, outBuf);
+        timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
             throwSpiceError(fmt::format(
                 "Error converting ephemeris time '{}' to date with format '{}'",

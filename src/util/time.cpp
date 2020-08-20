@@ -103,12 +103,20 @@ std::string_view Time::ISO8601() const {
     ZoneScoped
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
-    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(24));
-    std::memset(b, 0, 24);
+    constexpr const int S = sizeof(Format);
+    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(S));
+    std::memset(b, 0, S);
 
-    SpiceManager::ref().dateFromEphemerisTime(_time, b, 24, Format);
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, S, Format);
  
-    return std::string_view(b, 24);
+    return std::string_view(b, S);
+}
+
+void Time::ISO8601(char* buffer) const {
+    constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
+    constexpr const int S = sizeof(Format) + 1;
+    std::memset(buffer, 0, S);
+    SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
 }
 
 scripting::LuaLibrary Time::luaLibrary() {

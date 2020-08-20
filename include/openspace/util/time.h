@@ -118,10 +118,16 @@ public:
     std::string_view UTC() const;
 
     /**
-    * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ
-    * \return The current time as a ISO 8601 formatted string
-    */
+     * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ
+     * \return The current time as a ISO 8601 formatted string
+     */
     std::string_view ISO8601() const;
+
+    /**
+     * Creates the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ into the
+     * provided Buffer. The buffer needs to have space for 25 characters.
+     */
+    void ISO8601(char* buffer) const;
 
     /**
      * Advances the simulation time using the deltaTime() and the <code>tickTime</code>.

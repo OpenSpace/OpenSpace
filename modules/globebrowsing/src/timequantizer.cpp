@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/src/timequantizer.h>
 
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
@@ -475,8 +476,17 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
 bool TimeQuantizer::quantize(Time& t, bool clamp) {
     ZoneScoped
 
-    std::string_view unquantizedStr = t.ISO8601();
-    DateTime unquantized(unquantizedStr);
+    constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
+    constexpr const int BufferSize = sizeof(Format);
+    char unquantizedString[BufferSize];
+    std::memset(unquantizedString, 0, BufferSize);
+    SpiceManager::ref().dateFromEphemerisTime(
+        t.j2000Seconds(),
+        unquantizedString, BufferSize,
+        Format
+    );
+
+    DateTime unquantized(std::string_view(unquantizedString, BufferSize));
     // resolutionFraction helps to improve iteration performance
     constexpr const double ResolutionFraction = 0.7;
     constexpr const int IterationLimit = 50;
@@ -525,8 +535,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
         return true;
     }
     else if (clamp) {
-        const std::string clampedTime = _timerange.clamp(std::string(unquantizedStr).c_str());
-        t.setTime(clampedTime);
+        t.setTime(_timerange.clamp(unquantizedString));
         return true;
     }
     else {
@@ -561,13 +570,16 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, dou
         }
         case 'd':
         {
-            const double error = (unQ.J2000() - quantized.J2000()) / (60 * 60 * 24);
+            const double error = (unQ.J2000() - quantized.J2000()) / (60.0 * 60.0 * 24.0);
             const int originalHour = quantized.hour();
             const int originalMinute = quantized.minute();
             const int originalSecond = quantized.second();
             const double addToTime = std::round(error) * 86400;
             Time testDay(quantized.J2000() + addToTime);
-            quantized.setTime(testDay.ISO8601());
+
+            char Buffer[24];
+            testDay.ISO8601(Buffer);
+            quantized.setTime(std::string_view(Buffer, 24));
             quantized.setHour(originalHour);
             quantized.setMinute(originalMinute);
             quantized.setSecond(originalSecond);
