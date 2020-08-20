@@ -86,10 +86,6 @@
 #include <numeric>
 #include <sstream>
 
-#if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
-#include <vld.h>
-#endif
-
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
 #endif // __APPLE__
