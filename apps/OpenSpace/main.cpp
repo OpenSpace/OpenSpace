@@ -681,7 +681,7 @@ void mainDecodeFun(const std::vector<std::byte>& data, unsigned int) {
 void mainLogCallback(Log::Level level, const char* message) {
     ZoneScoped
 
-    std::string msg = message;
+    std::string_view msg = message;
     switch (level) {
         case Log::Level::Debug:
             LDEBUGC("SGCT", msg);
