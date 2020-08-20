@@ -325,10 +325,10 @@ namespace {
         try {
             return std::stod(line);
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const std::invalid_argument&) {
             throw ProfileParsingError(
                 lineNumber,
-                fmt::format("Expected a number for delta time entry, got ", line)
+                fmt::format("Expected a number for delta time entry, got '{}'", line)
             );
         }
     }
