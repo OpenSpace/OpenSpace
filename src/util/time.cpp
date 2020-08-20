@@ -85,6 +85,10 @@ void Time::setTime(const std::string& time) {
     _time = SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
+void Time::setTime(const char* time) {
+    _time = SpiceManager::ref().ephemerisTimeFromDate(time);
+}
+
 std::string_view Time::UTC() const {
     constexpr const char Format[] = "YYYY MON DDTHR:MN:SC.### ::RND";
     char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(32));

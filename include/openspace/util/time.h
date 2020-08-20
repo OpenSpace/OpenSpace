@@ -101,6 +101,7 @@ public:
      * \param time The time to be set as a date string
      */
     void setTime(const std::string& time);
+    void setTime(const char* time);
 
     /**
      * Returns the current time as the number of seconds past the J2000 epoch. If the

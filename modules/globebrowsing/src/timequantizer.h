@@ -69,7 +69,7 @@ public:
      *          less than start, equal to end if greater than end, or equal to input
      *          parameter if falls in-between
     */
-    std::string clamp(const std::string& checkTime);
+    const char* clamp(const char* checkTime);
 
     /*
      * Get the start date/time of the time range

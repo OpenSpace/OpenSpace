@@ -122,15 +122,15 @@ bool RangedTime::includes(const Time& checkTime) const {
     return (_startJ2000 <= tj && tj <= _endJ2000);
 }
 
-std::string RangedTime::clamp(const std::string& checkTime) {
+const char* RangedTime::clamp(const char* checkTime) {
     Time t;
     t.setTime(checkTime);
     const double tj = t.j2000Seconds();
     if (tj < _startJ2000) {
-        return _start;
+        return _start.c_str();
     }
     else if (tj > _endJ2000) {
-        return _end;
+        return _end.c_str();
     }
     else {
         return checkTime;
@@ -485,7 +485,6 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     int lastDecr = 0;
 
     if (_timerange.includes(t)) {
-        ZoneScopedN("includes")
         DateTime quantized = DateTime(_timerange.start());
         doFirstApproximation(quantized, unquantized, _resolutionValue, _resolutionUnit);
         double error = unquantized.J2000() - quantized.J2000();
@@ -513,12 +512,20 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
                 break;
             }
         }
-        quantized.setTime(_timerange.clamp(quantized.ISO8601()));
-        t.setTime(quantized.J2000());
+        char Buffer[20];
+        std::memset(Buffer, 0, 20);
+        fmt::format_to(
+            Buffer,
+            "{:0>4}-{:0>2}-{:0>2}T{:0>2}:{:0>2}:{:0>2}",
+            quantized.year(), quantized.month(), quantized.day(),
+            quantized.hour(), quantized.minute(), quantized.second()
+        );
+
+        t.setTime(_timerange.clamp(Buffer));
         return true;
     }
     else if (clamp) {
-        const std::string clampedTime = _timerange.clamp(std::string(unquantizedStr));
+        const std::string clampedTime = _timerange.clamp(std::string(unquantizedStr).c_str());
         t.setTime(clampedTime);
         return true;
     }
