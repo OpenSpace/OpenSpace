@@ -546,8 +546,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             glm::dvec3 position = _keplerTranslator.position({
                 {},
                 Time(timeOffset + orbit.epoch),
-                Time(0.0),
-                false
+                Time(0.0)
             });
 
             _vertexBufferData[vertexBufIdx].x = static_cast<float>(position.x);

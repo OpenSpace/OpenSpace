@@ -166,13 +166,6 @@ namespace {
         "The path to the texture that should be used as the base shape for the stars."
     };*/
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all stars."
-    };
-
     // PSF
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
@@ -432,10 +425,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(-10.f, -10.f),
         glm::vec2(10.f, 10.f)
     )
-    , _fixedColor(FixedColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _psfMethodOption(
         PSFMethodOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -478,6 +470,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableStars"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     _speckFile = absPath(dictionary.value<std::string>(KeyFile));
     _speckFile.onChange([&]() { _speckFileIsDirty = true; });
@@ -605,13 +600,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         _pointSpreadFunctionTextureIsDirty = true;
     });
     _userProvidedTextureOwner.addProperty(_pointSpreadFunctionTexturePath);
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    _parametersOwner.addProperty(_alphaValue);
 
     _psfMethodOption.addOption(PsfMethodSpencer, "Spencer's Function");
     _psfMethodOption.addOption(PsfMethodMoffat, "Moffat's Function");
@@ -1005,10 +993,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         const double funcValue = a * distCamera + b;
         fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
 
-        _program->setUniform(_uniformCache.alphaValue, _alphaValue * fadeInVariable);
+        _program->setUniform(_uniformCache.alphaValue, _opacity * fadeInVariable);
     }
     else {
-        _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+        _program->setUniform(_uniformCache.alphaValue, _opacity);
     }
 
     ghoul::opengl::TextureUnit psfUnit;

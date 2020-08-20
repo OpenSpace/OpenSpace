@@ -268,16 +268,15 @@ void LoadingScreen::render() {
         "Loading...";
     // We use "Loading" to center the text, but render "Loading..." to make it look more
     // pleasing
-    const FR::BoundingBoxInformation bbox = renderer.boundingBox(
-        *_loadingFont,
+    const glm::vec2 bbox = _loadingFont->boundingBox(
         headline.substr(0, headline.size() - 2)
     );
 
     const glm::vec2 loadingLl = glm::vec2(
-        res.x / 2.f - bbox.boundingBox.x / 2.f,
+        res.x / 2.f - bbox.x / 2.f,
         res.y * LoadingTextPosition
     );
-    const glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
+    const glm::vec2 loadingUr = loadingLl + bbox;
 
     renderer.render(*_loadingFont, loadingLl, headline);
 
@@ -286,16 +285,13 @@ void LoadingScreen::render() {
     if (_showMessage) {
         std::lock_guard<std::mutex> guard(_messageMutex);
 
-        FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
-            *_messageFont,
-            _message
-        );
+        const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
         messageLl = glm::vec2(
-            res.x / 2.f - bboxMessage.boundingBox.x / 2.f,
+            res.x / 2.f - bboxMessage.x / 2.f,
             res.y * StatusMessageOffset
         );
-        messageUr = messageLl + bboxMessage.boundingBox;
+        messageUr = messageLl + bboxMessage;
 
 
         renderer.render(*_messageFont, messageLl, _message);
@@ -322,8 +318,7 @@ void LoadingScreen::render() {
             if (!item.hasLocation) {
                 // Compute a new location
 
-                const FR::BoundingBoxInformation b = renderer.boundingBox(
-                    *_itemFont,
+                const glm::vec2 b = _itemFont->boundingBox(
                     (item.name + " 100%\n99999999/99999999")
                 );
 
@@ -338,15 +333,15 @@ void LoadingScreen::render() {
                 for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
-                        static_cast<int>(res.x - b.boundingBox.x - 15)
+                        static_cast<int>(res.x - b.x - 15)
                     );
                     std::uniform_int_distribution<int> distY(
                         15,
-                        static_cast<int>(res.y - b.boundingBox.y - 15)
+                        static_cast<int>(res.y - b.y - 15)
                     );
 
                     ll = { distX(_randomEngine), distY(_randomEngine) };
-                    ur = ll + b.boundingBox;
+                    ur = ll + b;
 
                     // Test against logo and text
                     const bool logoOverlap = rectOverlaps(

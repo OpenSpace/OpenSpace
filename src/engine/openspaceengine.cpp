@@ -41,8 +41,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/performance/performancemeasurement.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/helper.h>
@@ -86,10 +84,6 @@
 #include <glbinding-aux/types_to_string.h>
 #include <numeric>
 #include <sstream>
-
-#if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
-#include <vld.h>
-#endif
 
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
@@ -1057,17 +1051,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
 void OpenSpaceEngine::preSynchronization() {
     ZoneScoped
-
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
-
-    //std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::preSynchronization"
-        );
-    }
 
     FileSys.triggerFilesystemEvents();
 
@@ -1132,15 +1116,7 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     ZoneScoped
-
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::postSynchronizationPreDraw"
-        );
-    }
 
     bool master = global::windowDelegate.isMaster();
     global::syncEngine.postSynchronization(SyncEngine::IsMaster(master));
@@ -1209,15 +1185,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
                              const glm::mat4& projectionMatrix)
 {
     ZoneScoped
-
     LTRACE("OpenSpaceEngine::render(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::render"
-        );
-    }
 
     const bool isGuiWindow =
         global::windowDelegate.hasGuiWindow() ?
@@ -1241,15 +1209,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
 void OpenSpaceEngine::drawOverlays() {
     ZoneScoped
-
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::drawOverlays"
-        );
-    }
 
     const bool isGuiWindow =
         global::windowDelegate.hasGuiWindow() ?
@@ -1260,7 +1220,6 @@ void OpenSpaceEngine::drawOverlays() {
         global::renderEngine.renderOverlays(_shutdown);
         global::luaConsole.render();
         global::sessionRecording.render();
-
     }
 
     for (const std::function<void()>& func : global::callback::draw2D) {
@@ -1274,15 +1233,7 @@ void OpenSpaceEngine::drawOverlays() {
 
 void OpenSpaceEngine::postDraw() {
     ZoneScoped
-
     LTRACE("OpenSpaceEngine::postDraw(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::postDraw"
-        );
-    }
 
     global::renderEngine.postDraw();
 

@@ -214,6 +214,8 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
 }
 
 void TimeManager::progressTime(double dt) {
+    ZoneScoped
+
     _integrateFromTime = static_cast<Time&>(_currentTime);
     // Frames     |    1                    2          |
     //            |------------------------------------|

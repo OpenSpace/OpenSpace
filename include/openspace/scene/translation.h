@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 #include <functional>
 #include <memory>
@@ -42,7 +43,7 @@ namespace documentation {  struct Documentation; }
 
 class Translation : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Translation> createFromDictionary(
+    static ghoul::mm_unique_ptr<Translation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     Translation();

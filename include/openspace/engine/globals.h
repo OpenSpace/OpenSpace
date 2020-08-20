@@ -37,6 +37,7 @@ class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
 class LuaConsole;
+class MemoryManager;
 class MissionManager;
 class ModuleEngine;
 class OpenSpaceEngine;
@@ -59,7 +60,6 @@ namespace interaction {
     class SessionRecording;
     class ShortcutManager;
 } // namespace interaction
-namespace performance { class PerformanceManager; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
     class ScriptEngine;
@@ -76,6 +76,7 @@ Dashboard& gDashboard();
 DeferredcasterManager& gDeferredcasterManager();
 DownloadManager& gDownloadManager();
 LuaConsole& gLuaConsole();
+MemoryManager& gMemoryManager();
 MissionManager& gMissionManager();
 ModuleEngine& gModuleEngine();
 OpenSpaceEngine& gOpenSpaceEngine();
@@ -96,7 +97,6 @@ interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 interaction::SessionRecording& gSessionRecording();
 interaction::ShortcutManager& gShortcutManager();
-performance::PerformanceManager& gPerformanceManager();
 properties::PropertyOwner& gRootPropertyOwner();
 properties::PropertyOwner& gScreenSpaceRootPropertyOwner();
 scripting::ScriptEngine& gScriptEngine();
@@ -110,6 +110,7 @@ static Dashboard& dashboard = detail::gDashboard();
 static DeferredcasterManager& deferredcasterManager = detail::gDeferredcasterManager();
 static DownloadManager& downloadManager = detail::gDownloadManager();
 static LuaConsole& luaConsole = detail::gLuaConsole();
+static MemoryManager& memoryManager = detail::gMemoryManager();
 static MissionManager& missionManager = detail::gMissionManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
 static OpenSpaceEngine& openSpaceEngine = detail::gOpenSpaceEngine();
@@ -134,8 +135,6 @@ static interaction::KeybindingManager& keybindingManager = detail::gKeybindingMa
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();
 static interaction::ShortcutManager& shortcutManager = detail::gShortcutManager();
-static performance::PerformanceManager& performanceManager =
-    detail::gPerformanceManager();
 static properties::PropertyOwner& rootPropertyOwner = detail::gRootPropertyOwner();
 static properties::PropertyOwner& screenSpaceRootPropertyOwner =
     detail::gScreenSpaceRootPropertyOwner();

@@ -238,13 +238,12 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format(
             "Simulation increment: {:.1f} {:s} / second",
             deltaTime.first, deltaTime.second
         )
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

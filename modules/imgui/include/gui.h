@@ -33,9 +33,9 @@
 #include <modules/imgui/include/guihelpcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guijoystickcomponent.h>
+#include <modules/imgui/include/guimemorycomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
-#include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guishortcutscomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
@@ -106,12 +106,12 @@ public:
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
     GuiGlobeBrowsingComponent _globeBrowsing;
-    GuiPerformanceComponent _performance;
 
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _sceneProperty;
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _moduleProperty;
+    GuiMemoryComponent _memoryComponent;
 
     GuiPropertyComponent _virtualProperty;
     GuiSpaceTimeComponent _spaceTime;
@@ -139,6 +139,7 @@ private:
         &_virtualProperty,
         &_globalProperty,
         &_moduleProperty,
+        &_memoryComponent,
 
         &_spaceTime,
         &_mission,
@@ -152,8 +153,6 @@ private:
         &_shortcuts,
         &_joystick,
         &_filePath,
-
-        &_performance,
 
         &_help
     };

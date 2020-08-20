@@ -258,6 +258,9 @@ private:
 
     ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
 
+    std::vector<const Chunk*> _traversalMemory;
+
+
     Chunk _leftRoot;  // Covers all negative longitudes
     Chunk _rightRoot; // Covers all positive longitudes
 

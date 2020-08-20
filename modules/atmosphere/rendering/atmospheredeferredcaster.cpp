@@ -59,7 +59,6 @@
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
-#include <modules/atmosphere/rendering/renderableatmosphere.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -71,6 +70,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -125,12 +125,12 @@ namespace {
 
         const GLfloat vertex_data[] = {
             //      x      y     z     w
-            -size, -size, 0.0f, 1.0f,
-            size,    size, 0.0f, 1.0f,
-            -size,  size, 0.0f, 1.0f,
-            -size, -size, 0.0f, 1.0f,
-            size, -size, 0.0f, 1.0f,
-            size,    size, 0.0f, 1.0f
+            -size, -size, 0.f, 1.f,
+            size,    size, 0.f, 1.f,
+            -size,  size, 0.f, 1.f,
+            -size, -size, 0.f, 1.f,
+            size, -size, 0.f, 1.f,
+            size,    size, 0.f, 1.f
         };
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
@@ -154,6 +154,9 @@ void AtmosphereDeferredcaster::initialize() {
     if (!_atmosphereCalculated) {
         preCalculateAtmosphereParam();
     }
+
+    std::memset(_uniformNameBuffer, 0, sizeof(_uniformNameBuffer));
+    std::strcpy(_uniformNameBuffer, "shadowDataArray[");
 }
 
 void AtmosphereDeferredcaster::deinitialize() {
@@ -181,6 +184,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                                           const DeferredcastData&,
                                           ghoul::opengl::ProgramObject& program)
 {
+    ZoneScoped
+
     // Atmosphere Frustum Culling
     glm::dvec3 tPlanetPosWorld = glm::dvec3(
         _modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0)
@@ -297,16 +302,18 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {
-                std::vector<ShadowRenderingStruct> shadowDataArray;
-                shadowDataArray.reserve(_shadowConfArray.size());
+                ZoneScopedN("Shadow Configuration")
 
-                for (const ShadowConfiguration & shadowConf : _shadowConfArray) {
+                _shadowDataArrayCache.clear();
+
+                for (const ShadowConfiguration& shadowConf : _shadowConfArray) {
                     // TO REMEMBER: all distances and lengths in world coordinates are in
                     // meters!!! We need to move this to view space...
                     // Getting source and caster:
                     glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
                         shadowConf.source.first,
-                        "SUN", "GALACTIC",
+                        "SUN",
+                        "GALACTIC",
                         {},
                         _time,
                         lt
@@ -314,7 +321,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     sourcePos *= KM_TO_M; // converting to meters
                     glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
                         shadowConf.caster.first,
-                        "SUN", "GALACTIC",
+                        "SUN",
+                        "GALACTIC",
                         {},
                         _time,
                         lt
@@ -385,34 +393,32 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                                         (shadowData.rs - shadowData.rc);
                         shadowData.casterPositionVec = casterPos;
                     }
-                    shadowDataArray.push_back(shadowData);
+                    _shadowDataArrayCache.push_back(shadowData);
                 }
 
-                const std::string uniformVarName("shadowDataArray[");
+                // _uniformNameBuffer[0..15] = "shadowDataArray["
                 unsigned int counter = 0;
-                for (const ShadowRenderingStruct& sd : shadowDataArray) {
-                    std::stringstream ss;
-                    ss << uniformVarName << counter << "].isShadowing";
-                    program.setUniform(ss.str(), sd.isShadowing);
+                for (const ShadowRenderingStruct& sd : _shadowDataArrayCache) {
+                    // Add the counter
+                    char* bf = fmt::format_to(
+                        _uniformNameBuffer + 16,
+                        "{}", counter
+                    );
+
+                    std::strcpy(bf, "].isShadowing\0");
+                    program.setUniform(_uniformNameBuffer, sd.isShadowing);
+
                     if (sd.isShadowing) {
-                        ss.str(std::string());
-                        ss << uniformVarName << counter << "].xp";
-                        program.setUniform(ss.str(), sd.xp);
-                        ss.str(std::string());
-                        ss << uniformVarName << counter << "].xu";
-                        program.setUniform(ss.str(), sd.xu);
-                        // ss.str(std::string());
-                        // ss << uniformVarName << counter << "].rs";
-                        // program.setUniform(ss.str(), sd.rs);
-                        ss.str(std::string());
-                        ss << uniformVarName << counter << "].rc";
-                        program.setUniform(ss.str(), sd.rc);
-                        ss.str(std::string());
-                        ss << uniformVarName << counter << "].sourceCasterVec";
-                        program.setUniform(ss.str(), sd.sourceCasterVec);
-                        ss.str(std::string());
-                        ss << uniformVarName << counter << "].casterPositionVec";
-                        program.setUniform(ss.str(), sd.casterPositionVec);
+                        std::strcpy(bf, "].xp\0");
+                        program.setUniform(_uniformNameBuffer, sd.xp);
+                        std::strcpy(bf, "].xu\0");
+                        program.setUniform(_uniformNameBuffer, sd.xu);
+                        std::strcpy(bf, "].rc\0");
+                        program.setUniform(_uniformNameBuffer, sd.rc);
+                        std::strcpy(bf, "].sourceCasterVec\0");
+                        program.setUniform(_uniformNameBuffer, sd.sourceCasterVec);
+                        std::strcpy(bf, "].casterPositionVec\0");
+                        program.setUniform(_uniformNameBuffer, sd.casterPositionVec);
                     }
                     counter++;
                 }
@@ -440,6 +446,8 @@ void AtmosphereDeferredcaster::postRaycast(const RenderData&,
                                            const DeferredcastData&,
                                            ghoul::opengl::ProgramObject&)
 {
+    ZoneScoped
+
     // Deactivate the texture units
     _transmittanceTableTextureUnit.deactivate();
     _irradianceTableTextureUnit.deactivate();
@@ -552,6 +560,9 @@ void AtmosphereDeferredcaster::setShadowConfigArray(
                                        std::vector<ShadowConfiguration> shadowConfigArray)
 {
     _shadowConfArray = std::move(shadowConfigArray);
+
+    _shadowDataArrayCache.clear();
+    _shadowDataArrayCache.reserve(_shadowConfArray.size());
 }
 
 void AtmosphereDeferredcaster::enableSunFollowing(bool enable) {

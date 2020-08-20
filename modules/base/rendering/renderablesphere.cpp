@@ -360,7 +360,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     );
     _shader->setUniform(_uniformCache.modelViewRotation, modelViewRotation);
 
-    float adjustedTransparency = _opacity;
+    float adjustedOpacity = _opacity;
 
     if (!_disableFadeInDistance) {
         if (_fadeInThreshold > -1.0) {
@@ -377,10 +377,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
                     0.f,
                     1.f
                 );
-                adjustedTransparency *= fadeFactor;
+                adjustedOpacity *= fadeFactor;
             }
             else if (logDistCamera <= startLogFadeDistance) {
-                adjustedTransparency = 0.f;
+                adjustedOpacity = 0.f;
             }
         }
 
@@ -398,19 +398,19 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
                     0.f,
                     1.f
                 );
-                adjustedTransparency *= (1.f - fadeFactor);
+                adjustedOpacity *= (1.f - fadeFactor);
             }
             else if (logDistCamera >= stopLogFadeDistance) {
-                adjustedTransparency = 0.f;
+                adjustedOpacity = 0.f;
             }
         }
     }
     // Performance wise
-    if (adjustedTransparency < 0.01f) {
+    if (adjustedOpacity < 0.01f) {
         return;
     }
 
-    _shader->setUniform(_uniformCache.opacity, adjustedTransparency);
+    _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
     _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
 
     ghoul::opengl::TextureUnit unit;

@@ -40,7 +40,6 @@
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -51,8 +50,9 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/versionchecker.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -85,6 +85,11 @@ DownloadManager& gDownloadManager() {
 
 LuaConsole& gLuaConsole() {
     static LuaConsole g;
+    return g;
+}
+
+MemoryManager& gMemoryManager() {
+    static MemoryManager g;
     return g;
 }
 
@@ -185,11 +190,6 @@ interaction::SessionRecording& gSessionRecording() {
 
 interaction::ShortcutManager& gShortcutManager() {
     static interaction::ShortcutManager g;
-    return g;
-}
-
-performance::PerformanceManager& gPerformanceManager() {
-    static performance::PerformanceManager g;
     return g;
 }
 

@@ -70,9 +70,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
   ${OPENSPACE_BASE_DIR}/src/network/parallelserver.cpp
-  ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
-  ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
-  ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -253,9 +250,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemeasurement.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -370,6 +364,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/job.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h

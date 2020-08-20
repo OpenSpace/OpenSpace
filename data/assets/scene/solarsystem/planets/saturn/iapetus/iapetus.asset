@@ -4,15 +4,6 @@ local kernel = asset.require('../kernels').sat375
 asset.request('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Iapetus textures",
-    Type = "HttpSynchronization",
-    Identifier = "iapetus_textures",
-    Version = 1
-})
-
 local Iapetus = {
     Identifier = "Iapetus",
     Parent = transforms.SaturnBarycenter.Identifier,
@@ -33,15 +24,7 @@ local Iapetus = {
         Type = "RenderableGlobe",
         Radii = 734000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/iapetus.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/iapetus.labels",
@@ -56,7 +39,7 @@ local Iapetus = {
             FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },

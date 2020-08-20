@@ -30,6 +30,7 @@
 #include <chrono>
 #include <mutex>
 #include <vector>
+#include <string_view>
 
 namespace openspace {
 
@@ -91,8 +92,8 @@ public:
      * \param category The category of the log message
      * \param message The actual log message that was transmitted
      */
-    void log(ghoul::logging::LogLevel level, const std::string& category,
-        const std::string& message) override;
+    void log(ghoul::logging::LogLevel level, std::string_view category,
+        std::string_view message) override;
 
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by

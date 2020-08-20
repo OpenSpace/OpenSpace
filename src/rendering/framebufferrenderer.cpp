@@ -26,8 +26,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/performance/performancemanager.h>
-#include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/deferredcaster.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -514,14 +512,6 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
 }
 
 void FramebufferRenderer::applyTMO(float blackoutFactor) {
-    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
-    std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-
-    if (doPerformanceMeasurements) {
-        perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-            "FramebufferRenderer::render::TMO"
-        );
-    }
     _hdrFilteringProgram->activate();
 
     ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
@@ -554,15 +544,6 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
 }
 
 void FramebufferRenderer::applyFXAA() {
-    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
-    std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-
-    if (doPerformanceMeasurements) {
-        perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-            "FramebufferRenderer::render::FXAA"
-        );
-    }
-
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
@@ -636,15 +617,6 @@ void FramebufferRenderer::updateDownscaleTextures() {
 }
 
 void FramebufferRenderer::writeDownscaledVolume() {
-    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
-    std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-
-    if (doPerformanceMeasurements) {
-        perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-            "FramebufferRenderer::render::writeDownscaledVolume"
-            );
-    }
-
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
 
@@ -1160,16 +1132,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     _pingPongIndex = 0;
 
-    // Measurements cache variable
-    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (doPerformanceMeasurements) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "FramebufferRenderer::render"
-        );
-    }
-
     if (!scene || !camera) {
         return;
     }
@@ -1191,7 +1153,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     RenderData data = {
         *camera,
         std::move(time),
-        doPerformanceMeasurements,
         0,
         {}
     };
@@ -1218,13 +1179,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Run Volume Tasks
     {
         GLDebugGroup group("Raycaster Tasks");
-
-        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-        if (doPerformanceMeasurements) {
-            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::raycasterTasks"
-            );
-        }
         performRaycasterTasks(tasks.raycasterTasks);
 
         if (HasGLDebugInfo) {
@@ -1241,12 +1195,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
-        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-        if (doPerformanceMeasurements) {
-            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::deferredTasks"
-            );
-        }
         performDeferredTasks(tasks.deferredcasterTasks);
     }
     

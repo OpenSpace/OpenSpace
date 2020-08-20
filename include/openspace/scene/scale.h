@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -40,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 class Scale : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Scale> createFromDictionary(
+    static ghoul::mm_unique_ptr<Scale> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     Scale();

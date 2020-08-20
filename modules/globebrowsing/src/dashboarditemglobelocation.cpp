@@ -199,10 +199,9 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     );
 }
 glm::vec2 DashboardItemGlobeLocation::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

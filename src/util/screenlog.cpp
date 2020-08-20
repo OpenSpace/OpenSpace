@@ -48,15 +48,15 @@ void ScreenLog::removeExpiredEntries() {
     _entries.erase(rit, _entries.end() );
 }
 
-void ScreenLog::log(LogLevel level, const string& category, const string& message) {
+void ScreenLog::log(LogLevel level, std::string_view category, std::string_view message) {
     std::lock_guard<std::mutex> guard(_mutex);
     if (level >= _logLevel) {
         _entries.push_back({
             level,
             std::chrono::steady_clock::now(),
             Log::timeString(),
-            category,
-            message
+            static_cast<std::string>(category),
+            static_cast<std::string>(message)
         });
     }
 }

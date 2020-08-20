@@ -564,7 +564,7 @@ void RawTileDataReader::initialize() {
     const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
     _maxChunkLevel = static_cast<int>(-tileLevelDifference);
     if (numOverviews > 0) {
-        _maxChunkLevel += numOverviews - 1;
+        _maxChunkLevel += numOverviews;
     }
     _maxChunkLevel = std::max(_maxChunkLevel, 2);
 }

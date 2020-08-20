@@ -463,10 +463,9 @@ glm::vec2 DashboardItemDistance::size() const {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Distance from focus: {} {}", dist.first, dist.second)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

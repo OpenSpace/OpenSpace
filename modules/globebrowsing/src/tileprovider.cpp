@@ -48,8 +48,8 @@
 
 namespace ghoul {
     template <>
-    openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
-        from_string(const std::string& string)
+    constexpr openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
+        from_string(std::string_view string)
     {
         using namespace openspace::globebrowsing::tileprovider;
         if (string == "YYYY-MM-DD") {
@@ -68,7 +68,7 @@ namespace ghoul {
             return TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm;
         }
         else {
-            throw ghoul::RuntimeError("Unknown timeformat " + string);
+            throw ghoul::RuntimeError("Unknown timeformat '" + std::string(string) + "'");
         }
     }
 } // namespace ghoul
@@ -522,8 +522,8 @@ std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTyp
 
     const char* type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
-    std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
-    return result;
+    TileProvider* result = factory->create(type, dictionary);
+    return std::unique_ptr<TileProvider>(result);
 }
 
 TileProvider::TileProvider() : properties::PropertyOwner({ "tileProvider" }) {}
@@ -1296,8 +1296,6 @@ void reset(TileProvider& tp) {
 
 
 int maxLevel(TileProvider& tp) {
-    ZoneScoped
-
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);

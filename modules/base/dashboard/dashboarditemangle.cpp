@@ -429,10 +429,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemAngle::size() const {
     constexpr const double Angle = 120;
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        "Angle: " + std::to_string(Angle)
-    ).boundingBox;
+    return _font->boundingBox("Angle: " + std::to_string(Angle));
 }
 
 } // namespace openspace
