@@ -478,8 +478,6 @@ double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const 
 }
 
 double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
-    ghoul_assert(!timeString.empty(), "Empty timeString");
-
     double et;
     str2et_c(timeString, &et);
     if (failed_c()) {
