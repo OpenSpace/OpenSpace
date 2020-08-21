@@ -1048,7 +1048,11 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableBillboardsCloud::update(const UpdateData&) {
+    ZoneScoped
+
     if (_dataIsDirty && _hasSpeckFile) {
+        ZoneScopedN("Data dirty")
+        TracyGpuZone("Data dirty")
         LDEBUG("Regenerating data");
 
         createDataSlice();
@@ -1170,6 +1174,9 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
     if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
     {
+        ZoneScopedN("Sprite texture")
+        TracyGpuZone("Sprite texture")
+
         ghoul::opengl::Texture* t = _spriteTexture;
 
         unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
@@ -1619,6 +1626,8 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
 }
 
 void RenderableBillboardsCloud::createDataSlice() {
+    ZoneScoped
+
     _slicedData.clear();
     if (_hasColorMapFile) {
         _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
