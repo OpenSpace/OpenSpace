@@ -83,6 +83,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
+#include <future>
 #include <numeric>
 #include <sstream>
 
@@ -852,7 +853,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     runGlobalCustomizationScripts();
 
-    writeSceneDocumentation();
+    _writeDocumentationTask = std::async(&OpenSpaceEngine::writeSceneDocumentation, this);
 
     LTRACE("OpenSpaceEngine::loadSingleAsset(end)");
 }
@@ -1013,6 +1014,18 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
     std::string path = global::configuration.documentation.path;
     if (!path.empty()) {
+        std::future<std::string> root = std::async(
+            &properties::PropertyOwner::generateJson,
+            &global::rootPropertyOwner
+        );
+        
+        std::future<std::string> scene = std::async(
+            &properties::PropertyOwner::generateJson,
+            _scene.get()
+        );
+
+
+
         path = absPath(path) + "/";
         _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
         _documentationJson += global::keybindingManager.jsonName() + "\",";
@@ -1026,11 +1039,11 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Properties\",";
         _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
-        _documentationJson += "\",\"data\":" + global::rootPropertyOwner.generateJson();
+        _documentationJson += "\",\"data\":" + root.get();
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Graph Information\",";
         _documentationJson += "\"identifier\":\"propertylist";
-        _documentationJson += "\",\"data\":" + _scene->generateJson();
+        _documentationJson += "\",\"data\":" + scene.get();
         _documentationJson += "}";
 
         //add templates for the jsons we just registered
@@ -1149,7 +1162,14 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     const bool updated = _assetManager->update();
     if (updated) {
-        writeSceneDocumentation();
+        if (_writeDocumentationTask.valid()) {
+            // If there still is a documentation creation task the previous frame, we need
+            // to wait for it to finish first, or else we might write to the same file
+            _writeDocumentationTask.wait();
+        }
+        _writeDocumentationTask = std::async(
+            &OpenSpaceEngine::writeSceneDocumentation, this
+        );
     }
 
     if (!global::windowDelegate.isMaster()) {

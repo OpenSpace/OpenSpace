@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/glm.h>
 #include <sstream>
 
@@ -170,6 +171,8 @@ KeybindingManager::keyBindings() const
 }
 
 std::string KeybindingManager::generateJson() const {
+    ZoneScoped
+
     std::stringstream json;
     json << "[";
     bool first = true;
