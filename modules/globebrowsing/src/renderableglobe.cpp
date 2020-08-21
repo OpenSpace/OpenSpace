@@ -923,21 +923,6 @@ void RenderableGlobe::update(const UpdateData& data) {
         _shadowComponent.update(data);
     }
 
-    _layerManager.update();
-
-    if (_nLayersIsDirty) {
-        std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
-            _layerManager.layerGroups();
-        _generalProperties.nActiveLayers = std::accumulate(
-            lgs.begin(),
-            lgs.end(),
-            0,
-            [](int lhs, LayerGroup* lg) {
-                return lhs + static_cast<int>(lg->activeLayers().size());
-            }
-        );
-        _nLayersIsDirty = false;
-    }
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {
@@ -969,6 +954,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                                    bool renderGeomOnly)
 {
     ZoneScoped
+
+    _layerManager.update();
+
+    if (_nLayersIsDirty) {
+        std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
+            _layerManager.layerGroups();
+        _generalProperties.nActiveLayers = std::accumulate(
+            lgs.begin(),
+            lgs.end(),
+            0,
+            [](int lhs, LayerGroup* lg) {
+            return lhs + static_cast<int>(lg->activeLayers().size());
+        }
+        );
+        _nLayersIsDirty = false;
+    }
 
     if (_shadersNeedRecompilation) {
         recompileShaders();
