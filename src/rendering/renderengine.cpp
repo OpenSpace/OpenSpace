@@ -389,6 +389,8 @@ RenderEngine::RenderEngine()
 RenderEngine::~RenderEngine() {} // NOLINT
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
+    ZoneScoped
+
     _rendererImplementation = rendererFromString(renderingMethod);
 
     std::unique_ptr<Renderer> newRenderer = nullptr;
@@ -486,10 +488,6 @@ void RenderEngine::initializeGL() {
     setRendererFromString(renderingMethod);
 
 
-
-    // TODO:    Fix the power scaled coordinates in such a way that these
-    //            values can be set to more realistic values
-
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
@@ -498,19 +496,38 @@ void RenderEngine::initializeGL() {
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
 
-    constexpr const float FontSizeFrameinfo = 32.f;
-    _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
-    constexpr const float FontSizeTime = 15.f;
-    _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
-    constexpr const float FontSizeMono = 10.f;
-    _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
-    constexpr const float FontSizeLight = 8.f;
-    _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+    {
+        ZoneScopedN("Font: Mono")
+        TracyGpuZone("Font: Mono")
+        constexpr const float FontSizeFrameinfo = 32.f;
+        _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
+    }
+    {
+        ZoneScopedN("Font: Date")
+        TracyGpuZone("Font: Date")
+        constexpr const float FontSizeTime = 15.f;
+        _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
+    }
+    {
+        ZoneScopedN("Font: Info")
+        TracyGpuZone("Font: Info")
+        constexpr const float FontSizeMono = 10.f;
+        _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
+    }
+    {
+        ZoneScopedN("Font: Log")
+        TracyGpuZone("Font: Log")
+        constexpr const float FontSizeLight = 8.f;
+        _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+    }
 
-    LINFO("Initializing Log");
-    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
-    _log = log.get();
-    ghoul::logging::LogManager::ref().addLog(std::move(log));
+    {
+        ZoneScopedN("Log")
+        LINFO("Initializing Log");
+        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        _log = log.get();
+        ghoul::logging::LogManager::ref().addLog(std::move(log));
+    }
 
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
@@ -1101,6 +1118,8 @@ void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
  * Set renderer
  */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
+    ZoneScoped
+
     if (_renderer) {
         _renderer->deinitialize();
     }

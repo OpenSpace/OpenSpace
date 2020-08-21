@@ -219,10 +219,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::initializeGL.emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(
-            _tileCacheSizeMB
-        );
-        addPropertySubOwner(*_tileCache);
+        _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
+        addPropertySubOwner(_tileCache.get());
 
         tileprovider::initializeDefaultTile();
 

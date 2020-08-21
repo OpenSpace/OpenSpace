@@ -162,6 +162,7 @@ namespace openspace {
 
 void FramebufferRenderer::initialize() {
     ZoneScoped
+    TracyGpuZone("Rendering initialize");
 
     LDEBUG("Initializing FramebufferRenderer");
 
@@ -479,6 +480,9 @@ void FramebufferRenderer::initialize() {
 }
 
 void FramebufferRenderer::deinitialize() {
+    ZoneScoped
+    TracyGpuZone("Renderer deinitialize")
+
     LINFO("Deinitializing FramebufferRenderer");
 
     glDeleteFramebuffers(1, &_gBuffers.framebuffer);
@@ -523,6 +527,9 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
 }
 
 void FramebufferRenderer::applyTMO(float blackoutFactor) {
+    ZoneScoped
+    TracyGpuZone("applyTMO")
+
     _hdrFilteringProgram->activate();
 
     ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
@@ -797,6 +804,9 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
+    ZoneScoped
+    TracyGpuZone("Renderer updateResolution")
+
     glBindTexture(GL_TEXTURE_2D, _gBuffers.colorTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -983,6 +993,8 @@ void FramebufferRenderer::updateResolution() {
 }
 
 void FramebufferRenderer::updateRaycastData() {
+    ZoneScoped
+
     _raycastData.clear();
     _exitPrograms.clear();
     _raycastPrograms.clear();
@@ -993,6 +1005,8 @@ void FramebufferRenderer::updateRaycastData() {
 
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
+        ZoneScopedN("raycaster")
+
         RaycastData data = { nextId++, "Helper" };
 
         const std::string& vsPath = raycaster->boundsVertexShaderPath();
@@ -1107,6 +1121,8 @@ void FramebufferRenderer::updateDeferredcastData() {
 
 
 void FramebufferRenderer::updateHDRAndFiltering() {
+    ZoneScoped
+
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
         absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
@@ -1115,6 +1131,8 @@ void FramebufferRenderer::updateHDRAndFiltering() {
 }
 
 void FramebufferRenderer::updateFXAA() {
+    ZoneScoped
+
     _fxaaProgram = ghoul::opengl::ProgramObject::Build(
         "FXAA Program",
         absPath("${SHADERS}/framebuffer/fxaa.vert"),
@@ -1123,7 +1141,9 @@ void FramebufferRenderer::updateFXAA() {
 }
 
 void FramebufferRenderer::updateDownscaledVolume() {
-    _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
+    ZoneScoped
+        
+        _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
@@ -1533,6 +1553,8 @@ void FramebufferRenderer::enableFXAA(bool enable) {
 }
 
 void FramebufferRenderer::updateRendererData() {
+    ZoneScoped
+
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("hdrExposure", std::to_string(_hdrExposure));
