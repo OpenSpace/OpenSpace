@@ -289,6 +289,7 @@ private:
     bool _chunkCornersDirty = true;
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
+    bool _layerManagerDirty = true;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;

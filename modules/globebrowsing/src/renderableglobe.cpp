@@ -923,6 +923,20 @@ void RenderableGlobe::update(const UpdateData& data) {
         _shadowComponent.update(data);
     }
 
+    // abock (2020-08-21)
+    // This is a bit nasty every since we removed the second update call from the render
+    // loop. The problem is when we enable a new layer, the dirty flags above will be set
+    // to true, but the update method hasn't run yet.  So we need to move the layerManager
+    // update method to the render function call, but we don't want to *actually* update
+    // the layers once per render call; hence this nasty dirty flag
+    //
+    // How it is without in the frame when we enable a layer:
+    //
+    // RenderableGlobe::update() // updated with the old number of layers
+    // // Lua script to enable layer is executed and sets the dirty flags
+    // RenderableGlobe::render() // rendering with the new number of layers but the
+    //                           // LayerManager hasn't updated yet :o
+    _layerManagerDirty = true;
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {
@@ -955,7 +969,11 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 {
     ZoneScoped
 
-    _layerManager.update();
+
+    if (_layerManagerDirty) {
+        _layerManager.update();
+        _layerManagerDirty = false;
+    }
 
     if (_nLayersIsDirty) {
         std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
