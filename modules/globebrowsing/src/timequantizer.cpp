@@ -577,9 +577,9 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, DateTime& unQ, dou
             const double addToTime = std::round(error) * 86400;
             Time testDay(quantized.J2000() + addToTime);
 
-            char Buffer[24];
+            char Buffer[25];
             testDay.ISO8601(Buffer);
-            quantized.setTime(std::string_view(Buffer, 24));
+            quantized.setTime(std::string_view(Buffer, 25));
             quantized.setHour(originalHour);
             quantized.setMinute(originalMinute);
             quantized.setSecond(originalSecond);

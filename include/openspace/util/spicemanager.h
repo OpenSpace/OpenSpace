@@ -499,7 +499,7 @@ public:
         const char (&format)[N] = "YYYY MON DDTHR:MN:SC.### ::RND") const
     {
         static_assert(N != 0, "Format must not be empty");
-        ghoul_assert(N > bufferSize - 1, "Buffer size too small");
+        ghoul_assert(N >= bufferSize - 1, "Buffer size too small");
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
