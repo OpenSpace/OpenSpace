@@ -160,7 +160,7 @@ private:
      * allows culling of the <code>Chunk</code>s in question.
      */
     bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
-        const BoundingHeights& heights) const;
+        const BoundingHeights& heights, const glm::dmat4& mvp) const;
 
     /**
      * Gets the desired level which can be used to determine if a chunk should split
@@ -222,7 +222,7 @@ private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
         bool renderBounds, bool renderAABB) const;
 
-    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData, const glm::dmat4& mvp) const;
     bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights) const;
 
@@ -245,8 +245,8 @@ private:
 
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
-    bool updateChunkTree(Chunk& cn, const RenderData& data);
-    void updateChunk(Chunk& chunk, const RenderData& data) const;
+    bool updateChunkTree(Chunk& cn, const RenderData& data, const glm::dmat4& mvp);
+    void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
     Ellipsoid _ellipsoid;

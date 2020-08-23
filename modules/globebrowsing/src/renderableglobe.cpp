@@ -1076,20 +1076,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _localRenderer.updatedSinceLastCall = false;
     }
 
+    // Calculate the MVP matrix
+    const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
+    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+        viewTransform;
+    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
     _allChunksAvailable = true;
-    updateChunkTree(_leftRoot, data);
-    updateChunkTree(_rightRoot, data);
+    updateChunkTree(_leftRoot, data, mvp);
+    updateChunkTree(_rightRoot, data, mvp);
     _chunkCornersDirty = false;
     _iterationsOfAvailableData =
         (_allChunksAvailable ? _iterationsOfAvailableData + 1 : 0);
     _iterationsOfUnavailableData =
         (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
 
-    // Calculate the MVP matrix
-    const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-        viewTransform;
-    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
 
     //
     // Setting uniforms that don't change between chunks but are view dependent
@@ -1885,12 +1887,13 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 
 bool RenderableGlobe::testIfCullable(const Chunk& chunk,
                                      const RenderData& renderData,
-                                     const BoundingHeights& heights) const
+                                     const BoundingHeights& heights,
+                                     const glm::dmat4& mvp) const
 {
     ZoneScoped
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData));
+           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -2370,22 +2373,17 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
-                                          const RenderData& renderData) const
+                                          const RenderData& renderData,
+                                          const glm::dmat4& mvp) const
 {
     ZoneScoped
-
-    // Calculate the MVP matrix
-    const glm::dmat4 viewTransform = glm::dmat4(renderData.camera.combinedViewMatrix());
-    const glm::dmat4 modelViewProjectionTransform = glm::dmat4(
-        renderData.camera.sgctInternal.projectionMatrix()
-    ) * viewTransform * _cachedModelTransform;
 
     const std::array<glm::dvec4, 8>& corners = chunk.corners;
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
     for (size_t i = 0; i < 8; ++i) {
-        const glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
+        const glm::dvec4 cornerClippingSpace = mvp * corners[i];
         const glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
         );
@@ -2523,7 +2521,9 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
     cn.children.fill(nullptr);
 }
 
-bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
+bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
+                                      const glm::dmat4& mvp)
+{
     ZoneScoped
 
     // abock:  I tried turning this into a queue and use iteration, rather than recursion
@@ -2533,7 +2533,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     //         In addition, this didn't even improve performance ---  2018-10-04
     if (isLeaf(cn)) {
         ZoneScopedN("leaf")
-        updateChunk(cn, data);
+        updateChunk(cn, data, mvp);
 
         if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
@@ -2549,13 +2549,13 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         ZoneScopedN("!leaf")
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
-            if (updateChunkTree(*cn.children[i], data)) {
+            if (updateChunkTree(*cn.children[i], data, mvp)) {
                 requestedMergeMask |= (1 << i);
             }
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        updateChunk(cn, data);
+        updateChunk(cn, data, mvp);
 
         if (allChildrenWantsMerge && (cn.status != Chunk::Status::WantSplit)) {
             mergeChunkNode(cn);
@@ -2571,7 +2571,9 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     }
 }
 
-void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
+void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data,
+                                  const glm::dmat4& mvp) const
+{
     ZoneScoped
 
     const BoundingHeights& heights = boundingHeightsForChunk(chunk, _layerManager);
@@ -2584,7 +2586,7 @@ void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
         // The flag gets set to false globally after the updateChunkTree calls
     }
 
-    if (testIfCullable(chunk, data, heights)) {
+    if (testIfCullable(chunk, data, heights, mvp)) {
         chunk.isVisible = false;
         chunk.status = Chunk::Status::WantMerge;
     }

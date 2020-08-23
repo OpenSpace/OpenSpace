@@ -939,10 +939,11 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
 
     switch (tp.type) {
         case Type::DefaultTileProvider: {
+            ZoneScopedN("Type::DefaultTileProvider")
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
                 if (tileIndex.level > maxLevel(t)) {
-                    return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
+                    return Tile { nullptr, std::nullopt, Tile::Status::OutOfRange };
                 }
                 const cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
                 Tile tile = t.tileCache->get(key);
@@ -958,10 +959,12 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             }
         }
         case Type::SingleImageTileProvider: {
+            ZoneScopedN("Type::SingleImageTileProvider")
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
             return t.tile;
         }
         case Type::SizeReferenceTileProvider: {
+            ZoneScopedN("Type::SizeReferenceTileProvider")
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
 
             const GeodeticPatch patch(tileIndex);
@@ -1002,6 +1005,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             return tile(t, tileIndex);
         }
         case Type::TileIndexTileProvider: {
+            ZoneScopedN("Type::TileIndexTileProvider")
             TileIndexTileProvider& t = static_cast<TileIndexTileProvider&>(tp);
             t.text = fmt::format(
                 "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
@@ -1016,12 +1020,14 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             return tile(t, tileIndex);
         }
         case Type::ByIndexTileProvider: {
+            ZoneScopedN("Type::ByIndexTileProvider")
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
             const auto it = t.tileProviderMap.find(tileIndex.hashKey());
             const bool hasProvider = it != t.tileProviderMap.end();
             return hasProvider ? tile(*it->second, tileIndex) : Tile();
         }
         case Type::ByLevelTileProvider: {
+            ZoneScopedN("Type::ByLevelTileProvider")
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             TileProvider* provider = levelProvider(t, tileIndex.level);
             if (provider) {
@@ -1032,6 +1038,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             }
         }
         case Type::TemporalTileProvider: {
+            ZoneScopedN("Type::TemporalTileProvider")
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
                 ensureUpdated(t);
