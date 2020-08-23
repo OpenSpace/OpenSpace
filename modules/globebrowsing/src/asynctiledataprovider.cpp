@@ -59,6 +59,8 @@ const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
+    ZoneScoped
+
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
         auto job = std::make_unique<TileLoadJob>(*_rawTileDataReader, tileIndex);
         _concurrentJobManager.enqueueJob(std::move(job), tileIndex.hashKey());
@@ -97,6 +99,8 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
 }
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
+    ZoneScoped
+
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
     const bool alreadyEnqueued = _concurrentJobManager.touch(tileIndex.hashKey());
     // Early out so we don't need to check the already enqueued requests
