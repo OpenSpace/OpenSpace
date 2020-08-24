@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,31 +33,30 @@
 
 namespace openspace::kameleonvolume {
 
-    class KameleonVolumeToRawTask : public Task {
-    public:
-        KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
+class KameleonVolumeToRawTask : public Task {
+public:
+    KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
 
-        std::string description() override;
-        void perform(const Task::ProgressCallback& progressCallback) override;
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
 
-        static documentation::Documentation documentation();
+    static documentation::Documentation documentation();
 
-    private:
-        std::string _inputPath;
-        std::string _rawVolumeOutputPath;
-        std::string _dictionaryOutputPath;
+private:
+    std::string _inputPath;
+    std::string _rawVolumeOutputPath;
+    std::string _dictionaryOutputPath;
 
-        std::string _time;
-        std::string _variable;
-        std::vector<std::string> _variableVector;
-        glm::uvec3 _dimensions;
-        bool _autoDomainBounds = false;
-        glm::vec3 _lowerDomainBound;
-        glm::vec3 _upperDomainBound;
-        float _innerRadialLimit;
-        std::string _visUnit;
-        bool _factorRSquared = false;
-    };
+    std::string _variable;
+    std::vector<std::string> _variableVector;
+    std::string _units;
+    glm::uvec3 _dimensions;
+    bool _autoDomainBounds = false;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+    float _innerRadialLimit;
+    bool _factorRSquared = false;
+};
 
 } // namespace openspace::kameleon
 

@@ -22,8 +22,8 @@ debugHelper.registerCartesianAxes(asset, {
 })
 
 debugHelper.registerCartesianAxes(asset, {
-	Parent = sun_transforms.SunIAU.Identifier,
-	Scale = sunRadius * 300
+    Parent = sun_transforms.SunIAU.Identifier,
+    Scale = sunRadius * 300
 })
 
 --debugHelper.registerCartesianAxes(asset, {
@@ -32,6 +32,6 @@ debugHelper.registerCartesianAxes(asset, {
 --})
 
 debugHelper.registerCartesianAxes(asset, {
-    Parent = sun_mas.HNMReferenceFrame.Identifier,
-    Scale = sunRadius * 300
+    Parent = sun_transforms.SolarSystemBarycenter.Identifier,
+    Scale = sunRadius * 100
 })

@@ -1,12 +1,3 @@
-asset.info = {
-    Name = "Predictive Science Inc. MAS Bastille Day Textures",
-    Version = "1.0",
-    Description = " Magnetograms of the sun ",
-    Author = "OpenSpace team, ccmc",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
-}
-
 local TexturesPath = asset.syncedResource({
     Name = "PREDSCI MAS Bastille Day Textures",
     Type = "HttpSynchronization",
@@ -15,3 +6,12 @@ local TexturesPath = asset.syncedResource({
  })
 
 asset.export("TexturesPath", TexturesPath)
+
+asset.meta = {
+    Name = "Predictive Science Inc. MAS Bastille Day Textures",
+    Version = "1.0",
+    Description = " Magnetograms of the sun",
+    Author = "OpenSpace team",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}
