@@ -127,6 +127,16 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "in one second of real time"
             },
             {
+                "setDeltaTimeSteps",
+                &luascriptfunctions::time_setDeltaTimeSteps,
+                {},
+                "List of numbers",
+                "Sets the list of discrete delta time steps for the simulation speed "
+                "that can be quickly jumped between. The list will be sorted to be in "
+                "increasing order. A negative verison of each specified time step will "
+                "be added per default as well."
+            },
+            {
                 "deltaTime",
                 &luascriptfunctions::time_deltaTime,
                 {},
@@ -166,31 +176,74 @@ scripting::LuaLibrary Time::luaLibrary() {
                 &luascriptfunctions::time_interpolateTimeRelative,
                 {},
                 "number [, number]",
-                "Increments the current simulation time "
-                "by the specified number of seconds."
+                "Increments the current simulation time by the specified number of "
+                "seconds. If a second input value is given, the interpolation is done "
+                "over the specified number of seconds."
             },
             {
                 "interpolateDeltaTime",
                 &luascriptfunctions::time_interpolateDeltaTime,
                 {},
-                "number",
-                "Sets the amount of simulation time that happens "
-                "in one second of real time"
+                "number [, number]",
+                "Sets the amount of simulation time that happens in one second of real "
+                "time. If a second input value is given, the interpolation is done "
+                "over the specified number of seconds."
+            },
+            {
+                "setNextDeltaTimeStep",
+                &luascriptfunctions::time_setNextDeltaTimeStep,
+                {},
+                "",
+                "Immediately set the simulation speed to the first delta time step in "
+                "the list that is larger than the current choice of simulation speed, "
+                "if any."
+            },
+            {
+                "setPreviousDeltaTimeStep",
+                &luascriptfunctions::time_setPreviousDeltaTimeStep,
+                {},
+                "",
+                "Immediately set the simulation speed to the first delta time step in "
+                "the list that is smaller than the current choice of simulation speed. "
+                "if any."
+            },
+            {
+                "interpolateNextDeltaTimeStep",
+                &luascriptfunctions::time_interpolateNextDeltaTimeStep,
+                {},
+                "[number]",
+                "Interpolate the simulation speed to the first delta time step in the "
+                "list that is larger than the current simulation speed, if any. If an "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
+            },
+            {
+                "interpolatePreviousDeltaTimeStep",
+                &luascriptfunctions::time_interpolatePreviousDeltaTimeStep,
+                {},
+                "[number]",
+                "Interpolate the simulation speed to the first delta time step in the "
+                "list that is smaller than the current simulation speed, if any. If an "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
             },
             {
                 "interpolatePause",
                 &luascriptfunctions::time_interpolatePause,
                 {},
-                "bool",
-                "Pauses the simulation time or restores the delta time"
+                "bool [, number]",
+                "Pauses the simulation time or restores the delta time. If a second "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
             },
             {
                 "interpolateTogglePause",
                 &luascriptfunctions::time_interpolateTogglePause,
                 {},
-                "",
+                "[number]",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
+                " and restoring it afterwards. If an input value is given, the "
+                "interpolation is done over the specified number of seconds."
             },
             {
                 "currentTime",
