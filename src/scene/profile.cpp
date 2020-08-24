@@ -985,7 +985,7 @@ std::string Profile::convertToScene() const {
     {
         std::string nodes;
         for (const std::string& n : markNodes) {
-            nodes += fmt::format("[[ {} ]],", n);
+            nodes += fmt::format("[[{}]],", n);
         }
         output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
     }

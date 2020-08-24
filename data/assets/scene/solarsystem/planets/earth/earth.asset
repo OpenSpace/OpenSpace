@@ -2,7 +2,7 @@ local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 local labelsPath = asset.require('./earth_globelabels').LabelsPath
 
-asset.request('./trail')
+asset.require('./trail')
 
 -- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
 local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }

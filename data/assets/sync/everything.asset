@@ -4,7 +4,7 @@
 
 local assetHelper = asset.require('../util/asset_helper')
 
-assetHelper.requestAll(asset, '../customization')
-assetHelper.requestAll(asset, '../scene')
-assetHelper.requestAll(asset, '../spice')
-assetHelper.requestAll(asset, '../util')
+assetHelper.requireAll(asset, '../customization')
+assetHelper.requireAll(asset, '../scene')
+assetHelper.requireAll(asset, '../spice')
+assetHelper.requireAll(asset, '../util')

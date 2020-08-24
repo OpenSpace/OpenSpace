@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./../transforms')
 asset.require("spice/base")
-asset.request('./../trail')
+asset.require('../trail')
 local labelsPath = asset.require('./../pluto_globelabels').LabelsPath
 
 
