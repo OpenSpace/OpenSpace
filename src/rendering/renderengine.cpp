@@ -1368,6 +1368,28 @@ void RenderEngine::renderVersionInformation() {
             glm::vec4(0.5, 0.5, 0.5, 1.f)
         );
     }
+
+#ifdef TRACY_ENABLE
+    {
+        // If we have Tracy enabled, we should inform the user about it that the
+        // application will crash after a while if no profiler is attached
+
+        ZoneScopedN("Tracy Information")
+
+        const glm::vec2 tracyBox = _fontInfo->boundingBox("TRACY PROFILING ENABLED");
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x - tracyBox.x - 10.f,
+            versionBox.y + commitBox.y + 5.f
+        );
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            penPosition,
+            "TRACY PROFILING ENABLED",
+            glm::vec4(0.8f, 0.2f, 0.15f, 1.f)
+        );
+    }
+#endif // TRACY_ENABLE
+
 }
 
 void RenderEngine::renderScreenLog() {

@@ -191,12 +191,6 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(*_luaState, &assetloader::require, 1);
     lua_setfield(*_luaState, assetTableIndex, RequireFunctionName);
 
-    // Register request function
-    // Dependency request(string path)
-    lua_pushlightuserdata(*_luaState, asset);
-    lua_pushcclosure(*_luaState, &assetloader::request, 1);
-    lua_setfield(*_luaState, assetTableIndex, RequestFunctionName);
-
     // Register exists function
     // bool exists(string path)
     lua_pushlightuserdata(*_luaState, asset);
@@ -473,14 +467,6 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
     return 0;
 }
 
-std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
-    std::shared_ptr<Asset> asset = getAsset(identifier);
-    Asset* parent = _currentAsset;
-    parent->request(asset);
-    assetRequested(parent, asset);
-    return asset;
-}
-
 void AssetLoader::unrequest(const std::string& identifier) {
     std::shared_ptr<Asset> asset = has(identifier);
     Asset* parent = _currentAsset;
@@ -501,7 +487,11 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
     ZoneScoped
 
     setCurrentAsset(_rootAsset.get());
-    return request(identifier);
+    std::shared_ptr<Asset> asset = getAsset(identifier);
+    Asset* parent = _currentAsset;
+    parent->request(asset);
+    assetRequested(parent, asset);
+    return asset;
 }
 
 void AssetLoader::remove(const std::string& identifier) {
@@ -712,32 +702,6 @@ int AssetLoader::requireLua(Asset* dependant) {
 
     ghoul_assert(lua_gettop(*_luaState) == 2, "Incorrect number of items left on stack");
     return 2;
-}
-
-int AssetLoader::requestLua(Asset* parent) {
-    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::request");
-
-    const std::string assetName = luaL_checkstring(*_luaState, 1);
-    lua_settop(*_luaState, 0);
-
-    std::shared_ptr<Asset> child = request(assetName);
-
-    addLuaDependencyTable(parent, child.get());
-
-    // Get the dependency table
-    lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-    lua_getfield(*_luaState, -1, child->id().c_str());
-    lua_getfield(*_luaState, -1, DependantsTableName);
-    lua_getfield(*_luaState, -1, parent->id().c_str());
-    const int dependencyTableIndex = lua_gettop(*_luaState);
-
-    lua_pushvalue(*_luaState, dependencyTableIndex);
-
-    lua_replace(*_luaState, 1);
-    lua_settop(*_luaState, 1);
-
-    ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
-    return 1;
 }
 
 int AssetLoader::existsLua(Asset*) {

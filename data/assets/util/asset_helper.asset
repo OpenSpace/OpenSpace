@@ -132,21 +132,6 @@ local requireAll = function (sceneAsset, directory)
     return result
 end
 
-local requestAll = function (sceneAsset, directory)
-    function string.ends(String,End)
-       return End=='' or string.sub(String,-string.len(End))==End
-    end
-
-    local files = openspace.walkDirectoryFiles(sceneAsset.localResource('') .. directory, true)
-    for _, file in pairs(files) do
-        if file:ends('.asset') then
-            openspace.printDebug("Requesting: " .. file:sub(file:find(directory), -7))
-            sceneAsset.request(file:sub(file:find(directory), -7))
-        end
-    end
-end
-
-
 local getDefaultLightSources = function (solarSystemBarycenterIdentifier)
     local sourceList = {
         {
@@ -203,6 +188,5 @@ asset.export("registerScreenSpaceRenderables", registerScreenSpaceRenderables)
 asset.export("registerSpiceKernels", registerSpiceKernels)
 asset.export("registerDashboardItems", registerDashboardItems)
 asset.export("requireAll", requireAll)
-asset.export("requestAll", requestAll)
 asset.export("getDefaultLightSources", getDefaultLightSources)
 asset.export("createModelPart", createModelPart)
