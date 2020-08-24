@@ -47,14 +47,15 @@ namespace openspace::kameleonvolume {
         std::string _rawVolumeOutputPath;
         std::string _dictionaryOutputPath;
 
+        std::string _time;
         std::string _variable;
         std::vector<std::string> _variableVector;
-        std::string _units;
         glm::uvec3 _dimensions;
         bool _autoDomainBounds = false;
         glm::vec3 _lowerDomainBound;
         glm::vec3 _upperDomainBound;
         float _innerRadialLimit;
+        std::string _visUnit;
         bool _factorRSquared = false;
     };
 

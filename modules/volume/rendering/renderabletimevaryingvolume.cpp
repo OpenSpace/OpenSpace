@@ -52,6 +52,7 @@ namespace {
 
     const char* KeyStepSize = "StepSize";
     const char* KeyGridType = "GridType";
+    const char* KeyOpacity = "Opacity";
     const char* KeyTransferFunction = "TransferFunction";
     const char* KeySourceDirectory = "SourceDirectory";
 
@@ -117,6 +118,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "opacity",
+        "Opacity",
+        "" // @TODO Missing documentation
+    };
+
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
         "rNormalization",
         "Radius normalization",
@@ -173,6 +180,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
+    , _opacity(OpacityInfo, 10.0f, 0.f, VolumeMaxOpacity)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -206,6 +214,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _stepSize = dictionary.value<float>(KeyStepSize);
     }
 
+    if (dictionary.hasValue<float>(KeyOpacity)) {
+        _opacity = dictionary.value<float>(KeyOpacity) * VolumeMaxOpacity;
+    }
+    
     if (dictionary.hasKeyAndValue<float>(KeySecondsBefore)) {
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
     }
@@ -260,7 +272,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
         t.rawVolume = reader.read();
 
         float min = t.metadata.minValue;
-        float diff = t.metadata.maxValue - t.metadata.minValue;
+        float diff = t.metadata.maxValue - min;
         float* data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
@@ -469,7 +481,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity * VolumeMaxOpacity);
+        _raycaster->setOpacity(_opacity);
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

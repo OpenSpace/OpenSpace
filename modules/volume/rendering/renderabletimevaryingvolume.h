@@ -89,6 +89,7 @@ private:
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
+    properties::FloatProperty _opacity;
     properties::FloatProperty _rNormalization;
     properties::FloatProperty _rUpperBound;
     properties::FloatProperty _secondsBefore;

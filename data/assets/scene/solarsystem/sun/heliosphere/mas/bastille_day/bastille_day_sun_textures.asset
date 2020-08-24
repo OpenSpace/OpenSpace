@@ -2,7 +2,7 @@ asset.info = {
     Name = "Predictive Science Inc. MAS Bastille Day Textures",
     Version = "1.0",
     Description = " Magnetograms of the sun ",
-    Author = "OpenSpace team",
+    Author = "OpenSpace team, ccmc",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }

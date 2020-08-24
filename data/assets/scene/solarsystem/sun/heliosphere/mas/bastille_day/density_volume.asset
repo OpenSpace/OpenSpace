@@ -2,7 +2,7 @@ asset.info = {
     Name = "Predictive Science Inc. Volume Rendering Bastille Day",
     Version = "1.0",
     Description = " Volumetric rendering for the bastille day CME event ",
-    Author = "OpenSpace team",
+    Author = "OpenSpace team, ccmc",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }
@@ -22,17 +22,19 @@ local sunRadius = 6.957E8
 
 local densityVolume = {
     Identifier = "MAS_MHD_density",
-    -- wrong Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    -- wrong     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    -- right 
     Parent = sunTransforms.SunIAU.Identifier,
     -- wrong Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
         StepSize = 0.004,
-        Opacity = 0.3,
-        TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
+        --Enabled = false,
+        --Opacity = 0.3,
+        TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"), --test1
         SourceDirectory = densityDirectory,
-        LowerValueBound = 0,
-        UpperValueBound = 1,
+        --LowerValueBound = 0,
+        --UpperValueBound = 1,
         GridType = "Spherical",
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60
@@ -44,8 +46,11 @@ local densityVolume = {
         },
         Rotation = {
             Type = "FixedRotation", --LuaRotation
+--            XAxis = {-1.0, 0.0, 0.0}, 
+--            YAxis = {0.0, -1.0, 0.0},
+
             XAxis = {0.0, 1.0, 0.0},
-            YAxis = {1.0, 0.0, 0.0},     
+            YAxis = {1.0, 0.0, 0.0},
             ZAxis = {0.0, 0.0, -1.0}
 
             --Script = asset.localResource("kernels/carringtonRotation.lua")

@@ -29,13 +29,17 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/assert.h>
+
 #include <ghoul/glm.h>
 #include <fstream>
 #include <sstream>
 
 namespace {
+    constexpr const char* _loggerCat = "KameleonVolumeToRawTask";
+
     constexpr const char* KeyInput = "Input";
     constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
     constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
@@ -152,6 +156,11 @@ namespace openspace::kameleonvolume {
         _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
         _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
         _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
+        if (dictionary.hasValue<std::string>(KeyTime)) {
+            _time = dictionary.value<std::string>(KeyTime);
+        } else {
+            LWARNING("Time not specified in task file!?");
+        }
 
         if (dictionary.hasValue<std::string>(KeyVariable)) {
             _variable = dictionary.value<std::string>(KeyVariable);
@@ -187,6 +196,10 @@ namespace openspace::kameleonvolume {
         if (!dictionary.getValue<float>(KeyInnerRadialLimit, _innerRadialLimit)) {
             _innerRadialLimit = -1.0;
         }
+        if (!dictionary.getValue<std::string>(KeyVisUnit, _visUnit)) {
+            _visUnit = "amu/cm^3";
+        }
+
     }
 
     std::string KameleonVolumeToRawTask::description() {
@@ -243,15 +256,15 @@ namespace openspace::kameleonvolume {
         ghoul::Dictionary inputMetadata = reader.readMetaData();
         ghoul::Dictionary outputMetadata;
 
-        std::string time = reader.time();
+        // std::string time = reader.time();
         // std::string time = "2000-07-14T10:00:58.848";
 
         // Do not include time offset in time string
-        if (time.back() == 'Z') {
-            time.pop_back();
+        if (_time.back() == 'Z') {
+            _time.pop_back();
         }
 
-        outputMetadata.setValue(KeyTime, time);
+        outputMetadata.setValue(KeyTime, _time);
         outputMetadata.setValue(KeyDimensions, glm::vec3(_dimensions));
         outputMetadata.setValue(KeyLowerDomainBound, _lowerDomainBound);
         outputMetadata.setValue(KeyUpperDomainBound, _upperDomainBound);
@@ -272,7 +285,7 @@ namespace openspace::kameleonvolume {
             );
         outputMetadata.setValue<std::string>(
             KeyVisUnit,
-            static_cast<std::string>(reader.getVisUnit(_variable))
+            static_cast<std::string>(_variable)
             );
 
         std::string metadataString = ghoul::formatLua(outputMetadata);

@@ -11,7 +11,7 @@ local sunRadius = 695508000
 
 local volume = {
     Identifier = "GeneratedVolume",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Parent = transforms.SunIAU.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
         SourceDirectory = asset.localResource("cartesian"),

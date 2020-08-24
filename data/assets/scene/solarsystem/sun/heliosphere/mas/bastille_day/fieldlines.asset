@@ -2,7 +2,7 @@ asset.info = {
     Name = "Predictive Science Inc. Fieldlines Bastille Day",
     Version = "1.0",
     Description = " Magnetic fieldlines for the bastille day CME event ",
-    Author = "OpenSpace team",
+    Author = "OpenSpace team, ccmc",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }
@@ -28,8 +28,8 @@ local sunRadius = 6.957E8
 -- Fieldlies from binaries
 local fieldlines = {
     Identifier = "MAS_MHD_Fieldlines",
-    --Parent = transforms.HNMReferenceFrame.Identifier,
-    Parent = sunTransforms.SunIAU.Identifier,
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    --Parent = sunTransforms.SunIAU.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
@@ -63,6 +63,20 @@ local fieldlines = {
             Type = "StaticScale",
             Scale = sunRadius
         },
+        Rotation = { 
+            -- This rotation matrix is derived from the fact that the fieldlines were 
+            -- seeded in the carrington coordinate system, but then rotate with the heeq-coordinate system.
+            -- In OpenSpace, a HEEQ+180 deg offset coordinate system is supported (see renderable parent node).
+            -- At the reference time (when the fieldlines were seeded), 
+            -- the carrington longitude at earth was 309.3 and the heeq longitude at earth is always 0.
+            -- The angle difference is therefor 0-309.3 or 360-309.3 =(1) -309.3 or =(2) 50.7
+            -- With adding or subtracting the 180 degree offset, it result in either =(1) -129.3 or =(2) 230.7 deg.
+            -- Rotation around z with these angles both result in the same matrix:
+            Type = "FixedRotation",
+            XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
+            YAxis = {0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0},
+            ZAxis = {0.0, 0.0, 1.0}
+        }   
     }
 } 
 

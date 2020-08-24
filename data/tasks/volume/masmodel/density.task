@@ -35,21 +35,869 @@
 --return tasks
 
 
-local length = 1
+local timeVariable = ""
+
+local switch = {
+  [1] = function()
+    timeVariable = "2000-07-14T08:33:37.105"
+  end,
+  [2] = function()
+    timeVariable = "2000-07-14T08:38:26.824"
+  end,
+  [3] = function()
+    timeVariable = "2000-07-14T08:43:15.358"
+  end,
+  [4] = function()
+    timeVariable = "2000-07-14T08:48:04.757"
+  end,
+  [5] = function()
+    timeVariable = "2000-07-14T08:52:53.952"
+  end,
+  [6] = function()
+    timeVariable = "2000-07-14T08:57:42.951"
+  end,
+  [7] = function()
+    timeVariable = "2000-07-14T09:02:33.550"
+  end,
+  [8] = function()
+    timeVariable = "2000-07-14T09:07:22.995"
+  end,
+  [9] = function()
+    timeVariable = "2000-07-14T09:12:10.408"
+  end,
+  [10] = function()
+    timeVariable = "2000-07-14T09:17:00.503"
+  end,
+  [11] = function()
+    timeVariable = "2000-07-14T09:21:49.226"
+  end,
+  [12] = function()
+    timeVariable = "2000-07-14T09:24:14.536"
+  end,
+  [13] = function()
+    timeVariable = "2000-07-14T09:26:37.677"
+  end,
+  [14] = function()
+    timeVariable = "2000-07-14T09:29:02.987"
+  end,
+  [15] = function()
+    timeVariable = "2000-07-14T09:31:28.297"
+  end,
+  [16] = function()
+    timeVariable = "2000-07-14T09:33:51.438"
+  end,
+  [17] = function()
+    timeVariable = "2000-07-14T09:36:16.748"
+  end,
+  [18] = function()
+    timeVariable = "2000-07-14T09:38:42.058"
+  end,
+  [19] = function()
+    timeVariable = "2000-07-14T09:41:05.199"
+  end,
+  [20] = function()
+    timeVariable = "2000-07-14T09:43:30.509"
+  end,
+  [21] = function()
+    timeVariable = "2000-07-14T09:45:55.819"
+  end,
+  [22] = function()
+    timeVariable = "2000-07-14T09:48:18.960"
+  end,
+  [23] = function()
+    timeVariable = "2000-07-14T09:50:44.270"
+  end,
+  [24] = function()
+    timeVariable = "2000-07-14T09:53:09.580"
+  end,
+  [25] = function()
+    timeVariable = "2000-07-14T09:55:32.721"
+  end,
+  [26] = function()
+    timeVariable = "2000-07-14T09:57:58.031"
+  end,
+  [27] = function()
+    timeVariable = "2000-07-14T10:00:23.341"
+  end,
+  [28] = function()
+    timeVariable = "2000-07-14T10:02:46.482"
+  end,
+  [29] = function()
+    timeVariable = "2000-07-14T10:05:11.792"
+  end,
+  [30] = function()
+    timeVariable = "2000-07-14T10:07:37.102"
+  end,
+  [31] = function()
+    timeVariable = "2000-07-14T10:10:00.243"
+  end,
+  [32] = function()
+    timeVariable = "2000-07-14T10:10:30.527"
+  end,
+  [33] = function()
+    timeVariable = "2000-07-14T10:10:58.197"
+  end,
+  [34] = function()
+    timeVariable = "2000-07-14T10:11:26.803"
+  end,
+  [35] = function()
+    timeVariable = "2000-07-14T10:11:55.685"
+  end,
+  [36] = function()
+    timeVariable = "2000-07-14T10:12:24.607"
+  end,
+  [37] = function()
+    timeVariable = "2000-07-14T10:12:53.526"
+  end,
+  [38] = function()
+    timeVariable = "2000-07-14T10:13:22.442"
+  end,
+  [39] = function()
+    timeVariable = "2000-07-14T10:13:51.361"
+  end,
+  [40] = function()
+    timeVariable = "2000-07-14T10:14:20.321"
+  end,
+  [41] = function()
+    timeVariable = "2000-07-14T10:14:49.245"
+  end,
+  [42] = function()
+    timeVariable = "2000-07-14T10:15:18.099"
+  end,
+  [43] = function()
+    timeVariable = "2000-07-14T10:15:47.078"
+  end,
+  [44] = function()
+    timeVariable = "2000-07-14T10:16:15.963"
+  end,
+  [45] = function()
+    timeVariable = "2000-07-14T10:16:44.879"
+  end,
+  [46] = function()
+    timeVariable = "2000-07-14T10:17:13.820"
+  end,
+  [47] = function()
+    timeVariable = "2000-07-14T10:17:42.766"
+  end,
+  [48] = function()
+    timeVariable = "2000-07-14T10:18:11.728"
+  end,
+  [49] = function()
+    timeVariable = "2000-07-14T10:18:40.572"
+  end,
+  [50] = function()
+    timeVariable = "2000-07-14T10:19:09.463"
+  end,
+  [51] = function()
+    timeVariable = "2000-07-14T10:19:38.359"
+  end,
+  [52] = function()
+    timeVariable = "2000-07-14T10:20:07.473"
+  end,
+  [53] = function()
+    timeVariable = "2000-07-14T10:20:36.333"
+  end,
+  [54] = function()
+    timeVariable = "2000-07-14T10:21:05.308"
+  end,
+  [55] = function()
+    timeVariable = "2000-07-14T10:21:34.220"
+  end,
+  [56] = function()
+    timeVariable = "2000-07-14T10:22:03.225"
+  end,
+  [57] = function()
+    timeVariable = "2000-07-14T10:23:15.303"
+  end,
+  [58] = function()
+    timeVariable = "2000-07-14T10:24:27.726"
+  end,
+  [59] = function()
+    timeVariable = "2000-07-14T10:25:39.959"
+  end,
+  [60] = function()
+    timeVariable = "2000-07-14T10:26:52.371"
+  end,
+  [61] = function()
+    timeVariable = "2000-07-14T10:28:04.572"
+  end,
+  [62] = function()
+    timeVariable = "2000-07-14T10:29:16.710"
+  end,
+  [63] = function()
+    timeVariable = "2000-07-14T10:30:29.186"
+  end,
+  [64] = function()
+    timeVariable = "2000-07-14T10:31:41.621"
+  end,
+  [65] = function()
+    timeVariable = "2000-07-14T10:32:53.783"
+  end,
+  [66] = function()
+    timeVariable = "2000-07-14T10:34:05.937"
+  end,
+  [67] = function()
+    timeVariable = "2000-07-14T10:35:18.613"
+  end,
+  [68] = function()
+    timeVariable = "2000-07-14T10:36:30.486"
+  end,
+  [69] = function()
+    timeVariable = "2000-07-14T10:37:43.362"
+  end,
+  [70] = function()
+    timeVariable = "2000-07-14T10:38:55.167"
+  end,
+  [71] = function()
+    timeVariable = "2000-07-14T10:40:07.851"
+  end,
+  [72] = function()
+    timeVariable = "2000-07-14T10:41:19.703"
+  end,
+  [73] = function()
+    timeVariable = "2000-07-14T10:42:32.031"
+  end,
+  [74] = function()
+    timeVariable = "2000-07-14T10:43:44.522"
+  end,
+  [75] = function()
+    timeVariable = "2000-07-14T10:44:57.069"
+  end,
+  [76] = function()
+    timeVariable = "2000-07-14T10:46:09.667"
+  end,
+  [77] = function()
+    timeVariable = "2000-07-14T10:47:21.250"
+  end,
+  [78] = function()
+    timeVariable = "2000-07-14T10:48:33.976"
+  end,
+  [79] = function()
+    timeVariable = "2000-07-14T10:49:46.528"
+  end,
+  [80] = function()
+    timeVariable = "2000-07-14T10:50:58.050"
+  end,
+  [81] = function()
+    timeVariable = "2000-07-14T10:52:10.525"
+  end,
+  [82] = function()
+    timeVariable = "2000-07-14T10:53:22.754"
+  end,
+  [83] = function()
+    timeVariable = "2000-07-14T10:54:35.078"
+  end,
+  [84] = function()
+    timeVariable = "2000-07-14T10:55:47.741"
+  end,
+  [85] = function()
+    timeVariable = "2000-07-14T10:57:00.083"
+  end,
+  [86] = function()
+    timeVariable = "2000-07-14T10:58:12.269"
+  end,
+  [87] = function()
+    timeVariable = "2000-07-14T10:59:24.523"
+  end,
+  [88] = function()
+    timeVariable = "2000-07-14T11:00:37.038"
+  end,
+  [89] = function()
+    timeVariable = "2000-07-14T11:01:49.053"
+  end,
+  [90] = function()
+    timeVariable = "2000-07-14T11:03:01.683"
+  end,
+  [91] = function()
+    timeVariable = "2000-07-14T11:04:14.014"
+  end,
+  [92] = function()
+    timeVariable = "2000-07-14T11:05:26.339"
+  end,
+  [93] = function()
+    timeVariable = "2000-07-14T11:06:38.524"
+  end,
+  [94] = function()
+    timeVariable = "2000-07-14T11:07:50.885"
+  end,
+  [95] = function()
+    timeVariable = "2000-07-14T11:09:03.197"
+  end,
+  [96] = function()
+    timeVariable = "2000-07-14T11:10:15.691"
+  end,
+  [97] = function()
+    timeVariable = "2000-07-14T11:11:27.199"
+  end,
+  [98] = function()
+    timeVariable = "2000-07-14T11:12:39.954"
+  end,
+  [99] = function()
+    timeVariable = "2000-07-14T11:13:52.810"
+  end,
+  [100] = function()
+    timeVariable = "2000-07-14T11:15:03.896"
+  end,
+  [101] = function()
+    timeVariable = "2000-07-14T11:16:16.290"
+  end,
+  [102] = function()
+    timeVariable = "2000-07-14T11:17:28.781"
+  end,
+  [103] = function()
+    timeVariable = "2000-07-14T11:18:41.401"
+  end,
+  [104] = function()
+    timeVariable = "2000-07-14T11:19:54.268"
+  end,
+  [105] = function()
+    timeVariable = "2000-07-14T11:21:06.146"
+  end,
+  [106] = function()
+    timeVariable = "2000-07-14T11:22:18.430"
+  end,
+  [107] = function()
+    timeVariable = "2000-07-14T11:24:43.118"
+  end,
+  [108] = function()
+    timeVariable = "2000-07-14T11:27:07.374"
+  end,
+  [109] = function()
+    timeVariable = "2000-07-14T11:29:31.514"
+  end,
+  [110] = function()
+    timeVariable = "2000-07-14T11:31:57.213"
+  end,
+  [111] = function()
+    timeVariable = "2000-07-14T11:34:21.677"
+  end,
+  [112] = function()
+    timeVariable = "2000-07-14T11:36:45.149"
+  end,
+  [113] = function()
+    timeVariable = "2000-07-14T11:39:10.619"
+  end,
+  [114] = function()
+    timeVariable = "2000-07-14T11:41:35.124"
+  end,
+  [115] = function()
+    timeVariable = "2000-07-14T11:44:00.180"
+  end,
+  [116] = function()
+    timeVariable = "2000-07-14T11:46:24.367"
+  end,
+  [117] = function()
+    timeVariable = "2000-07-14T11:48:48.954"
+  end,
+  [118] = function()
+    timeVariable = "2000-07-14T11:51:14.112"
+  end,
+  [119] = function()
+    timeVariable = "2000-07-14T11:53:37.493"
+  end,
+  [120] = function()
+    timeVariable = "2000-07-14T11:56:02.868"
+  end,
+  [121] = function()
+    timeVariable = "2000-07-14T11:58:27.079"
+  end,
+  [122] = function()
+    timeVariable = "2000-07-14T12:00:52.667"
+  end,
+  [123] = function()
+    timeVariable = "2000-07-14T12:03:16.624"
+  end,
+  [124] = function()
+    timeVariable = "2000-07-14T12:05:41.349"
+  end,
+  [125] = function()
+    timeVariable = "2000-07-14T12:08:05.478"
+  end,
+  [126] = function()
+    timeVariable = "2000-07-14T12:10:29.400"
+  end,
+  [127] = function()
+    timeVariable = "2000-07-14T12:12:55.500"
+  end,
+  [128] = function()
+    timeVariable = "2000-07-14T12:15:19.969"
+  end,
+  [129] = function()
+    timeVariable = "2000-07-14T12:17:44.495"
+  end,
+  [130] = function()
+    timeVariable = "2000-07-14T12:20:09.805"
+  end,
+  [131] = function()
+    timeVariable = "2000-07-14T12:22:32.946"
+  end,
+  [132] = function()
+    timeVariable = "2000-07-14T12:24:58.256"
+  end,
+  [133] = function()
+    timeVariable = "2000-07-14T12:27:23.566"
+  end,
+  [134] = function()
+    timeVariable = "2000-07-14T12:29:46.707"
+  end,
+  [135] = function()
+    timeVariable = "2000-07-14T12:32:12.017"
+  end,
+  [136] = function()
+    timeVariable = "2000-07-14T12:34:37.327"
+  end,
+  [137] = function()
+    timeVariable = "2000-07-14T12:37:00.468"
+  end,
+  [138] = function()
+    timeVariable = "2000-07-14T12:39:25.778"
+  end,  
+  [139] = function()
+    timeVariable = "2000-07-14T12:41:51.088"
+  end,
+  [140] = function()
+    timeVariable = "2000-07-14T12:44:14.229"
+  end,
+  [141] = function()
+    timeVariable = "2000-07-14T12:46:39.539"
+  end,
+  [142] = function()
+    timeVariable = "2000-07-14T12:49:04.849"
+  end,
+  [143] = function()
+    timeVariable = "2000-07-14T12:51:27.990"
+  end,
+  [144] = function()
+    timeVariable = "2000-07-14T12:53:53.300"
+  end,
+  [145] = function()
+    timeVariable = "2000-07-14T12:56:18.610"
+  end,
+  [146] = function()
+    timeVariable = "2000-07-14T12:58:41.751"
+  end,
+  [147] = function()
+    timeVariable = "2000-07-14T13:01:07.061"
+  end,
+  [148] = function()
+    timeVariable = "2000-07-14T13:03:32.371"
+  end,
+  [149] = function()
+    timeVariable = "2000-07-14T13:05:55.512"
+  end,
+  [150] = function()
+    timeVariable = "2000-07-14T13:08:20.822"
+  end,
+  [151] = function()
+    timeVariable = "2000-07-14T13:10:46.132"
+  end,
+  [152] = function()
+    timeVariable = "2000-07-14T13:13:09.273"
+  end,
+  [153] = function()
+    timeVariable = "2000-07-14T13:15:34.583"
+  end,
+  [154] = function()
+    timeVariable = "2000-07-14T13:17:59.893"
+  end,
+  [155] = function()
+    timeVariable = "2000-07-14T13:20:23.034"
+  end,
+  [156] = function()
+    timeVariable = "2000-07-14T13:22:48.344"
+  end,
+  [157] = function()
+    timeVariable = "2000-07-14T13:25:13.654"
+  end,
+  [158] = function()
+    timeVariable = "2000-07-14T13:27:36.795"
+  end,
+  [159] = function()
+    timeVariable = "2000-07-14T13:30:02.105"
+  end,
+  [160] = function()
+    timeVariable = "2000-07-14T13:32:27.415"
+  end,
+  [161] = function()
+    timeVariable = "2000-07-14T13:34:50.556"
+  end,
+  [162] = function()
+    timeVariable = "2000-07-14T13:37:15.866"
+  end,
+  [163] = function()
+    timeVariable = "2000-07-14T13:39:41.176"
+  end,
+  [164] = function()
+    timeVariable = "2000-07-14T13:42:04.317"
+  end,
+  [165] = function()
+    timeVariable = "2000-07-14T13:44:29.627"
+  end,
+  [166] = function()
+    timeVariable = "2000-07-14T13:46:54.937"
+  end,
+  [167] = function()
+    timeVariable = "2000-07-14T13:49:18.078"
+  end,
+  [168] = function()
+    timeVariable = "2000-07-14T13:51:43.388"
+  end,
+  [169] = function()
+    timeVariable = "2000-07-14T13:54:08.698"
+  end,
+  [170] = function()
+    timeVariable = "2000-07-14T13:56:31.839"
+  end,
+  [171] = function()
+    timeVariable = "2000-07-14T13:58:57.149"
+  end,
+  [172] = function()
+    timeVariable = "2000-07-14T14:01:22.459"
+  end,
+  [173] = function()
+    timeVariable = "2000-07-14T14:03:45.600"
+  end,
+  [174] = function()
+    timeVariable = "2000-07-14T14:06:10.910"
+  end,
+  [175] = function()
+    timeVariable = "2000-07-14T14:08:36.220"
+  end,
+  [176] = function()
+    timeVariable = "2000-07-14T14:10:59.361"
+  end,
+  [177] = function()
+    timeVariable = "2000-07-14T14:13:24.671"
+  end,
+  [178] = function()
+    timeVariable = "2000-07-14T14:15:49.981"
+  end,
+  [179] = function()
+    timeVariable = "2000-07-14T14:18:13.122"
+  end,
+  [180] = function()
+    timeVariable = "2000-07-14T14:20:38.432"
+  end,
+  [181] = function()
+    timeVariable = "2000-07-14T14:23:03.742"
+  end,
+  [182] = function()
+    timeVariable = "2000-07-14T14:25:26.883"
+  end,
+  [183] = function()
+    timeVariable = "2000-07-14T14:27:52.193"
+  end,
+  [184] = function()
+    timeVariable = "2000-07-14T14:30:17.503"
+  end,
+  [185] = function()
+    timeVariable = "2000-07-14T14:32:40.644"
+  end,
+  [186] = function()
+    timeVariable = "2000-07-14T14:35:05.954"
+  end,
+  [187] = function()
+    timeVariable = "2000-07-14T14:37:31.264"
+  end,
+  [188] = function()
+    timeVariable = "2000-07-14T14:39:54.405"
+  end,
+  [189] = function()
+    timeVariable = "2000-07-14T14:42:19.715"
+  end,
+  [190] = function()
+    timeVariable = "2000-07-14T14:44:45.025"
+  end,
+  [191] = function()
+    timeVariable = "2000-07-14T14:47:08.166"
+  end,
+  [192] = function()
+    timeVariable = "2000-07-14T14:49:33.476"
+  end,
+  [193] = function()
+    timeVariable = "2000-07-14T14:51:58.786"
+  end,
+  [194] = function()
+    timeVariable = "2000-07-14T14:54:21.927"
+  end,
+  [195] = function()
+    timeVariable = "2000-07-14T14:56:47.237"
+  end,
+  [196] = function()
+    timeVariable = "2000-07-14T14:59:12.547"
+  end,
+  [197] = function()
+    timeVariable = "2000-07-14T15:01:35.688"
+  end,
+  [198] = function()
+    timeVariable = "2000-07-14T15:04:00.998"
+  end,
+  [199] = function()
+    timeVariable = "2000-07-14T15:06:26.308"
+  end,
+  [200] = function()
+    timeVariable = "2000-07-14T15:08:49.449"
+  end,
+  [201] = function()
+    timeVariable = "2000-07-14T15:11:14.759"
+  end,
+  [202] = function()
+    timeVariable = "2000-07-14T15:13:40.069"
+  end,
+  [203] = function()
+    timeVariable = "2000-07-14T15:16:03.210"
+  end,
+  [204] = function()
+    timeVariable = "2000-07-14T15:18:28.520"
+  end,
+  [205] = function()
+    timeVariable = "2000-07-14T15:20:53.830"
+  end,
+  [206] = function()
+    timeVariable = "2000-07-14T15:23:16.971"
+  end,
+  [207] = function()
+    timeVariable = "2000-07-14T15:25:42.281"
+  end,  
+  [208] = function()
+    timeVariable = "2000-07-14T15:28:07.591"
+  end,
+  [209] = function()
+    timeVariable = "2000-07-14T15:30:30.732"
+  end,
+  [210] = function()
+    timeVariable = "2000-07-14T15:32:56.042"
+  end,
+  [211] = function()
+    timeVariable = "2000-07-14T15:35:21.352"
+  end,
+  [212] = function()
+    timeVariable = "2000-07-14T15:37:44.493"
+  end,
+  [213] = function()
+    timeVariable = "2000-07-14T15:40:09.803"
+  end,
+  [214] = function()
+    timeVariable = "2000-07-14T15:42:35.113"
+  end,
+  [215] = function()
+    timeVariable = "2000-07-14T15:44:58.254"
+  end,
+  [216] = function()
+    timeVariable = "2000-07-14T15:47:23.564"
+  end,
+  [217] = function()
+    timeVariable = "2000-07-14T15:49:48.874"
+  end,
+  [218] = function()
+    timeVariable = "2000-07-14T15:52:12.015"
+  end,
+  [219] = function()
+    timeVariable = "2000-07-14T15:54:37.325"
+  end,
+  [220] = function()
+    timeVariable = "2000-07-14T15:57:02.635"
+  end,
+  [221] = function()
+    timeVariable = "2000-07-14T15:59:25.776"
+  end,
+  [222] = function()
+    timeVariable = "2000-07-14T16:01:51.086"
+  end,
+  [223] = function()
+    timeVariable = "2000-07-14T16:04:16.396"
+  end,
+  [224] = function()
+    timeVariable = "2000-07-14T16:06:39.537"
+  end,
+  [225] = function()
+    timeVariable = "2000-07-14T16:09:04.847"
+  end,
+  [226] = function()
+    timeVariable = "2000-07-14T16:11:30.157"
+  end,
+  [227] = function()
+    timeVariable = "2000-07-14T16:13:53.298"
+  end,
+  [228] = function()
+    timeVariable = "2000-07-14T16:16:18.608"
+  end,
+  [229] = function()
+    timeVariable = "2000-07-14T16:18:43.918"
+  end,
+  [230] = function()
+    timeVariable = "2000-07-14T16:21:07.059"
+  end,
+  [231] = function()
+    timeVariable = "2000-07-14T16:23:32.369"
+  end,
+  [232] = function()
+    timeVariable = "2000-07-14T16:25:57.679"
+  end,
+  [233] = function()
+    timeVariable = "2000-07-14T16:28:20.820"
+  end,
+  [234] = function()
+    timeVariable = "2000-07-14T16:30:46.130"
+  end,
+  [235] = function()
+    timeVariable = "2000-07-14T16:33:11.440"
+  end,
+  [236] = function()
+    timeVariable = "2000-07-14T16:35:34.581"
+  end,
+  [237] = function()
+    timeVariable = "2000-07-14T16:40:25.201"
+  end,
+  [238] = function()
+    timeVariable = "2000-07-14T16:45:13.652"
+  end,
+  [239] = function()
+    timeVariable = "2000-07-14T16:50:02.103"
+  end,
+  [240] = function()
+    timeVariable = "2000-07-14T16:54:52.723"
+  end,
+  [241] = function()
+    timeVariable = "2000-07-14T16:59:41.174"
+  end,
+  [242] = function()
+    timeVariable = "2000-07-14T17:04:29.625"
+  end,
+  [243] = function()
+    timeVariable = "2000-07-14T17:09:20.245"
+  end,
+  [244] = function()
+    timeVariable = "2000-07-14T17:14:08.696"
+  end,
+  [245] = function()
+    timeVariable = "2000-07-14T17:18:57.147"
+  end,
+  [246] = function()
+    timeVariable = "2000-07-14T17:23:47.767"
+  end,
+  [247] = function()
+    timeVariable = "2000-07-14T17:28:36.218"
+  end,
+  [248] = function()
+    timeVariable = "2000-07-14T17:33:24.669"
+  end,
+  [249] = function()
+    timeVariable = "2000-07-14T17:38:15.289"
+  end,
+  [250] = function()
+    timeVariable = "2000-07-14T17:43:03.740"
+  end,
+  [251] = function()
+    timeVariable = "2000-07-14T17:47:52.191"
+  end,
+  [252] = function()
+    timeVariable = "2000-07-14T17:52:42.811"
+  end,
+  [253] = function()
+    timeVariable = "2000-07-14T17:57:31.262"
+  end,
+  [254] = function()
+    timeVariable = "2000-07-14T18:02:19.713"
+  end,
+  [255] = function()
+    timeVariable = "2000-07-14T18:07:10.333"
+  end,
+  [256] = function()
+    timeVariable = "2000-07-14T18:11:58.784"
+  end,
+  [257] = function()
+    timeVariable = "2000-07-14T18:16:47.235"
+  end,
+  [258] = function()
+    timeVariable = "2000-07-14T18:21:37.855"
+  end,
+  [259] = function()
+    timeVariable = "2000-07-14T18:26:26.306"
+  end,
+  [260] = function()
+    timeVariable = "2000-07-14T18:31:14.757"
+  end,
+  [261] = function()
+    timeVariable = "2000-07-14T18:36:05.377"
+  end,
+  [262] = function()
+    timeVariable = "2000-07-14T18:40:53.828"
+  end,
+  [263] = function()
+    timeVariable = "2000-07-14T18:45:42.279"
+  end,
+  [264] = function()
+    timeVariable = "2000-07-14T18:50:32.899"
+  end,
+  [265] = function()
+    timeVariable = "2000-07-14T18:55:21.350"
+  end,
+  [266] = function()
+    timeVariable = "2000-07-14T19:00:09.801"
+  end,
+  [267] = function()
+    timeVariable = "2000-07-14T19:05:00.421"
+  end,
+  [268] = function()
+    timeVariable = "2000-07-14T19:09:48.872"
+  end,
+  [269] = function()
+    timeVariable = "2000-07-14T19:14:37.323"
+  end,
+  [270] = function()
+    timeVariable = "2000-07-14T19:19:27.943"
+  end,
+  [271] = function()
+    timeVariable = "2000-07-14T19:24:16.394"
+  end,
+  [272] = function()
+    timeVariable = "2000-07-14T19:29:04.845"
+  end,
+  [273] = function()
+    timeVariable = "2000-07-14T19:33:55.465"
+  end,
+  [274] = function()
+    timeVariable = "2000-07-14T19:38:43.916"
+  end,
+  [275] = function()
+    timeVariable = "2000-07-14T19:43:32.367"
+  end,
+  [276] = function()
+    timeVariable = "2000-07-14T19:48:22.987"
+  end
+}
+
+local length = 60  
 local tasks = {}
 
-for i=1,length do
-   tasks[#tasks+1] = {
-       Type = "KameleonVolumeToRawTask",
-       Input = "C:/Users/eolsson/Downloads/mas_merged_step_" .. 60 .. ".cdf",
-       Dimensions = {100, 100, 128},
-       VariableVector = "ur uphi utheta",
-       InnerRadialLimit = 1.75,
-       LowerDomainBound = {1, -90, 0},
-       UpperDomainBound = {15, 90, 360},
-       RawVolumeOutput = "C:/OpenSpace/newMatteTantan/OpenSpace/data/mas/bastille/u/mas_merged_step_" .. i .. ".rawvolume",
-       DictionaryOutput = "C:/OpenSpace/newMatteTantan/OpenSpace/data/mas/bastille/u/mas_merged_step_" .. i .. ".dictionary"
-   }
+for i=60,length do
+
+  --if i == 102 or i == 104 or i == 105 or i == 106 or i == 107 or i == 108 or i == 114 or i == 116 then
+    local f = switch[i]
+    if(f) then
+      f()
+    else        -- for case default
+      timeVariable = "2000-07-14T00:13:37.000"
+    end
+
+    tasks[#tasks+1] = {
+        Type = "KameleonVolumeToRawTask",
+        Input = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_CDF/mas_merged_step_" .. i .. ".cdf",
+        Dimensions = {100, 100, 128},
+        Time = timeVariable,
+         MaxValue=1,  -- make sure this works
+         MinValue=0,  -- if it is suppost to be 0 and 1
+         Opacity = 0.3, -- same heres
+        VariableVector = "ur uphi utheta",
+        InnerRadialLimit = 1.75,
+        LowerDomainBound = {1, -90, 0}, -- is this correct?
+        UpperDomainBound = {15, 90, 360},
+        RawVolumeOutput = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_raw_TestA/mas_merged_step_" .. i .. ".rawvolume",
+        DictionaryOutput = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_raw_TestA/mas_merged_step_" .. i .. ".dictionary"--,
+        --VisUnit="amu/cm^3"
+    }
+  --end
 end
 
 return tasks

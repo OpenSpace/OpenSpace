@@ -8,6 +8,11 @@ asset.require('examples/debugcoordinateaxes')
 asset.require('util/default_dashboard')
 
 asset.require('scene/solarsystem/sun/magnetogram_textures')
+
+-- temp
+-- asset.require('examples/volume/generated/spherical')
+asset.require('examples/volume/generated/cartesian')
+
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 
 -- must be >0
@@ -57,15 +62,15 @@ local Keybindings = {
             textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');
 
             if (textureIndex == nil) then 
-                textureIndex = 1;
+                textureIndex = 0;
             end; 
 
             textureIndex = textureIndex + 1
             if (textureIndex >= #textureList) then
-                textureIndex = 1;
+                textureIndex = 0;
             end;
 
-            if (textureIndex == 1) then
+            if (textureIndex == 0) then
                 openspace.setPropertyValue("Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled", false);
                 openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled", true);
             else

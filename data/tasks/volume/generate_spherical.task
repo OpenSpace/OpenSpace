@@ -1,15 +1,20 @@
 local fn =
 	"return function (r, phi, theta) " ..
-    "    return 1 - math.floor(r*10)/10 " ..
+    "    if phi<90 then " ..
+    "        if theta>300 then " ..
+    "            return 1.0 " .. 
+    "        end " ..
+    "    end " ..
+    "    return 0.0 " ..
     "end"
 
 return {{
     Type = "GenerateRawVolumeTask",
     Dimensions = {32, 32, 32},
     LowerDomainBound = {0, 0, 0},
-    UpperDomainBound = {1, math.pi, 2 * math.pi},
+    UpperDomainBound = {1, 90, 360},
     ValueFunction = fn,
-    Time = "2018-05-04T00:00:00",
+    Time = "2000-07-14T10:10:00",
     RawVolumeOutput = "${DATA}/assets/examples/volume/generated/spherical/spherical.rawvolume",
     DictionaryOutput = "${DATA}/assets/examples/volume/generated/spherical/spherical.dictionary"
 }}

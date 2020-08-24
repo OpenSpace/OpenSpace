@@ -1,5 +1,6 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local sun_mas = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/transforms')
 local debugHelper = asset.require('util/debug_helper')
 
 local sunRadius = 6.957E8
@@ -25,7 +26,12 @@ debugHelper.registerCartesianAxes(asset, {
 	Scale = sunRadius * 300
 })
 
+--debugHelper.registerCartesianAxes(asset, {
+--	Parent = sun_transforms.SolarSystemBarycenter.Identifier,
+--	Scale = sunRadius * 100
+--})
+
 debugHelper.registerCartesianAxes(asset, {
-	Parent = sun_transforms.SolarSystemBarycenter.Identifier,
-	Scale = sunRadius * 100
+    Parent = sun_mas.HNMReferenceFrame.Identifier,
+    Scale = sunRadius * 300
 })
