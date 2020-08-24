@@ -1,0 +1,10 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Mola_Utah",
+    Name = "Mola Elevation [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/Mola_Elevation.wms",
+    TilePixelSize = 90
+}
+
+asset.export("layer", layer)

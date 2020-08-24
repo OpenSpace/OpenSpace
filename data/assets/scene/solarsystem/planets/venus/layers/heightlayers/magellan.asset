@@ -1,0 +1,14 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Magellan",
+    Name = "Magellan Elevation [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MagellanDEM.wms",
+    TilePixelSize = 64,
+    Settings = {
+        Gamma = 1.72,
+        Multiplier = 1.1
+    }
+}
+
+asset.export("layer", layer)

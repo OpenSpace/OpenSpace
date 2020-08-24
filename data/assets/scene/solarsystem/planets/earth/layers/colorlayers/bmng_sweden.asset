@@ -1,0 +1,9 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "BMNG_Sweden",
+    Name = "BMNG [Sweden]",
+    FilePath = mapServiceConfigsPath .. "/LiU/Bmng.wms"
+}
+
+asset.export("layer", layer)

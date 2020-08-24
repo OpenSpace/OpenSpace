@@ -1,0 +1,9 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "ESRI_World_Imagery",
+    Name = "ESRI World Imagery",
+    FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms"
+}
+
+asset.export("layer", layer)

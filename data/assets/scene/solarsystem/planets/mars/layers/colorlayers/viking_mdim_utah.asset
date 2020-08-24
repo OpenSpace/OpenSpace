@@ -1,0 +1,9 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Viking_MDIM_Utah",
+    Name = "Viking MDIM [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/Mdim.wms"
+}
+
+asset.export("layer", layer)

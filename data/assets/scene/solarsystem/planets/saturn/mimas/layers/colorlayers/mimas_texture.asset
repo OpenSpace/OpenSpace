@@ -1,0 +1,8 @@
+local texturesPath = asset.require("./../../mimas_textures").TexturesPath
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/mimas.jpg",
+}
+
+asset.export("layer", layer)

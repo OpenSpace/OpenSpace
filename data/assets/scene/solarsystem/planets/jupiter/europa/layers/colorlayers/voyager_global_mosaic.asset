@@ -1,0 +1,10 @@
+local map_service_configs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Voyager_Global_Mosaic",
+    Name = "Voyager Global Mosaic [Sweden]",
+    FilePath = map_service_configs .. "/LiU/Voyager_GalileoSSI_global_mosaic_500m.wms",
+    BlendMode = "Color",
+}
+
+asset.export("layer", layer)

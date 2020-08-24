@@ -1,0 +1,8 @@
+local texturesPath = asset.require("./../../iapetus_textures").TexturesPath
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/iapetus.jpg",
+}
+
+asset.export("layer", layer)

@@ -1,0 +1,8 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Coastlines",
+    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Coastlines.wms"
+}
+
+asset.export("layer", layer)

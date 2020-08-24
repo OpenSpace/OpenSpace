@@ -1,0 +1,9 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Name = "Gebco [Utah]",
+    Identifier = "Gebco_Utah",
+    FilePath = mapServiceConfigsPath .. "/Utah/Gebco.wms"
+}
+
+asset.export("layer", layer)

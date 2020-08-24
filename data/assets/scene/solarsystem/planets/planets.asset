@@ -1,0 +1,34 @@
+asset.request('./mercury/mercury')
+
+asset.request('./venus/venus')
+asset.request('./venus/atmosphere')
+
+asset.request('./earth/earth')
+asset.request('./earth/atmosphere')
+asset.request('./earth/markers')
+asset.request('./earth/moon/moon')
+
+asset.request('./mars/mars')
+asset.request('./mars/atmosphere')
+
+asset.request('./jupiter/jupiter')
+asset.request('./jupiter/major_moons')
+
+asset.request('./saturn/saturn')
+asset.request('./saturn/major_moons')
+
+asset.request('./uranus/uranus')
+asset.request('./uranus/major_moons')
+
+asset.request('./neptune/neptune')
+asset.request('./neptune/major_moons')
+
+
+asset.meta = {
+    Name = "Planets",
+    Version = "1.0",
+    Description = [[ Collection of planets in the solar system ]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
