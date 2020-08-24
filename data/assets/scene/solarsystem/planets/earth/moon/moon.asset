@@ -3,7 +3,7 @@ local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 local earthAsset = asset.require('../earth')
 asset.require('spice/base')
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('./moon_labels').LabelsPath
 
 local Moon = {

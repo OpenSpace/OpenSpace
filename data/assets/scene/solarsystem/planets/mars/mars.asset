@@ -1,7 +1,7 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('./mars_globelabels').LabelsPath
 
 -- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
