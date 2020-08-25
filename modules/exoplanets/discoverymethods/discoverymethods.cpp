@@ -289,7 +289,7 @@ namespace openspace::exoplanets{
     }
 
     void DiscoveryMethods::addDopplerMethodVisualization() {
-        SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+        const SceneGraphNode* focusNode = global::navigationHandler.anchorNode();
         std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName(); // getStarName 
         glm::dvec3 starPosition = focusNode->worldPosition(); // can get from Exoplanet.POSITIONX/.POSITIONY/.POSITIONZ (in parsecs)
         glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPosition);
@@ -380,7 +380,7 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::addTransitMethodVisualization() {
 
-        SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+        const SceneGraphNode* focusNode = global::navigationHandler.anchorNode();
         std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName(); // getStarName 
         glm::dvec3 starPosition = focusNode->worldPosition(); // can get from Exoplanet.POSITIONX/.POSITIONY/.POSITIONZ (in parsecs)
         glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPosition);
