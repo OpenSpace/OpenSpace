@@ -30,6 +30,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
     constexpr const char* EventKey = "event";
@@ -53,6 +54,9 @@ TimeTopic::~TimeTopic() {
     if (_deltaTimeCallbackHandle != UnsetOnChangeHandle) {
         global::timeManager.removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
     }
+    if (_deltaTimeStepsCallbackHandle != UnsetOnChangeHandle) {
+        global::timeManager.removeDeltaTimeStepsChangeCallback(_deltaTimeStepsCallbackHandle);
+    }
 }
 
 bool TimeTopic::isDone() const {
@@ -67,6 +71,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     }
 
     sendFullTimeData();
+    sendDeltaTimeSteps();
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -94,6 +99,37 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
             sendFullTimeData();
         }
     });
+
+    _deltaTimeStepsCallbackHandle = global::timeManager.addDeltaTimeStepsChangeCallback(
+        [this]() {
+            const std::vector<double> steps = global::timeManager.deltaTimeSteps();
+            if (steps != _lastDeltaTimeSteps) {
+                sendDeltaTimeSteps();
+            }
+        }
+    );
+}
+
+const json TimeTopic::getNextPrevDeltaTimeStepJson() {
+    const std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
+    const std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
+    const bool hasNext = nextStep.has_value();
+    const bool hasPrev = prevStep.has_value();
+
+    json nextPrevJson = {
+        { "hasNextStep", hasNext },
+        { "hasPrevStep", hasPrev }
+    };
+
+    if (hasNext) {
+        nextPrevJson["nextStep"] = nextStep.value();
+    }
+
+    if (hasPrev) {
+        nextPrevJson["prevStep"] = prevStep.value();
+    }
+
+    return nextPrevJson;
 }
 
 void TimeTopic::sendCurrentTime() {
@@ -110,17 +146,34 @@ void TimeTopic::sendFullTimeData() {
     const double targetDeltaTime = global::timeManager.targetDeltaTime();
     const bool isPaused = global::timeManager.isPaused();
 
-    const json timeJson = {
+    json timeJson = {
         { "time", currentTime },
         { "deltaTime", deltaTime},
         { "targetDeltaTime", targetDeltaTime},
-        { "isPaused", isPaused },
+        { "isPaused", isPaused }
     };
+
+    const json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    timeJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
     _connection->sendJson(wrappedPayload(timeJson));
     _lastUpdateTime = std::chrono::system_clock::now();
     _lastPauseState = isPaused;
     _lastTargetDeltaTime = targetDeltaTime;
+}
+
+void TimeTopic::sendDeltaTimeSteps() {
+    const std::vector<double>& steps = global::timeManager.deltaTimeSteps();
+
+    json deltaTimeStepsJson = {
+        { "deltaTimeSteps", steps } 
+    };
+
+    const json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    deltaTimeStepsJson.insert(nextPrevJson.begin(), nextPrevJson.end());
+
+    _connection->sendJson(wrappedPayload(deltaTimeStepsJson));
+    _lastDeltaTimeSteps = steps;
 }
 
 } // namespace openspace
