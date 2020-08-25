@@ -54,6 +54,9 @@ TimeTopic::~TimeTopic() {
     if (_deltaTimeCallbackHandle != UnsetOnChangeHandle) {
         global::timeManager.removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
     }
+    if (_deltaTimeStepsCallbackHandle != UnsetOnChangeHandle) {
+        global::timeManager.removeDeltaTimeStepsChangeCallback(_deltaTimeStepsCallbackHandle);
+    }
 }
 
 bool TimeTopic::isDone() const {
@@ -68,6 +71,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     }
 
     sendFullTimeData();
+    sendDeltaTimeSteps();
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -95,6 +99,15 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
             sendFullTimeData();
         }
     });
+
+    _deltaTimeStepsCallbackHandle = global::timeManager.addDeltaTimeStepsChangeCallback(
+        [this]() {
+            const std::vector<double> steps = global::timeManager.deltaTimeSteps();
+            if (steps != _lastDeltaTimeSteps) {
+                sendDeltaTimeSteps();
+            }
+        }
+    );
 }
 
 void TimeTopic::sendCurrentTime() {
@@ -138,6 +151,32 @@ void TimeTopic::sendFullTimeData() {
     _lastUpdateTime = std::chrono::system_clock::now();
     _lastPauseState = isPaused;
     _lastTargetDeltaTime = targetDeltaTime;
+}
+
+void TimeTopic::sendDeltaTimeSteps() {
+    const std::vector<double> steps = global::timeManager.deltaTimeSteps();
+    const std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
+    const std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
+
+    const bool hasNext = nextStep.has_value();
+    const bool hasPrev = prevStep.has_value();
+
+    json deltaTimeStepsJson = {
+        { "deltaTimeSteps", steps }, 
+        { "hasNextStep", hasNext },
+        { "hasPrevStep", hasPrev }
+    };
+
+    if (hasNext) {
+        deltaTimeStepsJson["nextStep"] = nextStep.value();
+    }
+
+    if (hasPrev) {
+        deltaTimeStepsJson["prevStep"] = prevStep.value();
+    }
+
+    _connection->sendJson(wrappedPayload(deltaTimeStepsJson));
+    _lastDeltaTimeSteps = steps;
 }
 
 } // namespace openspace

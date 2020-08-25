@@ -43,14 +43,17 @@ private:
 
     void sendCurrentTime();
     void sendFullTimeData();
+    void sendDeltaTimeSteps();
 
     int _timeCallbackHandle = UnsetOnChangeHandle;
     int _deltaTimeCallbackHandle = UnsetOnChangeHandle;
+    int _deltaTimeStepsCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
     std::chrono::system_clock::time_point _lastUpdateTime;
 
     bool _lastPauseState = false;
     double _lastTargetDeltaTime = 0.0;
+    std::vector<double> _lastDeltaTimeSteps;
 };
 
 } // namespace openspace
