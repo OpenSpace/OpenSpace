@@ -64,13 +64,6 @@ namespace {
         "This value is used to limit the width of the rings. Each of the two values is "
         "the lower and the upper uncertainties of the semi-major axis. "
     };
-
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value determines the transparency of part of the rings depending on the "
-        "color values. For this value v, the transparency is equal to length(color) / v."
-    };
 } // namespace
 
 namespace openspace {
@@ -109,12 +102,6 @@ documentation::Documentation RenderableOrbitdisc::Documentation() {
                 new DoubleVector2Verifier,
                 Optional::Yes,
                 OffsetInfo.description
-            },
-            {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TransparencyInfo.description
             }
         }
     };
@@ -126,7 +113,6 @@ RenderableOrbitdisc::RenderableOrbitdisc(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
     , _shader(nullptr)
     , _texture(nullptr)
     , _textureFile(nullptr)
@@ -162,16 +148,13 @@ RenderableOrbitdisc::RenderableOrbitdisc(const ghoul::Dictionary& dictionary)
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _transparency = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_transparency);
-
-    _eccentricity = static_cast<float>(dictionary.value<double>(EccentricityInfo.identifier));
+    _eccentricity = static_cast<float>(
+        dictionary.value<double>(EccentricityInfo.identifier)
+    );
     _eccentricity.onChange([&]() { _planeIsDirty = true; });
     addProperty(_eccentricity);
+
+    addProperty(_opacity);
 }
 
 bool RenderableOrbitdisc::isReady() const {
@@ -189,9 +172,8 @@ void RenderableOrbitdisc::initializeGL() {
         "modelViewProjectionTransform"
     );
     _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-    _uniformCache.transparency = _shader->uniformLocation("transparency");
-    //_uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
-    _uniformCache.texture = _shader->uniformLocation("texture1");
+    _uniformCache.opacity = _shader->uniformLocation("opacity");
+    _uniformCache.texture = _shader->uniformLocation("discTexture");
     _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
     _uniformCache.semiMajorAxis = _shader->uniformLocation("semiMajorAxis");
 
@@ -231,12 +213,9 @@ void RenderableOrbitdisc::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.textureOffset, _offset);
-    _shader->setUniform(_uniformCache.transparency, _transparency);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
     _shader->setUniform(_uniformCache.eccentricity, _eccentricity);
     _shader->setUniform(_uniformCache.semiMajorAxis, _size);
-    //_shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-
-    //setPscUniforms(*_shader, data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -255,14 +234,12 @@ void RenderableOrbitdisc::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitdisc::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
         _uniformCache.modelViewProjection = _shader->uniformLocation(
             "modelViewProjectionTransform"
         );
         _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-        _uniformCache.transparency = _shader->uniformLocation("transparency");
-        //_uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
-        _uniformCache.texture = _shader->uniformLocation("texture1");
+        _uniformCache.opacity = _shader->uniformLocation("opacity");
+        _uniformCache.texture = _shader->uniformLocation("discTexture");
         _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
         _uniformCache.semiMajorAxis = _shader->uniformLocation("semiMajorAxis");
     }
@@ -276,9 +253,6 @@ void RenderableOrbitdisc::update(const UpdateData& data) {
         loadTexture();
         _textureIsDirty = false;
     }
-
-    //_sunPosition = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
-        //data.modelTransform.translation;
 }
 
 void RenderableOrbitdisc::loadTexture() {

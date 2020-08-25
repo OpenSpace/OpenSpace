@@ -25,13 +25,11 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
 
-#include <openspace/util/task.h>
 #include <openspace/properties/vector/vec3property.h>
-
+#include <openspace/util/task.h>
 #include <string>
 
-namespace openspace {
-namespace exoplanets {
+namespace openspace::exoplanets {
 
 class ExoplanetsCsvToBinTask : public Task {
 public:
@@ -41,12 +39,12 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _inputCSVPath;
-    std::string _inputSPECKPath;
-    std::string _outputBINPath;
-    std::string _outputLUTPath;
+    std::string _inputCsvPath;
+    std::string _inputSpeckPath;
+    std::string _outputBinPath;
+    std::string _outputLutPath;
 
-    std::string getExplName(std::string csvName);
+    std::string getExoplanetName(std::string csvName);
     glm::vec3 getStarPosition(std::string starName);
 
     struct Exoplanet {
@@ -95,7 +93,6 @@ private:
     };
 };
 
-} // namespace exoplanets
-} // namespace openspace
+} // namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__

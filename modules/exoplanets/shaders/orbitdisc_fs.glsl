@@ -27,19 +27,12 @@
 
 in vec2 vs_st;
 in vec4 vs_position;
-//in vec4 vs_gPosition;
-//in vec3 vs_gNormal;
 
-uniform sampler1D texture1;
+uniform sampler1D discTexture;
 uniform vec2 textureOffset;
-uniform float transparency;
+uniform float opacity;
 uniform float eccentricity;
 uniform float semiMajorAxis;
-
-uniform bool hasSunPosition;
-uniform vec3 sunPosition;
-//uniform float _nightFactor;
-
 
 Fragment getFragment() {
     // Moving the origin to the center
@@ -61,17 +54,17 @@ Fragment getFragment() {
     float apo_inner = AL * (1 + E);
 
     if(eccentricity <= 0.000000){
-        outer = pow(st.x , 2.0) / pow(AU/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BU/apo, 2.0)) );
-        inner = pow(st.x , 2.0) / pow(AL/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BL/apo, 2.0)) );
+        outer = pow(st.x, 2.0) / pow(AU/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BU/apo, 2.0)));
+        inner = pow(st.x, 2.0) / pow(AL/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BL/apo, 2.0)));
     }  
     else {
-        outer = ( pow((st.x + CU/apo), 2.0) ) / pow(AU/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BU/apo, 2.0)) );
-        inner = ( pow((st.x + CL/apo), 2.0) ) / pow(AL/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BL/apo, 2.0)) );
+        outer = pow((st.x + CU/apo), 2.0) / pow(AU/apo, 2.0)  +  pow(st.y, 2.0) / (pow(BU/apo, 2.0));
+        inner = pow((st.x + CL/apo), 2.0) / pow(AL/apo, 2.0)  +  pow(st.y, 2.0) / (pow(BL/apo, 2.0));
     }
     
-    if (outer > 1.0 ) // point is outside outer ellipse
+    if (outer > 1.0) // point is outside outer ellipse
         discard;
-    if (inner < 1.0 ) // point is inside inner ellipse
+    if (inner < 1.0) // point is inside inner ellipse
         discard;
 
     // Remapping the texture coordinates
@@ -79,14 +72,14 @@ Fragment getFragment() {
 
     // Find outer ellipse: where along the direction is the equation = 1
     float scale;
-    if(eccentricity <= 0.000000){
-        scale = sqrt(  (   pow((AU/apo)*(BU/apo),2)   ) / ((pow((BU/apo)*dir.x,2))+(pow((AU/apo)*dir.y,2)))   );
+    if (eccentricity <= 0.000000) {
+        scale = sqrt((pow((AU/apo) * (BU/apo), 2)) / ((pow((BU/apo) * dir.x, 2)) + (pow((AU/apo) * dir.y, 2))));
     }
-    else{
-        float first = -( pow(BU/apo, 2.0)*dir.x*(CU/apo) ) / ( pow((BU/apo)*dir.x, 2.0) + pow((AU/apo)*dir.y, 2.0) );
-        float second = pow( ( pow(BU/apo, 2.0)*dir.x*(CU/apo) )  /  ( pow((BU/apo)*dir.x, 2.0) + pow( (AU/apo)*dir.y, 2.0 ) ) , 2.0);
-        float third = (  pow( (BU/apo)*(CU/apo) , 2.0 ) - pow( (AU/apo)*(BU/apo), 2.0 )   ) / (   pow( (BU/apo)*dir.x, 2.0 ) + pow( (AU/apo)*dir.y, 2.0 )   );
-        scale = first + sqrt( second - third);
+    else {
+        float first = -(pow(BU/apo, 2.0) * dir.x * (CU/apo)) / ( pow((BU/apo) * dir.x, 2.0) + pow((AU/apo) * dir.y, 2.0));
+        float second = pow((pow(BU/apo, 2.0) * dir.x * (CU/apo))  /  (pow((BU/apo) * dir.x, 2.0) + pow((AU/apo) * dir.y, 2.0)), 2.0);
+        float third = (pow( (BU/apo) * (CU/apo) , 2.0) - pow((AU/apo) * (BU/apo), 2.0)) / (pow((BU/apo) * dir.x, 2.0) + pow((AU/apo) * dir.y, 2.0));
+        scale = first + sqrt(second - third);
     }
     
     vec2 max = dir * scale;
@@ -94,15 +87,10 @@ Fragment getFragment() {
 
     float distance1 = distance(max, min);
     float distance2 = distance(max, st);
-    float textureCoord = distance2/distance1;
+    float textureCoord = distance2 / distance1;
 
-    vec4 diffuse = texture(texture1, textureCoord);
-    float colorValue = length(diffuse.rgb);
-    // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
-    // to normalize the transparency value to [0,1]
-    if (colorValue < 3.0 * transparency) {
-        diffuse.a = pow(colorValue / (3.0 * transparency), 1);
-    }
+    vec4 diffuse = texture(discTexture, textureCoord);
+    diffuse.a *= opacity;
 
     // The normal for the one plane depends on whether we are dealing
     // with a front facing or back facing fragment
@@ -116,13 +104,8 @@ Fragment getFragment() {
         normal = vec3(1.0, 0.0, 0.0);
     }
 
-
     Fragment frag;
     frag.color = diffuse;
     frag.depth = vs_position.w;
-
-    //frag.gPosition  = vs_gPosition;
-    //frag.gNormal    = vs_gNormal;
-
     return frag;
 }

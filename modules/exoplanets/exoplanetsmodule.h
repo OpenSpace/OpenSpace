@@ -25,12 +25,9 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 
-
-
-#include <openspace/util/openspacemodule.h>
-#include <openspace/documentation/documentation.h>
-
 #include <modules/exoplanets/discoverymethods/discoverymethods.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
     struct Exoplanet {
@@ -90,16 +87,17 @@ public:
     std::vector<documentation::Documentation> documentations() const override;
 
     void setClosestExoplanet(Exoplanet);
-    Exoplanet getClosestExoplanet();
     void setStarName(std::string);
-    std::string getStarName();
-    void setPlsy(std::vector<Exoplanet>);
-    std::vector<Exoplanet> getPlsy();
-    void setPlna(std::vector<std::string>);
-    std::vector<std::string> getPlna();
+    void setPlanetSystem(std::vector<Exoplanet>);
+    void setPlanetNames(std::vector<std::string>);
     void setRotation(glm::dmat3);
-    glm::dmat3 getRotation();
     void setNorthVector(glm::dvec3);
+
+    Exoplanet closestExoplanet();
+    std::string getStarName();
+    std::vector<Exoplanet> planetSystem();
+    std::vector<std::string> planetNames();
+    glm::dmat3 getRotation();
     glm::dvec3 getNorthVector();
 
 protected:
@@ -108,8 +106,8 @@ protected:
 
     Exoplanet _exo;
     std::string _starName;
-    std::vector<Exoplanet> _plsy;
-    std::vector<std::string> _plna;
+    std::vector<Exoplanet> _planetSystem;
+    std::vector<std::string> _planetNames;
     glm::dmat3 _rotation;
     glm::dvec3 _north;
 };

@@ -34,151 +34,148 @@
 #include <fstream>
 
 namespace {
-    const char* KeyInputCSV = "InputCSV";
-    const char* KeyInputSPECK = "InputSPECK";
-    const char* KeyOutputBIN = "OutputBIN";
-    const char* KeyOutputLUT = "OutputLUT";
+    const char* KeyInputCsv = "InputCSV";
+    const char* KeyInputSpeck = "InputSPECK";
+    const char* KeyOutputBin = "OutputBIN";
+    const char* KeyOutputLut = "OutputLUT";
 
     constexpr const char* _loggerCat = "CsvToBinTask";
 } // namespace
 
-namespace openspace {
-namespace exoplanets {
+namespace openspace::exoplanets {
 
 ExoplanetsCsvToBinTask::ExoplanetsCsvToBinTask(const ghoul::Dictionary& dictionary) {
-  openspace::documentation::testSpecificationAndThrow(
-      documentation(),
-      dictionary,
-      "ExoplanetsCsvToBinTask"
-  );
+    openspace::documentation::testSpecificationAndThrow(
+        documentation(),
+        dictionary,
+        "ExoplanetsCsvToBinTask"
+    );
 
-  _inputCSVPath = absPath(dictionary.value<std::string>(KeyInputCSV));
-  _inputSPECKPath = absPath(dictionary.value<std::string>(KeyInputSPECK));
-  _outputBINPath = absPath(dictionary.value<std::string>(KeyOutputBIN));
-  _outputLUTPath = absPath(dictionary.value<std::string>(KeyOutputLUT));
+    _inputCsvPath = absPath(dictionary.value<std::string>(KeyInputCsv));
+    _inputSpeckPath = absPath(dictionary.value<std::string>(KeyInputSpeck));
+    _outputBinPath = absPath(dictionary.value<std::string>(KeyOutputBin));
+    _outputLutPath = absPath(dictionary.value<std::string>(KeyOutputLut));
 }
 
 std::string ExoplanetsCsvToBinTask::description() {
-    return "Extract metadata from csv-file " + _inputCSVPath +
-        " and write as bin to " + _outputBINPath;
+    return "Extract metadata from csv-file " + _inputCsvPath +
+        " and write as bin to " + _outputBinPath;
 }
 
-std::string ExoplanetsCsvToBinTask::getExplName(std::string csvName) {
-    std::string explName = csvName;
+std::string ExoplanetsCsvToBinTask::getExoplanetName(std::string csvName) {
+    std::string name = csvName;
     if (csvName == "HD 1237")
-        explName = "GJ 3021";
+        name = "GJ 3021";
     else if (csvName == "MOA-2009-BLG-387L")
-        explName = "MOA 2009-BLG-387L";
+        name = "MOA 2009-BLG-387L";
     else if (csvName == "HD 126614 A")
-        explName = "HD 126614";
+        name = "HD 126614";
     else if (csvName == "epsilon Ret")
-        explName = "HD 27442";
+        name = "HD 27442";
     else if (csvName == "PH-1")
-        explName = "PH1";
+        name = "PH1";
     else if (csvName == "gamma Leo A")
-        explName = "gam 1 Leo";
+        name = "gam 1 Leo";
     else if (csvName == "OGLE-2007-BLG-368L")
-        explName = "OGLE 2007-BLG-368L";
+        name = "OGLE 2007-BLG-368L";
     else if (csvName == "alpha Ari")
-        explName = "alf Ari";
+        name = "alf Ari";
     else if (csvName == "mu Ara")
-        explName = "HD 160691";
+        name = "HD 160691";
     else if (csvName == "OGLE-05-169L")
-        explName = "OGLE 2005-BLG-169L";
+        name = "OGLE 2005-BLG-169L";
     else if (csvName == "tau Gru")
-        explName = "HD 216435";
+        name = "HD 216435";
     else if (csvName == "iota Hor")
-        explName = "HR 810";
+        name = "HR 810";
     else if (csvName == "OGLE-05-071L")
-        explName = "OGLE 2005-BLG-71L";
+        name = "OGLE 2005-BLG-71L";
     else if (csvName == "OGLE235-MOA53")
-        explName = "OGLE 2003-BLG-235L";
+        name = "OGLE 2003-BLG-235L";
     else if (csvName == "MOA-2008-BLG-310L")
-        explName = "MOA 2008-BLG-310L";
+        name = "MOA 2008-BLG-310L";
     else if (csvName == "KIC 11442793")
-        explName = "KOI-351";
+        name = "KOI-351";
     else if (csvName == "OGLE-2006-BLG-109L")
-        explName = "OGLE 2006-BLG-109L";
+        name = "OGLE 2006-BLG-109L";
     else if (csvName == "HD 137388")
-        explName = "HD 137388 A";
+        name = "HD 137388 A";
     else if (csvName == "kappa CrB")
-        explName = "kap CrB";
+        name = "kap CrB";
     else if (csvName == "XO-2")
-        explName = "XO-2 N";
+        name = "XO-2 N";
     else if (csvName == "epsilon Tau")
-        explName = "eps Tau";
+        name = "eps Tau";
     else if (csvName == "epsilon Eri")
-        explName = "eps Eri";
+        name = "eps Eri";
     else if (csvName == "Kepler-448")
-        explName = "KOI-12";
+        name = "KOI-12";
     else if (csvName == "omega Ser")
-        explName = "ome Ser";
+        name = "ome Ser";
     else if (csvName == "MOA-2010-BLG-477L")
-        explName = "MOA 2010-BLG-477L";
+        name = "MOA 2010-BLG-477L";
     else if (csvName == "GJ 176")
-        explName = "HD 285968";
+        name = "HD 285968";
     else if (csvName == "HIP 2247")
-        explName = "BD-17 63";
+        name = "BD-17 63";
     else if (csvName == "MOA-2009-BLG-266L")
-        explName = "MOA 2009-BLG-266L";
+        name = "MOA 2009-BLG-266L";
     else if (csvName == "Kepler-89")
-        explName = "KOI-94";
+        name = "KOI-94";
     else if (csvName == "iota Dra")
-        explName = "HIP 75458";
+        name = "HIP 75458";
     else if (csvName == "MOA-2007-BLG-400L")
-        explName = "MOA 2007-BLG-400L";
+        name = "MOA 2007-BLG-400L";
     else if (csvName == "upsilon And")
-        explName = "ups And";
+        name = "ups And";
     else if (csvName == "OGLE-2011-BLG-0251")
-        explName = "OGLE 2011-BLG-251L";
+        name = "OGLE 2011-BLG-251L";
     else if (csvName == "OGLE-05-390L")
-        explName = "OGLE 2005-BLG-390L";
+        name = "OGLE 2005-BLG-390L";
     else if (csvName == "Kepler-420")
-        explName = "KOI-1257";
+        name = "KOI-1257";
     else if (csvName == "beta Pic")
-        explName = "bet Pic";
+        name = "bet Pic";
     else if (csvName == "gamma Cep")
-        explName = "gam Cep";
+        name = "gam Cep";
     else if (csvName == "MOA-2007-BLG-192L")
-        explName = "MOA 2007-BLG-192L";
+        name = "MOA 2007-BLG-192L";
     else if (csvName == "MOA-2009-BLG-319L")
-        explName = "MOA 2009-BLG-319L";
+        name = "MOA 2009-BLG-319L";
     else if (csvName == "omicron CrB")
-        explName = "omi CrB";
+        name = "omi CrB";
     else if (csvName == "beta Gem")
-        explName = "HD 62509";
+        name = "HD 62509";
     else if (csvName == "epsilon CrB")
-        explName = "eps CrB";
+        name = "eps CrB";
     else if (csvName == "omicron UMa")
-        explName = "omi UMa";
+        name = "omi UMa";
     else if (csvName == "HD 142022")
-        explName = "HD 142022 A";
+        name = "HD 142022 A";
 
-    return explName;
+    return name;
 }
 
-glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName)
-{
-    glm::vec3 pos;
-    pos[0] = NAN;
-    pos[1] = NAN;
-    pos[2] = NAN;
-    std::ifstream expl_file(_inputSPECKPath);
-    if (!expl_file) {
+glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName) {
+    glm::vec3 position;
+    position[0] = NAN;
+    position[1] = NAN;
+    position[2] = NAN;
+    std::ifstream exoplanetsFile(_inputSpeckPath);
+    if (!exoplanetsFile) {
         LERROR(fmt::format("Error opening file expl.speck."));
     }
 
     std::string line;
     std::string d;
     std::string n;
-    while (getline(expl_file, line))
+    while (getline(exoplanetsFile, line))
     {
         if (line[0] == '#' || line.substr(0, 7) == "datavar" || line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture" || line.empty()) {
             continue;
         }
 
         std::istringstream linestream(line);
-
         getline(linestream, d, '#');
         getline(linestream, n);
         n.erase(0, 1);
@@ -186,576 +183,578 @@ glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName)
         std::string coord;
         if (n.compare(starName) == 0)
         {
-            std::stringstream datastream(d);
-            getline(datastream, coord, ' ');
-            pos[0] = std::stof(coord.c_str(), nullptr);
-            getline(datastream, coord, ' ');
-            pos[1] = std::stof(coord.c_str(), nullptr);
-            getline(datastream, coord, ' ');
-            pos[2] = std::stof(coord.c_str(), nullptr);
+            std::stringstream dataStream(d);
+            getline(dataStream, coord, ' ');
+            position[0] = std::stof(coord.c_str(), nullptr);
+            getline(dataStream, coord, ' ');
+            position[1] = std::stof(coord.c_str(), nullptr);
+            getline(dataStream, coord, ' ');
+            position[2] = std::stof(coord.c_str(), nullptr);
             break;
         }
     }
 
-    //Apply transformation matrix to pos
+    // Apply transformation matrix to pos
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
-    glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::dvec4(pos, 1.0));
+    glm::vec3 transformedPosition = glm::vec3(
+        _transformationMatrix * glm::dvec4(position, 1.0)
+    );
 
-    expl_file.close();
-    return transformedPos;
+    exoplanetsFile.close();
+    return transformedPosition;
 }
 
 void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallback) {
-    std::ifstream csv_file(_inputCSVPath);
-    if (!csv_file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _inputCSVPath));
+    std::ifstream csvFile(_inputCsvPath);
+    if (!csvFile.good()) {
+        LERROR(fmt::format("Failed to open CSV file '{}'", _inputCsvPath));
         return;
     }
 
-    std::ofstream bin_file(_outputBINPath, std::ios::out | std::ios::binary);
-    std::ofstream lut_file(_outputLUTPath);
+    std::ofstream binFile(_outputBinPath, std::ios::out | std::ios::binary);
+    std::ofstream lutFile(_outputLutPath);
 
     int version = 1;
-    bin_file.write((char *)&version, sizeof(int));
+    binFile.write((char *)&version, sizeof(int));
 
     Exoplanet p;
 
     std::string planetname;
     std::string component;
-    std::string planet_row;
-    getline(csv_file, planet_row); // The first line, containing the data names
+    std::string planetRow;
+    getline(csvFile, planetRow); // The first line, containing the data names
 
-    std::string data_s;
     bool iskeplerobject = false;
     int total = 0;
-    while (getline(csv_file, planet_row)) {
+    while (getline(csvFile, planetRow)) {
         ++total;
     }
-    csv_file.clear();
-    csv_file.seekg(0);
-    getline(csv_file, planet_row); // The first line, containing the data names
+    csvFile.clear();
+    csvFile.seekg(0);
+    getline(csvFile, planetRow); // The first line, containing the data names
     LINFOC("CSVTOBIN", fmt::format("Loading {} stars", total));
 
     int count = 0;
-    while (getline(csv_file, planet_row)) {
+    std::string data;
+    while (getline(csvFile, planetRow)) {
         ++count;
         progressCallback(static_cast<float>(count) / static_cast<float>(total));
 
-        std::istringstream lineStream(planet_row);
+        std::istringstream lineStream(planetRow);
 
-        getline(lineStream, data_s, ','); // A
-        if (!data_s.empty())
-            p.A = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // A
+        if (!data.empty())
+            p.A = std::stof(data.c_str(), nullptr);
         else
             p.A = NAN;
-        getline(lineStream, data_s, ','); // AUPPER
-        if (!data_s.empty())
-            p.AUPPER = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // AUPPER
+        if (!data.empty())
+            p.AUPPER = std::stod(data.c_str(), nullptr);
         else
             p.AUPPER = NAN;
-        getline(lineStream, data_s, ','); // ALOWER
-        if (!data_s.empty())
-            p.ALOWER = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // ALOWER
+        if (!data.empty())
+            p.ALOWER = std::stod(data.c_str(), nullptr);
         else
             p.ALOWER = NAN;
-        getline(lineStream, data_s, ','); // UA
-        if (!data_s.empty())
-            p.UA = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // UA
+        if (!data.empty())
+            p.UA = std::stod(data.c_str(), nullptr);
         else
             p.UA = NAN;
-        getline(lineStream, data_s, ','); // AREF
-        getline(lineStream, data_s, ','); // AURL
-        getline(lineStream, data_s, ','); // AR
-        getline(lineStream, data_s, ','); // ARUPPER
-        getline(lineStream, data_s, ','); // ARLOWER
-        getline(lineStream, data_s, ','); // UAR
-        getline(lineStream, data_s, ','); // ARREF
-        getline(lineStream, data_s, ','); // ARURL
-        getline(lineStream, data_s, ','); // ASTROMETRY
-        getline(lineStream, data_s, ','); // B
-        getline(lineStream, data_s, ','); // BUPPER
-        getline(lineStream, data_s, ','); // BLOWER
-        getline(lineStream, data_s, ','); // UB
-        getline(lineStream, data_s, ','); // BREF
-        getline(lineStream, data_s, ','); // BURL
-        getline(lineStream, data_s, ','); // BIGOM
-        if (!data_s.empty())
-            p.BIGOM = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // AREF
+        getline(lineStream, data, ','); // AURL
+        getline(lineStream, data, ','); // AR
+        getline(lineStream, data, ','); // ARUPPER
+        getline(lineStream, data, ','); // ARLOWER
+        getline(lineStream, data, ','); // UAR
+        getline(lineStream, data, ','); // ARREF
+        getline(lineStream, data, ','); // ARURL
+        getline(lineStream, data, ','); // ASTROMETRY
+        getline(lineStream, data, ','); // B
+        getline(lineStream, data, ','); // BUPPER
+        getline(lineStream, data, ','); // BLOWER
+        getline(lineStream, data, ','); // UB
+        getline(lineStream, data, ','); // BREF
+        getline(lineStream, data, ','); // BURL
+        getline(lineStream, data, ','); // BIGOM
+        if (!data.empty())
+            p.BIGOM = std::stof(data.c_str(), nullptr);
         else
             p.BIGOM = NAN;
-        getline(lineStream, data_s, ','); // BIGOMUPPER
-        if (!data_s.empty())
-            p.BIGOMUPPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // BIGOMUPPER
+        if (!data.empty())
+            p.BIGOMUPPER = std::stof(data.c_str(), nullptr);
         else
             p.BIGOMUPPER = NAN;
-        getline(lineStream, data_s, ','); // BIGOMLOWER
-        if (!data_s.empty())
-            p.BIGOMLOWER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // BIGOMLOWER
+        if (!data.empty())
+            p.BIGOMLOWER = std::stof(data.c_str(), nullptr);
         else
             p.BIGOMLOWER = NAN;
-        getline(lineStream, data_s, ','); // UBIGOM
-        if (!data_s.empty())
-            p.UBIGOM = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // UBIGOM
+        if (!data.empty())
+            p.UBIGOM = std::stof(data.c_str(), nullptr);
         else
             p.UBIGOM = NAN;
-        getline(lineStream, data_s, ','); // BIGOMREF
-        getline(lineStream, data_s, ','); // BIGOMURL
-        getline(lineStream, data_s, ','); // BINARY
-        if (!data_s.empty())
-            p.BINARY = std::stoi(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // BIGOMREF
+        getline(lineStream, data, ','); // BIGOMURL
+        getline(lineStream, data, ','); // BINARY
+        if (!data.empty())
+            p.BINARY = std::stoi(data.c_str(), nullptr);
         else
             p.BINARY = -1;
-        getline(lineStream, data_s, ','); // BINARYREF
-        getline(lineStream, data_s, ','); // BINARYURL
-        getline(lineStream, data_s, ','); // BMV
-        if (!data_s.empty())
-            p.BMV = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // BINARYREF
+        getline(lineStream, data, ','); // BINARYURL
+        getline(lineStream, data, ','); // BMV
+        if (!data.empty())
+            p.BMV = std::stof(data.c_str(), nullptr);
         else
             p.BMV = NAN;
-        getline(lineStream, data_s, ','); // CHI2
-        getline(lineStream, data_s, ','); // COMP
-        component = data_s;
-        getline(lineStream, data_s, ','); // DATE
-        getline(lineStream, data_s, ','); // DEC
-        getline(lineStream, data_s, ','); // DEC_STRING
-        getline(lineStream, data_s, ','); // DENSITY
-        getline(lineStream, data_s, ','); // DENSITYUPPER
-        getline(lineStream, data_s, ','); // DENSITYLOWER
-        getline(lineStream, data_s, ','); // UDENSITY
-        getline(lineStream, data_s, ','); // DENSITYREF
-        getline(lineStream, data_s, ','); // DENSITYURL
-        getline(lineStream, data_s, ','); // DEPTH
-        getline(lineStream, data_s, ','); // DEPTHUPPER
-        getline(lineStream, data_s, ','); // DEPTHLOWER
-        getline(lineStream, data_s, ','); // UDEPTH
-        getline(lineStream, data_s, ','); // DEPTHREF
-        getline(lineStream, data_s, ','); // DEPTHURL
-        getline(lineStream, data_s, ','); // DIST
-        getline(lineStream, data_s, ','); // DISTUPPER
-        getline(lineStream, data_s, ','); // DISTLOWER
-        getline(lineStream, data_s, ','); // UDIST
-        getline(lineStream, data_s, ','); // DISTREF
-        getline(lineStream, data_s, ','); // DISTURL
-        getline(lineStream, data_s, ','); // DR
-        getline(lineStream, data_s, ','); // DRUPPER
-        getline(lineStream, data_s, ','); // DRLOWER
-        getline(lineStream, data_s, ','); // UDR
-        getline(lineStream, data_s, ','); // DRREF
-        getline(lineStream, data_s, ','); // DRURL
-        getline(lineStream, data_s, ','); // DVDT
-        getline(lineStream, data_s, ','); // DVDTUPPER
-        getline(lineStream, data_s, ','); // DVDTLOWER
-        getline(lineStream, data_s, ','); // UDVDT
-        getline(lineStream, data_s, ','); // DVDTREF
-        getline(lineStream, data_s, ','); // DVDTURL
-        getline(lineStream, data_s, ','); // EANAME
-        getline(lineStream, data_s, ','); // EAURL
-        getline(lineStream, data_s, ','); // ECC
-        if (!data_s.empty())
-            p.ECC = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // CHI2
+        getline(lineStream, data, ','); // COMP
+        component = data;
+        getline(lineStream, data, ','); // DATE
+        getline(lineStream, data, ','); // DEC
+        getline(lineStream, data, ','); // DEC_STRING
+        getline(lineStream, data, ','); // DENSITY
+        getline(lineStream, data, ','); // DENSITYUPPER
+        getline(lineStream, data, ','); // DENSITYLOWER
+        getline(lineStream, data, ','); // UDENSITY
+        getline(lineStream, data, ','); // DENSITYREF
+        getline(lineStream, data, ','); // DENSITYURL
+        getline(lineStream, data, ','); // DEPTH
+        getline(lineStream, data, ','); // DEPTHUPPER
+        getline(lineStream, data, ','); // DEPTHLOWER
+        getline(lineStream, data, ','); // UDEPTH
+        getline(lineStream, data, ','); // DEPTHREF
+        getline(lineStream, data, ','); // DEPTHURL
+        getline(lineStream, data, ','); // DIST
+        getline(lineStream, data, ','); // DISTUPPER
+        getline(lineStream, data, ','); // DISTLOWER
+        getline(lineStream, data, ','); // UDIST
+        getline(lineStream, data, ','); // DISTREF
+        getline(lineStream, data, ','); // DISTURL
+        getline(lineStream, data, ','); // DR
+        getline(lineStream, data, ','); // DRUPPER
+        getline(lineStream, data, ','); // DRLOWER
+        getline(lineStream, data, ','); // UDR
+        getline(lineStream, data, ','); // DRREF
+        getline(lineStream, data, ','); // DRURL
+        getline(lineStream, data, ','); // DVDT
+        getline(lineStream, data, ','); // DVDTUPPER
+        getline(lineStream, data, ','); // DVDTLOWER
+        getline(lineStream, data, ','); // UDVDT
+        getline(lineStream, data, ','); // DVDTREF
+        getline(lineStream, data, ','); // DVDTURL
+        getline(lineStream, data, ','); // EANAME
+        getline(lineStream, data, ','); // EAURL
+        getline(lineStream, data, ','); // ECC
+        if (!data.empty())
+            p.ECC = std::stof(data.c_str(), nullptr);
         else
             p.ECC = NAN;
 
-        getline(lineStream, data_s, ','); // ECCUPPER
-        if (!data_s.empty())
-            p.ECCUPPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // ECCUPPER
+        if (!data.empty())
+            p.ECCUPPER = std::stof(data.c_str(), nullptr);
         else
             p.ECCUPPER = NAN;
 
-        getline(lineStream, data_s, ','); // ECCLOWER
-        if (!data_s.empty())
-            p.ECCLOWER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // ECCLOWER
+        if (!data.empty())
+            p.ECCLOWER = std::stof(data.c_str(), nullptr);
         else
             p.ECCLOWER = NAN;
 
-        getline(lineStream, data_s, ','); // UECC
-        if (!data_s.empty())
-            p.UECC = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // UECC
+        if (!data.empty())
+            p.UECC = std::stof(data.c_str(), nullptr);
         else
             p.UECC = NAN;
 
-        getline(lineStream, data_s, ','); // ECCREF
-        getline(lineStream, data_s, ','); // ECCURL
-        getline(lineStream, data_s, ','); // EOD
-        getline(lineStream, data_s, ','); // ETDNAME
-        getline(lineStream, data_s, ','); // ETDURL
-        getline(lineStream, data_s, ','); // FE
-        getline(lineStream, data_s, ','); // FEUPPER
-        getline(lineStream, data_s, ','); // FELOWER
-        getline(lineStream, data_s, ','); // UFE
-        getline(lineStream, data_s, ','); // FEREF
-        getline(lineStream, data_s, ','); // FEURL
-        getline(lineStream, data_s, ','); // FIRSTREF
-        getline(lineStream, data_s, ','); // FIRSTURL
-        getline(lineStream, data_s, ','); // FREEZE_ECC
-        getline(lineStream, data_s, ','); // GAMMA
-        getline(lineStream, data_s, ','); // GAMMAUPPER
-        getline(lineStream, data_s, ','); // GAMMALOWER
-        getline(lineStream, data_s, ','); // UGAMMA
-        getline(lineStream, data_s, ','); // GAMMAREF
-        getline(lineStream, data_s, ','); // GAMMAURL
-        getline(lineStream, data_s, ','); // GL
-        getline(lineStream, data_s, ','); // GRAVITY
-        getline(lineStream, data_s, ','); // GRAVITYUPPER
-        getline(lineStream, data_s, ','); // GRAVITYLOWER
-        getline(lineStream, data_s, ','); // UGRAVITY
-        getline(lineStream, data_s, ','); // GRAVITYREF
-        getline(lineStream, data_s, ','); // GRAVITYURL
-        getline(lineStream, data_s, ','); // H
-        getline(lineStream, data_s, ','); // HD
-        getline(lineStream, data_s, ','); // HIPP
-        getline(lineStream, data_s, ','); // HR
-        getline(lineStream, data_s, ','); // I
-        if (!data_s.empty())
-            p.I = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // ECCREF
+        getline(lineStream, data, ','); // ECCURL
+        getline(lineStream, data, ','); // EOD
+        getline(lineStream, data, ','); // ETDNAME
+        getline(lineStream, data, ','); // ETDURL
+        getline(lineStream, data, ','); // FE
+        getline(lineStream, data, ','); // FEUPPER
+        getline(lineStream, data, ','); // FELOWER
+        getline(lineStream, data, ','); // UFE
+        getline(lineStream, data, ','); // FEREF
+        getline(lineStream, data, ','); // FEURL
+        getline(lineStream, data, ','); // FIRSTREF
+        getline(lineStream, data, ','); // FIRSTURL
+        getline(lineStream, data, ','); // FREEZE_ECC
+        getline(lineStream, data, ','); // GAMMA
+        getline(lineStream, data, ','); // GAMMAUPPER
+        getline(lineStream, data, ','); // GAMMALOWER
+        getline(lineStream, data, ','); // UGAMMA
+        getline(lineStream, data, ','); // GAMMAREF
+        getline(lineStream, data, ','); // GAMMAURL
+        getline(lineStream, data, ','); // GL
+        getline(lineStream, data, ','); // GRAVITY
+        getline(lineStream, data, ','); // GRAVITYUPPER
+        getline(lineStream, data, ','); // GRAVITYLOWER
+        getline(lineStream, data, ','); // UGRAVITY
+        getline(lineStream, data, ','); // GRAVITYREF
+        getline(lineStream, data, ','); // GRAVITYURL
+        getline(lineStream, data, ','); // H
+        getline(lineStream, data, ','); // HD
+        getline(lineStream, data, ','); // HIPP
+        getline(lineStream, data, ','); // HR
+        getline(lineStream, data, ','); // I
+        if (!data.empty())
+            p.I = std::stof(data.c_str(), nullptr);
         else
             p.I = NAN;
 
-        getline(lineStream, data_s, ','); // IUPPER
-        if (!data_s.empty())
-            p.IUPPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // IUPPER
+        if (!data.empty())
+            p.IUPPER = std::stof(data.c_str(), nullptr);
         else
             p.IUPPER = NAN;
 
-        getline(lineStream, data_s, ','); // ILOWER
-        if (!data_s.empty())
-            p.ILOWER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // ILOWER
+        if (!data.empty())
+            p.ILOWER = std::stof(data.c_str(), nullptr);
         else
             p.ILOWER = NAN;
 
-        getline(lineStream, data_s, ','); // UI
-        if (!data_s.empty())
-            p.UI = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // UI
+        if (!data.empty())
+            p.UI = std::stof(data.c_str(), nullptr);
         else
             p.UI = NAN;
 
-        getline(lineStream, data_s, ','); // IREF
-        getline(lineStream, data_s, ','); // IURL
-        getline(lineStream, data_s, ','); // IMAGING
-        getline(lineStream, data_s, ','); // J
-        getline(lineStream, data_s, ','); // JSNAME
-        getline(lineStream, data_s, ','); // EPEURL
-        getline(lineStream, data_s, ','); // K
-        getline(lineStream, data_s, ','); // KUPPER
-        getline(lineStream, data_s, ','); // KLOWER
-        getline(lineStream, data_s, ','); // UK
-        getline(lineStream, data_s, ','); // KREF
-        getline(lineStream, data_s, ','); // KURL
-        getline(lineStream, data_s, ','); // KOI
-        getline(lineStream, data_s, ','); // KS
-        getline(lineStream, data_s, ','); // KP
-        getline(lineStream, data_s, ','); // LAMBDA
-        getline(lineStream, data_s, ','); // LAMBDAUPPER
-        getline(lineStream, data_s, ','); // LAMBDALOWER
-        getline(lineStream, data_s, ','); // ULAMBDA
-        getline(lineStream, data_s, ','); // LAMBDAREF
-        getline(lineStream, data_s, ','); // LAMBDAURL
-        getline(lineStream, data_s, ','); // LOGG
-        getline(lineStream, data_s, ','); // LOGGUPPER
-        getline(lineStream, data_s, ','); // LOGGLOWER
-        getline(lineStream, data_s, ','); // ULOGG
-        getline(lineStream, data_s, ','); // LOGGREF
-        getline(lineStream, data_s, ','); // LOGGURL;
-        getline(lineStream, data_s, ','); // MASS
-        getline(lineStream, data_s, ','); // MASSUPPER
-        getline(lineStream, data_s, ','); // MASSLOWER
-        getline(lineStream, data_s, ','); // UMASS
-        getline(lineStream, data_s, ','); // MASSREF
-        getline(lineStream, data_s, ','); // MASSURL
-        getline(lineStream, data_s, ','); // MICROLENSING
-        getline(lineStream, data_s, ','); // MSINI
-        getline(lineStream, data_s, ','); // MSINIUPPER
-        getline(lineStream, data_s, ','); // MSINILOWER
-        getline(lineStream, data_s, ','); // UMSINI
-        getline(lineStream, data_s, ','); // MSINIREF
-        getline(lineStream, data_s, ','); // MSINIURL
-        getline(lineStream, data_s, ','); // MSTAR
-        getline(lineStream, data_s, ','); // MSTARUPPER
-        getline(lineStream, data_s, ','); // MSTARLOWER
-        getline(lineStream, data_s, ','); // UMSTAR
-        getline(lineStream, data_s, ','); // MSTARREF
-        getline(lineStream, data_s, ','); // MSTARURL
-        getline(lineStream, data_s, ','); // MULT
-        getline(lineStream, data_s, ','); // NAME
-        getline(lineStream, data_s, ','); // NCOMP
-        if (!data_s.empty())
-            p.NCOMP = std::stoi(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // IREF
+        getline(lineStream, data, ','); // IURL
+        getline(lineStream, data, ','); // IMAGING
+        getline(lineStream, data, ','); // J
+        getline(lineStream, data, ','); // JSNAME
+        getline(lineStream, data, ','); // EPEURL
+        getline(lineStream, data, ','); // K
+        getline(lineStream, data, ','); // KUPPER
+        getline(lineStream, data, ','); // KLOWER
+        getline(lineStream, data, ','); // UK
+        getline(lineStream, data, ','); // KREF
+        getline(lineStream, data, ','); // KURL
+        getline(lineStream, data, ','); // KOI
+        getline(lineStream, data, ','); // KS
+        getline(lineStream, data, ','); // KP
+        getline(lineStream, data, ','); // LAMBDA
+        getline(lineStream, data, ','); // LAMBDAUPPER
+        getline(lineStream, data, ','); // LAMBDALOWER
+        getline(lineStream, data, ','); // ULAMBDA
+        getline(lineStream, data, ','); // LAMBDAREF
+        getline(lineStream, data, ','); // LAMBDAURL
+        getline(lineStream, data, ','); // LOGG
+        getline(lineStream, data, ','); // LOGGUPPER
+        getline(lineStream, data, ','); // LOGGLOWER
+        getline(lineStream, data, ','); // ULOGG
+        getline(lineStream, data, ','); // LOGGREF
+        getline(lineStream, data, ','); // LOGGURL;
+        getline(lineStream, data, ','); // MASS
+        getline(lineStream, data, ','); // MASSUPPER
+        getline(lineStream, data, ','); // MASSLOWER
+        getline(lineStream, data, ','); // UMASS
+        getline(lineStream, data, ','); // MASSREF
+        getline(lineStream, data, ','); // MASSURL
+        getline(lineStream, data, ','); // MICROLENSING
+        getline(lineStream, data, ','); // MSINI
+        getline(lineStream, data, ','); // MSINIUPPER
+        getline(lineStream, data, ','); // MSINILOWER
+        getline(lineStream, data, ','); // UMSINI
+        getline(lineStream, data, ','); // MSINIREF
+        getline(lineStream, data, ','); // MSINIURL
+        getline(lineStream, data, ','); // MSTAR
+        getline(lineStream, data, ','); // MSTARUPPER
+        getline(lineStream, data, ','); // MSTARLOWER
+        getline(lineStream, data, ','); // UMSTAR
+        getline(lineStream, data, ','); // MSTARREF
+        getline(lineStream, data, ','); // MSTARURL
+        getline(lineStream, data, ','); // MULT
+        getline(lineStream, data, ','); // NAME
+        getline(lineStream, data, ','); // NCOMP
+        if (!data.empty())
+            p.NCOMP = std::stoi(data.c_str(), nullptr);
         else
             p.NCOMP = -1;
-        getline(lineStream, data_s, ','); // NOBS
-        getline(lineStream, data_s, ','); // OM
-        if (!data_s.empty())
-            p.OM = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // NOBS
+        getline(lineStream, data, ','); // OM
+        if (!data.empty())
+            p.OM = std::stof(data.c_str(), nullptr);
         else
             p.OM = NAN;
 
-        getline(lineStream, data_s, ','); // OMUPPER
-        if (!data_s.empty())
-            p.OMUPPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // OMUPPER
+        if (!data.empty())
+            p.OMUPPER = std::stof(data.c_str(), nullptr);
         else
             p.OMUPPER = NAN;
 
-        getline(lineStream, data_s, ','); // OMLOWER
-        if (!data_s.empty())
-            p.OMLOWER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // OMLOWER
+        if (!data.empty())
+            p.OMLOWER = std::stof(data.c_str(), nullptr);
         else
             p.OMLOWER = NAN;
 
-        getline(lineStream, data_s, ','); // UOM
-        if (!data_s.empty())
-            p.UOM = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // UOM
+        if (!data.empty())
+            p.UOM = std::stof(data.c_str(), nullptr);
         else
             p.UOM = NAN;
 
-        getline(lineStream, data_s, ','); // OMREF
-        getline(lineStream, data_s, ','); // OMURL
-        getline(lineStream, data_s, ','); // ORBREF
-        getline(lineStream, data_s, ','); // ORBURL
-        getline(lineStream, data_s, ','); // OTHERNAME
-        getline(lineStream, data_s, ','); // PAR
-        getline(lineStream, data_s, ','); // PARUPPER
-        getline(lineStream, data_s, ','); // PARLOWER
-        getline(lineStream, data_s, ','); // UPAR
-        getline(lineStream, data_s, ','); // PER
-        if (!data_s.empty())
-            p.PER = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // OMREF
+        getline(lineStream, data, ','); // OMURL
+        getline(lineStream, data, ','); // ORBREF
+        getline(lineStream, data, ','); // ORBURL
+        getline(lineStream, data, ','); // OTHERNAME
+        getline(lineStream, data, ','); // PAR
+        getline(lineStream, data, ','); // PARUPPER
+        getline(lineStream, data, ','); // PARLOWER
+        getline(lineStream, data, ','); // UPAR
+        getline(lineStream, data, ','); // PER
+        if (!data.empty())
+            p.PER = std::stod(data.c_str(), nullptr);
         else
             p.PER = NAN;
 
-        getline(lineStream, data_s, ','); // PERUPPER
-        if (!data_s.empty())
-            p.PERUPPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // PERUPPER
+        if (!data.empty())
+            p.PERUPPER = std::stof(data.c_str(), nullptr);
         else
             p.PERUPPER = NAN;
 
-        getline(lineStream, data_s, ','); // PERLOWER
-        if (!data_s.empty())
-            p.PERLOWER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // PERLOWER
+        if (!data.empty())
+            p.PERLOWER = std::stof(data.c_str(), nullptr);
         else
             p.PERLOWER = NAN;
 
-        getline(lineStream, data_s, ','); // UPER
-        if (!data_s.empty())
-            p.UPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // UPER
+        if (!data.empty())
+            p.UPER = std::stof(data.c_str(), nullptr);
         else
             p.UPER = NAN;
 
-        getline(lineStream, data_s, ','); // PERREF
-        getline(lineStream, data_s, ','); // PERURL
-        getline(lineStream, data_s, ','); // PLANETDISCMETH
-        getline(lineStream, data_s, ','); // R
-        if (!data_s.empty())
-            p.R = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // PERREF
+        getline(lineStream, data, ','); // PERURL
+        getline(lineStream, data, ','); // PLANETDISCMETH
+        getline(lineStream, data, ','); // R
+        if (!data.empty())
+            p.R = std::stod(data.c_str(), nullptr);
         else
             p.R = NAN;
 
-        getline(lineStream, data_s, ','); // RUPPER
-        if (!data_s.empty())
-            p.RUPPER = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // RUPPER
+        if (!data.empty())
+            p.RUPPER = std::stod(data.c_str(), nullptr);
         else
             p.RUPPER = NAN;
 
-        getline(lineStream, data_s, ','); // RLOWER
-        if (!data_s.empty())
-            p.RLOWER = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // RLOWER
+        if (!data.empty())
+            p.RLOWER = std::stod(data.c_str(), nullptr);
         else
             p.RLOWER = NAN;
 
-        getline(lineStream, data_s, ','); //UR
-        if (!data_s.empty())
-            p.UR = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); //UR
+        if (!data.empty())
+            p.UR = std::stod(data.c_str(), nullptr);
         else
             p.UR = NAN;
 
-        getline(lineStream, data_s, ','); // RREF
-        getline(lineStream, data_s, ','); // RURL
-        getline(lineStream, data_s, ','); // RA
-        getline(lineStream, data_s, ','); // RA_STRING
-        getline(lineStream, data_s, ','); // RHK
-        getline(lineStream, data_s, ','); // RHOSTAR
-        getline(lineStream, data_s, ','); // RHOSTARUPPER
-        getline(lineStream, data_s, ','); // RHOSTARLOWER
-        getline(lineStream, data_s, ','); // URHOSTAR
-        getline(lineStream, data_s, ','); // RHOSTARREF
-        getline(lineStream, data_s, ','); // RHOSTARURL
-        getline(lineStream, data_s, ','); // RMS
-        getline(lineStream, data_s, ','); // RR
-        getline(lineStream, data_s, ','); // RRUPPER
-        getline(lineStream, data_s, ','); // RRLOWER
-        getline(lineStream, data_s, ','); // URR
-        getline(lineStream, data_s, ','); // RRREF
-        getline(lineStream, data_s, ','); // RRURL
-        getline(lineStream, data_s, ','); // RSTAR
-        if (!data_s.empty())
-            p.RSTAR = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // RREF
+        getline(lineStream, data, ','); // RURL
+        getline(lineStream, data, ','); // RA
+        getline(lineStream, data, ','); // RA_STRING
+        getline(lineStream, data, ','); // RHK
+        getline(lineStream, data, ','); // RHOSTAR
+        getline(lineStream, data, ','); // RHOSTARUPPER
+        getline(lineStream, data, ','); // RHOSTARLOWER
+        getline(lineStream, data, ','); // URHOSTAR
+        getline(lineStream, data, ','); // RHOSTARREF
+        getline(lineStream, data, ','); // RHOSTARURL
+        getline(lineStream, data, ','); // RMS
+        getline(lineStream, data, ','); // RR
+        getline(lineStream, data, ','); // RRUPPER
+        getline(lineStream, data, ','); // RRLOWER
+        getline(lineStream, data, ','); // URR
+        getline(lineStream, data, ','); // RRREF
+        getline(lineStream, data, ','); // RRURL
+        getline(lineStream, data, ','); // RSTAR
+        if (!data.empty())
+            p.RSTAR = std::stof(data.c_str(), nullptr);
         else
             p.RSTAR = NAN;
 
-        getline(lineStream, data_s, ','); // RSTARUPPER
-        if (!data_s.empty())
-            p.RSTARUPPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // RSTARUPPER
+        if (!data.empty())
+            p.RSTARUPPER = std::stof(data.c_str(), nullptr);
         else
             p.RSTARUPPER = NAN;
 
-        getline(lineStream, data_s, ','); // RSTARLOWER
-        if (!data_s.empty())
-            p.RSTARLOWER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // RSTARLOWER
+        if (!data.empty())
+            p.RSTARLOWER = std::stof(data.c_str(), nullptr);
         else
             p.RSTARLOWER = NAN;
 
-        getline(lineStream, data_s, ','); // URSTAR
-        if (!data_s.empty())
-            p.URSTAR = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // URSTAR
+        if (!data.empty())
+            p.URSTAR = std::stof(data.c_str(), nullptr);
         else
             p.URSTAR = NAN;
 
-        getline(lineStream, data_s, ','); // RSTARREF
-        getline(lineStream, data_s, ','); // RSTARURL
-        getline(lineStream, data_s, ','); // SAO
-        getline(lineStream, data_s, ','); // SE
-        getline(lineStream, data_s, ','); // SEREF
-        getline(lineStream, data_s, ','); // SEURL
-        getline(lineStream, data_s, ','); // SEDEPTHJ
-        getline(lineStream, data_s, ','); // SEDEPTHJUPPER
-        getline(lineStream, data_s, ','); // SEDEPTHJLOWER
-        getline(lineStream, data_s, ','); // USEDEPTHJ
-        getline(lineStream, data_s, ','); // SEDEPTHJREF
-        getline(lineStream, data_s, ','); // SEDEPTHJURL
-        getline(lineStream, data_s, ','); // SEDEPTHH
-        getline(lineStream, data_s, ','); // SEDEPTHHUPPER
-        getline(lineStream, data_s, ','); // SEDEPTHHLOWER
-        getline(lineStream, data_s, ','); // USEDEPTHH
-        getline(lineStream, data_s, ','); // SEDEPTHHREF
-        getline(lineStream, data_s, ','); // SEDEPTHHURL
-        getline(lineStream, data_s, ','); // SEDEPTHKS
-        getline(lineStream, data_s, ','); // SEDEPTHKSUPPER
-        getline(lineStream, data_s, ','); // SEDEPTHKSLOWER
-        getline(lineStream, data_s, ','); // USEDEPTHKS
-        getline(lineStream, data_s, ','); // SEDEPTHKSREF
-        getline(lineStream, data_s, ','); // SEDEPTHKSURL
-        getline(lineStream, data_s, ','); // SEDEPTHKP
-        getline(lineStream, data_s, ','); // SEDEPTHKPUPPER
-        getline(lineStream, data_s, ','); // SEDEPTHKPLOWER
-        getline(lineStream, data_s, ','); // USEDEPTHKP
-        getline(lineStream, data_s, ','); // SEDEPTHKPREF
-        getline(lineStream, data_s, ','); // SEDEPTHKPURL
-        getline(lineStream, data_s, ','); // SEDEPTH36
-        getline(lineStream, data_s, ','); // SEDEPTH36UPPER
-        getline(lineStream, data_s, ','); // SEDEPTH36LOWER
-        getline(lineStream, data_s, ','); // USEDEPTH36
-        getline(lineStream, data_s, ','); // SEDEPTH36REFx
-        getline(lineStream, data_s, ','); // SEDEPTH36URLx
-        getline(lineStream, data_s, ','); // SEDEPTH45
-        getline(lineStream, data_s, ','); // SEDEPTH45UPPER
-        getline(lineStream, data_s, ','); // SEDEPTH45LOWER
-        getline(lineStream, data_s, ','); // USEDEPTH45
-        getline(lineStream, data_s, ','); // SEDEPTH45REF
-        getline(lineStream, data_s, ','); // SEDEPTH45URL
-        getline(lineStream, data_s, ','); // SEDEPTH58
-        getline(lineStream, data_s, ','); // SEDEPTH58UPPER
-        getline(lineStream, data_s, ','); // SEDEPTH58LOWER
-        getline(lineStream, data_s, ','); // USEDEPTH58
-        getline(lineStream, data_s, ','); // EDEPTH58REF
-        getline(lineStream, data_s, ','); // SEDEPTH58URL
-        getline(lineStream, data_s, ','); // SEDEPTH80
-        getline(lineStream, data_s, ','); // SEDEPTH80UPPER
-        getline(lineStream, data_s, ','); // SEDEPTH80LOWER
-        getline(lineStream, data_s, ','); // USEDEPTH80
-        getline(lineStream, data_s, ','); // SEDEPTH80REF
-        getline(lineStream, data_s, ','); // SEDEPTH80URL
-        getline(lineStream, data_s, ','); // SEP
-        getline(lineStream, data_s, ','); // SEPUPPER
-        getline(lineStream, data_s, ','); // SEPLOWER
-        getline(lineStream, data_s, ','); // USEP
-        getline(lineStream, data_s, ','); // SEPREF
-        getline(lineStream, data_s, ','); // SEPURL
-        getline(lineStream, data_s, ','); // SET
-        getline(lineStream, data_s, ','); // SETUPPER
-        getline(lineStream, data_s, ','); // SETLOWER
-        getline(lineStream, data_s, ','); // USET
-        getline(lineStream, data_s, ','); // SETREF
-        getline(lineStream, data_s, ','); // SETURL
-        getline(lineStream, data_s, ','); // SHK
-        getline(lineStream, data_s, ','); // SIMBADNAME
-        getline(lineStream, data_s, ','); // SIMBADURL
-        getline(lineStream, data_s, ','); // SPECREF
-        getline(lineStream, data_s, ','); // SPECURL
-        getline(lineStream, data_s, ','); // STAR
-        std::string  speckStarname = getExplName(data_s);
+        getline(lineStream, data, ','); // RSTARREF
+        getline(lineStream, data, ','); // RSTARURL
+        getline(lineStream, data, ','); // SAO
+        getline(lineStream, data, ','); // SE
+        getline(lineStream, data, ','); // SEREF
+        getline(lineStream, data, ','); // SEURL
+        getline(lineStream, data, ','); // SEDEPTHJ
+        getline(lineStream, data, ','); // SEDEPTHJUPPER
+        getline(lineStream, data, ','); // SEDEPTHJLOWER
+        getline(lineStream, data, ','); // USEDEPTHJ
+        getline(lineStream, data, ','); // SEDEPTHJREF
+        getline(lineStream, data, ','); // SEDEPTHJURL
+        getline(lineStream, data, ','); // SEDEPTHH
+        getline(lineStream, data, ','); // SEDEPTHHUPPER
+        getline(lineStream, data, ','); // SEDEPTHHLOWER
+        getline(lineStream, data, ','); // USEDEPTHH
+        getline(lineStream, data, ','); // SEDEPTHHREF
+        getline(lineStream, data, ','); // SEDEPTHHURL
+        getline(lineStream, data, ','); // SEDEPTHKS
+        getline(lineStream, data, ','); // SEDEPTHKSUPPER
+        getline(lineStream, data, ','); // SEDEPTHKSLOWER
+        getline(lineStream, data, ','); // USEDEPTHKS
+        getline(lineStream, data, ','); // SEDEPTHKSREF
+        getline(lineStream, data, ','); // SEDEPTHKSURL
+        getline(lineStream, data, ','); // SEDEPTHKP
+        getline(lineStream, data, ','); // SEDEPTHKPUPPER
+        getline(lineStream, data, ','); // SEDEPTHKPLOWER
+        getline(lineStream, data, ','); // USEDEPTHKP
+        getline(lineStream, data, ','); // SEDEPTHKPREF
+        getline(lineStream, data, ','); // SEDEPTHKPURL
+        getline(lineStream, data, ','); // SEDEPTH36
+        getline(lineStream, data, ','); // SEDEPTH36UPPER
+        getline(lineStream, data, ','); // SEDEPTH36LOWER
+        getline(lineStream, data, ','); // USEDEPTH36
+        getline(lineStream, data, ','); // SEDEPTH36REFx
+        getline(lineStream, data, ','); // SEDEPTH36URLx
+        getline(lineStream, data, ','); // SEDEPTH45
+        getline(lineStream, data, ','); // SEDEPTH45UPPER
+        getline(lineStream, data, ','); // SEDEPTH45LOWER
+        getline(lineStream, data, ','); // USEDEPTH45
+        getline(lineStream, data, ','); // SEDEPTH45REF
+        getline(lineStream, data, ','); // SEDEPTH45URL
+        getline(lineStream, data, ','); // SEDEPTH58
+        getline(lineStream, data, ','); // SEDEPTH58UPPER
+        getline(lineStream, data, ','); // SEDEPTH58LOWER
+        getline(lineStream, data, ','); // USEDEPTH58
+        getline(lineStream, data, ','); // EDEPTH58REF
+        getline(lineStream, data, ','); // SEDEPTH58URL
+        getline(lineStream, data, ','); // SEDEPTH80
+        getline(lineStream, data, ','); // SEDEPTH80UPPER
+        getline(lineStream, data, ','); // SEDEPTH80LOWER
+        getline(lineStream, data, ','); // USEDEPTH80
+        getline(lineStream, data, ','); // SEDEPTH80REF
+        getline(lineStream, data, ','); // SEDEPTH80URL
+        getline(lineStream, data, ','); // SEP
+        getline(lineStream, data, ','); // SEPUPPER
+        getline(lineStream, data, ','); // SEPLOWER
+        getline(lineStream, data, ','); // USEP
+        getline(lineStream, data, ','); // SEPREF
+        getline(lineStream, data, ','); // SEPURL
+        getline(lineStream, data, ','); // SET
+        getline(lineStream, data, ','); // SETUPPER
+        getline(lineStream, data, ','); // SETLOWER
+        getline(lineStream, data, ','); // USET
+        getline(lineStream, data, ','); // SETREF
+        getline(lineStream, data, ','); // SETURL
+        getline(lineStream, data, ','); // SHK
+        getline(lineStream, data, ','); // SIMBADNAME
+        getline(lineStream, data, ','); // SIMBADURL
+        getline(lineStream, data, ','); // SPECREF
+        getline(lineStream, data, ','); // SPECURL
+        getline(lineStream, data, ','); // STAR
+        std::string  speckStarname = getExoplanetName(data);
         glm::vec3 pos = getStarPosition(speckStarname);
         p.POSITIONX = pos[0];
         p.POSITIONY = pos[1];
         p.POSITIONZ = pos[2];
 
-        getline(lineStream, data_s, ','); // STARDISCMETH
-        getline(lineStream, data_s, ','); // T0
-        getline(lineStream, data_s, ','); // T0UPPER
-        getline(lineStream, data_s, ','); // T0LOWER
-        getline(lineStream, data_s, ','); // UT0
-        getline(lineStream, data_s, ','); // T0REF
-        getline(lineStream, data_s, ','); // T0URL
-        getline(lineStream, data_s, ','); // T14
-        getline(lineStream, data_s, ','); // T14UPPER
-        getline(lineStream, data_s, ','); // T14LOWER
-        getline(lineStream, data_s, ','); // UT14
-        getline(lineStream, data_s, ','); // T14REF
-        getline(lineStream, data_s, ','); // T14URL
-        getline(lineStream, data_s, ','); // TEFF
+        getline(lineStream, data, ','); // STARDISCMETH
+        getline(lineStream, data, ','); // T0
+        getline(lineStream, data, ','); // T0UPPER
+        getline(lineStream, data, ','); // T0LOWER
+        getline(lineStream, data, ','); // UT0
+        getline(lineStream, data, ','); // T0REF
+        getline(lineStream, data, ','); // T0URL
+        getline(lineStream, data, ','); // T14
+        getline(lineStream, data, ','); // T14UPPER
+        getline(lineStream, data, ','); // T14LOWER
+        getline(lineStream, data, ','); // UT14
+        getline(lineStream, data, ','); // T14REF
+        getline(lineStream, data, ','); // T14URL
+        getline(lineStream, data, ','); // TEFF
         float teff;
-        if (!data_s.empty())
-            teff = std::stof(data_s.c_str(), nullptr);
+        if (!data.empty())
+            teff = std::stof(data.c_str(), nullptr);
         else
             teff = NAN;
 
-        getline(lineStream, data_s, ','); // TEFFUPPER
-        getline(lineStream, data_s, ','); // TEFFLOWER
-        getline(lineStream, data_s, ','); // UTEFF
-        getline(lineStream, data_s, ','); // TEFFREF
-        getline(lineStream, data_s, ','); // TEFFURL
-        getline(lineStream, data_s, ','); // TIMING
-        getline(lineStream, data_s, ','); // TRANSIT
-        getline(lineStream, data_s, ','); // TRANSITREF
-        getline(lineStream, data_s, ','); // TRANSITURL
-        getline(lineStream, data_s, ','); // TREND
-        getline(lineStream, data_s, ','); // TT
-        if (!data_s.empty())
-            p.TT = std::stod(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // TEFFUPPER
+        getline(lineStream, data, ','); // TEFFLOWER
+        getline(lineStream, data, ','); // UTEFF
+        getline(lineStream, data, ','); // TEFFREF
+        getline(lineStream, data, ','); // TEFFURL
+        getline(lineStream, data, ','); // TIMING
+        getline(lineStream, data, ','); // TRANSIT
+        getline(lineStream, data, ','); // TRANSITREF
+        getline(lineStream, data, ','); // TRANSITURL
+        getline(lineStream, data, ','); // TREND
+        getline(lineStream, data, ','); // TT
+        if (!data.empty())
+            p.TT = std::stod(data.c_str(), nullptr);
         else
             p.TT = NAN;
 
-        getline(lineStream, data_s, ','); // TTUPPER
-        if (!data_s.empty())
-            p.TTUPPER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // TTUPPER
+        if (!data.empty())
+            p.TTUPPER = std::stof(data.c_str(), nullptr);
         else
             p.TTUPPER = NAN;
 
-        getline(lineStream, data_s, ','); // TTLOWER
-        if (!data_s.empty())
-            p.TTLOWER = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // TTLOWER
+        if (!data.empty())
+            p.TTLOWER = std::stof(data.c_str(), nullptr);
         else
             p.TTLOWER = NAN;
 
-        getline(lineStream, data_s, ','); // UTT
-        if (!data_s.empty())
-            p.UTT = std::stof(data_s.c_str(), nullptr);
+        getline(lineStream, data, ','); // UTT
+        if (!data.empty())
+            p.UTT = std::stof(data.c_str(), nullptr);
         else
             p.UTT = NAN;
 
-        getline(lineStream, data_s, ','); // TTREF
-        getline(lineStream, data_s, ','); // TTURL
-        getline(lineStream, data_s, ','); // V
-        getline(lineStream, data_s, ','); // VREF
-        getline(lineStream, data_s, ','); // VURL
-        getline(lineStream, data_s, ','); // VSINI
-        getline(lineStream, data_s, ','); // VSINIUPPER
-        getline(lineStream, data_s, ','); // VSINILOWER
-        getline(lineStream, data_s, ','); // UVSINI
-        getline(lineStream, data_s, ','); // VSINIREF
-        getline(lineStream, data_s, ','); // VSINIURL
-        getline(lineStream, data_s, ','); // KEPID
-        if (!data_s.empty())
+        getline(lineStream, data, ','); // TTREF
+        getline(lineStream, data, ','); // TTURL
+        getline(lineStream, data, ','); // V
+        getline(lineStream, data, ','); // VREF
+        getline(lineStream, data, ','); // VURL
+        getline(lineStream, data, ','); // VSINI
+        getline(lineStream, data, ','); // VSINIUPPER
+        getline(lineStream, data, ','); // VSINILOWER
+        getline(lineStream, data, ','); // UVSINI
+        getline(lineStream, data, ','); // VSINIREF
+        getline(lineStream, data, ','); // VSINIURL
+        getline(lineStream, data, ','); // KEPID
+        if (!data.empty())
             iskeplerobject = true;
-        getline(lineStream, data_s); // KDE
+        getline(lineStream, data); // KDE
 
         if (!iskeplerobject) {
             // calculate B-V from Teff if not exsisting
@@ -788,12 +787,11 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
                                 BV = 2.00;
                             }
                             else {
-                                BV = (((bv_upper - bv_lower)*(teff - teff_lower)) / (teff_upper - teff_lower)) + bv_lower;
+                                BV = (((bv_upper - bv_lower) * (teff - teff_lower)) / (teff_upper - teff_lower)) + bv_lower;
                             }
                             break;
                         }
                     }
-
                     teff_bv.close();
                     p.BMV = BV;
                 }
@@ -802,16 +800,17 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
                 }
             }
 
-            long pos = bin_file.tellp();
+            // crate look-up table
+            long pos = binFile.tellp();
             planetname = speckStarname + " " + component;
-            lut_file << planetname << "," << pos << std::endl;
-            bin_file.write((char *)&p, sizeof(struct Exoplanet));
+            lutFile << planetname << "," << pos << std::endl;
+            binFile.write((char *)&p, sizeof(struct Exoplanet));
         }
     }
 
-    csv_file.close();
-    bin_file.close();
-    lut_file.close();
+    csvFile.close();
+    binFile.close();
+    lutFile.close();
 
     progressCallback(1.0f);
 }
@@ -829,25 +828,25 @@ documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
                 "The type of this task"
             },
             {
-                KeyInputCSV,
+                KeyInputCsv,
                 new StringAnnotationVerifier("A file path to a csv file"),
                 Optional::No,
                 "The csv file to extract data from"
             },
             {
-                KeyInputSPECK,
+                KeyInputSpeck,
                 new StringAnnotationVerifier("A file path to a speck file"),
                 Optional::No,
-                "The speck file to with star location"
+                "The speck file with star location"
             },
             {
-                KeyOutputBIN,
+                KeyOutputBin,
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "The bin file to export data into"
             },
             {
-                KeyOutputLUT,
+                KeyOutputLut,
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "The txt file to write look-up table into"
@@ -856,5 +855,4 @@ documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
     };
 }
 
-} // namespace exoplanets
-} // namespace openspace
+} // namespace openspace::exoplanets

@@ -25,13 +25,11 @@
 #ifndef __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 
-#include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
@@ -66,19 +64,17 @@ private:
     properties::FloatProperty _size;
     properties::FloatProperty _eccentricity;
     properties::Vec2Property _offset;
-    //properties::FloatProperty _nightFactor;
-    properties::FloatProperty _transparency;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(modelViewProjection, textureOffset, transparency,
+    UniformCache(modelViewProjection, textureOffset, opacity,
          texture, eccentricity, semiMajorAxis) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     bool _textureIsDirty;
+    bool _planeIsDirty;
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-    bool _planeIsDirty;
 };
 
 } // namespace openspace
