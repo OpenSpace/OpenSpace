@@ -90,7 +90,6 @@ glm::dvec3 ExoplanetsModule::getNorthVector() {
 }
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
-
     scripting::LuaLibrary res;
     res.name = "exoplanets";
     res.functions = {
@@ -108,14 +107,12 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             "string",
             "Removes the nodes from the scene graph of the exoplanet system."
         }
-
     };
 
     return res;
 }
 
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
-
     auto fTask = FactoryManager::ref().factory<Task>();
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
@@ -129,9 +126,7 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
 
     // Render
     global::callback::render.push_back([&]() {
-
-        if (_discoveryMethods->isDoppler())
-        {
+        if (_discoveryMethods->isDoppler()) {
             std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
             std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
             SceneGraphNode* planetNode = global::renderEngine.scene()->sceneGraphNode(planetNames[0]);
@@ -141,34 +136,31 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
             glm::dvec3 starToPosVec = normalize(planetPos - starPos);
             glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPos);
             glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
-            glm::dvec3 northProjected = glm::normalize(glm::length(north)*glm::sin(glm::dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec)));
+            glm::dvec3 northProjected = glm::normalize(
+                glm::length(north) * glm::sin(glm::dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec))
+            );
             float northAngle = glm::acos(glm::dot(starToPosVec, northProjected)) * 57.2957795;
             float viewAngle = glm::acos(glm::dot(starToPosVec, starToSunVec)) * 57.2957795;
 
             float imagePos = 0;
-            if ( viewAngle <= 90.0 && northAngle <= 90.0)
-            {
+            if ( viewAngle <= 90.0 && northAngle <= 90.0) {
                 imagePos = viewAngle / -90.0;
             }
-            else if (viewAngle > 90.0 && northAngle <= 90.0)
-            {
+            else if (viewAngle > 90.0 && northAngle <= 90.0) {
                 imagePos = (180.0 - viewAngle) / -90.0;
             }
-            else if (viewAngle > 90.0 && northAngle > 90.0)
-            {
+            else if (viewAngle > 90.0 && northAngle > 90.0) {
                 imagePos = (180.0 - viewAngle) / 90.0;
             }
-            else if (viewAngle <= 90.0 && northAngle > 90.0)
-            {
+            else if (viewAngle <= 90.0 && northAngle > 90.0) {
                 imagePos = viewAngle / 90.0;
             }
             
             imagePos *= 0.01;
             _discoveryMethods->setDopplerImagePos(imagePos);
-
         }
-        if (_discoveryMethods->isTransit()) {
 
+        if (_discoveryMethods->isTransit()) {
             std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
             std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
             SceneGraphNode* planetNode = global::renderEngine.scene()->sceneGraphNode(planetNames[0]);
@@ -189,32 +181,27 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
             glm::dvec3 posVecProjected = starToPosVec - (((dot(starToPosVec, starToSunVec)) / (glm::length(starToSunVec)))*starToSunVec);
             float l = glm::length(posVecProjected); //in m
             float imageYPos = -0.60;
+
             if (l<(starRadius*0.82) && viewAngle <= 90.0) {
                 imageYPos = -0.80;
             }
 
             float imageXPos = 0;
-            if (viewAngle <= 90.0 && northAngle <= 90.0)
-            {
-            imageXPos = (viewAngle / 90.0) * 0.5;
+            if (viewAngle <= 90.0 && northAngle <= 90.0) {
+                imageXPos = (viewAngle / 90.0) * 0.5;
             }
-            else if (viewAngle > 90.0 && northAngle <= 90.0)
-            {
-            imageXPos = (viewAngle / 90.0) * 0.5;
+            else if (viewAngle > 90.0 && northAngle <= 90.0) {
+                imageXPos = (viewAngle / 90.0) * 0.5;
             }
-            else if (viewAngle > 90.0 && northAngle > 90.0)
-            {
-            imageXPos = (viewAngle / 90.0) * -0.5;
+            else if (viewAngle > 90.0 && northAngle > 90.0) {
+                imageXPos = (viewAngle / 90.0) * -0.5;
             }
-            else if (viewAngle <= 90.0 && northAngle > 90.0)
-            {
-            imageXPos = (viewAngle / 90.0) * -0.5;
+            else if (viewAngle <= 90.0 && northAngle > 90.0) {
+                imageXPos = (viewAngle / 90.0) * -0.5;
             }
             imageXPos *= 0.5;
             _discoveryMethods->setTransitImagePos(imageXPos, imageYPos);
-
         }
-
     });
 }
 

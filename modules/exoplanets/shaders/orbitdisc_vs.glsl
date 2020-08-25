@@ -43,5 +43,4 @@ void main() {
         modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0)
     );
     gl_Position = vs_position;
-
 }

@@ -44,7 +44,6 @@ uniform vec3 sunPosition;
 Fragment getFragment() {
     // Moving the origin to the center
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
-    
 
     // The length of the texture coordinates vector is our distance from the center
     float outer;

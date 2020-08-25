@@ -41,31 +41,30 @@
 
 
 namespace {
-	constexpr const char* _loggerCat = "DiscoveryMethods";
+    constexpr const char* _loggerCat = "DiscoveryMethods";
 
-	static const openspace::properties::Property::PropertyInfo TransitMethodInfo = {
-		"TransitMethod",
-		"Show transit method",
-		"Change the view so that the transit method can be presented."
-	};
-	
-	static const openspace::properties::Property::PropertyInfo DopplerMethodInfo = {
-		"DopplerMethod",
-		"Show doppler method",
-		"Change the view so that the doppler method can be presented."
-	};
+    static const openspace::properties::Property::PropertyInfo TransitMethodInfo = {
+        "TransitMethod",
+        "Show transit method",
+        "Change the view so that the transit method can be presented."
+    };
+    
+    static const openspace::properties::Property::PropertyInfo DopplerMethodInfo = {
+        "DopplerMethod",
+        "Show doppler method",
+        "Change the view so that the doppler method can be presented."
+    };
     
     static const openspace::properties::Property::PropertyInfo SolarSystemReferenceInfo = {
-		"SolarSystemReference",
-		"Show solar system reference",
-		"Show the size of the solar system as a reference for size."
-	};
+        "SolarSystemReference",
+        "Show solar system reference",
+        "Show the size of the solar system as a reference for size."
+    };
 } // namespace
 
-namespace openspace::exoplanets{
+namespace openspace::exoplanets {
 
     void DiscoveryMethods::addDirectionsMarkers(glm::dvec3 viewDirecionPos, glm::dvec3 northDirectionPos, float starRadius) {
-
         const std::string markerView = "{"
             "Identifier = 'markerView',"
             "Parent = 'SolarSystemBarycenter',"
@@ -147,22 +146,21 @@ namespace openspace::exoplanets{
     }
 
     void addDopplerGraphs() {
-        std::string script = "openspace.addScreenSpaceRenderable("
-                "{"
+        std::string script = 
+            "openspace.addScreenSpaceRenderable("
+            "{"
                 "Identifier = 'DopplerShift2',"
                 "Type = 'ScreenSpaceImageLocal',"
                 "TexturePath = openspace.absPath('${BASE}/modules/exoplanets/stripes2.png'),"
                 "EuclideanPosition = {0.0, -0.7}"
-                "}"
-            ");"
+            "});"
             "openspace.addScreenSpaceRenderable("
-                "{"
+            "{"
                 "Identifier = 'DopplerShift1',"
                 "Type = 'ScreenSpaceImageLocal',"
                 "TexturePath = openspace.absPath('${BASE}/modules/exoplanets/spectrum.jpg'),"
                 "EuclideanPosition = {0.0, -0.7}"
-                "}"
-            ");";
+            "});";
 
         openspace::global::scriptEngine.queueScript(
             script,
@@ -171,7 +169,8 @@ namespace openspace::exoplanets{
     }
 
     void addTransitGraphs() {
-        std::string script = "openspace.addScreenSpaceRenderable("
+        std::string script = 
+            "openspace.addScreenSpaceRenderable("
             "{"
                 "Identifier = 'Transit2',"
                 "Type = 'ScreenSpaceImageLocal',"
@@ -201,8 +200,6 @@ namespace openspace::exoplanets{
         );
     }
 
-    
-
     void DiscoveryMethods::scaleNode(std::string nodeName, float scalefactor) {
         std::string script = "openspace.setPropertyValueSingle( 'Scene."+ nodeName +".Scale.Scale', " + std::to_string(scalefactor) + ", 1);"; //get name of current star from em
         openspace::global::scriptEngine.queueScript(
@@ -226,7 +223,6 @@ namespace openspace::exoplanets{
         {
             //keeping first planet in the list, wich dosn't neccesarily mean the closest one...
             for (size_t i = 1; i < planetNames.size(); i++) {
-                
                 std::string script = "";
                 //remove planetglobe
                 if (!isnan(planets[i].R)) {
@@ -256,7 +252,6 @@ namespace openspace::exoplanets{
     }
 
     void DiscoveryMethods::moveCamera(glm::dvec3 pos) {
-
         Camera* cam = global::navigationHandler.camera();
         cam->setPositionVec3(pos);
         global::navigationHandler.resetCameraDirection();
@@ -299,8 +294,7 @@ namespace openspace::exoplanets{
         float semiMajorAxis = planets[0].A; // in AU
         float starSemiMajorAxis = 0.1 * semiMajorAxis; // 10% of exoplanets semiMajorAxis
         float eccentricity = planets[0].ECC;
-        if (isnan(planets[0].ECC))
-        {
+        if (isnan(planets[0].ECC)) {
             eccentricity = 0.0;
         }
         float starRadius = planets[0].RSTAR; // in Solar Radii
@@ -344,7 +338,6 @@ namespace openspace::exoplanets{
         glm::dvec3 viewDirectionPos = starPosition + (double(starRadius * scale) * starToSunVec);
         //addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
         // END MARKERS
-
     }
 
     void DiscoveryMethods::removeDopplerMethodVisualization() {
@@ -379,7 +372,6 @@ namespace openspace::exoplanets{
     }
 
     void DiscoveryMethods::addTransitMethodVisualization() {
-
         const SceneGraphNode* focusNode = global::navigationHandler.anchorNode();
         std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName(); // getStarName 
         glm::dvec3 starPosition = focusNode->worldPosition(); // can get from Exoplanet.POSITIONX/.POSITIONY/.POSITIONZ (in parsecs)
@@ -389,8 +381,7 @@ namespace openspace::exoplanets{
         
         float semiMajorAxis = planets[0].A; // in AU (1AU = 149 597 870 700m)
         float eccentricity = planets[0].ECC;
-        if (isnan(planets[0].ECC))
-        {
+        if (isnan(planets[0].ECC)) {
             eccentricity = 0.0;
         }
         float starRadius = planets[0].RSTAR; // in Solar Radii
@@ -402,7 +393,6 @@ namespace openspace::exoplanets{
         glm::dvec3 cameraPosition = starPosition + ((4.0 * semiMajorAxis * 149597870700.0) * starToSunVec);
         //glm::dvec3 cameraPosition = starPosition + ((3.0 * semiMajorAxis * 149597870700.0) * faceOnVector);
         
-
         moveCamera(cameraPosition);
         // END CAMERA
         toggleVisabilityPlanet(planetNames[0], "true");
@@ -430,6 +420,7 @@ namespace openspace::exoplanets{
         //addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
         // END MARKERS
     }
+
     void DiscoveryMethods::removeTransitMethodVisualization() {
         std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
         //SCALE STAR AND PLANET
@@ -438,7 +429,10 @@ namespace openspace::exoplanets{
         scaleNode(planetNames[0], 1);
 
         // REMOVE GRAPH
-        std::string script = "openspace.removeScreenSpaceRenderable('Transit3');openspace.removeScreenSpaceRenderable('Transit2');openspace.removeScreenSpaceRenderable('Transit1');";
+        std::string script = "openspace.removeScreenSpaceRenderable('Transit3');"
+            "openspace.removeScreenSpaceRenderable('Transit2');"
+            "openspace.removeScreenSpaceRenderable('Transit1');";
+
         openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
@@ -448,24 +442,22 @@ namespace openspace::exoplanets{
         //removeDirectionsMarkers();
     }
 
-
     void DiscoveryMethods::addSolarSystemReferenceVisualization() {
-
         std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
         std::vector<Exoplanet> planets = global::moduleEngine.module<ExoplanetsModule>()->getPlsy();
         std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
         
         // SUN
         const std::string sunRef = "{"
-        	"Identifier = 'SunReference',"
-        	"Parent = '" + starName + "',"
-        	"Renderable = {"
-        	    "Type = 'RenderablePlaneImageLocal',"
-        	    "Size = 6.957E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
-        	    "Billboard = true,"
-        	    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/target-blue-ring.png'),"
-        	    "BlendMode = 'Additive'"
-        	"},"
+            "Identifier = 'SunReference',"
+            "Parent = '" + starName + "',"
+            "Renderable = {"
+                "Type = 'RenderablePlaneImageLocal',"
+                "Size = 6.957E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+                "Billboard = true,"
+                "Texture = openspace.absPath('${MODULE_EXOPLANETS}/target-blue-ring.png'),"
+                "BlendMode = 'Additive'"
+            "},"
             "Transform = {"
                 "Translation = {"
                     "Type = 'StaticTranslation',"
@@ -507,9 +499,9 @@ namespace openspace::exoplanets{
                 openspace::scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
-        
 
         glm::dmat3 rotation = global::moduleEngine.module<ExoplanetsModule>()->getRotation();
+
         // ORBIT
         const std::string orbitRef = "{"
             "Identifier = 'OrbitReference',"
@@ -546,46 +538,40 @@ namespace openspace::exoplanets{
         );
     }
 
-	DiscoveryMethods::DiscoveryMethods()
-		: PropertyOwner({ "DiscoveryMethods" })
-		, _showTransit(TransitMethodInfo, false)
-		, _showDoppler(DopplerMethodInfo, false)
-		, _showSolarSystemReference(SolarSystemReferenceInfo, false)
-	{
+    DiscoveryMethods::DiscoveryMethods()
+        : PropertyOwner({ "DiscoveryMethods" })
+        , _showTransit(TransitMethodInfo, false)
+        , _showDoppler(DopplerMethodInfo, false)
+        , _showSolarSystemReference(SolarSystemReferenceInfo, false)
+    {
         _showTransit.onChange([&]() {
             if (_showTransit) //just changed to true
             {
-                if (_showDoppler) //only one viz at the time
-                {
+                if (_showDoppler) { //only one viz at the time
                     _showDoppler = false;
                     removeDopplerMethodVisualization();
                 }
-
                 addTransitMethodVisualization();
             }
-            else //just changed to false
-            {
+            else { //just changed to false
                 removeTransitMethodVisualization();
             }
              
         });
         addProperty(_showTransit);
+
         _showDoppler.onChange([&]() { 
             if (_showDoppler) //just changed to true
             {
-                if (_showTransit)
-                {
-                    
+                if (_showTransit) {
                     _showTransit = false;
                     removeTransitMethodVisualization();
                 }
                 addDopplerMethodVisualization();
             }
-            else //just changed to false
-            {
+            else { //just changed to false
                 removeDopplerMethodVisualization();
             }
-             
         });
         addProperty(_showDoppler);
 
@@ -598,7 +584,5 @@ namespace openspace::exoplanets{
             }
         });
         addProperty(_showSolarSystemReference);
-	}
-
+    }
 } // namespce
-

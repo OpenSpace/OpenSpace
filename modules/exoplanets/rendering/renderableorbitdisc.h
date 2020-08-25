@@ -79,7 +79,6 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
     bool _planeIsDirty;
-
 };
 
 } // namespace openspace

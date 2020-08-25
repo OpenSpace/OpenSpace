@@ -28,12 +28,11 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-
 namespace openspace::exoplanets {
 
 class DiscoveryMethods : public properties::PropertyOwner {
 public:
-	DiscoveryMethods();
+    DiscoveryMethods();
     bool isDoppler();
     bool isTransit();
     bool isReference();
@@ -42,9 +41,9 @@ public:
     float getTransitScaleFactor();
 
 private:
-	properties::BoolProperty _showTransit;
-	properties::BoolProperty _showDoppler;
-	properties::BoolProperty _showSolarSystemReference;
+    properties::BoolProperty _showTransit;
+    properties::BoolProperty _showDoppler;
+    properties::BoolProperty _showSolarSystemReference;
 
     void addSolarSystemReferenceVisualization();
     void removeSolarSystemReferenceVisualization();
@@ -62,7 +61,6 @@ private:
     void toggleVisabilityPlanet(std::string, std::string);
 
     float _transitScaleFactor;
-
 };
 
 } // namespace

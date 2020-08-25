@@ -27,22 +27,22 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/exoplanetscsvtobintask.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.h
-	${CMAKE_CURRENT_SOURCE_DIR}/discoverymethods/discoverymethods.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/discoverymethods/discoverymethods.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/exoplanetscsvtobintask.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/discoverymethods/discoverymethods.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/orbitdisc_fs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/orbitdisc_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/orbitdisc_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/orbitdisc_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
