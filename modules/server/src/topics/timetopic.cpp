@@ -110,7 +110,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     );
 }
 
-json TimeTopic::getNextPrevDeltaTimeStepJson() {
+const json TimeTopic::getNextPrevDeltaTimeStepJson() {
     const std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
     const std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
     const bool hasNext = nextStep.has_value();
@@ -153,7 +153,7 @@ void TimeTopic::sendFullTimeData() {
         { "isPaused", isPaused }
     };
 
-    json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    const json nextPrevJson = getNextPrevDeltaTimeStepJson();
     timeJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
     _connection->sendJson(wrappedPayload(timeJson));
@@ -163,13 +163,13 @@ void TimeTopic::sendFullTimeData() {
 }
 
 void TimeTopic::sendDeltaTimeSteps() {
-    const std::vector<double> steps = global::timeManager.deltaTimeSteps();
+    const std::vector<double>& steps = global::timeManager.deltaTimeSteps();
 
     json deltaTimeStepsJson = {
         { "deltaTimeSteps", steps } 
     };
 
-    json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    const json nextPrevJson = getNextPrevDeltaTimeStepJson();
     deltaTimeStepsJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
     _connection->sendJson(wrappedPayload(deltaTimeStepsJson));
