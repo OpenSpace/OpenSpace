@@ -30,6 +30,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
     constexpr const char* EventKey = "event";
@@ -110,12 +111,28 @@ void TimeTopic::sendFullTimeData() {
     const double targetDeltaTime = global::timeManager.targetDeltaTime();
     const bool isPaused = global::timeManager.isPaused();
 
-    const json timeJson = {
+    std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
+    std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
+
+    bool hasNext = nextStep.has_value();
+    bool hasPrev = prevStep.has_value();
+
+    json timeJson = {
         { "time", currentTime },
         { "deltaTime", deltaTime},
         { "targetDeltaTime", targetDeltaTime},
         { "isPaused", isPaused },
+        { "hasNextStep", hasNext },
+        { "hasPrevStep", hasPrev }
     };
+
+    if (hasNext) {
+        timeJson["nextStep"] = nextStep.value();
+    }
+
+    if (hasPrev) {
+        timeJson["prevStep"] = prevStep.value();
+    }
 
     _connection->sendJson(wrappedPayload(timeJson));
     _lastUpdateTime = std::chrono::system_clock::now();
