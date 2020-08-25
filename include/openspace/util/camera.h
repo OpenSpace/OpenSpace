@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___CAMERA___H__
 #define __OPENSPACE_CORE___CAMERA___H__
 
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <mutex>
@@ -33,11 +32,9 @@
 namespace openspace {
 
 class SceneGraphNode;
-class SyncBuffer;
 
 /**
  * This class still needs some more love. Suggested improvements:
- * - Remove psc from the camera class interface.
  * - Accessors should return constant references to double precision class members.
  * - Remove the scaling variable (What is it used for?)
  * - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded
@@ -61,9 +58,8 @@ public:
      */
     template<typename T>
     struct Cached {
-        Cached() { isDirty = true; }
-        T datum;
-        bool isDirty;
+        T datum = T(0);
+        bool isDirty = true;
     };
 
     Camera() = default;
@@ -72,7 +68,6 @@ public:
 
     // Mutators
     void setPositionVec3(glm::dvec3 pos);
-    void setFocusPositionVec3(glm::dvec3 pos);
     void setRotation(glm::dquat rotation);
     void setScaling(float scaling);
     void setMaxFov(float fov);
@@ -86,7 +81,6 @@ public:
     const glm::dvec3& positionVec3() const;
     glm::dvec3 eyePositionVec3() const;
     const glm::dvec3& unsynchedPositionVec3() const;
-    const glm::dvec3& focusPositionVec3() const;
     const glm::dvec3& viewDirectionWorldSpace() const;
     const glm::dvec3& lookUpVectorCameraSpace() const;
     const glm::dvec3& lookUpVectorWorldSpace() const;
@@ -130,26 +124,14 @@ public:
         SgctInternal() = default;
         SgctInternal(const SgctInternal& o);
 
-        glm::mat4 _sceneMatrix;
-        glm::mat4 _viewMatrix;
-        glm::mat4 _projectionMatrix;
+        glm::mat4 _sceneMatrix = glm::mat4(1.f);
+        glm::mat4 _viewMatrix = glm::mat4(1.f);
+        glm::mat4 _projectionMatrix = glm::mat4(1.f);
 
         mutable Cached<glm::mat4> _cachedViewProjectionMatrix;
         mutable std::mutex _mutex;
     } sgctInternal;
 
-    // Deprecated
-    // [[deprecated("Replaced by Camera::setPositionVec3()")]]
-    void setPosition(psc pos);
-    // [[deprecated("Replaced by Camera::setFocusPositionVec3()")]]
-    void setFocusPosition(psc pos);
-    // [[deprecated("Replaced by Camera::positionVec3()")]]
-    psc position() const;
-    // [[deprecated("Replaced by Camera::unsynchedPositionVec3()")]]
-    psc unsynchedPosition() const;
-    // [[deprecated("Replaced by Camera::focusPositionVec3()")]]
-    psc focusPosition() const;
-    const glm::mat4& sceneMatrix() const;
     // @TODO use Camera::SgctInternal interface instead
     // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
@@ -160,10 +142,11 @@ public:
 
     std::vector<Syncable*> getSyncables();
 
-private:
     // Static constants
     static const glm::dvec3 ViewDirectionCameraSpace;
-    static const glm::dvec3 LookupVectorCameraSpace;
+    static const glm::dvec3 UpDirectionCameraSpace;
+
+private:
 
     SyncData<glm::dvec3> _position = glm::dvec3(1.0, 1.0, 1.0);
     SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));
@@ -171,7 +154,7 @@ private:
     SceneGraphNode* _parent = nullptr;
 
     // _focusPosition to be removed
-    glm::dvec3 _focusPosition;
+    glm::dvec3 _focusPosition = glm::dvec3(0.0);
     float _maxFov = 0.f;
 
     // Cached data

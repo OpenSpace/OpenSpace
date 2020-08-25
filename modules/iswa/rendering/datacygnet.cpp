@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -140,7 +140,8 @@ bool DataCygnet::updateTexture() {
                 texture->setFilter(Texture::FilterMode::LinearMipMap);
                 _textures[option] = std::move(texture);
             }
-        } else {
+        }
+        else {
             _textures[option]->setPixelData(values);
             _textures[option]->uploadTexture();
         }
@@ -227,7 +228,8 @@ void DataCygnet::setTextureUniforms() {
         tfUnits[0].activate();
         _transferFunctions[0].bind();
         _shader->setUniform("transferFunctions[0]", tfUnits[0]);
-    } else {
+    }
+    else {
         for (int option : selectedOptions) {
             if (static_cast<int>(_transferFunctions.size()) >= option) {
                 tfUnits[j].activate();
@@ -284,7 +286,8 @@ void DataCygnet::fillOptions(const std::string& source) {
 
         g->registerOptions(_dataOptions.options());
         _dataOptions.setValue(g->dataOptionsValue());
-    } else {
+    }
+    else {
         _dataOptions.setValue(std::vector<int>(1, 0));
     }
 }

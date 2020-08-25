@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
@@ -117,18 +116,15 @@ private:
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
-    bool _labelDataIsDirty = true;
 
-    properties::FloatProperty _alphaValue;
-    //properties::FloatProperty _scaleFactor;
-    //properties::Vec3Property _pointColor;
-    properties::Vec4Property _textColor;
+    properties::Vec3Property _textColor;
+    properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
-    //properties::OptionProperty _blendMode;
     properties::FloatProperty _textMinSize;
     properties::FloatProperty _textMaxSize;
+    properties::FloatProperty _lineWidth;
 
     // DEBUG:
     properties::OptionProperty _renderOption;
@@ -147,13 +143,9 @@ private:
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     int _nValuesPerAstronomicalObject = 0;
 
-    glm::dmat4 _transformationMatrix;
-
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;
 };
-
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEDUMESHES___H__

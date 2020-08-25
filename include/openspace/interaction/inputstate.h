@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___INPUTSTATE___H__
 #define __OPENSPACE_CORE___INPUTSTATE___H__
 
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
@@ -33,6 +34,7 @@
 namespace openspace::interaction {
 
 struct JoystickInputStates;
+struct WebsocketInputStates;
 
 // This class represents the global input state of interaction devices
 class InputState {
@@ -56,13 +58,19 @@ public:
     float joystickAxis(int i) const;
     bool joystickButton(int i) const;
 
+    WebsocketInputStates& websocketInputStates();
+    float websocketAxis(int i) const;
+    bool websocketButton(int i) const;
+    bool hasWebsocketStates() const;
+    void resetWebsockets();
+
 private:
     // Input from keyboard
     std::vector<std::pair<Key, KeyModifier>> _keysDown;
 
     // Input from mouse
     std::vector<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
+    glm::dvec2 _mousePosition = glm::dvec2(0.0);
     double _mouseScrollDelta;
 };
 

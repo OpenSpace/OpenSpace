@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,22 +29,18 @@ in vec2 vs_st;
 in vec4 vs_position;
 
 uniform sampler2D texture1;
-uniform float OcclusionDepth;
 uniform float Alpha;
-
 
 Fragment getFragment() {
     Fragment frag;
 
-    // power scale coordinates for depth. w value is set to 1.0.
-    float depth = (1.0 + log(abs(OcclusionDepth) + 1/pow(k, 1.0))/log(k)) / 27.0;
     frag.color = texture(texture1, vs_st);
-    frag.color.a = (frag.color.a != 0.0) ? Alpha : frag.color.a;
+    frag.color.a = Alpha * frag.color.a;
     if (frag.color.a == 0.0) {
         discard;
     }
 
-    frag.depth = denormalizeFloat(depth);
+    frag.depth = vs_position.z;
 
     return frag;
 }

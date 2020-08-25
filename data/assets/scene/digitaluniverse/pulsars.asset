@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Pulsars Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_pulsars_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,20 +22,22 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 0.7, 0.0, 0.0 },
-        Transparency = 0.5,
+        Opacity = 1.0,
         File = speck .. "/pulsar.speck",
         Texture = textures .. "/point4.png",
         PolygonSides = 4,
         LabelFile = speck .. "/pulsar.label",
-        TextColor = { 0.7, 0.0, 0.0, 1.0 },
-        ScaleFactor = 418.33,
-        TextSize = 16.68,
-        TextMinSize = 7.5,
-        TextMaxSize = 30.0,
-        Unit = "pc"
+        TextColor = { 0.7, 0.2, 0.2 },
+        ScaleFactor = 424,
+        TextSize = 15.77,
+        TextMinSize = 4,
+        TextMaxSize = 20.0,
+        Unit = "pc",
+        BillboardMaxSize = 500,
+        EnablePixelSizeControl = false
     },
     GUI = {
-        Path = "/Milky Way/Pulsars"
+        Path = "/Milky Way"
     }
 }
 

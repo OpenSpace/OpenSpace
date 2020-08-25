@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -248,7 +248,8 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
                             LWARNING("Warning: There might be a gap in the data");
                         }
                         // Leave values at zero if outside domain
-                    } else { // if inside
+                    }
+                    else { // if inside
                         // ENLIL CDF specific hacks!
                         // Convert from meters to AU for interpolator
                         const double localRPh = rPh / ccmc::constants::AU_in_meters;
@@ -268,8 +269,8 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
                     doubleData[index] = value;
                     histogram[mapToHistogram(value)]++;
-
-                } else {
+                }
+                else {
                     // Assume cartesian for fallback purpose
                     const double stepX = (_max.x - _min.x) /
                                          (static_cast<double>(outDimensions.x));
@@ -408,7 +409,9 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                                 LWARNING("Warning: There might be a gap in the data");
                             }
                             // Leave values at zero if outside domain
-                        } else { // if inside
+                        }
+                        else {
+                            // if inside
                             // ENLIL CDF specific hacks!
                             // Convert from meters to AU for interpolator
                             const double localRPh = rPh / ccmc::constants::AU_in_meters;
@@ -426,7 +429,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                             );
                         }
 
-                } else {
+                }
+                else {
                     const double xPos = _min.x + stepX * xi;
                     const double yPos = _min.y + stepY * yi;
                     const double zPos = _min.z + stepZ * zi;
@@ -443,7 +447,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                 if (value != missingValue) {
                     doubleData[index] = value;
                     data[index] = static_cast<float>(value);
-                } else {
+                }
+                else {
                     doubleData[index] = 0;
                 }
             }
@@ -513,7 +518,8 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
                     data[index + 2] = (zVal - varZMin) / (varZMax - varZMin); // B
                     // GL_RGB refuses to work. Workaround doing a GL_RGBA  hardcoded alpha
                     data[index + 3] = 1.f;
-                } else {
+                }
+                else {
                     LERROR(
                         "Only cartesian grid supported for "
                         "uniformSampledVectorValues (for now)"
@@ -579,7 +585,8 @@ KameleonWrapper::Fieldlines KameleonWrapper::classifiedFieldLines(const std::str
 
             fieldLines.push_back(line);
         }
-    } else {
+    }
+    else {
         LERROR("Fieldlines are only supported for BATSRUS model");
     }
 
@@ -637,7 +644,8 @@ KameleonWrapper::Fieldlines KameleonWrapper::fieldLines(const std::string& xVar,
 
             fieldLines.push_back(line);
         }
-    } else {
+    }
+    else {
         LERROR("Fieldlines are only supported for BATSRUS model");
     }
 
@@ -989,17 +997,23 @@ KameleonWrapper::Model KameleonWrapper::modelType() const {
             _kameleon->getGlobalAttribute("model_name").getAttributeString();
         if (modelName == "open_ggcm" || modelName == "ucla_ggcm") {
             return Model::OpenGGCM;
-        } else if (modelName == "batsrus") {
+        }
+        else if (modelName == "batsrus") {
             return Model::BATSRUS;
-        } else if (modelName == "enlil") {
+        }
+        else if (modelName == "enlil") {
             return Model::ENLIL;
-        } else if (modelName == "mas") {
+        }
+        else if (modelName == "mas") {
             return Model::MAS;
-        } else if (modelName == "ADAPT3D") {
+        }
+        else if (modelName == "ADAPT3D") {
             return Model::Adapt3D;
-        } else if (modelName == "swmf") {
+        }
+        else if (modelName == "swmf") {
             return Model::SWMF;
-        } else if (modelName == "LFM") {
+        }
+        else if (modelName == "LFM") {
             return Model::LFM;
         }
     }
@@ -1012,17 +1026,20 @@ glm::vec4 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEn
     {
         // closed
         return glm::vec4(1.f, 0.f, 0.f, 1.f);
-    } else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::NORTH) ||
-               (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::NORTH))
+    }
+    else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::NORTH) ||
+             (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::NORTH))
     {
         // north
         return glm::vec4(1.f, 1.f, 0.f, 1.f);
-    } else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::SOUTH) ||
-               (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::SOUTH))
+    }
+    else if ((fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::SOUTH) ||
+             (bEnd == FieldlineEnd::FAROUT && fEnd == FieldlineEnd::SOUTH))
     {
         // south
         return glm::vec4(0.f, 1.f, 0.f, 1.f);
-    } else if (fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::FAROUT) {
+    }
+    else if (fEnd == FieldlineEnd::FAROUT && bEnd == FieldlineEnd::FAROUT) {
         // solar wind
         return glm::vec4(0.f, 0.f, 1.f, 1.f);
     }

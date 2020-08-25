@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/profiling.h>
 #include <fstream>
 
 #include "scriptengine_lua.inl"
@@ -49,20 +50,16 @@ ScriptEngine::ScriptEngine()
         "Script Documentation",
         "scripting",
         {
-            {
-                "mainTemplate",
-                "${WEB}/luascripting/main.hbs"
-            },
-            {
-                "scriptingTemplate",
-                "${WEB}/luascripting/scripting.hbs"
-            }
-        },
-        "${WEB}/luascripting/script.js"
+            { "scriptingTemplate","${WEB}/documentation/scripting.hbs" },
+        }
     )
-{}
+{
+    tracy::LuaRegister(_state);
+}
 
 void ScriptEngine::initialize() {
+    ZoneScoped
+
     LDEBUG("Adding base library");
     addBaseLibrary();
 
@@ -71,10 +68,14 @@ void ScriptEngine::initialize() {
 }
 
 void ScriptEngine::deinitialize() {
+    ZoneScoped
+
     _registeredLibraries.clear();
 }
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
+    ZoneScoped
+
     LDEBUG("Create openspace base library");
     const int top = lua_gettop(state);
 
@@ -94,6 +95,8 @@ ghoul::lua::LuaState* ScriptEngine::luaState() {
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
+    ZoneScoped
+
     auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs)
     {
         return lhs.name < rhs.name;
@@ -161,7 +164,9 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
     return (it != _registeredLibraries.end());
 }
 
-bool ScriptEngine::runScript(const std::string& script) {
+bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
+    ZoneScoped
+
     if (script.empty()) {
         LWARNING("Script was empty");
         return false;
@@ -173,7 +178,14 @@ bool ScriptEngine::runScript(const std::string& script) {
     }
 
     try {
-        ghoul::lua::runScript(_state, script);
+        if (callback) {
+            ghoul::Dictionary returnValue =
+                ghoul::lua::loadArrayDictionaryFromString(script, _state);
+            callback(returnValue);
+        }
+        else {
+            ghoul::lua::runScript(_state, script);
+        }
     }
     catch (const ghoul::lua::LuaLoadingException& e) {
         LERRORC(e.component, e.message);
@@ -183,11 +195,17 @@ bool ScriptEngine::runScript(const std::string& script) {
         LERRORC(e.component, e.message);
         return false;
     }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return false;
+    }
 
     return true;
 }
 
 bool ScriptEngine::runScriptFile(const std::string& filename) {
+    ZoneScoped
+
     if (filename.empty()) {
         LWARNING("Filename was empty");
         return false;
@@ -268,6 +286,8 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
 void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                                        Replace replace)
 {
+    ZoneScoped
+
     ghoul_assert(state, "State must not be nullptr");
     for (const LuaLibrary::Function& p : library.functions) {
         if (!replace) {
@@ -328,6 +348,8 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 }
 
 void ScriptEngine::addBaseLibrary() {
+    ZoneScoped
+
     LuaLibrary lib = {
         "",
         {
@@ -462,6 +484,13 @@ void ScriptEngine::addBaseLibrary() {
                 "true, then the compressed file will be deleted after the decompression "
                  "is finished."
             },
+            {
+                "saveLastChangeToProfile",
+                &luascriptfunctions::saveLastChangeToProfile,
+                {},
+                "",
+                "This function saves the last script log action into the profile "
+            },
         }
     };
     addLibrary(lib);
@@ -480,6 +509,8 @@ void ScriptEngine::remapPrintFunction() {
 }
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
+    ZoneScoped
+
     ghoul_assert(state, "State must not be nullptr");
     const int top = lua_gettop(state);
 
@@ -519,6 +550,8 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
 }
 
 std::vector<std::string> ScriptEngine::allLuaFunctions() const {
+    ZoneScoped
+
     std::vector<std::string> result;
 
     for (const LuaLibrary& library : _registeredLibraries) {
@@ -545,6 +578,8 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
 }
 
 std::string ScriptEngine::generateJson() const {
+    ZoneScoped
+
     // Create JSON
     std::stringstream json;
     json << "[";
@@ -565,7 +600,7 @@ std::string ScriptEngine::generateJson() const {
 
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
-            json << fmt::format(replStr, "library", f.name);
+            json << fmt::format(replStr, "name", f.name);
             json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
             json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
@@ -594,6 +629,8 @@ std::string ScriptEngine::generateJson() const {
 }
 
 bool ScriptEngine::writeLog(const std::string& script) {
+    ZoneScoped
+
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
@@ -615,7 +652,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
 
                 return false;
             }
-        } else {
+        }
+        else {
             _logScripts = false;
             return false;
         }
@@ -635,76 +673,97 @@ bool ScriptEngine::writeLog(const std::string& script) {
 }
 
 void ScriptEngine::preSync(bool isMaster) {
+    ZoneScoped
+
     if (!isMaster) {
         return;
     }
 
-    _mutex.lock();
-    if (!_queuedScripts.empty()) {
-        _currentSyncedScript = _queuedScripts.back().first;
-        const bool remoteScripting = _queuedScripts.back().second;
+    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    while (!_incomingScripts.empty()) {
+        QueueItem item = std::move(_incomingScripts.front());
+        _incomingScripts.pop();
+
+        _scriptsToSync.push_back(item.script);
+        const bool remoteScripting = item.remoteScripting;
 
         // Not really a received script but the master also needs to run the script...
-        _receivedScripts.push_back(_currentSyncedScript);
-        _queuedScripts.pop_back();
+        _masterScriptQueue.push(item);
 
         if (global::parallelPeer.isHost() && remoteScripting) {
-            global::parallelPeer.sendScript(_currentSyncedScript);
+            global::parallelPeer.sendScript(item.script);
         }
         if (global::sessionRecording.isRecording()) {
-            global::sessionRecording.saveScriptKeyframe(_currentSyncedScript);
+            global::sessionRecording.saveScriptKeyframe(item.script);
         }
     }
-    _mutex.unlock();
 }
 
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
-    syncBuffer->encode(_currentSyncedScript);
-    _currentSyncedScript.clear();
+    ZoneScoped
+
+    size_t nScripts = _scriptsToSync.size();
+    syncBuffer->encode(nScripts);
+    for (const std::string& s : _scriptsToSync) {
+        syncBuffer->encode(s);
+    }
+    _scriptsToSync.clear();
 }
 
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
-    syncBuffer->decode(_currentSyncedScript);
+    ZoneScoped
 
-    if (!_currentSyncedScript.empty()) {
-        _mutex.lock();
-        _receivedScripts.push_back(_currentSyncedScript);
-        _mutex.unlock();
+    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    size_t nScripts;
+    syncBuffer->decode(nScripts);
+
+    for (size_t i = 0; i < nScripts; ++i) {
+        std::string script;
+        syncBuffer->decode(script);
+        _slaveScriptQueue.push(std::move(script));
     }
 }
 
-void ScriptEngine::postSync(bool) {
-    std::vector<std::string> scripts;
+void ScriptEngine::postSync(bool isMaster) {
+    ZoneScoped
 
-    _mutex.lock();
-    scripts.assign(_receivedScripts.begin(), _receivedScripts.end());
-    _receivedScripts.clear();
-    _mutex.unlock();
-
-    while (!scripts.empty()) {
-        try {
-            runScript(scripts.back());
+    if (isMaster) {
+        while (!_masterScriptQueue.empty()) {
+            std::string script = std::move(_masterScriptQueue.front().script);
+            ScriptCallback callback = std::move(_masterScriptQueue.front().callback);
+            _masterScriptQueue.pop();
+            try {
+                runScript(script, callback);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+                continue;
+            }
         }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
+    }
+    else {
+        std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+        while (!_slaveScriptQueue.empty()) {
+            try {
+                runScript(_slaveScriptQueue.front());
+                _slaveScriptQueue.pop();
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
         }
-        scripts.pop_back();
     }
 }
 
 void ScriptEngine::queueScript(const std::string& script,
-                               ScriptEngine::RemoteScripting remoteScripting)
+                               ScriptEngine::RemoteScripting remoteScripting,
+                               ScriptCallback callback)
 {
-    if (script.empty()) {
-        return;
-    }
+    ZoneScoped
 
-    _mutex.lock();
-    _queuedScripts.insert(
-        _queuedScripts.begin(),
-        std::make_pair(script, remoteScripting)
-    );
-    _mutex.unlock();
+    if (!script.empty()) {
+        _incomingScripts.push({ script, remoteScripting, callback });
+    }
 }
 
 } // namespace openspace::scripting

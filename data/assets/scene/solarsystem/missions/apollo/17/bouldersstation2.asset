@@ -1,0 +1,162 @@
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local asset_helper = asset.require('util/asset_helper')
+local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local models = asset.require('./boulder_models').models
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sun_transforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
+local Station2Boulder1Holder = {
+    Identifier = "Station_2_Boulder1",
+    Parent = moon_asset.Moon.Identifier,
+    Transform = {
+        Translation = {
+            Type = "GlobeTranslation",
+            Globe = moon_asset.Moon.Identifier,
+            Longitude = -360+30.5294692,
+            Latitude = 20.098824,
+            Altitude = -2442.8,
+            UseHeightMap = false
+        }
+    },
+    GUI = {
+        Name = "Station 2 Boulder 1",
+        Path = "/Solar System/Missions/Apollo/17/Station 2"
+    }
+}
+
+local Station2Boulder1Model = {
+    Identifier = "Station2Boulder1Model",
+    Parent = Station2Boulder1Holder.Identifier,
+    Transform = {
+          Scale = {
+            Type = "StaticScale",
+            Scale = 0.06
+        },
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/b1-v2.obj"
+        },
+        RotationVector = { 243.243256 ,206.270264, 309.677429 },
+        ColorTexture = models .. "/b1-v2_u1_v1.jpeg",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true
+    },
+    GUI = {
+        Name = "Station 2 Boulder 1 Model",
+        Path = "/Solar System/Missions/Apollo/17/Station 2"
+    }
+}
+
+local Station2Boulder2Holder = {
+    Identifier = "Station_2_Boulder2",
+    Parent = moon_asset.Moon.Identifier,
+    Transform = {
+        Translation = {
+            Type = "GlobeTranslation",
+            Globe = moon_asset.Moon.Identifier,
+            Longitude = -360+30.5287892,
+            Latitude = 20.098240,
+            Altitude = -2434.6,
+            UseHeightMap = false
+        }
+    },
+    GUI = {
+        Name = "Station 2 Boulder 2",
+        Path = "/Solar System/Missions/Apollo/17/Station 2"
+    }
+}
+
+local Station2Boulder2Model = {
+    Identifier = "Station2Boulder2Model",
+    Parent = Station2Boulder2Holder.Identifier,
+    Transform = {
+          Scale = {
+            Type = "StaticScale",
+            Scale = 0.06
+        },
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/b2model.obj"
+        },
+        RotationVector = { 66.162155, 7.783780, 114.193550 },
+        ColorTexture = models .. "/b2model_u1_v1.jpeg",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true
+    },
+    GUI = {
+        Name = "Station 2 Boulder 2 Model",
+        Path = "/Solar System/Missions/Apollo/17/Station 2"
+    }
+}
+
+local Station2Boulder3Holder = {
+    Identifier = "Station_2_Boulder3",
+    Parent = moon_asset.Moon.Identifier,
+    Transform = {
+        Translation = {
+            Type = "GlobeTranslation",
+            Globe = moon_asset.Moon.Identifier,
+            Longitude = -360+30.5294692,
+            Latitude = 20.098610,
+            Altitude = -2441.55,
+            UseHeightMap = false
+        }
+    },
+    GUI = {
+        Name = "Station 2 Boulder 3",
+        Path = "/Solar System/Missions/Apollo/17/Station 2"
+    }
+}
+
+local Station2Boulder3Model = {
+    Identifier = "Station2Boulder3Model",
+    Parent = Station2Boulder3Holder.Identifier,
+    Transform = {
+          Scale = {
+            Type = "StaticScale",
+            Scale = 0.06
+        },
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/b3model.obj"
+        },
+        RotationVector = { 161.513519 ,243.243256, 65.806450 },
+        ColorTexture = models .. "/b3model_u1_v1.jpeg",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true
+    },
+    GUI = {
+        Name = "Station 2 Boulder 3 Model",
+        Path = "/Solar System/Missions/Apollo/17/Station 2"
+    }
+}
+
+asset_helper.registerSceneGraphNodesAndExport(asset, {
+    Station2Boulder1Holder, Station2Boulder1Model,
+    Station2Boulder2Holder, Station2Boulder2Model,
+    Station2Boulder3Holder, Station2Boulder3Model
+})

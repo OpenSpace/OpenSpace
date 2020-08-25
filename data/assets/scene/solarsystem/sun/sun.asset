@@ -1,24 +1,16 @@
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
-
-
 
 local Sun = {
     Identifier = "Sun",
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
-        Type = "RenderablePlanet",
+        Type = "RenderableGlobe",
         Enabled = false,
-        Frame = "IAU_SUN",
-        Body = "SUN",
-        Geometry = {
-            Type = "SimpleSphere",
-            Radius = 6.957E8,
-            Segments = 100
-        },
-        ColorTexture = textures .. "/sun.jpg",
+        Radii = { 6.957E8, 6.957E8, 6.957E8 },
+        SegmentsPerPatch = 64,
+        Layers = {},
         PerformShading = false
     },
     GUI = {
@@ -26,6 +18,32 @@ local Sun = {
     }
 }
 
+local SunLabel = {
+    Identifier = "SunLabel",
+    Parent = Sun.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Sun",
+        FontSize = 100.0,
+        LabelSize = 13.127,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        EnableFading = true,
+        FadeStartUnit = "Pm",
+        FadeStartDistance = 2.841,
+        FadeStartSpeed = 1.375,
+        FadeEndUnit = "pc",
+        FadeEndDistance = 1.326,
+        FadeEndSpeed = 1.0
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Sun Label",
+        Path = "/Solar System/Sun"
+    }
+}
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Sun })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })

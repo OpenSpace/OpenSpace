@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -143,7 +143,7 @@ function (handle_modules internal_module_path external_modules_paths)
         # Only link openspace-core against the library if it has been set STATIC
         get_target_property(library_type ${library_name} TYPE)
         if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
-            target_link_libraries(openspace-core ${library_name})
+            target_link_libraries(openspace-core PUBLIC ${library_name})
         endif()
 
         create_define_name(${name} define_name)

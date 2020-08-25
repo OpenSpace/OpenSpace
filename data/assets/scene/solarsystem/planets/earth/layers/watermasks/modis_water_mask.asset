@@ -1,0 +1,9 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "MODIS_Water_Mask",
+    Name = "MODIS Water Mask",
+    FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
+}
+
+asset.export("layer", layer)

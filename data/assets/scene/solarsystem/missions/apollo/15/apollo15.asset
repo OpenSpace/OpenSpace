@@ -1,0 +1,115 @@
+local assetHelper = asset.require('util/asset_helper')
+local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local csm = asset.require('../apollo_csm')
+asset.require('spice/base')
+
+local kernels = asset.require('scene/solarsystem/missions/apollo/15/kernels').kernels
+
+
+-- local models = asset.syncedResource({
+--     Name = "Apollo 15 Models",
+--     Type = "HttpSynchronization",
+--     Identifier = "apollo_models",
+--     Version = 1
+-- })
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sun_transforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    -- {
+    --     Identifier = "Camera",
+    --     Type = "CameraLightSource",
+    --     Intensity = 0.5,
+    --     Enabled = false
+    -- }
+}
+
+
+local Apollo15 = {
+    Identifier = "Apollo15",
+    Parent = moon_transforms.Moon.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "APOLLO 15",
+            Observer = "MOON",
+            Frame = "IAU_MOON",
+            Kernels = kernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "A15_METRIC",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "1971-07-30T02:22:00.00",
+        End = "1971-08-01T18:05:00.00"
+    },
+    GUI = {
+        Name = "Apollo 15",
+        Path = "/Solar System/Missions/Apollo/15"
+    }
+}
+
+-- local Apollo15Main = {
+--     Identifier = "Apollo15Main",
+--     Parent = Apollo15.Identifier,
+--     Renderable = {
+--         Type = "RenderableModel",
+--         Geometry = {
+--             Type = "MultiModelGeometry",
+-- --            GeometryFile = models .. "/Apollo_Spacecraft.obj"
+--             GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj"
+--         },
+--         ColorTexture = models .. "/gray.png",
+--         LightSources = LightSources,
+--         DisableFaceCulling = true 
+--     },
+--     GUI = {
+--         Name = "Apollo 15 Main",
+--         Path = "/Solar System/Missions/Apollo 15"
+--     }   
+-- }
+
+local Apollo15Trail = {
+    Identifier = "Apollo15Trail",
+    Parent = moon_transforms.Moon.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "APOLLO 15",
+            Observer = "MOON",
+            Frame = "IAU_MOON",
+            Kernels = kernels
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1971 JUL 26",
+        EndTime = "1971 AUG 01 14:30:41.680",
+        SampleInterval = 2
+    },
+    GUI = {
+        Name = "Apollo 15 Trail",
+        Path = "/Solar System/Missions/Apollo/15"
+    }
+}
+
+
+local model_part = csm.createCsmModel(Apollo15.Identifier)
+
+local list = { Apollo15, Apollo15Trail }
+for k,v in pairs(model_part) do
+    v.GUI.Path = "/Solar System/Missions/Apollo/15/Model"
+    table.insert(list, v)
+end
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, list)
+

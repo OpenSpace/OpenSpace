@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -71,6 +72,25 @@ class Translation;
  */
 class RenderableTrail : public Renderable {
 public:
+
+const double DISTANCE_CULLING_RADII = 800.0;
+
+struct Appearance : properties::PropertyOwner {
+        Appearance();
+        /// Specifies the base color of the line before fading
+        properties::Vec3Property lineColor;
+        /// Settings that enables or disables the line fading
+        properties::BoolProperty useLineFade;
+        /// Specifies a multiplicative factor that fades out the line
+        properties::FloatProperty lineFade;
+        /// Line width for the line rendering part
+        properties::FloatProperty lineWidth;
+        /// Point size for the point rendering part
+        properties::IntProperty pointSize;
+        /// The option determining which rendering method to use
+        properties::OptionProperty renderingModes;
+    };
+
     ~RenderableTrail() = default;
 
     void initializeGL() override;
@@ -106,7 +126,7 @@ protected:
     std::vector<unsigned int> _indexArray;
 
     /// The Translation object that provides the position of the individual trail points
-    std::unique_ptr<Translation> _translation;
+    ghoul::mm_unique_ptr<Translation> _translation;
 
     /// The RenderInformation contains information filled in by the concrete subclasses to
     /// be used by this class.
@@ -143,24 +163,24 @@ protected:
     RenderInformation _floatingRenderInformation;
 
 private:
-    /// Specifies the base color of the line before fading
-    properties::Vec3Property _lineColor;
-    /// Settings that enables or disables the line fading
-    properties::BoolProperty _useLineFade;
-    /// Specifies a multiplicative factor that fades out the line
-    properties::FloatProperty _lineFade;
-    /// Line width for the line rendering part
-    properties::FloatProperty _lineWidth;
-    /// Point size for the point rendering part
-    properties::IntProperty _pointSize;
-    /// The option determining which rendering method to use
-    properties::OptionProperty _renderingModes;
+    void internalRender(bool renderLines, bool renderPoints,
+        const RenderData& data,
+        const glm::dmat4& modelTransform,
+        RenderInformation& info, int nVertices, int offset);
+
+   Appearance _appearance;
 
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
-
+#ifdef __APPLE__
+    UniformCache(opacity, modelView, projection, color, useLineFade,
+                 lineFade, vertexSorting, idOffset, nVertices, stride,
+                 pointSize, renderPhase) _uniformCache;
+#else
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
+        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase,
+        resolution, lineWidth) _uniformCache;
+#endif
 };
 
 } // namespace openspace

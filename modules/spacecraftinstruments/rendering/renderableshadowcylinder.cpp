@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -39,8 +38,8 @@ namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
 
-    constexpr const std::array<const char*, 2> UniformNames = {
-        "modelViewProjectionTransform", "shadowColor"
+    constexpr const std::array<const char*, 3> UniformNames = {
+        "modelViewProjectionTransform", "shadowColor", "opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
@@ -106,19 +105,6 @@ namespace {
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
     };
-
-    glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
-        const float k = 10.f;
-        const float ds = v2.w - v1.w;
-        if (ds >= 0) {
-            float p = pow(k, -ds);
-            return glm::vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-        }
-        else {
-            float p = pow(k, ds);
-            return glm::vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-        }
-    }
 } // namespace
 
 namespace openspace {
@@ -149,7 +135,7 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
             },
             {
                 ShadowColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 ShadowColorInfo.description
             },
@@ -203,11 +189,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     : Renderable(dictionary)
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
-    , _shadowColor(
-        ShadowColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 0.25f),
-        glm::vec4(0.f), glm::vec4(1.f)
-    )
+    , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _terminatorType(
         TerminatorTypeInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -223,6 +205,9 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         dictionary,
         "RenderableShadowCylinder"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKey(NumberPointsInfo.identifier)) {
         _numberOfPoints = static_cast<int>(
@@ -241,7 +226,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 
 
     if (dictionary.hasKey(ShadowColorInfo.identifier)) {
-        _shadowColor = dictionary.value<glm::vec4>(ShadowLengthInfo.identifier);
+        _shadowColor = dictionary.value<glm::vec3>(ShadowLengthInfo.identifier);
     }
     _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_shadowColor);
@@ -320,6 +305,8 @@ bool RenderableShadowCylinder::isReady() const {
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
+    glDisable(GL_CULL_FACE);
+
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
@@ -335,6 +322,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     );
 
     _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
@@ -342,6 +330,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
+    glDisable(GL_CULL_FACE);
     glDepthMask(true);
 }
 
@@ -374,15 +363,13 @@ void RenderableShadowCylinder::createCylinder(double time) {
         _numberOfPoints
     );
 
-    std::vector<psc> terminatorPoints;
+    std::vector<glm::vec3> terminatorPoints;
     std::transform(
         res.terminatorPoints.begin(),
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            psc coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-            coord[3] += 3;
-            return coord;
+            return p * 1000.0;
         }
     );
 
@@ -404,15 +391,10 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
-    const psc endpoint = psc::CreatePowerScaledCoordinate(
-        vecLightSource.x,
-        vecLightSource.y,
-        vecLightSource.z
-    );
-    for (const psc& v : terminatorPoints) {
-        _vertices.push_back({ v[0], v[1], v[2], v[3] });
-        glm::vec4 f = psc_addition(v.vec4(), endpoint.vec4());
-        _vertices.push_back({ f[0], f[1], f[2], f[3] });
+    for (const glm::vec3& v : terminatorPoints) {
+        _vertices.push_back({ v[0], v[1], v[2], 0.f });
+        glm::vec3 f = v + glm::vec3(vecLightSource);
+        _vertices.push_back({ f[0], f[1], f[2], 0.f });
     }
     _vertices.push_back(_vertices[0]);
     _vertices.push_back(_vertices[1]);

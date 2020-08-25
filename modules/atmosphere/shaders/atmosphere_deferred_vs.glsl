@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,11 @@
 layout(location = 0) in vec4 in_position;
 
 out vec3 interpolatedNDCPos;
+out vec2 texCoord;
 
 void main()
 {
+    texCoord = 0.5 + in_position.xy * 0.5;
     interpolatedNDCPos       = in_position.xyz;
     gl_Position              = in_position;
 }

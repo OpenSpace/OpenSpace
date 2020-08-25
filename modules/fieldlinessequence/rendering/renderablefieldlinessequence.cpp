@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
@@ -249,7 +250,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pColorTablePath(ColorTablePathInfo)
     , _pColorUniform(
         ColorUniformInfo,
-        glm::vec4(0.75f, 0.5f, 0.0f, 0.5f),
+        glm::vec4(0.75f, 0.5f, 0.f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -262,7 +263,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pDomainR(DomainRInfo)
     , _pFlowColor(
         FlowColorInfo,
-        glm::vec4(0.8f, 0.7f, 0.0f, 0.6f),
+        glm::vec4(0.8f, 0.7f, 0.f, 0.6f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -763,12 +764,14 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             ));
             return;
         }
-        global::navigationHandler.setFocusNode(node->parent());
-        global::navigationHandler.resetCameraDirection();
+        global::navigationHandler.orbitalNavigator().setFocusNode(
+            node->parent()->identifier()
+        );
+        global::navigationHandler.orbitalNavigator().startRetargetAnchor();
     });
 
     _pJumpToStartBtn.onChange([this] {
-        global::timeManager.setTimeNextFrame(_startTimes[0]);
+        global::timeManager.setTimeNextFrame(Time(_startTimes[0]));
     });
 }
 
@@ -1154,12 +1157,14 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
             if (_loadingStatesDynamically) {
                 _mustLoadNewStateFromDisk = true;
-            } else {
+            }
+            else {
                 _needsUpdate = true;
                 _activeStateIndex = _activeTriggerTimeIndex;
             }
         } // else {we're still in same state as previous frame (no changes needed)}
-    } else {
+    }
+    else {
         // Not in interval => set everything to false
         _activeTriggerTimeIndex   = -1;
         _mustLoadNewStateFromDisk = false;
@@ -1218,7 +1223,8 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTi
         else {
             _activeTriggerTimeIndex = 0;
         }
-    } else {
+    }
+    else {
         _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
     }
 }

@@ -15,16 +15,23 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.65,
+        Opacity = 0.65,
         --ScaleFactor = 10.0,
         LabelFile = speck .. "/groups.label",
-        TextColor = { 0.1, 0.6, 0.2, 1.0 },
+        TextColor = { 0.1, 0.6, 0.2 },
         TextSize = 21.5,
         TextMinSize = 8.0,
-        Unit = "Mpc"
+        Unit = "Mpc",
+        DrawLabels = true,
+        TransformationMatrix = {
+            -0.7357425748,    0.67726129641,  0.0,           0.0,
+            -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+            0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+            0.0,              0.0,            0.0,           1.0
+        },
     },
     GUI = {
-        Name = "Nearby Galaxy Groups",
+        Name = "Galaxy Group Labels",
         Path = "/Universe/Galaxies"
     }
 }

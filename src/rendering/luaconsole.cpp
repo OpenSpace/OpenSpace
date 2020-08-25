@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
@@ -142,7 +143,7 @@ LuaConsole::LuaConsole()
     )
     , _historyTextColor(
         HistoryTextColorInfo,
-        glm::vec4(1.0f, 1.0f, 1.0f, 0.65f),
+        glm::vec4(1.f, 1.f, 1.f, 0.65f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -166,6 +167,8 @@ LuaConsole::LuaConsole()
 LuaConsole::~LuaConsole() {} // NOLINT
 
 void LuaConsole::initialize() {
+    ZoneScoped
+
     const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
@@ -229,6 +232,8 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
+    ZoneScoped
+
     const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
@@ -589,22 +594,17 @@ void LuaConsole::charCallback(unsigned int codepoint,
 }
 
 void LuaConsole::update() {
+    ZoneScoped
+
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
-    const size_t nLines = std::min(
-        static_cast<size_t>(_historyLength),
-        _commandsHistory.size()
-    );
-    const FontRenderer::BoundingBoxInformation& bbox =
-        FontRenderer::defaultRenderer().boundingBox(
-            *_historyFont,
-            std::string(nLines, '\n')
-        );
+
+    const float height = _historyFont->height() * (_commandsHistory.size() + 1);
 
     // Update the full height and the target height.
     // Add the height of the entry line and space for a separator.
-    _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
+    _fullHeight = (height + EntryFontSize + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
     // The first frame is going to be finished in approx 10 us, which causes a floating
@@ -615,18 +615,20 @@ void LuaConsole::update() {
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
-    const glm::ivec2 res = global::windowDelegate.currentWindowResolution();
+    const glm::ivec2 res = global::windowDelegate.currentSubwindowSize();
     const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const double dHeight = (_targetHeight - _currentHeight) *
         std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
 
     _currentHeight += static_cast<float>(dHeight);
 
-    _currentHeight = std::max(0.0f, _currentHeight);
+    _currentHeight = std::max(0.f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
 }
 
 void LuaConsole::render() {
+    ZoneScoped
+
     using namespace ghoul::fontrendering;
 
     // Don't render the console if it's collapsed.
@@ -636,7 +638,7 @@ void LuaConsole::render() {
 
     const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentWindowResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
 
 
     // Render background
@@ -646,7 +648,7 @@ void LuaConsole::render() {
     glDisable(GL_DEPTH_TEST);
 
     rendering::helper::renderBox(
-        glm::vec2(0.f, 0.f),
+        glm::vec2(0.f),
         glm::vec2(1.f, _currentHeight / res.y),
         _backgroundColor
     );
@@ -674,10 +676,8 @@ void LuaConsole::render() {
         using namespace ghoul::fontrendering;
 
         // Compute the current width of the string and console prefix.
-        const float currentWidth = FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "> " + currentCommand
-        ).boundingBox.x + inputLocation.x;
+        const float currentWidth =
+            _font->boundingBox("> " + currentCommand).x + inputLocation.x;
 
         // Compute the overflow in pixels
         const float overflow = currentWidth - res.x * 0.995f;
@@ -783,17 +783,12 @@ void LuaConsole::render() {
             res.y - _currentHeight + EntryFontSize
         );
 
-        const FontRenderer::BoundingBoxInformation bbox =
-            FontRenderer::defaultRenderer().boundingBox(*_font, text);
-
-        return glm::vec2(
-            loc.x + res.x - bbox.boundingBox.x - 10.f,
-            loc.y
-        );
+        const glm::vec2 bbox = _font->boundingBox(text);
+        return glm::vec2(loc.x + res.x - bbox.x - 10.f, loc.y);
     };
 
     if (_remoteScripting) {
-        const glm::vec4 Red(1, 0, 0, 1);
+        const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
         ParallelConnection::Status status = global::parallelPeer.status();
         const int nClients =
@@ -808,8 +803,9 @@ void LuaConsole::render() {
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
-    } else if (global::parallelPeer.isHost()) {
-        const glm::vec4 LightBlue(0.4, 0.4, 1, 1);
+    }
+    else if (global::parallelPeer.isHost()) {
+        const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText = "Local script execution";
         const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);

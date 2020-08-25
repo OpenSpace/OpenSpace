@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +61,7 @@ public:
     BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
     ~BrowserInstance();
 
-    void loadUrl(const std::string& url);
+    void loadUrl(std::string url);
     /**
      * Load a local file.
      *
@@ -83,6 +83,10 @@ public:
      */
     void draw();
     void close(bool force = false);
+
+#ifdef WIN32
+    void sendTouchEvent(const CefTouchEvent& event) const;
+#endif
 
     bool sendKeyEvent(const CefKeyEvent& event);
     bool sendMouseClickEvent(const CefMouseEvent& event,
@@ -108,9 +112,13 @@ public:
 
     void reloadBrowser();
 
+    void selectAll();
+
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
     bool hasContent(int x, int y);
+
+    bool _shouldReshape = false;
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;

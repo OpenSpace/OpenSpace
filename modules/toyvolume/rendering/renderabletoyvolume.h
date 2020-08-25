@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
 
@@ -54,9 +53,12 @@ private:
     properties::FloatProperty _stepSize;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
-    properties::Vec4Property _color;
+    properties::Vec3Property _color;
+    properties::FloatProperty _downScaleVolumeRendering;
 
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;
+
+    int _rayCastSteps = 1000;
 };
 
 } // namespace openspace

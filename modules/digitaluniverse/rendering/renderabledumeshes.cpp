@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,6 @@ namespace {
     };
 
     constexpr const char* KeyFile = "File";
-    constexpr const char* keyColor = "Color";
     constexpr const char* keyUnit = "Unit";
     constexpr const char* MeterUnit = "m";
     constexpr const char* KilometerUnit = "Km";
@@ -64,33 +63,23 @@ namespace {
     constexpr const char* GigaparsecUnit = "Gpc";
     constexpr const char* GigalightyearUnit = "Gly";
 
+    constexpr const int RenderOptionViewDirection = 0;
+    constexpr const int RenderOptionPositionNormal = 1;
+
     constexpr const int8_t CurrentCacheVersion = 1;
     constexpr const double PARSEC = 0.308567756E17;
-
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all point."
-    };
-
-    //constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-    //    "ScaleFactor",
-    //    "Scale Factor",
-    //    "This value is used as a multiplicative factor that is applied to the apparent "
-    //    "size of each point."
-    //};
-
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "This value is used to define the color of the astronomical object."
-    };
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
         "The text color for the astronomical object."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+        "TextOpacity",
+        "Text Opacity",
+        "Determines the transparency of the text label, where 1 is completely opaque "
+        "and 0 fully transparent."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
@@ -120,6 +109,12 @@ namespace {
         "objects being rendered."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "If the DU mesh is of wire type, this value determines the width of the lines"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -130,12 +125,6 @@ namespace {
         "DrawLabels",
         "Draw Labels",
         "Determines whether labels should be drawn or hidden."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
@@ -172,24 +161,6 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 "astronomical object being rendered."
             },
             {
-                keyColor,
-                new Vector3Verifier<float>,
-                Optional::No,
-                "Astronomical Object Color (r,g,b)."
-            },
-            {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TransparencyInfo.description
-            },
-            /*{
-                ScaleFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleFactorInfo.description
-            },*/
-            {
                 DrawLabelInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -197,9 +168,15 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             },
             {
                 TextColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 TextColorInfo.description
+            },
+            {
+                TextOpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TextOpacityInfo.description
             },
             {
                 TextSizeInfo.identifier,
@@ -226,10 +203,10 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 LabelMaxSizeInfo.description
             },
             {
-                TransformationMatrixInfo.identifier,
-                new Matrix4x4Verifier<double>,
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
                 Optional::Yes,
-                TransformationMatrixInfo.description
+                LineWidthInfo.description
             },
             {
                 MeshColorInfo.identifier,
@@ -241,22 +218,16 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
     };
 }
 
-
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-    , _textColor(
-        TextColorInfo,
-        glm::vec4(1.0f, 1.0, 1.0f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
+    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
+    , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
-    , _textMinSize(LabelMinSizeInfo, 8.0, 0.5, 24.0)
-    , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
+    , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
+    , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
+    , _lineWidth(LineWidthInfo, 2.f, 0.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     documentation::testSpecificationAndThrow(
@@ -265,6 +236,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         "RenderableDUMeshes"
     );
 
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
         _hasSpeckFile = true;
@@ -272,13 +246,13 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_drawElements);
     }
 
-    _renderOption.addOption(0, "Camera View Direction");
-    _renderOption.addOption(1, "Camera Position Normal");
+    _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
+    _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
     if (global::windowDelegate.isFisheyeRendering()) {
-        _renderOption.set(1);
+        _renderOption = RenderOptionPositionNormal;
     }
     else {
-        _renderOption.set(0);
+        _renderOption = RenderOptionViewDirection;
     }
     addProperty(_renderOption);
 
@@ -311,24 +285,12 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         }
     }
 
-    /*if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::vec3>(keyColor);
-    }
-    addProperty(_pointColor);*/
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
+    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
         );
     }
-    addProperty(_alphaValue);
-
-    /*if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-            dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
-    }
-    addProperty(_scaleFactor);*/
+    addProperty(_lineWidth);
 
     if (dictionary.hasKey(DrawLabelInfo.identifier)) {
         _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
@@ -336,19 +298,21 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_drawLabels);
 
     if (dictionary.hasKey(LabelFileInfo.identifier)) {
-        _labelFile = absPath(dictionary.value<std::string>(
-            LabelFileInfo.identifier
-        ));
+        _labelFile = absPath(dictionary.value<std::string>(LabelFileInfo.identifier));
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
+        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
+            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+        }
+        addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
             _textSize = dictionary.value<float>(TextSizeInfo.identifier);
@@ -356,24 +320,14 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = floor(
-                dictionary.value<float>(LabelMinSizeInfo.identifier)
-            );
+            _textMinSize = floor(dictionary.value<float>(LabelMinSizeInfo.identifier));
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = floor(
-                dictionary.value<float>(LabelMaxSizeInfo.identifier)
-            );
+            _textMaxSize = floor(dictionary.value<float>(LabelMaxSizeInfo.identifier));
         }
         addProperty(_textMaxSize);
-    }
-
-    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(
-            TransformationMatrixInfo.identifier
-        );
     }
 
     if (dictionary.hasKey(MeshColorInfo.identifier)) {
@@ -381,23 +335,22 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             MeshColorInfo.identifier
         );
         for (int i = 0; i < static_cast<int>(colorDict.size()); ++i) {
-            _meshColorMap.insert({ i + 1,
-                colorDict.value<glm::vec3>(std::to_string(i + 1)) }
+            _meshColorMap.insert(
+                { i + 1, colorDict.value<glm::vec3>(std::to_string(i + 1)) }
             );
         }
-
     }
 }
 
 bool RenderableDUMeshes::isReady() const {
     return (_program != nullptr) &&
-           (!_renderingMeshesMap.empty() || (!_labelData.empty()));
+        (!_renderingMeshesMap.empty() || (!_labelData.empty()));
 }
 
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() {
             return global::renderEngine.buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
@@ -429,7 +382,7 @@ void RenderableDUMeshes::initializeGL() {
 }
 
 void RenderableDUMeshes::deinitializeGL() {
-    for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
@@ -473,18 +426,18 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
     glEnablei(GL_BLEND, 0);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
+    glEnable(GL_DEPTH_TEST);
 
     _program->activate();
 
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    //_program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
 
-    for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
         for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
@@ -492,7 +445,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Solid:
                     break;
                 case Wire:
-                    glLineWidth(2.0);
+                    glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
                     glLineWidth(lineWidth);
                     break;
@@ -527,10 +480,10 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     float scale = 0.f;
     switch (_unit) {
         case Meter:
-            scale = 1.0;
+            scale = 1.f;
             break;
         case Kilometer:
-            scale = 1e3;
+            scale = 1e3f;
             break;
         case Parsec:
             scale = static_cast<float>(PARSEC);
@@ -549,24 +502,30 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
             break;
     }
 
+    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
+    labelInfo.orthoRight = orthoRight;
+    labelInfo.orthoUp = orthoUp;
+    labelInfo.minSize = static_cast<int>(_textMinSize);
+    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.cameraPos = data.camera.positionVec3();
+    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
+    labelInfo.renderType = _renderOption;
+    labelInfo.mvpMatrix = modelViewProjectionMatrix;
+    labelInfo.scale = pow(10.f, _textSize);
+    labelInfo.enableDepth = true;
+    labelInfo.enableFalseDepth = false;
+   
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             pair.second,
-            _textColor,
-            pow(10.f, _textSize.value()),
-            static_cast<int>(_textMinSize),
-            static_cast<int>(_textMaxSize),
-            modelViewProjectionMatrix,
-            orthoRight,
-            orthoUp,
-            data.camera.positionVec3(),
-            data.camera.lookUpVectorWorldSpace(),
-            _renderOption.value()
+            textColor,
+            labelInfo
         );
     }
 }
@@ -596,18 +555,17 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-            );
+        );
     }
-
-    const glm::vec3 orthoUp = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::vec4(up, 0.0))
-    );
 
     if (_hasSpeckFile) {
         renderMeshes(data, modelViewMatrix, projectionMatrix);
     }
 
     if (_drawLabels && _hasLabel) {
+        const glm::vec3 orthoUp = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
+        );
         renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
     }
 }
@@ -645,16 +603,12 @@ bool RenderableDUMeshes::loadData() {
         // else
         // {
         //     LINFO("Cache for Speck file '" << _speckFile << "' not found");
-            LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
+        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
 
-            success = readSpeckFile();
-            if (!success) {
-                return false;
-            }
-
-            // LINFO("Saving cache");
-            //success &= saveCachedFile(cachedFile);
-        // }
+        success = readSpeckFile();
+        if (!success) {
+            return false;
+        }
     }
 
     std::string labelFile = _labelFile;
@@ -680,12 +634,12 @@ bool RenderableDUMeshes::loadData() {
         // }
         // else {
         //     LINFO("Cache for Label file '" << labelFile << "' not found");
-            LINFO(fmt::format("Loading Label file '{}'", labelFile));
+        LINFO(fmt::format("Loading Label file '{}'", labelFile));
 
-            success &= readLabelFile();
-            if (!success) {
-                return false;
-            }
+        success &= readLabelFile();
+        if (!success) {
+            return false;
+        }
 
         // }
     }
@@ -717,21 +671,25 @@ bool RenderableDUMeshes::readSpeckFile() {
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() -1);
+            line = line.substr(0, line.length() - 1);
         }
 
         if (line.empty() || line[0] == '#') {
             continue;
         }
 
-        if (line.substr(0, 4) != "mesh") {
+        std::size_t found = line.find("mesh");
+        if (found == std::string::npos) {
+        //if (line.substr(0, 4) != "mesh") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
-            file.seekg(position);
-            break;
+            //file.seekg(position);
+            //break;
+            continue;
         }
+        else {
 
-        if (line.substr(0, 4) == "mesh") {
+        //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
             // mesh -t texnum -c colorindex -s style {
             // where textnum is the index of the texture;
@@ -834,7 +792,7 @@ bool RenderableDUMeshes::readLabelFile() {
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() -1);
+            line = line.substr(0, line.length() - 1);
         }
 
 
@@ -860,7 +818,6 @@ bool RenderableDUMeshes::readLabelFile() {
         }
     }
 
-
     do {
         std::vector<float> values(_nValuesPerAstronomicalObject);
 
@@ -869,7 +826,7 @@ bool RenderableDUMeshes::readLabelFile() {
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() -1);
+            line = line.substr(0, line.length() - 1);
         }
 
         if (line.empty()) {
@@ -878,7 +835,7 @@ bool RenderableDUMeshes::readLabelFile() {
 
         std::stringstream str(line);
 
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }
@@ -895,10 +852,7 @@ bool RenderableDUMeshes::readLabelFile() {
             dummy.clear();
         }
 
-        glm::vec3 transformedPos = glm::vec3(
-            _transformationMatrix * glm::dvec4(position, 1.0)
-        );
-        _labelData.emplace_back(std::make_pair(transformedPos, label));
+        _labelData.emplace_back(std::make_pair(position, label));
 
     } while (!file.eof());
 
@@ -907,115 +861,174 @@ bool RenderableDUMeshes::readLabelFile() {
 
 bool RenderableDUMeshes::loadCachedFile(const std::string& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
-    if (fileStream.good()) {
-        int8_t version = 0;
-        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-        if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed: deleting old cache");
-            fileStream.close();
-            FileSys.deleteFile(file);
-            return false;
-        }
-
-        int32_t nValues = 0;
-        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(
-            reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
-            sizeof(int32_t)
-        );
-
-        _fullData.resize(nValues);
-        fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
-            nValues * sizeof(_fullData[0]));
-
-        bool success = fileStream.good();
-        return success;
-    }
-    else {
+    if (!fileStream.good()) {
         LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
+
+    int8_t version = 0;
+    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+    if (version != CurrentCacheVersion) {
+        LINFO("The format of the cached file has changed: deleting old cache");
+        fileStream.close();
+        FileSys.deleteFile(file);
+        return false;
+    }
+
+    int32_t nValues = 0;
+    fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+    fileStream.read(
+        reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
+        sizeof(int32_t)
+    );
+
+    _fullData.resize(nValues);
+    fileStream.read(
+        reinterpret_cast<char*>(&_fullData[0]),
+        nValues * sizeof(_fullData[0])
+    );
+
+    bool success = fileStream.good();
+    return success;
 }
 
 bool RenderableDUMeshes::saveCachedFile(const std::string& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
-    if (fileStream.good()) {
-        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t));
-
-        const int32_t nValues = static_cast<int32_t>(_fullData.size());
-        if (nValues == 0) {
-            LERROR("Error writing cache: No values were loaded");
-            return false;
-        }
-        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-        const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-            _nValuesPerAstronomicalObject
-        );
-        fileStream.write(
-            reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
-            sizeof(int32_t)
-        );
-
-        const size_t nBytes = nValues * sizeof(_fullData[0]);
-        fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-        const bool success = fileStream.good();
-        return success;
-    }
-    else {
+    if (!fileStream.good()) {
         LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
+
+    fileStream.write(
+        reinterpret_cast<const char*>(&CurrentCacheVersion),
+        sizeof(int8_t)
+    );
+
+    const int32_t nValues = static_cast<int32_t>(_fullData.size());
+    if (nValues == 0) {
+        LERROR("Error writing cache: No values were loaded");
+        return false;
+    }
+    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+
+    const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
+        _nValuesPerAstronomicalObject
+    );
+    fileStream.write(
+        reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
+        sizeof(int32_t)
+    );
+
+    const size_t nBytes = nValues * sizeof(_fullData[0]);
+    fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
+
+    const bool success = fileStream.good();
+    return success;
 }
 
 void RenderableDUMeshes::createMeshes() {
-    if (_dataIsDirty && _hasSpeckFile) {
-        LDEBUG("Creating planes");
+    if (!(_dataIsDirty && _hasSpeckFile)) {
+        return;
+    }
+    LDEBUG("Creating planes");
 
-        for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-            float scale = 0.f;
-            switch (_unit) {
-                case Meter:
-                    scale = 1.f;
-                    break;
-                case Kilometer:
-                    scale = 1e3f;
-                    break;
-                case Parsec:
-                    scale = static_cast<float>(PARSEC);
-                    break;
-                case Kiloparsec:
-                    scale = static_cast<float>(1e3 * PARSEC);
-                    break;
-                case Megaparsec:
-                    scale = static_cast<float>(1e6 * PARSEC);
-                    break;
-                case Gigaparsec:
-                    scale = static_cast<float>(1e9 * PARSEC);
-                    break;
-                case GigalightYears:
-                    scale = static_cast<float>(306391534.73091 * PARSEC);
-                    break;
+    for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
+        float scale = 0.f;
+        switch (_unit) {
+            case Meter:
+                scale = 1.f;
+                break;
+            case Kilometer:
+                scale = 1e3f;
+                break;
+            case Parsec:
+                scale = static_cast<float>(PARSEC);
+                break;
+            case Kiloparsec:
+                scale = static_cast<float>(1e3 * PARSEC);
+                break;
+            case Megaparsec:
+                scale = static_cast<float>(1e6 * PARSEC);
+                break;
+            case Gigaparsec:
+                scale = static_cast<float>(1e9 * PARSEC);
+                break;
+            case GigalightYears:
+                scale = static_cast<float>(306391534.73091 * PARSEC);
+                break;
+        }
+
+        for (GLfloat& v : p.second.vertices) {
+            v *= scale;
+        }
+
+        for (int i = 0; i < p.second.numU; ++i) {
+            GLuint vao;
+            glGenVertexArrays(1, &vao);
+            p.second.vaoArray.push_back(vao);
+
+            GLuint vbo;
+            glGenBuffers(1, &vbo);
+            p.second.vboArray.push_back(vbo);
+
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                p.second.vertices.size() * sizeof(GLfloat),
+                &p.second.vertices[0],
+                GL_STATIC_DRAW
+            );
+            // in_position
+            glEnableVertexAttribArray(0);
+            // U and V may not be given by the user
+            if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
+                glVertexAttribPointer(
+                    0,
+                    3,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    sizeof(GLfloat) * 5,
+                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
+                );
+
+                // texture coords
+                glEnableVertexAttribArray(1);
+                glVertexAttribPointer(
+                    1,
+                    2,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    sizeof(GLfloat) * 7,
+                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
+                );
             }
-
-            for (GLfloat& v : p.second.vertices) {
-                v *= scale;
+            else { // no U and V:
+                glVertexAttribPointer(
+                    0,
+                    3,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    0,
+                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
+                );
             }
+        }
 
-            for (int i = 0; i < p.second.numU; ++i) {
-                GLuint vao;
-                glGenVertexArrays(1, &vao);
-                p.second.vaoArray.push_back(vao);
+        // Grid: we need columns
+        if (p.second.numU > 1) {
+            for (int i = 0; i < p.second.numV; ++i) {
+                GLuint cvao;
+                glGenVertexArrays(1, &cvao);
+                p.second.vaoArray.push_back(cvao);
 
-                GLuint vbo;
-                glGenBuffers(1, &vbo);
-                p.second.vboArray.push_back(vbo);
+                GLuint cvbo;
+                glGenBuffers(1, &cvbo);
+                p.second.vboArray.push_back(cvbo);
 
-                glBindVertexArray(vao);
-                glBindBuffer(GL_ARRAY_BUFFER, vbo);
-                //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
+                glBindVertexArray(cvao);
+                glBindBuffer(GL_ARRAY_BUFFER, cvbo);
                 glBufferData(
                     GL_ARRAY_BUFFER,
                     p.second.vertices.size() * sizeof(GLfloat),
@@ -1031,8 +1044,8 @@ void RenderableDUMeshes::createMeshes() {
                         3,
                         GL_FLOAT,
                         GL_FALSE,
-                        sizeof(GLfloat) * 5,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
+                        p.second.numV * sizeof(GLfloat) * 5,
+                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i)
                     );
 
                     // texture coords
@@ -1042,10 +1055,8 @@ void RenderableDUMeshes::createMeshes() {
                         2,
                         GL_FLOAT,
                         GL_FALSE,
-                        sizeof(GLfloat) * 7,
-                        reinterpret_cast<GLvoid*>(
-                            sizeof(GLfloat) * 3 * i * p.second.numV
-                        )
+                        p.second.numV * sizeof(GLfloat) * 7,
+                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
                     );
                 }
                 else { // no U and V:
@@ -1054,81 +1065,17 @@ void RenderableDUMeshes::createMeshes() {
                         3,
                         GL_FLOAT,
                         GL_FALSE,
-                        0,
-                        reinterpret_cast<GLvoid*>(
-                            sizeof(GLfloat) * 3 * i * p.second.numV
-                        )
+                        p.second.numV * sizeof(GLfloat) * 3,
+                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
                     );
-                }
-            }
-
-            // Grid: we need columns
-            if (p.second.numU > 1) {
-                for (int i = 0; i < p.second.numV; ++i) {
-                    GLuint cvao;
-                    glGenVertexArrays(1, &cvao);
-                    p.second.vaoArray.push_back(cvao);
-
-                    GLuint cvbo;
-                    glGenBuffers(1, &cvbo);
-                    p.second.vboArray.push_back(cvbo);
-
-                    glBindVertexArray(cvao);
-                    glBindBuffer(GL_ARRAY_BUFFER, cvbo);
-                    glBufferData(
-                        GL_ARRAY_BUFFER,
-                        p.second.vertices.size() * sizeof(GLfloat),
-                        &p.second.vertices[0],
-                        GL_STATIC_DRAW
-                    );
-                    // in_position
-                    glEnableVertexAttribArray(0);
-                    // U and V may not be given by the user
-                    if (p.second.vertices.size() /
-                        (p.second.numU * p.second.numV) > 3)
-                    {
-                        glVertexAttribPointer(
-                            0,
-                            3,
-                            GL_FLOAT,
-                            GL_FALSE,
-                            p.second.numV * sizeof(GLfloat) * 5,
-                            reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i)
-                        );
-
-                        // texture coords
-                        glEnableVertexAttribArray(1);
-                        glVertexAttribPointer(
-                            1,
-                            2,
-                            GL_FLOAT,
-                            GL_FALSE,
-                            p.second.numV * sizeof(GLfloat) * 7,
-                            reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
-                        );
-                    }
-                    else { // no U and V:
-                        glVertexAttribPointer(
-                            0,
-                            3,
-                            GL_FLOAT,
-                            GL_FALSE,
-                            p.second.numV * sizeof(GLfloat) * 3,
-                            reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
-                        );
-                    }
                 }
             }
         }
-
-        glBindVertexArray(0);
-
-        _dataIsDirty = false;
     }
 
-    if (_hasLabel && _labelDataIsDirty) {
-        _labelDataIsDirty = false;
-    }
+    glBindVertexArray(0);
+
+    _dataIsDirty = false;
 }
 
 } // namespace openspace

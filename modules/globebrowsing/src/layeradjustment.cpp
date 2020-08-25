@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/src/layeradjustment.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
 namespace {
     constexpr const char* KeyType = "Type";
@@ -50,6 +53,35 @@ namespace {
 } // namespace
 
 namespace openspace::globebrowsing {
+
+documentation::Documentation LayerAdjustment::Documentation() {
+    using namespace documentation;
+    return {
+        "LayerAdjustment",
+        "globebrowsing_layeradjustment",
+        {
+            {
+                KeyType,
+                new StringInListVerifier({ "None", "ChromaKey", "TransferFunction" }),
+                Optional::Yes,
+                "Specifies the type of the adjustment that is applied"
+            },
+            {
+                KeyChromaKeyColor,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                "Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'."
+            },
+            {
+                KeyChromaKeyTolerance,
+                new DoubleVerifier,
+                Optional::Yes,
+                "Specifies the tolerance to match the color to the chroma key when the "
+                "'ChromaKey' type is selected for the 'Type'."
+            }
+        }
+    };
+}
 
 LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner({ "adjustment" })
@@ -89,6 +121,12 @@ LayerAdjustment::LayerAdjustment()
 }
 
 void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict) {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        adjustmentDict,
+        "LayerAdjustment"
+    );
+
     if (adjustmentDict.hasKeyAndValue<std::string>(KeyType)) {
         std::string dictType = adjustmentDict.value<std::string>(KeyType);
         _typeOption = static_cast<int>(

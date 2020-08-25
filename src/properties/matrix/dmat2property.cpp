@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,11 +41,11 @@ glm::dmat2x2 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::dmat2x2(0);
+                return glm::dmat2x2(0.0);
             }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::dmat2x2(0);
+                return glm::dmat2x2(0.0);
             }
             else {
                 result[i][j] = lua_tonumber(state, -1);
@@ -55,7 +55,7 @@ glm::dmat2x2 fromLuaConversion(lua_State* state, bool& success) {
         }
     }
     // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+    lua_pop(state, 1);
     success = true;
     return result;
 }
@@ -74,7 +74,7 @@ bool toLuaConversion(lua_State* state, glm::dmat2x2 value) {
 }
 
 glm::dmat2x2 fromStringConversion(const std::string& val, bool& success) {
-    glm::dmat2x2 result;
+    glm::dmat2x2 result = glm::dmat2x2(1.0);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() !=
         (ghoul::glm_rows<glm::dmat2x2>::value * ghoul::glm_cols<glm::dmat2x2>::value))
@@ -123,7 +123,7 @@ using nl = std::numeric_limits<double>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DMat2Property,
     glm::dmat2x2,
-    glm::dmat2x2(0),
+    glm::dmat2x2(0.0),
     glm::dmat2x2(nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest()),
     glm::dmat2x2(nl::max(), nl::max(), nl::max(), nl::max()),
     glm::dmat2x2(0.01, 0.01, 0.01, 0.01),

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,10 +68,11 @@ void SubscriptionTopic::resetCallbacks() {
 }
 
 void SubscriptionTopic::handleJson(const nlohmann::json& json) {
-    std::string key = json.at(PropertyKey).get<std::string>();
     const std::string& event = json.at(EventKey).get<std::string>();
 
     if (event == StartSubscription) {
+        std::string key = json.at(PropertyKey).get<std::string>();
+
         _prop = property(key);
         resetCallbacks();
 

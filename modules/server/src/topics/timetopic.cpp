@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,14 +30,12 @@
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "TimeTopic";
-    constexpr const char* PropertyKey = "property";
     constexpr const char* EventKey = "event";
+    constexpr const char* SubscribeEvent = "start_subscription";
     constexpr const char* UnsubscribeEvent = "stop_subscription";
-    constexpr const char* CurrentTimeKey = "currentTime";
-    constexpr const char* DeltaTimeKey = "deltaTime";
     constexpr const std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
 
@@ -47,9 +45,7 @@ namespace openspace {
 
 TimeTopic::TimeTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
-{
-    LDEBUG("Starting new time subscription");
-}
+{}
 
 TimeTopic::~TimeTopic() {
     if (_timeCallbackHandle != UnsetOnChangeHandle) {
@@ -57,6 +53,9 @@ TimeTopic::~TimeTopic() {
     }
     if (_deltaTimeCallbackHandle != UnsetOnChangeHandle) {
         global::timeManager.removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
+    }
+    if (_deltaTimeStepsCallbackHandle != UnsetOnChangeHandle) {
+        global::timeManager.removeDeltaTimeStepsChangeCallback(_deltaTimeStepsCallbackHandle);
     }
 }
 
@@ -71,54 +70,110 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    std::string requestedKey = json.at(PropertyKey).get<std::string>();
-    LDEBUG("Subscribing to " + requestedKey);
+    sendFullTimeData();
+    sendDeltaTimeSteps();
 
-    if (requestedKey == CurrentTimeKey) {
-        _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > TimeUpdateInterval) {
-                _connection->sendJson(currentTime());
-                _lastUpdateTime = now;
-            }
-        });
-        _connection->sendJson(currentTime());
-    }
-    else if (requestedKey == DeltaTimeKey) {
-        _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback(
-            [this]() {
-                std::chrono::system_clock::time_point now =
-                    std::chrono::system_clock::now();
-                if (now - _lastUpdateTime > TimeUpdateInterval) {
-                    _connection->sendJson(deltaTime());
-                    if (_timeCallbackHandle != UnsetOnChangeHandle) {
-                        _connection->sendJson(currentTime());
-                        _lastUpdateTime = std::chrono::system_clock::now();
-                    }
-                    _lastUpdateTime = now;
-                }
-            }
-        );
-        _connection->sendJson(deltaTime());
-    }
-    else {
-        LWARNING("Cannot get " + requestedKey);
+    if (event != SubscribeEvent) {
         _isDone = true;
+        return;
     }
+
+    _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        if (now - _lastUpdateTime > TimeUpdateInterval) {
+            sendCurrentTime();
+        }
+    });
+
+    _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback([this]() {
+        // Throttle by last update,
+        // but force update if pause state or target delta changes.
+
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const double targetDeltaTime = global::timeManager.targetDeltaTime();
+        const bool isPaused = global::timeManager.isPaused();
+        const bool forceUpdate =
+            isPaused != _lastPauseState || targetDeltaTime != _lastTargetDeltaTime;
+
+        if (forceUpdate || now - _lastUpdateTime > TimeUpdateInterval) {
+            sendFullTimeData();
+        }
+    });
+
+    _deltaTimeStepsCallbackHandle = global::timeManager.addDeltaTimeStepsChangeCallback(
+        [this]() {
+            const std::vector<double> steps = global::timeManager.deltaTimeSteps();
+            if (steps != _lastDeltaTimeSteps) {
+                sendDeltaTimeSteps();
+            }
+        }
+    );
 }
 
-json TimeTopic::currentTime() {
-    json timeJson = { { "time", global::timeManager.time().ISO8601() } };
-    return wrappedPayload(timeJson);
-}
+const json TimeTopic::getNextPrevDeltaTimeStepJson() {
+    const std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
+    const std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
+    const bool hasNext = nextStep.has_value();
+    const bool hasPrev = prevStep.has_value();
 
-json TimeTopic::deltaTime() {
-    json timeJson = {
-        { "deltaTime", global::timeManager.deltaTime() },
-        { "targetDeltaTime", global::timeManager.targetDeltaTime() },
-        { "isPaused", global::timeManager.isPaused() },
+    json nextPrevJson = {
+        { "hasNextStep", hasNext },
+        { "hasPrevStep", hasPrev }
     };
-    return wrappedPayload(timeJson);
+
+    if (hasNext) {
+        nextPrevJson["nextStep"] = nextStep.value();
+    }
+
+    if (hasPrev) {
+        nextPrevJson["prevStep"] = prevStep.value();
+    }
+
+    return nextPrevJson;
+}
+
+void TimeTopic::sendCurrentTime() {
+    const json timeJson = {
+        { "time", global::timeManager.time().ISO8601() }
+    };
+    _connection->sendJson(wrappedPayload(timeJson));
+    _lastUpdateTime = std::chrono::system_clock::now();
+}
+
+void TimeTopic::sendFullTimeData() {
+    const std::string currentTime = global::timeManager.time().ISO8601();
+    const double deltaTime = global::timeManager.deltaTime();
+    const double targetDeltaTime = global::timeManager.targetDeltaTime();
+    const bool isPaused = global::timeManager.isPaused();
+
+    json timeJson = {
+        { "time", currentTime },
+        { "deltaTime", deltaTime},
+        { "targetDeltaTime", targetDeltaTime},
+        { "isPaused", isPaused }
+    };
+
+    const json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    timeJson.insert(nextPrevJson.begin(), nextPrevJson.end());
+
+    _connection->sendJson(wrappedPayload(timeJson));
+    _lastUpdateTime = std::chrono::system_clock::now();
+    _lastPauseState = isPaused;
+    _lastTargetDeltaTime = targetDeltaTime;
+}
+
+void TimeTopic::sendDeltaTimeSteps() {
+    const std::vector<double>& steps = global::timeManager.deltaTimeSteps();
+
+    json deltaTimeStepsJson = {
+        { "deltaTimeSteps", steps } 
+    };
+
+    const json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    deltaTimeStepsJson.insert(nextPrevJson.begin(), nextPrevJson.end());
+
+    _connection->sendJson(wrappedPayload(deltaTimeStepsJson));
+    _lastDeltaTimeSteps = steps;
 }
 
 } // namespace openspace

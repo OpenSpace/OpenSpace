@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -173,7 +173,8 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
-      } else {
+      }
+      else {
         // On line 9 of the algorithm, the texture table deltaSR is updated, so when we are not in the first
         // iteraction, we are getting the updated result of deltaSR (not the single inscattered light but the
         // accumulated (higher order) inscattered light.

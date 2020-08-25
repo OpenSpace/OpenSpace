@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,8 +49,9 @@ namespace {
     };
 } // namespace
 
-// @TODO:  This clas is not properly working anymore and needs to be substantially
-//         rewritten
+// @TODO:  This class is not properly working anymore and needs to be substantially
+//         rewritten. When doing so, make sure that any color property uses three
+//         values, not four. The opacity should be handled separately
 
 namespace openspace {
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -99,9 +99,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     addProperty(_fontName);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
         _font = global::fontManager.font(_fontName, _fontSize);
@@ -121,10 +119,9 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemDate::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Date: {} UTC", global::timeManager.time().UTC())
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 
 #include <openspace/rendering/renderer.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
@@ -59,15 +60,6 @@ class FramebufferRenderer : public Renderer, public RaycasterListener,
                             public DeferredcasterListener
 {
 public:
-    typedef std::map<
-        VolumeRaycaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
-    > RaycasterProgObjMap;
-    typedef std::map<
-        Deferredcaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
-    > DeferredcasterProgObjMap;
-public:
     virtual ~FramebufferRenderer() = default;
 
     void initialize() override;
@@ -76,18 +68,19 @@ public:
     void updateResolution();
     void updateRaycastData();
     void updateDeferredcastData();
-    void updateHDRData();
-    void updateMSAASamplingPattern();
+    void updateHDRAndFiltering();
+    void updateFXAA();
+    void updateDownscaledVolume();
 
     void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
-    void setHDRBackground(float hdrBackground) override;
     void setGamma(float gamma) override;
+    void setHue(float hue) override;
+    void setValue(float value) override;
+    void setSaturation(float sat) override;
 
-    float hdrBackground() const override;
-    int nAaSamples() const override;
-    const std::vector<double>& mSSAPattern() const override;
+    void enableFXAA(bool enable) override;
+    void setDisableHDR(bool disable) override;
 
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
@@ -106,6 +99,22 @@ public:
         DeferredcasterListener::IsAttached isAttached) override;
 
 private:
+    using RaycasterProgObjMap = std::map<
+        VolumeRaycaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    >;
+    using DeferredcasterProgObjMap = std::map<
+        Deferredcaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    >;
+
+    void resolveMSAA(float blackoutFactor);
+    void applyTMO(float blackoutFactor);
+    void applyFXAA();
+    void updateDownscaleTextures();
+    void updateExitVolumeTextures();
+    void writeDownscaledVolume();
+
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
     RaycasterProgObjMap _raycastPrograms;
@@ -113,36 +122,71 @@ private:
 
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
     DeferredcasterProgObjMap _deferredcastPrograms;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
-    UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
+    UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
+                 Hue, Saturation, Value) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
+    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth)
+        _writeDownscaledVolumeUniformCache;
+
+    GLint _defaultFBO;
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
-    GLuint _mainColorTexture;
-    GLuint _mainPositionTexture;
-    GLuint _mainNormalTexture;
-    GLuint _mainDepthTexture;
     GLuint _exitColorTexture;
-    GLuint _mainFramebuffer;
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
-    GLuint _deferredFramebuffer;
-    GLuint _deferredColorTexture;
+
+    struct {
+        GLuint colorTexture;
+        GLuint positionTexture;
+        GLuint normalTexture;
+        GLuint depthTexture;
+        GLuint framebuffer;
+    } _gBuffers;
+
+    struct {
+        GLuint framebuffer;
+        GLuint colorTexture[2];
+    } _pingPongBuffers;
+
+    struct {
+        GLuint hdrFilteringFramebuffer;
+        GLuint hdrFilteringTexture;
+    } _hdrBuffers;
+
+    struct {
+        GLuint fxaaFramebuffer;
+        GLuint fxaaTexture;
+    } _fxaaBuffers;
+
+    struct {
+        GLuint framebuffer;
+        GLuint colorTexture;
+        GLuint depthbuffer;
+        float currentDownscaleFactor  = 1.f;
+    } _downscaleVolumeRendering;
+
+    unsigned int _pingPongIndex = 0u;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
-    bool _dirtyMsaaSamplingPattern;
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
-    float _hdrExposure = 0.4f;
-    float _hdrBackground = 2.8f;
-    float _gamma = 2.2f;
+    bool _enableFXAA = true;
+    bool _disableHDR = false;
 
-    std::vector<double> _mSAAPattern;
+    float _hdrExposure = 3.7f;
+    float _gamma = 0.95f;
+    float _hue = 1.f;
+    float _saturation = 1.f;
+    float _value = 1.f;
 
     ghoul::Dictionary _rendererData;
 };

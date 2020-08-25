@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,14 +49,13 @@ public:
     virtual void deinitialize() = 0;
 
     virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(int nAaSamples) = 0;
     virtual void setHDRExposure(float hdrExposure) = 0;
-    virtual void setHDRBackground(float hdrBackground) = 0;
     virtual void setGamma(float gamma) = 0;
-
-    virtual float hdrBackground() const = 0;
-    virtual int nAaSamples() const = 0;
-    virtual const std::vector<double>& mSSAPattern() const = 0;
+    virtual void setHue(float hue) = 0;
+    virtual void setValue(float value) = 0;
+    virtual void setSaturation(float sat) = 0;
+    virtual void enableFXAA(bool enable) = 0;
+    virtual void setDisableHDR(bool disable) = 0;
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.

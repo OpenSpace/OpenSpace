@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,8 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -46,21 +48,20 @@ struct SurfacePositionHandle;
 namespace documentation { struct Documentation; }
 
 class Camera;
-class PowerScaledCoordinate;
 
 class Renderable : public properties::PropertyOwner {
 public:
     enum class RenderBin : int {
         Background = 1,
         Opaque = 2,
-        Transparent = 4,
-        Overlay = 8
+        PreDeferredTransparent = 4,
+        PostDeferredTransparent = 8,
+        Overlay = 16
     };
 
-    static std::unique_ptr<Renderable> createFromDictionary(
+    static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    // constructors & destructor
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable() = default;
 
@@ -80,6 +81,8 @@ public:
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                                 const glm::dvec3& targetModelSpace) const;
 
+    virtual bool renderedWithDesiredData() const;
+
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);
     bool matchesRenderBinMask(int binMask);
@@ -88,20 +91,19 @@ public:
 
     void onEnabledChange(std::function<void(bool)> callback);
 
-    static void setPscUniforms(ghoul::opengl::ProgramObject& program,
-        const Camera& camera, const PowerScaledCoordinate& position);
-
     static documentation::Documentation Documentation();
 
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
+    properties::FloatProperty _boundingSphere;
+    properties::StringProperty _renderableType;
 
+    void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
 private:
     RenderBin _renderBin = RenderBin::Opaque;
-    float _boundingSphere = 0.f;
 };
 
 } // namespace openspace

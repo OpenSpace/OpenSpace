@@ -1,0 +1,8 @@
+local texturesPath = asset.require("./../../saturn_textures").TexturesPath
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/saturn.jpg",
+}
+
+asset.export("layer", layer)

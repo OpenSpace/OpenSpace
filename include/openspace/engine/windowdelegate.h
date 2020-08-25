@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,31 +32,31 @@
 namespace openspace {
 
 struct WindowDelegate {
+    enum class Frustum { Mono, LeftEye, RightEye };
+
     void (*terminate)() = [](){};
 
     void (*setBarrier)(bool enabled) = [](bool) {};
 
     void (*setSynchronization)(bool enabled) = [](bool) {};
 
-    void (*clearAllWindows)(const glm::vec4& clearColor) = [](const glm::vec4&) {};
-
     bool (*windowHasResized)() = []() { return false; };
 
     double (*averageDeltaTime)() = []() { return 0.0; };
+
+    double (*minDeltaTime)() = []() { return 0.0; };
+
+    double (*maxDeltaTime)() = []() { return 0.0; };
+
+    double (*deltaTimeStandardDeviation)() = []() { return 0.0; };
 
     double (*deltaTime)() = []() { return 0.0; };
 
     double (*applicationTime)() = []() { return 0.0; };
 
-    glm::vec2 (*mousePosition)() = []() { return glm::vec2(0.f); };
-
-    uint32_t (*mouseButtons)(int maxNumber) = [](int) { return uint32_t(0); };
-
     glm::ivec2 (*currentWindowSize)() = []() { return glm::ivec2(0); };
 
     glm::ivec2 (*currentSubwindowSize)() = []() { return glm::ivec2(0); };
-
-    glm::ivec2 (*currentWindowResolution)() = []() { return glm::ivec2(0); };
 
     glm::ivec2 (*currentDrawBufferResolution)() = []() { return glm::ivec2(0); };
 
@@ -64,42 +64,19 @@ struct WindowDelegate {
 
     glm::vec2 (*dpiScaling)() = []() { return glm::vec2(1.f); };
 
-    int (*currentNumberOfAaSamples)() = []() { return 1; };
-
-    bool (*isRegularRendering)() = []() { return true; };
-
     bool (*hasGuiWindow)() = []() { return false; };
 
     bool (*isGuiWindow)() = []() { return false; };
 
-    bool (*isMaster)() = []() { return false; };
-
-    int (*clusterId)() = []() { return 0; };
-
-    bool (*isUsingSwapGroups)() = []() { return false; };
-
-    bool (*isSwapGroupMaster)() = []() { return false; };
-
-    glm::mat4 (*viewProjectionMatrix)() = []() { return glm::mat4(1.f); };
+    bool (*isMaster)() = []() { return true; };
 
     glm::mat4 (*modelMatrix)() = []() { return glm::mat4(1.f); };
 
     void (*setNearFarClippingPlane)(float near, float far) = [](float, float) {};
 
-    void (*setEyeSeparationDistance)(float distance) = [](float) {};
-
-    glm::ivec4 (*viewportPixelCoordinates)() = []() { return glm::ivec4(0, 0, 0, 0); };
-
-    bool (*isExternalControlConnected)() = []() { return false; };
-
-    void (*sendMessageToExternalControl)(const std::vector<char>& message) =
-        [](const std::vector<char>&) {};
-
-    bool (*isSimpleRendering)() = []() { return true; };
-
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    void (*takeScreenshot)(bool applyWarping) = [](bool) { };
+    unsigned int (*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };
 
     void (*swapBuffer)() = []() {};
 
@@ -107,10 +84,22 @@ struct WindowDelegate {
 
     int (*currentWindowId)() = []() { return 0; };
 
+    double (*getHorizFieldOfView)() = []() { return 0.0; };
+
+    void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
+
+    void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* {
+        return nullptr;
+    };
+
     using GLProcAddress = void(*)(void);
 
     GLProcAddress (*openGLProcedureAddress)(const char*) =
         [](const char*) -> GLProcAddress { return []() {}; };
+
+    Frustum (*frustumMode)() = []() { return Frustum::Mono; };
+
+    uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 };
 
 } // namespace openspace

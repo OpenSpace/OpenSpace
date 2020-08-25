@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -169,7 +169,12 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _statsToFileName(StatsToFileNameInfo)
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
-    , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _rotation(
+        RotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(0.f),
+        glm::vec3(glm::two_pi<float>())
+    )
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
     if (dictionary.hasKeyAndValue<std::string>(KeyDataSource)) {
@@ -216,7 +221,8 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         _startTime = SpiceManager::ref().ephemerisTimeFromDate(startTimeString);
         _endTime = SpiceManager::ref().ephemerisTimeFromDate(endTimeString);
         _loop = false;
-    } else {
+    }
+    else {
         _loop = true;
         LWARNING("Node does not provide time information. Viewing one image / frame");
     }
@@ -263,9 +269,11 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     std::string selectorName = _selectorName;
     if (selectorName == "simple") {
         _selector = Selector::SIMPLE;
-    } else if (selectorName == "local") {
+    }
+    else if (selectorName == "local") {
         _selector = Selector::LOCAL;
-    } else {
+    }
+    else {
         _selector = Selector::TF;
     }
 
@@ -275,11 +283,14 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         std::string newSelectorName = _selectorName;
         if (newSelectorName == "simple") {
             s = Selector::SIMPLE;
-        } else if (newSelectorName == "local") {
+        }
+        else if (newSelectorName == "local") {
             s = Selector::LOCAL;
-        } else if (newSelectorName == "tf") {
+        }
+        else if (newSelectorName == "tf") {
             s = Selector::TF;
-        } else {
+        }
+        else {
             return;
         }
         setSelectorType(s);
@@ -469,13 +480,15 @@ bool RenderableMultiresVolume::initializeSelector() {
                         fmt::format("Loading histograms from cache: {}", cacheFilename)
                     );
                     success &= _errorHistogramManager->loadFromFile(cacheFilename);
-                } else if (_errorHistogramsPath != "") {
+                }
+                else if (_errorHistogramsPath != "") {
                     // Read histograms from scene data.
                     LINFO(fmt::format(
                         "Loading histograms from scene data: {}", _errorHistogramsPath
                     ));
                     success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
-                } else {
+                }
+                else {
                     // Build histograms from tsp file.
                     LWARNING(fmt::format("Failed to open {}", cacheFilename));
                     success &= _errorHistogramManager->buildHistograms(nHistograms);
@@ -505,7 +518,8 @@ bool RenderableMultiresVolume::initializeSelector() {
                     cacheFile.close();
                     LINFO(fmt::format("Loading histograms from {}", cacheFilename));
                     success &= _histogramManager->loadFromFile(cacheFilename);
-                } else {
+                }
+                else {
                     // Build histograms from tsp file.
                     LWARNING(fmt::format("Failed to open '{}'", cacheFilename));
                     success &= _histogramManager->buildHistograms(
@@ -536,7 +550,8 @@ bool RenderableMultiresVolume::initializeSelector() {
                     cacheFile.close();
                     LINFO(fmt::format("Loading histograms from {}", cacheFilename));
                     success &= _localErrorHistogramManager->loadFromFile(cacheFilename);
-                } else {
+                }
+                else {
                     // Build histograms from tsp file.
                     LWARNING(fmt::format("Failed to open {}", cacheFilename));
                     success &= _localErrorHistogramManager->buildHistograms(nHistograms);
@@ -714,7 +729,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
     if (_raycaster) {
         glm::mat4 transform = glm::translate(
-            glm::mat4(1.0),
+            glm::mat4(1.f),
             static_cast<glm::vec3>(_translation) *
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );

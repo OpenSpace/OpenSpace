@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@
 
 namespace openspace::globebrowsing::layergroupid {
 
-static constexpr int NUM_LAYER_GROUPS = 5;
+static constexpr const int NUM_LAYER_GROUPS = 5;
 static constexpr const char* LAYER_GROUP_IDENTIFIERS[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
@@ -56,7 +56,7 @@ enum GroupID {
     Unknown,
 };
 
-static constexpr int NUM_LAYER_TYPES = 8;
+static constexpr const int NUM_LAYER_TYPES = 8;
 static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
     "DefaultTileLayer",
     "SingleImageTileLayer",
@@ -124,18 +124,52 @@ enum class BlendModeID {
 namespace ghoul {
 
 template <>
-openspace::globebrowsing::layergroupid::TypeID from_string(const std::string& string);
+constexpr openspace::globebrowsing::layergroupid::TypeID from_string(
+                                                                  std::string_view string)
+{
+    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_LAYER_TYPES; ++i) {
+        if (string == openspace::globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) {
+            return static_cast<openspace::globebrowsing::layergroupid::TypeID>(i);
+        }
+    }
+    return openspace::globebrowsing::layergroupid::TypeID::Unknown;
+}
 
 template <>
-openspace::globebrowsing::layergroupid::GroupID from_string(const std::string& string);
+constexpr openspace::globebrowsing::layergroupid::GroupID from_string(
+                                                                  std::string_view string)
+{
+    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_LAYER_GROUPS; ++i) {
+        if (string == openspace::globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i]) {
+            return static_cast<openspace::globebrowsing::layergroupid::GroupID>(i);
+        }
+    }
+    return openspace::globebrowsing::layergroupid::GroupID::Unknown;
+}
 
 template <>
-openspace::globebrowsing::layergroupid::AdjustmentTypeID from_string(
-    const std::string& string);
+constexpr openspace::globebrowsing::layergroupid::AdjustmentTypeID from_string(
+                                                                  std::string_view string)
+{
+    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
+        if (string == openspace::globebrowsing::layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
+            return static_cast<openspace::globebrowsing::layergroupid::AdjustmentTypeID>(i);
+        }
+    }
+    return openspace::globebrowsing::layergroupid::AdjustmentTypeID::None;
+}
 
 template <>
-openspace::globebrowsing::layergroupid::BlendModeID from_string(
-    const std::string& string);
+constexpr openspace::globebrowsing::layergroupid::BlendModeID from_string(
+                                                                  std::string_view string)
+{
+    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_BLEND_MODES; ++i) {
+        if (string == openspace::globebrowsing::layergroupid::BLEND_MODE_NAMES[i]) {
+            return static_cast<openspace::globebrowsing::layergroupid::BlendModeID>(i);
+        }
+    }
+    return openspace::globebrowsing::layergroupid::BlendModeID::Normal;
+}
 
 } // ghoul
 

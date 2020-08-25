@@ -1,6 +1,6 @@
 openspace.documentation = {
     {
-        Name = "markInteratingNodes",
+        Name = "markInterestingNodes",
         Arguments = "List of nodes",
         Documentation = "This function marks the scene graph nodes identified by name " ..
         "as interesting, which will provide shortcut access to focus buttons and " .. 

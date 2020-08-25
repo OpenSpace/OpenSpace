@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -384,7 +385,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
-            glm::dvec3 otherPos;
+            glm::dvec3 otherPos = glm::dvec3(0.0);
             if (otherComp.type == Type::NodeSurface) {
                 // We are only interested in the direction, and we want to prevent
                 // infinite recursion
@@ -400,11 +401,16 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 
             return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
         }
-        case Type::Focus:
-            return {
-                global::navigationHandler.focusNode()->worldPosition(),
-                "focus"
-            };
+        case Type::Focus: {
+            const SceneGraphNode* anchor =
+                global::navigationHandler.orbitalNavigator().anchorNode();
+            if (!anchor) {
+                return { glm::dvec3(0.0), "Unknown" };
+            }
+            else {
+                return { anchor->worldPosition(), "focus" };
+            }
+        }
         case Type::Camera:
             return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:
@@ -434,6 +440,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     }
 
     penPosition.y -= _font->height();
+
     RenderFont(
         *_font,
         penPosition,
@@ -456,10 +463,9 @@ glm::vec2 DashboardItemDistance::size() const {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Distance from focus: {} {}", dist.first, dist.second)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

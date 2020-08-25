@@ -1,0 +1,6 @@
+local layer = {
+    Identifier = "Indices",
+    Type = "TileIndexTileLayer"
+}
+
+asset.export("layer", layer)

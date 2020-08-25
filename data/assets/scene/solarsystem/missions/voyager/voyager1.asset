@@ -61,7 +61,12 @@ local Voyager1 = {
         Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "VG1_SC_BUS",
-            DestinationFrame = "GALACTIC"
+            DestinationFrame = "GALACTIC",
+            TimeFrame = {
+                Type = "TimeFrameInterval",
+                Start = "1977-SEP-05 14:10:11.786",
+                End = "2027-DEC-27"
+            }
         }
     },
     GUI = {

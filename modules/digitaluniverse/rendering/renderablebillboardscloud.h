@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <functional>
@@ -103,6 +102,8 @@ private:
     bool _hasSpriteTexture = false;
     bool _spriteTextureIsDirty = true;
     bool _hasColorMapFile = false;
+    bool _isColorMapExact = false;
+    bool _hasDatavarSize = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
 
@@ -113,7 +114,8 @@ private:
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
-    properties::Vec4Property _textColor;
+    properties::Vec3Property _textColor;
+    properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
     properties::FloatProperty _textMinSize;
     properties::FloatProperty _textMaxSize;
@@ -121,6 +123,7 @@ private:
     properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
+    properties::OptionProperty _datavarSizeOption;
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _billboardMaxSize;
@@ -139,24 +142,27 @@ private:
     UniformCache(cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup,
         renderOption, minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
-        screenSize, spriteTexture, hasColormap, enabledRectSizeControl
+        screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
+
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;
     std::string _colorMapFile;
     std::string _labelFile;
     std::string _colorOptionString;
+    std::string _datavarSizeOptionString;
 
     Unit _unit = Parsec;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
     std::vector<glm::vec4> _colorMapData;
+    std::vector<glm::vec2> _colorRangeData;
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
-    std::vector<glm::vec2> _colorRangeData;
+    std::unordered_map<int, std::string> _optionConversionSizeMap;
 
     int _nValuesPerAstronomicalObject = 0;
 

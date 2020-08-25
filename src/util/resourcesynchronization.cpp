@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,7 +78,8 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
 
     auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
-    return factory->create(synchronizationType, dictionary);
+    ResourceSynchronization* sync = factory->create(synchronizationType, dictionary);
+    return std::unique_ptr<ResourceSynchronization>(sync);
 }
 
 ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dictionary) {
@@ -95,15 +96,15 @@ ResourceSynchronization::State ResourceSynchronization::state() const {
     return _state;
 }
 
-bool ResourceSynchronization::isResolved() {
+bool ResourceSynchronization::isResolved() const {
     return _state == State::Resolved;
 }
 
-bool ResourceSynchronization::isRejected() {
+bool ResourceSynchronization::isRejected() const {
     return _state == State::Rejected;
 }
 
-bool ResourceSynchronization::isSyncing() {
+bool ResourceSynchronization::isSyncing() const {
     return _state == State::Syncing;
 }
 
@@ -143,8 +144,9 @@ void ResourceSynchronization::setState(State state) {
     _callbackMutex.lock();
     std::vector<StateChangeCallback> callbacks;
     callbacks.reserve(_stateChangeCallbacks.size());
-    for (const std::pair<CallbackHandle, StateChangeCallback>& it : _stateChangeCallbacks)
-    {
+    using K = CallbackHandle;
+    using V = StateChangeCallback;
+    for (const std::pair<const K, V>& it : _stateChangeCallbacks) {
         callbacks.push_back(it.second);
     }
     _callbackMutex.unlock();

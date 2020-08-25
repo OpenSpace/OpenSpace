@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -226,9 +226,8 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         for (int i = 0; i < nValues; ++i) {
             const glm::vec3 p = _translation->position({
                 {},
-                _start + i * totalSampleInterval,
-                0.0,
-                false
+                Time(_start + i * totalSampleInterval),
+                Time(0.0)
             });
             _vertexArray[i] = { p.x, p.y, p.z };
         }
@@ -333,6 +332,25 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     }
 
     glBindVertexArray(0);
+
+    // Updating bounding sphere
+    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
+    glm::vec3 minVertex(std::numeric_limits<float>::max());
+
+    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
+        maxVertex.x = std::max(maxVertex.x, vertexData.x);
+        maxVertex.y = std::max(maxVertex.y, vertexData.y);
+        maxVertex.z = std::max(maxVertex.z, vertexData.z);
+
+        minVertex.x = std::min(minVertex.x, vertexData.x);
+        minVertex.y = std::min(minVertex.y, vertexData.y);
+        minVertex.z = std::min(minVertex.z, vertexData.z);
+    };
+
+    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
+
+    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
+
 }
 
 } // namespace openspace

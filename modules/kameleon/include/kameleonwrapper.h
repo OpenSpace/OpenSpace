@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,8 @@ namespace ccmc {
 namespace openspace {
 
 struct LinePoint {
-    glm::vec3 position;
-    glm::vec4 color;
+    glm::vec3 position = glm::vec3(0.f);
+    glm::vec4 color = glm::vec4(0.f);
 };
 
 std::array<std::string, 3> gridVariables(ccmc::Model* model);
@@ -51,7 +51,7 @@ public:
     enum class Model {
         OpenGGCM,
         BATSRUS,        // Magnetosphere
-        ENLIL,            // Heliosphere
+        ENLIL,          // Heliosphere
         MAS,
         Adapt3D,
         SWMF,
@@ -145,10 +145,10 @@ private:
     ccmc::Interpolator* _interpolator = nullptr;
 
     // Model parameters
-    glm::vec3 _min;
-    glm::vec3 _max;
-    glm::vec3 _validMin;
-    glm::vec3 _validMax;
+    glm::vec3 _min = glm::vec3(0.f);
+    glm::vec3 _max = glm::vec3(0.f);
+    glm::vec3 _validMin = glm::vec3(0.f);
+    glm::vec3 _validMax = glm::vec3(0.f);
     std::string _xCoordVar;
     std::string _yCoordVar;
     std::string _zCoordVar;

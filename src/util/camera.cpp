@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,15 +28,14 @@
 
 namespace openspace {
 
-const glm::dvec3 Camera::ViewDirectionCameraSpace = glm::dvec3(0, 0, -1);
-const glm::dvec3 Camera::LookupVectorCameraSpace = glm::dvec3(0, 1, 0);
+const glm::dvec3 Camera::ViewDirectionCameraSpace = glm::dvec3(0.0, 0.0, -1.0);
+const glm::dvec3 Camera::UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
 
 Camera::Camera(const Camera& o)
     : sgctInternal(o.sgctInternal)
     , _position(o._position)
     , _rotation(o._rotation)
     , _scaling(o._scaling)
-    , _focusPosition(o._focusPosition)
     , _maxFov(o._maxFov)
     , _cachedViewDirection(o._cachedViewDirection)
     , _cachedLookupVector(o._cachedLookupVector)
@@ -47,11 +46,6 @@ void Camera::setPositionVec3(glm::dvec3 pos) {
     _position = std::move(pos);
 
     _cachedCombinedViewMatrix.isDirty = true;
-}
-
-void Camera::setFocusPositionVec3(glm::dvec3 pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _focusPosition = std::move(pos);
 }
 
 void Camera::setRotation(glm::dquat rotation) {
@@ -116,30 +110,26 @@ const glm::dvec3& Camera::unsynchedPositionVec3() const {
     return _position;
 }
 
-const glm::dvec3& Camera::focusPositionVec3() const {
-    return _focusPosition;
-}
-
 const glm::dvec3& Camera::viewDirectionWorldSpace() const {
     if (_cachedViewDirection.isDirty) {
         _cachedViewDirection.datum = glm::normalize(
             static_cast<glm::dquat>(_rotation) * ViewDirectionCameraSpace
         );
-        _cachedViewDirection.isDirty = true;
+        _cachedViewDirection.isDirty = false;
     }
     return _cachedViewDirection.datum;
 }
 
 const glm::dvec3& Camera::lookUpVectorCameraSpace() const {
-    return LookupVectorCameraSpace;
+    return UpDirectionCameraSpace;
 }
 
 const glm::dvec3& Camera::lookUpVectorWorldSpace() const {
     if (_cachedLookupVector.isDirty) {
         _cachedLookupVector.datum = glm::normalize(
-            static_cast<glm::dquat>(_rotation) * LookupVectorCameraSpace
+            static_cast<glm::dquat>(_rotation) * UpDirectionCameraSpace
         );
-        _cachedLookupVector.isDirty = true;
+        _cachedLookupVector.isDirty = false;
     }
 
     return _cachedLookupVector.datum;
@@ -166,18 +156,20 @@ float Camera::scaling() const {
 }
 
 const glm::dmat4& Camera::viewRotationMatrix() const {
-    if (_cachedViewRotationMatrix.isDirty) {
+    //if (_cachedViewRotationMatrix.isDirty) {
         _cachedViewRotationMatrix.datum = glm::mat4_cast(
             glm::inverse(static_cast<glm::dquat>(_rotation))
         );
-    }
+        _cachedViewRotationMatrix.isDirty = false;
+    //}
     return _cachedViewRotationMatrix.datum;
 }
 
 const glm::dmat4& Camera::viewScaleMatrix() const {
-    if (_cachedViewScaleMatrix.isDirty) {
+    //if (_cachedViewScaleMatrix.isDirty) {
         _cachedViewScaleMatrix.datum = glm::scale(glm::mat4(1.f), glm::vec3(_scaling));
-    }
+        _cachedViewScaleMatrix.isDirty = false;
+    //}
     return _cachedViewScaleMatrix.datum;
 }
 
@@ -186,7 +178,7 @@ const glm::dquat& Camera::rotationQuaternion() const {
 }
 
 const glm::dmat4& Camera::combinedViewMatrix() const {
-    if (_cachedCombinedViewMatrix.isDirty) {
+    //if (_cachedCombinedViewMatrix.isDirty) {
         const glm::dmat4 cameraTranslation = glm::inverse(
             glm::translate(glm::dmat4(1.0), static_cast<glm::dvec3>(_position))
         );
@@ -195,8 +187,8 @@ const glm::dmat4& Camera::combinedViewMatrix() const {
             glm::dmat4(viewScaleMatrix()) *
             glm::dmat4(viewRotationMatrix()) *
             cameraTranslation;
-        _cachedCombinedViewMatrix.isDirty = true;
-    }
+        _cachedCombinedViewMatrix.isDirty = false;
+    //}
     return _cachedCombinedViewMatrix.datum;
 }
 
@@ -205,6 +197,8 @@ void Camera::invalidateCache() {
     _cachedLookupVector.isDirty = true;
     _cachedViewRotationMatrix.isDirty = true;
     _cachedCombinedViewMatrix.isDirty = true;
+    _cachedViewScaleMatrix.isDirty = true;
+    _cachedSinMaxFov.isDirty = true;
 }
 
 void Camera::serialize(std::ostream& os) const {
@@ -216,8 +210,8 @@ void Camera::serialize(std::ostream& os) const {
 
 void Camera::deserialize(std::istream& is) {
     glm::dvec3 p;
-    glm::dquat q;
     is >> p.x >> p.y >> p.z;
+    glm::dquat q;
     is >> q.x >> q.y >> q.z >> q.w;
     setPositionVec3(p);
     setRotation(q);
@@ -262,35 +256,12 @@ const glm::mat4& Camera::SgctInternal::projectionMatrix() const {
 }
 
 const glm::mat4& Camera::SgctInternal::viewProjectionMatrix() const {
-    if (_cachedViewProjectionMatrix.isDirty) {
+    //if (_cachedViewProjectionMatrix.isDirty) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _cachedViewProjectionMatrix.datum = _projectionMatrix * _viewMatrix;
         _cachedViewProjectionMatrix.isDirty = false;
-    }
+    //}
     return _cachedViewProjectionMatrix.datum;
-}
-
-// Deprecated
-void Camera::setPosition(psc pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _position = pos.dvec3();
-}
-
-void Camera::setFocusPosition(psc pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _focusPosition = pos.dvec3();
-}
-
-psc Camera::position() const {
-    return psc(static_cast<glm::dvec3>(_position));
-}
-
-psc Camera::unsynchedPosition() const {
-    return psc(static_cast<glm::dvec3>(_position));
-}
-
-psc Camera::focusPosition() const {
-    return psc(_focusPosition);
 }
 
 const glm::mat4& Camera::viewMatrix() const {

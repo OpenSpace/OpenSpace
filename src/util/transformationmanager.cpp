@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,10 +40,6 @@
 #pragma warning (pop)
 #endif // WIN32
 #endif
-
-namespace {
-    constexpr const char* _loggerCat = "TransformationManager";
-}
 
 namespace openspace {
 
@@ -110,9 +106,9 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(
     _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
 
     return glm::dmat3(
-        out0.c0 , out0.c1   , out0.c2,
-        out1.c0 , out1.c1   , out1.c2,
-        out2.c0 , out2.c1   , out2.c2
+        out0.c0, out0.c1, out0.c2,
+        out1.c0, out1.c1, out1.c2,
+        out2.c0, out2.c1, out2.c2
     );
 #else
     return glm::dmat3(0.0);
@@ -138,7 +134,8 @@ glm::dmat3 TransformationManager::frameTransformationMatrix(
     if (fromKameleon && toKameleon) {
         return kameleonTransformationMatrix(from, to, ephemerisTime);
 
-    } else if (fromKameleon && !toKameleon) {
+    }
+    else if (fromKameleon && !toKameleon) {
         glm::dmat3 kameleonTransformation = kameleonTransformationMatrix(
             from,
             "J2000",
@@ -150,7 +147,8 @@ glm::dmat3 TransformationManager::frameTransformationMatrix(
             ephemerisTime
         );
         return spiceTransformation*kameleonTransformation;
-    } else if (!fromKameleon && toKameleon) {
+    }
+    else if (!fromKameleon && toKameleon) {
         glm::dmat3 spiceTransformation = SpiceManager::ref().frameTransformationMatrix(
             from,
             "J2000",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,8 +61,8 @@ std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictio
     std::string taskType = dictionary.value<std::string>("Type");
     auto factory = FactoryManager::ref().factory<Task>();
 
-    std::unique_ptr<Task> task = factory->create(taskType, dictionary);
-    return task;
+    Task* task = factory->create(taskType, dictionary);
+    return std::unique_ptr<Task>(task);
 }
 
 } // namespace openspace

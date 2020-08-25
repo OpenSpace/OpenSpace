@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 #define __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
 #include <array>
 #include <memory>
@@ -113,10 +115,25 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::JoystickAction& value);
+inline std::string to_string(const openspace::interaction::JoystickAction& value) {
+    switch (value) {
+        case openspace::interaction::JoystickAction::Idle:    return "Idle";
+        case openspace::interaction::JoystickAction::Press:   return "Press";
+        case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
+        case openspace::interaction::JoystickAction::Release: return "Release";
+       default:                                              throw MissingCaseException();
+    }
+}
 
 template <>
-openspace::interaction::JoystickAction from_string(const std::string& str);
+constexpr openspace::interaction::JoystickAction from_string(std::string_view string) {
+    if (string == "Idle") { return openspace::interaction::JoystickAction::Idle; }
+    if (string == "Press") { return openspace::interaction::JoystickAction::Press; }
+    if (string == "Repeat") { return openspace::interaction::JoystickAction::Repeat; }
+    if (string == "Release") { return openspace::interaction::JoystickAction::Release; }
+
+    throw RuntimeError("Unknown action '" + std::string(string) + "'");
+}
 
 } // namespace ghoul
 

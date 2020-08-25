@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,61 +26,62 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonwrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonhelper.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonwrapper.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonhelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/kameleonwrapper.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/kameleonhelper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/kameleonwrapper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/kameleonhelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-    "Kameleon"
-    kameleon_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "Kameleon"
+  kameleon_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-    option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
-    if (WIN32)
-        option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
-    else ()
-        option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-    endif ()
-    mark_as_advanced(BUILD_SHARED_LIBS) # Change to set instead of option
-    option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
-    set(KAMELEON_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)
-    set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
-    add_subdirectory(${KAMELEON_ROOT_DIR})
-    target_include_directories(${kameleon_module} SYSTEM PUBLIC ${KAMELEON_INCLUDES})
-    target_link_libraries(${kameleon_module} ccmc)
-    mark_as_advanced(CDF_BUILD_ZLIB CDF_INCLUDES CDF_LIBRARY CDF_USE_STATIC_LIBS
-        CDF_USE_ZLIB HDF5_DIR HDF5_USE_STATIC_LIBRARIES KAMELEON_LIBRARY_ONLY
-        KAMELEON_USE_HDF5)
+option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
+if (WIN32)
+  option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
+else ()
+  option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+endif ()
+mark_as_advanced(BUILD_SHARED_LIBS) # Change to set instead of option
+option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
+set(KAMELEON_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)
+set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
+add_subdirectory(${KAMELEON_ROOT_DIR})
+target_include_directories(${kameleon_module} SYSTEM PUBLIC ${KAMELEON_INCLUDES})
+target_link_libraries(${kameleon_module} PRIVATE ccmc)
+mark_as_advanced(CDF_BUILD_ZLIB CDF_INCLUDES CDF_LIBRARY CDF_USE_STATIC_LIBS
+  CDF_USE_ZLIB HDF5_DIR HDF5_USE_STATIC_LIBRARIES KAMELEON_LIBRARY_ONLY KAMELEON_USE_HDF5
+)
 
-    if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
-        if (MSVC)
-            target_compile_options(ccmc PRIVATE "/W0" "/MP")
-            target_compile_definitions(ccmc PRIVATE "_SCL_SECURE_NO_WARNINGS")
-        else ()
-            target_compile_options(ccmc PRIVATE "-w")
-        endif ()
+if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
+  if (MSVC)
+    target_compile_options(ccmc PRIVATE "/W0" "/MP")
+    target_compile_definitions(ccmc PRIVATE "_SCL_SECURE_NO_WARNINGS")
+  else ()
+    target_compile_options(ccmc PRIVATE "-w")
+  endif ()
+endif ()
+set_folder_location(ccmc "External")
+if (TARGET cdf)
+  if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
+    if (MSVC)
+      target_compile_options(cdf PRIVATE "/W0" "/MP")
+      target_compile_definitions(cdf PRIVATE "_SCL_SECURE_NO_WARNINGS")
+    else ()
+      target_compile_options(cdf PRIVATE "-w")
     endif ()
-    set_folder_location(ccmc "External")
-    if (TARGET cdf)
-        if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
-            if (MSVC)
-                target_compile_options(cdf PRIVATE "/W0" "/MP")
-                target_compile_definitions(cdf PRIVATE "_SCL_SECURE_NO_WARNINGS")
-            else ()
-                target_compile_options(cdf PRIVATE "-w")
-            endif ()
-        endif ()
-        set_folder_location(cdf "External")
-    endif ()
+  endif ()
+  set_folder_location(cdf "External")
+endif ()
+
 # Boost
 find_package(Boost REQUIRED)
 target_include_directories(openspace-module-kameleon SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})

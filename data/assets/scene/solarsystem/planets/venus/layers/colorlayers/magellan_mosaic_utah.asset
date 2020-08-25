@@ -1,0 +1,13 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Magellan_Mosaic_Utah",
+    Name = "Magellan Mosaic [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.vrt",
+    BlendMode = "Color",
+    Settings = {
+        Gamma = 2.0
+    }
+}
+
+asset.export("layer", layer)

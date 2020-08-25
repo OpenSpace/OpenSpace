@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -271,8 +271,8 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     const std::vector<std::pair<std::string, bool>>& activeMap =
         sequencer.activeInstruments(currentTime);
 
-    glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
-    glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+    glm::vec4 firing(0.58f - t, 1.f - t, 1.f - t, 1.f);
+    glm::vec4 notFiring(0.5f, 0.5f, 0.5f, 1.f);
 
     RenderFont(
         *_font,
@@ -284,11 +284,11 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     for (const std::pair<std::string, bool>& m : activeMap) {
         if (m.second) {
-            RenderFont(*_font, penPosition, "|", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(*_font, penPosition, "|", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             if (m.first == "NH_LORRI") {
                 RenderFont(*_font, penPosition, " + ", firing);
             }
-            RenderFont(*_font, penPosition, "  |", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(*_font, penPosition, "  |", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             RenderFont(*_font,
                 penPosition,
                 fmt::format("    {:5s}", m.first),
@@ -297,12 +297,12 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             );
         }
         else {
-            RenderFont(*_font, penPosition, "| |", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(*_font, penPosition, "| |", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             RenderFont(
                 *_font,
                 penPosition,
                 fmt::format("    {:5s}", m.first),
-                glm::vec4(0.3, 0.3, 0.3, 1),
+                glm::vec4(0.3f, 0.3f, 0.3f, 1.f),
                 ghoul::fontrendering::CrDirection::Down
             );
         }
@@ -310,12 +310,12 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemInstruments::size() const {
-    glm::vec2 size = { 0.f, 0.f };
+    glm::vec2 size = glm::vec2(0.f);
     //return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
     double currentTime = global::timeManager.time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
-        return { 0.f, 0.f };
+        return glm::vec2(0.f);
     }
     ImageSequencer& sequencer = ImageSequencer::ref();
 
@@ -337,23 +337,21 @@ glm::vec2 DashboardItemInstruments::size() const {
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(*_font, "Next instrument activity:").boundingBox
+            _font->boundingBox("Next instrument activity:")
         );
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(
-                *_font,
-                fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100)
-            ).boundingBox
+            _font->boundingBox(
+                fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
+            )
         );
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(
-                *_font,
+            _font->boundingBox(
                 fmt::format("Data acquisition time: {}", str)
-            ).boundingBox
+            )
         );
     }
     std::pair<double, std::string> nextTarget = sequencer.nextTarget(currentTime);
@@ -362,9 +360,6 @@ glm::vec2 DashboardItemInstruments::size() const {
     if (currentTarget.first <= 0.0) {
         return size;
     }
-
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR& renderer = FR::defaultRenderer();
 
     const int timeleft = static_cast<int>(nextTarget.first - currentTime);
 
@@ -393,20 +388,16 @@ glm::vec2 DashboardItemInstruments::size() const {
 
     size = addToBoundingbox(
         size,
-        renderer.boundingBox(
-            *_font,
+        _font->boundingBox(
             fmt::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
-        ).boundingBox
+        )
     );
 
     size.y += _font->height();
 
     size = addToBoundingbox(
         size,
-        ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "Active Instruments:"
-        ).boundingBox
+        _font->boundingBox("Active Instruments:")
     );
     return size;
 }

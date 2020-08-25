@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/updatestructures.h>
@@ -142,7 +143,10 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     using namespace globebrowsing;
 
-    SceneGraphNode* n = global::navigationHandler.focusNode();
+    const SceneGraphNode* n = global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!n) {
+        return;
+    }
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         return;
@@ -169,9 +173,16 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     bool isEast = lon > 0.0;
     lon = std::abs(lon);
 
-    const double altitude = glm::length(
+    double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
     );
+
+    if (glm::length(cameraPositionModelSpace) <
+        glm::length(posHandle.centerToReferenceSurface))
+    {
+        altitude = -altitude;
+    }
+
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
     penPosition.y -= _font->height();
@@ -188,10 +199,9 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     );
 }
 glm::vec2 DashboardItemGlobeLocation::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

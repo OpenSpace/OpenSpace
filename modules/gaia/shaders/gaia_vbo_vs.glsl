@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -112,7 +112,8 @@ void main() {
     if ( length(in_position) > EPS ){
         vs_gPosition = vec4(model * objectPosition);    
         gl_Position = vec4(projection * viewPosition);
-    } else {
+    }
+    else {
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
     }

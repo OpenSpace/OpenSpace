@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/property.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -40,23 +41,13 @@ namespace openspace::properties {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     : DocumentationGenerator(
-        "Documented",
+        "Property Owners",
         "propertyOwners",
         {
-            {
-                "mainTemplate",
-                "${WEB}/properties/main.hbs"
-            },
-            {
-                "propertyOwnerTemplate",
-                "${WEB}/properties/propertyowner.hbs"
-            },
-            {
-                "propertyTemplate",
-                "${WEB}/properties/property.hbs"
-            }
-        },
-        "${WEB}/properties/script.js"
+            { "propertyOwnersTemplate","${WEB}/documentation/propertyowners.hbs" },
+            { "propertyTemplate","${WEB}/documentation/property.hbs" },
+            { "propertylistTemplate","${WEB}/documentation/propertylist.hbs" }
+        }
     )
     , _identifier(std::move(info.identifier))
     , _guiName(std::move(info.guiName))
@@ -199,7 +190,8 @@ void PropertyOwner::addProperty(Property* prop) {
             identifier()
         ));
         return;
-    } else {
+    }
+    else {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
         const bool hasOwner = hasPropertySubOwner(prop->identifier());
         if (hasOwner) {
@@ -244,7 +236,8 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
             identifier()
         ));
         return;
-    } else {
+    }
+    else {
         // We still need to check if the PropertyOwners name is used in a Property
         const bool hasProp = hasProperty(owner->identifier());
         if (hasProp) {
@@ -278,7 +271,8 @@ void PropertyOwner::removeProperty(Property* prop) {
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
         (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);
-    } else {
+    }
+    else {
         LERROR(fmt::format(
             "Property with identifier '{}' not found for removal", prop->identifier()
         ));
@@ -304,7 +298,8 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     // If we found the propertyowner, we can delete it
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
         _subOwners.erase(it);
-    } else {
+    }
+    else {
         LERROR(fmt::format(
             "PropertyOwner with name '{}' not found for removal", owner->identifier()
         ));
@@ -364,22 +359,22 @@ std::string PropertyOwner::generateJson() const {
     std::function<std::string(properties::PropertyOwner*)> createJson =
         [&createJson](properties::PropertyOwner* owner) -> std::string
     {
-        constexpr const char* replStr = R"("{}": "{}",)";
+        constexpr const char* replStr = R"("{}": "{}")";
 
         std::stringstream json;
         json << "{";
-        json << fmt::format(replStr, "name", owner->identifier());
+        json << fmt::format(replStr, "name", owner->identifier()) << ",";
 
         json << "\"properties\": [";
         const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
             json << "{";
-            json << fmt::format(replStr, "id", p->identifier());
-            json << fmt::format(replStr, "type", p->className());
+            json << fmt::format(replStr, "id", p->identifier()) << ",";
+            json << fmt::format(replStr, "type", p->className()) << ",";
             json << fmt::format(
                 replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
-            );
-            json << fmt::format(replStr, "guiName", p->guiName());
+            ) << ",";
+            json << fmt::format(replStr, "guiName", p->guiName()) << ",";
             json << fmt::format(replStr, "description", escapedJson(p->description()));
             json << "}";
             if (p != properties.back()) {
@@ -412,6 +407,8 @@ std::string PropertyOwner::generateJson() const {
             subOwners.end(),
             createJson(*subOwners.begin()),
             [createJson](std::string a, PropertyOwner* n) {
+            //TODO figure out how to ignore scene when its not the root
+            //right now will be done on client side
             return a + "," + createJson(n);
         }
         );

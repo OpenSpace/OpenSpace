@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,8 @@
 
 #include <openspace/util/syncbuffer.h>
 
+#include <ghoul/misc/profiling.h>
+
 namespace openspace {
 
 SyncBuffer::SyncBuffer(size_t n)
@@ -35,9 +37,16 @@ SyncBuffer::SyncBuffer(size_t n)
 SyncBuffer::~SyncBuffer() {} // NOLINT
 
 void SyncBuffer::encode(const std::string& s) {
-    ghoul_assert(_encodeOffset + sizeof(char) * s.size() + sizeof(int32_t) < _n, "");
+    ZoneScoped
 
-    int32_t length = static_cast<int32_t>(s.length());
+    int32_t anticpatedBufferSize = static_cast<int32_t>(
+        _encodeOffset + (sizeof(char) * s.size()) + sizeof(int32_t)
+    );
+    if (anticpatedBufferSize >= _n) {
+        _dataStream.resize(anticpatedBufferSize);
+    }
+
+    int32_t length = static_cast<int32_t>(s.size() * sizeof(char));
     memcpy(
         _dataStream.data() + _encodeOffset,
         reinterpret_cast<const char*>(&length),
@@ -49,6 +58,8 @@ void SyncBuffer::encode(const std::string& s) {
 }
 
 std::string SyncBuffer::decode() {
+    ZoneScoped
+
     int32_t length;
     memcpy(
         reinterpret_cast<char*>(&length),
@@ -68,11 +79,11 @@ void SyncBuffer::decode(std::string& s) {
     s = decode();
 }
 
-void SyncBuffer::setData(std::vector<char> data) {
+void SyncBuffer::setData(std::vector<std::byte> data) {
     _dataStream = std::move(data);
 }
 
-std::vector<char> SyncBuffer::data() {
+std::vector<std::byte> SyncBuffer::data() {
     _dataStream.resize(_encodeOffset);
 
     return _dataStream;
@@ -83,21 +94,5 @@ void SyncBuffer::reset() {
     _encodeOffset = 0;
     _decodeOffset = 0;
 }
-
-//void SyncBuffer::write() {
-//    _dataStream.resize(_encodeOffset);
-//    _synchronizationBuffer->setVal(_dataStream);
-//    sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
-//    _dataStream.resize(_n);
-//    _encodeOffset = 0;
-//    _decodeOffset = 0;
-//}
-//
-//void SyncBuffer::read() {
-//    sgct::SharedData::instance()->readVector(_synchronizationBuffer.get());
-//    _dataStream = _synchronizationBuffer->getVal();
-//    _encodeOffset = 0;
-//    _decodeOffset = 0;
-//}
 
 } // namespace openspace

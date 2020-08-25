@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,9 +48,9 @@ public:
     glm::ivec3 indexToCoords(size_t linear) const;
 
 private:
-    glm::ivec3 _dimensions;
+    glm::ivec3 _dimensions = glm::ivec3(0);
     std::string _path;
-    size_t _bufferSize;
+    size_t _bufferSize = 0;
 };
 
 } // namespace openspace::volume

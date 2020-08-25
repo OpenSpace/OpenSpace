@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,8 +63,8 @@ std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
     std::string geometryType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
-    std::unique_ptr<PlanetGeometry> result = factory->create(geometryType, dictionary);
-    return result;
+    PlanetGeometry* result = factory->create(geometryType, dictionary);
+    return std::unique_ptr<PlanetGeometry>(result);
 }
 
 PlanetGeometry::PlanetGeometry() : properties::PropertyOwner({ "PlanetGeometry" }) {}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +85,7 @@ void GuiShortcutsComponent::render() {
     using V = interaction::KeybindingManager::KeyInformation;
     const std::multimap<K, V>& binds = global::keybindingManager.keyBindings();
 
-    for (const std::pair<K, V>& p : binds) {
+    for (const std::pair<const K, V>& p : binds) {
         if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
             global::scriptEngine.queueScript(
                 p.second.command,

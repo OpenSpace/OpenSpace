@@ -1,14 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
-asset.request('./trail')
-
-local textures = asset.syncedResource({
-    Name = "Neptune textures",
-    Type = "HttpSynchronization",
-    Identifier = "neptune_textures",
-    Version = 1
-})
+asset.require('./trail')
 
 local Neptune = {
     Identifier = "Neptune",
@@ -18,25 +11,13 @@ local Neptune = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_NEPTUNE",
             DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
         }
     },
     Renderable = {
         Type = "RenderableGlobe",
         Radii = { 24764000.0, 24764000.0, 24314000.0 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/neptune.jpg",
-                    Enabled = true
-                }
-            }
-        }
+        Layers = {}
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
@@ -44,4 +25,25 @@ local Neptune = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune })
+local NeptuneLabel = {
+    Identifier = "NeptuneLabel",
+    Parent = Neptune.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "Neptune",
+        FontSize = 100.0,
+        LabelSize = 8.8,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive"
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "Neptune Label",
+        Path = "/Solar System/Planets/Neptune"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })

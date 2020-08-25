@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,13 +26,13 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
 set(OPENSPACE_HEADER_FILES
-    webguimodule.h
-    )
+  webguimodule.h
+)
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
-    webguimodule.cpp
-    )
+  webguimodule.cpp
+)
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -46,8 +46,8 @@ include(nodejs_support)
 DownloadNodeJs("${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
 
 create_new_module(
-    WebGui
-    webgui_module
-    STATIC
-    ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
+  WebGui
+  webgui_module
+  STATIC
+  ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )

@@ -1,0 +1,9 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "Earth_at_Night_2012",
+    Name = "Earth at Night 2012",
+    FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
+}
+
+asset.export("layer", layer)

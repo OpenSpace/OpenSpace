@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,12 +28,8 @@
 #include <openspace/documentation/documentationgenerator.h>
 
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/templatefactory.h>
 #include <memory>
-
-namespace ghoul {
-    template <class T> class TemplateFactory;
-    class TemplateFactoryBase;
-} // namespace ghoul
 
 namespace openspace {
 
@@ -111,8 +107,8 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-private:
     std::string generateJson() const override;
+private:
 
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;

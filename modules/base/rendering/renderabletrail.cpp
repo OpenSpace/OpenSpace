@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,28 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
+
+#include <cmath>
 
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
 
+#ifdef __APPLE__
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
         "renderPhase"
     };
+#else
+    constexpr const std::array<const char*, 14> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
+        "renderPhase", "resolution", "lineWidth"
+    };
+#endif
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -57,6 +68,21 @@ namespace {
         { "Points", RenderingModePoints },
         { "Lines+Points", RenderingModeLinesPoints },
         { "Points+Lines", RenderingModeLinesPoints }
+    };
+
+    // Fragile! Keep in sync with documentation
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+        { "Background", openspace::Renderable::RenderBin::Background },
+        { "Opaque", openspace::Renderable::RenderBin::Opaque },
+        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
+        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
+    };
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
+        AppearanceInfo = {
+            "Appearance",
+            "Appearance",
+            "The appearance of the trail."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
@@ -104,6 +130,13 @@ namespace {
         "Determines how the trail should be rendered to the screen.If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
         "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
+        "RenderBinMode",
+        "RenderBin Mode",
+        "Determines if the trails will be rendered after all other elements, including"
+        "atmospheres if needed."
     };
 
 } // namespace
@@ -166,71 +199,101 @@ documentation::Documentation RenderableTrail::Documentation() {
     };
 }
 
-RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _useLineFade(EnableFadeInfo, true)
-    , _lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
-    , _pointSize(PointSizeInfo, 1, 1, 64)
-    , _renderingModes(
-        RenderingModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
+RenderableTrail::Appearance::Appearance()
+    : properties::PropertyOwner(AppearanceInfo)
+    , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , useLineFade(EnableFadeInfo, true)
+    , lineFade(FadeInfo, 1.f, 0.f, 30.f)
+    , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
+    , pointSize(PointSizeInfo, 1, 1, 64)
+    , renderingModes(
+          RenderingModeInfo,
+          properties::OptionProperty::DisplayType::Dropdown
     )
 {
+    renderingModes.addOptions({
+        { RenderingModeLines, "Lines" },
+        { RenderingModePoints, "Points" },
+        { RenderingModeLinesPoints, "Lines+Points" }
+    });
+
+    addProperty(lineColor);
+    addProperty(useLineFade);
+    addProperty(lineFade);
+    addProperty(lineWidth);
+    addProperty(pointSize);
+    addProperty(renderingModes);
+}
+
+RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+{
+    setRenderBin(RenderBin::Overlay);
     addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
     addPropertySubOwner(_translation.get());
 
-    _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
-    addProperty(_lineColor);
+    _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
 
     if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
-        _useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
+        _appearance.useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
     }
-    addProperty(_useLineFade);
 
     if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
-        _lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
+        _appearance.lineFade = static_cast<float>(
+            dictionary.value<double>(FadeInfo.identifier)
+        );
     }
-    addProperty(_lineFade);
 
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(dictionary.value<double>(
+        _appearance.lineWidth = static_cast<float>(dictionary.value<double>(
             LineWidthInfo.identifier
         ));
     }
-    addProperty(_lineWidth);
 
     if (dictionary.hasKeyAndValue<double>(PointSizeInfo.identifier)) {
-        _pointSize = static_cast<int>(dictionary.value<double>(PointSizeInfo.identifier));
+        _appearance.pointSize = static_cast<int>(
+            dictionary.value<double>(PointSizeInfo.identifier)
+        );
     }
-    addProperty(_pointSize);
-
-    _renderingModes.addOptions({
-        { RenderingModeLines, "Lines" },
-        { RenderingModePoints, "Points" },
-        { RenderingModeLinesPoints, "Lines+Points" }
-    });
 
     // This map is not accessed out of order as long as the Documentation is adapted
     // whenever the map changes. The documentation will check for valid values
     if (dictionary.hasKeyAndValue<std::string>(RenderingModeInfo.identifier)) {
-        _renderingModes = RenderingModeConversion.at(
+        _appearance.renderingModes = RenderingModeConversion.at(
             dictionary.value<std::string>(RenderingModeInfo.identifier)
         );
     }
     else {
-        _renderingModes = RenderingModeLines;
+        _appearance.renderingModes = RenderingModeLines;
     }
-    addProperty(_renderingModes);
+
+    addPropertySubOwner(_appearance);
+
+    if (dictionary.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
+        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+            dictionary.value<std::string>(RenderBinModeInfo.identifier)
+        );
+        setRenderBin(cfgRenderBin);
+    }
 }
 
 void RenderableTrail::initializeGL() {
+#ifdef __APPLE__
+    _programObject = BaseModule::ProgramObjectManager.request(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine.buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
+            );
+        }
+    );
+#else
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -241,10 +304,9 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
+#endif
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
-
-    setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 void RenderableTrail::deinitializeGL() {
@@ -261,7 +323,105 @@ bool RenderableTrail::isReady() const {
     return _programObject != nullptr;
 }
 
+void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
+                                     const RenderData& data,
+                                     const glm::dmat4& modelTransform, 
+                                     RenderInformation& info, int nVertices, int offset)
+{
+    ZoneScoped
+
+    // We pass in the model view transformation matrix as double in order to maintain
+    // high precision for vertices; especially for the trails, a high vertex precision
+    // is necessary as they are usually far away from their reference
+    _programObject->setUniform(
+        _uniformCache.modelView,
+        data.camera.combinedViewMatrix() * modelTransform * info._localTransform
+    );
+
+    const int sorting = [](RenderInformation::VertexSorting sorting) {
+        switch (sorting) {
+            case RenderInformation::VertexSorting::NewestFirst: return 0;
+            case RenderInformation::VertexSorting::OldestFirst: return 1;
+            case RenderInformation::VertexSorting::NoSorting: return 2;
+        }
+    }(info.sorting);
+
+    // The vertex sorting method is used to tweak the fading along the trajectory
+    _programObject->setUniform(_uniformCache.vertexSorting, sorting);
+
+    // This value is subtracted from the vertex id in the case of a potential ring
+    // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
+    // brightest
+    _programObject->setUniform(_uniformCache.idOffset, offset);
+
+    _programObject->setUniform(_uniformCache.nVertices, nVertices);
+
+#if !defined(__APPLE__)
+    glm::ivec2 resolution = global::renderEngine.renderingResolution();
+    _programObject->setUniform(_uniformCache.resolution, resolution);
+    _programObject->setUniform(
+        _uniformCache.lineWidth,
+        std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
+    );
+#endif
+
+    if (renderPoints) {
+        // The stride parameter determines the distance between larger points and
+        // smaller ones
+        _programObject->setUniform(_uniformCache.stride, info.stride);
+        _programObject->setUniform(_uniformCache.pointSize, _appearance.pointSize);
+    }
+
+    // Fragile! Keep in sync with fragment shader
+    enum RenderPhase {
+        RenderPhaseLines = 0,
+        RenderPhasePoints
+    };
+
+    glBindVertexArray(info._vaoID);
+    if (renderLines) {
+        _programObject->setUniform(_uniformCache.renderPhase, RenderPhaseLines);
+        // Subclasses of this renderer might be using the index array or might now be
+        // so we check if there is data available and if there isn't, we use the
+        // glDrawArrays draw call; otherwise the glDrawElements
+        if (info._iBufferID == 0) {
+            glDrawArrays(
+                GL_LINE_STRIP,
+                info.first,
+                info.count
+            );
+        }
+        else {
+            glDrawElements(
+                GL_LINE_STRIP,
+                info.count,
+                GL_UNSIGNED_INT,
+                reinterpret_cast<void*>(info.first * sizeof(unsigned int))
+            );
+        }
+    }
+    if (renderPoints) {
+        // Subclasses of this renderer might be using the index array or might now be
+        // so we check if there is data available and if there isn't, we use the
+        // glDrawArrays draw call; otherwise the glDrawElements
+        _programObject->setUniform(_uniformCache.renderPhase, RenderPhasePoints);
+        if (info._iBufferID == 0) {
+            glDrawArrays(GL_POINTS, info.first, info.count);
+        }
+        else {
+            glDrawElements(
+                GL_POINTS,
+                info.count,
+                GL_UNSIGNED_INT,
+                reinterpret_cast<void*>(info.first * sizeof(unsigned int))
+            );
+        }
+    }
+}
+#pragma optimize("", off)
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
+    ZoneScoped
+
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, _opacity);
 
@@ -272,18 +432,14 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
-    _programObject->setUniform(_uniformCache.color, _lineColor);
-    _programObject->setUniform(_uniformCache.useLineFade, _useLineFade);
-    if (_useLineFade) {
-        _programObject->setUniform(_uniformCache.lineFade, _lineFade);
+    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     }
 
-    static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
-        // Fragile! Keep in sync with shader
-        { RenderInformation::VertexSorting::NewestFirst, 0 },
-        { RenderInformation::VertexSorting::OldestFirst, 1 },
-        { RenderInformation::VertexSorting::NoSorting, 2}
-    };
+    /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
+    _programObject->setUniform(_uniformCache.resolution, resolution);*/
 
     const bool usingFramebufferRenderer =
         global::renderEngine.rendererImplementation() ==
@@ -291,97 +447,25 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     if (usingFramebufferRenderer) {
         glDepthMask(false);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    const bool renderLines = (_renderingModes == RenderingModeLines) |
-                             (_renderingModes == RenderingModeLinesPoints);
+    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) |
+                             (_appearance.renderingModes == RenderingModeLinesPoints);
 
-    const bool renderPoints = (_renderingModes == RenderingModePoints) |
-                              (_renderingModes == RenderingModeLinesPoints);
+    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) |
+                              (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-        glLineWidth(_lineWidth);
+#ifdef __APPLE__
+        glLineWidth(1);
+#else
+        glLineWidth(ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
+#endif
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
     }
-
-    auto render = [renderLines, renderPoints, p = _programObject, &data,
-                   &modelTransform, pointSize = _pointSize.value(), c = _uniformCache]
-                  (RenderInformation& info, int nVertices, int offset)
-    {
-        // We pass in the model view transformation matrix as double in order to maintain
-        // high precision for vertices; especially for the trails, a high vertex precision
-        // is necessary as they are usually far away from their reference
-        p->setUniform(
-            c.modelView,
-            data.camera.combinedViewMatrix() * modelTransform * info._localTransform
-        );
-
-        // The vertex sorting method is used to tweak the fading along the trajectory
-        p->setUniform(c.vertexSorting, SortingMapping[info.sorting]);
-
-        // This value is subtracted from the vertex id in the case of a potential ring
-        // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
-        // brightest
-        p->setUniform(c.idOffset, offset);
-
-        p->setUniform(c.nVertices, nVertices);
-
-        if (renderPoints) {
-            // The stride parameter determines the distance between larger points and
-            // smaller ones
-            p->setUniform(c.stride, info.stride);
-            p->setUniform(c.pointSize, pointSize);
-        }
-
-        // Fragile! Keep in sync with fragment shader
-        enum RenderPhase {
-            RenderPhaseLines = 0,
-            RenderPhasePoints
-        };
-
-        glBindVertexArray(info._vaoID);
-        if (renderLines) {
-            p->setUniform(c.renderPhase, RenderPhaseLines);
-            // Subclasses of this renderer might be using the index array or might now be
-            // so we check if there is data available and if there isn't, we use the
-            // glDrawArrays draw call; otherwise the glDrawElements
-            if (info._iBufferID == 0) {
-                glDrawArrays(
-                    GL_LINE_STRIP,
-                    info.first,
-                    info.count
-                );
-            }
-            else {
-                glDrawElements(
-                    GL_LINE_STRIP,
-                    info.count,
-                    GL_UNSIGNED_INT,
-                    reinterpret_cast<void*>(info.first * sizeof(unsigned int))
-                );
-            }
-        }
-        if (renderPoints) {
-            // Subclasses of this renderer might be using the index array or might now be
-            // so we check if there is data available and if there isn't, we use the
-            // glDrawArrays draw call; otherwise the glDrawElements
-            p->setUniform(c.renderPhase, RenderPhasePoints);
-            if (info._iBufferID == 0) {
-                glDrawArrays(GL_POINTS, info.first, info.count);
-            }
-            else {
-                glDrawElements(
-                    GL_POINTS,
-                    info.count,
-                    GL_UNSIGNED_INT,
-                    reinterpret_cast<void*>(info.first * sizeof(unsigned int))
-                );
-            }
-        }
-    };
 
     // The combined size of vertices; -1 because we duplicate the penultimate point
     const int totalNumber = _primaryRenderInformation.count +
@@ -393,12 +477,35 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         0 :
         _primaryRenderInformation.first;
 
+    // Culling
+    const glm::dvec3 trailPosWorld = glm::dvec3(
+        modelTransform * _primaryRenderInformation._localTransform *
+        glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+    const double distance = glm::distance(trailPosWorld, data.camera.eyePositionVec3());
+
+    if (distance > _boundingSphere * DISTANCE_CULLING_RADII) {
+        return;
+    }
+
     // Render the primary batch of vertices
-    render(_primaryRenderInformation, totalNumber, primaryOffset);
+    internalRender(
+        renderLines,
+        renderPoints,
+        data,
+        modelTransform,
+        _primaryRenderInformation,
+        totalNumber,
+        primaryOffset
+    );
 
     // The secondary batch is optional, so we need to check whether we have any data here
     if (_floatingRenderInformation._vaoID != 0 && _floatingRenderInformation.count != 0) {
-        render(
+        internalRender(
+            renderLines,
+            renderPoints,
+            data,
+            modelTransform,
             _floatingRenderInformation,
             totalNumber,
             // -1 because we duplicate the penultimate point between the vertices

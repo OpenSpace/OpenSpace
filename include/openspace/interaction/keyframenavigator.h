@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,8 +49,8 @@ public:
     BooleanType(Inclusive);
 
     struct CameraPose {
-        glm::dvec3 position;
-        glm::quat rotation;
+        glm::dvec3 position = glm::dvec3(0.0);
+        glm::quat rotation = glm::quat(1.f, 0.f, 0.f, 0.f);
         std::string focusNode;
         float scale;
         bool followFocusNodeRotation;

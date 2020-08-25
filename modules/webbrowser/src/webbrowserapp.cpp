@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,10 +41,12 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
 }
 
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
-                                                  CefRefPtr<CefCommandLine>)
+                                                  CefRefPtr<CefCommandLine> commandLine)
 {
-//    command_line->AppendSwitch("disable-gpu");
-//    command_line->AppendSwitch("disable-gpu-compositing");
+    commandLine->AppendSwitch("disable-gpu");
+    commandLine->AppendSwitch("disable-gpu-compositing");
+    commandLine->AppendSwitch("enable-begin-frame-scheduling");
+    commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 }
 
 } // namespace openspace

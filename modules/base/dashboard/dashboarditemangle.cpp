@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -213,9 +214,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
 
     _fontName.onChange([this]() {
@@ -255,9 +254,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_source.type);
 
-    _source.nodeName.onChange([this]() {
-        _source.node = nullptr;
-    });
+    _source.nodeName.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node) {
         if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
             _source.nodeName = dictionary.value<std::string>(
@@ -296,9 +293,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_reference.type);
 
-    _reference.nodeName.onChange([this]() {
-        _reference.node = nullptr;
-    });
+    _reference.nodeName.onChange([this]() { _reference.node = nullptr; });
     if (_reference.type == Type::Node) {
         if (dictionary.hasKey(ReferenceNodeNameInfo.identifier)) {
             _reference.nodeName = dictionary.value<std::string>(
@@ -380,7 +375,14 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         case Type::Node:
             return { comp.node->worldPosition(), comp.node->guiName() };
         case Type::Focus:
-            return { global::navigationHandler.focusNode()->worldPosition(), "focus" };
+        {
+            const SceneGraphNode* node =
+                global::navigationHandler.orbitalNavigator().anchorNode();
+            return {
+                node->worldPosition(),
+                "focus"
+            };
+        }
         case Type::Camera:
             return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:
@@ -427,10 +429,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemAngle::size() const {
     constexpr const double Angle = 120;
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        "Angle: " + std::to_string(Angle)
-    ).boundingBox;
+    return _font->boundingBox("Angle: " + std::to_string(Angle));
 }
 
 } // namespace openspace

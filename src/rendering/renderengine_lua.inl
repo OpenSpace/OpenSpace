@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,56 +50,6 @@ int setRenderer(lua_State* L) {
     return 0;
 }
 
-/**
-* \ingroup LuaScripts
-* toggleFade(float):
-* Toggle a global fade over (float) seconds
-*/
-int toggleFade(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::toggleFade");
-
-    const float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
-
-    constexpr const float fadedIn = 1.f;
-    const int direction = global::renderEngine.globalBlackOutFactor() == fadedIn ? -1 : 1;
-
-    global::renderEngine.startFading(direction, static_cast<float>(t));
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* fadeIn(float):
-* start a global fadein over (float) seconds
-*/
-int fadeIn(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeIn");
-
-    const float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
-
-    global::renderEngine.startFading(1, t);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-/**
-* \ingroup LuaScripts
-* fadeIn(float):
-* start a global fadeout over (float) seconds
-*/
-int fadeOut(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeOut");
-
-    float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
-
-    global::renderEngine.startFading(-1, t);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
 int addScreenSpaceRenderable(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addScreenSpaceRenderable");
 
@@ -137,6 +87,16 @@ int removeScreenSpaceRenderable(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
+}
+
+int takeScreenshot(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::takeScreenshot");
+
+    global::renderEngine.takeScreenshot();
+    const unsigned int screenshotNumber = global::renderEngine.latestScreenshotNumber();
+
+    lua_pushinteger(L, screenshotNumber);
+    return 1;
 }
 
 }// namespace openspace::luascriptfunctions

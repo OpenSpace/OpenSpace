@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* _loggerCat = "CEF BrowserInstance";
@@ -49,8 +50,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     _client = new BrowserClient(_renderHandler, _keyboardHandler);
 
     CefWindowInfo windowInfo;
-    const bool renderTransparent = true;
-    windowInfo.SetAsWindowless(nullptr, renderTransparent);
+    windowInfo.SetAsWindowless(nullptr);
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
@@ -63,6 +63,10 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
         browserSettings,
         nullptr
     );
+
+    if (!_browser) {
+        LERROR("Error when creating browser");
+    }
 }
 
 BrowserInstance::~BrowserInstance() {
@@ -70,15 +74,25 @@ BrowserInstance::~BrowserInstance() {
 }
 
 void BrowserInstance::initialize() {
-    reshape(global::windowDelegate.currentWindowSize());
+    reshape(static_cast<glm::ivec2>(
+        static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
+        global::windowDelegate.dpiScaling()
+    ));
     _isInitialized = true;
+    _shouldReshape = true;
 }
 
-void BrowserInstance::loadUrl(const std::string& url) {
+void BrowserInstance::loadUrl(std::string url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
-    LDEBUG(fmt::format("Loading URL: {}", url));
-    _browser->GetMainFrame()->LoadURL(url);
+    if (!url.empty()) {
+        LDEBUG(fmt::format("Loading URL: {}", url));
+        CefString cefUrl = std::move(url);
+        _browser->GetMainFrame()->LoadURL(cefUrl);
+    }
+    else {
+        LWARNING("Provided browser URL is empty");
+    }
 }
 
 bool BrowserInstance::loadLocalPath(std::string path) {
@@ -92,11 +106,15 @@ bool BrowserInstance::loadLocalPath(std::string path) {
 }
 
 void BrowserInstance::reshape(const glm::ivec2& windowSize) {
+    ZoneScoped
+
     _renderHandler->reshape(windowSize.x, windowSize.y);
     _browser->GetHost()->WasResized();
 }
 
 void BrowserInstance::draw() {
+    ZoneScoped
+
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);
     }
@@ -131,6 +149,12 @@ bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
     return hasContent(event.x, event.y);
 }
 
+#ifdef WIN32
+void BrowserInstance::sendTouchEvent(const CefTouchEvent& event) const{
+    _browser->GetHost()->SendTouchEvent(event);
+}
+#endif
+
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent& event) {
     constexpr const bool DidNotLeaveWindow = false;
 
@@ -146,14 +170,22 @@ bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent& event,
 }
 
 void BrowserInstance::setZoom(float ratio) {
-    //Zooming in CEF is non-linear according to this:
-    //https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
-    _zoomLevel = glm::log(static_cast<double>(ratio))/glm::log(1.2);
+    const float dpiScaling = global::windowDelegate.dpiScaling().x;
+
+    // Zooming in CEF is non-linear according to this:
+    // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
+    _zoomLevel = glm::log(static_cast<double>(ratio * dpiScaling))/glm::log(1.2);
     _browser->GetHost()->SetZoomLevel(_zoomLevel);
 }
 
 void BrowserInstance::reloadBrowser() {
     _browser->Reload();
+}
+
+void BrowserInstance::selectAll() {
+    if (_browser->GetFocusedFrame()) {
+        _browser->GetFocusedFrame()->SelectAll();
+    }
 }
 
 bool BrowserInstance::hasContent(int x, int y) {

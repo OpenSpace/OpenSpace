@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     double alpha = (1.0 - beta) * (glm::length(p) / n);
 
     const glm::dvec3 p2 = p * p;
-    glm::dvec3 d;
+    glm::dvec3 d = glm::dvec3(0.0);
     double s = 0.0;
     double dSdA = 1.0;
 

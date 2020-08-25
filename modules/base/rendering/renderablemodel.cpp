@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,10 +47,11 @@ namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
 
-    constexpr const std::array<const char*, 11> UniformNames = {
+    constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "projectionTransform", "performShading", "texture1",
-        "ambientIntensity", "diffuseIntensity", "specularIntensity"
+        "modelViewTransform", "crippedModelViewTransform", "projectionTransform", 
+        "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
+        "specularIntensity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -85,11 +86,23 @@ namespace {
         "of the Sun."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
+        "DisableFaceCulling",
+        "Disable Face Culling",
+        "Disable OpenGL automatic face culling optimization."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
         "all other transformations are applied."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
+        "RotationVector",
+        "Rotation Vector",
+        "Rotation Vector using degrees"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
@@ -144,10 +157,22 @@ documentation::Documentation RenderableModel::Documentation() {
                 ShadingInfo.description
             },
             {
+                DisableFaceCullingInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFaceCullingInfo.description
+            },
+            {
                 ModelTransformInfo.identifier,
                 new DoubleMatrix3Verifier,
                 Optional::Yes,
                 ModelTransformInfo.description
+            },
+           {
+                RotationVecInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                RotationVecInfo.description
             },
             {
                 LightSourcesInfo.identifier,
@@ -172,7 +197,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
     , _performShading(ShadingInfo, true)
-    , _modelTransform(ModelTransformInfo, glm::mat3(1.f))
+    , _disableFaceCulling(DisableFaceCullingInfo, false)
+    , _modelTransform(
+        ModelTransformInfo,
+        glm::dmat3(1.0),
+        glm::dmat3(-1.0),
+        glm::dmat3(1.0)
+    )
+    , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -214,6 +246,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
 
+    if (dictionary.hasKey(DisableFaceCullingInfo.identifier)) {
+        _disableFaceCulling = dictionary.value<bool>(DisableFaceCullingInfo.identifier);
+    }
+
     if (dictionary.hasKey(LightSourcesInfo.identifier)) {
         const ghoul::Dictionary& lsDictionary =
             dictionary.value<ghoul::Dictionary>(LightSourcesInfo.identifier);
@@ -227,6 +263,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+
     addPropertySubOwner(_lightSourcePropertyOwner);
     addPropertySubOwner(_geometry.get());
 
@@ -238,6 +275,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
+    addProperty(_disableFaceCulling);
+    addProperty(_modelTransform);
+    addProperty(_rotationVec);
+
+    _rotationVec.onChange([this]() {
+        _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));
+    });
+
+
+    if (dictionary.hasKey(RotationVecInfo.identifier)) {
+        _rotationVec = dictionary.value<glm::vec3>(RotationVecInfo.identifier);
+    }
 }
 
 bool RenderableModel::isReady() const {
@@ -332,6 +381,16 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelViewTransform,
         glm::mat4(modelViewTransform)
     );
+
+    glm::dmat4 crippedModelViewTransform = glm::transpose(glm::inverse(
+        glm::dmat4(glm::inverse(data.camera.sgctInternal.viewMatrix())) * modelViewTransform
+    ));
+
+    _program->setUniform(
+        _uniformCache.crippedModelViewTransform,
+        glm::mat4(crippedModelViewTransform)
+    );
+
     _program->setUniform(
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
@@ -361,7 +420,15 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _texture->bind();
     _program->setUniform(_uniformCache.texture, unit);
 
+    if (_disableFaceCulling) {
+        glDisable(GL_CULL_FACE);
+    }
+
     _geometry->render();
+    
+    if (_disableFaceCulling) {
+        glEnable(GL_CULL_FACE);
+    }
 
     _program->deactivate();
 }

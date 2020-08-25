@@ -1,17 +1,10 @@
+asset.require('./static_server')
+
 local guiCustomization = asset.require('customization/gui')
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "abf5fe23ef29af408d6c071057f1cc706c9b09a3"
-local backendHash = "6e773425b3e90ba93f0090e44427e474fe5c633f"
-
+local frontendHash = "e520f14d3fffc915b7b900f4fc6d888070f458c4"
 local dataProvider = "data.openspaceproject.com/files/webgui"
-
-local backend = asset.syncedResource({
-    Identifier = "WebGuiBackend",
-    Name = "Web Gui Backend",
-    Type = "UrlSynchronization",
-    Url = dataProvider .. "/backend/" ..  backendHash .. "/backend.zip"
-})
 
 local frontend = asset.syncedResource({
     Identifier = "WebGuiFrontend",
@@ -27,23 +20,22 @@ asset.onInitialize(function ()
         openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
     end
 
-    -- Unzip the frontend bundle
-    dest = backend .. "/backend"
-    if not openspace.directoryExists(dest) then
-        openspace.unzipFile(backend .. "/backend.zip", dest, true)
-    end
+    -- Disable the server, add production gui endpoint, and restart server.
+    -- The temporary disabling avoids restarting the server on each property change.
+    -- TODO: Add a trigger property to the module to restart the server "manually"
+    -- and remove automatic restart on each property change,
+    -- since frequent restarting seems to be unstable on mac.
 
-    -- Do not serve the files if we are in webgui development mode.
-    -- In that case, you have to serve the webgui manually, using `npm start`.
-    if not guiCustomization.webguiDevelopmentMode then
-        openspace.setPropertyValueSingle(
-            "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend/backend.js"
-        )
-        openspace.setPropertyValueSingle(
-            "Modules.WebGui.WebDirectory", frontend .. "/frontend"
-        )
-        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
-    end
+    local enabled = openspace.getPropertyValue("Modules.WebGui.ServerProcessEnabled")
+    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
+
+    local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+    directories[#directories + 1] = "frontend"
+    directories[#directories + 1] = frontend .. '/frontend'
+
+    openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
+    openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
+    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
 
     -- The GUI contains date and simulation increment,
     -- so let's remove these from the dashboard.
@@ -54,5 +46,49 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
+    -- Remove the frontend endpoint
+    local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+    local newDirectories = {};
+
+    -- @TODO(maci, 2019-08-23) see message below
+    --openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
+
+    for i = 0, #directories, 2 do
+        -- @TODO(abock, 2019-08-20) The explicit check for directories[i] is a workaround
+        -- for an error that was otherwise thrown when directories[i] was nil
+        if (directories[i] and string.find(directories[i], "frontend") == nil) then
+            newDirectories[#newDirectories + 1] = directories[i]
+            newDirectories[#newDirectories + 1] = directories[i + 1]
+        end
+    end
+    -- @TODO(maci, 2019-08-23) setting this value on exit was causing the server to restart
+    -- on macos, which in turn, stopped the application from exiting. 
+    -- need to address in webguimodule.cpp
+    --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
+
+function setCefRoute(route)
+    local port = 4680
+    -- As a developer, you can manually serve the webgui from port 4690
+    -- with the command `npm start` in the web gui repository
+    if guiCustomization.webguiDevelopmentMode then
+        port = 4690
+    end
+    openspace.setPropertyValueSingle(
+        "Modules.CefWebGui.GuiUrl",
+        "http://127.0.0.1:" .. port .. "/frontend/#/" .. route
+    )
+end
+
+
+asset.export("setCefRoute", setCefRoute)
+
+
+asset.meta = {
+    Name = "WebGUI",
+    Version = "0.1",
+    Description = [[ insert CEF rant ]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,10 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/util/time.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <openspace/util/time.h>
 
 namespace openspace {
 
@@ -77,10 +79,6 @@ public:
      */
     static documentation::Documentation Documentation();
 
-protected:
-    /// Default construct that initializes all the properties and member variables
-    KeplerTranslation();
-
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
      * the form YYYY MM DD HH:mm:ss.
@@ -123,10 +121,13 @@ protected:
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
 
-private:
+    /// Default construct that initializes all the properties and member variables
+    KeplerTranslation();
+
     /// Recombutes the rotation matrix used in the update method
     void computeOrbitPlane() const;
 
+private:
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
      * eccentricity into acount) based on the mean anomaly (location of the space craft
@@ -159,10 +160,10 @@ private:
     /// Dirty flag for the _orbitPlaneRotation parameters
     mutable bool _orbitPlaneDirty = true;
     /// The rotation matrix that defines the plane of the orbit
-    mutable glm::dmat3 _orbitPlaneRotation;
+    mutable glm::dmat3 _orbitPlaneRotation = glm::dmat3(1.0);
 
     /// The cached position for the last time with which the update method was called
-    glm::dvec3 _position;
+    glm::dvec3 _position = glm::dvec3(0.0);
 };
 
 } // namespace openspace

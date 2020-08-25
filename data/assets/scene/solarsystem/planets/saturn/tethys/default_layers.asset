@@ -1,0 +1,13 @@
+local layerHelper = asset.require('util/layer_helper')
+local globeAsset = asset.require('./tethys')
+local globeIdentifier = globeAsset.Tethys.Identifier
+
+-- set enabled and fallback layers
+local defaultLayers = asset.require('./layers/default_layers')
+
+local colorLayer = asset.require('./layers/colorlayers/tethys_texture').layer
+colorLayer.Enabled = true
+
+asset.onInitialize(function ()
+    layerHelper.addLayersToGlobe(globeIdentifier, defaultLayers)
+end)

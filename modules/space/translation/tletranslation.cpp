@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -145,9 +145,7 @@ namespace {
 
         // The main overview of this function:
         // 1. Reconstruct the full year from the YY part
-        // 2. Calculate the number of seconds since the beginning of the year
-        // 2.a Get the number of full days since the beginning of the year
-        // 2.b If the year is a leap year, modify the number of days
+        // 2. Calculate the number of days since the beginning of the year
         // 3. Convert the number of days to a number of seconds
         // 4. Get the number of leap seconds since January 1st, 2000 and remove them
         // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
@@ -168,20 +166,7 @@ namespace {
         const int daysSince2000 = countDays(year);
 
         // 2.
-        // 2.a
         double daysInYear = std::atof(epochString.substr(2).c_str());
-
-        // 2.b
-        const bool isInLeapYear = std::find(
-            LeapYears.begin(),
-            LeapYears.end(),
-            year
-        ) != LeapYears.end();
-        if (isInLeapYear && daysInYear >= 60) {
-            // We are in a leap year, so we have an effective day more if we are
-            // beyond the end of february (= 31+29 days)
-            --daysInYear;
-        }
 
         // 3
         using namespace std::chrono;
@@ -319,7 +304,8 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
         //    13   65-68   Element set  number.Incremented when a new TLE is generated
         //    14   69-69   Checksum (modulo 10)
         keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
-    } else {
+    }
+    else {
         throw ghoul::RuntimeError(fmt::format(
             "File {} @ line {} does not have '1' header", filename, lineNum + 1
         ));
@@ -371,7 +357,8 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
         // Get mean motion
         stream.str(line.substr(52, 11));
         stream >> keplerElements.meanMotion;
-    } else {
+    }
+    else {
         throw ghoul::RuntimeError(fmt::format(
             "File {} @ line {} does not have '2' header", filename, lineNum + 2
         ));

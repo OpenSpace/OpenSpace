@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,22 +67,17 @@ public:
      * \pre javascriptFilename must not be empty
      */
     DocumentationGenerator(std::string name, std::string jsonName,
-        std::vector<HandlebarTemplate> handlebarTemplates,
-        std::string javascriptFilename);
+        std::vector<HandlebarTemplate> handlebarTemplates);
 
     /// Default constructor
     virtual ~DocumentationGenerator() = default;
 
-    /**
-     * Create the documentation into the provided filename. Any existing file will be
-     * silently overwritten. This method will call the generateJson method that can be
-     * used by concrete subclasses to provide the actual data that is provided in the
-     * documentation.
-     * \param filename The filename in which the documentation is written
-     */
-    void writeDocumentation(const std::string& filename);
+    //getter for handlebar templates
+    std::vector<HandlebarTemplate> templatesToRegister();
 
-protected:
+    //getter for identifier
+    std::string jsonName();
+
     /**
      * This abstract method is used by concrete subclasses to provide the actual data that
      * is used in the documentation written by this DocumentationGenerator class. The JSON
@@ -97,7 +92,6 @@ private:
     const std::string _name;
     const std::string _jsonName;
     const std::vector<HandlebarTemplate> _handlebarTemplates;
-    const std::string _javascriptFile;
 };
 
 /**

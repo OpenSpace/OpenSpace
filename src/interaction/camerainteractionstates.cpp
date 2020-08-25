@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/inputdevicestates.h>
+#include <openspace/interaction/camerainteractionstates.h>
 
 #include <openspace/interaction/inputstate.h>
 
@@ -76,6 +76,14 @@ void CameraInteractionStates::setVelocityScaleFactor(double scaleFactor) {
     _truckMovementState.setVelocityScaleFactor(scaleFactor);
     _localRollState.setVelocityScaleFactor(scaleFactor);
     _globalRollState.setVelocityScaleFactor(scaleFactor);
+}
+
+void CameraInteractionStates::resetVelocities() {
+    _globalRotationState.velocity.setHard({ 0.0, 0.0 });
+    _localRotationState.velocity.setHard({ 0.0, 0.0 });
+    _truckMovementState.velocity.setHard({ 0.0, 0.0 });
+    _localRollState.velocity.setHard({ 0.0, 0.0 });
+    _globalRollState.velocity.setHard({ 0.0, 0.0 });
 }
 
 glm::dvec2 CameraInteractionStates::globalRotationVelocity() const{

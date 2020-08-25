@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,8 @@
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 
 namespace {
     constexpr const char* PropertyKey = "property";
@@ -40,22 +42,19 @@ namespace openspace {
 void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
-
-        properties::Property* prop = property(propertyKey);
-        if (prop) {
-            LDEBUG("Triggering " + propertyKey);
-            prop->set("poke");
-        }
-        else {
-            LWARNING("Could not find property " + propertyKey);
-        }
+        global::scriptEngine.queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
     catch (const std::out_of_range& e) {
-        LERROR("Could not poke property -- key or value is missing in payload");
+        LERROR("Could not trigger property -- key or value is missing in payload");
         LERROR(e.what());
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR("Could not poke property -- runtime error:");
+        LERROR("Could not trigger property -- runtime error:");
         LERROR(e.what());
     }
 }

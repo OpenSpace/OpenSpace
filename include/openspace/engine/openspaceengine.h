@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
+#include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
 #include <memory>
 #include <string>
@@ -74,14 +76,17 @@ public:
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
+    void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
-    void externalControlCallback(const char* receivedChars, int size, int clientId);
-    std::vector<char> encode();
-    void decode(std::vector<char> data);
+    void touchDetectionCallback(TouchInput input);
+    void touchUpdateCallback(TouchInput input);
+    void touchExitCallback(TouchInput input);
+    std::vector<std::byte> encode();
+    void decode(std::vector<std::byte> data);
 
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
@@ -105,13 +110,22 @@ private:
 
     void runGlobalCustomizationScripts();
     void configureLogging();
+    std::string generateFilePath(std::string openspaceRelativePath);
+    void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
+    bool _shouldAbortLoading = false;
     std::unique_ptr<LoadingScreen> _loadingScreen;
+    std::unique_ptr<VersionChecker> _versionChecker;
 
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
+
+    glm::vec2 _mousePosition;
+
+    //grabs json from each module to pass to the documentation engine.
+    std::string _documentationJson;
 
     ShutdownInformation _shutdown;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -107,12 +107,15 @@ IswaManager::IswaManager()
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
-    global::downloadManager.fetchFile(
-        "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
-        [this](const DownloadManager::MemoryFile& file) {
-            fillCygnetInfo(std::string(file.buffer));
-        }
-    );
+    // @TODO (abock, 2019-09-17): I commented this out as the webpage has been down for a
+    // while and would probably not work anymore either way
+
+    // global::downloadManager.fetchFile(
+    //     "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
+    //     [this](const DownloadManager::MemoryFile& file) {
+    //         fillCygnetInfo(std::string(file.buffer));
+    //     }
+    // );
 }
 
 IswaManager::~IswaManager() {
@@ -144,7 +147,8 @@ IswaManager& IswaManager::ref() {
 void IswaManager::addIswaCygnet(int id, const std::string& type, std::string group) {
     if (id > 0) {
         createScreenSpace(id);
-    } else if (id < 0) {
+    }
+    else if (id < 0) {
         // create metadata object and assign group and id
         MetadataFuture metaFuture;
         metaFuture.id = id;
@@ -153,9 +157,11 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
         // Assign type of cygnet Texture/Data
         if (type == _type[CygnetType::Texture]) {
             metaFuture.type = CygnetType::Texture;
-        } else if (type  == _type[CygnetType::Data]) {
+        }
+        else if (type  == _type[CygnetType::Data]) {
             metaFuture.type = CygnetType::Data;
-        } else {
+        }
+        else {
             LERROR("\""+ type + "\" is not a valid type");
             return;
         }
@@ -175,7 +181,8 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
                 if (j["Coordinate Type"].is_null()) {
                     metaFuture.geom = CygnetGeometry::Sphere;
                     createSphere(metaFuture);
-                } else if (j["Coordinate Type"] == "Cartesian") {
+                }
+                else if (j["Coordinate Type"] == "Cartesian") {
                     metaFuture.geom = CygnetGeometry::Plane;
                     createPlane(metaFuture);
                 }
@@ -255,7 +262,8 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     std::string url;
     if (id < 0) {
         url = _baseUrl + type + "/" + std::to_string(-id) + "/";
-    } else {
+    }
+    else {
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?"
               "window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }
@@ -289,18 +297,21 @@ void IswaManager::registerGroup(std::string groupName, std::string type) {
                 std::move(groupName),
                 std::move(type)
             );
-        } else if (kameleonGroup) {
+        }
+        else if (kameleonGroup) {
             _groups[groupName] = std::make_shared<IswaKameleonGroup>(
                 std::move(groupName),
                 std::move(type)
             );
-        } else {
+        }
+        else {
             _groups[groupName] = std::make_shared<IswaBaseGroup>(
                 std::move(groupName),
                 std::move(type)
             );
         }
-    } else if (!_groups[groupName]->isType(type)) {
+    }
+    else if (!_groups[groupName]->isType(type)) {
         LWARNING("Can't add cygnet to groups with diffent type");
     }
 }
@@ -405,15 +416,15 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
     if (extension == "cdf") {
         KameleonWrapper kw = KameleonWrapper(absPath(info.path));
 
-        std::string parent  = kw.parent();
-        std::string frame   = kw.frame();
-        glm::vec3   min     = kw.gridMin();
-        glm::vec3   max     = kw.gridMax();
+        std::string parent = kw.parent();
+        std::string frame = kw.frame();
+        glm::vec3 min = kw.gridMin();
+        glm::vec3 max = kw.gridMax();
 
 
         std::array<std::string, 3> gridUnits = kw.gridUnits();
 
-        glm::vec4 spatialScale;
+        glm::vec4 spatialScale = glm::vec4(0.f);
         std::string coordinateType;
         if (gridUnits[0] == "R" && gridUnits[1] == "R" && gridUnits[2] == "R") {
             spatialScale.x = 6.371f;
@@ -422,7 +433,8 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
             spatialScale.w = 6;
 
             coordinateType = "Cartesian";
-        } else {
+        }
+        else {
             spatialScale = glm::vec4(1.f);
             spatialScale.w = 1; //-log10(1.0f/max.x);
             coordinateType = "Polar";
@@ -511,7 +523,8 @@ void IswaManager::createPlane(MetadataFuture& data) {
         std::string type;
         if (data.type == CygnetType::Data) {
             type = typeid(DataPlane).name();
-        } else {
+        }
+        else {
             type = typeid(TexturePlane).name();
         }
 
@@ -520,7 +533,8 @@ void IswaManager::createPlane(MetadataFuture& data) {
         auto it = _groups.find(data.group);
         if (it == _groups.end() || (*it).second->isType(type)) {
             name = data.group + "_" + name;
-        } else {
+        }
+        else {
             data.group = "";
         }
     }
@@ -546,14 +560,15 @@ void IswaManager::createSphere(MetadataFuture& data) {
     // check if this sphere already exist
     std::string name = _type[data.type] + _geom[data.geom] + std::to_string(data.id);
 
-    if(!data.group.empty()){
+    if (!data.group.empty()){
         std::string type = typeid(DataSphere).name();
         registerGroup(data.group, type);
 
         auto it = _groups.find(data.group);
         if (it == _groups.end() || (*it).second->isType(type)) {
             name = data.group + "_" + name;
-        } else {
+        }
+        else {
             data.group = "";
         }
     }
@@ -586,7 +601,8 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
             auto it = _groups.find(info.group);
             if (it == _groups.end() || (*it).second->isType(type)) {
                 info.name = info.group + "_" + info.name;
-            } else {
+            }
+            else {
                 info.group = "";
             }
         }
@@ -606,7 +622,8 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
-    } else {
+    }
+    else {
         LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
     }
 }
@@ -645,7 +662,8 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
-    } else {
+    }
+    else {
         LWARNING( cdfPath + " is not a cdf file or can't be found.");
     }
 }
@@ -725,7 +743,8 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
             jsonFile.close();
         }
-    } else {
+    }
+    else {
         LWARNING(cdfpath + " is not a cdf file or can't be found.");
     }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,11 +28,15 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include <fstream>
 
 namespace {
-    constexpr const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";
-    constexpr const char* DocumentationTemplateFilename =
-                                                 "${WEB}/documentation/documentation.hbs";
+    constexpr const char* HandlebarsFilename =
+        "${WEB}/documentation/handlebars-v4.0.5.js";
+    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr const char* CssFilename = "${WEB}/documentation/style.css";
     constexpr const char* JsFilename = "${WEB}/documentation/script.js";
 } // namespace
 
@@ -41,24 +45,22 @@ namespace openspace::documentation {
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
-                    Documentation doc)
+                                                              Documentation documentation)
     : ghoul::RuntimeError(fmt::format(
         "Duplicate Documentation with name '{}' and id '{}'",
-        doc.name,
-        doc.id
+        documentation.name,
+        documentation.id
     ))
-    , documentation(std::move(doc))
+    , documentation(std::move(documentation))
 {}
 
 DocumentationEngine::DocumentationEngine()
     : DocumentationGenerator(
-        "Documentation",
-        "documentation",
+        "Top Level",
+        "toplevel",
         {
-            { "mainTemplate", MainTemplateFilename },
-            { "documentationTemplate", DocumentationTemplateFilename }
-        },
-        JsFilename
+            { "toplevelTemplate", "${WEB}/documentation/toplevel.hbs" },
+        }
     )
 {}
 
@@ -83,69 +85,6 @@ DocumentationEngine& DocumentationEngine::ref() {
         registerCoreClasses(*_instance);
     }
     return *_instance;
-}
-
-std::string generateTextDocumentation(const Documentation& d, int& indentLevel) {
-    auto indentMessage = [&indentLevel](const std::string& prefix, const std::string& msg)
-    {
-        if (msg.empty()) {
-            return std::string();
-        }
-        else {
-            return std::string(indentLevel, '\t') + prefix + ": " + msg + '\n';
-        }
-    };
-    std::string result;
-
-    result += indentMessage("Name", d.name);
-    if (!d.name.empty()) {
-        ++indentLevel;
-    }
-    for (const DocumentationEntry& p : d.entries) {
-        result += indentMessage("Key", (p.key == "*") ? p.key : "\"" + p.key + "\"");
-        result += indentMessage("Optional", (p.optional ? "true" : "false"));
-        result += indentMessage("Type", p.verifier->type());
-        result += indentMessage("Documentation", p.documentation);
-        TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
-        ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
-
-        // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
-        // TableVerifier
-        if (rv) {
-            const std::vector<Documentation>& documentations = DocEng.documentations();
-            auto it = std::find_if(
-                documentations.begin(),
-                documentations.end(),
-                [rv](const Documentation& doc) { return doc.id == rv->identifier; }
-            );
-
-            if (it == documentations.end()) {
-                result += indentMessage("Referencing", rv->identifier + "(NOT FOUND)");
-            }
-            else {
-                result += indentMessage("Referencing", it->name);
-            }
-        } else if (tv) {
-            // We have a TableVerifier, so we need to recurse
-            ++indentLevel;
-            result += generateTextDocumentation(
-                { "", "", tv->documentations },
-                indentLevel
-            );
-            result = result.substr(0, result.size() - 2);
-            --indentLevel;
-        }
-        else {
-            result += indentMessage("Restrictions", p.verifier->documentation());
-        }
-        result += indentMessage("Documentation", p.documentation);
-        result += "\n\n";
-    }
-    if (!d.name.empty()) {
-        --indentLevel;
-    }
-
-    return result;
 }
 
 std::string generateJsonDocumentation(const Documentation& d) {
@@ -174,7 +113,8 @@ std::string generateJsonDocumentation(const Documentation& d) {
 
             if (it == documentations.end()) {
                 result << R"("reference": { "found": false })";
-            } else {
+            }
+            else {
                 result << R"("reference": {)"
                     << R"("found": true,)"
                     << R"("name": ")" << it->name << "\","
@@ -201,77 +141,6 @@ std::string generateJsonDocumentation(const Documentation& d) {
     result << '}';
 
     return result.str();
-}
-
-std::string generateHtmlDocumentation(const Documentation& d) {
-    std::stringstream html;
-
-    html << "\t<tr>\n"
-         << "\t\t<td colspan=6>" << d.name << "<a name=\"" << d.id << "\"></a></td>\n";
-
-    for (const DocumentationEntry& p : d.entries) {
-        html << "\t<tr>\n"
-             << "\t\t<td></td>\n"
-             << "\t\t<td>" << p.key << "</td>\n"
-             << "\t\t<td>" << (p.optional ? "Optional" : "Required") << "</td>\n"
-             << "\t\t<td>" << escapedJson(p.documentation) << "</td>\n"
-             << "\t\t<td>" << p.verifier->type() << "</td>\n";
-
-        TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
-        ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
-
-        // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
-        // TableVerifier
-        if (rv) {
-            const std::vector<Documentation>& documentations = DocEng.documentations();
-            auto it = std::find_if(
-                documentations.begin(),
-                documentations.end(),
-                [rv](const Documentation& doc) { return doc.id == rv->identifier; }
-            );
-
-            if (it == documentations.end()) {
-                html << "\t\t<td>"
-                     << "<font color=\"red\">"
-                     << "Could not find identifier: " << rv->identifier
-                     << "</font>"
-                     << "</td>";
-            }
-            else {
-                html << "\t\t<td>"
-                     << "\t\t\tReferencing: "
-                     << "<a href=\"#" << rv->identifier << "\">" << it->name << "</a>"
-                     << "\t\t</td>";
-            }
-        }
-        else if (tv) {
-            // We have a TableVerifier, so we need to recurse
-            html << "<td><table>\n"
-                 << "\t<thead>\n"
-                 << "\t\t<tr>\n"
-                 << "\t\t\t<th></th>\n"
-                 << "\t\t\t<th>Key</th>\n"
-                 << "\t\t\t<th>Optional</th>\n"
-                 << "\t\t\t<th>Type</th>\n"
-                 << "\t\t\t<th>Restrictions</th>\n"
-                 << "\t\t\t<th>Documentation</th>\n"
-                 << "\t\t</tr>\n"
-                 << "\t</thead>\n"
-                 << "\t<tbody>\n"
-                 << generateHtmlDocumentation({ "", "", tv->documentations })
-                 << "\t</tbody>\n"
-                 << "</table>\n"
-                 << "</td>\n";
-        }
-        else {
-            html << "\t\t<td>" << p.verifier->documentation() << "</td>\n";
-        }
-        html << "\t\t<td>" << p.documentation << "</td>\n"
-             << "\t</tr>\n";
-
-    }
-
-    return html.str();
 }
 
 std::string DocumentationEngine::generateJson() const {
@@ -310,8 +179,140 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
     }
 }
 
+void DocumentationEngine::addHandlebarTemplates(std::vector<HandlebarTemplate> templates)
+{
+    _handlebarTemplates.insert(
+        std::end(_handlebarTemplates),
+        std::begin(templates), std::end(templates)
+    );
+}
+
 std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
+
+void DocumentationEngine::writeDocumentationHtml(const std::string& path,
+                                                 std::string data)
+{
+    std::ifstream handlebarsInput;
+    handlebarsInput.exceptions(~std::ofstream::goodbit);
+    handlebarsInput.open(absPath(HandlebarsFilename));
+    const std::string handlebarsContent = std::string(
+        std::istreambuf_iterator<char>(handlebarsInput),
+        std::istreambuf_iterator<char>()
+    );
+    std::ifstream jsInput;
+    jsInput.exceptions(~std::ofstream::goodbit);
+    jsInput.open(absPath(JsFilename));
+    const std::string jsContent = std::string(
+        std::istreambuf_iterator<char>(jsInput),
+        std::istreambuf_iterator<char>()
+    );
+
+    std::ifstream bootstrapInput;
+    bootstrapInput.exceptions(~std::ofstream::goodbit);
+    bootstrapInput.open(absPath(BootstrapFilename));
+    const std::string bootstrapContent = std::string(
+        std::istreambuf_iterator<char>(bootstrapInput),
+        std::istreambuf_iterator<char>()
+    );
+
+    std::ifstream cssInput;
+    cssInput.exceptions(~std::ofstream::goodbit);
+    cssInput.open(absPath(CssFilename));
+    const std::string cssContent = std::string(
+        std::istreambuf_iterator<char>(cssInput),
+        std::istreambuf_iterator<char>()
+    );
+
+    std::string filename = path + ("index.html");
+    std::ofstream file;
+    file.exceptions(~std::ofstream::goodbit);
+    file.open(filename);
+
+    // We probably should escape backslashes here?
+    file << "<!DOCTYPE html>" << '\n'
+        << "<html>" << '\n'
+        << "  " << "<head>" << '\n';
+
+    //write handlebar templates to htmlpage as script elements (as per hb)
+    for (const HandlebarTemplate& t : _handlebarTemplates) {
+        const char* Type = "text/x-handlebars-template";
+        file << "    <script id=\"" << t.name << "\" type=\"" << Type << "\">";
+        file << '\n';
+
+        std::ifstream templateFilename(absPath(t.filename));
+        std::string templateContent(
+            std::istreambuf_iterator<char>{templateFilename},
+            std::istreambuf_iterator<char>{}
+        );
+        file << templateContent << "\n    </script>" << '\n';
+    }
+
+    //write main template
+    file << "    <script id=\"mainTemplate\" type=\"text/x-handlebars-template\">";
+    file << '\n';
+    std::ifstream templateFilename(absPath("${WEB}/documentation/main.hbs"));
+    std::string templateContent(
+        std::istreambuf_iterator<char>{templateFilename},
+        std::istreambuf_iterator<char>{}
+    );
+    file << templateContent << "    </script>" << '\n';
+
+    //write scripte to register templates dynamically
+    file << "    <script type=\"text/javascript\">" << '\n';
+    file << "      templates = [];" << '\n';
+    file << "      registerTemplates = function() {" << '\n';
+
+    for (const HandlebarTemplate& t : _handlebarTemplates) {
+        std::string nameOnly = t.name.substr(0, t.name.length() - 8); //-8 for Template
+        file << "\t\t\t\tvar " << t.name;
+        file << "Element = document.getElementById('" << t.name << "');" << '\n';
+
+        file << "\t\t\t\tHandlebars.registerPartial('" << nameOnly << "', ";
+        file << t.name << "Element.innerHTML);" << '\n';
+
+        file << "\t\t\t\ttemplates['" << nameOnly << "'] = Handlebars.compile(";
+        file << t.name << "Element.innerHTML);" << '\n';
+    }
+    file << "\t\t\t}" << '\n';
+    file << "\t\t</script>" << '\n';
+
+
+    const std::string DataId = "data";
+
+    const std::string Version =
+        "[" +
+        std::to_string(OPENSPACE_VERSION_MAJOR) + "," +
+        std::to_string(OPENSPACE_VERSION_MINOR) + "," +
+        std::to_string(OPENSPACE_VERSION_PATCH) +
+        "]";
+
+    file
+        << "    " << "<script id=\"" << DataId
+        << "\" type=\"text/application/json\">" << '\n'
+        << "      " << std::move(data) << '\n'
+        << "    " << "</script>" << '\n';
+
+
+    file
+        << "  " << "<script>" << '\n'
+        << "    " << jsContent << '\n'
+        << "    " << "var documentation = parseJson('" << DataId << "').documentation;\n"
+        << "    " << "var version = " << Version << ";" << '\n'
+        << "    " << "var currentDocumentation = documentation[0];" << '\n'
+        << "    " << handlebarsContent << '\n'
+        << "  " << "</script>" << '\n'
+        << "  " << "<style type=\"text/css\">" << '\n'
+        << "    " << cssContent << '\n'
+        << "    " << bootstrapContent << '\n'
+        << "  " << "</style>" << '\n'
+        << "    " << "<title>OpenSpace Documentation</title>" << '\n'
+        << "  " << "</head>" << '\n'
+        << "  " << "<body>" << '\n'
+        << "  " << "</body>" << '\n'
+        << "</html>" << '\n';
+}
+
 
 } // namespace openspace::documentation

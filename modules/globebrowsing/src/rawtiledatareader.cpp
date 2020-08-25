@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -394,7 +394,8 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
     return region;
 }
 
-RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile, size_t nRasters,
+RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile,
+                                         [[ maybe_unused ]] size_t nRasters,
                                          float noDataValue)
 {
     // This check was implicit before and just made explicit here
@@ -445,14 +446,21 @@ void RawTileDataReader::initialize() {
     GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
 
     std::string content = _datasetFilePath;
-    if (module.isCachingEnabled() && FileSys.fileExists(_datasetFilePath)) {
-        // Only replace the 'content' if the dataset is an XML file and we want to do
-        // caching
-        std::ifstream t(_datasetFilePath);
-        std::string c(
-            (std::istreambuf_iterator<char>(t)),
-            std::istreambuf_iterator<char>()
-        );
+    if (module.isWMSCachingEnabled()) {
+        std::string c;
+        if (FileSys.fileExists(_datasetFilePath)) {
+            // Only replace the 'content' if the dataset is an XML file and we want to do
+            // caching
+            std::ifstream t(_datasetFilePath);
+            c.append(
+                (std::istreambuf_iterator<char>(t)),
+                std::istreambuf_iterator<char>()
+            );
+        }
+        else {
+            //GDAL input case for configuration string (e.g. temporal data)
+            c = _datasetFilePath;
+        }
 
         if (c.size() > 10 && c.substr(0, 10) == "<GDAL_WMS>") {
             // We know that _datasetFilePath is an XML file, so now we add a Cache line
@@ -476,14 +484,14 @@ void RawTileDataReader::initialize() {
                 CPLCreateXMLElementAndValue(
                     cache,
                     "Path",
-                    absPath(module.cacheLocation()).c_str()
+                    absPath(module.wmsCacheLocation()).c_str()
                 );
                 CPLCreateXMLElementAndValue(cache, "Depth", "4");
                 CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years
                 CPLCreateXMLElementAndValue(
                     cache,
                     "MaxSize",
-                    std::to_string(module.cacheSize()).c_str()
+                    std::to_string(module.wmsCacheSize()).c_str()
                 );
 
                 // The serialization only needs to be one if the cache didn't exist
@@ -556,7 +564,7 @@ void RawTileDataReader::initialize() {
     const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
     _maxChunkLevel = static_cast<int>(-tileLevelDifference);
     if (numOverviews > 0) {
-        _maxChunkLevel += numOverviews - 1;
+        _maxChunkLevel += numOverviews;
     }
     _maxChunkLevel = std::max(_maxChunkLevel, 2);
 }

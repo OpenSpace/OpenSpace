@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,12 @@ struct KeyframeBase {
 */
 template <typename T>
 struct Keyframe : public KeyframeBase {
-    Keyframe(size_t i, double t, T p);
+    Keyframe(size_t i, double t, T d);
+
+    Keyframe(Keyframe const&) = default;
+    Keyframe(Keyframe&&) = default;
+    Keyframe& operator=(Keyframe&&) = default;
+    Keyframe& operator=(Keyframe const&) = default;
     T data;
 };
 
@@ -56,7 +61,8 @@ class Timeline {
 public:
     virtual ~Timeline() = default;
 
-    void addKeyframe(double time, T data);
+    void addKeyframe(double time, const T& data);
+    void addKeyframe(double time, T&& data);
     void clearKeyframes();
     void removeKeyframe(size_t id);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
@@ -66,6 +72,7 @@ public:
     size_t nKeyframes() const;
     const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
     const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
+
     const std::deque<Keyframe<T>>& keyframes() const;
 
 private:

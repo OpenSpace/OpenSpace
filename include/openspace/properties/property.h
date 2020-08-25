@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -153,7 +153,7 @@ public:
      * \return The value that is encapsulated by this Property, or an empty ghoul::any
      *         object if the method was not overritten.
      */
-    virtual ghoul::any get() const;
+    virtual std::any get() const;
 
     /**
      * Sets the value encapsulated by this Property to the \p value passed to this
@@ -164,7 +164,7 @@ public:
      *
      * \param value The new value that should be stored in this Property
      */
-    virtual void set(ghoul::any value);
+    virtual void set(std::any value);
 
     /**
      * This method returns the type that is requested by this Property for the set method.
@@ -395,9 +395,7 @@ public:
     /**
     * Default view options that can be used in the Property::setViewOption method. The
     * values are: Property::ViewOptions::Color = \c color,
-    * Property::ViewOptions::LightPosition = \c lightPosition,
-    * Property::ViewOptions::PowerScaledScalar = \c powerScaledScalar, and
-    * Property::ViewOptions::PowerScaledCoordinate = \c powerScaledCoordinate.
+    * Property::ViewOptions::LightPosition = \c lightPosition
     */
     struct ViewOptions {
         static const char* Color;
@@ -455,7 +453,7 @@ public:
     virtual std::string jsonValue() const;
 
     /// Interpolation methods
-    virtual void setInterpolationTarget(ghoul::any value);
+    virtual void setInterpolationTarget(std::any value);
     virtual void setLuaInterpolationTarget(lua_State* state);
     virtual void setStringInterpolationTarget(std::string value);
 
@@ -497,6 +495,18 @@ public:
      */
     virtual std::string generateAdditionalJsonDescription() const;
 
+    /**
+     * Returns whether or not the property value has changed.
+     *
+     * \return true if the property has changed
+     */
+    bool hasChanged() const;
+
+    /**
+     * Reset the valChanged flag to an unchanged state, as if value has not been changed.
+     */
+    void resetToUnchanged();
+
 protected:
     static const char* IdentifierKey;
     static const char* NameKey;
@@ -532,6 +542,9 @@ protected:
 
     /// The callback function sthat will be invoked whenever the value changes
     std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
+
+    /// Flag indicating that this property value has been changed after initialization
+    bool _isValueDirty = false;
 
 private:
     void notifyDeleteListeners();

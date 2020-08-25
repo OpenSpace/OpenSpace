@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -269,12 +269,6 @@ int downloadFile(lua_State* L) {
 int isMaster(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isMaster");
     ghoul::lua::push(L, global::windowDelegate.isMaster());
-    return 1;
-}
-
-int clusterId(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clusterId");
-    ghoul::lua::push(L, global::windowDelegate.clusterId());
     return 1;
 }
 

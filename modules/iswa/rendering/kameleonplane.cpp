@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -131,7 +131,8 @@ void KameleonPlane::initializeGL() {
     if (_group) {
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
-    } else {
+    }
+    else {
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
 
         //If autofiler is on, background values property should be hidden
@@ -143,7 +144,8 @@ void KameleonPlane::initializeGL() {
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
-            } else {
+            }
+            else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
                 //_backgroundValues.setVisible(true);
             }
@@ -286,7 +288,8 @@ void KameleonPlane::updateFieldlineSeeds() {
             );
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
-        } else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
+        }
+        else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
             SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
@@ -377,9 +380,11 @@ void KameleonPlane::setDimensions() {
 
     if (_cut == Cut::X) {
         _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
-    } else if (_cut == Cut::Y) {
+    }
+    else if (_cut == Cut::Y) {
         _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
-    } else {
+    }
+    else {
         _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
     }
 }

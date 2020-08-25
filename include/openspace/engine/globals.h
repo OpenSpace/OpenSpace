@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,9 +37,9 @@ class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
 class LuaConsole;
+class MemoryManager;
 class MissionManager;
 class ModuleEngine;
-class NetworkEngine;
 class OpenSpaceEngine;
 class ParallelPeer;
 class RaycasterManager;
@@ -47,22 +47,25 @@ class RenderEngine;
 class ScreenSpaceRenderable;
 class SyncEngine;
 class TimeManager;
+class VersionChecker;
 class VirtualPropertyManager;
 struct WindowDelegate;
 namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
+    struct WebsocketInputStates;
+    class InteractionMonitor;
     class KeybindingManager;
     class NavigationHandler;
     class SessionRecording;
     class ShortcutManager;
 } // namespace interaction
-namespace performance { class PerformanceManager; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
     class ScriptEngine;
     class ScriptScheduler;
 } // namespace scripting
+class Profile;
 
 namespace global {
 
@@ -73,9 +76,9 @@ Dashboard& gDashboard();
 DeferredcasterManager& gDeferredcasterManager();
 DownloadManager& gDownloadManager();
 LuaConsole& gLuaConsole();
+MemoryManager& gMemoryManager();
 MissionManager& gMissionManager();
 ModuleEngine& gModuleEngine();
-NetworkEngine& gNetworkEngine();
 OpenSpaceEngine& gOpenSpaceEngine();
 ParallelPeer& gParallelPeer();
 RaycasterManager& gRaycasterManager();
@@ -83,19 +86,22 @@ RenderEngine& gRenderEngine();
 std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables();
 SyncEngine& gSyncEngine();
 TimeManager& gTimeManager();
+VersionChecker& gVersionChecker();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
 configuration::Configuration& gConfiguration();
+interaction::InteractionMonitor& gInteractionMonitor();
 interaction::JoystickInputStates& gJoystickInputStates();
+interaction::WebsocketInputStates& gWebsocketInputStates();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 interaction::SessionRecording& gSessionRecording();
 interaction::ShortcutManager& gShortcutManager();
-performance::PerformanceManager& gPerformanceManager();
 properties::PropertyOwner& gRootPropertyOwner();
 properties::PropertyOwner& gScreenSpaceRootPropertyOwner();
 scripting::ScriptEngine& gScriptEngine();
 scripting::ScriptScheduler& gScriptScheduler();
+Profile& gProfile();
 
 } // namespace detail
 
@@ -104,9 +110,9 @@ static Dashboard& dashboard = detail::gDashboard();
 static DeferredcasterManager& deferredcasterManager = detail::gDeferredcasterManager();
 static DownloadManager& downloadManager = detail::gDownloadManager();
 static LuaConsole& luaConsole = detail::gLuaConsole();
+static MemoryManager& memoryManager = detail::gMemoryManager();
 static MissionManager& missionManager = detail::gMissionManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
-static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static OpenSpaceEngine& openSpaceEngine = detail::gOpenSpaceEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RaycasterManager& raycasterManager = detail::gRaycasterManager();
@@ -115,22 +121,26 @@ static std::vector<std::unique_ptr<ScreenSpaceRenderable>>& screenSpaceRenderabl
     detail::gScreenspaceRenderables();
 static SyncEngine& syncEngine = detail::gSyncEngine();
 static TimeManager& timeManager = detail::gTimeManager();
+static VersionChecker& versionChecker = detail::gVersionChecker();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static configuration::Configuration& configuration = detail::gConfiguration();
+static interaction::InteractionMonitor& interactionMonitor =
+    detail::gInteractionMonitor();
 static interaction::JoystickInputStates& joystickInputStates =
     detail::gJoystickInputStates();
+static interaction::WebsocketInputStates& websocketInputStates =
+    detail::gWebsocketInputStates();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();
 static interaction::ShortcutManager& shortcutManager = detail::gShortcutManager();
-static performance::PerformanceManager& performanceManager =
-    detail::gPerformanceManager();
 static properties::PropertyOwner& rootPropertyOwner = detail::gRootPropertyOwner();
 static properties::PropertyOwner& screenSpaceRootPropertyOwner =
     detail::gScreenSpaceRootPropertyOwner();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
+static Profile& profile = detail::gProfile();
 
 void initialize();
 void initializeGL();

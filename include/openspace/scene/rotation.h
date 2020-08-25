@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -40,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 class Rotation : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Rotation> createFromDictionary(
+    static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     Rotation(const ghoul::Dictionary& dictionary);
@@ -61,7 +62,7 @@ protected:
 private:
     bool _needsUpdate = true;
     double _cachedTime = -std::numeric_limits<double>::max();
-    glm::dmat3 _cachedMatrix;
+    glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
 };
 
 }  // namespace openspace

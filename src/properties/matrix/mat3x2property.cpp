@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 namespace {
 
 glm::mat3x2 fromLuaConversion(lua_State* state, bool& success) {
-    glm::mat3x2 result;
+    glm::mat3x2 result = glm::mat3x2(1.f);
     lua_pushnil(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat3x2>::value; ++i) {
@@ -41,12 +41,13 @@ glm::mat3x2 fromLuaConversion(lua_State* state, bool& success) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
-                return glm::mat3x2(0);
+                return glm::mat3x2(0.f);
             }
-             if (lua_isnumber(state, -1) != 1) {
+            if (lua_isnumber(state, -1) != 1) {
                 success = false;
-                return glm::mat3x2(0);
-            } else {
+                return glm::mat3x2(0.f);
+            }
+            else {
                 result[i][j]
                         = static_cast<glm::mat3x2::value_type>(lua_tonumber(state, -1));
                 lua_pop(state, 1);
@@ -55,7 +56,7 @@ glm::mat3x2 fromLuaConversion(lua_State* state, bool& success) {
         }
     }
     // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+    lua_pop(state, 1);
     success = true;
     return result;
 }
@@ -74,7 +75,7 @@ bool toLuaConversion(lua_State* state, glm::mat3x2 value) {
 }
 
 glm::mat3x2 fromStringConversion(const std::string& val, bool& success) {
-    glm::mat3x2 result;
+    glm::mat3x2 result = glm::mat3x2(1.f);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() !=
         (ghoul::glm_rows<glm::mat3x2>::value * ghoul::glm_cols<glm::mat3x2>::value))
@@ -123,7 +124,7 @@ using nl = std::numeric_limits<float>;
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Mat3x2Property,
     glm::mat3x2,
-    glm::mat3x2(0),
+    glm::mat3x2(1.f),
     glm::mat3x2(
         nl::lowest(), nl::lowest(), nl::lowest(),
         nl::lowest(), nl::lowest(), nl::lowest()

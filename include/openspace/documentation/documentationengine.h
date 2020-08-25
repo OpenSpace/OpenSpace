@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,6 +70,14 @@ public:
      */
     void addDocumentation(Documentation documentation);
 
+     /* Adds the \p templates to the list of templates that are written to the
+     * documentation html file.
+     * \param templates Vector of templates to add. Most of the time this list
+     * will just contain one item, but some modules may wish to provide
+     * multiple templates for subtypes, etc
+     */
+    void addHandlebarTemplates(std::vector<HandlebarTemplate> templates);
+
     /**
      * Returns a list of all registered Documentation%s.
      *
@@ -88,11 +96,25 @@ public:
      */
     static DocumentationEngine& ref();
 
-private:
+    /**
+    * Generates the documentation html file. Generated file will have embeded
+    * in it: HandlebarJS Templates (from _handlebarTemplates) and json (from
+    * \p data) along with the base template and js/css files from the source
+    * directory ${WEB}/documentation
+    * \param templates Vector of templates to add. Most of the time this list
+    * will just contain one item, but some modules may wish to provide
+    * multiple templates for subtypes, etc
+    */
+    void writeDocumentationHtml(const std::string& path, std::string data);
+
     std::string generateJson() const override;
+
+private:
 
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
+    /// The list of templates to render the documentation with.
+    std::vector<HandlebarTemplate> _handlebarTemplates;
 
     static DocumentationEngine* _instance;
 };

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -40,14 +40,14 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
 
 create_new_module(
-    "Spout"
-    spout_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "Spout"
+  spout_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 target_include_directories(openspace-module-spout SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-target_link_libraries(openspace-module-spout ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
+target_link_libraries(openspace-module-spout PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
 register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll")
 
 target_compile_definitions(openspace-module-spout PUBLIC "OPENSPACE_HAS_SPOUT")

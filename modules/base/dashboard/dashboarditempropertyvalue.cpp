@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/query/query.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -129,9 +129,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
     addProperty(_fontName);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
         _font = global::fontManager.font(_fontName, _fontSize);
@@ -141,9 +139,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
     if (dictionary.hasKey(PropertyUriInfo.identifier)) {
         _propertyUri = dictionary.value<std::string>(PropertyUriInfo.identifier);
     }
-    _propertyUri.onChange([this]() {
-        _propertyIsDirty = true;
-    });
+    _propertyUri.onChange([this]() { _propertyIsDirty = true; });
     addProperty(_propertyUri);
 
     if (dictionary.hasKey(DisplayStringInfo.identifier)) {
@@ -165,19 +161,12 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
         _property->getStringValue(value);
 
         penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(_displayString.value(), value)
-        );
+        RenderFont(*_font, penPosition, fmt::format(_displayString.value(), value));
     }
 }
 
 glm::vec2 DashboardItemPropertyValue::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        _displayString.value()
-    ).boundingBox;
+    return _font->boundingBox(_displayString.value());
 }
 
 } // namespace openspace

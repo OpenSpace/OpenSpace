@@ -23,20 +23,36 @@ local planeSpeck = asset.syncedResource({
     Version = 1
 })
 
+local homespeck = asset.syncedResource({
+    Name = "Home Speck File",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_home_speck",
+    Version = 1
+})
+
 local sphere = {
     Identifier = "MilkyWay",
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {0, 0, 3.14159265359}
+        }
+    },
     Renderable = {
         Type = "RenderableSphere",
-        Size = 9.2E20,
+        Size = 9.2E21,
         Segments = 40,
-        Opacity = 0.4,
+        Opacity = 0.35,
         Texture = sphereTextures .. "/DarkUniverse_mellinger_4k.jpg",
-        Orientation = "Inside/Outside",
-        FadeOutThreshould = 0.25
+        Orientation = "Inside",
+        UseAdditiveBlending = true,
+        MirrorTexture = true,
+        FadeOutThreshold = 0.0015,
+        Background = true
     },
     GUI = {
-        Name = "Milky Way",
-        Path = "/Milky Way/Milky Way"
+        Name = "Milky Way Sphere",
+        Path = "/Milky Way"
     }
 }
 
@@ -47,15 +63,14 @@ local plane = {
         Type = "RenderablePlanesCloud",
         Enabled = true,
         Color = { 1.0, 1.0, 1.0 },
-        Transparency = 0.90,
+        Opacity = 0.99,
         ScaleFactor = 2.8,
         File = planeSpeck .. "/galaxy.speck",
         TexturePath = planeTextures,
         Luminosity = "size",
         ScaleLuminosity = 1.0,
         -- Fade in value in the same unit as "Unit"
-        FadeInThreshould = 119441,
-        FadeInDistances = { 1400.0, 119441.0 },
+        FadeInDistances = { 3000.0, 50000.0 },
         PlaneMinSize = 5.0,
         Unit = "pc"
     },
@@ -65,6 +80,43 @@ local plane = {
     }
 }
 
+local homeLabel = {
+    Identifier = "HomeLabel",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 1.0, 0.4, 0.2 },
+        Opacity = 0.99,
+        ScaleFactor = 500.0,
+        --File = homespeck .. "/home.speck",
+        -- Texture = textures .. "/point3.png",
+        DrawLabels = true,
+        LabelFile = homespeck .. "/home.label",
+        TextColor = { 0.8, 0.8, 0.8 },
+        TextSize = 20.50,
+        TextMinSize = 16.0,
+        TransformationMatrix = {
+            -0.7357425748,    0.67726129641,  0.0,           0.0,
+            -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+            0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+            0.0,              0.0,            0.0,           1.0
+        },
+        Unit = "Mpc",
+        -- Fade in value in the same unit as "Unit"
+        FadeInDistances = { 0.05, 1.0 },
+        -- Max size in pixels
+        BillboardMaxSize = 8.22,
+        BillboardMinSize = 0.0,
+        --CorrectionSizeEndDistance = 22.0,
+        --CorrectionSizeFactor = 10.45
+        EnablePixelSizeControl = true
+    },
+    GUI = {
+        Name = "Home Label",
+        Path = "/Universe/Galaxies"
+    }
+}
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { sphere, plane })
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { sphere, plane, homeLabel })

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,27 +23,28 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+
 set(CEFWEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "CEFWEBGUI_MODULE_PATH")
 set(CEFWEBGUI_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/web CACHE INTERNAL "CEFWEBGUI_MODULE_PATH")
 
 set(OPENSPACE_HEADER_FILES
-    cefwebguimodule.h
-    include/guirenderhandler.h
-    include/guikeyboardhandler.h
-    )
+  cefwebguimodule.h
+  include/guirenderhandler.h
+  include/guikeyboardhandler.h
+)
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
-    cefwebguimodule.cpp
-    src/guirenderhandler.cpp
-    src/guikeyboardhandler.cpp
-    )
+  cefwebguimodule.cpp
+  src/guirenderhandler.cpp
+  src/guikeyboardhandler.cpp
+)
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
-    CefWebGui
-    cefwebgui_module
-    ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
+  CefWebGui
+  cefwebgui_module
+  ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )

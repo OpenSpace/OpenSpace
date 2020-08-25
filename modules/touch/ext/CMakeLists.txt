@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -44,9 +44,9 @@ set(TUIO_SOURCE
     ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/OscReceiver.cpp 
     ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/OneEuroFilter.cpp
     ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/FlashSender.cpp
-	
+    
     ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/IpEndpointName.cpp
-	
+    
     ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/osc/OscTypes.cpp
     ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/osc/OscReceivedElements.cpp
     ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/osc/OscPrintReceivedElements.cpp
@@ -58,7 +58,7 @@ if (WIN32)
         ${TUIO_SOURCE}
         ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/win32/NetworkingUtils.cpp
         ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/win32/UdpSocket.cpp
-	)
+    )
 endif ()
 
 if (UNIX)
@@ -76,3 +76,8 @@ target_include_directories(libTUIO11 PUBLIC
     ${PROJECT_SOURCE_DIR}/libTUIO11/
     ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack
     ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO)
+
+if (WIN32)
+    # Tuio dependencies
+    target_link_libraries(libTUIO11 PRIVATE winmm.lib wininet.lib ws2_32.lib)
+endif ()

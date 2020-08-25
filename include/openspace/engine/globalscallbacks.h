@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <functional>
 #include <vector>
 
@@ -49,9 +50,13 @@ std::vector<std::function<void()>>& gPostDraw();
 std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard();
 std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter();
 
-std::vector<std::function<bool(MouseButton, MouseAction)>>& gMouseButton();
+std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>& gMouseButton();
 std::vector<std::function<void(double, double)>>& gMousePosition();
 std::vector<std::function<bool(double, double)>>& gMouseScrollWheel();
+
+std::vector<std::function<bool(TouchInput)>>& gTouchDetected();
+std::vector<std::function<bool(TouchInput)>>& gTouchUpdated();
+std::vector<std::function<void(TouchInput)>>& gTouchExit();
 
 } // namespace detail
 
@@ -70,12 +75,29 @@ static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& keyboard =
     detail::gKeyboard();
 static std::vector<std::function<bool(unsigned int, KeyModifier)>>& character =
     detail::gCharacter();
-static std::vector<std::function<bool(MouseButton, MouseAction)>>& mouseButton =
-    detail::gMouseButton();
+static std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>&
+    mouseButton = detail::gMouseButton();
 static std::vector<std::function<void(double, double)>>& mousePosition =
     detail::gMousePosition();
 static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
     detail::gMouseScrollWheel();
+static std::vector<std::function<bool(TouchInput)>>& touchDetected =
+    detail::gTouchDetected();
+static std::vector<std::function<bool(TouchInput)>>& touchUpdated =
+    detail::gTouchUpdated();
+static std::vector<std::function<void(TouchInput)>>& touchExit =
+    detail::gTouchExit();
+
+/**
+ * If the framerate becomes slow, Chromium Embedded Framework (used in Web Browser Module)
+ * needs to perform its message loop work more frequently than once per frame. If this
+ * method is not called frequently enough, the GUI will become much less responsive.
+ * A future more long-term may decouple the browser's message work loop from the main
+ * render loop altogehter using a separate thread.
+ * Currently, this method is called from within the RenderEngine,
+ * between calls to individual renderables.
+ */
+extern void (*webBrowserPerformanceHotfix)();
 
 } // namespace callback
 

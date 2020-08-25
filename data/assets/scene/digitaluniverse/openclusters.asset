@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Open Clusters Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_openclusters_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,21 +22,23 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 0.1, 0.8, 0.4 },
-        Transparency = 0.5,
+        Opacity = 0.5,
         File = speck .. "/oc.speck",
         Texture = textures .. "/point4.png",
         PolygonSides = 12,
-        TextColor = { 0.05, 0.4, 0.2, 1.0 },
+        TextColor = { 0.05, 0.4, 0.2 },
         LabelFile = speck .. "/oc.label",
-        ScaleFactor = 418.33,
-        TextSize = 16.68,
+        ScaleFactor = 405.75,
+        TextSize = 15.5,
         TextMinSize = 4.5,
         TextMaxSize = 30.0,
-        Unit = "pc"
+        Unit = "pc",
+        BillboardMaxSize = 604,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Open Star Clusters",
-        Path = "/Milky Way/Open Clusters"
+        Path = "/Milky Way"
     }
 }
 

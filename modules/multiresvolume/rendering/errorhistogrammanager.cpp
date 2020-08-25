@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -117,7 +117,8 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
                     _histograms[innerNodeIndex] = Histogram(_minBin, _maxBin, _numBins);
                     ancestorVoxels = readValues(ancestorBrickIndex);
                     _voxelCache[innerNodeIndex] = ancestorVoxels;
-                } else {
+                }
+                else {
                     ancestorVoxels = it->second;
                 }
 
@@ -289,7 +290,8 @@ const Histogram* ErrorHistogramManager::histogram(unsigned int brickIndex) const
     const unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
         return &(_histograms[innerNodeIndex]);
-    } else {
+    }
+    else {
         return nullptr;
     }
 }
@@ -364,8 +366,7 @@ unsigned int ErrorHistogramManager::brickToInnerNodeIndex(unsigned int brickInde
 unsigned int ErrorHistogramManager::innerNodeToBrickIndex(
                                                         unsigned int innerNodeIndex) const
 {
-    // @TODO(abock): innerNodeIndex is an unsigned int, so it will never be < 0
-    if (innerNodeIndex < 0 || innerNodeIndex >= _numInnerNodes) {
+    if (innerNodeIndex >= _numInnerNodes) {
         return std::numeric_limits<unsigned int>::max(); // Not an inner node
     }
 

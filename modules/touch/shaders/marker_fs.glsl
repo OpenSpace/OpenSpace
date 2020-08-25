@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 in vec2 out_position;
 
 uniform float radius;
-uniform float transparency;
+uniform float opacity;
 uniform float thickness;
 uniform vec3 color;
 
@@ -47,7 +47,7 @@ Fragment getFragment() {
     // calculate lighting
     vec3 light_dir = vec3(0.0, 0.0, 1.0);
     float diffuse = max(0.0, dot(light_dir, n));
-    float alpha = min(pow(sqrt(mag), thickness), transparency);
+    float alpha = min(pow(sqrt(mag), thickness), opacity);
 
     Fragment frag;
     frag.color = vec4(color * diffuse, alpha);

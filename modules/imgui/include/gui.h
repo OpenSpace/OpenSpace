@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,9 +33,9 @@
 #include <modules/imgui/include/guihelpcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guijoystickcomponent.h>
+#include <modules/imgui/include/guimemorycomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
-#include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guishortcutscomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
@@ -44,6 +44,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -89,6 +90,10 @@ public:
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
     bool charCallback(unsigned int character, KeyModifier modifier);
 
+    bool touchDetectedCallback(TouchInput input);
+    bool touchUpdatedCallback(TouchInput input);
+    void touchExitCallback(TouchInput input);
+
     void startFrame(float deltaTime, const glm::vec2& windowSize,
         const glm::vec2& dpiScaling, const glm::vec2& mousePos,
         uint32_t mouseButtonsPressed);
@@ -101,12 +106,12 @@ public:
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
     GuiGlobeBrowsingComponent _globeBrowsing;
-    GuiPerformanceComponent _performance;
 
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _sceneProperty;
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _moduleProperty;
+    GuiMemoryComponent _memoryComponent;
 
     GuiPropertyComponent _virtualProperty;
     GuiSpaceTimeComponent _spaceTime;
@@ -134,6 +139,7 @@ private:
         &_virtualProperty,
         &_globalProperty,
         &_moduleProperty,
+        &_memoryComponent,
 
         &_spaceTime,
         &_mission,
@@ -147,8 +153,6 @@ private:
         &_shortcuts,
         &_joystick,
         &_filePath,
-
-        &_performance,
 
         &_help
     };
@@ -169,6 +173,8 @@ private:
         properties::Property::Visibility::Developer;
 
     std::vector<ImGuiContext*> _contexts;
+
+    std::vector<TouchInput> _validTouchStates;
 };
 
 void CaptionText(const char* text);

@@ -1,16 +1,8 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Tethys textures",
-    Type = "HttpSynchronization",
-    Identifier = "tethys_textures",
-    Version = 1
-})
+asset.require('./trail')
+local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Tethys = {
     Identifier = "Tethys",
@@ -32,14 +24,22 @@ local Tethys = {
         Type = "RenderableGlobe",
         Radii = 531100,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/tethys.jpg",
-                    Enabled = true
-                }
-            }
+        Layers = {},
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/tethys.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 14.0,
+            LabelsSize = 8.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 500000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },

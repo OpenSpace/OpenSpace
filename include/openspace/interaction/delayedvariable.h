@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,8 +46,8 @@ public:
 private:
     ScaleType _scaleFactor;
     ScaleType _friction;
-    T _targetValue;
-    T _currentValue;
+    T _targetValue = T(0);
+    T _currentValue = T(0);
 };
 
 } // namespace openspace::interaction

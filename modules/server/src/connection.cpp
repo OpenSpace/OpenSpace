@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,11 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/documentationtopic.h>
+#include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
+#include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
 #include <modules/server/include/topics/shortcuttopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
@@ -41,6 +44,7 @@
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <fmt/format.h>
 
 namespace {
@@ -52,14 +56,17 @@ namespace {
 
     constexpr const char* VersionTopicKey = "version";
     constexpr const char* AuthenticationTopicKey = "authorize";
+    constexpr const char* DocumentationTopicKey = "documentation";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
+    constexpr const char* SessionRecordingTopicKey = "sessionRecording";
     constexpr const char* SetPropertyTopicKey = "set";
     constexpr const char* ShortcutTopicKey = "shortcuts";
     constexpr const char* SubscriptionTopicKey = "subscribe";
     constexpr const char* TimeTopicKey = "time";
     constexpr const char* TriggerPropertyTopicKey = "trigger";
     constexpr const char* BounceTopicKey = "bounce";
+    constexpr const char* FlightControllerTopicKey = "flightcontroller";
 } // namespace
 
 namespace openspace {
@@ -76,23 +83,34 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
 
     _topicFactory.registerClass(
         AuthenticationTopicKey,
-        [password](bool, const ghoul::Dictionary&) {
-            return new AuthorizationTopic(password);
+        [password](bool, const ghoul::Dictionary&, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->alloc(sizeof(AuthorizationTopic));
+                return new (ptr) AuthorizationTopic(password);
+            }
+            else {
+                return new AuthorizationTopic(password);
+            }
         }
     );
 
+    _topicFactory.registerClass<DocumentationTopic>(DocumentationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
+    _topicFactory.registerClass<SessionRecordingTopic>(SessionRecordingTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
     _topicFactory.registerClass<ShortcutTopic>(ShortcutTopicKey);
     _topicFactory.registerClass<SubscriptionTopic>(SubscriptionTopicKey);
     _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
     _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
+    _topicFactory.registerClass<FlightControllerTopic>(FlightControllerTopicKey);
     _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
 }
 
 void Connection::handleMessage(const std::string& message) {
+    ZoneScoped
+
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
@@ -113,14 +131,15 @@ void Connection::handleMessage(const std::string& message) {
                 message
             ));
             return;
-        } else {
+        }
+        else {
             std::string sanitizedString = message;
             std::transform(
                 message.begin(),
                 message.end(),
                 sanitizedString.begin(),
-                [](const unsigned char& c) {
-                    return std::isprint(c) ? c : ' ';
+                [](wchar_t c) {
+                    return std::isprint(c, std::locale("")) ? c : ' ';
                 }
             );
             LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
@@ -129,6 +148,8 @@ void Connection::handleMessage(const std::string& message) {
 }
 
 void Connection::handleJson(const nlohmann::json& json) {
+    ZoneScoped
+
     auto topicJson = json.find(MessageKeyTopic);
     auto payloadJson = json.find(MessageKeyPayload);
 
@@ -163,13 +184,14 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
 
-        std::unique_ptr<Topic> topic = _topicFactory.create(type);
+        std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(_topicFactory.create(type));
         topic->initialize(this, topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {
             _topics.emplace(topicId, std::move(topic));
         }
-    } else {
+    }
+    else {
         if (!isAuthorized()) {
             LERROR("Connection isn't authorized.");
             return;

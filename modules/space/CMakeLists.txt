@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,57 +25,55 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitalkepler.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesmallbody.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitalkepler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesmallbody.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nighttexture_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nighttexture_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableplanet_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableplanet_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_nighttexture_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/shadow_nighttexture_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_ge.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/debrisViz_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/debrisViz_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_ge.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Space"
-    space_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "Space"
+  space_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

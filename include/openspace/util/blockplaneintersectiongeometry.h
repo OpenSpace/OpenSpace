@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,12 +47,11 @@ public:
 private:
     void updateVertices();
     std::vector<float> _vertices;
-    // bool _isInitialized;
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
-    glm::vec3 _size;
-    glm::vec3 _normal;
-    float _planeDistance;
+    glm::vec3 _size = glm::vec3(0.f);
+    glm::vec3 _normal = glm::vec3(0.f);
+    float _planeDistance = 0.f;
 };
 
 } // namespace openspace

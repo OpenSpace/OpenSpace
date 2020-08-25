@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,15 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_positionScreenSpace;
+in float vs_positionDepth;
 in vec4 vs_gPosition;
 in float fade;
-in float v_pointSize;
+noperspective in vec2 mathLine;
 
 uniform vec3 color;
 uniform int renderPhase;
 uniform float opacity = 1.0;
+uniform float lineWidth;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
 #define RenderPhaseLines 0
@@ -43,10 +44,8 @@ uniform float opacity = 1.0;
 Fragment getFragment() {
     Fragment frag;
     frag.color = vec4(color * fade, fade * opacity);
-    frag.depth = vs_positionScreenSpace.w;
+    frag.depth = vs_positionDepth;
     frag.blend = BLEND_MODE_ADDITIVE;
-
-    vec4 depthCorrection = vec4(0.0, 0.0, 100.0, 0.0);
 
     if (renderPhase == RenderPhasePoints) {
         // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
@@ -60,14 +59,24 @@ Fragment getFragment() {
         }
 
         frag.color.a = transparencyCorrection;
-    }    
+    }
 
+    double distanceCenter = length(mathLine - vec2(gl_FragCoord.xy));
+    double dLW = double(lineWidth);
+    float blendFactor = 20;
+    
+    if (distanceCenter > dLW) {
+        frag.color.a = 0.0;
+        //discard;
+    }
+    else {
+        frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+        // if (frag.color.a < 0.4)
+        //     discard;
+    }
 
-    // G-Buffer
-    // JCC: The depthCorrection here is a temporary tweak
-    // to fix precision problems.
-    frag.gPosition = vs_gPosition + depthCorrection;
-
+    frag.gPosition = vs_gPosition;
+    
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 

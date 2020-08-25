@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,7 @@
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
 
+
 #include <fstream>
 
 namespace {
@@ -50,9 +51,6 @@ namespace {
     constexpr const char* KeyValueFunction = "ValueFunction";
     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
 } // namespace
 
 namespace openspace {
@@ -174,8 +172,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     metadata.maxValue = maxVal;
 
     ghoul::Dictionary outputDictionary = metadata.dictionary();
-    ghoul::DictionaryLuaFormatter formatter;
-    std::string metadataString = formatter.format(outputDictionary);
+    std::string metadataString = ghoul::formatLua(outputDictionary);
 
     std::fstream f(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;

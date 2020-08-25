@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -144,11 +144,10 @@ void TransferFunction::saveEnvelopesToFile(const std::string& path) {
     envelopesToLua(state);
 
     ghoul::lua::luaDictionaryFromState(state, dictionary);
-    ghoul::DictionaryLuaFormatter formatter;
     std::ofstream tfFile;
     tfFile.open(path);
     tfFile << "return {";
-    tfFile << formatter.format(dictionary);
+    tfFile << ghoul::formatLua(dictionary);
     tfFile << "}";
     tfFile.close();
 }
@@ -197,7 +196,7 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
         for (int i = 0; i < _width ; ++i) {
             const float position = static_cast<float>(i) / static_cast<float>(_width);
             int count = 0;
-            glm::vec4 rgbFromEnvelopes(0.f, 0.f, 0.f, 0.f);
+            glm::vec4 rgbFromEnvelopes(0.f);
             float alpha = 0.f;
             for (const Envelope& env : _envelopes) {
                 if (env.isValueInEnvelope(position) && env.isEnvelopeValid()) {

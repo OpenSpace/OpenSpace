@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/triggerproperty.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -62,9 +63,11 @@ class WebKeyboardHandler;
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
     ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceBrowser() = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
+    bool initializeGL() override;
+    bool deinitializeGL() override;
+
     void render() override;
     void update() override;
     bool isReady() const override;
@@ -72,14 +75,18 @@ public:
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
-        void draw();
-        void render();
+        void draw() override;
+        void render() override;
 
         void setTexture(GLuint t);
     };
 
+    void bindTexture() override;
+
     properties::StringProperty _url;
     properties::Vec2Property _dimensions;
+    properties::TriggerProperty _reload;
+
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
     std::unique_ptr<BrowserInstance> _browserInstance;

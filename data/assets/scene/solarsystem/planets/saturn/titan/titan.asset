@@ -1,17 +1,8 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
-
-
-local map_service_configs = asset.localResource("map_service_configs")
-
-local textures = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Titan textures",
-    Identifier = "titan_textures",
-    Version = 1
-})
+asset.require('./trail')
+local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Titan = {
     Identifier = "Titan",
@@ -33,20 +24,22 @@ local Titan = {
         Type = "RenderableGlobe",
         Radii = 2576000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/titan.jpg",
-                    -- Enabled = true
-                },
-                {
-                    Identifier = "Cassini_ISS_Global_Mosaic_4km_LiU",
-                    Name = "Cassini ISS Global Mosaic [Sweden]",
-                    FilePath = map_service_configs .. "/LiU/ISS_P19658_Mosaic_Global_4km.wms",
-                    Enabled = true
-                }
-            }
+        Layers = {},
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/titan.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 14.0,
+            LabelsSize = 8.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 500000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },

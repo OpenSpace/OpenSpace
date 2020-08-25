@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -208,7 +208,7 @@ void RenderableDebugPlane::deinitializeGL() {
 }
 
 void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {
-    glm::mat4 transform = glm::mat4(1.0);
+    glm::mat4 transform = glm::mat4(1.f);
     if (_billboard) {
         transform = glm::inverse(glm::mat4(data.camera.viewRotationMatrix()));
     }
@@ -218,7 +218,11 @@ void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
-    setPscUniforms(*_shader, data.camera, data.position);
+
+    _shader->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _shader->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    _shader->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    _shader->setUniform("scaling", glm::vec2(1.f, 0.f));
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

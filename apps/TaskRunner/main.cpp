@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #include <string>
 #include <ghoul/glm.h>
 
+#include <ghoul/ghoul.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereaderdevil.h>
@@ -34,7 +35,8 @@
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
-#include <ghoul/ghoul.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
@@ -105,6 +107,14 @@ int main(int argc, char** argv) {
     using namespace openspace;
 
     ghoul::initialize();
+
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
 
     std::string configFile = configuration::findConfiguration();
     global::configuration = configuration::loadConfigurationFromFile(configFile);

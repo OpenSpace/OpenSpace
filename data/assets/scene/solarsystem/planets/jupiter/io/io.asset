@@ -1,17 +1,9 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local kernel = asset.require('../kernels').jup310
-
-
-
-local textures = asset.syncedResource({
-    Name = "Io Textures",
-    Type = "HttpSynchronization",
-    Identifier = "io_textures",
-    Version = 1
-})
+local labelsPath = asset.require('../jupiter_globelabels').LabelsPath
 
 local Io = {
     Identifier = "Io",
@@ -28,20 +20,28 @@ local Io = {
             Target = "IO",
             Observer = "JUPITER BARYCENTER",
             Kernels = kernel
-        },
+        }
     },
     Renderable = {
         Type = "RenderableGlobe",
         Radii = 1821600,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/io.jpg",
-                    Enabled = true
-                }
-            }
+        Layers = {},
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/io.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 40.0,
+            LabelsSize = 10.5,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 15000000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,13 +49,13 @@ private:
     properties::StringProperty _globe;
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _latitude;
-    properties::DoubleProperty _fixedAltitude;
-    properties::BoolProperty _useFixedAltitude;
+    properties::DoubleProperty _altitude;
+    properties::BoolProperty _useHeightmap;
 
     RenderableGlobe* _attachedNode = nullptr;
 
     mutable bool _positionIsDirty = true;
-    mutable glm::dvec3 _position;
+    mutable glm::dvec3 _position = glm::dvec3(0.0);
 };
 
 } // namespace openspace::globebrowsing

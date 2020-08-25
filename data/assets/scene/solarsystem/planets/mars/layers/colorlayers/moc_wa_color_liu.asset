@@ -1,0 +1,13 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+
+local layer = {
+    Identifier = "MOC_WA_Color_LiU",
+    Name = "MOC WA Color [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Color.wms",
+    Settings = {
+        Gamma = 1.6,
+        Multiplier = 1.07
+    }
+}
+
+asset.export("layer", layer)

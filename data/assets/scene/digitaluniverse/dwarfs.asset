@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Brown Dwarf Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_dwarfs_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,20 +22,26 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 0.4, 0.0, 0.1 },
-        Transparency = 0.999,
+        Opacity = 1.0,
         File = speck .. "/dwarfs.speck",
         Texture = textures .. "/point3.png",
         LabelFile = speck .. "/dwarfs.label",
-        TextColor = { 0.5, 0.1, 0.2, 1.0 },
+        ColorMap = speck .. "/dwarfs.cmap",
+        ColorOption = { "typeindex" },
+        --ColorRange = { { 1.0, 4.0} },
+        TextColor = { 0.5, 0.1, 0.2 },
         TextSize = 14.6,
         TextMinSize = 10.0,
-        ScaleFactor = 360,
-        CorrectionSizeEndDistance = 16.1,
-        CorrectionSizeFactor = 7.75,
+        ScaleFactor = 370,
+        --CorrectionSizeEndDistance = 16.1,
+        --CorrectionSizeFactor = 7.75,
+        BillboardMaxSize = 18.0,
+        EnablePixelSizeControl = true,
         Unit = "pc"
     },
     GUI = {
-        Path = "/Milky Way/Brown Dwarfs"
+        Name = "Brown Dwarfs",
+        Path = "/Milky Way"
     }
 }
 

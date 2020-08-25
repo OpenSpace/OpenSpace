@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,7 +87,8 @@ void GuiIswaComponent::render() {
                 script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
-        } else {
+        }
+        else {
             global::scriptEngine.queueScript(
                 "openspace.iswa.removeGroup('GMData');",
                 scripting::ScriptEngine::RemoteScripting::Yes
@@ -106,7 +107,8 @@ void GuiIswaComponent::render() {
                 script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
-        } else {
+        }
+        else {
             global::scriptEngine.queueScript(
                 "openspace.iswa.removeGroup('GMImage');",
                 scripting::ScriptEngine::RemoteScripting::Yes
@@ -114,13 +116,14 @@ void GuiIswaComponent::render() {
         }
     }
 
-    if(_ionData != oldIonDataValue) {
-        if(_ionData) {
+    if (_ionData != oldIonDataValue) {
+        if (_ionData) {
             global::scriptEngine.queueScript(
                 "openspace.iswa.addCygnet(-10, 'Data', 'Ionosphere');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
-        } else {
+        }
+        else {
             global::scriptEngine.queueScript(
                 "openspace.iswa.removeGroup('Ionosphere');",
                 scripting::ScriptEngine::RemoteScripting::Yes
@@ -202,7 +205,8 @@ void GuiIswaComponent::render() {
                         "openspace.iswa.addScreenSpaceCygnet({CygnetId=" + idStr + "});",
                         scripting::ScriptEngine::RemoteScripting::Yes
                     );
-                } else {
+                }
+                else {
                     global::scriptEngine.queueScript(
                         "openspace.iswa.removeScreenSpaceCygnet(" + idStr + ");",
                         scripting::ScriptEngine::RemoteScripting::Yes

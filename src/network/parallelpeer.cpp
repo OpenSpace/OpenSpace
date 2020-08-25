@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/misc/profiling.h>
 
 #include "parallelpeer_lua.inl"
 
@@ -325,7 +326,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
                 TimeKeyframeData timeKeyframeData;
                 timeKeyframeData.delta = kfMessage._dt;
                 timeKeyframeData.pause = kfMessage._paused;
-                timeKeyframeData.time = kfMessage._time;
+                timeKeyframeData.time = Time(kfMessage._time);
                 timeKeyframeData.jump = kfMessage._requiresTimeJump;
 
                 const double kfTimestamp = convertTimestamp(kfMessage._timestamp);
@@ -503,6 +504,8 @@ void ParallelPeer::resetTimeOffset() {
 }
 
 void ParallelPeer::preSynchronization() {
+    ZoneScoped
+
     std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
         ParallelConnection::Message& message = _receiveBuffer.front();
@@ -544,7 +547,8 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
         global::timeManager.addTimelineChangeCallback([this]() {
             _timeTimelineChanged = true;
         });
-    } else {
+    }
+    else {
         if (_timeJumpCallback != -1) {
             global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
         }
@@ -585,27 +589,29 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+    interaction::NavigationHandler& navHandler = global::navigationHandler;
+
+    const SceneGraphNode* focusNode =
+        navHandler.orbitalNavigator().anchorNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = global::navigationHandler.focusNodeToCameraVector();
+    kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
 
-    kf._followNodeRotation =
-        global::navigationHandler.orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
+        kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
-        kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
+        kf._rotation = navHandler.camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->identifier();
-    kf._scale = global::navigationHandler.camera()->scaling();
+    kf._scale = navHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = global::windowDelegate.applicationTime();

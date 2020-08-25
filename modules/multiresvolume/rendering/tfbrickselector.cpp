@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
 
 namespace {
     bool compareSplitPoints(const openspace::BrickSelection& a,
@@ -84,7 +85,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
 
     if (splitType != BrickSelection::SplitType::None) {
         priorityQueue.push_back(brickSelection);
-    } else {
+    }
+    else {
         leafSelections.push_back(brickSelection);
     }
 
@@ -126,7 +128,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
 
             if (pickRightTimeChild) {
                 childBrickIndex = _tsp->bstRight(brickIndex);
-            } else {
+            }
+            else {
                 childBrickIndex = _tsp->bstLeft(brickIndex);
             }
 
@@ -145,10 +148,12 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
                     priorityQueue.end(),
                     compareSplitPoints
                 );
-            } else {
+            }
+            else {
                 leafSelections.push_back(childSelection);
             }
-        } else if (bs.splitType == BrickSelection::SplitType::Spatial) {
+        }
+        else if (bs.splitType == BrickSelection::SplitType::Spatial) {
             nBricksInMemory += 7; // Remove one and add eight.
             unsigned int firstChild = _tsp->firstOctreeChild(brickIndex);
 
@@ -167,7 +172,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
                 }
                 if (bs.splitPoints > -1) {
                     temporalSplitQueue.push_back(bs);
-                } else {
+                }
+                else {
                     deadEnds.push_back(bs);
                 }
                 break;
@@ -196,7 +202,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
                         priorityQueue.end(),
                         compareSplitPoints
                     );
-                } else {
+                }
+                else {
                     leafSelections.push_back(childSelection);
                 }
             }
@@ -224,7 +231,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
                     temporalSplitQueue.end(),
                     compareSplitPoints
                 );
-            } else {
+            }
+            else {
                 deadEnds.push_back(bs);
             }
         }
@@ -273,7 +281,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
                     temporalSplitQueue.end(),
                     compareSplitPoints
                 );
-            } else {
+            }
+            else {
                 BrickSelection childSelection = bs.splitTemporally(
                     pickRightTimeChild,
                     childBrickIndex,
@@ -283,7 +292,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
                 deadEnds.push_back(childSelection);
             }
         }
-    } else {
+    }
+    else {
         // Write selected inner nodes to brickSelection vector
         //std::cout << "priority queue: " << priorityQueue.size() << std::endl;
         for (const BrickSelection& bs : priorityQueue) {
@@ -357,10 +367,12 @@ float TfBrickSelector::splitPoints(unsigned int brickIndex,
     if (spatialPoints > 0 && spatialPoints > temporalPoints) {
         splitPoints = spatialPoints;
         splitType = BrickSelection::SplitType::Spatial;
-    } else if (temporalPoints > 0) {
+    }
+    else if (temporalPoints > 0) {
         splitPoints = temporalPoints;
         splitType = BrickSelection::SplitType::Temporal;
-    } else {
+    }
+    else {
         splitPoints = -1;
         splitType = BrickSelection::SplitType::None;
     }
@@ -396,7 +408,8 @@ bool TfBrickSelector::calculateBrickErrors() {
     for (unsigned int brickIndex = 0; brickIndex < nHistograms; brickIndex++) {
         if (_tsp->isBstLeaf(brickIndex) && _tsp->isOctreeLeaf(brickIndex)) {
             _brickErrors[brickIndex] = 0;
-        } else {
+        }
+        else {
             const Histogram* histogram = _histogramManager->histogram(brickIndex);
             float error = 0;
             for (size_t i = 0; i < gradients.size(); i++) {

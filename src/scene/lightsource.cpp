@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,12 +91,12 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     const std::string timeFrameType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<LightSource>();
-    std::unique_ptr<LightSource> result = factory->create(timeFrameType, dictionary);
-
+    LightSource* source = factory->create(timeFrameType, dictionary);
+    
     const std::string identifier = dictionary.value<std::string>(KeyIdentifier);
-    result->setIdentifier(identifier);
+    source->setIdentifier(identifier);
 
-    return result;
+    return std::unique_ptr<LightSource>(source);
 }
 
 LightSource::LightSource()

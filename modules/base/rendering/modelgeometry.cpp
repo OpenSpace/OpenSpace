@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,7 +81,8 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     const std::string& geometryType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
-    return factory->create(geometryType, dictionary);;
+    ModelGeometry* geometry = factory->create(geometryType, dictionary);
+    return std::unique_ptr<ModelGeometry>(geometry);
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)

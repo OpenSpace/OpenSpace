@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,11 @@
 
 #include <openspace/interaction/inputstate.h>
 
+namespace {
+    const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
+    const double SENSITIVITY_ADJUSTMENT_DECREASE = 0.5;
+}
+
 namespace openspace::interaction {
 
 MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFactor)
@@ -35,10 +40,15 @@ MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFac
 void MouseCameraStates::updateStateFromInput(const InputState& inputState,
                                              double deltaTime)
 {
+    MouseButton primary =
+        _isMouseButtonInverted ? MouseButton::Button2 : MouseButton::Button1;
+    MouseButton secondary =
+        _isMouseButtonInverted ? MouseButton::Button1 : MouseButton::Button2;
+
     glm::dvec2 mousePosition = inputState.mousePosition();
 
-    bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
-    bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
+    bool primaryPressed = inputState.isMouseButtonPressed(primary);
+    bool secondaryPressed = inputState.isMouseButtonPressed(secondary);
     bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
     bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl) |
                           inputState.isKeyPressed(Key::RightControl);
@@ -48,7 +58,7 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
                          inputState.isKeyPressed(Key::RightAlt);
 
     // Update the mouse states
-    if (button1Pressed && !keyShiftPressed && !keyAltPressed) {
+    if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta = _localRotationState.previousPosition -
                                              mousePosition;
@@ -79,11 +89,20 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
         _globalRotationState.previousPosition = mousePosition;
         _globalRotationState.velocity.decelerate(deltaTime);
     }
-    if (button2Pressed || (keyAltPressed && button1Pressed)) {
+    if (secondaryPressed || (keyAltPressed && primaryPressed)) {
         glm::dvec2 mousePositionDelta = _truckMovementState.previousPosition -
                                         mousePosition;
+
+        double sensitivity = _sensitivity;
+        if (inputState.isKeyPressed(Key::Z)) {
+            sensitivity *= SENSITIVITY_ADJUSTMENT_INCREASE;
+        }
+        else if (inputState.isKeyPressed(Key::X)) {
+            sensitivity *= SENSITIVITY_ADJUSTMENT_DECREASE;
+        }
+
         _truckMovementState.velocity.set(
-            mousePositionDelta * _sensitivity,
+            mousePositionDelta * sensitivity,
             deltaTime
         );
     }
@@ -91,7 +110,7 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
         _truckMovementState.previousPosition = mousePosition;
         _truckMovementState.velocity.decelerate(deltaTime);
     }
-    if (button3Pressed || (keyShiftPressed && button1Pressed)) {
+    if (button3Pressed || (keyShiftPressed && primaryPressed)) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta = _localRollState.previousPosition -
                                             mousePosition;
@@ -122,6 +141,10 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
         _localRollState.previousPosition = mousePosition;
         _localRollState.velocity.decelerate(deltaTime);
     }
+}
+
+void MouseCameraStates::setInvertMouseButton(bool value) {
+    _isMouseButtonInverted = value;
 }
 
 } // namespace openspace::interaction

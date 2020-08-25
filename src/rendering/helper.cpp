@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,13 @@
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <algorithm>
 #include <fstream>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -133,6 +136,9 @@ VertexObjects& gVertexObjectsConstructor() {
 } // namespace detail
 
 void initialize() {
+    ZoneScoped
+    TracyGpuZone("helper::initialize")
+
     ghoul_assert(!isInitialized, "Rendering Helper initialized twice");
 
     //
@@ -349,5 +355,37 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
     shdr.program->deactivate();
 }
 
+VertexXYZ convertToXYZ(const Vertex& v) {
+    return VertexXYZ{ v.xyz[0], v.xyz[1], v.xyz[2] };
+}
+
+std::vector<VertexXYZ> convert(std::vector<Vertex> v) {
+    std::vector<VertexXYZ> result(v.size());
+    std::transform(v.begin(), v.end(), result.begin(), convertToXYZ);
+    return result;
+}
+
+std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors) {
+    const int nVertices = nSegments + 1;
+    std::vector<Vertex> vertices(nVertices);
+
+    const float fsegments = static_cast<float>(nSegments);
+
+    for (int i = 0; i <= nSegments; ++i) {
+        const float fi = static_cast<float>(i);
+
+        const float theta = fi * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
+
+        const float x = radius * std::cos(theta);
+        const float y = radius * std::sin(theta);
+        const float z = 0.f;
+
+        const float u = std::cos(theta);
+        const float v = std::sin(theta);
+
+        vertices[i] = { x, y, z, u, v, colors.r, colors.g, colors.b, colors.a };
+    }
+    return vertices;
+}
 
 } // namespace openspace::rendering::helper

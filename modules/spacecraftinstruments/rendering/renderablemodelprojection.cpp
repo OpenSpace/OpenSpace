@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -377,8 +377,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
         global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 
-    _sunPosition =
-        PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z).vec3();
+    _sunPosition = static_cast<glm::vec3>(p);
 }
 
 void RenderableModelProjection::imageProjectGPU(
@@ -462,11 +461,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
         lightTime
     );
 
-    // @TODO:  Remove this and replace with cpos = p * 1000 ?
-    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-
-    position[3] += 4;
-    const glm::vec3 cpos = position.vec3();
+    const glm::vec3 cpos = p * 10000.0;
 
     const float distance = glm::length(cpos);
     const float radius = boundingSphere();

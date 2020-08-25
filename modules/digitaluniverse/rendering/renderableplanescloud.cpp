@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,13 +68,6 @@ namespace {
         BlendModeAdditive
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
@@ -86,6 +79,13 @@ namespace {
         "TextColor",
         "Text Color",
         "The text color for the astronomical object."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
+        "TextOpacity",
+        "Text Opacity",
+        "Determines the transparency of the text label, where 1 is completely opaque "
+        "and 0 fully transparent."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
@@ -201,12 +201,6 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 "astronomical object being rendered."
             },
             {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
-            },
-            {
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -214,9 +208,15 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
             },
             {
                 TextColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 TextColorInfo.description
+            },
+            {
+                TextOpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TextOpacityInfo.description
             },
             {
                 TextSizeInfo.identifier,
@@ -297,14 +297,9 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
-    , _textColor(
-        TextColorInfo,
-        glm::vec4(1.0f, 1.0, 1.0f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10000.f)
+    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -323,6 +318,8 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         dictionary,
         "RenderablePlanesCloud"
     );
+
+    addProperty(_opacity);
 
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
@@ -371,13 +368,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         _unit = Meter;
     }
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
-
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
             dictionary.value<double>(ScaleFactorInfo.identifier)
@@ -393,13 +383,17 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
+        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
+            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+        }
+        addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
             _textSize = dictionary.value<float>(TextSizeInfo.identifier);
@@ -435,7 +429,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
                 setRenderBin(Renderable::RenderBin::Opaque);
                 break;
             case BlendModeAdditive:
-                setRenderBin(Renderable::RenderBin::Transparent);
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
             default:
                 throw ghoul::MissingCaseException();
@@ -580,7 +574,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         _uniformCache.modelViewProjectionTransform,
         modelViewProjectionMatrix
     );
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];
@@ -598,6 +592,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
             continue;
         }
 
+        // We only bind a new texture when it is needed
         if (currentTextureIndex != pAMapItem.first) {
             _textureMap[pAMapItem.first]->bind();
             currentTextureIndex = pAMapItem.first;
@@ -650,8 +645,24 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    glm::vec4 textColor = _textColor;
-    textColor.a *= fadeInVariable;
+    glm::vec4 textColor = glm::vec4(
+        glm::vec3(_textColor), 
+        _textOpacity * fadeInVariable
+    );
+
+    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
+    labelInfo.orthoRight = orthoRight;
+    labelInfo.orthoUp = orthoUp;
+    labelInfo.minSize = static_cast<int>(_textMinSize);
+    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.cameraPos = data.camera.positionVec3();
+    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
+    labelInfo.renderType = _renderOption;
+    labelInfo.mvpMatrix = modelViewProjectionMatrix;
+    labelInfo.scale = pow(10.f, _textSize);
+    labelInfo.enableDepth = true;
+    labelInfo.enableFalseDepth = false;
+
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -661,15 +672,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
             scaledPos,
             pair.second,
             textColor,
-            pow(10.f, _textSize.value()),
-            _textMinSize,
-            _textMaxSize,
-            modelViewProjectionMatrix,
-            orthoRight,
-            orthoUp,
-            data.camera.positionVec3(),
-            data.camera.lookUpVectorWorldSpace(),
-            _renderOption.value()
+            labelInfo
         );
     }
 }
@@ -702,12 +705,14 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
-        double distCamera = glm::length(data.camera.positionVec3());
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        distCamera /= scale;
         const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        //const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
+        const float a = 1.f / ((fadeRange.y - fadeRange.x));
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const float funcValue = static_cast<float>(a * distCamera + b);
-        fadeInVariable *= std::min(funcValue, 1.f);
+        const float funcValue = a * distCamera + b;
+        fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
 
         if (funcValue < 0.01f) {
             return;
@@ -838,7 +843,7 @@ bool RenderablePlanesCloud::loadData() {
 
 bool RenderablePlanesCloud::loadTextures() {
     if (!_textureFileMap.empty()) {
-        for (const std::pair<int, std::string>& pair : _textureFileMap) {
+        for (const std::pair<const int, std::string>& pair : _textureFileMap) {
             const auto& p = _textureMap.insert(std::make_pair(
                 pair.first,
                 ghoul::io::TextureReader::ref().loadTexture(pair.second)
@@ -875,7 +880,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::streampos position = file.tellg();
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
@@ -894,9 +898,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
             line.substr(0, 10) != "polyorivar" &&
             line.substr(0, 10) != "maxcomment")
         {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
+            // Started reading data
             break;
         }
 
@@ -987,9 +989,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
     _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
 
     do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
-        std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
         // lines to have a final \r
@@ -998,6 +997,11 @@ bool RenderablePlanesCloud::readSpeckFile() {
         }
 
         if (line.empty()) {
+            std::getline(file, line);
+            continue;
+        }
+        else if (line[0] == '#') {
+            std::getline(file, line);
             continue;
         }
 
@@ -1006,6 +1010,8 @@ bool RenderablePlanesCloud::readSpeckFile() {
         glm::vec3 u(0.f);
         glm::vec3 v(0.f);
         int textureIndex = 0;
+
+        std::vector<float> values(_nValuesPerAstronomicalObject);
 
         for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
             str >> values[i];
@@ -1040,6 +1046,9 @@ bool RenderablePlanesCloud::readSpeckFile() {
             }
         }
         _fullData.insert(_fullData.end(), values.begin(), values.end());
+
+        // reads new line
+        std::getline(file, line);
     } while (!file.eof());
 
     return true;
@@ -1105,7 +1114,7 @@ bool RenderablePlanesCloud::readLabelFile() {
 
         std::stringstream str(line);
 
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         for (int j = 0; j < 3; ++j) {
             str >> position[j];
         }

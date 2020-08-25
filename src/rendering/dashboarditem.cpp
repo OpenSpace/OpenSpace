@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -95,7 +95,8 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
-    return factory->create(dashboardType, std::move(dictionary));
+    DashboardItem* item = factory->create(dashboardType, std::move(dictionary));
+    return std::unique_ptr<DashboardItem>(item);
 }
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
@@ -111,8 +112,10 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     std::string identifier = dictionary.value<std::string>(IdentifierInfo.identifier);
     setIdentifier(std::move(identifier));
 
-    std::string guiName = dictionary.value<std::string>(GuiNameInfo.identifier);
-    setGuiName(std::move(guiName));
+    if (dictionary.hasKeyAndValue<std::string>(GuiNameInfo.identifier)) {
+        std::string guiName = dictionary.value<std::string>(GuiNameInfo.identifier);
+        setGuiName(std::move(guiName));
+    }
 
     addProperty(_isEnabled);
 }

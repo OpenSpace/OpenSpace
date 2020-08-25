@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <ghoul/glm.h>
 #include <memory>
@@ -50,6 +51,7 @@ public:
     void removeDashboardItem(const std::string& identifier);
     void removeDashboardItem(int index);
     void clearDashboardItems();
+    glm::vec2 getStartPositionOffset();
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -59,6 +61,7 @@ public:
 
 private:
     properties::BoolProperty _isEnabled;
+    properties::IVec2Property _startPositionOffset;
 
     std::vector<std::unique_ptr<DashboardItem>> _items;
 };

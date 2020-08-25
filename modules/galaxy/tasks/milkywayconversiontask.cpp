@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ namespace {
 
 namespace openspace {
 
-MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) 
+MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary)
     : _inFirstIndex(0)
     , _inNSlices(0)
 {
@@ -86,8 +86,8 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
     );
     std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
         [&](glm::ivec3 outCoord) {
-            const glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5)) *
-                                      resolutionRatio) - glm::vec3(0.5);
+            const glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5f)) *
+                                      resolutionRatio) - glm::vec3(0.5f);
             const glm::tvec4<GLfloat> value = sampler.sample(inCoord);
             return value;
         };

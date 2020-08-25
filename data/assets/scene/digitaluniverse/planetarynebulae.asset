@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Planetary Nebulae Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_planetarynebulae_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -22,21 +22,23 @@ local object = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
         Color = { 0.4, 0.4, 0.9 },
-        Transparency = 0.35,
+        Opacity = 0.65,
         File = speck .. "/pn.speck",
         Texture = textures .. "/point4.png",
         PolygonSides = 3,
         LabelFile = speck .. "/pn.label",
-        TextColor = { 0.25, 0.25, 0.65, 1.0 },
-        ScaleFactor = 418.33,
-        TextSize = 16.68,
+        TextColor = { 0.25, 0.25, 0.65 },
+        ScaleFactor = 425.0,
+        TextSize = 16.24,
         TextMinSize = 4.5,
-        TextMaxSize = 30.0,
-        Unit = "pc"
+        TextMaxSize = 25.0,
+        Unit = "pc",
+        BillboardMaxSize = 500,
+        EnablePixelSizeControl = true
     },
     GUI = {
         Name = "Planetary Nebulae",
-        Path = "/Milky Way/Planetary Nebulae"
+        Path = "/Milky Way"
     }
 }
 

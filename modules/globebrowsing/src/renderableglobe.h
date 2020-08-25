@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,11 @@
 
 #include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/ringscomponent.h>
+#include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -40,11 +43,20 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 class GPULayerGroup;
 class RenderableGlobe;
 struct TileIndex;
+
+struct BoundingHeights {
+    float min;
+    float max;
+    bool available;
+    bool tileOK;
+};
 
 namespace chunklevelevaluator { class Evaluator; }
 namespace culling { class ChunkCuller; }
@@ -64,8 +76,16 @@ struct Chunk {
     Status status;
 
     bool isVisible = true;
+    bool colorTileOK = false;
+    bool heightTileOK = false;
+
     std::array<glm::dvec4, 8> corners;
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
+};
+
+enum class ShadowCompType {
+    GLOBAL_SHADOW,
+    LOCAL_SHADOW
 };
 
 /**
@@ -88,10 +108,14 @@ public:
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const override;
 
+    bool renderedWithDesiredData() const override;
+
     const Ellipsoid& ellipsoid() const;
     const LayerManager& layerManager() const;
     LayerManager& layerManager();
     const glm::dmat4& modelTransform() const;
+
+    static documentation::Documentation Documentation();
 
 private:
     constexpr static const int MinSplitDepth = 2;
@@ -105,21 +129,28 @@ private:
         properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
-        properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty  modelSpaceRenderingCutoffLevel;
+        properties::IntProperty  dynamicLodIterationCount;
     } _debugProperties;
 
     struct {
-        properties::BoolProperty performShading;
-        properties::BoolProperty useAccurateNormals;
-        properties::BoolProperty eclipseShadowsEnabled;
-        properties::BoolProperty eclipseHardShadows;
-        properties::FloatProperty lodScaleFactor;
+        properties::BoolProperty  performShading;
+        properties::BoolProperty  useAccurateNormals;
+        properties::BoolProperty  eclipseShadowsEnabled;
+        properties::BoolProperty  eclipseHardShadows;
+        properties::BoolProperty  shadowMapping;
+        properties::FloatProperty zFightingPercentage;
+        properties::IntProperty   nShadowSamples;
+        properties::FloatProperty targetLodScaleFactor;
+        properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
-        properties::IntProperty nActiveLayers;
+        properties::IntProperty   nActiveLayers;
     } _generalProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
+
+    properties::PropertyOwner _shadowMappingPropertyOwner;
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered
@@ -128,7 +159,8 @@ private:
      * Goes through all available <code>ChunkCuller</code>s and check if any of them
      * allows culling of the <code>Chunk</code>s in question.
      */
-    bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
+    bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
     /**
      * Gets the desired level which can be used to determine if a chunk should split
@@ -140,7 +172,8 @@ private:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int desiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -155,7 +188,9 @@ private:
      */
     float getHeight(const glm::dvec3& position) const;
 
-    void renderChunks(const RenderData& data, RendererTasks& rendererTask);
+    void renderChunks(const RenderData& data, RendererTasks& rendererTask,
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+    );
 
     /**
      * Chunks can be rendered either globally or locally. Global rendering is performed
@@ -165,7 +200,9 @@ private:
      * point precision by doing this which means that the camera too close to a global
      * tile will lead to jagging. We only render global chunks for lower chunk levels.
      */
-    void renderChunkGlobally(const Chunk& chunk, const RenderData& data);
+    void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+    );
 
     /**
      * Local rendering of chunks are done using linear interpolation in camera space.
@@ -178,21 +215,26 @@ private:
      * levels) the better the approximation becomes. This is why we only render local
      * chunks for higher chunk levels.
      */
-    void renderChunkLocally(const Chunk& chunk, const RenderData& data);
+    void renderChunkLocally(const Chunk& chunk, const RenderData& data,
+        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+    );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
         bool renderBounds, bool renderAABB) const;
 
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
-    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data,
+        const BoundingHeights& heights) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data,
+        const BoundingHeights& heights) const;
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
 
     void calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
-        const RenderData& data);
+        const RenderData& data, ShadowCompType stype);
 
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
@@ -211,10 +253,13 @@ private:
     SkirtedGrid _grid;
     LayerManager _layerManager;
 
-    glm::dmat4 _cachedModelTransform;
-    glm::dmat4 _cachedInverseModelTransform;
+    glm::dmat4 _cachedModelTransform = glm::dmat4(1.0);
+    glm::dmat4 _cachedInverseModelTransform = glm::dmat4(1.0);
 
     ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
+
+    std::vector<const Chunk*> _traversalMemory;
+
 
     Chunk _leftRoot;  // Covers all negative longitudes
     Chunk _rightRoot; // Covers all positive longitudes
@@ -231,7 +276,7 @@ private:
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
-        UniformCache(skirtLength, p01, p11, p00, p10, patchNormalModelSpace,
+        UniformCache(skirtLength, p01, p11, p00, p10,
             patchNormalCameraSpace) uniformCache;
 
         std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
@@ -241,7 +286,20 @@ private:
     bool _lodScaleFactorDirty = true;
     bool _chunkCornersDirty = true;
     bool _nLayersIsDirty = true;
+    bool _allChunksAvailable = true;
+    size_t _iterationsOfAvailableData = 0;
+    size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    // Components
+    RingsComponent _ringsComponent;
+    ShadowComponent _shadowComponent;
+    bool _hasRings = false;
+    bool _hasShadows = false;
+
+    // Labels
+    GlobeLabelsComponent _globeLabelsComponent;
+    ghoul::Dictionary _labelsDictionary;
 };
 
 } // namespace openspace::globebrowsing

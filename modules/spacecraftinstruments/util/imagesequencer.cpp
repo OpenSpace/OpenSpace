@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -416,6 +416,8 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
             source.begin(),
             source.end()
         );
+
+        _subsetMap[key]._range.include(it.second._range);
     }
 
     _instrumentTimes.insert(

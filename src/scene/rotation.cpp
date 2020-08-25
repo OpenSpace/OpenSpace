@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
@@ -59,15 +61,19 @@ documentation::Documentation Rotation::Documentation() {
     };
 }
 
-std::unique_ptr<Rotation> Rotation::createFromDictionary(
+ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
     const std::string& rotationType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<Rotation>();
-    std::unique_ptr<Rotation> result = factory->create(rotationType, dictionary);
-    return result;
+    Rotation* result = factory->create(
+        rotationType,
+        dictionary,
+        &global::memoryManager.PersistentMemory
+    );
+    return ghoul::mm_unique_ptr<Rotation>(result);
 }
 
 Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}

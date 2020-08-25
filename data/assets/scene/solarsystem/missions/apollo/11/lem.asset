@@ -1,0 +1,53 @@
+-- a11_lem.asset
+local asset_helper = asset.require('util/asset_helper')
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+
+local lem_model = asset.require('scene/solarsystem/missions/apollo/lem_model')
+
+
+local Apollo11Lem = {
+    Identifier = "Apollo11Lem",
+    Parent = moon_asset.Moon.Identifier,
+    Transform = {
+        Translation = {
+            Type = "GlobeTranslation",
+            Globe = moon_asset.Moon.Identifier,
+            Longitude = -360+23.47306,
+            Latitude = 0.67402,
+            Altitude = -1927.65,
+            UseHeightMap = false
+        },
+    },
+    GUI = {
+        Name = "Apollo 11 Lem Position",
+        Path = "/Solar System/Missions/Apollo/11"
+    }
+}
+
+local Apollo11LemModel = {
+    Identifier = "Apollo11LemModel",
+    Parent = Apollo11Lem.Identifier,
+    Transform = {
+         Scale = {
+            Type = "StaticScale",
+            Scale = 0.24
+        }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = lem_model.modelFolder .. "/LM-2_ver2clean.obj"
+        },
+        RotationVector = { 91.044090,171.229706,111.666664 },
+        ColorTexture = lem_model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
+        LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    },
+    GUI = {
+        Name = "Apollo 11 Lem",
+        Path = "/Solar System/Missions/Apollo/11"
+    }
+}
+
+asset_helper.registerSceneGraphNodesAndExport(asset, { Apollo11Lem, Apollo11LemModel })

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -21,7 +21,6 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
-
 
 function(set_cef_targets cef_root main_target)
     # find cef cmake helpers
@@ -62,8 +61,17 @@ function(run_cef_platform_config cef_root cef_target module_path)
 endfunction()
 
 function(run_cef_macosx_config CEF_ROOT module_path)
-    set(CEF_FINAL_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/${CEF_TARGET}.app")
-    set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/${CEF_HELPER_TARGET}.app")
+    if (${CMAKE_GENERATOR} STREQUAL "Ninja" OR
+        ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+        set(CEF_OUTPUT_PREFIX "")
+    else()
+        set(CEF_OUTPUT_PREFIX "$<CONFIG>/")
+    endif()
+
+    set(CEF_FINAL_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_OUTPUT_PREFIX}${CEF_TARGET}.app")
+    set(CEF_INTERMEDIATE_HELPER_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_OUTPUT_PREFIX}${CEF_HELPER_TARGET}.app")
+
+    set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/Frameworks/${CEF_HELPER_TARGET}.app")
     set(CEF_FRAMEWORK_LOCATION "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
     set(CEF_FRAMEWORK_FINAL_LOCATION "${CEF_FINAL_APP}/Contents/Frameworks/Chromium Embedded Framework.framework")
 
@@ -80,7 +88,7 @@ function(run_cef_macosx_config CEF_ROOT module_path)
         TARGET ${CEF_TARGET}
         POST_BUILD
         # Copy the helper app bundle into the Frameworks directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug${CEF_HELPER_APP}" "${CEF_FINAL_HELPER_APP}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_INTERMEDIATE_HELPER_APP}" "${CEF_FINAL_HELPER_APP}"
         # Copy the CEF framework into the Frameworks directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_FRAMEWORK_LOCATION}" "${CEF_FRAMEWORK_FINAL_LOCATION}"
         VERBATIM
@@ -97,9 +105,6 @@ function(run_cef_macosx_config CEF_ROOT module_path)
             "${CEF_FINAL_APP}/Contents/${file_name}"
         )
     endforeach ()
-
-    # Fix the framework rpath in the main executable.
-    FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
 
     if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
         # Manually process and copy over resource files.

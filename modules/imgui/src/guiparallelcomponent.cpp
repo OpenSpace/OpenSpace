@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -146,7 +146,8 @@ void GuiParallelComponent::renderHost() {
     const size_t nClients = nConnections - 1;
     if (nClients == 1) {
         connectionInfo = "Hosting session with 1 client";
-    } else {
+    }
+    else {
         connectionInfo = "Hosting session with " + std::to_string(nClients) + " clients";
     }
 

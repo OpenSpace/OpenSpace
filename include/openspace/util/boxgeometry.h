@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ public:
 
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
-    glm::vec3 _size;
+    glm::vec3 _size = glm::vec3(0.f);
 };
 
 } // namespace openspace

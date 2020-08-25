@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -436,7 +436,8 @@ bool TSP::calculateTemporalError() {
         // 0.0 higher up in the tree
         if (coveredBricks.size() == 1) {
             errors[brick] = -0.1f;
-        } else {
+        }
+        else {
             // Calculate standard deviation per voxel, average over brick
             float avgStdDev = 0.f;
             for (unsigned int voxel = 0; voxel<numBrickVals; ++voxel) {

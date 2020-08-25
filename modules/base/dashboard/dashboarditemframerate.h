@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul { class Dictionary; }
@@ -42,6 +43,9 @@ class DashboardItemFramerate : public DashboardItem {
 public:
     enum class FrametimeType {
         DtTimeAvg = 0,
+        DtTimeExtremes,
+        DtStandardDeviation,
+        DtCoefficientOfVariation,
         FPS,
         FPSAvg,
         None
@@ -57,8 +61,13 @@ private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
     properties::OptionProperty _frametimeType;
+    properties::TriggerProperty _clearCache;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
+
+    double _minDeltaTimeCache = 1.0;
+    double _maxDeltaTimeCache = -1.0;
+    bool _shouldClearCache = true;
 };
 
 } // openspace

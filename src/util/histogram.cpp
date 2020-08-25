@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -127,7 +127,8 @@ bool Histogram::add(const Histogram& histogram) {
         }
         _numValues += histogram._numValues;
         return true;
-    } else {
+    }
+    else {
         LERROR("Dimension mismatch");
         return false;
     }
@@ -329,7 +330,8 @@ float Histogram::highestBinValue(bool equalized, int overBins){
                     _numBins * (_maxValue - _minValue);
         float high = low + (_maxValue - _minValue) / static_cast<float>(_numBins);
         return (high+low) / 2.f;
-    } else {
+    }
+    else {
         return highestBin / static_cast<float>(_numBins);
         // return equalize((high+low)/2.0);
     }

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2020                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -37,40 +37,40 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_common.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_vs.glsl 
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_final_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_final_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_sup_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_sup_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/transmittance_calc_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/transmittance_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_common.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_vs.glsl 
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_final_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_final_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_sup_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_sup_calc_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/transmittance_calc_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/transmittance_calc_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Atmosphere"
-    atmosphere_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "Atmosphere"
+  atmosphere_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

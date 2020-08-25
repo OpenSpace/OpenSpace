@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,18 +43,29 @@ class WebKeyboardHandler;
 
 class BrowserClient : public CefClient {
 public:
+
+    class NoContextMenuHandler : public CefContextMenuHandler {
+        bool RunContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+            CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model,
+            CefRefPtr<CefRunContextMenuCallback> callback) override;
+
+        IMPLEMENT_REFCOUNTING(NoContextMenuHandler);
+    };
+
     BrowserClient(WebRenderHandler* handler, WebKeyboardHandler* keyboardHandler);
 
     CefRefPtr<CefRenderHandler> GetRenderHandler() override;
     CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
     CefRefPtr<CefRequestHandler> GetRequestHandler() override;
     CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override;
+    CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override;
 
 private:
     CefRefPtr<CefRenderHandler> _renderHandler;
     CefRefPtr<CefKeyboardHandler> _keyboardHandler;
     CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
     CefRefPtr<CefRequestHandler> _requestHandler;
+    CefRefPtr<CefContextMenuHandler> _contextMenuHandler;
 
     IMPLEMENT_REFCOUNTING(BrowserClient);
 };

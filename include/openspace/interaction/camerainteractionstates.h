@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,18 +56,19 @@ public:
     glm::dvec2 localRollVelocity() const;
     glm::dvec2 globalRollVelocity() const;
 
+    void resetVelocities();
+
 protected:
     struct InteractionState {
         InteractionState(double scaleFactor);
         void setFriction(double friction);
         void setVelocityScaleFactor(double scaleFactor);
 
-        glm::dvec2 previousPosition;
+        glm::dvec2 previousPosition = glm::dvec2(0.0);
         DelayedVariable<glm::dvec2, double> velocity;
     };
 
-
-    double _sensitivity;
+    double _sensitivity = 0.0;
 
     InteractionState _globalRotationState;
     InteractionState _localRotationState;

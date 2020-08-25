@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,7 +74,8 @@ void ShenBrickSelector::traverseBST(int timestep, unsigned int brickIndex,
     if (timestep <= timeSpanCenter) {
         bstChild = _tsp->bstLeft(brickIndex);
         timeSpanEnd = timeSpanCenter;
-    } else {
+    }
+    else {
         bstChild = _tsp->bstRight(brickIndex);
         timeSpanStart = timeSpanCenter;
     }
@@ -97,11 +98,14 @@ void ShenBrickSelector::selectBricks(int timestep, unsigned int brickIndex,
     if (_tsp->temporalError(brickIndex) <= _temporalTolerance) {
         if (_tsp->isOctreeLeaf(bstRootBrickIndex)) {
             selectCover(coveredBricks, brickIndex, bricks);
-        } else if (_tsp->spatialError(brickIndex) <= _spatialTolerance) {
+        }
+        else if (_tsp->spatialError(brickIndex) <= _spatialTolerance) {
             selectCover(coveredBricks, brickIndex, bricks);
-        } else if (_tsp->isBstLeaf(brickIndex)) {
+        }
+        else if (_tsp->isBstLeaf(brickIndex)) {
             traverseOT(timestep, bstRootBrickIndex, coveredBricks, bricks);
-        } else {
+        }
+        else {
             traverseBST(
                 timestep,
                 brickIndex,
@@ -112,13 +116,16 @@ void ShenBrickSelector::selectBricks(int timestep, unsigned int brickIndex,
                 bricks
             );
         }
-    } else if (_tsp->isBstLeaf(brickIndex)) {
+    }
+    else if (_tsp->isBstLeaf(brickIndex)) {
         if (_tsp->isOctreeLeaf(bstRootBrickIndex)) {
             selectCover(coveredBricks, brickIndex, bricks);
-        } else {
+        }
+        else {
             traverseOT(timestep, bstRootBrickIndex, coveredBricks, bricks);
         }
-    } else {
+    }
+    else {
         traverseBST(
             timestep,
             brickIndex,

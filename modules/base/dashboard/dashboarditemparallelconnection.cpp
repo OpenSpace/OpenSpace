@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -103,9 +103,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
     addProperty(_fontName);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
         _font = global::fontManager.font(_fontName, _fontSize);
@@ -210,10 +208,7 @@ glm::vec2 DashboardItemParallelConnection::size() const {
     }
 
     if (!connectionInfo.empty()) {
-        return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            connectionInfo
-        ).boundingBox;
+        return _font->boundingBox(connectionInfo);
     }
     else {
         return { 0.f, 0.f };

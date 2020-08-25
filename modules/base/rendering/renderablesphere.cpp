@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -43,13 +42,15 @@
 namespace {
     constexpr const char* ProgramName = "Sphere";
 
-    constexpr const std::array<const char*, 4> UniformNames = {
-        "opacity", "ViewProjection", "ModelTransform", "texture1"
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
+        "mirrorTexture"
     };
 
-    enum Orientation {
-        Outside = 1,
-        Inside = 2
+    enum class Orientation : int {
+        Outside = 0,
+        Inside,
+        Both
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -60,11 +61,23 @@ namespace {
         "projection."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
+        "MirrorTexture",
+        "Mirror Texture",
+        "Mirror the texture along the x-axis."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseAdditiveBlendingInfo = {
+        "UseAdditiveBlending",
+        "Use Additive Blending",
+        "Render the object using additive blending."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
@@ -79,24 +92,30 @@ namespace {
         "This value specifies the radius of the sphere in meters."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
-        "FadeOutThreshould",
-        "Fade-Out Threshould",
+    constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
+        "FadeOutThreshold",
+        "Fade-Out Threshold",
         "This value determines percentage of the sphere is visible before starting "
         "fading-out it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
-        "FadeInThreshould",
-        "Fade-In Threshould",
+    constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
+        "FadeInThreshold",
+        "Fade-In Threshold",
         "Distance from center of MilkyWay from where the astronomical object starts to "
         "fade in."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
-        "DisableFadeInOu",
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
+        "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
         "Enables/Disables the Fade-In/Out effects."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
+        "Background",
+        "Sets the current sphere rendering as a background rendering type",
+        "Enables/Disables background rendering."
     };
 } // namespace
 
@@ -128,27 +147,45 @@ documentation::Documentation RenderableSphere::Documentation() {
             },
             {
                 OrientationInfo.identifier,
-                new StringInListVerifier({ "Inside", "Outside", "Inside/Outside" }),
+                new StringInListVerifier({ "Inside", "Outside", "Both" }),
                 Optional::Yes,
                 OrientationInfo.description
             },
             {
-                FadeOutThreshouldInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 1.0),
-                Optional::Yes,
-                FadeOutThreshouldInfo.description
-            },
-            {
-                FadeInThreshouldInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInThreshouldInfo.description
-            },
-            {
-                DisableFadeInOuInfo.identifier,
+                UseAdditiveBlendingInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
-                DisableFadeInOuInfo.description
+                UseAdditiveBlendingInfo.description
+            },
+            {
+                MirrorTextureInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                MirrorTextureInfo.description
+            },
+            {
+                FadeOutThresholdInfo.identifier,
+                new DoubleInRangeVerifier(0.0, 1.0),
+                Optional::Yes,
+                FadeOutThresholdInfo.description
+            },
+            {
+                FadeInThresholdInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeInThresholdInfo.description
+            },
+            {
+                DisableFadeInOutInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInOutInfo.description
+            },
+            {
+                BackgroundInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                BackgroundInfo.description
             },
         }
     };
@@ -161,7 +198,12 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
-    , _disableFadeInDistance(DisableFadeInOuInfo, true)
+    , _mirrorTexture(MirrorTextureInfo, false)
+    , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
+    , _disableFadeInDistance(DisableFadeInOutInfo, true)
+    , _backgroundRendering(BackgroundInfo, false)
+    , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
+    , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -177,28 +219,28 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
 
     _orientation.addOptions({
-        { Outside, "Outside" },
-        { Inside, "Inside" },
-        { Outside | Inside, "Inside/Outside" }
+        { static_cast<int>(Orientation::Outside), "Outside" },
+        { static_cast<int>(Orientation::Inside), "Inside" },
+        { static_cast<int>(Orientation::Both), "Both" }
     });
 
     if (dictionary.hasKey(OrientationInfo.identifier)) {
         const std::string& v = dictionary.value<std::string>(OrientationInfo.identifier);
         if (v == "Inside") {
-            _orientation = Inside;
+            _orientation = static_cast<int>(Orientation::Inside);
         }
         else if (v == "Outside") {
-            _orientation = Outside;
+            _orientation = static_cast<int>(Orientation::Outside);
         }
-        else if (v == "Inside/Outside") {
-            _orientation = Outside | Inside;
+        else if (v == "Both") {
+            _orientation = static_cast<int>(Orientation::Both);
         }
         else {
             throw ghoul::MissingCaseException();
         }
     }
     else {
-        _orientation = Outside;
+        _orientation = static_cast<int>(Orientation::Outside);
     }
     addProperty(_orientation);
 
@@ -211,23 +253,50 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
 
-    if (dictionary.hasKey(FadeOutThreshouldInfo.identifier)) {
+    addProperty(_mirrorTexture);
+    addProperty(_useAdditiveBlending);
+
+
+    if (dictionary.hasKey(MirrorTextureInfo.identifier)) {
+       _mirrorTexture = dictionary.value<bool>(MirrorTextureInfo.identifier);
+    }
+    if (dictionary.hasKey(UseAdditiveBlendingInfo.identifier)) {
+        _useAdditiveBlending = dictionary.value<bool>(UseAdditiveBlendingInfo.identifier);
+
+        if (_useAdditiveBlending) {
+            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+        }
+    }
+
+    if (dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
         _fadeOutThreshold = static_cast<float>(
-            dictionary.value<double>(FadeOutThreshouldInfo.identifier)
+            dictionary.value<double>(FadeOutThresholdInfo.identifier)
         );
+        addProperty(_fadeOutThreshold);
     }
 
-    if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+    if (dictionary.hasKey(FadeInThresholdInfo.identifier)) {
         _fadeInThreshold = static_cast<float>(
-            dictionary.value<double>(FadeInThreshouldInfo.identifier)
+            dictionary.value<double>(FadeInThresholdInfo.identifier)
         );
+        addProperty(_fadeInThreshold);
     }
 
-    if (dictionary.hasKey(FadeOutThreshouldInfo.identifier) ||
-        dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+    if (dictionary.hasKey(FadeOutThresholdInfo.identifier) ||
+        dictionary.hasKey(FadeInThresholdInfo.identifier)) {
         _disableFadeInDistance.set(false);
         addProperty(_disableFadeInDistance);
     }
+
+    if (dictionary.hasKey(BackgroundInfo.identifier)) {
+        _backgroundRendering = dictionary.value<bool>(BackgroundInfo.identifier);
+
+        if (_backgroundRendering) {
+            setRenderBin(Renderable::RenderBin::Background);
+        }
+    }
+
+    setRenderBinFromOpacity();
 }
 
 bool RenderableSphere::isReady() const {
@@ -235,10 +304,7 @@ bool RenderableSphere::isReady() const {
 }
 
 void RenderableSphere::initializeGL() {
-    _sphere = std::make_unique<PowerScaledSphere>(
-        PowerScaledScalar::CreatePSS(_size),
-        _segments
-    );
+    _sphere = std::make_unique<Sphere>(_size, _segments);
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -270,57 +336,99 @@ void RenderableSphere::deinitializeGL() {
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
-    glm::mat4 transform = glm::mat4(1.0);
+    Orientation orientation = static_cast<Orientation>(_orientation.value());
 
-    transform = glm::rotate(transform, glm::half_pi<float>(), glm::vec3(1, 0, 0));
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    glm::dmat3 modelRotation =
+        glm::dmat3(data.modelTransform.rotation);
 
     // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    _shader->setUniform(_uniformCache.viewProjection, data.camera.viewProjectionMatrix());
-    _shader->setUniform(_uniformCache.modelTransform, transform);
+    glm::mat4 modelViewProjection = data.camera.projectionMatrix() *
+                             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
+    _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjection);
 
-    setPscUniforms(*_shader, data.camera, data.position);
+    glm::mat3 modelViewRotation = glm::mat3(
+        glm::dmat3(data.camera.viewRotationMatrix()) * modelRotation
+    );
+    _shader->setUniform(_uniformCache.modelViewRotation, modelViewRotation);
 
-    float adjustedTransparency = _opacity;
+    float adjustedOpacity = _opacity;
 
-    if (_fadeInThreshold > 0.0) {
-        const double distCamera = glm::length(data.camera.positionVec3());
-        const float funcValue = static_cast<float>(
-            (1.0 / double(_fadeInThreshold / 1E24)) * (distCamera / 1E24)
-        );
+    if (!_disableFadeInDistance) {
+        if (_fadeInThreshold > -1.0) {
+            const float logDistCamera = glm::log(static_cast<float>(
+                glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
+                ));
+            const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
+            const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-        adjustedTransparency *= (funcValue > 1.f) ? 1.f : funcValue;
+            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+                const float fadeFactor = glm::clamp(
+                    (logDistCamera - startLogFadeDistance) /
+                    (stopLogFadeDistance - startLogFadeDistance),
+                    0.f,
+                    1.f
+                );
+                adjustedOpacity *= fadeFactor;
+            }
+            else if (logDistCamera <= startLogFadeDistance) {
+                adjustedOpacity = 0.f;
+            }
+        }
+
+        if (_fadeOutThreshold > -1.0) {
+            const float logDistCamera = glm::log(static_cast<float>(
+                glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
+                ));
+            const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
+            const float stopLogFadeDistance = startLogFadeDistance + 1.f;
+
+            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+                const float fadeFactor = glm::clamp(
+                    (logDistCamera - startLogFadeDistance) /
+                    (stopLogFadeDistance - startLogFadeDistance),
+                    0.f,
+                    1.f
+                );
+                adjustedOpacity *= (1.f - fadeFactor);
+            }
+            else if (logDistCamera >= stopLogFadeDistance) {
+                adjustedOpacity = 0.f;
+            }
+        }
     }
-
-    if (_fadeOutThreshold > -1.0) {
-        const double distCamera = glm::distance(
-            data.camera.positionVec3(),
-            data.position.dvec3()
-        );
-        const double term = std::exp(
-            (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
-        );
-
-        adjustedTransparency *= static_cast<float>(term / (term + 1.0));
-    }
-
     // Performance wise
-    if (adjustedTransparency < 0.01f) {
+    if (adjustedOpacity < 0.01f) {
         return;
     }
 
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
+    _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.colorTexture, unit);
 
+    // Setting these states should not be necessary,
+    // since they are the default state in OpenSpace.
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+
+    if (orientation == Orientation::Inside) {
+        glCullFace(GL_FRONT);
+    }
+    else if (orientation == Orientation::Both) {
+        glDisable(GL_CULL_FACE);
+    }
 
     bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
@@ -328,22 +436,31 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
-    if (usingABufferRenderer) {
+    if (usingABufferRenderer && _useAdditiveBlending) {
         _shader->setUniform("additiveBlending", true);
     }
 
-    if (usingFramebufferRenderer) {
+    if (usingFramebufferRenderer && _useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (usingFramebufferRenderer) {
+    if (usingFramebufferRenderer && _useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(true);
     }
 
     _shader->setIgnoreUniformLocationError(IgnoreError::No);
     _shader->deactivate();
+
+    if (orientation == Orientation::Inside) {
+        glCullFace(GL_BACK);
+    }
+    else if (orientation == Orientation::Both) {
+        glEnable(GL_CULL_FACE);
+    }
 }
 
 void RenderableSphere::update(const UpdateData&) {
@@ -353,10 +470,7 @@ void RenderableSphere::update(const UpdateData&) {
     }
 
     if (_sphereIsDirty) {
-        _sphere = std::make_unique<PowerScaledSphere>(
-            PowerScaledScalar::CreatePSS(_size),
-            _segments
-        );
+        _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
         _sphereIsDirty = false;
     }

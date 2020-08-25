@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,7 +65,7 @@ int progressCallback(void* userData, int64_t nTotalDownloadBytes,
     HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
     return r->_onProgress(
         HttpRequest::Progress{
-            true,
+            nTotalDownloadBytes > 0,
             static_cast<size_t>(nTotalDownloadBytes),
             static_cast<size_t>(nDownloadedBytes)
         }
@@ -124,9 +124,13 @@ void HttpRequest::perform(RequestOptions opt) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
 
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
+    #if LIBCURL_VERSION_NUM >= 0x072000
+    // xferinfo was introduced in 7.32.0, if a lower curl version is used the progress
+    // will not be shown for downloads on the splash screen
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this); // NOLINT
     // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
+    #endif
 
     if (opt.requestTimeoutSeconds > 0) {
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds); // NOLINT
@@ -138,10 +142,12 @@ void HttpRequest::perform(RequestOptions opt) {
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode); // NOLINT
         if (responseCode == StatusCodeOk) {
             setReadyState(ReadyState::Success);
-        } else {
+        }
+        else {
             setReadyState(ReadyState::Fail);
         }
-    } else {
+    }
+    else {
         setReadyState(ReadyState::Fail);
     }
     curl_easy_cleanup(curl);
@@ -197,6 +203,7 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
 
     if (!initDownload()) {
         LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
+        deinitDownload();
         markAsFailed();
         return;
     }
@@ -211,14 +218,16 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
         if (rs == HttpRequest::ReadyState::Success) {
             LTRACE(fmt::format("Finished sync download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsSuccessful();
-        } else if (rs == HttpRequest::ReadyState::Fail) {
+        }
+        else if (rs == HttpRequest::ReadyState::Fail) {
             LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsFailed();
         }
     });
     _httpRequest.perform(opt);
-    deinitDownload();
 
     LTRACE(fmt::format("End sync download '{}'", _httpRequest.url()));
 }
@@ -242,7 +251,12 @@ void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
     }
     markAsStarted();
     _downloadThread = std::thread([this, opt] {
-        download(opt);
+        try {
+            download(opt);
+        }
+        catch (const ghoul::filesystem::FileSystem::FileSystemException& e) {
+            LERRORC(e.component, e.message);
+        }
     });
 }
 
@@ -286,21 +300,25 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
         if (rs == HttpRequest::ReadyState::Success) {
             LTRACE(fmt::format("Finished async download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsSuccessful();
         }
         else if (rs == HttpRequest::ReadyState::Fail) {
             LTRACE(fmt::format("Failed async download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsFailed();
         }
     });
 
     _httpRequest.perform(opt);
     if (!hasSucceeded()) {
+        deinitDownload();
         markAsFailed();
     }
-    _downloadFinishCondition.notify_all();
-    deinitDownload();
+
     LTRACE(fmt::format("End async download '{}'", _httpRequest.url()));
+
+    _downloadFinishCondition.notify_all();
 }
 
 const std::string& AsyncHttpDownload::url() const {
@@ -351,6 +369,7 @@ bool HttpFileDownload::initDownload() {
     }
 
     ++nCurrentFilehandles;
+    _hasHandle = true;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
     if (_file.fail()) {
@@ -414,8 +433,11 @@ const std::string& HttpFileDownload::destination() const {
 }
 
 bool HttpFileDownload::deinitDownload() {
-    _file.close();
-    --nCurrentFilehandles;
+    if (_hasHandle) {
+        _hasHandle = false;
+        _file.close();
+        --nCurrentFilehandles;
+    }
     return _file.good();
 }
 

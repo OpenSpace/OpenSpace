@@ -7,7 +7,8 @@ local Kernels = asset.syncedResource({
 
 local PlutoKernels = {
     Kernels .. "/NavPE_de433_od122.bsp",
-    Kernels .. "/NavSE_plu047_od122.bsp"
+    Kernels .. "/NavSE_plu047_od122.bsp",
+    Kernels .. "/ssd_jpl_nasa_gov_plu043.bsp"
 }
 
 asset.export("PlutoKernels", PlutoKernels)

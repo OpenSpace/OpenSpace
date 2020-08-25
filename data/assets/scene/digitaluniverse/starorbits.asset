@@ -1,0 +1,170 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+
+local speck = asset.syncedResource({
+    Name = "Grids Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_starorbits_speck",
+    Version = 1
+})
+
+local sunOrbit = {
+    Identifier = "SunOrbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Opacity = 1.0,
+        File = speck .. "/starorbits-Sun.speck",
+        MeshColor = {{ 1.0, 0.65, 0.0 }},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "Sun Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+local barnardsOrbit = {
+    Identifier = "BarnardsOrbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Opacity = 1.0,
+        File = speck .. "/starorbits-BarnardsStar.speck",
+        MeshColor = {{0.39, 0.58, 0.93}},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "Barnards Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+local kapteynsOrbit = {
+    Identifier = "KapteynsOrbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Opacity = 1.0,
+        File = speck .. "/starorbits-KapteynsStar.speck",
+        MeshColor = {{0.6, 0.6, 0.6}},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "Kapteyns Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+local lacaille9352Orbit = {
+    Identifier = "Lacaille9352Orbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Opacity = 1.0,
+        File = speck .. "/starorbits-Lacaille9352.speck",
+        MeshColor = {{0.58, 0.0, 0.83}},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "Lacaille 9352 Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+local lSR1826Orbit = {
+    Identifier = "LSR1826Orbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Opacity = 1.0,
+        File = speck .. "/starorbits-LSR1826+3014.speck",
+        MeshColor = {{0.0, 0.39, 0.0}},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "LSR1826+3014 Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+local lSRJ0822Orbit = {
+    Identifier = "LSRJ0822Orbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Opacity = 1.0,
+        File = speck .. "/starorbits-LSRJ0822+1700.speck",
+        MeshColor = {{0.5, 1.0, 0.0}},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "LSRJ0822+1700 Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+local pM_J13420Orbit = {
+    Identifier = "PM_J13420Orbit",
+    --Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Opacity = 1.0,
+        File = speck .. "/starorbits-PM_J13420-3415.speck",
+        MeshColor = {{0.70, 0.13, 0.13}},
+        --LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "PM_J13420-3415 Orbit",
+        Path = "/Milky Way/Stars/Stars Orbits"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    sunOrbit, barnardsOrbit, pM_J13420Orbit, lSRJ0822Orbit, lSR1826Orbit,
+    lacaille9352Orbit, kapteynsOrbit
+})

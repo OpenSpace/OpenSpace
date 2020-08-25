@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,26 +41,43 @@ namespace {
 
     std::string escapedLuaString(const std::string& str) {
         std::string luaString;
+
         for (const char& c : str) {
             switch (c) {
-                case '\'':
-                    luaString += "\'";
-                    break;
-                default:
-                    luaString += c;
+            case '\t':
+                luaString += "\\t"; // Replace tab with \t.
+                break;
+            case '"':
+                luaString += "\\\""; // Replace " with \".
+                break;
+            case '\\':
+                luaString += "\\\\"; // Replace \ with \\.
+                break;
+            case '\n':
+                luaString += "\\\\n"; // Replace newline with \n.
+                break;
+            case '\r':
+                luaString += "\\r"; // Replace carriage return with \r.
+                break;
+            default:
+                luaString += c;
             }
         }
+
         return luaString;
     }
 
     std::string luaLiteralFromJson(nlohmann::json value) {
         if (value.is_string()) {
             return "'" + escapedLuaString(value.get<std::string>()) + "'";
-        } else if (value.is_boolean()) {
+        }
+        else if (value.is_boolean()) {
             return value.get<bool>() ? "true" : "false";
-        } else if (value.is_number()) {
+        }
+        else if (value.is_number()) {
             return std::to_string(value.get<double>());
-        } else if (value.is_array()) {
+        }
+        else if (value.is_array()) {
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += luaLiteralFromJson(it.value()) += ",";
@@ -68,7 +85,8 @@ namespace {
             literal.pop_back(); // remove last comma
             literal += "}";
             return literal;
-        } else if (value.is_object()) {
+        }
+        else if (value.is_object()) {
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
@@ -76,8 +94,9 @@ namespace {
             literal.pop_back(); // remove last comma
             literal += "}";
             return literal;
-        }{
-            return "null";
+        }
+        else {
+            return "nil";
         }
     }
 } // namespace

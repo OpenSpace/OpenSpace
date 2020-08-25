@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/lightsource.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -58,6 +59,9 @@ namespace openspace {
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(Mission::Documentation());
+    engine.addDocumentation(
+        interaction::NavigationHandler::NavigationState::Documentation()
+    );
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
     engine.addDocumentation(Scale::Documentation());
@@ -69,6 +73,9 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LightSource::Documentation());
 }
 
+// NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just
+//       because it has the same method name (and similar implementaiton) as the
+//       documentation version.
 void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Dashboard::luaLibrary());
     engine.addLibrary(MissionManager::luaLibrary());
@@ -77,6 +84,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(ParallelPeer::luaLibrary());
     engine.addLibrary(RenderEngine::luaLibrary());
     engine.addLibrary(SpiceManager::luaLibrary());
+    engine.addLibrary(Profile::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());

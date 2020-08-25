@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,10 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
@@ -58,7 +59,7 @@ documentation::Documentation Translation::Documentation() {
     };
 }
 
-std::unique_ptr<Translation> Translation::createFromDictionary(
+ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Translation");
@@ -66,9 +67,13 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
     const std::string& translationType = dictionary.value<std::string>(KeyType);
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
-    std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
+    Translation* result = factory->create(
+        translationType,
+        dictionary,
+        &global::memoryManager.PersistentMemory
+    );
     result->setIdentifier("Translation");
-    return result;
+    return ghoul::mm_unique_ptr<Translation>(result);
 }
 
 Translation::Translation() : properties::PropertyOwner({ "Translation" }) {}

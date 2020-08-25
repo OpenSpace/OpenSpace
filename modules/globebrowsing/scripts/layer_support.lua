@@ -49,6 +49,16 @@ openspace.globebrowsing.documentation = {
             ")"
     },
     {
+        Name = "addGibsLayer",
+        Arguments = "string, string, string, string, string",
+        Documentation = "Adds a new layer from NASA GIBS to the Earth globe. Arguments " ..
+            "are: imagery layer name, imagery resolution, start date, end date, format. " ..
+             "For all specifications, see " ..
+            "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products" ..
+            "Usage:" ..
+            "openspace.globebrowsing.addGibsLayer('AIRS_Temperature_850hPa_Night', '2km', '2013-07-15', 'Present', 'png')"
+    },
+    {
         Name = "parseInfoFile",
         Arguments = "string",
         Documentation =
@@ -82,10 +92,11 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addFocusNodeFromLatLong",
-        Arguments = "string, number, number, string",
+        Arguments = "string, string, number, number, number",
         Documentation =
             "Creates a new SceneGraphNode that can be used as focus node. " ..
-            "Usage: openspace.globebrowsing.addFocusNodeFromLatLong(\"Olympus Mons\", -18.65, 226.2, \"Mars\")"
+            "Usage: openspace.globebrowsing.addFocusNodeFromLatLong(" ..
+            "\"Olympus Mons\", \"Mars\", -18.65, 226.2, optionalAltitude)"
     },
     {
         Name = "loadWMSServersFromFile",
@@ -95,6 +106,14 @@ openspace.globebrowsing.documentation = {
             "'openspace.globebrowsing.loadWMSCapabilities' file."
     }
 }
+
+openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, startDate, endDate)
+    if endDate == 'Present' then
+        endDate = ''
+    end
+    local xml = openspace.globebrowsing.createTemporalGibsGdalXml(layer, startDate, endDate, '1d', resolution, format)
+    openspace.globebrowsing.addLayer('Earth', 'ColorLayers', { Identifier = layer,  Type = "TemporalTileLayer", FilePath = xml })
+end
 
 openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format)
     temporalTemplate =
@@ -228,7 +247,13 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     -- to be walked recursively. This is probably not what the users expects (and it is
     -- also one of the default values in the globebrowsing customization script), so we
     -- ignore the empty string here
-    if dir == '' then
+
+    if dir == nil or dir == '' then
+        openspace.printError("No directory specified")
+        return
+    end
+    if node_name == nil or node_name == '' then
+        openspace.printError("No node name specified")
         return
     end
 
@@ -289,10 +314,10 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
     end
 end
 
-openspace.globebrowsing.addFocusNodeFromLatLong = function (name, lat, long, globe_identifier)  
-    openspace.printInfo("Creating focus node for '" .. name .. "'")
+openspace.globebrowsing.addFocusNodeFromLatLong = function (name, globe_identifier, lat, long, altitude)
+    altitude = altitude or 0;
 
-    local a, b, c = openspace.globebrowsing.getGeoPosition(globe_identifier, lat, long, 0.0)
+    local a, b, c = openspace.globebrowsing.getGeoPosition(globe_identifier, lat, long, altitude)
     local p = { a, b, c }
     local identifier = globe_identifier .. "-" .. name
 
@@ -301,8 +326,11 @@ openspace.globebrowsing.addFocusNodeFromLatLong = function (name, lat, long, glo
         Parent = globe_identifier,
         Transform = {
             Translation = {
-                Type = "StaticTranslation",
-                Position = { p[1], p[2], p[3] }
+                Type = "GlobeTranslation",
+                Globe = globe_identifier,
+                Latitude = lat,
+                Longitude = long,
+                FixedAltitude = altitude
             }
         },
         GUI = {
@@ -328,5 +356,4 @@ openspace.globebrowsing.loadWMSServersFromFile = function (file_path)
             )
         end
     end
-
 end

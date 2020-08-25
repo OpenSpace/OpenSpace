@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
 #include <functional>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -68,6 +69,7 @@ public:
     void setTimeNextFrame(Time t);
     void setDeltaTime(double deltaTime);
     void setPause(bool pause);
+    void setDeltaTimeSteps(const std::vector<double> deltaTimes);
 
     /**
      * Returns the delta time, unaffected by pause
@@ -80,6 +82,8 @@ public:
     double deltaTime() const;
     bool isPaused() const;
 
+    std::vector<double> deltaTimeSteps() const;
+
     float defaultTimeInterpolationDuration() const;
     float defaultDeltaTimeInterpolationDuration() const;
     float defaultPauseInterpolationDuration() const;
@@ -90,6 +94,15 @@ public:
     void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
     void interpolatePause(bool pause, double durationSeconds);
 
+    std::optional<double> nextDeltaTimeStep();
+    std::optional<double> previousDeltaTimeStep();
+    bool hasNextDeltaTimeStep() const;
+    bool hasPreviousDeltaTimeStep() const;
+    void setNextDeltaTimeStep();
+    void setPreviousDeltaTimeStep();
+    void interpolateNextDeltaTimeStep(double durationSeconds);
+    void interpolatePreviousDeltaTimeStep(double durationSeconds);
+
     void addKeyframe(double timestamp, TimeKeyframeData kf);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
     void removeKeyframesAfter(double timestamp, bool inclusive = false);
@@ -99,11 +112,13 @@ public:
 
     CallbackHandle addTimeChangeCallback(TimeChangeCallback cb);
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
+    CallbackHandle addDeltaTimeStepsChangeCallback(TimeChangeCallback cb);
     CallbackHandle addTimeJumpCallback(TimeChangeCallback cb);
     CallbackHandle addTimelineChangeCallback(TimeChangeCallback cb);
 
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+    void removeDeltaTimeStepsChangeCallback(CallbackHandle handle);
     void triggerPlaybackStart();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
@@ -121,9 +136,13 @@ private:
     bool _timePaused = false;
     double _targetDeltaTime = 1.0;
     double _deltaTime = 0.0;
-    double _lastTime = 0;
+    double _lastTime = 0.0;
     bool _lastTimePaused = false;
-    double _lastDeltaTime = 0;
+    double _lastDeltaTime = 0.0;
+    double _lastTargetDeltaTime = 0.0;
+
+    std::vector<double> _deltaTimeSteps;
+    bool _deltaTimeStepsChanged = false;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
     properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
@@ -141,6 +160,7 @@ private:
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
+    std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeStepsChangeCallbacks;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;

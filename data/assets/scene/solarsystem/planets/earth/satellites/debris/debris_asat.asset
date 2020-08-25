@@ -1,0 +1,15 @@
+local assetHelper = asset.require('util/asset_helper')
+local shared = asset.require('util/tle_helper')
+
+local group = {
+    Title = "Indian ASAT test Debris",
+    Url = "http://www.celestrak.com/NORAD/elements/2019-006.txt",
+    TrailColor = { 0.25, 0.35, 0.45 }
+}
+
+local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+
+
+local objectNames = {}
+
+shared.registerSatelliteGroupObjects(asset, group, tle, true)

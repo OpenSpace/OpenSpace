@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 #include "moduleengine_lua.inl"
 
@@ -42,6 +43,8 @@ ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }) {}
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
+    ZoneScoped
+
     for (OpenSpaceModule* m : AllModules()) {
         const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
@@ -54,6 +57,8 @@ void ModuleEngine::initialize(
 }
 
 void ModuleEngine::initializeGL() {
+    ZoneScoped
+
     LDEBUG("Initializing OpenGL of modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
         LDEBUG(fmt::format("Initializing OpenGL of module '{}'", m->identifier()));
@@ -63,6 +68,8 @@ void ModuleEngine::initializeGL() {
 }
 
 void ModuleEngine::deinitialize() {
+    ZoneScoped
+
     LDEBUG("Deinitializing modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
         LDEBUG(fmt::format("Deinitializing module '{}'", m->identifier()));
@@ -81,6 +88,8 @@ void ModuleEngine::deinitialize() {
 }
 
 void ModuleEngine::deinitializeGL() {
+    ZoneScoped
+
     LDEBUG("Deinitializing OpenGL of modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
         LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", m->identifier()));
@@ -93,6 +102,8 @@ void ModuleEngine::deinitializeGL() {
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
                                   const ghoul::Dictionary& configuration)
 {
+    ZoneScoped
+
     ghoul_assert(mod, "Module must not be nullptr");
 
     auto it = std::find_if(

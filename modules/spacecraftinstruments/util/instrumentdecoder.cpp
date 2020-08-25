@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,8 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
 
     if (dictionary.hasKeyAndValue<std::string>(KeyStopCommand) && _type == "SCANNER"){
         dictionary.getValue(KeyStopCommand, _stopCommand);
-    } else {
+    }
+    else {
         LWARNING("Scanner must provide stop command, please check mod file.");
     }
 

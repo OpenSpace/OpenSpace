@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,7 @@ protected:
     void add(const std::vector<std::vector<float>>& optionValues,
         const std::vector<float>& sum);
 
-    glm::size3_t _dimensions;
+    glm::size3_t _dimensions = glm::size3_t(0);
     bool _useLog = false;
     bool _useHistogram = false;
     glm::vec2 _normValues = glm::vec2(1.f);
@@ -90,7 +90,7 @@ protected:
     std::vector<std::unique_ptr<Histogram>> _histograms;
     std::set<std::string> _coordinateVariables = { "x", "y", "z", "phi", "theta" };
 
-    glm::vec2 _histNormValues = glm::vec2(10.f, 10.f);
+    glm::vec2 _histNormValues = glm::vec2(10.f);
 };
 
 } // namespace openspace
