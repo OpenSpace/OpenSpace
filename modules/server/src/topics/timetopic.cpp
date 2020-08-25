@@ -110,6 +110,28 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     );
 }
 
+json TimeTopic::getNextPrevDeltaTimeStepJson() {
+    const std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
+    const std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
+    const bool hasNext = nextStep.has_value();
+    const bool hasPrev = prevStep.has_value();
+
+    json nextPrevJson = {
+        { "hasNextStep", hasNext },
+        { "hasPrevStep", hasPrev }
+    };
+
+    if (hasNext) {
+        nextPrevJson["nextStep"] = nextStep.value();
+    }
+
+    if (hasPrev) {
+        nextPrevJson["prevStep"] = prevStep.value();
+    }
+
+    return nextPrevJson;
+}
+
 void TimeTopic::sendCurrentTime() {
     const json timeJson = {
         { "time", global::timeManager.time().ISO8601() }
@@ -124,28 +146,15 @@ void TimeTopic::sendFullTimeData() {
     const double targetDeltaTime = global::timeManager.targetDeltaTime();
     const bool isPaused = global::timeManager.isPaused();
 
-    std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
-    std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
-
-    bool hasNext = nextStep.has_value();
-    bool hasPrev = prevStep.has_value();
-
     json timeJson = {
         { "time", currentTime },
         { "deltaTime", deltaTime},
         { "targetDeltaTime", targetDeltaTime},
-        { "isPaused", isPaused },
-        { "hasNextStep", hasNext },
-        { "hasPrevStep", hasPrev }
+        { "isPaused", isPaused }
     };
 
-    if (hasNext) {
-        timeJson["nextStep"] = nextStep.value();
-    }
-
-    if (hasPrev) {
-        timeJson["prevStep"] = prevStep.value();
-    }
+    json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    timeJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
     _connection->sendJson(wrappedPayload(timeJson));
     _lastUpdateTime = std::chrono::system_clock::now();
@@ -155,25 +164,13 @@ void TimeTopic::sendFullTimeData() {
 
 void TimeTopic::sendDeltaTimeSteps() {
     const std::vector<double> steps = global::timeManager.deltaTimeSteps();
-    const std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
-    const std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
-
-    const bool hasNext = nextStep.has_value();
-    const bool hasPrev = prevStep.has_value();
 
     json deltaTimeStepsJson = {
-        { "deltaTimeSteps", steps }, 
-        { "hasNextStep", hasNext },
-        { "hasPrevStep", hasPrev }
+        { "deltaTimeSteps", steps } 
     };
 
-    if (hasNext) {
-        deltaTimeStepsJson["nextStep"] = nextStep.value();
-    }
-
-    if (hasPrev) {
-        deltaTimeStepsJson["prevStep"] = prevStep.value();
-    }
+    json nextPrevJson = getNextPrevDeltaTimeStepJson();
+    deltaTimeStepsJson.insert(nextPrevJson.begin(), nextPrevJson.end());
 
     _connection->sendJson(wrappedPayload(deltaTimeStepsJson));
     _lastDeltaTimeSteps = steps;
