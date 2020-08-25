@@ -919,7 +919,7 @@ RenderEngine::RendererImplementation RenderEngine::rendererImplementation() cons
 
 ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
     if (_openglStateCache == nullptr) {
-        _openglStateCache = ghoul::opengl::OpenGLStateCache::getInstance();
+        _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
     }
     return *_openglStateCache;
 }

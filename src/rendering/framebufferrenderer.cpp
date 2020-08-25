@@ -450,7 +450,6 @@ void FramebufferRenderer::initialize() {
     global::deferredcasterManager.addListener(*this);
 
     // Set Default Rendering OpenGL State
-
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     glEnablei(GL_BLEND, 0);
     glDisablei(GL_BLEND, 1);
@@ -1124,8 +1123,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-    GLint viewport[4] = {0};
-    global::renderEngine.openglStateCache().viewPort(viewport);
+    GLint viewport[4] = { 0 };
+    global::renderEngine.openglStateCache().viewport(viewport);
 
     // Set Render Pipeline State
     global::renderEngine.openglStateCache().setCachedStates();
@@ -1142,7 +1141,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Deferred G-Buffer")
 
         GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        global::renderEngine.openglStateCache().setViewPortState(vp);
+        global::renderEngine.openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
@@ -1252,8 +1251,8 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GLint viewport[4] = {0};
-        global::renderEngine.openglStateCache().viewPort(viewport);
+        GLint viewport[4] = { 0 };
+        global::renderEngine.openglStateCache().viewport(viewport);
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1271,7 +1270,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
                 static_cast<GLsizei>(viewport[2] * s),
                 static_cast<GLsizei>(viewport[3] * s)
             };
-            global::renderEngine.openglStateCache().setViewPortState(newVP);
+            global::renderEngine.openglStateCache().setViewportState(newVP);
 
             if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
                 _downscaleVolumeRendering.currentDownscaleFactor = s;
@@ -1368,7 +1367,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            global::renderEngine.openglStateCache().setViewPortState(viewport);
+            global::renderEngine.openglStateCache().setViewportState(viewport);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
         }

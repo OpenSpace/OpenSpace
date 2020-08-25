@@ -915,7 +915,7 @@ void RenderableStars::renderPSFToTexture() {
     //glDeleteFramebuffers(1, &convolveFBO);
 
     // Restores OpenGL blending state
-    global::renderEngine.openglStateCache().setBlendState();
+    global::renderEngine.openglStateCache().resetBlendState();
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {

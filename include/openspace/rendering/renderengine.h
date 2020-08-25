@@ -35,11 +35,15 @@
 #include <openspace/properties/triggerproperty.h>
 
 namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class OpenGLStateCache;
+    } // namespace opengl
+
     class Dictionary;
     class SharedMemory;
 } // ghoul
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl { class ProgramObject; class OpenGLStateCache; }
 
 namespace openspace {
 

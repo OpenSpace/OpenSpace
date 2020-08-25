@@ -247,8 +247,8 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setLineState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetLineState();
 }
 
 } // namespace openspace

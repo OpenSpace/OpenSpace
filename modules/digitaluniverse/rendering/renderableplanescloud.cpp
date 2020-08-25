@@ -585,8 +585,8 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->deactivate();
 
     // Restores OpenGL Rendering State
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setDepthState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetDepthState();
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data,

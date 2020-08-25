@@ -1194,7 +1194,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     }
 
     // Restores OpenGL blending state
-    global::renderEngine.openglStateCache().setBlendState();
+    global::renderEngine.openglStateCache().resetBlendState();
 }
 
 void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
@@ -1213,9 +1213,9 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
     GLint m_viewport[4];
-    global::renderEngine.openglStateCache().viewPort(m_viewport);
+    global::renderEngine.openglStateCache().viewport(m_viewport);
 
-    // Creates the FBO for the cFglGetalculations
+    // Creates the FBO for the calculations
     GLuint calcFBO;
     glGenFramebuffers(1, &calcFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
@@ -1239,7 +1239,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    global::renderEngine.openglStateCache().setViewPortState(m_viewport);
+    global::renderEngine.openglStateCache().setViewportState(m_viewport);
     glDeleteBuffers(1, &quadCalcVBO);
     glDeleteVertexArrays(1, &quadCalcVAO);
     glDeleteFramebuffers(1, &calcFBO);

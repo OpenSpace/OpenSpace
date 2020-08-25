@@ -860,8 +860,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glBindVertexArray(0);
     _program->deactivate();
 
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setDepthState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetDepthState();
 
 }
 

@@ -682,8 +682,8 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     _pointsProgram->deactivate();
 
     // Restores OpenGL Rendering State
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setDepthState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetDepthState();
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {

@@ -234,7 +234,7 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         t.fontRenderer->render(*t.font, t.textPosition, t.text, t.textColor);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        global::renderEngine.openglStateCache().setViewPortState();
+        global::renderEngine.openglStateCache().resetViewportState();
         //glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
