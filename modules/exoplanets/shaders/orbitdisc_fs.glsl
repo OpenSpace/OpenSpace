@@ -34,56 +34,71 @@ uniform float opacity;
 uniform float eccentricity;
 uniform float semiMajorAxis;
 
+const float AstronomicalUnit = 149597870700.0; // m
+const float Epsilon = 0.0000001;
+
+// Compute semi minor axis from major axis, a, and eccentricity, e
+float semiMinorAxis(float a, float e) {
+    return a * sqrt(1.0 - pow(e, 2.0));
+}
+
+// If returned value <= 1, the point is insdie or on the ellipse specified by the input:
+// a and b are the semi-major and semi-minor axes, respectively.
+// cx is the displacement of the center of the ellipse along the x-axis (for an orbit,
+// the y-displacement is always zero)
+float ellipseTest(vec2 point, float a, float b, float cx) {
+    float x = point.x;
+    float y = point.y;
+    return (pow(x - cx, 2.0) / (a*a)) + ((y*y) / (b*b));
+}
+
 Fragment getFragment() {
     // Moving the origin to the center
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
-    // The length of the texture coordinates vector is our distance from the center
-    float outer;
-    float inner;
-    
-    float E = eccentricity;
-    float AU = semiMajorAxis;
-    float BU = AU * sqrt(1.0 - pow(E, 2.0)); // semi-minor axis
-    float CU = sqrt(pow(AU, 2.0) - pow(BU, 2.0));
-    float apo = AU * (1 + E);
+    float AUpper = semiMajorAxis;
+    float BUpper = semiMinorAxis(AUpper, eccentricity); 
+    float CUpper = sqrt(AUpper*AUpper - BUpper*BUpper);
+    float outerApoapsisDistance = AUpper * (1 + eccentricity); 
 
-    float AL = AU - textureOffset.x * 149597870700.0 - textureOffset.y * 149597870700.0;
-    float BL = AL * sqrt(1.0 - pow(E, 2.0));
-    float CL = sqrt(pow(AL, 2.0) - pow(BL, 2.0));
-    float apo_inner = AL * (1 + E);
+    float ALower = AUpper - AstronomicalUnit * (textureOffset.x + textureOffset.y);
+    float BLower = semiMinorAxis(ALower, eccentricity);
+    float CLower = sqrt(ALower*ALower - BLower*BLower);
+    float innerApoapsisDistance = ALower * (1 + eccentricity); 
 
-    if(eccentricity <= 0.000000){
-        outer = pow(st.x, 2.0) / pow(AU/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BU/apo, 2.0)));
-        inner = pow(st.x, 2.0) / pow(AL/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BL/apo, 2.0)));
+    // Normalize based on outer apoapsis distance (size of plane)
+    float AU_n = AUpper / outerApoapsisDistance;
+    float BU_n = BUpper / outerApoapsisDistance; 
+    float CU_n = CUpper / outerApoapsisDistance;
+    float AL_n = ALower / outerApoapsisDistance;
+    float BL_n = BLower / outerApoapsisDistance;
+    float CL_n = CLower / outerApoapsisDistance;
+
+    if (eccentricity <= Epsilon) {
+        CU_n = 0.0;
+        CL_n = 0.0;
     }  
-    else {
-        outer = pow((st.x + CU/apo), 2.0) / pow(AU/apo, 2.0)  +  pow(st.y, 2.0) / (pow(BU/apo, 2.0));
-        inner = pow((st.x + CL/apo), 2.0) / pow(AL/apo, 2.0)  +  pow(st.y, 2.0) / (pow(BL/apo, 2.0));
+
+    float outer = ellipseTest(st, AU_n, BU_n, -CU_n); 
+    float inner = ellipseTest(st, AL_n, BL_n, -CL_n);
+    if (outer > 1.0 || inner < 1.0) { 
+        // point is outside outer ellipse or inside inner eliipse
+        discard;
     }
-    
-    if (outer > 1.0) // point is outside outer ellipse
-        discard;
-    if (inner < 1.0) // point is inside inner ellipse
-        discard;
 
     // Remapping the texture coordinates
     vec2 dir = normalize(st);
 
-    // Find outer ellipse: where along the direction is the equation = 1
-    float scale;
-    if (eccentricity <= 0.000000) {
-        scale = sqrt((pow((AU/apo) * (BU/apo), 2)) / ((pow((BU/apo) * dir.x, 2)) + (pow((AU/apo) * dir.y, 2))));
-    }
-    else {
-        float first = -(pow(BU/apo, 2.0) * dir.x * (CU/apo)) / ( pow((BU/apo) * dir.x, 2.0) + pow((AU/apo) * dir.y, 2.0));
-        float second = pow((pow(BU/apo, 2.0) * dir.x * (CU/apo))  /  (pow((BU/apo) * dir.x, 2.0) + pow((AU/apo) * dir.y, 2.0)), 2.0);
-        float third = (pow( (BU/apo) * (CU/apo) , 2.0) - pow((AU/apo) * (BU/apo), 2.0)) / (pow((BU/apo) * dir.x, 2.0) + pow((AU/apo) * dir.y, 2.0));
-        scale = first + sqrt(second - third);
-    }
+    // Find outer ellipse: where along the direction does the equation == 1?
+    float denominator = pow(BU_n * dir.x, 2.0) + pow(AU_n * dir.y, 2.0);
+    float first = -(pow(BU_n, 2.0) * dir.x * CU_n) / denominator;
+    float second = pow((pow(BU_n, 2.0) * dir.x * CU_n)  /  denominator, 2.0);
+    float third = (pow(BU_n * CU_n, 2.0) - pow(AU_n * BU_n, 2.0)) / denominator;
+
+    float scale = first + sqrt(second - third);
     
     vec2 max = dir * scale;
-    vec2 min = max * (apo_inner/apo);
+    vec2 min = max * (innerApoapsisDistance / outerApoapsisDistance);
 
     float distance1 = distance(max, min);
     float distance2 = distance(max, st);
