@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 
-#include <modules/exoplanets/discoverymethods/discoverymethods.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/openspacemodule.h>
 
@@ -83,33 +82,10 @@ public:
     virtual ~ExoplanetsModule() = default;
 
     scripting::LuaLibrary luaLibrary() const override;
-
     std::vector<documentation::Documentation> documentations() const override;
-
-    void setClosestExoplanet(Exoplanet);
-    void setStarName(std::string);
-    void setPlanetSystem(std::vector<Exoplanet>);
-    void setPlanetNames(std::vector<std::string>);
-    void setRotation(glm::dmat3);
-    void setNorthVector(glm::dvec3);
-
-    Exoplanet closestExoplanet();
-    std::string getStarName();
-    std::vector<Exoplanet> planetSystem();
-    std::vector<std::string> planetNames();
-    glm::dmat3 getRotation();
-    glm::dvec3 getNorthVector();
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
-    std::unique_ptr<openspace::exoplanets::DiscoveryMethods> _discoveryMethods;
-
-    Exoplanet _exo;
-    std::string _starName;
-    std::vector<Exoplanet> _planetSystem;
-    std::vector<std::string> _planetNames;
-    glm::dmat3 _rotation;
-    glm::dvec3 _north;
 };
 
 } // namespace openspace

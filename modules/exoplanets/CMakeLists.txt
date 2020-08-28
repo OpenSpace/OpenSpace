@@ -26,7 +26,6 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/discoverymethods/discoverymethods.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/exoplanetscsvtobintask.h
 )
@@ -35,7 +34,6 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule_lua.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/discoverymethods/discoverymethods.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/exoplanetscsvtobintask.cpp
 )

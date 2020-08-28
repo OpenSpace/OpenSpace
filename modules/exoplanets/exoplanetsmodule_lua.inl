@@ -320,8 +320,6 @@ int addExoplanetSystem(lua_State* L) {
     std::string starNameSpeck = getSpeckStarname(starName);
     std::replace(starNameSpeck.begin(), starNameSpeck.end(), ' ', '_');
 
-    global::moduleEngine.module<ExoplanetsModule>()->setStarName(starNameSpeck);
-
     std::ifstream data(
         absPath("${MODULE_EXOPLANETS}/expl_data.bin"), 
         std::ios::in | std::ios::binary
@@ -367,9 +365,6 @@ int addExoplanetSystem(lua_State* L) {
     
     data.close();
     lut.close();
-    global::moduleEngine.module<ExoplanetsModule>()->setPlanetNames(planetNames);
-    global::moduleEngine.module<ExoplanetsModule>()->setPlanetSystem(planetSystem);
-    global::moduleEngine.module<ExoplanetsModule>()->setClosestExoplanet(p);
 
     if (!found || isnan(p.POSITIONX) || isnan(p.A) || isnan(p.PER)) { // || p.BINARY
         return ghoul::lua::luaError(L, "No star with that name or not enough data about it."); 
@@ -397,7 +392,6 @@ int addExoplanetSystem(lua_State* L) {
 
     // Earths north vector projected onto the skyplane, the plane perpendicular to the viewing vector (starTosunVec)
     glm::dvec3 northProjected = normalize(celestialNorth - (((dot(celestialNorth, starToSunVec)) / (glm::length(starToSunVec))) * starToSunVec));
-    global::moduleEngine.module<ExoplanetsModule>()->setNorthVector(northProjected);
 
     glm::dvec3 beta = normalize(cross(starToSunVec, northProjected));
 
@@ -638,7 +632,6 @@ int addExoplanetSystem(lua_State* L) {
             // Get the orbit plane that the trail orbit and planet have from the KeplerTranslation
             glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(planet.I, planet.BIGOM, planet.OM, exoplanetSystemRotation);
             glm::dmat3 rotation = orbitPlaneRotationMatrix;
-            global::moduleEngine.module<ExoplanetsModule>()->setRotation(rotation);
             const std::string discNode = "{"
                 "Identifier = '" + planetName + "Disc',"
                 "Parent = '" + starNameSpeck + "',"
