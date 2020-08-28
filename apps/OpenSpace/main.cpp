@@ -86,6 +86,9 @@
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
 
+#include <launcherwindow.h>
+#include <QApplication>
+
 using namespace openspace;
 using namespace sgct;
 
@@ -1079,6 +1082,13 @@ int main(int argc, char** argv) {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
+
+    //Call profile GUI
+    int ac = 0;
+    QApplication a(ac, nullptr);
+    LauncherWindow w(absPath("${BASE}"));
+    w.show();
+    a.exec();
 
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
