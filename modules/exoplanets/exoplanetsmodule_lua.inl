@@ -22,10 +22,13 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/timeconversion.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
@@ -81,194 +84,6 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om , glm:
         glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
 
     return orbitPlaneRotation;
-}
-
-std::string getSpeckStarname(std::string csvName) {
-    std::string explName = csvName;
-    if (csvName == "HD 1237")
-        explName = "GJ 3021";
-    else if (csvName == "MOA-2009-BLG-387L")
-        explName = "MOA 2009-BLG-387L";
-    else if (csvName == "HD 126614 A")
-        explName = "HD 126614";
-    else if (csvName == "epsilon Ret")
-        explName = "HD 27442";
-    else if (csvName == "PH-1")
-        explName = "PH1";
-    else if (csvName == "gamma Leo A")
-        explName = "gam 1 Leo";
-    else if (csvName == "OGLE-2007-BLG-368L")
-        explName = "OGLE 2007-BLG-368L";
-    else if (csvName == "alpha Ari")
-        explName = "alf Ari";
-    else if (csvName == "mu Ara")
-        explName = "HD 160691";
-    else if (csvName == "OGLE-05-169L")
-        explName = "OGLE 2005-BLG-169L";
-    else if (csvName == "tau Gru")
-        explName = "HD 216435";
-    else if (csvName == "iota Hor")
-        explName = "HR 810";
-    else if (csvName == "OGLE-05-071L")
-        explName = "OGLE 2005-BLG-71L";
-    else if (csvName == "OGLE235-MOA53")
-        explName = "OGLE 2003-BLG-235L";
-    else if (csvName == "MOA-2008-BLG-310L")
-        explName = "MOA 2008-BLG-310L";
-    else if (csvName == "KIC 11442793")
-        explName = "KOI-351";
-    else if (csvName == "OGLE-2006-BLG-109L")
-        explName = "OGLE 2006-BLG-109L";
-    else if (csvName == "HD 137388")
-        explName = "HD 137388 A";
-    else if (csvName == "kappa CrB")
-        explName = "kap CrB";
-    else if (csvName == "XO-2")
-        explName = "XO-2 N";
-    else if (csvName == "epsilon Tau")
-        explName = "eps Tau";
-    else if (csvName == "epsilon Eri")
-        explName = "eps Eri";
-    else if (csvName == "Kepler-448")
-        explName = "KOI-12";
-    else if (csvName == "omega Ser")
-        explName = "ome Ser";
-    else if (csvName == "MOA-2010-BLG-477L")
-        explName = "MOA 2010-BLG-477L";
-    else if (csvName == "GJ 176")
-        explName = "HD 285968";
-    else if (csvName == "HIP 2247")
-        explName = "BD-17 63";
-    else if (csvName == "MOA-2009-BLG-266L")
-        explName = "MOA 2009-BLG-266L";
-    else if (csvName == "Kepler-89")
-        explName = "KOI-94";
-    else if (csvName == "iota Dra")
-        explName = "HIP 75458";
-    else if (csvName == "MOA-2007-BLG-400L")
-        explName = "MOA 2007-BLG-400L";
-    else if (csvName == "upsilon And")
-        explName = "ups And";
-    else if (csvName == "OGLE-2011-BLG-0251")
-        explName = "OGLE 2011-BLG-251L";
-    else if (csvName == "OGLE-05-390L")
-        explName = "OGLE 2005-BLG-390L";
-    else if (csvName == "Kepler-420")
-        explName = "KOI-1257";
-    else if (csvName == "beta Pic")
-        explName = "bet Pic";
-    else if (csvName == "gamma Cep")
-        explName = "gam Cep";
-    else if (csvName == "MOA-2007-BLG-192L")
-        explName = "MOA 2007-BLG-192L";
-    else if (csvName == "MOA-2009-BLG-319L")
-        explName = "MOA 2009-BLG-319L";
-    else if (csvName == "omicron CrB")
-        explName = "omi CrB";
-    else if (csvName == "beta Gem")
-        explName = "HD 62509";
-    else if (csvName == "epsilon CrB")
-        explName = "eps CrB";
-    else if (csvName == "omicron UMa")
-        explName = "omi UMa";
-    else if (csvName == "HD 142022")
-        explName = "HD 142022 A";
-
-    return explName;
-}
-
-std::string getCsvStarname(std::string explName) {
-    std::string csvName = explName;
-    if (explName == "GJ 3021")
-        csvName = "HD 1237";
-    else if (explName == "MOA 2009-BLG-387L")
-        csvName = "MOA-2009-BLG-387L";
-    else if (explName == "HD 126614")
-        csvName = "HD 126614 A";
-    else if (explName == "HD 27442")
-        csvName = "epsilon Ret";
-    else if (explName == "PH1")
-        csvName = "PH-1";
-    else if (explName == "gam 1 Leo")
-        csvName = "gamma Leo A";
-    else if (explName == "OGLE 2007-BLG-368L")
-        csvName = "OGLE-2007-BLG-368L";
-    else if (explName == "alf Ari")
-        csvName = "alpha Ari";
-    else if (explName == "HD 160691")
-        csvName = "mu Ara";
-    else if (explName == "OGLE 2005-BLG-169L")
-        csvName = "OGLE-05-169L";
-    else if (explName == "HD 216435")
-        csvName = "tau Gru";
-    else if (explName == "HR 810")
-        csvName = "iota Hor";
-    else if (explName == "OGLE 2005-BLG-71L")
-        csvName = "OGLE-05-071L";
-    else if (explName == "OGLE 2003-BLG-235L")
-        csvName = "OGLE235-MOA53";
-    else if (explName == "MOA 2008-BLG-310L")
-        csvName = "MOA-2008-BLG-310L";
-    else if (explName == "KOI-351")
-        csvName = "KIC 11442793";
-    else if (explName == "OGLE 2006-BLG-109L")
-        csvName = "OGLE-2006-BLG-109L";
-    else if (explName == "HD 137388 A")
-        csvName = "HD 137388";
-    else if (explName == "kap CrB")
-        csvName = "kappa CrB";
-    else if (explName == "XO-2 N")
-        csvName = "XO-2";
-    else if (explName == "eps Tau")
-        csvName = "epsilon Tau";
-    else if (explName == "eps Eri")
-        csvName = "epsilon Eri";
-    else if (explName == "KOI-12")
-        csvName = "Kepler-448";
-    else if (explName == "ome Ser")
-        csvName = "omega Ser";
-    else if (explName == "MOA 2010-BLG-477L")
-        csvName = "MOA-2010-BLG-477L";
-    else if (explName == "HD 285968")
-        csvName = "GJ 176";
-    else if (explName == "BD-17 63")
-        csvName = "HIP 2247";
-    else if (explName == "MOA 2009-BLG-266L")
-        csvName = "MOA-2009-BLG-266L";
-    else if (explName == "KOI-94")
-        csvName = "Kepler-89";
-    else if (explName == "HIP 75458")
-        csvName = "iota Dra";
-    else if (explName == "MOA 2007-BLG-400L")
-        csvName = "MOA-2007-BLG-400L";
-    else if (explName == "ups And")
-        csvName = "upsilon And";
-    else if (explName == "OGLE 2011-BLG-251L")
-        csvName = "OGLE-2011-BLG-0251";
-    else if (explName == "OGLE 2005-BLG-390L")
-        csvName = "OGLE-05-390L";
-    else if (explName == "KOI-1257")
-        csvName = "Kepler-420";
-    else if (explName == "bet Pic")
-        csvName = "beta Pic";
-    else if (explName == "gam Cep")
-        csvName = "gamma Cep";
-    else if (explName == "MOA 2007-BLG-192L")
-        csvName = "MOA-2007-BLG-192L";
-    else if (explName == "MOA 2009-BLG-319L")
-        csvName = "MOA-2009-BLG-319L";
-    else if (explName == "omi CrB")
-        csvName = "omicron CrB";
-    else if (explName == "HD 62509")
-        csvName = "beta Gem";
-    else if (explName == "eps CrB")
-        csvName = "epsilon CrB";
-    else if (explName == "omi UMa")
-        csvName = "omicron UMa";
-    else if (explName == "HD 142022 A")
-        csvName = "HD 142022";
-
-    return csvName;
 }
 
 // Rotate the original coordinate system (where x is pointing to First Point of Aries)
@@ -355,7 +170,7 @@ int addExoplanetSystem(lua_State* L) {
             long location = std::stol(location_s.c_str());
 
             data.seekg(location);
-            data.read((char*)&p, sizeof(struct Exoplanet));
+            data.read((char*)&p, sizeof(Exoplanet));
 
             planetNames.push_back(name);
             planetSystem.push_back(p);
@@ -371,12 +186,10 @@ int addExoplanetSystem(lua_State* L) {
     }
 
     Time epoch;
-    const double parsec = 0.308567756E17;
-
     glm::dvec3 starPosition = glm::dvec3(
-        p.POSITIONX * parsec, 
-        p.POSITIONY * parsec, 
-        p.POSITIONZ * parsec
+        p.POSITIONX * distanceconstants::Parsec, 
+        p.POSITIONY * distanceconstants::Parsec,
+        p.POSITIONZ * distanceconstants::Parsec
     );
        
     glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
@@ -441,16 +254,16 @@ int addExoplanetSystem(lua_State* L) {
         Exoplanet firstPlanet = planetSystem[0];
 
         if (isnan(firstPlanet.ECC)) {
-            firstPlanet.ECC = 0;
+            firstPlanet.ECC = 0.f;
         }
         if (isnan(firstPlanet.I)) {
-            firstPlanet.I = 90;
+            firstPlanet.I = 90.f;
         }
         if (isnan(firstPlanet.BIGOM)) {
-            firstPlanet.BIGOM = 180;
+            firstPlanet.BIGOM = 180.f;
         }
         if (isnan(firstPlanet.OM)) {
-            firstPlanet.OM = 90;
+            firstPlanet.OM = 90.f;
         }
         std::string sEpochStar;
         if (!isnan(firstPlanet.TT)) {
@@ -465,7 +278,7 @@ int addExoplanetSystem(lua_State* L) {
             "Parent = '" + starNameSpeck + "',"
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
-                "Radii = " + std::to_string(starRadius) + " * 6.957E8,"
+                "Radii = " + std::to_string(starRadius * distanceconstants::SolarRadius) + ","
                 "SegmentsPerPatch = 64,"
                 "PerformShading = false,"
                 "Layers = {"
@@ -494,13 +307,13 @@ int addExoplanetSystem(lua_State* L) {
                 "Translation = {"
                     "Type = 'KeplerTranslation',"
                     "Eccentricity = " + std::to_string(firstPlanet.ECC) + "," //ECC
-                    "SemiMajorAxis = 0," // 149 597 871km = 1 AU. A
+                    "SemiMajorAxis = 0," 
                     "Inclination = " + std::to_string(firstPlanet.I) + "," //I
                     "AscendingNode  = " + std::to_string(firstPlanet.BIGOM) + "," //BIGOM
                     "ArgumentOfPeriapsis  = " + std::to_string(firstPlanet.OM) + "," //OM
                     "MeanAnomaly = 180.0,"
                     "Epoch = '" + sEpochStar + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                    "Period = " + std::to_string(firstPlanet.PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "Period = " + std::to_string(firstPlanet.PER * static_cast<float>(SecondsPerDay)) + ","
                 "}"
             "}"
         "}";
@@ -516,16 +329,16 @@ int addExoplanetSystem(lua_State* L) {
         std::string planetName = planetNames[i];
 
         if (isnan(planet.ECC)) {
-            planet.ECC = 0;
+            planet.ECC = 0.f;
         }
         if (isnan(planet.I)) {
-            planet.I = 90;
+            planet.I = 90.f;
         }
         if (isnan(planet.BIGOM)) {
-            planet.BIGOM = 180;
+            planet.BIGOM = 180.f;
         }
         if (isnan(planet.OM)) {
-            planet.OM = 90;
+            planet.OM = 90.f;
         }
         std::string sEpoch;
         if (!isnan(planet.TT)) {
@@ -540,15 +353,15 @@ int addExoplanetSystem(lua_State* L) {
 
         if (isnan(planet.R)) {
             if (isnan(planet.RSTAR)) {
-                planetRadius = planet.A * 149597870700.f * 0.001f;
+                planetRadius = planet.A * 0.001f * distanceconstants::AstronomicalUnit;
             }
             else {
-                planetRadius = planet.RSTAR * 6.95700E8f * 0.1f;
+                planetRadius = planet.RSTAR * distanceconstants::SolarRadius * 0.1f; 
             }
             enabled = "false";
         }
         else {
-            planetRadius = planet.R * 7.1492E7; // 1 jupiter radii = 7.1492×10e7 m
+            planetRadius = planet.R * distanceconstants::JupiterRadius;
             enabled = "true";
         }
 
@@ -580,13 +393,13 @@ int addExoplanetSystem(lua_State* L) {
                 "Translation = {"
                     "Type = 'KeplerTranslation',"
                     "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC
-                    "SemiMajorAxis = " + std::to_string(planet.A) + " * 149597871," // 149 597 871km = 1 AU. A
+                    "SemiMajorAxis = " + std::to_string(planet.A * 0.001f * distanceconstants::AstronomicalUnit) + "," // km
                     "Inclination = " + std::to_string(planet.I) + "," //I
                     "AscendingNode = " + std::to_string(planet.BIGOM) + "," //BIGOM
                     "ArgumentOfPeriapsis = " + std::to_string(planet.OM) + "," //OM
                     "MeanAnomaly = 0.0,"
                     "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                    "Period = " + std::to_string(planet.PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "Period = " + std::to_string(planet.PER * static_cast<float>(SecondsPerDay)) + ","
                 "},"
             "},"
         "}";
@@ -607,13 +420,13 @@ int addExoplanetSystem(lua_State* L) {
                 "Translation = {"
                     "Type = 'KeplerTranslation',"
                     "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC 
-                    "SemiMajorAxis = " + std::to_string(planet.A) + " * 149597871," // 149 597 871km = 1 AU. A
+                    "SemiMajorAxis = " + std::to_string(planet.A * 0.001f * distanceconstants::AstronomicalUnit) + "," // km
                     "Inclination = " + std::to_string(planet.I) + "," //I
                     "AscendingNode  = " + std::to_string(planet.BIGOM) + "," //BIGOM
                     "ArgumentOfPeriapsis  = " + std::to_string(planet.OM) + "," //OM
                     "MeanAnomaly = 0.0,"
                     "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                    "Period = " + std::to_string(planet.PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "Period = " + std::to_string(planet.PER * static_cast<float>(SecondsPerDay)) + ","
                 "},"
                 "Color = { 1, 1, 1 }"
             "},"
@@ -639,7 +452,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Renderable = {"
                     "Type = 'RenderableOrbitdisc',"
                     "Texture = openspace.absPath('${MODULE_EXOPLANETS}/disc3.png'),"
-                    "Size = " + std::to_string(planet.A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
+                    "Size = " + std::to_string(planet.A * distanceconstants::AstronomicalUnit) + ","
                     "Eccentricity = " + std::to_string(planet.ECC) + ","
                     "Offset = { " + std::to_string(planet.ALOWER) + ", " + std::to_string(planet.AUPPER) + " }," //min / max extend
                     "Opacity = 0.5"
@@ -673,7 +486,7 @@ int addExoplanetSystem(lua_State* L) {
                     "Renderable = {"
                         "Type = 'RenderableOrbitdisc',"
                         "Texture = openspace.absPath('${MODULE_EXOPLANETS}/discL.png'),"
-                        "Size = " + std::to_string(planet.A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
+                        "Size = " + std::to_string(planet.A * distanceconstants::AstronomicalUnit) + ","
                         "Eccentricity = " + std::to_string(lowerEccentricity) + ","
                         "Offset = { " + std::to_string(planet.ALOWER) + ", " + std::to_string(planet.AUPPER) + " }," //min / max extend
                         "Opacity = 0.98,"
@@ -703,7 +516,7 @@ int addExoplanetSystem(lua_State* L) {
                     "Renderable = {"
                         "Type = 'RenderableOrbitdisc',"
                         "Texture = openspace.absPath('${MODULE_EXOPLANETS}/discU.png'),"
-                        "Size = " + std::to_string(planet.A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
+                        "Size = " + std::to_string(planet.A * distanceconstants::AstronomicalUnit) + ","
                         "Eccentricity = " + std::to_string(upperEccentricity) + ","
                         "Offset = { " + std::to_string(planet.ALOWER) + ", " + std::to_string(planet.AUPPER) + " }," //min / max extend
                         "Opacity = 0.98,"

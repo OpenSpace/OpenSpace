@@ -30,7 +30,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-
+#include <openspace/util/distanceconstants.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -135,7 +135,7 @@ RenderableOrbitdisc::RenderableOrbitdisc(const ghoul::Dictionary& dictionary)
     addProperty(_offset);
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    _size = _size + (_offset.value().y * 149597870700);
+    _size = _size + (_offset.value().y * distanceconstants::AstronomicalUnit);
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);

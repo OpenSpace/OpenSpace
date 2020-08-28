@@ -44,53 +44,7 @@ private:
     std::string _outputBinPath;
     std::string _outputLutPath;
 
-    std::string getExoplanetName(std::string csvName);
     glm::vec3 getStarPosition(std::string starName);
-
-    struct Exoplanet {
-        float A;
-        double AUPPER;
-        double ALOWER;
-        double UA;
-        float BIGOM;
-        float BIGOMUPPER;
-        float BIGOMLOWER;
-        float UBIGOM;
-        int BINARY; //  **one or more stars**
-        float BMV;
-        float ECC;
-        float ECCUPPER;
-        float ECCLOWER;
-        float UECC;
-        float I;
-        float IUPPER;
-        float ILOWER;
-        float UI;
-        int NCOMP; //  **number of planets**
-        float OM;
-        float OMUPPER;
-        float OMLOWER;
-        float UOM;
-        double PER;
-        float PERUPPER;
-        float PERLOWER;
-        float UPER;
-        double R;
-        double RUPPER;
-        double RLOWER;
-        double UR;
-        float RSTAR;
-        float RSTARUPPER;
-        float RSTARLOWER;
-        float URSTAR;
-        double TT;
-        float TTUPPER;
-        float TTLOWER;
-        float UTT;
-        float POSITIONX;
-        float POSITIONY;
-        float POSITIONZ;
-    };
 };
 
 } // namespace openspace::exoplanets

@@ -24,6 +24,7 @@
 
 #include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
 
+#include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -60,100 +61,6 @@ ExoplanetsCsvToBinTask::ExoplanetsCsvToBinTask(const ghoul::Dictionary& dictiona
 std::string ExoplanetsCsvToBinTask::description() {
     return "Extract metadata from csv-file " + _inputCsvPath +
         " and write as bin to " + _outputBinPath;
-}
-
-std::string ExoplanetsCsvToBinTask::getExoplanetName(std::string csvName) {
-    std::string name = csvName;
-    if (csvName == "HD 1237")
-        name = "GJ 3021";
-    else if (csvName == "MOA-2009-BLG-387L")
-        name = "MOA 2009-BLG-387L";
-    else if (csvName == "HD 126614 A")
-        name = "HD 126614";
-    else if (csvName == "epsilon Ret")
-        name = "HD 27442";
-    else if (csvName == "PH-1")
-        name = "PH1";
-    else if (csvName == "gamma Leo A")
-        name = "gam 1 Leo";
-    else if (csvName == "OGLE-2007-BLG-368L")
-        name = "OGLE 2007-BLG-368L";
-    else if (csvName == "alpha Ari")
-        name = "alf Ari";
-    else if (csvName == "mu Ara")
-        name = "HD 160691";
-    else if (csvName == "OGLE-05-169L")
-        name = "OGLE 2005-BLG-169L";
-    else if (csvName == "tau Gru")
-        name = "HD 216435";
-    else if (csvName == "iota Hor")
-        name = "HR 810";
-    else if (csvName == "OGLE-05-071L")
-        name = "OGLE 2005-BLG-71L";
-    else if (csvName == "OGLE235-MOA53")
-        name = "OGLE 2003-BLG-235L";
-    else if (csvName == "MOA-2008-BLG-310L")
-        name = "MOA 2008-BLG-310L";
-    else if (csvName == "KIC 11442793")
-        name = "KOI-351";
-    else if (csvName == "OGLE-2006-BLG-109L")
-        name = "OGLE 2006-BLG-109L";
-    else if (csvName == "HD 137388")
-        name = "HD 137388 A";
-    else if (csvName == "kappa CrB")
-        name = "kap CrB";
-    else if (csvName == "XO-2")
-        name = "XO-2 N";
-    else if (csvName == "epsilon Tau")
-        name = "eps Tau";
-    else if (csvName == "epsilon Eri")
-        name = "eps Eri";
-    else if (csvName == "Kepler-448")
-        name = "KOI-12";
-    else if (csvName == "omega Ser")
-        name = "ome Ser";
-    else if (csvName == "MOA-2010-BLG-477L")
-        name = "MOA 2010-BLG-477L";
-    else if (csvName == "GJ 176")
-        name = "HD 285968";
-    else if (csvName == "HIP 2247")
-        name = "BD-17 63";
-    else if (csvName == "MOA-2009-BLG-266L")
-        name = "MOA 2009-BLG-266L";
-    else if (csvName == "Kepler-89")
-        name = "KOI-94";
-    else if (csvName == "iota Dra")
-        name = "HIP 75458";
-    else if (csvName == "MOA-2007-BLG-400L")
-        name = "MOA 2007-BLG-400L";
-    else if (csvName == "upsilon And")
-        name = "ups And";
-    else if (csvName == "OGLE-2011-BLG-0251")
-        name = "OGLE 2011-BLG-251L";
-    else if (csvName == "OGLE-05-390L")
-        name = "OGLE 2005-BLG-390L";
-    else if (csvName == "Kepler-420")
-        name = "KOI-1257";
-    else if (csvName == "beta Pic")
-        name = "bet Pic";
-    else if (csvName == "gamma Cep")
-        name = "gam Cep";
-    else if (csvName == "MOA-2007-BLG-192L")
-        name = "MOA 2007-BLG-192L";
-    else if (csvName == "MOA-2009-BLG-319L")
-        name = "MOA 2009-BLG-319L";
-    else if (csvName == "omicron CrB")
-        name = "omi CrB";
-    else if (csvName == "beta Gem")
-        name = "HD 62509";
-    else if (csvName == "epsilon CrB")
-        name = "eps CrB";
-    else if (csvName == "omicron UMa")
-        name = "omi UMa";
-    else if (csvName == "HD 142022")
-        name = "HD 142022 A";
-
-    return name;
 }
 
 glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName) {
@@ -680,7 +587,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // SPECREF
         getline(lineStream, data, ','); // SPECURL
         getline(lineStream, data, ','); // STAR
-        std::string  speckStarname = getExoplanetName(data);
+        std::string  speckStarname = getSpeckStarname(data);
         glm::vec3 pos = getStarPosition(speckStarname);
         p.POSITIONX = pos[0];
         p.POSITIONY = pos[1];
@@ -804,7 +711,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
             long pos = binFile.tellp();
             planetname = speckStarname + " " + component;
             lutFile << planetname << "," << pos << std::endl;
-            binFile.write((char *)&p, sizeof(struct Exoplanet));
+            binFile.write((char *)&p, sizeof(Exoplanet));
         }
     }
 

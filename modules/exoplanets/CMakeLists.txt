@@ -25,6 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetshelper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/exoplanetscsvtobintask.h
@@ -32,6 +33,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetshelper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/exoplanetsmodule_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableorbitdisc.cpp
