@@ -74,9 +74,11 @@ struct Exoplanet {
     float POSITIONZ;    // Star position's Z-coordinate in parsec
 };
 
-std::string getSpeckStarname(std::string csvName);
+// Convert csv-file specific names to the corresponding name in the speck data file
+std::string getSpeckStarName(std::string name);
 
-std::string getCsvStarname(std::string explName);
+// Convert speck-file specific names to the corresponding name in the csv data file
+std::string getCsvStarName(std::string name);
 
 } // namespace openspace::exoplanets
 

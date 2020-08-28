@@ -126,12 +126,12 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
     Exoplanet p;
 
-    std::string planetname;
+    std::string planetName;
     std::string component;
     std::string planetRow;
     getline(csvFile, planetRow); // The first line, containing the data names
 
-    bool iskeplerobject = false;
+    bool isKeplerObject = false;
     int total = 0;
     while (getline(csvFile, planetRow)) {
         ++total;
@@ -587,11 +587,11 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // SPECREF
         getline(lineStream, data, ','); // SPECURL
         getline(lineStream, data, ','); // STAR
-        std::string  speckStarname = getSpeckStarname(data);
-        glm::vec3 pos = getStarPosition(speckStarname);
-        p.POSITIONX = pos[0];
-        p.POSITIONY = pos[1];
-        p.POSITIONZ = pos[2];
+        std::string  speckStarname = getSpeckStarName(data);
+        glm::vec3 position = getStarPosition(speckStarname);
+        p.POSITIONX = position[0];
+        p.POSITIONY = position[1];
+        p.POSITIONZ = position[2];
 
         getline(lineStream, data, ','); // STARDISCMETH
         getline(lineStream, data, ','); // T0
@@ -660,46 +660,54 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // VSINIURL
         getline(lineStream, data, ','); // KEPID
         if (!data.empty())
-            iskeplerobject = true;
+            isKeplerObject = true;
         getline(lineStream, data); // KDE
 
-        if (!iskeplerobject) {
+        if (!isKeplerObject) {
             // calculate B-V from Teff if not exsisting
             if (std::isnan(p.BMV)) {
                 if (!std::isnan(teff)) {
-                    float teff_current, teff_upper, teff_lower, BV, bv_upper, bv_lower = 0;
+                    std::ifstream teffToBvFile(
+                        absPath("${BASE}/modules/exoplanets/teff_bv.txt")
+                    );
 
-                    std::ifstream teff_bv(absPath("${BASE}/modules/exoplanets/teff_bv.txt"));
-                    if (!teff_bv.good()) {
+                    if (!teffToBvFile.good()) {
                         LERROR(fmt::format("Failed to open teff_bv.txt file"));
                         return;
                     }
 
-                    std::string row, teff_string, bv_string;
-                    while (getline(teff_bv, row)) {
+                    float BV = 0.f;
+                    float bvUpper = 0.f;
+                    float bvLower = 0.f;
+                    float teffLower, teffUpper;
+                    std::string row, teffString, bvString;
+                    while (getline(teffToBvFile, row)) {
                         std::istringstream lineStream(row);
-                        getline(lineStream, teff_string, ',');
-                        getline(lineStream, bv_string);
+                        getline(lineStream, teffString, ',');
+                        getline(lineStream, bvString);
 
-                        teff_current= std::stof(teff_string.c_str(), nullptr);
-                        
-                        if (teff > teff_current) {
-                            teff_lower = teff_current;
-                            bv_lower = std::stof(bv_string.c_str(), nullptr);
+                        float teffCurrent = std::stof(teffString.c_str(), nullptr);
+                        float bvCurrent = std::stof(bvString.c_str(), nullptr);
+
+                        if (teff > teffCurrent) {
+                            teffLower = teffCurrent;
+                            bvLower = bvCurrent;
                         }
                         else {
-                            teff_upper = teff_current;
-                            bv_upper = std::stof(bv_string.c_str(), nullptr);
-                            if (bv_lower == 0) {
-                                BV = 2.00;
+                            teffUpper = teffCurrent;
+                            bvUpper = bvCurrent;
+                            if (bvLower == 0.f) {
+                                BV = 2.f;
                             }
                             else {
-                                BV = (((bv_upper - bv_lower) * (teff - teff_lower)) / (teff_upper - teff_lower)) + bv_lower;
+                                float bvDiff = (bvUpper - bvLower);
+                                float teffDiff = (teffUpper - teffLower);
+                                BV = ((bvDiff * (teff - teffLower)) / teffDiff) + bvLower;
                             }
                             break;
                         }
                     }
-                    teff_bv.close();
+                    teffToBvFile.close();
                     p.BMV = BV;
                 }
                 else {
@@ -709,8 +717,8 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
             // crate look-up table
             long pos = binFile.tellp();
-            planetname = speckStarname + " " + component;
-            lutFile << planetname << "," << pos << std::endl;
+            planetName = speckStarname + " " + component;
+            lutFile << planetName << "," << pos << std::endl;
             binFile.write((char *)&p, sizeof(Exoplanet));
         }
     }
