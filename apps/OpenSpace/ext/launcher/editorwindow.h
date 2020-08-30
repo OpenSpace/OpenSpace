@@ -45,7 +45,8 @@ public slots:
    void cancel();
 
 public:
-    explicit editorwindow(QString assetPath, QWidget* parent = nullptr);
+    explicit editorwindow(QString assetPath, const std::string& profileName,
+        QWidget* parent = nullptr);
     ~editorwindow();
     std::vector<std::string> parseSelections();
     void setProfileName(QString name);
@@ -56,6 +57,7 @@ public:
 
 private:
     bool traverseToExpandSelectedItems(int nRows, QModelIndex parent);
+    void loadProfile(const std::string& profilePath);
     Ui::editorwindow *ui;
     QString _helperTextProfileName = "Enter profile name";
     QString _helperTextStartTime = "YYYY-MM-DDThh:mm:ss (leave blank for default time)";

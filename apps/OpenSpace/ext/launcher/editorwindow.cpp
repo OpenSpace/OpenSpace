@@ -29,6 +29,10 @@
 #include <sstream>
 #include "launcherwindow.h"
 #include "filesystemaccess.h"
+#include <openspace/scene/profile.h>
+#include <filesystem>
+#include <fstream>
+
 
 std::string testContents =
 "0Dir_1\n"
@@ -52,7 +56,7 @@ std::string testContents =
 "0 Dir B1\n"
 "0  File C1\n";
 
-editorwindow::editorwindow(QString assetPath, QWidget *parent)
+editorwindow::editorwindow(const QString assetPath, const std::string& profilePath, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::editorwindow)
     , _assetTreeModel(tr("Asset"), tr("Enabled"))
@@ -83,6 +87,26 @@ editorwindow::editorwindow(QString assetPath, QWidget *parent)
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
     connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
+
+    if (profilePath.length() != 0) {
+        loadProfile(profilePath);
+    }
+}
+
+void editorwindow::loadProfile(const std::string& filepath) {
+    if (!std::filesystem::exists(filepath)) {
+        throw std::runtime_error("Could not find file)");
+    }
+
+    std::ifstream f(filepath);
+
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(f, line)) {
+        lines.push_back(std::move(line));
+    }
+
+    openspace::Profile p(lines);
 }
 
 editorwindow::~editorwindow() {

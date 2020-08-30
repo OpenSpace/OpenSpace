@@ -72,14 +72,17 @@ void LauncherWindow::populateWindowConfigsList() {
 }
 
 void LauncherWindow::openWindow_new() {
-    myEditorWindow = new editorwindow(_basePath + "/data/assets");
+    myEditorWindow = new editorwindow(_basePath + "/data/assets", "");
     myEditorWindow->exec();
     std::vector<std::string> results = myEditorWindow->parseSelections();
     receiveAssets(results);
 }
 
 void LauncherWindow::openWindow_edit() {
-    myEditorWindow = new editorwindow(_basePath + "/data/assets");
+    std::string editProfilePath = _basePath.toUtf8().constData();
+    editProfilePath += "/profiles/";
+    editProfilePath += ui->comboBoxProfiles->currentText().toUtf8().constData();
+    myEditorWindow = new editorwindow(_basePath + "/data/assets", editProfilePath);
 
     int selectedProfileIdx = ui->comboBoxProfiles->currentIndex();
     QString profileToSet = ui->comboBoxProfiles->itemText(selectedProfileIdx);
