@@ -457,7 +457,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
                                            const std::string& currentTime,
                                  interaction::NavigationHandler::NavigationState navState)
 {
-    version = Profile::CurrentVersion;
+    _version = Profile::CurrentVersion;
 
     //
     // Update properties
@@ -469,7 +469,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
         p.setType = Property::SetType::SetPropertyValueSingle;
         p.name = prop->fullyQualifiedIdentifier();
         p.value = prop->getStringValue();
-        properties.push_back(std::move(p));
+        _properties.push_back(std::move(p));
     }
 
     //
@@ -478,7 +478,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     Time t;
     t.time = currentTime;
     t.type = Time::Type::Absolute;
-    time = std::move(t);
+    _time = std::move(t);
 
     // Camera
 
@@ -490,7 +490,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     c.up = navState.up;
     c.yaw = navState.yaw;
     c.pitch = navState.pitch;
-    camera = std::move(c);
+    _camera = std::move(c);
 }
 
 void Profile::setIgnoreUpdates(bool ignoreUpdates) {
@@ -503,19 +503,19 @@ void Profile::addAsset(const std::string& path) {
     }
 
     const auto it = std::find_if(
-        assets.begin(),
-        assets.end(),
+        _assets.begin(),
+        _assets.end(),
         [path](const Asset& a) { return a.path == path; }
     );
 
-    if (it != assets.end()) {
+    if (it != _assets.end()) {
         // Asset already existed, so nothing to do here
         return;
     }
 
     Asset a;
     a.path = path;
-    assets.push_back(std::move(a));
+    _assets.push_back(std::move(a));
 }
 
 void Profile::removeAsset(const std::string& path) {
@@ -524,18 +524,18 @@ void Profile::removeAsset(const std::string& path) {
     }
 
     const auto it = std::find_if(
-        assets.begin(),
-        assets.end(),
+        _assets.begin(),
+        _assets.end(),
         [path](const Asset& a) { return a.path == path; }
     );
 
-    if (it == assets.end()) {
+    if (it == _assets.end()) {
         throw ghoul::RuntimeError(fmt::format(
             "Tried to remove non-existing asset '{}'", path
         ));
     }
 
-    assets.erase(it);
+    _assets.erase(it);
 }
 
 scripting::LuaLibrary Profile::luaLibrary() {
@@ -564,33 +564,33 @@ scripting::LuaLibrary Profile::luaLibrary() {
 std::string Profile::serialize() const {
     std::string output;
     output += fmt::format("{}\n", headerVersion);
-    output += fmt::format("{}.{}\n", version.major, version.minor);
+    output += fmt::format("{}.{}\n", _version.major, _version.minor);
 
-    if (meta.has_value()) {
+    if (_meta.has_value()) {
         output += fmt::format("\n{}\n", headerMeta);
-        if (!meta->name.empty()) {
-            output += fmt::format("Name\t{}\n", meta->name);
+        if (!_meta->name.empty()) {
+            output += fmt::format("Name\t{}\n", _meta->name);
         }
-        if (!meta->version.empty()) {
-            output += fmt::format("Version\t{}\n", meta->version);
+        if (!_meta->version.empty()) {
+            output += fmt::format("Version\t{}\n", _meta->version);
         }
-        if (!meta->description.empty()) {
-            output += fmt::format("Description\t{}\n", meta->description);
+        if (!_meta->description.empty()) {
+            output += fmt::format("Description\t{}\n", _meta->description);
         }
-        if (!meta->author.empty()) {
-            output += fmt::format("Author\t{}\n", meta->author);
+        if (!_meta->author.empty()) {
+            output += fmt::format("Author\t{}\n", _meta->author);
         }
-        if (!meta->url.empty()) {
-            output += fmt::format("URL\t{}\n", meta->url);
+        if (!_meta->url.empty()) {
+            output += fmt::format("URL\t{}\n", _meta->url);
         }
-        if (!meta->license.empty()) {
-            output += fmt::format("License\t{}\n", meta->license);
+        if (!_meta->license.empty()) {
+            output += fmt::format("License\t{}\n", _meta->license);
         }
     }
 
-    if (!modules.empty()) {
+    if (!_modules.empty()) {
         output += fmt::format("\n{}\n", headerModule);
-        for (const Module& m : modules) {
+        for (const Module& m : _modules) {
             output += fmt::format(
                 "{}\t{}\t{}\n",
                 m.name, m.loadedInstruction, m.notLoadedInstruction
@@ -598,16 +598,16 @@ std::string Profile::serialize() const {
         }
     }
 
-    if (!assets.empty()) {
+    if (!_assets.empty()) {
         output += fmt::format("\n{}\n", headerAsset);
-        for (const Asset& a : assets) {
+        for (const Asset& a : _assets) {
             output += fmt::format("{}\t{}\n", a.path, a.name);
         }
     }
 
-    if (!properties.empty()) {
+    if (!_properties.empty()) {
         output += fmt::format("\n{}\n", headerProperty);
-        for (const Property& p : properties) {
+        for (const Property& p : _properties) {
             const std::string type = [](Property::SetType t) {
                 switch (t) {
                     case Property::SetType::SetPropertyValue:
@@ -622,9 +622,9 @@ std::string Profile::serialize() const {
         }
     }
 
-    if (!keybindings.empty()) {
+    if (!_keybindings.empty()) {
         output += fmt::format("\n{}\n", headerKeybinding);
-        for (const Keybinding& k : keybindings) {
+        for (const Keybinding& k : _keybindings) {
             const std::string key = ghoul::to_string(k.key);
             const std::string local = k.isLocal ? "true" : "false";
             output += fmt::format(
@@ -634,7 +634,7 @@ std::string Profile::serialize() const {
         }
     }
     
-    if (time.has_value()) {
+    if (_time.has_value()) {
         output += fmt::format("\n{}\n", headerTime);
         {
             const std::string type = [](Time::Type t) {
@@ -643,12 +643,12 @@ std::string Profile::serialize() const {
                     case Time::Type::Relative: return "relative";
                     default: throw ghoul::MissingCaseException();
                 }
-            }(time->type);
-            output += fmt::format("{}\t{}\n", type, time->time);
+            }(_time->type);
+            output += fmt::format("{}\t{}\n", type, _time->time);
         }
     }
 
-    if (camera.has_value()) {
+    if (_camera.has_value()) {
         output += fmt::format("\n{}\n", headerCamera);
         output += std::visit(
             overloaded {
@@ -694,20 +694,20 @@ std::string Profile::serialize() const {
                     }
                 }
             },
-            *camera
+            *_camera
         );
     }
 
-    if (!markNodes.empty()) {
+    if (!_markNodes.empty()) {
         output += fmt::format("\n{}\n", headerMarkNodes);
-        for (const std::string& n : markNodes) {
+        for (const std::string& n : _markNodes) {
             output += fmt::format("{}\n", n);
         }
     }
 
-    if (!additionalScripts.empty()) {
+    if (!_additionalScripts.empty()) {
         output += fmt::format("\n{}\n", headerAdditionalScripts);
-        for (const std::string& s : additionalScripts) {
+        for (const std::string& s : _additionalScripts) {
             output += fmt::format("{}\n", s);
         }
     }
@@ -764,70 +764,70 @@ Profile::Profile(const std::vector<std::string>& content) {
                     );
                 }
 
-                version = parseVersion(line, lineNum);
+                _version = parseVersion(line, lineNum);
                 foundVersion = true;
                 break;
             case Section::Meta:
             {
-                if (!meta.has_value()) {
-                    meta = Meta();
+                if (!_meta.has_value()) {
+                    _meta = Meta();
                 }
 
                 std::pair<MetaLineType, std::string> m = parseMeta(line, lineNum);
                 switch (m.first) {
                     case MetaLineType::Name:
-                        if (!meta->name.empty()) {
+                        if (!_meta->name.empty()) {
                             throw ProfileParsingError(
                                 lineNum,
                                 "Meta information 'Name' specified twice"
                             );
                         }
-                        meta->name = m.second;
+                        _meta->name = m.second;
                         break;
                     case MetaLineType::Version:
-                        if (!meta->version.empty()) {
+                        if (!_meta->version.empty()) {
                             throw ProfileParsingError(
                                 lineNum,
                                 "Meta information 'Version' specified twice"
                             );
                         }
-                        meta->version = m.second;
+                        _meta->version = m.second;
                         break;
                     case MetaLineType::Description:
-                        if (!meta->description.empty()) {
+                        if (!_meta->description.empty()) {
                             throw ProfileParsingError(
                                 lineNum,
                                 "Meta information 'Description' specified twice"
                             );
                         }
-                        meta->description = m.second;
+                        _meta->description = m.second;
                         break;
                     case MetaLineType::Author:
-                        if (!meta->author.empty()) {
+                        if (!_meta->author.empty()) {
                             throw ProfileParsingError(
                                 lineNum,
                                 "Meta information 'Author' specified twice"
                             );
                         }
-                        meta->author = m.second;
+                        _meta->author = m.second;
                         break;
                     case MetaLineType::URL:
-                        if (!meta->url.empty()) {
+                        if (!_meta->url.empty()) {
                             throw ProfileParsingError(
                                 lineNum,
                                 "Meta information 'URL' specified twice"
                             );
                         }
-                        meta->url = m.second;
+                        _meta->url = m.second;
                         break;
                     case MetaLineType::License:
-                        if (!meta->license.empty()) {
+                        if (!_meta->license.empty()) {
                             throw ProfileParsingError(
                                 lineNum,
                                 "Meta information 'License' specified twice"
                             );
                         }
-                        meta->license = m.second;
+                        _meta->license = m.second;
                         break;
                     default:
                         throw ghoul::MissingCaseException();
@@ -838,25 +838,25 @@ Profile::Profile(const std::vector<std::string>& content) {
             case Section::Module:
             {
                 Module m = parseModule(line, lineNum);
-                modules.push_back(std::move(m));
+                _modules.push_back(std::move(m));
                 break;
             }
             case Section::Asset:
             {
                 Asset a = parseAsset(line, lineNum);
-                assets.push_back(std::move(a));
+                _assets.push_back(std::move(a));
                 break;
             }
             case Section::Property:
             {
                 Property p = parseProperty(line, lineNum);
-                properties.push_back(std::move(p));
+                _properties.push_back(std::move(p));
                 break;
             }
             case Section::Keybinding:
             {
                 Keybinding kb = parseKeybinding(line, lineNum);
-                keybindings.push_back(std::move(kb));
+                _keybindings.push_back(std::move(kb));
                 break;
             }
             case Section::Time:
@@ -867,7 +867,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                     );
                 }
 
-                time = parseTime(line, lineNum);
+                _time = parseTime(line, lineNum);
                 foundTime = true;
                 break;
             case Section::Camera:
@@ -878,19 +878,19 @@ Profile::Profile(const std::vector<std::string>& content) {
                     );
                 }
 
-                camera = parseCamera(line, lineNum);
+                _camera = parseCamera(line, lineNum);
                 foundCamera = true;
                 break;
             case Section::MarkNodes:
             {
                 std::string m = parseMarkNodes(line, lineNum);
-                markNodes.push_back(std::move(m));
+                _markNodes.push_back(std::move(m));
                 break;
             }
             case Section::AdditionalScripts:
             {
                 std::string a = parseAdditionalScript(line, lineNum);
-                additionalScripts.push_back(std::move(a));
+                _additionalScripts.push_back(std::move(a));
                 break;
             }
             default:
@@ -910,32 +910,32 @@ std::string Profile::convertToScene() const {
 
     std::string output;
 
-    if (meta.has_value()) {
+    if (_meta.has_value()) {
         output += "asset.meta = {";
-        if (!meta->name.empty()) {
-            output += fmt::format("  Name = {},", meta->name);
+        if (!_meta->name.empty()) {
+            output += fmt::format("  Name = {},", _meta->name);
         }
-        if (!meta->version.empty()) {
-            output += fmt::format("  Version = {},", meta->version);
+        if (!_meta->version.empty()) {
+            output += fmt::format("  Version = {},", _meta->version);
         }
-        if (!meta->description.empty()) {
-            output += fmt::format("  Description = {},", meta->description);
+        if (!_meta->description.empty()) {
+            output += fmt::format("  Description = {},", _meta->description);
         }
-        if (!meta->author.empty()) {
-            output += fmt::format("  Author = {},", meta->author);
+        if (!_meta->author.empty()) {
+            output += fmt::format("  Author = {},", _meta->author);
         }
-        if (!meta->url.empty()) {
-            output += fmt::format("  URL = {},", meta->url);
+        if (!_meta->url.empty()) {
+            output += fmt::format("  URL = {},", _meta->url);
         }
-        if (!meta->license.empty()) {
-            output += fmt::format("  License = {},", meta->license);
+        if (!_meta->license.empty()) {
+            output += fmt::format("  License = {},", _meta->license);
         }
 
         output += "}";
     }
 
     // Modules
-    for (const Module& m : modules) {
+    for (const Module& m : _modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
             m.name, m.loadedInstruction, m.notLoadedInstruction
@@ -943,7 +943,7 @@ std::string Profile::convertToScene() const {
     }
 
     // Assets
-    for (const Asset& a : assets) {
+    for (const Asset& a : _assets) {
         if (a.name.empty()) {
             output += fmt::format("asset.require(\"{}\");\n", a.path);
         }
@@ -954,7 +954,7 @@ std::string Profile::convertToScene() const {
 
     output += "asset.onInitialize(function()\n";
     // Keybindings
-    for (const Keybinding& k : keybindings) {
+    for (const Keybinding& k : _keybindings) {
         const std::string key = ghoul::to_string(k.key);
         const std::string name = k.name.empty() ? key : k.name;
         output += fmt::format(
@@ -966,14 +966,14 @@ std::string Profile::convertToScene() const {
     }
 
     // Time
-    switch (time->type) {
+    switch (_time->type) {
         case Time::Type::Absolute:
-            output += fmt::format("openspace.time.setTime(\"{}\")\n", time->time);
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", _time->time);
             break;
         case Time::Type::Relative:
             output += "local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
-                "local prev = openspace.time.advancedTime(now, \"{}\");\n", time->time
+                "local prev = openspace.time.advancedTime(now, \"{}\");\n", _time->time
             );
             output += "openspace.time.setTime(prev);\n";
             break;
@@ -984,14 +984,14 @@ std::string Profile::convertToScene() const {
     // Mark Nodes
     {
         std::string nodes;
-        for (const std::string& n : markNodes) {
+        for (const std::string& n : _markNodes) {
             nodes += fmt::format("[[{}]],", n);
         }
         output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
 
     // Properties
-    for (const Property& p : properties) {
+    for (const Property& p : _properties) {
         switch (p.setType) {
             case Property::SetType::SetPropertyValue:
                 output += fmt::format(
@@ -1011,7 +1011,7 @@ std::string Profile::convertToScene() const {
     }
 
     // Camera
-    if (camera.has_value()) {
+    if (_camera.has_value()) {
         output += std::visit(
             overloaded {
                 [](const CameraNavState& camera) {
@@ -1058,11 +1058,11 @@ std::string Profile::convertToScene() const {
                     }
                 }
             },
-            *camera
+            *_camera
         );
     }
 
-    for (const std::string& a : additionalScripts) {
+    for (const std::string& a : _additionalScripts) {
         output += fmt::format("{}\n", a);
     }
 
@@ -1071,5 +1071,85 @@ std::string Profile::convertToScene() const {
     return output;
 }
 
+Profile::Version Profile::version() const {
+    return _version;
+}
+
+std::vector<Profile::Module> Profile::modules() const {
+    return _modules;
+}
+
+std::optional<Profile::Meta> Profile::meta() const {
+    return _meta;
+}
+
+std::vector<Profile::Asset> Profile::assets() const {
+    return _assets;
+}
+
+std::vector<Profile::Property> Profile::properties() const {
+    return _properties;
+}
+
+std::vector<Profile::Keybinding> Profile::keybindings() const {
+    return _keybindings;
+}
+
+std::optional<Profile::Time> Profile::time() const {
+    return _time;
+}
+
+std::optional<Profile::CameraType> Profile::camera() const {
+    return _camera;
+}
+
+std::vector<std::string> Profile::markNodes() const {
+    return _markNodes;
+}
+
+std::vector<std::string> Profile::additionalScripts() const {
+    return _additionalScripts;
+}
+
+void Profile::setVersion(Version v) {
+    _version = v;
+}
+
+void Profile::setModules(std::vector<Module>& m) {
+    _modules.clear();
+    copy(m.begin(), m.end(), back_inserter(_modules));
+}
+
+void Profile::setMeta(Meta m) {
+    _meta = m;
+}
+
+void Profile::setProperties(std::vector<Property>& p) {
+    _properties.clear();
+    copy(p.begin(), p.end(), back_inserter(_properties));
+}
+
+void Profile::setKeybindings(std::vector<Keybinding>& k) {
+    _keybindings.clear();
+    copy(k.begin(), k.end(), back_inserter(_keybindings));
+}
+
+void Profile::setTime(Time t) {
+    _time = t;
+}
+
+void Profile::setCamera(CameraType c) {
+    _camera = c;
+}
+
+void Profile::setMarkNodes(std::vector<std::string>& n) {
+    _markNodes.clear();
+    copy(n.begin(), n.end(), back_inserter(_markNodes));
+}
+
+void Profile::setAdditionalScripts(std::vector<std::string>& s) {
+    _additionalScripts.clear();
+    copy(s.begin(), s.end(), back_inserter(_additionalScripts));
+}
 
 }  // namespace openspace

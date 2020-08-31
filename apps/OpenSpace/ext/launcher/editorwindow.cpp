@@ -93,7 +93,18 @@ editorwindow::editorwindow(const QString assetPath, const std::string& profilePa
     }
 }
 
-void editorwindow::loadProfile(const std::string& filepath) {
+void editorwindow::loadProfile(std::string filepath) {
+#ifdef WIN32
+    const std::string search = "/";
+    const std::string replace = "\\";
+    if (filepath.find(search) != std::string::npos) {
+        size_t start_pos = 0;
+        while ((start_pos = filepath.find(search, start_pos)) != std::string::npos) {
+            filepath.replace(start_pos, search.length(), replace);
+            start_pos += replace.length();
+        }
+    }
+#endif //WIN32
     if (!std::filesystem::exists(filepath)) {
         throw std::runtime_error("Could not find file)");
     }
@@ -107,6 +118,10 @@ void editorwindow::loadProfile(const std::string& filepath) {
     }
 
     openspace::Profile p(lines);
+    std::optional t = p.time();
+    if (t.has_value()) {
+        ui->lineEditStartTime->setText(QString::fromUtf8(t.value().time.c_str()));
+    }
 }
 
 editorwindow::~editorwindow() {

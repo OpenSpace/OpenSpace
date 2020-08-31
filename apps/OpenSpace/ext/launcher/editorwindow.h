@@ -57,7 +57,7 @@ public:
 
 private:
     bool traverseToExpandSelectedItems(int nRows, QModelIndex parent);
-    void loadProfile(const std::string& profilePath);
+    void loadProfile(std::string profilePath);
     Ui::editorwindow *ui;
     QString _helperTextProfileName = "Enter profile name";
     QString _helperTextStartTime = "YYYY-MM-DDThh:mm:ss (leave blank for default time)";

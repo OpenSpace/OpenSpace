@@ -134,6 +134,27 @@ public:
     /// Removes an asset
     void removeAsset(const std::string& path);
 
+    Version version() const;
+    std::vector<Module> modules() const;
+    std::optional<Meta> meta() const;
+    std::vector<Asset> assets() const;
+    std::vector<Property> properties() const;
+    std::vector<Keybinding> keybindings() const;
+    std::optional<Time> time() const;
+    std::optional<CameraType> camera() const;
+    std::vector<std::string> markNodes() const;
+    std::vector<std::string> additionalScripts() const;
+
+    void setVersion(Version v);
+    void setModules(std::vector<Module>& m);
+    void setMeta(Meta m);
+    void setProperties(std::vector<Property>& p);
+    void setKeybindings(std::vector<Keybinding>& k);
+    void setTime(Time t);
+    void setCamera(CameraType c);
+    void setMarkNodes(std::vector<std::string>& n);
+    void setAdditionalScripts(std::vector<std::string>& s);
+
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
@@ -144,16 +165,16 @@ public:
 private:
     static constexpr const Version CurrentVersion = Version { 1, 0 };
 
-    Version version = CurrentVersion;
-    std::vector<Module> modules;
-    std::optional<Meta> meta;
-    std::vector<Asset> assets;
-    std::vector<Property> properties;
-    std::vector<Keybinding> keybindings;
-    std::optional<Time> time;
-    std::optional<CameraType> camera;
-    std::vector<std::string> markNodes;
-    std::vector<std::string> additionalScripts;
+    Version _version = CurrentVersion;
+    std::vector<Module> _modules;
+    std::optional<Meta> _meta;
+    std::vector<Asset> _assets;
+    std::vector<Property> _properties;
+    std::vector<Keybinding> _keybindings;
+    std::optional<Time> _time;
+    std::optional<CameraType> _camera;
+    std::vector<std::string> _markNodes;
+    std::vector<std::string> _additionalScripts;
 
     bool _ignoreUpdates = false;
 };

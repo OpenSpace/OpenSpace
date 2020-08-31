@@ -80,8 +80,9 @@ void LauncherWindow::openWindow_new() {
 
 void LauncherWindow::openWindow_edit() {
     std::string editProfilePath = _basePath.toUtf8().constData();
-    editProfilePath += "/profiles/";
+    editProfilePath += "/data/profiles/";
     editProfilePath += ui->comboBoxProfiles->currentText().toUtf8().constData();
+    editProfilePath += ".profile";
     myEditorWindow = new editorwindow(_basePath + "/data/assets", editProfilePath);
 
     int selectedProfileIdx = ui->comboBoxProfiles->currentIndex();
