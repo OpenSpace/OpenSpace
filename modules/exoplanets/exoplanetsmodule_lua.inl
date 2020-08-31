@@ -60,13 +60,11 @@ std::string getStarColor(float bv, std::ifstream& colormap) {
     return "{" + r + ", " + g + ", " + b + "}";
 }
 
-glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, 
-                                           float om, glm::dmat3 rot) 
-{
+glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om) {
     // Exoplanet defined inclination changed to be used as Kepler defined inclination
-    const glm::dvec3 ascendingNodeAxisRot = rot * glm::dvec3(0.f, 0.f, 1.f);
-    const glm::dvec3 inclinationAxisRot = rot * glm::dvec3(1.f, 0.f, 0.f );
-    const glm::vec3 argPeriapsisAxisRot = rot * glm::dvec3( 0.f, 0.f, 1.f );
+    const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.0, 0.0, 1.0);
+    const glm::dvec3 inclinationAxisRot =  glm::dvec3(1.0, 0.0, 0.0);
+    const glm::dvec3 argPeriapsisAxisRot = glm::dvec3(0.0, 0.0, 1.0);
 
     const double asc = glm::radians(bigom);
     const double inc = glm::radians(i);
@@ -312,23 +310,6 @@ int addExoplanetSystem(lua_State* L) {
                     "}"
                 "}"
             "},"
-            "Transform = {"
-                "Scale = {"
-                    "Type = 'StaticScale',"
-                    "Scale = 1.0,"
-                "},"
-                "Translation = {"
-                    "Type = 'KeplerTranslation',"
-                    "Eccentricity = " + std::to_string(firstPlanet.ECC) + "," //ECC
-                    "SemiMajorAxis = 0," 
-                    "Inclination = " + std::to_string(firstPlanet.I) + "," //I
-                    "AscendingNode  = " + std::to_string(firstPlanet.BIGOM) + "," //BIGOM
-                    "ArgumentOfPeriapsis  = " + std::to_string(firstPlanet.OM) + "," //OM
-                    "MeanAnomaly = 180.0,"
-                    "Epoch = '" + sEpochStar + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                    "Period = " + std::to_string(period) + ","
-                "}"
-            "},"
             "GUI = {"
                 "Name = '" + starNameSpeck + " Globe',"
                 "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
@@ -410,10 +391,6 @@ int addExoplanetSystem(lua_State* L) {
                 "}"
             "},"
             "Transform = {"
-                "Scale = {"
-                    "Type = 'StaticScale',"
-                    "Scale = 1.0,"
-                "},"
                 "Translation = {"
                     "Type = 'KeplerTranslation',"
                     "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC
@@ -478,10 +455,10 @@ int addExoplanetSystem(lua_State* L) {
             glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
                 planet.I, 
                 planet.BIGOM, 
-                planet.OM, 
-                exoplanetSystemRotation
+                planet.OM 
             );
             glm::dmat3 rotation = orbitPlaneRotationMatrix;
+
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
                 "Parent = '" + starIdentifier + "',"
