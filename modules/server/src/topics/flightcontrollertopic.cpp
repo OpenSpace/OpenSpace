@@ -303,12 +303,10 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
             fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j)
         );
         if (json.find(AimKey) == json.end()) {
-            const std::string j = json;
             LWARNING(
                 fmt::format("Could not find {} key in JSON. JSON was:\n{}", AimKey, j)
             );
             if (json.find(AnchorKey) == json.end()) {
-                const std::string j = json;
                 LWARNING(fmt::format(
                     "Could not find {} key in JSON. JSON was:\n{}", AnchorKey, j
                 ));

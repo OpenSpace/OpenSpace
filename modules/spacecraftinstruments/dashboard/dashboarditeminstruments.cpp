@@ -332,7 +332,6 @@ glm::vec2 DashboardItemInstruments::size() const {
 
     if (remaining > 0) {
         using FR = ghoul::fontrendering::FontRenderer;
-        FR& renderer = FR::defaultRenderer();
         std::string progress = progressToStr(25, t);
 
         size = addToBoundingbox(

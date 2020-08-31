@@ -687,7 +687,7 @@ void LuaConsole::render() {
 
         // Since the overflow is positive, at least one character needs to be removed.
         const size_t nCharsOverflow = static_cast<size_t>(std::min(
-            std::max(1.f, overflow / _font->glyph('m')->width()),
+            std::max(1.f, overflow / _font->glyph('m')->width),
             static_cast<float>(currentCommand.size())
         ));
 
