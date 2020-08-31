@@ -41,7 +41,7 @@
 
 namespace openspace::exoplanets::luascriptfunctions {
 
-constexpr const char* ExoplanetsGUIPath = "/Milky Way/Exoplanets/Exoplanets Systems/";
+constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
 std::string getStarColor(float bv, std::ifstream& colormap) {
     const int t = round(((bv + 0.4) / (2.0 + 0.4)) * 255);
@@ -220,33 +220,9 @@ int addExoplanetSystem(lua_State* L) {
         starToSunVec.z
     );
 
-    std::string starIdentifier = createIdentifier(starNameSpeck);
-
-    const std::string starParent = "{"
-        "Identifier = '" + starIdentifier + "',"
-        "Parent = 'SolarSystemBarycenter'," 
-        "Transform = {"
-            "Rotation = {"
-                "Type = 'StaticRotation',"
-                "Rotation = " + ghoul::to_string(exoplanetSystemRotation) + ""
-            "},"
-            "Translation = {"
-                "Type = 'StaticTranslation',"
-                "Position = " + ghoul::to_string(starPosition) + ""
-            "}"
-        "},"
-        "GUI = {"
-            "Name = '" + starNameSpeck + "',"
-            "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
-        "}"
-    "}";
-
-    openspace::global::scriptEngine.queueScript(
-        "openspace.addSceneGraphNode(" + starParent + ");",
-        openspace::scripting::ScriptEngine::RemoteScripting::Yes
-    );
-
-    float starRadius = p.RSTAR;
+    // Star renderable globe, if we have a radius
+    std::string starGlobeRenderableString = "";
+    const float starRadius = p.RSTAR;
     if (!isnan(starRadius)) {
         std::ifstream colorMap(
             absPath("${SYNC}/http/stars_colormap/2/colorbv.cmap"), 
@@ -258,69 +234,59 @@ int addExoplanetSystem(lua_State* L) {
         }
 
         std::string color = getStarColor(p.BMV, colorMap);
-        Exoplanet firstPlanet = planetSystem[0];
-
-        if (isnan(firstPlanet.ECC)) {
-            firstPlanet.ECC = 0.f;
-        }
-        if (isnan(firstPlanet.I)) {
-            firstPlanet.I = 90.f;
-        }
-        if (isnan(firstPlanet.BIGOM)) {
-            firstPlanet.BIGOM = 180.f;
-        }
-        if (isnan(firstPlanet.OM)) {
-            firstPlanet.OM = 90.f;
-        }
-        std::string sEpochStar;
-        if (!isnan(firstPlanet.TT)) {
-            epoch.setTime("JD " + std::to_string(firstPlanet.TT));
-            sEpochStar = epoch.ISO8601();
-        }
-        else {
-            sEpochStar = "2009-05-19T07:11:34.080";
-        }
-
-        const float period = firstPlanet.PER * static_cast<float>(SecondsPerDay);
         const float radiusInMeter = starRadius * distanceconstants::SolarRadius;
 
-        const std::string starGlobeNode = "{"
-            "Identifier = '" + starIdentifier + "_Globe',"
-            "Parent = '" + starIdentifier + "',"
-            "Renderable = {"
-                "Type = 'RenderableGlobe',"
-                "Radii = " + std::to_string(radiusInMeter) + ","
-                "SegmentsPerPatch = 64,"
-                "PerformShading = false,"
-                "Layers = {"
-                    "ColorLayers = {"
-                        "{"
-                            "Identifier = 'StarColor',"
-                            "Type = 'SolidColor',"
-                            "Color = " + color + ","
-                            "BlendMode = 'Normal',"
-                            "Enabled = true"
-                        "},"
-                        "{"
-                            "Identifier = 'StarTexture',"
-                            "FilePath = openspace.absPath('${MODULE_EXOPLANETS}/sun.jpg'),"
-                            "BlendMode = 'Color',"
-                            "Enabled = true"
-                        "}"
+        starGlobeRenderableString = "Renderable = {"
+            "Type = 'RenderableGlobe',"
+            "Radii = " + std::to_string(radiusInMeter) + ","
+            "SegmentsPerPatch = 64,"
+            "PerformShading = false,"
+            "Layers = {"
+                "ColorLayers = {"
+                    "{"
+                        "Identifier = 'StarColor',"
+                        "Type = 'SolidColor',"
+                        "Color = " + color + ","
+                        "BlendMode = 'Normal',"
+                        "Enabled = true"
+                    "},"
+                    "{"
+                        "Identifier = 'StarTexture',"
+                        "FilePath = openspace.absPath('${MODULE_EXOPLANETS}/sun.jpg'),"
+                        "BlendMode = 'Color',"
+                        "Enabled = true"
                     "}"
                 "}"
-            "},"
-            "GUI = {"
-                "Name = '" + starNameSpeck + " Globe',"
-                "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
             "}"
-        "}";
-
-        openspace::global::scriptEngine.queueScript(
-            "openspace.addSceneGraphNode(" + starGlobeNode + ");",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
+        "},";
     }
+
+    std::string starIdentifier = createIdentifier(starNameSpeck);
+
+    const std::string starParent = "{"
+        "Identifier = '" + starIdentifier + "',"
+        "Parent = 'SolarSystemBarycenter',"  
+        "" + starGlobeRenderableString + ""
+        "Transform = {"
+            "Rotation = {"
+                "Type = 'StaticRotation',"
+                "Rotation = " + ghoul::to_string(exoplanetSystemRotation) + ""
+            "},"
+            "Translation = {"
+                "Type = 'StaticTranslation',"
+                "Position = " + ghoul::to_string(starPosition) + ""
+            "}"
+        "},"
+        "GUI = {"
+            "Name = '" + starNameSpeck + " (Star)',"
+            "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
+        "}"
+    "}";
+
+    openspace::global::scriptEngine.queueScript(
+        "openspace.addSceneGraphNode(" + starParent + ");",
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
 
     for (size_t i = 0; i < planetSystem.size(); i++) {
         Exoplanet planet = planetSystem[i];
@@ -405,7 +371,7 @@ int addExoplanetSystem(lua_State* L) {
             "},"
             "GUI = {"
                 "Name = '" + planetName + "',"
-                "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
+                "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
             "}"
         "}";
 
@@ -437,7 +403,7 @@ int addExoplanetSystem(lua_State* L) {
             "},"
             "GUI = {"
                 "Name = '" + planetName + " Trail',"
-                "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
+                "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
             "}"
         "}";
 
@@ -482,7 +448,7 @@ int addExoplanetSystem(lua_State* L) {
                 "},"
                 "GUI = {"
                     "Name = '" + planetName + " Disc',"
-                    "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
+                    "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
                 "}"
             "}";
 
