@@ -121,7 +121,6 @@ int addExoplanetSystem(lua_State* L) {
 
     // If user have given name as in EOD, change it to speck-name
     std::string starNameSpeck = getSpeckStarName(starName);
-    std::replace(starNameSpeck.begin(), starNameSpeck.end(), ' ', '_');
 
     std::ifstream data(
         absPath("${MODULE_EXOPLANETS}/expl_data.bin"), 
@@ -214,6 +213,7 @@ int addExoplanetSystem(lua_State* L) {
         starToSunVec.z
     );
 
+    // Avoid whitespaces in identifiers
     std::replace(starNameSpeck.begin(), starNameSpeck.end(), ' ', '_');
 
     const std::string starParent = "{"
@@ -370,6 +370,9 @@ int addExoplanetSystem(lua_State* L) {
         const float period = planet.PER * static_cast<float>(SecondsPerDay);
         const float semiMajorAxisInMeter = planet.A * distanceconstants::AstronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
+
+        // Avoid whitespace in identifier
+        std::replace(planetName.begin(), planetName.end(), ' ', '_');
 
         const std::string planetNode = "{"
             "Identifier = '" + planetName + "',"
