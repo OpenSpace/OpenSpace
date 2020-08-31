@@ -70,7 +70,7 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om) {
     const double inc = glm::radians(i);
     const double per = glm::radians(om);
 
-    glm::dmat4 orbitPlaneRotation =
+    const glm::dmat4 orbitPlaneRotation =
         glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
         glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
         glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
@@ -127,7 +127,7 @@ int addExoplanetSystem(lua_State* L) {
     const std::string starName = luaL_checkstring(L, StringLocation);
 
     // If user have given name as in EOD, change it to speck-name
-    std::string starNameSpeck = getSpeckStarName(starName);
+    const std::string starNameSpeck = getSpeckStarName(starName);
 
     std::ifstream data(
         absPath("${MODULE_EXOPLANETS}/expl_data.bin"), 
@@ -182,23 +182,24 @@ int addExoplanetSystem(lua_State* L) {
         ); 
     }
 
-    Time epoch;
-    glm::dvec3 starPosition = glm::dvec3(
+    const glm::dvec3 starPosition = glm::dvec3(
         p.POSITIONX * distanceconstants::Parsec, 
         p.POSITIONY * distanceconstants::Parsec,
         p.POSITIONZ * distanceconstants::Parsec
     );
        
-    glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
-    glm::dvec3 starToSunVec = normalize(sunPosition - starPosition);
-    glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
+    const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
+    const glm::dvec3 starToSunVec = normalize(sunPosition - starPosition);
+    const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
 
-    glm::dmat3 galaxticToCelectialMatrix = SpiceManager::ref().positionTransformMatrix( // galaxtic north in celectial coordinates, or just celectial north?
+    const glm::dmat3 galaxticToCelectialMatrix = SpiceManager::ref().positionTransformMatrix( // galaxtic north in celectial coordinates, or just celectial north?
         "GALACTIC",
         "J2000",
         0.0
     );
-    glm::dvec3 celestialNorth = normalize(galaxticToCelectialMatrix * galacticNorth);
+    const glm::dvec3 celestialNorth = normalize(
+        galaxticToCelectialMatrix * galacticNorth
+    );
 
     // Earth's north vector projected onto the skyplane, the plane perpendicular to the viewing vector (starToSunVec)
     const float celestialAngle = dot(celestialNorth, starToSunVec);
@@ -206,7 +207,7 @@ int addExoplanetSystem(lua_State* L) {
         celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
     );
 
-    glm::dvec3 beta = glm::normalize(glm::cross(starToSunVec, northProjected));
+    const glm::dvec3 beta = glm::normalize(glm::cross(starToSunVec, northProjected));
 
     const glm::dmat3 exoplanetSystemRotation = glm::dmat3(
         northProjected.x, 
@@ -233,7 +234,7 @@ int addExoplanetSystem(lua_State* L) {
             ghoul::lua::luaError(L, "Failed to open colormap data file");
         }
 
-        std::string color = getStarColor(p.BMV, colorMap);
+        const std::string color = getStarColor(p.BMV, colorMap);
         const float radiusInMeter = starRadius * distanceconstants::SolarRadius;
 
         starGlobeRenderableString = "Renderable = {"
@@ -261,7 +262,7 @@ int addExoplanetSystem(lua_State* L) {
         "},";
     }
 
-    std::string starIdentifier = createIdentifier(starNameSpeck);
+    const std::string starIdentifier = createIdentifier(starNameSpeck);
 
     const std::string starParent = "{"
         "Identifier = '" + starIdentifier + "',"
@@ -290,7 +291,7 @@ int addExoplanetSystem(lua_State* L) {
 
     for (size_t i = 0; i < planetSystem.size(); i++) {
         Exoplanet planet = planetSystem[i];
-        std::string planetName = planetNames[i];
+        const std::string planetName = planetNames[i];
 
         if (isnan(planet.ECC)) {
             planet.ECC = 0.f;
@@ -304,6 +305,7 @@ int addExoplanetSystem(lua_State* L) {
         if (isnan(planet.OM)) {
             planet.OM = 90.f;
         }
+        Time epoch;
         std::string sEpoch;
         if (!isnan(planet.TT)) {
             epoch.setTime("JD " + std::to_string(planet.TT));
@@ -334,7 +336,19 @@ int addExoplanetSystem(lua_State* L) {
         const float semiMajorAxisInMeter = planet.A * distanceconstants::AstronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
-        std::string planetIdentifier = createIdentifier(planetName);
+        const std::string planetIdentifier = createIdentifier(planetName);
+
+        const std::string planetKeplerTranslation = "{"
+            "Type = 'KeplerTranslation',"
+            "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC 
+            "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
+            "Inclination = " + std::to_string(planet.I) + "," //I
+            "AscendingNode  = " + std::to_string(planet.BIGOM) + "," //BIGOM
+            "ArgumentOfPeriapsis  = " + std::to_string(planet.OM) + "," //OM
+            "MeanAnomaly = 0.0,"
+            "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
+            "Period = " + std::to_string(period) + ","
+        "}";
 
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
@@ -356,19 +370,7 @@ int addExoplanetSystem(lua_State* L) {
                     "}"
                 "}"
             "},"
-            "Transform = {"
-                "Translation = {"
-                    "Type = 'KeplerTranslation',"
-                    "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC
-                    "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
-                    "Inclination = " + std::to_string(planet.I) + "," //I
-                    "AscendingNode = " + std::to_string(planet.BIGOM) + "," //BIGOM
-                    "ArgumentOfPeriapsis = " + std::to_string(planet.OM) + "," //OM
-                    "MeanAnomaly = 0.0,"
-                    "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                    "Period = " + std::to_string(period) + ","
-                "},"
-            "},"
+            "Transform = { Translation = " + planetKeplerTranslation + "},"
             "GUI = {"
                 "Name = '" + planetName + "',"
                 "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
@@ -388,17 +390,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Type = 'RenderableTrailOrbit',"
                 "Period = " + std::to_string(planet.PER) + ","
                 "Resolution = 1000,"
-                "Translation = {"
-                    "Type = 'KeplerTranslation',"
-                    "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC 
-                    "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + "," 
-                    "Inclination = " + std::to_string(planet.I) + "," //I
-                    "AscendingNode  = " + std::to_string(planet.BIGOM) + "," //BIGOM
-                    "ArgumentOfPeriapsis  = " + std::to_string(planet.OM) + "," //OM
-                    "MeanAnomaly = 0.0,"
-                    "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                    "Period = " + std::to_string(period) + ","
-                "},"
+                "Translation = " + planetKeplerTranslation + ","
                 "Color = { 1, 1, 1 }"
             "},"
             "GUI = {"
@@ -418,12 +410,12 @@ int addExoplanetSystem(lua_State* L) {
         if (hasUpperAUncertainty && hasLowerAUncertainty)
         {
             // Get the orbit plane that the trail orbit and planet have from the KeplerTranslation
-            glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
+            const glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
                 planet.I, 
                 planet.BIGOM, 
                 planet.OM 
             );
-            glm::dmat3 rotation = orbitPlaneRotationMatrix;
+            const glm::dmat3 rotation = orbitPlaneRotationMatrix;
 
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
@@ -540,8 +532,8 @@ int addExoplanetSystem(lua_State* L) {
 int removeExoplanetSystem(lua_State* L) {
     const int StringLocation = -1;
     const std::string starName = luaL_checkstring(L, StringLocation);
-    std::string starNameSpeck = getSpeckStarName(starName);
-    std::string starIdentifier = createIdentifier(starNameSpeck);
+    const std::string starNameSpeck = getSpeckStarName(starName);
+    const std::string starIdentifier = createIdentifier(starNameSpeck);
 
     openspace::global::scriptEngine.queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
