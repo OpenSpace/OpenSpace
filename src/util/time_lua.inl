@@ -70,6 +70,156 @@ int time_setDeltaTime(lua_State* L) {
 }
 
 /**
+ * \ingroup LuaScripts
+* interpolateNextDeltaTimeStep(list of numbers):
+* Sets the list of discrete delta time steps for the simulation speed.
+ */
+int time_setDeltaTimeSteps(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setDeltaTimeSteps");
+
+    ghoul::Dictionary dict;
+    ghoul::lua::luaDictionaryFromState(L, dict);
+    const size_t nItems = dict.size();
+
+    std::vector<double> inputDeltaTimes;
+    inputDeltaTimes.reserve(nItems);
+
+    for (size_t i = 1; i <= nItems; ++i) {
+        std::string key = std::to_string(i);
+        if (dict.hasKeyAndValue<double>(key)) {
+            const double time = dict.value<double>(key);
+            inputDeltaTimes.push_back(time);
+        }
+        else {
+            const char* msg = lua_pushfstring(L,
+                "Error setting delta times. Expected list of numbers.");
+            return ghoul::lua::luaError(L, fmt::format("bad argument ({})", msg));
+        }
+    }
+    lua_pop(L, 1);
+
+    global::timeManager.setDeltaTimeSteps(inputDeltaTimes);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+* setNextDeltaTimeStep():
+* Immediately set the simulation speed to the first delta time step in the list that is 
+* larger than the current choice of simulation speed, if any.
+ */
+int time_setNextDeltaTimeStep(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setNextDeltaTimeStep");
+
+    global::timeManager.setNextDeltaTimeStep();
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+* setPreviousDeltaTimeStep():
+* Immediately set the simulation speed to the first delta time step in the list that is
+* smaller than the current choice of simulation speed, if any.
+ */
+int time_setPreviousDeltaTimeStep(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setPreviousDeltaTimeStep");
+
+    global::timeManager.setPreviousDeltaTimeStep();
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+* interpolateNextDeltaTimeStep([interpolationDuration]):
+* Interpolate the simulation speed to the next delta time step in the list. If an input
+* value is given, the interpolation is done over the specified number of seconds.
+* If interpolationDuration is not provided, the interpolation time will be based on the
+* `defaultDeltaTimeInterpolationDuration` property of the TimeManager.
+ */
+int time_interpolateNextDeltaTimeStep(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(
+        L, 
+        { 0, 1 }, 
+        "lua::time_interpolateNextDeltaTimeStep"
+    );
+
+    double interpolationDuration = 
+        global::timeManager.defaultDeltaTimeInterpolationDuration();
+
+    const int nArguments = lua_gettop(L);
+    if (nArguments == 1) {
+        const bool durationIsNumber = (lua_isnumber(L, 1) != 0);
+        if (!durationIsNumber) {
+            lua_settop(L, 0);
+            const char* msg = lua_pushfstring(
+                L,
+                "%s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                luaL_typename(L, -1)
+            );
+            return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+        }
+        interpolationDuration = lua_tonumber(L, 1);
+    }
+
+    global::timeManager.interpolateNextDeltaTimeStep(interpolationDuration);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+* interpolatePreviousDeltaTimeStep([interpolationDuration]):
+* Interpolate the simulation speed to the previous delta time step in the list. If an 
+* input value is given, the interpolation is done over the specified number of seconds.
+* If interpolationDuration is not provided, the interpolation time will be based on the
+* `defaultDeltaTimeInterpolationDuration` property of the TimeManager.
+ */
+int time_interpolatePreviousDeltaTimeStep(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(
+        L, 
+        { 0, 1 }, 
+        "lua::time_interpolatePreviousDeltaTimeStep"
+    );
+
+    double interpolationDuration = 
+        global::timeManager.defaultDeltaTimeInterpolationDuration();
+
+    const int nArguments = lua_gettop(L);
+    if (nArguments == 1) {
+        const bool durationIsNumber = (lua_isnumber(L, 1) != 0);
+        if (!durationIsNumber) {
+            lua_settop(L, 0);
+            const char* msg = lua_pushfstring(
+                L,
+                "%s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                luaL_typename(L, -1)
+            );
+            return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+        }
+        interpolationDuration = lua_tonumber(L, 1);
+    }
+
+    global::timeManager.interpolatePreviousDeltaTimeStep(interpolationDuration);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
 * \ingroup LuaScripts
 * time_interpolateDeltaTime(number [, number]):
 * Interpolates the delta time by calling the Time::interpolateDeltaTime method

@@ -65,9 +65,9 @@ public:
     void setCamera(Camera* camera);
     void clearPreviousState();
 
-    SceneGraphNode* focusNode() const;
-    void setFocusNode(const SceneGraphNode* focusNode);
-    void setFocusNode(const std::string& focusNode);
+    void setFocusNode(const SceneGraphNode* focusNode,
+        bool resetVelocitiesOnChange = true);
+    void setFocusNode(const std::string& focusNode, bool resetVelocitiesOnChange = true);
     void setAnchorNode(const std::string& anchorNode);
     void setAimNode(const std::string& aimNode);
 
@@ -121,7 +121,8 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setAnchorNode(const SceneGraphNode* anchorNode);
+    void setAnchorNode(const SceneGraphNode* anchorNode,
+        bool resetVelocitiesOnChange = true);
     void setAimNode(const SceneGraphNode* aimNode);
 
     Camera* _camera;

@@ -71,7 +71,7 @@ int onDeinitializeDependency(lua_State* state) {
 }
 
 /**
- * Requires rependency
+ * Requires dependency
  * Gives access to
  *   AssetTable: Exported lua values
  *   Dependency: ...
@@ -80,17 +80,6 @@ int onDeinitializeDependency(lua_State* state) {
 int require(lua_State* state) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->requireLua(asset);
-}
-
-/**
- * Requests rependency
- * Gives access to
- *   Dependency: ...
- * Usage: Dependency = asset.import(string assetIdentifier)
- */
-int request(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return asset->loader()->requestLua(asset);
 }
 
 int exists(lua_State* state) {

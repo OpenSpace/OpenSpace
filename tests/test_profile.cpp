@@ -168,6 +168,16 @@ TEST_CASE("Basic Time Absolute", "[profile]") {
     REQUIRE(serialized == contents);
 }
 
+TEST_CASE("Basic Delta Times", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_deltatimes.profile";
+    Profile p = loadProfile(TestFile);
+
+    std::string serialized = p.serialize();
+    std::string contents = loadFile(TestFile);
+
+    REQUIRE(serialized == contents);
+}
+
 TEST_CASE("Basic Camera NavState", "[profile]") {
     constexpr const char* TestFile = "${TESTDIR}/profile/basic_camera_navstate.profile";
     Profile p = loadProfile(TestFile);
@@ -687,6 +697,17 @@ TEST_CASE("Error time wrong parameter type 'type'", "[profile]") {
         loadProfile(TestFile),
         Catch::Matchers::Contains(
             "Expected 'absolute' or 'relative' for the type, got ER"
+        )
+    );
+}
+
+TEST_CASE("Error deltatimes wrong parameter type", "[profile]") {
+    constexpr const char* TestFile =
+        "${TESTDIR}/profile/error_deltatimes_wrong_parameter_value_type.profile";
+    REQUIRE_THROWS_WITH(
+        loadProfile(TestFile),
+        Catch::Matchers::Contains(
+            "Expected a number for delta time entry, got 'notANumber'" 
         )
     );
 }

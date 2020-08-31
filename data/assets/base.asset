@@ -19,15 +19,15 @@ asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
 asset.require('scene/solarsystem/dwarf_planets/pluto/default_layers')
 asset.require('scene/solarsystem/dwarf_planets/pluto/charon/default_layers')
-asset.request('scene/milkyway/milkyway/volume')
-asset.request('scene/milkyway/constellations/constellation_art')
-asset.request('scene/milkyway/constellations/constellation_keybinds')
+asset.require('scene/milkyway/milkyway/volume')
+asset.require('scene/milkyway/constellations/constellation_art')
+asset.require('scene/milkyway/constellations/constellation_keybinds')
 
 --- TESTELITEST ---
 asset.require('examples/pointscloud')
 --- TESTELITEST ---
 
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
+assetHelper.requireAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -37,7 +37,7 @@ asset.require('util/default_joystick')
 -- Load web gui
 local webGui = asset.require('util/webgui')
 
-asset.request('customization/globebrowsing')
+asset.require('customization/globebrowsing')
 
 -- Keybindings that are specific for this scene
 local Keybindings = {
