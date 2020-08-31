@@ -41,6 +41,8 @@
 
 namespace openspace::exoplanets::luascriptfunctions {
 
+constexpr const char* ExoplanetsGUIPath = "/Milky Way/Exoplanets/Exoplanets Systems/";
+
 std::string getStarColor(float bv, std::ifstream& colormap) {
     const int t = round(((bv + 0.4) / (2.0 + 0.4)) * 255);
     std::string color;
@@ -113,6 +115,13 @@ glm::dmat3 getExoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end) {
     );
 
     return glm::dmat3(toMat4(rotationQuat));
+}
+
+// Create an identifier without whitespaces
+std::string createIdentifier(const std::string& name) {
+    std::string res = name;
+    std::replace(res.begin(), res.end(), ' ', '_');
+    return res;
 }
 
 int addExoplanetSystem(lua_State* L) {
@@ -213,11 +222,10 @@ int addExoplanetSystem(lua_State* L) {
         starToSunVec.z
     );
 
-    // Avoid whitespaces in identifiers
-    std::replace(starNameSpeck.begin(), starNameSpeck.end(), ' ', '_');
+    std::string starIdentifier = createIdentifier(starNameSpeck);
 
     const std::string starParent = "{"
-        "Identifier = '" + starNameSpeck + "',"
+        "Identifier = '" + starIdentifier + "',"
         "Parent = 'SolarSystemBarycenter'," 
         "Transform = {"
             "Rotation = {"
@@ -228,6 +236,10 @@ int addExoplanetSystem(lua_State* L) {
                 "Type = 'StaticTranslation',"
                 "Position = " + ghoul::to_string(starPosition) + ""
             "}"
+        "},"
+        "GUI = {"
+            "Name = '" + starNameSpeck + "',"
+            "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
         "}"
     "}";
 
@@ -275,8 +287,8 @@ int addExoplanetSystem(lua_State* L) {
         const float radiusInMeter = starRadius * distanceconstants::SolarRadius;
 
         const std::string starGlobeNode = "{"
-            "Identifier = '" + starNameSpeck + "Globe',"
-            "Parent = '" + starNameSpeck + "',"
+            "Identifier = '" + starIdentifier + "_Globe',"
+            "Parent = '" + starIdentifier + "',"
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
                 "Radii = " + std::to_string(radiusInMeter) + ","
@@ -316,6 +328,10 @@ int addExoplanetSystem(lua_State* L) {
                     "Epoch = '" + sEpochStar + "'," //TT. JD to YYYY MM DD hh:mm:ss
                     "Period = " + std::to_string(period) + ","
                 "}"
+            "},"
+            "GUI = {"
+                "Name = '" + starNameSpeck + " Globe',"
+                "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
             "}"
         "}";
 
@@ -371,12 +387,11 @@ int addExoplanetSystem(lua_State* L) {
         const float semiMajorAxisInMeter = planet.A * distanceconstants::AstronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
-        // Avoid whitespace in identifier
-        std::replace(planetName.begin(), planetName.end(), ' ', '_');
+        std::string planetIdentifier = createIdentifier(planetName);
 
         const std::string planetNode = "{"
-            "Identifier = '" + planetName + "',"
-            "Parent = '" + starNameSpeck + "',"
+            "Identifier = '" + planetIdentifier + "',"
+            "Parent = '" + starIdentifier + "',"
             "Enabled = true,"
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
@@ -411,6 +426,10 @@ int addExoplanetSystem(lua_State* L) {
                     "Period = " + std::to_string(period) + ","
                 "},"
             "},"
+            "GUI = {"
+                "Name = '" + planetName + "',"
+                "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
+            "}"
         "}";
 
         openspace::global::scriptEngine.queueScript(
@@ -419,8 +438,8 @@ int addExoplanetSystem(lua_State* L) {
         );
 
         const std::string planetTrailNode = "{"
-            "Identifier = '" + planetName + "Trail',"
-            "Parent = '" + starNameSpeck + "',"
+            "Identifier = '" + planetIdentifier + "_Trail',"
+            "Parent = '" + starIdentifier + "',"
             "Enabled = true,"
             "Renderable = {"
                 "Type = 'RenderableTrailOrbit',"
@@ -439,6 +458,10 @@ int addExoplanetSystem(lua_State* L) {
                 "},"
                 "Color = { 1, 1, 1 }"
             "},"
+            "GUI = {"
+                "Name = '" + planetName + " Trail',"
+                "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
+            "}"
         "}";
 
         openspace::global::scriptEngine.queueScript(
@@ -460,8 +483,8 @@ int addExoplanetSystem(lua_State* L) {
             );
             glm::dmat3 rotation = orbitPlaneRotationMatrix;
             const std::string discNode = "{"
-                "Identifier = '" + planetName + "Disc',"
-                "Parent = '" + starNameSpeck + "',"
+                "Identifier = '" + planetIdentifier + "_Disc',"
+                "Parent = '" + starIdentifier + "',"
                 "Enabled = true,"
                 "Renderable = {"
                     "Type = 'RenderableOrbitdisc',"
@@ -480,6 +503,10 @@ int addExoplanetSystem(lua_State* L) {
                         "Rotation = " + ghoul::to_string(rotation) + ","
                     "}"
                 "},"
+                "GUI = {"
+                    "Name = '" + planetName + " Disc',"
+                    "Path = '" + ExoplanetsGUIPath + starNameSpeck + "',"
+                "}"
             "}";
 
             openspace::global::scriptEngine.queueScript(
@@ -499,8 +526,8 @@ int addExoplanetSystem(lua_State* L) {
                 }
 
                 const std::string discLowerEccentricityNode = "{"
-                    "Identifier = '" + planetName + "discECCLOWER',"
-                    "Parent = '" + starNameSpeck + "',"
+                    "Identifier = '" + planetIdentifier + "_Disc_ECC_LOWER',"
+                    "Parent = '" + starIdentifier + "',"
                     "Renderable = {"
                         "Type = 'RenderableOrbitdisc',"
                         "Texture = openspace.absPath('${MODULE_EXOPLANETS}/discL.png'),"
@@ -519,6 +546,7 @@ int addExoplanetSystem(lua_State* L) {
                             "Rotation = " + ghoul::to_string(rotation) + ","
                         "}"
                     "},"
+                    // @TODO: GUI, if we make it work 
                 "}";
 
                 openspace::global::scriptEngine.queueScript(
@@ -532,8 +560,8 @@ int addExoplanetSystem(lua_State* L) {
                 }
 
                 const std::string discUpperEccentricityNode = "{"
-                    "Identifier = '" + planetName + "discECCUPPER',"
-                    "Parent = '" + starNameSpeck + "',"
+                    "Identifier = '" + planetIdentifier + "_Disc_ECC_UPPER',"
+                    "Parent = '" + starIdentifier + "',"
                     "Renderable = {"
                         "Type = 'RenderableOrbitdisc',"
                         "Texture = openspace.absPath('${MODULE_EXOPLANETS}/discU.png'),"
@@ -552,6 +580,7 @@ int addExoplanetSystem(lua_State* L) {
                             "Rotation = " + ghoul::to_string(rotation) + ","
                         "}"
                     "},"
+                    // @TODO: GUI, if we make it work 
                 "}";
 
                 openspace::global::scriptEngine.queueScript(
@@ -569,10 +598,10 @@ int removeExoplanetSystem(lua_State* L) {
     const int StringLocation = -1;
     const std::string starName = luaL_checkstring(L, StringLocation);
     std::string starNameSpeck = getSpeckStarName(starName);
-    std::replace(starNameSpeck.begin(), starNameSpeck.end(), ' ', '_');
+    std::string starIdentifier = createIdentifier(starNameSpeck);
 
     openspace::global::scriptEngine.queueScript(
-        "openspace.removeSceneGraphNode('" + starNameSpeck + "');",
+        "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
