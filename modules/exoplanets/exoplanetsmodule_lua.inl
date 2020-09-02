@@ -422,7 +422,7 @@ int addExoplanetSystem(lua_State* L) {
                         std::to_string(planet.ALOWER) + ", " +
                         std::to_string(planet.AUPPER) + 
                     " }," //min / max extend
-                    "Opacity = 0.5"
+                    "Opacity = 0.3"
                 "},"
                 "Transform = {"
                     "Rotation = {"
