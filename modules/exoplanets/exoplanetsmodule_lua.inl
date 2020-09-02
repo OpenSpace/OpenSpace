@@ -46,7 +46,7 @@ constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Syste
 std::string getStarColor(float bv, std::ifstream& colormap) {
     const int t = round(((bv + 0.4) / (2.0 + 0.4)) * 255);
     std::string color;
-    for (size_t i = 0; i < t + 12; i++) {
+    for (int i = 0; i < t + 12; i++) {
         getline(colormap, color);
     }
     colormap.close();
@@ -360,15 +360,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Radii = " + std::to_string(planetRadius) + "," //R. in meters. 
                 "SegmentsPerPatch = 64,"
                 "PerformShading = false,"
-                "Layers = {"
-                    "ColorLayers = {"
-                        "{"
-                            "Identifier = 'ExoplanetTexture',"
-                            "FilePath = openspace.absPath('${DATA}/test3.jpg'),"
-                            "Enabled = true"
-                        "}"
-                    "}"
-                "}"
+                "Layers = {}"
             "},"
             "Transform = { Translation = " + planetKeplerTranslation + "},"
             "GUI = {"
@@ -423,7 +415,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Enabled = true,"
                 "Renderable = {"
                     "Type = 'RenderableOrbitdisc',"
-                    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/disc3.png'),"
+                    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/disc_texture.png'),"
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
                     "Eccentricity = " + std::to_string(planet.ECC) + ","
                     "Offset = { " +
