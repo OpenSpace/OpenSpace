@@ -221,9 +221,15 @@ int addExoplanetSystem(lua_State* L) {
         starToSunVec.z
     );
 
+    const std::string starIdentifier = createIdentifier(starNameSpeck);
+
     // Star renderable globe, if we have a radius
     std::string starGlobeRenderableString = "";
     const float starRadius = p.RSTAR;
+
+    const float validRadius = isnan(starRadius) ? 1.f : starRadius;
+    const float starRadiusInMeter = validRadius * distanceconstants::SolarRadius;
+
     if (!isnan(starRadius)) {
         std::ifstream colorMap(
             absPath("${SYNC}/http/stars_colormap/2/colorbv.cmap"), 
@@ -235,11 +241,10 @@ int addExoplanetSystem(lua_State* L) {
         }
 
         const std::string color = getStarColor(p.BMV, colorMap);
-        const float radiusInMeter = starRadius * distanceconstants::SolarRadius;
 
         starGlobeRenderableString = "Renderable = {"
             "Type = 'RenderableGlobe',"
-            "Radii = " + std::to_string(radiusInMeter) + ","
+            "Radii = " + std::to_string(starRadiusInMeter) + ","
             "SegmentsPerPatch = 64,"
             "PerformShading = false,"
             "Layers = {"
@@ -262,7 +267,6 @@ int addExoplanetSystem(lua_State* L) {
         "},";
     }
 
-    const std::string starIdentifier = createIdentifier(starNameSpeck);
 
     const std::string starParent = "{"
         "Identifier = '" + starIdentifier + "',"
@@ -284,8 +288,33 @@ int addExoplanetSystem(lua_State* L) {
         "}"
     "}";
 
+
     openspace::global::scriptEngine.queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    const std::string starGlare = "{"
+        "Identifier = '" + starIdentifier + "_glare',"
+        "Parent = '" + starIdentifier + "',"
+        "Renderable = {"
+            "Type = 'RenderablePlaneImageLocal',"
+            "Size = " + std::to_string(10.f * starRadiusInMeter) + ","
+            "Origin = 'Center',"
+            "Billboard = true,"
+            "Texture = openspace.absPath('${SYNC}/http/sun_textures/4/halo.png'),"
+            "BlendMode = 'Additive',"
+            "Opacity = 0.65,"
+            "RenderableType = 'PreDeferredTransparency'"
+        "},"
+        "GUI = {"
+            "Name = '" + starNameSpeck + " (Star Glare)',"
+            "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
+        "}"
+    "}";
+
+    openspace::global::scriptEngine.queueScript(
+        "openspace.addSceneGraphNode(" + starGlare + ");",
         openspace::scripting::ScriptEngine::RemoteScripting::Yes
     );
 
