@@ -294,6 +294,7 @@ int addExoplanetSystem(lua_State* L) {
         openspace::scripting::ScriptEngine::RemoteScripting::Yes
     );
 
+    //@TODO: emmbr (2020-09-03) tint the glare in the same color as the star
     const std::string starGlare = "{"
         "Identifier = '" + starIdentifier + "_glare',"
         "Parent = '" + starIdentifier + "',"
