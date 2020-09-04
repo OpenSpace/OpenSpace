@@ -1149,8 +1149,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     GLint viewport[4] = { 0 };
     global::renderEngine.openglStateCache().viewport(viewport);
 
-    // Set Render Pipeline State
-    global::renderEngine.openglStateCache().setCachedStates();
+    // Reset Render Pipeline State
+    global::renderEngine.openglStateCache().resetCachedStates();
 
     _pingPongIndex = 0;
 
