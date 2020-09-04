@@ -207,10 +207,14 @@ void Connection::handleJson(const nlohmann::json& json) {
 }
 
 void Connection::sendMessage(const std::string& message) {
+    ZoneScoped
+
     _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json& json) {
+    ZoneScoped
+
     sendMessage(json.dump());
 }
 

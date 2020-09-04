@@ -37,9 +37,9 @@ local Pioneer11 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = modelFolder .. "/Pioneer.obj"
+            GeometryFile = modelFolder .. "/Pioneer.obj",
+            ColorTexture = modelFolder .. "/gray.png"
         },
-        ColorTexture = modelFolder .. "/gray.png",
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
     },
     GUI = {

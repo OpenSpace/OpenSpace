@@ -76,7 +76,7 @@ struct TileProvider : public properties::PropertyOwner {
 
     std::string name;
 
-    unsigned int uniqueIdentifier = 0;
+    uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
 };
 

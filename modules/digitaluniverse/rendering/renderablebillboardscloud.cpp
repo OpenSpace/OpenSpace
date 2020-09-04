@@ -37,6 +37,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -701,6 +702,8 @@ bool RenderableBillboardsCloud::isReady() const {
 }
 
 void RenderableBillboardsCloud::initialize() {
+    ZoneScoped
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -716,6 +719,8 @@ void RenderableBillboardsCloud::initialize() {
 }
 
 void RenderableBillboardsCloud::initializeGL() {
+    ZoneScoped
+
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() {
@@ -1043,7 +1048,11 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableBillboardsCloud::update(const UpdateData&) {
+    ZoneScoped
+
     if (_dataIsDirty && _hasSpeckFile) {
+        ZoneScopedN("Data dirty")
+        TracyGpuZone("Data dirty")
         LDEBUG("Regenerating data");
 
         createDataSlice();
@@ -1165,6 +1174,9 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
     if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
     {
+        ZoneScopedN("Sprite texture")
+        TracyGpuZone("Sprite texture")
+
         ghoul::opengl::Texture* t = _spriteTexture;
 
         unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
@@ -1177,6 +1189,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                     ghoul::io::TextureReader::ref().loadTexture(absPath(path));
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                t->purgeFromRAM();
                 return t;
             }
         );
@@ -1613,6 +1626,8 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
 }
 
 void RenderableBillboardsCloud::createDataSlice() {
+    ZoneScoped
+
     _slicedData.clear();
     if (_hasColorMapFile) {
         _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
@@ -1714,6 +1729,8 @@ void RenderableBillboardsCloud::createDataSlice() {
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {
+    ZoneScoped
+
     LDEBUG("Creating Polygon Texture");
 
     glGenTextures(1, &_pTexture);

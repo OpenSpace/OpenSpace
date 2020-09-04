@@ -36,7 +36,7 @@ namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -72,6 +72,7 @@ public:
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;
+    bool shouldUpdateIfDisabled() const;
 
     void setBoundingSphere(float boundingSphere);
     float boundingSphere() const;
@@ -98,6 +99,8 @@ protected:
     properties::FloatProperty _opacity;
     properties::FloatProperty _boundingSphere;
     properties::StringProperty _renderableType;
+
+    bool _shouldUpdateIfDisabled = false;
 
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();

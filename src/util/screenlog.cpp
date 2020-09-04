@@ -26,14 +26,14 @@
 
 #include <algorithm>
 
-using std::string;
-
 namespace openspace {
 
 ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
     : _timeToLive(std::move(timeToLive))
     , _logLevel(logLevel)
-{}
+{
+    _entries.reserve(64);
+}
 
 void ScreenLog::removeExpiredEntries() {
     std::lock_guard<std::mutex> guard(_mutex);

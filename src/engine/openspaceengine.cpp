@@ -62,6 +62,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
@@ -82,6 +83,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
+#include <future>
 #include <numeric>
 #include <sstream>
 
@@ -257,11 +259,9 @@ void OpenSpaceEngine::initialize() {
 #endif // WIN32
 
 #ifndef GHOUL_LOGGING_ENABLE_TRACE
-    LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
-
     if (level == ghoul::logging::LogLevel::Trace) {
         LWARNING(
-            "Desired logging level is set to 'Trace' but application was " <<
+            "Desired logging level is set to 'Trace' but application was "
             "compiled without Trace support"
         );
     }
@@ -707,8 +707,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration.useMultithreadedInitialization) {
-        unsigned int nAvailableThreads = std::thread::hardware_concurrency();
-        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads - 1;
+        unsigned int nAvailableThreads = std::min(
+            std::thread::hardware_concurrency() - 1,
+            4u
+        );
+        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads;
         sceneInitializer = std::make_unique<MultiThreadedSceneInitializer>(nThreads);
     }
     else {
@@ -850,7 +853,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     runGlobalCustomizationScripts();
 
-    writeSceneDocumentation();
+    _writeDocumentationTask = std::async(&OpenSpaceEngine::writeSceneDocumentation, this);
 
     LTRACE("OpenSpaceEngine::loadSingleAsset(end)");
 }
@@ -1008,6 +1011,18 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
     std::string path = global::configuration.documentation.path;
     if (!path.empty()) {
+        std::future<std::string> root = std::async(
+            &properties::PropertyOwner::generateJson,
+            &global::rootPropertyOwner
+        );
+        
+        std::future<std::string> scene = std::async(
+            &properties::PropertyOwner::generateJson,
+            _scene.get()
+        );
+
+
+
         path = absPath(path) + "/";
         _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
         _documentationJson += global::keybindingManager.jsonName() + "\",";
@@ -1021,11 +1036,11 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Properties\",";
         _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
-        _documentationJson += "\",\"data\":" + global::rootPropertyOwner.generateJson();
+        _documentationJson += "\",\"data\":" + root.get();
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Graph Information\",";
         _documentationJson += "\"identifier\":\"propertylist";
-        _documentationJson += "\",\"data\":" + _scene->generateJson();
+        _documentationJson += "\",\"data\":" + scene.get();
         _documentationJson += "}";
 
         //add templates for the jsons we just registered
@@ -1048,9 +1063,14 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
 void OpenSpaceEngine::preSynchronization() {
     ZoneScoped
+    TracyGpuZone("preSynchronization")
+
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
     FileSys.triggerFilesystemEvents();
+
+    // Reset the temporary, frame-based storage
+    global::memoryManager.TemporaryMemory.reset();
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
@@ -1113,6 +1133,7 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     ZoneScoped
+    TracyGpuZone("postSynchronizationPreDraw")
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
 
     bool master = global::windowDelegate.isMaster();
@@ -1138,10 +1159,19 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     const bool updated = _assetManager->update();
     if (updated) {
-        writeSceneDocumentation();
+        if (_writeDocumentationTask.valid()) {
+            // If there still is a documentation creation task the previous frame, we need
+            // to wait for it to finish first, or else we might write to the same file
+            _writeDocumentationTask.wait();
+        }
+        _writeDocumentationTask = std::async(
+            &OpenSpaceEngine::writeSceneDocumentation, this
+        );
     }
 
-    global::renderEngine.updateScene();
+    if (!global::windowDelegate.isMaster()) {
+        global::renderEngine.updateScene();
+    }
     global::renderEngine.updateRenderer();
     global::renderEngine.updateScreenSpaceRenderables();
     global::renderEngine.updateShaderPrograms();
@@ -1182,6 +1212,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
                              const glm::mat4& projectionMatrix)
 {
     ZoneScoped
+    TracyGpuZone("Render")
     LTRACE("OpenSpaceEngine::render(begin)");
 
     const bool isGuiWindow =
@@ -1206,6 +1237,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
 void OpenSpaceEngine::drawOverlays() {
     ZoneScoped
+    TracyGpuZone("Draw2D")
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
 
     const bool isGuiWindow =
@@ -1230,6 +1262,7 @@ void OpenSpaceEngine::drawOverlays() {
 
 void OpenSpaceEngine::postDraw() {
     ZoneScoped
+    TracyGpuZone("postDraw")
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine.postDraw();
@@ -1245,6 +1278,8 @@ void OpenSpaceEngine::postDraw() {
         resetPropertyChangeFlags();
         _isFirstRenderingFirstFrame = false;
     }
+
+    global::memoryManager.PersistentMemory.housekeeping();
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
 }

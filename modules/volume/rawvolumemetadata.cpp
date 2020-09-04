@@ -112,12 +112,12 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
     }
 
     if (hasTime) {
-        std::string timeString = Time(time).ISO8601();
+        std::string_view timeString = Time(time).ISO8601();
         // Do not include time offset in time string
         if (timeString.back() == 'Z') {
-            timeString.pop_back();
+            timeString = timeString.substr(0, timeString.size() - 1);
         }
-        dict.setValue<std::string>(KeyTime, timeString);
+        dict.setValue<std::string>(KeyTime, std::string(timeString));
     }
     return dict;
 }

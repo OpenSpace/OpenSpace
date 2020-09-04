@@ -1073,6 +1073,7 @@ int main(int argc, char** argv) {
     
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
+    Log::instance().setShowLogLevel(false);
     Log::instance().setLogCallback(mainLogCallback);
 
 #ifdef __APPLE__

@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 #define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 
-#include <openspace/properties/propertyowner.h>
-
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -38,7 +38,7 @@ namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::modelgeometry {
 
-class ModelGeometry : public properties::PropertyOwner {
+class ModelGeometry {
 public:
     struct Vertex {
         GLfloat location[4];
@@ -46,7 +46,7 @@ public:
         GLfloat normal[3];
     };
 
-    static std::unique_ptr<ModelGeometry> createFromDictionary(
+    static ghoul::mm_unique_ptr<ModelGeometry> createFromDictionary(
         const ghoul::Dictionary& dictionary
     );
 
@@ -55,6 +55,7 @@ public:
 
     virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
+    void bindTexture();
     void render();
 
     virtual bool loadModel(const std::string& filename) = 0;
@@ -79,6 +80,8 @@ protected:
     GLenum _mode = GL_TRIANGLES;
 
     double _boundingRadius = 0.0;
+    std::string _colorTexturePath;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::vector<Vertex> _vertices;
     std::vector<int> _indices;
