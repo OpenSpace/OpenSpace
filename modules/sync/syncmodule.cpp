@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {

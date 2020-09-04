@@ -32,6 +32,7 @@
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
@@ -42,6 +43,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <fstream>
 #include "cpl_minixml.h"
 
@@ -210,9 +212,9 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
-        GLint viewport[4];
+        //GLint viewport[4];
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        //glGetIntegerv(GL_VIEWPORT, viewport);
 
         // Render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, t.fbo);
@@ -233,7 +235,8 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         t.fontRenderer->render(*t.font, t.textPosition, t.text, t.textColor);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        global::renderEngine.openglStateCache().resetViewportState();
+        //glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         t.tileCache->put(key, t.initData.hashKey, tile);

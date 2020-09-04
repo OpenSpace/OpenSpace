@@ -29,6 +29,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <string_view>
 #include <vector>
 
 namespace openspace {

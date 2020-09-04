@@ -56,6 +56,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #ifdef GHOUL_USE_DEVIL
@@ -948,6 +949,13 @@ const Renderer& RenderEngine::renderer() const {
 
 RenderEngine::RendererImplementation RenderEngine::rendererImplementation() const {
     return _rendererImplementation;
+}
+
+ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
+    if (_openglStateCache == nullptr) {
+        _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
+    }
+    return *_openglStateCache;
 }
 
 float RenderEngine::globalBlackOutFactor() {

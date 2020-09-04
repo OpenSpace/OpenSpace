@@ -72,6 +72,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -851,24 +852,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
     ghoul::opengl::TextureUnit deltaJTableTextureUnit;
 
-    // Saving current OpenGL state
-    GLboolean blendEnabled = glIsEnabled(GL_BLEND);
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-
-    if (blendEnabled) {
-        glDisable(GL_BLEND);
-    }
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+    glDisable(GL_BLEND);
 
     // ===========================================================
     // See Precomputed Atmosphere Scattering from Bruneton et al. paper, algorithm 4.1:
@@ -1214,12 +1198,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     }
 
     // Restores OpenGL blending state
-    if (blendEnabled) {
-        glEnable(GL_BLEND);
-    }
-
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+    global::renderEngine.openglStateCache().resetBlendState();
 }
 
 void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
@@ -1238,7 +1217,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
     GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    global::renderEngine.openglStateCache().viewport(m_viewport);
 
     // Creates the FBO for the calculations
     GLuint calcFBO;
@@ -1264,12 +1243,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(
-        m_viewport[0],
-        m_viewport[1],
-        m_viewport[2],
-        m_viewport[3]
-    );
+    global::renderEngine.openglStateCache().setViewportState(m_viewport);
     glDeleteBuffers(1, &quadCalcVBO);
     glDeleteVertexArrays(1, &quadCalcVAO);
     glDeleteFramebuffers(1, &calcFBO);

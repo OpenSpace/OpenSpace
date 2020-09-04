@@ -38,6 +38,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -797,28 +798,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
                                                  float fadeInVariable)
 {
     glDepthMask(false);
-    glEnable(GL_DEPTH_TEST);
-
-    // Saving current OpenGL state
-    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
-
-    GLenum blendEquationRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-
-    GLenum blendEquationAlpha;
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-
-    GLenum blendDestAlpha;
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-
-    GLenum blendDestRGB;
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-
-    GLenum blendSrcAlpha;
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-
-    GLenum blendSrcRGB;
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -886,15 +865,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-
-    if (!blendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-
-    glDepthMask(true);
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetDepthState();
 
 }
 

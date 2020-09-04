@@ -41,6 +41,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 #include <string>
@@ -95,31 +96,7 @@ namespace {
     constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
-    const GLenum ColorAttachment0Array[1] = {
-        GL_COLOR_ATTACHMENT0
-    };
-
-    const GLenum ColorAttachment1Array[1] = {
-       GL_COLOR_ATTACHMENT1
-    };
-
-    const GLenum ColorAttachment01Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1
-    };
-
-    const GLenum ColorAttachment03Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT3
-    };
-
-    const GLenum ColorAttachment012Array[3] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1,
-       GL_COLOR_ATTACHMENT2
-    };
-
-    const GLenum ColorAttachment0123Array[4] = {
+    const GLenum ColorAttachmentArray[4] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
        GL_COLOR_ATTACHMENT2,
@@ -475,8 +452,21 @@ void FramebufferRenderer::initialize() {
     global::raycasterManager.addListener(*this);
     global::deferredcasterManager.addListener(*this);
 
+    // Set Default Rendering OpenGL State
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+
+    glEnable(GL_DEPTH_TEST);
+
     // Default GL State for Blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Save State in Cache
+    global::renderEngine.openglStateCache().loadCurrentGLState();
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -1154,22 +1144,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     ZoneScoped
     TracyGpuZone("FramebufferRenderer")
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-    {
-        // Set OpenGL default rendering state
-        ZoneScopedN("Setting OpenGL state")
+    GLint viewport[4] = { 0 };
+    global::renderEngine.openglStateCache().viewport(viewport);
 
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-        glEnablei(GL_BLEND, 0);
-        glDisablei(GL_BLEND, 1);
-        glDisablei(GL_BLEND, 2);
+    // Reset Render Pipeline State
+    global::renderEngine.openglStateCache().resetCachedStates();
 
-        glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-
-        glEnable(GL_DEPTH_TEST);
-    }
     _pingPongIndex = 0;
 
     if (!scene || !camera) {
@@ -1181,10 +1163,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         ZoneScopedN("Deferred G-Buffer")
         TracyGpuZone("Deferred G-Buffer")
 
-        glViewport(0, 0, _resolution.x, _resolution.y);
+        GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
+        global::renderEngine.openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-        glDrawBuffers(3, ColorAttachment012Array);
+        glDrawBuffers(3, ColorAttachmentArray);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     Time time = global::timeManager.time();
@@ -1239,12 +1222,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // render to the same final buffer, multiple
         // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-        glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
         performDeferredTasks(tasks.deferredcasterTasks);
     }
     
-    glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+    glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
 
     {
@@ -1268,11 +1251,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
 
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
     if (_enableFXAA) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
-        glDrawBuffers(1, ColorAttachment0Array);
+        glDrawBuffers(1, ColorAttachmentArray);
         glDisable(GL_BLEND);
 
     }
@@ -1308,8 +1289,8 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        GLint viewport[4] = { 0 };
+        global::renderEngine.openglStateCache().viewport(viewport);
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1321,12 +1302,14 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         if (raycaster->downscaleRender() < 1.f) {
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
-            glViewport(
+            GLint newVP[4] = {
                 viewport[0],
                 viewport[1],
                 static_cast<GLsizei>(viewport[2] * s),
                 static_cast<GLsizei>(viewport[3] * s)
-            );
+            };
+            global::renderEngine.openglStateCache().setViewportState(newVP);
+
             if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
                 _downscaleVolumeRendering.currentDownscaleFactor = s;
                 updateDownscaleTextures();
@@ -1422,7 +1405,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+            global::renderEngine.openglStateCache().setViewportState(viewport);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
         }
@@ -1450,7 +1433,7 @@ void FramebufferRenderer::performDeferredTasks(
         if (deferredcastProgram) {
             _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
             int fromIndex = _pingPongIndex == 0 ? 1 : 0;
-            glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+            glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
             glDisablei(GL_BLEND, 0);
             glDisablei(GL_BLEND, 1);
 

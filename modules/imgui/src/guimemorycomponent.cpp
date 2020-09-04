@@ -41,9 +41,9 @@ namespace {
                 "  %i: %i/%i (%.2f/%.2f kiB)",
                 i,
                 occupancies[i],
-                p.BucketSize,
+                p._bucketSize,
                 occupancies[i] / 1024.f,
-                p.BucketSize / 1024.f
+                p._bucketSize / 1024.f
             );
         }
     }
