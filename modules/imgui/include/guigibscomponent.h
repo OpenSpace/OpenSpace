@@ -22,36 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___DELTA_TIME_STEPS_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___DELTA_TIME_STEPS_TOPIC___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIGIBSCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIGIBSCOMPONENT___H__
 
-#include <modules/server/include/topics/topic.h>
-#include <optional>
+#include <modules/imgui/include/guicomponent.h>
 
-namespace openspace {
+#include <string>
 
-class DeltaTimeStepsTopic : public Topic {
+namespace openspace::gui {
+
+class GuiGIBSComponent : public GuiComponent {
 public:
-    DeltaTimeStepsTopic();
-    virtual ~DeltaTimeStepsTopic();
-
-    void handleJson(const nlohmann::json& json) override;
-    bool isDone() const override;
-
-private:
-    const int UnsetOnChangeHandle = -1;
-
-    bool dataHasChanged();
-    void sendDeltaTimesData();
-
-    int _deltaTimeCallbackHandle = UnsetOnChangeHandle;
-    int _deltaTimesListCallbackHandle = UnsetOnChangeHandle;
-    bool _isDone = false;
-
-    std::optional<double> _lastNextDeltaTime = std::nullopt;
-    std::optional<double> _lastPrevDeltaTime = std::nullopt;
+    GuiGIBSComponent();
+    void render() override;
 };
 
-} // namespace openspace
+} // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_SERVER___DELTA_TIME_STEPS_TOPIC___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIGIBSCOMPONENT___H__

@@ -997,10 +997,7 @@ void OpenSpaceEngine::loadFonts() {
     }
 
     try {
-        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-        if (!initSuccess) {
-            LERROR("Error initializing default font renderer");
-        }
+        ghoul::fontrendering::FontRenderer::initialize();
     }
     catch (const ghoul::RuntimeError& err) {
         LERRORC(err.component, err.message);
