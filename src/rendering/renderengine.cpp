@@ -458,7 +458,7 @@ void RenderEngine::initialize() {
             OPENSPACE_VERSION_MAJOR,
             OPENSPACE_VERSION_MINOR,
             OPENSPACE_VERSION_PATCH
-};
+        };
         if (current < latest) {
             _versionString += fmt::format(
                 " [Available: {}.{}.{}]", latest.major, latest.minor, latest.patch
@@ -1465,16 +1465,16 @@ void RenderEngine::renderScreenLog() {
         {
             const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
                 switch (level) {
-                case ghoul::logging::LogLevel::Debug:
-                    return glm::vec4(0.f, 1.f, 0.f, alpha);
-                case ghoul::logging::LogLevel::Warning:
-                    return glm::vec4(1.f, 1.f, 0.f, alpha);
-                case ghoul::logging::LogLevel::Error:
-                    return glm::vec4(1.f, 0.f, 0.f, alpha);
-                case ghoul::logging::LogLevel::Fatal:
-                    return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-                default:
-                    return white;
+                    case ghoul::logging::LogLevel::Debug:
+                        return glm::vec4(0.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Warning:
+                        return glm::vec4(1.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Error:
+                        return glm::vec4(1.f, 0.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Fatal:
+                        return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
+                    default:
+                        return white;
                 }
             }(it->level);
 

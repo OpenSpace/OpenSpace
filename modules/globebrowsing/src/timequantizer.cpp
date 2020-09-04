@@ -212,24 +212,24 @@ void DateTime::incrementOnce(int value, char unit) {
             if (singleIncrement(_minute, value, 0, 59)) {
                 break;
             }
-            //[[ fallthrough ]]
+            [[ fallthrough ]];
         case 'h':
             if (singleIncrement(_hour, value, 0, 23)) {
                 break;
             }
-            //[[ fallthrough ]]
+            [[ fallthrough ]];
         case 'd':
             if (singleIncrement(_day, value, 1, monthSize(_month, _year))) {
                 break;
             }
-            //[[ fallthrough ]]
+            [[ fallthrough ]];
         case 'M':
             inBounds = singleIncrement(_month, value, 1, 12);
             _day = std::clamp(_day, 1, monthSize(_month, _year));
             if (inBounds) {
                 break;
             }
-            //[[ fallthrough ]]
+            [[ fallthrough ]];
         case 'y':
             _year += value;
             break;
