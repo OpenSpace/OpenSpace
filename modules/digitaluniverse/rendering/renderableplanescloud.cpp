@@ -35,6 +35,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -479,6 +480,8 @@ bool RenderablePlanesCloud::isReady() const {
 }
 
 void RenderablePlanesCloud::initialize() {
+    ZoneScoped
+
     const bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -486,6 +489,8 @@ void RenderablePlanesCloud::initialize() {
 }
 
 void RenderablePlanesCloud::initializeGL() {
+    ZoneScoped
+
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -831,6 +836,7 @@ bool RenderablePlanesCloud::loadTextures() {
                 p.first->second->setFilter(
                     ghoul::opengl::Texture::FilterMode::LinearMipMap
                 );
+                p.first->second->purgeFromRAM();
             }
         }
     }

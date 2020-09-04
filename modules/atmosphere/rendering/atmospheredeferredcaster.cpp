@@ -151,6 +151,8 @@ namespace {
 namespace openspace {
 
 void AtmosphereDeferredcaster::initialize() {
+    ZoneScoped
+
     if (!_atmosphereCalculated) {
         preCalculateAtmosphereParam();
     }
@@ -160,6 +162,8 @@ void AtmosphereDeferredcaster::initialize() {
 }
 
 void AtmosphereDeferredcaster::deinitialize() {
+    ZoneScoped
+
     _transmittanceProgramObject = nullptr;
     _irradianceProgramObject = nullptr;
     _irradianceSupTermsProgramObject = nullptr;

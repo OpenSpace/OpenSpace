@@ -43,18 +43,6 @@ namespace {
     // as the maximum message length
     constexpr const unsigned SpiceErrorBufferSize = 1841;
 
-    // This method checks if one of the previous SPICE methods has failed. If it has, an
-    // exception with the SPICE error message is thrown
-    // If an error occurred, true is returned, otherwise, false
-    void throwSpiceError(const std::string& errorMessage) {
-        if (openspace::SpiceManager::ref().exceptionHandling()) {
-            char buffer[SpiceErrorBufferSize];
-            getmsg_c("LONG", SpiceErrorBufferSize, buffer);
-            reset_c();
-            throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
-        }
-    }
-
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
         using SM = openspace::SpiceManager;
         switch (m) {
@@ -194,6 +182,18 @@ bool SpiceManager::isInitialized() {
 SpiceManager& SpiceManager::ref() {
     ghoul_assert(isInitialized(), "SpiceManager is not initialized");
     return *_instance;
+}
+
+// This method checks if one of the previous SPICE methods has failed. If it has, an
+// exception with the SPICE error message is thrown
+// If an error occurred, true is returned, otherwise, false
+void throwSpiceError(const std::string& errorMessage) {
+    if (openspace::SpiceManager::ref().exceptionHandling()) {
+        char buffer[SpiceErrorBufferSize];
+        getmsg_c("LONG", SpiceErrorBufferSize, buffer);
+        reset_c();
+        throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
+    }
 }
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
@@ -474,31 +474,16 @@ double SpiceManager::spacecraftClockToET(const std::string& craft, double craftT
 double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const {
     ghoul_assert(!timeString.empty(), "Empty timeString");
 
+    return ephemerisTimeFromDate(timeString.c_str());
+}
+
+double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
     double et;
-    str2et_c(timeString.c_str(), &et);
+    str2et_c(timeString, &et);
     if (failed_c()) {
         throwSpiceError(fmt::format("Error converting date '{}'", timeString));
     }
     return et;
-}
-
-std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
-                                                    const std::string& formatString) const
-{
-    ghoul_assert(!formatString.empty(), "Format is empty");
-
-    constexpr const int BufferSize = 256;
-    SpiceChar buffer[BufferSize];
-    timout_c(ephemerisTime, formatString.c_str(), BufferSize - 1, buffer);
-    if (failed_c()) {
-        throwSpiceError(
-            fmt::format("Error converting ephemeris time '{}' to date with format '{}'",
-                ephemerisTime, formatString
-            )
-        );
-    }
-
-    return std::string(buffer);
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,

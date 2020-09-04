@@ -184,6 +184,7 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     _framebuffer->deactivate();
 }

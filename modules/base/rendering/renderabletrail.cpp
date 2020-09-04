@@ -282,6 +282,8 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
+    ZoneScoped
+
 #ifdef __APPLE__
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,

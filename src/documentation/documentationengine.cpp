@@ -29,6 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/profiling.h>
 
 #include <fstream>
 
@@ -194,6 +195,8 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
 void DocumentationEngine::writeDocumentationHtml(const std::string& path,
                                                  std::string data)
 {
+    ZoneScoped
+
     std::ifstream handlebarsInput;
     handlebarsInput.exceptions(~std::ofstream::goodbit);
     handlebarsInput.open(absPath(HandlebarsFilename));

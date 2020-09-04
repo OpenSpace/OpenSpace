@@ -34,6 +34,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -114,6 +115,8 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
 }
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     const ParallelConnection::Status status = global::parallelPeer.status();
     const size_t nConnections = global::parallelPeer.nConnections();
     const std::string& hostName = global::parallelPeer.hostName();
@@ -164,6 +167,8 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemParallelConnection::size() const {
+    ZoneScoped
+
     ParallelConnection::Status status = global::parallelPeer.status();
     size_t nConnections = global::parallelPeer.nConnections();
     const std::string& hostName = global::parallelPeer.hostName();

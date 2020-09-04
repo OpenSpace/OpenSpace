@@ -488,6 +488,7 @@ void RenderableSphere::loadTexture() {
             );
             texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+            texture->purgeFromRAM();
             _texture = std::move(texture);
         }
     }

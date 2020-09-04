@@ -678,22 +678,21 @@ void mainDecodeFun(const std::vector<std::byte>& data, unsigned int) {
 
 
 
-void mainLogCallback(Log::Level level, const char* message) {
+void mainLogCallback(Log::Level level, std::string_view message) {
     ZoneScoped
 
-    std::string msg = message;
     switch (level) {
         case Log::Level::Debug:
-            LDEBUGC("SGCT", msg);
+            LDEBUGC("SGCT", message);
             break;
         case Log::Level::Info:
-            LINFOC("SGCT", msg);
+            LINFOC("SGCT", message);
             break;
         case Log::Level::Warning:
-            LWARNINGC("SGCT", msg);
+            LWARNINGC("SGCT", message);
             break;
         case Log::Level::Error:
-            LERRORC("SGCT", msg);
+            LERRORC("SGCT", message);
             break;
 }
 
@@ -1074,6 +1073,7 @@ int main(int argc, char** argv) {
     
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
+    Log::instance().setShowLogLevel(false);
     Log::instance().setLogCallback(mainLogCallback);
 
 #ifdef __APPLE__
