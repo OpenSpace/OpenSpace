@@ -1,3 +1,5 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
 local layer =  {
     Identifier = "Earth_at_Night_Temporal",
     Name = "Earth at Night (Temporal)",
@@ -11,5 +13,9 @@ local layer =  {
         "png"
     )
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+end)
 
 asset.export("layer", layer)

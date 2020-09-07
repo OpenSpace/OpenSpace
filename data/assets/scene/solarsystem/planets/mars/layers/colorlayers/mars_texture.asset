@@ -1,9 +1,14 @@
 local texturesPath = asset.require("./../../mars_textures").TexturesPath
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
 local layer = {
     Identifier = "Mars_Texture",
     Name = "Mars Texture",
     FilePath = texturesPath .. "/mars.jpg",
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

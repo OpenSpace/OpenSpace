@@ -1,4 +1,5 @@
 local texturesPath = asset.require("./../../venus_textures").TexturesPath
+local globeIdentifier = asset.require("./../../venus").Venus.Identifier
 
 local layer = {
     Identifier = "Texture",
@@ -8,5 +9,9 @@ local layer = {
         Gamma = 0.48
     }
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

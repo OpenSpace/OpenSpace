@@ -1,4 +1,5 @@
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
 local layer = {
     Identifier = "CTX_blended_01",
@@ -10,5 +11,9 @@ local layer = {
         Multiplier = 1.54
     }
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

@@ -1,13 +1,9 @@
-local layerHelper = asset.require('util/layer_helper')
-local globeAsset = asset.require('./neptune')
-local globeIdentifier = globeAsset.Neptune.Identifier
+local colorLayersPath = "./layers/colorlayers"
 
--- set enabled and fallback layers
-local defaultLayers = asset.require('./layers/default_layers')
+local colorLayer = asset.require(colorLayersPath .. "/neptune_texture")
 
-local colorLayer = asset.require('./layers/colorlayers/neptune_texture').layer
-colorLayer.Enabled = true
-
-asset.onInitialize(function ()
-    layerHelper.addLayersToGlobe(globeIdentifier, defaultLayers)
+-- Set enabled layers (temporary solution)
+-- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
+asset.onInitialize(function () 
+    openspace.setPropertyValueSingle("Scene.Neptune.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
 end)

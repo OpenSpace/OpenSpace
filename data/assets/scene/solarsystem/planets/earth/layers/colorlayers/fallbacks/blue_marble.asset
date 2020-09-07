@@ -1,4 +1,5 @@
-local texturesPath = asset.require("./../../earth_textures").TexturesPath
+local texturesPath = asset.require("./../../../earth_textures").TexturesPath
+local globeIdentifier = asset.require("./../../../earth").Earth.Identifier
 
 local layer = {
     Identifier = "Blue_Marble",
