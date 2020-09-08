@@ -424,7 +424,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Wire:
                     glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                    global::renderEngine.openglStateCache().setLineState();
+                    global::renderEngine.openglStateCache().resetLineState();
                     break;
                 case Point:
                     glDrawArrays(GL_POINTS, 0, pair.second.numV);
@@ -439,8 +439,8 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     _program->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().setDepthState();
-    global::renderEngine.openglStateCache().setBlendState();
+    global::renderEngine.openglStateCache().resetDepthState();
+    global::renderEngine.openglStateCache().resetBlendState();
 }
 
 void RenderableDUMeshes::renderLabels(const RenderData& data,

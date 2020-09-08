@@ -32,6 +32,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -176,6 +177,8 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     const double targetDt = global::timeManager.targetDeltaTime();
     const double currentDt = global::timeManager.deltaTime();
     std::pair<double, std::string> targetDeltaTime;
@@ -227,6 +230,8 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
+    ZoneScoped
+
     double t = global::timeManager.targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {

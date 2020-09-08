@@ -1,9 +1,14 @@
 local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 local layer = {
     Identifier = "ESRI_Imagery_World_2D",
     Name = "ESRI Imagery World 2D",
     FilePath = mapServiceConfigsPath .. "/ESRI/ESRI_Imagery_World_2D.wms"
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

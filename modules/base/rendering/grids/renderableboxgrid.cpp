@@ -32,8 +32,8 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -203,8 +203,8 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setLineState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetLineState();
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {

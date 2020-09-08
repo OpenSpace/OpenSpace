@@ -38,6 +38,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -358,6 +359,8 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     addProperty(_requestedUnit);
 
     _font = global::fontManager.font(_fontName, _fontSize);
+
+    _buffer.resize(256);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
@@ -419,6 +422,8 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 }
 
 void DashboardItemDistance::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(
         _source,
         _destination
@@ -440,18 +445,20 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     }
 
     penPosition.y -= _font->height();
-
-    RenderFont(
-        *_font,
-        penPosition,
-        fmt::format(
-            "Distance from {} to {}: {:f} {}",
-            sourceInfo.second, destinationInfo.second, dist.first, dist.second
-        )
+    std::fill(_buffer.begin(), _buffer.end(), 0);
+    char* end = fmt::format_to(
+        _buffer.data(),
+        "Distance from {} to {}: {:f} {}\0",
+        sourceInfo.second, destinationInfo.second, dist.first, dist.second
     );
+
+    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+    RenderFont(*_font, penPosition, text);
 }
 
 glm::vec2 DashboardItemDistance::size() const {
+    ZoneScoped
+
     const double d = glm::length(1e20);
     std::pair<double, std::string> dist;
     if (_doSimplification) {

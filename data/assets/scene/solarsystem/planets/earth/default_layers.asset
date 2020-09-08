@@ -1,33 +1,47 @@
-local layerHelper = asset.require('util/layer_helper')
-local globeAsset = asset.require('./earth')
-local globeIdentifier = globeAsset.Earth.Identifier
+local colorLayersPath = "./layers/colorlayers"
+local heightLayersPath = "./layers/heightlayers"
+local nightLayersPath = "./layers/nightlayers"
+local overlaysPath = "./layers/overlays"
+local waterMasksPath = "./layers/watermasks"
 
--- set enabled and fallback layers
-local defaultLayers = asset.require('./layers/default_layers')
-local colorFallbackLayer = asset.require('./layers/colorlayers/blue_marble_fallback').layer
-local nightFallbackLayer = asset.require('./layers/nightlayers/earth_night_texture').layer
-local heightFallbackLayer = asset.require('./layers/heightlayers/blue_marble_height_fallback').layer
+-- Color layers
+local colorLayer = asset.require(colorLayersPath .. "/esri_viirs_combo")
+asset.require(colorLayersPath .. "/esri_world_imagery") 
+asset.require(colorLayersPath .. "/esri_imagery_world_2d")
+asset.require(colorLayersPath .. "/viirs_snpp_temporal")
+asset.require(colorLayersPath .. "/aqua_modis_temporal")
+asset.require(colorLayersPath .. "/terra_modis_temporal")
+asset.require(colorLayersPath .. "/bmng_utah")
+asset.require(colorLayersPath .. "/bmng_sweden")
+asset.require(colorLayersPath .. "/amsr2_gcom_w1_sea_ice_concentration_temporal") 
+asset.require(colorLayersPath .. "/modis_terra_chlorophyll_a_temporal")
+asset.require(colorLayersPath .. "/ghrsst_l4_g1sst_sea_surface_temperature_temporal")
+asset.require(colorLayersPath .. "/ghrsst_l4_mur_sea_surface_temperature_temporal")
 
-colorFallbackLayer.Enabled = true
-heightFallbackLayer.Enabled = true
-nightFallbackLayer.Enabled = true
+-- Height layers
+local heightLayer = asset.require(heightLayersPath .. "/terrain_tileset")
 
-local colorLayer = asset.require('./layers/colorlayers/esri_viirs_combo').layer
-local heightLayer = asset.require('./layers/heightlayers/terrain_tileset').layer
-local nightLayer = asset.require('./layers/nightlayers/earth_at_night_2012').layer
-local waterMask = asset.require('./layers/watermasks/modis_water_mask').layer
+-- Night layers
+local nightLayer = asset.require(nightLayersPath .. "/earth_at_night_2012")
+asset.require(nightLayersPath .. "/earth_at_night_temporal")
 
-colorLayer.Enabled = true
-colorLayer.Fallback = colorFallbackLayer
+-- Overlays
+asset.require(overlaysPath .. "/coastlines")
+asset.require(overlaysPath .. "/reference_features")
+asset.require(overlaysPath .. "/reference_labels")
+asset.require(overlaysPath .. "/tile_indices")
+asset.require(overlaysPath .. "/size_reference")
 
-heightLayer.Enabled = true
-heightLayer.Fallback = heightFallbackLayer
+-- Watermasks
+asset.require(waterMasksPath .. "/gebco_sweden")
+asset.require(waterMasksPath .. "/gebco_utah") 
+local watermask = asset.require(waterMasksPath .. "/modis_water_mask")
 
-nightLayer.Enabled = true
-nightLayer.Fallback = nightFallbackLayer
-
-waterMask.Enabled = true
-
-asset.onInitialize(function ()
-    layerHelper.addLayersToGlobe(globeIdentifier, defaultLayers)
+-- Set enabled layers (temporary solution)
+-- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
+asset.onInitialize(function () 
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers." .. nightLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.WaterMasks." .. watermask.layer.Identifier .. ".Enabled", true)
 end)

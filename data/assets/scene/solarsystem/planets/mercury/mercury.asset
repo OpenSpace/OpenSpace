@@ -3,7 +3,7 @@ local transforms = asset.require('./transforms')
 local labelsPath = asset.require('./mercury_globelabels').LabelsPath
 
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 
 local Mercury = {
     Identifier = "Mercury",

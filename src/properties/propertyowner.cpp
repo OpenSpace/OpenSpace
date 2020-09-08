@@ -35,6 +35,111 @@
 
 namespace {
     constexpr const char* _loggerCat = "PropertyOwner";
+
+    std::string escapedJson(const std::string& text) {
+        std::string jsonString;
+        for (const char& c : text) {
+            switch (c) {
+                case '\t':
+                    jsonString += "\\t"; // Replace tab with \t.
+                    break;
+                case '"':
+                    jsonString += "\\\""; // Replace " with \".
+                    break;
+                case '\\':
+                    jsonString += "\\\\"; // Replace \ with \\.
+                    break;
+                case '\n':
+                    jsonString += "\\\\n"; // Replace newline with \n.
+                    break;
+                case '\r':
+                    jsonString += "\\r"; // Replace carriage return with \r.
+                    break;
+                default:
+                    jsonString += c;
+            }
+        }
+        return jsonString;
+    }
+
+    void createJson(openspace::properties::PropertyOwner* owner, std::vector<char>& buf) {
+        ZoneScoped
+
+        using namespace openspace;
+
+        constexpr const char* replStr = R"("{}": "{}")";
+
+        //std::stringstream json;
+        //json << "{";
+        buf.push_back('{');
+        //json << fmt::format(replStr, "name", owner->identifier()) << ",";
+        fmt::format_to(std::back_inserter(buf), replStr, "name", owner->identifier());
+        buf.push_back(',');
+
+        constexpr const char propertiesText[] = "\"properties\": [";
+        //constexpr const std::array<char, 16> propertiesText = { "\"properties\": [" };
+        buf.insert(buf.end(), std::begin(propertiesText), std::end(propertiesText) - 1);
+        //json << "\"properties\": [";
+        const std::vector<properties::Property*>& properties = owner->properties();
+        for (properties::Property* p : properties) {
+            //json << "{";
+            buf.push_back('{');
+            //json << fmt::format(replStr, "id", p->identifier()) << ",";
+            fmt::format_to(std::back_inserter(buf), replStr, "id", p->identifier());
+            buf.push_back(',');
+            //json << fmt::format(replStr, "type", p->className()) << ",";
+            fmt::format_to(std::back_inserter(buf), replStr, "type", p->className());
+            buf.push_back(',');
+
+            //json << fmt::format(
+            //    replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
+            //) << ",";
+            fmt::format_to(
+                std::back_inserter(buf),
+                replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
+            );
+            buf.push_back(',');
+
+            //json << fmt::format(replStr, "guiName", p->guiName()) << ",";
+            fmt::format_to(std::back_inserter(buf), replStr, "guiName", p->guiName());
+            buf.push_back(',');
+
+            //json << fmt::format(replStr, "description", escapedJson(p->description()));
+            fmt::format_to(
+                std::back_inserter(buf),
+                replStr, "description", escapedJson(p->description())
+            );
+            //json << "}";
+            buf.push_back('}');
+            if (p != properties.back()) {
+                //json << ",";
+                buf.push_back(',');
+            }
+        }
+        //json << "],";
+        buf.push_back(']');
+        buf.push_back(',');
+
+        constexpr const char propertyOwnersText[] = "\"propertyOwners\": [";
+        //constexpr const std::array<char, 20> propertyOwnersText = { "\"propertyOwners\": [" };
+        //json << "\"propertyOwners\": [";
+        buf.insert(buf.end(), std::begin(propertyOwnersText), std::end(propertyOwnersText) - 1);
+        auto propertyOwners = owner->propertySubOwners();
+        for (properties::PropertyOwner* o : propertyOwners) {
+            createJson(o, buf);
+            //json << createJson(o);
+            if (o != propertyOwners.back()) {
+                //json << ",";
+                buf.push_back(',');
+            }
+        }
+        //json << "]";
+        buf.push_back(']');
+        //json << "}";
+        buf.push_back('}');
+
+        //return json.str();
+    };
 } // namespace
 
 namespace openspace::properties {
@@ -356,67 +461,19 @@ void PropertyOwner::removeTag(const std::string& tag) {
 }
 
 std::string PropertyOwner::generateJson() const {
-    std::function<std::string(properties::PropertyOwner*)> createJson =
-        [&createJson](properties::PropertyOwner* owner) -> std::string
-    {
-        constexpr const char* replStr = R"("{}": "{}")";
+    ZoneScoped
 
-        std::stringstream json;
-        json << "{";
-        json << fmt::format(replStr, "name", owner->identifier()) << ",";
-
-        json << "\"properties\": [";
-        const std::vector<properties::Property*>& properties = owner->properties();
-        for (properties::Property* p : properties) {
-            json << "{";
-            json << fmt::format(replStr, "id", p->identifier()) << ",";
-            json << fmt::format(replStr, "type", p->className()) << ",";
-            json << fmt::format(
-                replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
-            ) << ",";
-            json << fmt::format(replStr, "guiName", p->guiName()) << ",";
-            json << fmt::format(replStr, "description", escapedJson(p->description()));
-            json << "}";
-            if (p != properties.back()) {
-                json << ",";
-            }
-        }
-        json << "],";
-
-        json << "\"propertyOwners\": [";
-        auto propertyOwners = owner->propertySubOwners();
-        for (properties::PropertyOwner* o : propertyOwners) {
-            json << createJson(o);
-            if (o != propertyOwners.back()) {
-                json << ",";
-            }
-        }
-        json << "]";
-        json << "}";
-
-        return json.str();
-    };
-
-
-    std::stringstream json;
-    json << "[";
+    std::vector<char> res;
+    res.reserve(5 * 51024 * 1024); // 5 MB
+    res.push_back('[');
     std::vector<PropertyOwner*> subOwners = propertySubOwners();
-    if (!subOwners.empty()) {
-        json << std::accumulate(
-            std::next(subOwners.begin()),
-            subOwners.end(),
-            createJson(*subOwners.begin()),
-            [createJson](std::string a, PropertyOwner* n) {
-            //TODO figure out how to ignore scene when its not the root
-            //right now will be done on client side
-            return a + "," + createJson(n);
-        }
-        );
+    for (PropertyOwner* owner : subOwners) {
+        createJson(owner, res);
+        res.push_back(',');
     }
+    res.back() = ']';
 
-    json << "]";
-
-    return json.str();
+    return std::string(res.begin(), res.end());
 }
 
 } // namespace openspace::properties

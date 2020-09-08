@@ -113,14 +113,14 @@ void ScreenSpaceFramebuffer::render() {
     if (!_renderFunctions.empty()) {
         GLint viewport[4];
         //glGetIntegerv(GL_VIEWPORT, viewport);
-        global::renderEngine.openglStateCache().viewPort(viewport);
+        global::renderEngine.openglStateCache().viewport(viewport);
         glViewport(
             static_cast<GLint>(-size.x * xratio),
             static_cast<GLint>(-size.y * yratio),
             static_cast<GLsizei>(resolution.x * xratio),
             static_cast<GLsizei>(resolution.y * yratio)
         );
-        global::renderEngine.openglStateCache().setViewPortState(viewport);
+        global::renderEngine.openglStateCache().setViewportState(viewport);
 
         GLint defaultFBO = _framebuffer->getActiveObject();
         _framebuffer->activate();
@@ -184,6 +184,7 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     _framebuffer->deactivate();
 }

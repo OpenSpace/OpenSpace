@@ -40,6 +40,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -328,41 +329,6 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     else {
         LERROR("No points filename specified.");
     }
-}
-
-void RenderableGalaxy::initializeGL() {
-    // Aspect is currently hardcoded to cubic voxels.
-    _aspect = static_cast<glm::vec3>(_volumeDimensions);
-    _aspect /= std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
-
-    // The volume
-    volume::RawVolumeReader<glm::tvec4<GLubyte>> reader(
-        _volumeFilename,
-        _volumeDimensions
-    );
-    _volume = reader.read();
-
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        _volumeDimensions,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
-    );
-
-    _texture->setPixelData(
-        reinterpret_cast<char*>(_volume->data()),
-        ghoul::opengl::Texture::TakeOwnership::No
-    );
-
-    _texture->setDimensions(_volume->dimensions());
-    _texture->uploadTexture();
-
-    _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
-    _raycaster->initialize();
-
-    global::raycasterManager.attachRaycaster(*_raycaster);
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
@@ -386,6 +352,95 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_rotation);
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
+}
+
+void RenderableGalaxy::initialize() {
+    ZoneScoped
+
+    // Aspect is currently hardcoded to cubic voxels.
+    _aspect = static_cast<glm::vec3>(_volumeDimensions);
+    _aspect /= std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
+
+    // The volume
+    volume::RawVolumeReader<glm::tvec4<GLubyte>> reader(
+        _volumeFilename,
+        _volumeDimensions
+    );
+    _volume = reader.read();
+
+    std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
+        _pointsFilename,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+    const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
+    if (hasCachedFile) {
+        LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
+            cachedPointsFile, _pointsFilename
+        ));
+
+        Result res = loadCachedFile(cachedPointsFile);
+        if (res.success) {
+            _pointPositionsCache = std::move(res.positions);
+            _pointColorsCache = std::move(res.color);
+        }
+        else {
+            FileSys.cacheManager()->removeCacheFile(_pointsFilename);
+            Result resPoint = loadPointFile(_pointsFilename);
+            _pointPositionsCache = std::move(resPoint.positions);
+            _pointColorsCache = std::move(resPoint.color);
+            saveCachedFile(
+                cachedPointsFile,
+                _pointPositionsCache,
+                _pointColorsCache,
+                _nPoints,
+                _enabledPointsRatio
+            );
+        }
+    }
+    else {
+        Result res = loadPointFile(_pointsFilename);
+        ghoul_assert(res.success, "Point file loading failed");
+        _pointPositionsCache = std::move(res.positions);
+        _pointColorsCache = std::move(res.color);
+        saveCachedFile(
+            cachedPointsFile,
+            _pointPositionsCache,
+            _pointColorsCache,
+            _nPoints,
+            _enabledPointsRatio
+        );
+    }
+}
+
+void RenderableGalaxy::initializeGL() {
+    ZoneScoped
+
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        _volumeDimensions,
+        ghoul::opengl::Texture::Format::RGBA,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+        ghoul::opengl::Texture::AllocateData::No,
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+
+    _texture->setPixelData(
+        reinterpret_cast<char*>(_volume->data()),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+
+    _texture->setDimensions(_volume->dimensions());
+    _texture->uploadTexture();
+
+    _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
+    _raycaster->initialize();
+
+    // We no longer need the data
+    _volume = nullptr;
+
+    global::raycasterManager.attachRaycaster(*_raycaster);
 
     // initialize points.
     if (_pointsFilename.empty()) {
@@ -443,53 +498,6 @@ void RenderableGalaxy::initializeGL() {
     GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
     GLint colorAttrib = _pointsProgram->attributeLocation("in_color");
 
-
-    std::vector<glm::vec3> pointPositions;
-    std::vector<glm::vec3> pointColors;
-
-    std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
-        _pointsFilename,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-    const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
-    if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
-            cachedPointsFile, _pointsFilename
-        ));
-
-        Result res = loadCachedFile(cachedPointsFile);
-        if (res.success) {
-            pointPositions = std::move(res.positions);
-            pointColors = std::move(res.color);
-        }
-        else {
-            FileSys.cacheManager()->removeCacheFile(_pointsFilename);
-            Result resPoint = loadPointFile(_pointsFilename);
-            pointPositions = std::move(resPoint.positions);
-            pointColors = std::move(resPoint.color);
-            saveCachedFile(
-                cachedPointsFile,
-                pointPositions,
-                pointColors,
-                _nPoints,
-                _enabledPointsRatio
-            );
-        }
-    }
-    else {
-        Result res = loadPointFile(_pointsFilename);
-        ghoul_assert(res.success, "Point file loading failed");
-        pointPositions = std::move(res.positions);
-        pointColors = std::move(res.color);
-        saveCachedFile(
-            cachedPointsFile,
-            pointPositions,
-            pointColors,
-            _nPoints,
-            _enabledPointsRatio
-        );
-    }
-
     glGenVertexArrays(1, &_pointsVao);
     glGenBuffers(1, &_positionVbo);
     glGenBuffers(1, &_colorVbo);
@@ -497,17 +505,19 @@ void RenderableGalaxy::initializeGL() {
     glBindVertexArray(_pointsVao);
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
     glBufferData(GL_ARRAY_BUFFER,
-        pointPositions.size() * sizeof(glm::vec3),
-        pointPositions.data(),
+        _pointPositionsCache.size() * sizeof(glm::vec3),
+        _pointPositionsCache.data(),
         GL_STATIC_DRAW
     );
+    _pointPositionsCache.clear();
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
     glBufferData(GL_ARRAY_BUFFER,
-        pointColors.size() * sizeof(glm::vec3),
-        pointColors.data(),
+        _pointColorsCache.size() * sizeof(glm::vec3),
+        _pointColorsCache.data(),
         GL_STATIC_DRAW
     );
+    _pointColorsCache.clear();
 
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
     glEnableVertexAttribArray(positionAttrib);
@@ -682,8 +692,8 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     _pointsProgram->deactivate();
 
     // Restores OpenGL Rendering State
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setDepthState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetDepthState();
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {

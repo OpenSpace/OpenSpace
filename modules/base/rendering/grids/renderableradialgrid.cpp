@@ -282,8 +282,8 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setLineState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetLineState();
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {

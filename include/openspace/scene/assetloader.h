@@ -45,7 +45,6 @@ int onDeinitialize(lua_State* state);
 int onInitializeDependency(lua_State* state);
 int onDeinitializeDependency(lua_State* state);
 int require(lua_State* state);
-int request(lua_State* state);
 int exists(lua_State* state);
 int localResource(lua_State* state);
 int syncedResource(lua_State* state);
@@ -164,7 +163,6 @@ public:
     void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child);
 
 private:
-    std::shared_ptr<Asset> request(const std::string& identifier);
     void unrequest(const std::string& identifier);
 
     void setUpAssetLuaTable(Asset* asset);
@@ -194,7 +192,6 @@ private:
     friend int assetloader::onInitializeDependency(lua_State* state);
     friend int assetloader::onDeinitializeDependency(lua_State* state);
     friend int assetloader::require(lua_State* state);
-    friend int assetloader::request(lua_State* state);
     friend int assetloader::exists(lua_State* state);
     friend int assetloader::localResource(lua_State* state);
     friend int assetloader::syncedResource(lua_State* state);

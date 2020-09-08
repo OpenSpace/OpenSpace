@@ -159,9 +159,9 @@ local Juno = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = model .. "/Juno.obj"
+            GeometryFile = model .. "/Juno.obj",
+            ColorTexture =  textures .. "/gray.png"
         }, 
-        ColorTexture =  textures .. "/gray.png",
         ModelTransform = RotationMatrix,
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
     },

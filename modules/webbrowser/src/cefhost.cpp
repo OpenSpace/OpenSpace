@@ -29,7 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <fmt/format.h>
-#include <include/wrapper/cef_helpers.h>
 
 #ifdef __APPLE__
 #include <include/wrapper/cef_library_loader.h>

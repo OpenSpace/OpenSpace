@@ -24,12 +24,15 @@
 
 #include <openspace/util/time.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <mutex>
 #include <string_view>
 
@@ -42,7 +45,15 @@ double Time::convertTime(const std::string& time) {
     return SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
+double Time::convertTime(const char* time) {
+    return SpiceManager::ref().ephemerisTimeFromDate(time);
+}
+
 Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
+
+Time::Time(const std::string& time) :
+    _time(SpiceManager::ref().ephemerisTimeFromDate(time))
+{}
 
 Time Time::now() {
     Time now;
@@ -70,36 +81,42 @@ double Time::advanceTime(double delta) {
     return _time;
 }
 
-void Time::setTime(std::string time) {
-    _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
+void Time::setTime(const std::string& time) {
+    _time = SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
-std::string Time::UTC() const {
-    return SpiceManager::ref().dateFromEphemerisTime(_time);
+void Time::setTime(const char* time) {
+    _time = SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
-std::string Time::ISO8601() const {
-    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
-    std::string_view month = std::string_view(datetime).substr(5, 3);
+std::string_view Time::UTC() const {
+    constexpr const char Format[] = "YYYY MON DDTHR:MN:SC.### ::RND";
+    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(32));
+    std::memset(b, 0, 32);
 
-    std::string_view mm = [](std::string_view month) {
-        if (month == "JAN") { return "-01-"; }
-        else if (month == "FEB") { return "-02-"; }
-        else if (month == "MAR") { return "-03-"; }
-        else if (month == "APR") { return "-04-"; }
-        else if (month == "MAY") { return "-05-"; }
-        else if (month == "JUN") { return "-06-"; }
-        else if (month == "JUL") { return "-07-"; }
-        else if (month == "AUG") { return "-08-"; }
-        else if (month == "SEP") { return "-09-"; }
-        else if (month == "OCT") { return "-10-"; }
-        else if (month == "NOV") { return "-11-"; }
-        else if (month == "DEC") { return "-12-"; }
-        else { throw ghoul::MissingCaseException(); }
-    }(month);
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, 32, Format);
 
-    datetime.replace(4, 5, mm);
-    return datetime;
+    return std::string_view(b, 32);
+}
+
+std::string_view Time::ISO8601() const {
+    ZoneScoped
+
+    constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
+    constexpr const int S = sizeof(Format);
+    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(S));
+    std::memset(b, 0, S);
+
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, S, Format);
+ 
+    return std::string_view(b, S);
+}
+
+void Time::ISO8601(char* buffer) const {
+    constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
+    constexpr const int S = sizeof(Format) + 1;
+    std::memset(buffer, 0, S);
+    SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
 }
 
 scripting::LuaLibrary Time::luaLibrary() {
@@ -125,6 +142,16 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "number",
                 "Sets the amount of simulation time that happens "
                 "in one second of real time"
+            },
+            {
+                "setDeltaTimeSteps",
+                &luascriptfunctions::time_setDeltaTimeSteps,
+                {},
+                "List of numbers",
+                "Sets the list of discrete delta time steps for the simulation speed "
+                "that can be quickly jumped between. The list will be sorted to be in "
+                "increasing order. A negative verison of each specified time step will "
+                "be added per default as well."
             },
             {
                 "deltaTime",
@@ -166,31 +193,74 @@ scripting::LuaLibrary Time::luaLibrary() {
                 &luascriptfunctions::time_interpolateTimeRelative,
                 {},
                 "number [, number]",
-                "Increments the current simulation time "
-                "by the specified number of seconds."
+                "Increments the current simulation time by the specified number of "
+                "seconds. If a second input value is given, the interpolation is done "
+                "over the specified number of seconds."
             },
             {
                 "interpolateDeltaTime",
                 &luascriptfunctions::time_interpolateDeltaTime,
                 {},
-                "number",
-                "Sets the amount of simulation time that happens "
-                "in one second of real time"
+                "number [, number]",
+                "Sets the amount of simulation time that happens in one second of real "
+                "time. If a second input value is given, the interpolation is done "
+                "over the specified number of seconds."
+            },
+            {
+                "setNextDeltaTimeStep",
+                &luascriptfunctions::time_setNextDeltaTimeStep,
+                {},
+                "",
+                "Immediately set the simulation speed to the first delta time step in "
+                "the list that is larger than the current choice of simulation speed, "
+                "if any."
+            },
+            {
+                "setPreviousDeltaTimeStep",
+                &luascriptfunctions::time_setPreviousDeltaTimeStep,
+                {},
+                "",
+                "Immediately set the simulation speed to the first delta time step in "
+                "the list that is smaller than the current choice of simulation speed. "
+                "if any."
+            },
+            {
+                "interpolateNextDeltaTimeStep",
+                &luascriptfunctions::time_interpolateNextDeltaTimeStep,
+                {},
+                "[number]",
+                "Interpolate the simulation speed to the first delta time step in the "
+                "list that is larger than the current simulation speed, if any. If an "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
+            },
+            {
+                "interpolatePreviousDeltaTimeStep",
+                &luascriptfunctions::time_interpolatePreviousDeltaTimeStep,
+                {},
+                "[number]",
+                "Interpolate the simulation speed to the first delta time step in the "
+                "list that is smaller than the current simulation speed, if any. If an "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
             },
             {
                 "interpolatePause",
                 &luascriptfunctions::time_interpolatePause,
                 {},
-                "bool",
-                "Pauses the simulation time or restores the delta time"
+                "bool [, number]",
+                "Pauses the simulation time or restores the delta time. If a second "
+                "input value is given, the interpolation is done over the specified "
+                "number of seconds."
             },
             {
                 "interpolateTogglePause",
                 &luascriptfunctions::time_interpolateTogglePause,
                 {},
-                "",
+                "[number]",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards"
+                " and restoring it afterwards. If an input value is given, the "
+                "interpolation is done over the specified number of seconds."
             },
             {
                 "currentTime",

@@ -139,7 +139,7 @@ void Connection::handleMessage(const std::string& message) {
                 message.end(),
                 sanitizedString.begin(),
                 [](wchar_t c) {
-                    return std::isprint(c, std::locale("")) ? c : ' ';
+                    return std::isprint(c, std::locale("")) ? char(c) : ' ';
                 }
             );
             LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
@@ -207,10 +207,14 @@ void Connection::handleJson(const nlohmann::json& json) {
 }
 
 void Connection::sendMessage(const std::string& message) {
+    ZoneScoped
+
     _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json& json) {
+    ZoneScoped
+
     sendMessage(json.dump());
 }
 

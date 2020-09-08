@@ -304,8 +304,8 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     // Restore GL State
     unbindGL();
     _program->deactivate();
-    global::renderEngine.openglStateCache().setBlendState();
-    global::renderEngine.openglStateCache().setLineState();
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetLineState();
 }
 
 void RenderableNodeLine::validateNodes() {

@@ -41,9 +41,9 @@ local Gaia = {
         Body = "GAIA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = model .. "/gaia.obj"
+            GeometryFile = model .. "/gaia.obj",
+            ColorTexture = textures .. "/gaia-baked.png"
         }, 
-        ColorTexture = textures .. "/gaia-baked.png",
         LightSources = {
             {
                 Type = "SceneGraphLightSource",
