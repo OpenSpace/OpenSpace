@@ -115,7 +115,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCo
     if (isShift && isKeypad) {
         LWARNINGC(
             "bindKey",
-            "Windows does not support binding keys to Shift + Keyboard as it will "
+            "Windows does not support binding keys to Shift + Keypad as it will "
             "internally convert these into Home, End, etc, keys."
         );
     }
