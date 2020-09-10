@@ -83,6 +83,7 @@ private:
         Sizescaling = 0,
         Colortables = 1,
         Sizeandcolor = 2,
+        Illuminance = 3,
     };
 
     UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
@@ -154,10 +155,16 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
     // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
     std::unique_ptr<TransferFunction> _transferFunction;
+    // Transfer function used to color with the CMR map
+    std::unique_ptr<TransferFunction> _transferFunctionCMR;
     // Transfer function used to color line near Earth
     std::unique_ptr<TransferFunction> _transferFunctionEarth;
     // Transfer function used to color line flow
     std::unique_ptr<TransferFunction> _transferFunctionFlow;
+    // Transfer function used to color illuminance for nodes close to the Earth
+    std::unique_ptr<TransferFunction> _transferFunctionIlluminance;
+    // Transfer function used to color illuminance for nodes close to the Earth2
+    std::unique_ptr<TransferFunction> _transferFunctionIlluminance2;
 
     // ------------------------------------ VECTORS ----------------------------------- //
     // Paths to color tables. One for each 'ColorFlux'
@@ -203,6 +210,8 @@ private:
     properties::Vec2Property _pColorTableRange;
     // The value of alpha for the flux color mode
     properties::FloatProperty _pFluxColorAlpha;
+    // The value of alpha for the flux illuminance color mode
+    //properties::FloatProperty _pFluxColorAlphaIlluminance;
     // Group to hold the particle properties
     properties::PropertyOwner _pStreamGroup;
     // Scaling options

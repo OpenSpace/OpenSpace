@@ -182,6 +182,11 @@ namespace {
         "Flux Color Alpha",
         "The value of alpha for the flux color mode."
     };
+    /*constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaIlluminanceInfo = {
+        "fluxColorAlphaIlluminance",
+        "Flux Color Alpha for illuminance",
+        "The value of alpha for the flux color mode."
+    };*/
     constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
         "skippingNodesByFlux",
         "Skipping Nodes By Flux",
@@ -405,6 +410,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pColorTableRange(colorTableRangeInfo)
     , _pDomainZ(DomainZInfo)
     , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
+    //, _pFluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
     , _pThresholdFlux(ThresholdFluxInfo, 0.f, -50.f, 10.f)
     , _pFilteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
@@ -537,8 +543,11 @@ void RenderableStreamNodes::initializeGL() {
     // corrupt or not provided!
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
-    _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]));
-    _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]));
+    _transferFunctionCMR = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]));
+    _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]));
+    _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]));
+    _transferFunctionIlluminance = std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
+    _transferFunctionIlluminance2 = std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
@@ -1138,6 +1147,7 @@ void RenderableStreamNodes::setupProperties() {
     _pColorGroup.addProperty(_pColorTablePath);
     _pColorGroup.addProperty(_pStreamColor);
     _pColorGroup.addProperty(_pFluxColorAlpha);
+    //_pColorGroup.addProperty(_pFluxColorAlphaIlluminance);
 
     _pStreamGroup.addProperty(_pThresholdFlux);
     _pStreamGroup.addProperty(_pFilteringLower);
@@ -1189,6 +1199,7 @@ void RenderableStreamNodes::setupProperties() {
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
     _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
+    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Illuminance), "Illuminance");
 
     _pCameraPerspectiveGroup.addProperty(_pCameraPerspectiveEnabled);
     _pCameraPerspectiveGroup.addProperty(_pPerspectiveDistanceFactor);
@@ -1333,6 +1344,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("nodeSkipFluxThreshold", _pFluxNodeskipThreshold);
     _shaderProgram->setUniform("nodeSkipRadiusThreshold", _pRadiusNodeSkipThreshold);
     _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
+    //_shaderProgram->setUniform("fluxColorAlphaIlluminance", _pFluxColorAlphaIlluminance);
     _shaderProgram->setUniform("earthPos", earthPos);
     _shaderProgram->setUniform("distanceThreshold", _pDistanceThreshold);
     _shaderProgram->setUniform("activeStreamNumber", _pActiveStreamNumber);
@@ -1447,6 +1459,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _transferFunction->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTable", textureUnit);
 
+        ghoul::opengl::TextureUnit textureUnitCMR;
+        textureUnitCMR.activate();
+        _transferFunctionCMR->bind(); // Calls update internally
+        _shaderProgram->setUniform("colorTableCMR", textureUnitCMR);
+
         ghoul::opengl::TextureUnit textureUnitEarth;
         textureUnitEarth.activate();
         _transferFunctionEarth->bind(); // Calls update internally
@@ -1456,6 +1473,16 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         textureUnitFlow.activate();
         _transferFunctionFlow->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTableFlow", textureUnitFlow);
+
+        ghoul::opengl::TextureUnit textureUnitIlluminance;
+        textureUnitIlluminance.activate();
+        _transferFunctionIlluminance->bind(); // Calls update internally
+        _shaderProgram->setUniform("colorTableIlluminance", textureUnitIlluminance);
+
+        ghoul::opengl::TextureUnit textureUnitIlluminance2;
+        textureUnitIlluminance2.activate();
+        _transferFunctionIlluminance2->bind(); // Calls update internally
+        _shaderProgram->setUniform("colorTableIlluminance2", textureUnitIlluminance2);
     }
 
     const std::vector<glm::vec3>& vertPos = _vertexPositions;

@@ -32,8 +32,11 @@ uniform mat4      modelViewProjection;
 // Uniforms needed to color by quantity
 uniform int       colorMode;
 uniform sampler1D colorTable;
+uniform sampler1D colorTableCMR;
 uniform sampler1D colorTableEarth;
 uniform sampler1D colorTableFlow;
+uniform sampler1D colorTableIlluminance;
+uniform sampler1D colorTableIlluminance2;
 uniform vec2      colorTableRange;
 
 // Uniforms needed for Particle Flow
@@ -69,6 +72,7 @@ uniform int     nodeSkipDefault;
 uniform float   nodeSkipFluxThreshold;
 uniform float   nodeSkipRadiusThreshold;
 uniform float   fluxColorAlpha;
+//uniform float   fluxColorAlphaIlluminance;
 uniform vec3    earthPos;
 uniform float   distanceThreshold;
 uniform int     activeStreamNumber;
@@ -76,7 +80,6 @@ uniform bool    firstRender;
 uniform int     enhanceMethod;
 uniform double  time;
 uniform bool    usingInterestingStreams;
-
 
 //uniform float interestingStreams[4];
 
@@ -149,6 +152,7 @@ const int lnRFlux = 4;
 const int sizeScaling = 0;
 const int colorTables = 1;
 const int sizeAndColor = 2;
+const int illuminance = 3;
 
 out vec4    vs_color;
 out float   vs_depth;
@@ -246,7 +250,7 @@ void DecidehowtoshowClosetoEarth(){
         vec4 fluxColor = getTransferFunctionColor(colorTable);
         vs_color = vec4(fluxColor.xyz, fluxColor.a);
     }
-    //SizeColor
+    // SizeColor
     if(enhanceMethod == sizeAndColor){
         vec4 fluxColor3 = getTransferFunctionColor(colorTable);
         vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
@@ -256,6 +260,12 @@ void DecidehowtoshowClosetoEarth(){
             tempR2 = 1.5;
         }
         gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
+    }
+    // Illuminance
+    if(enhanceMethod == illuminance){
+        //vec4 fluxColor1 = getTransferFunctionColor(colorTableIlluminance);
+        vec4 fluxColor1 = getTransferFunctionColor(colorTableCMR);
+        vs_color = vec4(fluxColor1.xyz, fluxColor1.a);
     }
 }
 
@@ -280,9 +290,18 @@ void CheckdistanceMethod() {
              vs_color = vec4(fluxColor2.xyz, fluxColorAlpha);
              //vs_color = vec4(0.3, 0.3, 0.3, fluxColorAlpha);
         }
+         if(enhanceMethod == illuminance){
+             vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
+             vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
+        }
         if(distance(earthPos, in_position) < distanceThreshold){
             DecidehowtoshowClosetoEarth();
         }
+        /*else{
+            if(enhanceMethod == illuminance){
+                 vs_color.a = fluxColorAlphaIlluminance;
+            }
+        }*/
 }
 
 void main() {
