@@ -145,7 +145,7 @@ void KeybindingManager::removeKeyBinding(const std::string& key) {
             it = _keyLua.erase(it);
         }
         else {
-            // We if it is not, we continue iteration
+            // If it is not, we continue iteration
             ++it;
         }
     }
