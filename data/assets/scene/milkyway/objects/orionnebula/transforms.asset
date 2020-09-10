@@ -9,7 +9,11 @@ local NebulaPosition = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = { -329.915 * PARSEC_CONSTANT,  -183.153 * PARSEC_CONSTANT,  -132.706 * PARSEC_CONSTANT}
+            Position = {
+                -329.915 * PARSEC_CONSTANT,
+                -183.153 * PARSEC_CONSTANT,
+                -132.706 * PARSEC_CONSTANT
+            }
         },
     },
     GUI = {

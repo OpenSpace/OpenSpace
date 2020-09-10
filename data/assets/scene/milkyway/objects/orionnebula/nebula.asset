@@ -2,7 +2,8 @@ local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('./transforms')
 
-local LIGHTS = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier);
+local center = sunTransforms.SolarSystemBarycenter.Identifier;
+local LIGHTS = assetHelper.getDefaultLightSources(center);
 
 local sync = asset.syncedResource({
     Name = "Orion Nebula Model",
@@ -10,7 +11,6 @@ local sync = asset.syncedResource({
     Identifier = "orion_nebula_model",
     Version = 1
 })
-
 
 local NebulaHolder = {
     Identifier = "OrionNebulaHolder",

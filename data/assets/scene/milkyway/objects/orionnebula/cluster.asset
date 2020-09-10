@@ -22,7 +22,7 @@ local OrionClusterStars = {
         RenderMethod = "Texture Based"
     },
     GUI = {
-    	Name = "Orion Nebula Star Cluster",
+        Name = "Orion Nebula Star Cluster",
         Path = "/Milky Way/Stars"
     }
 }
