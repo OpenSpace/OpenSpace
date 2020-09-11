@@ -28,14 +28,16 @@ set(HEADER_FILES
   include/camera.h
   include/deltatimes.h
   include/filesystemaccess.h
+  include/keybindings.h
   include/launcherwindow.h
   include/profileedit.h
   include/ui_addedscripts.h
   include/ui_assets.h
   include/ui_camera.h
   include/ui_deltatimes.h
-  include/ui_editorwindow.h
+  include/ui_keybindings.h
   include/ui_launcherwindow.h
+  include/ui_profileedit.h
 )
 
 set(SOURCE_FILES
@@ -46,6 +48,7 @@ set(SOURCE_FILES
   src/camera.cpp
   src/deltatimes.cpp
   src/filesystemaccess.cpp
+  src/keybindings.cpp
   src/launcherwindow.cpp
   src/profileedit.cpp
 )
