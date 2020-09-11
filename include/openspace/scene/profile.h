@@ -121,7 +121,7 @@ public:
      * and all of the property & asset changes that were made since startup.
      */
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-        const std::string& currentTime,
+        std::string currentTime, 
         interaction::NavigationHandler::NavigationState navState);
 
     /// If the value passed to this function is 'true', the addAsset and removeAsset
@@ -172,6 +172,7 @@ private:
     std::vector<Property> _properties;
     std::vector<Keybinding> _keybindings;
     std::optional<Time> _time;
+    std::vector<double> _deltaTimes;
     std::optional<CameraType> _camera;
     std::vector<std::string> _markNodes;
     std::vector<std::string> _additionalScripts;

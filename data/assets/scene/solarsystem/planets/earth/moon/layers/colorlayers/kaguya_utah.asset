@@ -1,4 +1,5 @@
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../moon").Moon.Identifier
 
 local layer = {
     Identifier = "Kaguya_Utah",
@@ -9,5 +10,9 @@ local layer = {
         Multiplier = 1.23
     }
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

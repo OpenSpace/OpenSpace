@@ -35,6 +35,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 #include <chrono>
 
 namespace {
@@ -178,6 +179,8 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     double currentTime = global::timeManager.time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
@@ -227,7 +230,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             ghoul::fontrendering::CrDirection::Down
         );
 
-        std::string str = SpiceManager::ref().dateFromEphemerisTime(
+        std::string_view str = SpiceManager::ref().dateFromEphemerisTime(
             sequencer.nextCaptureTime(global::timeManager.time().j2000Seconds()),
             "YYYY MON DD HR:MN:SC"
         );
@@ -332,7 +335,6 @@ glm::vec2 DashboardItemInstruments::size() const {
 
     if (remaining > 0) {
         using FR = ghoul::fontrendering::FontRenderer;
-        FR& renderer = FR::defaultRenderer();
         std::string progress = progressToStr(25, t);
 
         size = addToBoundingbox(

@@ -374,6 +374,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 }
 
 void Layer::initialize() {
+    ZoneScoped
+
     if (_tileProvider) {
         tileprovider::initialize(*_tileProvider);
     }
@@ -386,16 +388,18 @@ void Layer::deinitialize() {
 }
 
 ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+    ZoneScoped
+
     if (_tileProvider) {
         return tileprovider::chunkTilePile(*_tileProvider, tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
-        chunkTilePile.resize(pileSize);
+        std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
         for (int i = 0; i < pileSize; ++i) {
-            chunkTilePile[i].tile = Tile();
-            chunkTilePile[i].uvTransform.uvOffset = { 0, 0 };
-            chunkTilePile[i].uvTransform.uvScale = { 1, 1 };
+            chunkTilePile[i] = ChunkTile {
+                Tile(), TileUvTransform { { 0, 0 }, { 1, 1 } }
+            };
         }
         return chunkTilePile;
     }

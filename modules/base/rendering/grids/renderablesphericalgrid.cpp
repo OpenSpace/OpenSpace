@@ -32,6 +32,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -209,25 +210,6 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     adjustedLineWidth = _lineWidth;
 #endif
 
-    // Saves current state:
-    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLfloat currentLineWidth;
-    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
-    
-    GLenum currentDepthFunction;
-    glGetIntegerv(GL_DEPTH_FUNC, &currentDepthFunction);
-    glDepthFunc(GL_LEQUAL);
-
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
-        blendDestRGB, blendSrcAlpha, blendSrcRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     // Changes GL state:
     glLineWidth(adjustedLineWidth);
     glEnablei(GL_BLEND, 0);
@@ -242,19 +224,8 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->deactivate();
 
     // Restores GL State
-    glLineWidth(currentLineWidth);
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    
-    if (!isBlendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-    
-    if (!isLineSmoothEnabled) {
-        glDisable(GL_LINE_SMOOTH);
-    }
-
-    glDepthFunc(currentDepthFunction);
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetLineState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {

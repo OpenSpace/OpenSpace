@@ -204,8 +204,9 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     ZoneScoped
 
     std::string messageString;
+    messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
-        std::lock_guard<std::mutex> lock(_messageQueueMutex);
+        std::lock_guard lock(_messageQueueMutex);
         _messageQueue.push_back({ connection, std::move(messageString) });
     }
 }
@@ -213,7 +214,7 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
 void ServerModule::consumeMessages() {
     ZoneScoped
 
-    std::lock_guard<std::mutex> lock(_messageQueueMutex);
+    std::lock_guard lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();
         if (std::shared_ptr<Connection> c = m.connection.lock()) {

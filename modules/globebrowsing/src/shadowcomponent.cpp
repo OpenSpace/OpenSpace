@@ -43,6 +43,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -226,6 +227,8 @@ bool ShadowComponent::isReady() const {
 }
 
 void ShadowComponent::initializeGL() {
+    ZoneScoped
+
     createDepthTexture();
     createShadowFBO();
 }
@@ -437,6 +440,8 @@ void ShadowComponent::end() {
 }
 
 void ShadowComponent::update(const UpdateData&) {
+    ZoneScoped
+
     _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition();
 
     glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();

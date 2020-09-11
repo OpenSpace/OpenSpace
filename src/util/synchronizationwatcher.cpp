@@ -24,6 +24,7 @@
 
 #include <openspace/util/synchronizationwatcher.h>
 
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
 
 namespace openspace {
@@ -75,8 +76,9 @@ void SynchronizationWatcher::unwatchSynchronization(WatchHandle watchHandle) {
     ), _pendingNotifications.end());
 }
 
-
 void SynchronizationWatcher::notify() {
+    ZoneScoped
+
     std::vector<NotificationData> notifications;
     {
         std::lock_guard guard(_mutex);
@@ -85,6 +87,7 @@ void SynchronizationWatcher::notify() {
     }
 
     for (const NotificationData& n : notifications) {
+        ZoneScopedN("Notification")
         std::shared_ptr<ResourceSynchronization> sync = n.synchronization.lock();
         if (!sync) {
             continue;

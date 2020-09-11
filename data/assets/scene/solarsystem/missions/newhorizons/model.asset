@@ -24,9 +24,9 @@ local NewHorizons = {
         Body = "NEW HORIZONS",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+            GeometryFile = models .. "/NewHorizonsCleanModel.obj",
+            ColorTexture = textures .. "/NHTexture.jpg"
         }, 
-        ColorTexture = textures .. "/NHTexture.jpg",
         AmbientIntensity = 0.0,
         DiffuseIntensity = 1.0,
         SpecularIntensity = 1.0,

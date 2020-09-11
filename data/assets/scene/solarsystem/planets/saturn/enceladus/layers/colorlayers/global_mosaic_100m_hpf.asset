@@ -1,9 +1,14 @@
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../enceladus").Enceladus.Identifier
 
 local layer = {
     Identifier = "Global_Mosaic_100m_HPF",
     Name = "Cassini Global Mosaic 100m HPF",
     FilePath = mapServiceConfigs .. "/Cassini_ISS_Global_Mosaic_100m_HPF.wms",
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

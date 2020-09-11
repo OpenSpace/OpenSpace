@@ -37,11 +37,13 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -49,6 +51,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
+#include <memory_resource>
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -258,10 +261,14 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
+std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
 tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
-    std::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings;
+    ZoneScoped
+
+    std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings(
+        &global::memoryManager.TemporaryMemory
+    );
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
@@ -275,6 +282,8 @@ tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileInde
 }
 
 BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm) {
+    ZoneScoped
+
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
     BoundingHeights boundingHeights { 0.f, 0.f, false, true };
@@ -284,10 +293,9 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     // (that is channel 0).
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
-    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
-        heightmaps,
-        chunk.tileIndex
-    );
+
+    std::pmr::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
+        tilesAndSettingsUnsorted(heightmaps, chunk.tileIndex);
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
@@ -337,18 +345,16 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
 }
 
 bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
-    using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
-    const LayerGroup& colormaps = lm.layerGroup(layergroupid::GroupID::ColorLayers);
-    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
-        colormaps,
-        chunk.tileIndex
-    );
+    ZoneScoped
 
-    for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
-        const ChunkTile& chunkTile = chunkTileSettingsPair.first;
+    const LayerGroup& colorLayers = lm.layerGroup(layergroupid::GroupID::ColorLayers);
 
-        if (chunkTile.tile.status == Tile::Status::Unavailable) {
-            return false;
+    for (Layer* lyr : colorLayers.activeLayers()) {
+        if (lyr->tileProvider()) {
+            ChunkTile t = tileprovider::chunkTile(*lyr->tileProvider(), chunk.tileIndex);
+            if (t.tile.status == Tile::Status::Unavailable) {
+                return false;
+            }
         }
     }
 
@@ -359,6 +365,8 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
                                                   const Ellipsoid& ellipsoid,
                                                   const BoundingHeights& heights)
 {
+    ZoneScoped
+
     // assume worst case
     const double patchCenterRadius = ellipsoid.maximumRadius();
 
@@ -607,7 +615,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
 
-    _traversalMemory.reserve(512);
+    _globalChunkBuffer.resize(2048);
+    _localChunkBuffer.resize(2048);
+    _traversalMemory.resize(512);
 
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
@@ -843,6 +853,8 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
+    ZoneScoped
+
     if (_localRenderer.program && _localRenderer.program->isDirty()) {
         _localRenderer.program->rebuildFromFile();
 
@@ -911,21 +923,20 @@ void RenderableGlobe::update(const UpdateData& data) {
         _shadowComponent.update(data);
     }
 
-    _layerManager.update();
-
-    if (_nLayersIsDirty) {
-        std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
-            _layerManager.layerGroups();
-        _generalProperties.nActiveLayers = std::accumulate(
-            lgs.begin(),
-            lgs.end(),
-            0,
-            [](int lhs, LayerGroup* lg) {
-                return lhs + static_cast<int>(lg->activeLayers().size());
-            }
-        );
-        _nLayersIsDirty = false;
-    }
+    // abock (2020-08-21)
+    // This is a bit nasty every since we removed the second update call from the render
+    // loop. The problem is when we enable a new layer, the dirty flags above will be set
+    // to true, but the update method hasn't run yet.  So we need to move the layerManager
+    // update method to the render function call, but we don't want to *actually* update
+    // the layers once per render call; hence this nasty dirty flag
+    //
+    // How it is without in the frame when we enable a layer:
+    //
+    // RenderableGlobe::update() // updated with the old number of layers
+    // // Lua script to enable layer is executed and sets the dirty flags
+    // RenderableGlobe::render() // rendering with the new number of layers but the
+    //                           // LayerManager hasn't updated yet :o
+    _layerManagerDirty = true;
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {
@@ -957,6 +968,26 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                                    bool renderGeomOnly)
 {
     ZoneScoped
+
+
+    if (_layerManagerDirty) {
+        _layerManager.update();
+        _layerManagerDirty = false;
+    }
+
+    if (_nLayersIsDirty) {
+        std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
+            _layerManager.layerGroups();
+        _generalProperties.nActiveLayers = std::accumulate(
+            lgs.begin(),
+            lgs.end(),
+            0,
+            [](int lhs, LayerGroup* lg) {
+            return lhs + static_cast<int>(lg->activeLayers().size());
+        }
+        );
+        _nLayersIsDirty = false;
+    }
 
     if (_shadersNeedRecompilation) {
         recompileShaders();
@@ -1045,20 +1076,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _localRenderer.updatedSinceLastCall = false;
     }
 
+    // Calculate the MVP matrix
+    const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
+    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+        viewTransform;
+    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
     _allChunksAvailable = true;
-    updateChunkTree(_leftRoot, data);
-    updateChunkTree(_rightRoot, data);
+    updateChunkTree(_leftRoot, data, mvp);
+    updateChunkTree(_rightRoot, data, mvp);
     _chunkCornersDirty = false;
     _iterationsOfAvailableData =
         (_allChunksAvailable ? _iterationsOfAvailableData + 1 : 0);
     _iterationsOfUnavailableData =
         (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
 
-    // Calculate the MVP matrix
-    const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-        viewTransform;
-    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
 
     //
     // Setting uniforms that don't change between chunks but are view dependent
@@ -1165,24 +1198,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
-    constexpr const int ChunkBufferSize = 2048;
-    std::array<const Chunk*, ChunkBufferSize> global;
     int globalCount = 0;
-    std::array<const Chunk*, ChunkBufferSize> local;
     int localCount = 0;
 
-    auto traversal = [&global, &globalCount, &local, &localCount, this,
-          cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
+    auto traversal = [](const Chunk& node, std::vector<const Chunk*>& global,
+        int& globalCount, std::vector<const Chunk*>& local, int& localCount, int cutoff,
+        std::vector<const Chunk*>& traversalMemory)
     {
         ZoneScopedN("traversal")
 
-        _traversalMemory.clear();
+        traversalMemory.clear();
 
         // Loop through nodes in breadths first order
-        _traversalMemory.push_back(&node);
-        while (!_traversalMemory.empty()) {
-            const Chunk* n = _traversalMemory.front();
-            _traversalMemory.erase(_traversalMemory.begin());
+        traversalMemory.push_back(&node);
+        while (!traversalMemory.empty()) {
+            const Chunk* n = traversalMemory.front();
+            traversalMemory.erase(traversalMemory.begin());
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
@@ -1198,43 +1229,59 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             // Add children to queue, if any
             if (!isLeaf(*n)) {
                 for (int i = 0; i < 4; ++i) {
-                    _traversalMemory.push_back(n->children[i]);
+                    traversalMemory.push_back(n->children[i]);
                 }
             }
         }
     };
 
-    traversal(_leftRoot);
-    traversal(_rightRoot);
+    traversal(
+        _leftRoot,
+        _globalChunkBuffer,
+        globalCount,
+        _localChunkBuffer,
+        localCount,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _traversalMemory
+    );
+    traversal(
+        _rightRoot,
+        _globalChunkBuffer,
+        globalCount,
+        _localChunkBuffer,
+        localCount,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _traversalMemory
+    );
 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
-    for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
-        renderChunkGlobally(*global[i], data, shadowData, renderGeomOnly);
+    for (int i = 0; i < globalCount; ++i) {
+        renderChunkGlobally(*_globalChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
-    for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
-        renderChunkLocally(*local[i], data, shadowData, renderGeomOnly);
+    for (int i = 0; i < localCount; ++i) {
+        renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
-        for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
+        for (int i = 0; i < globalCount; ++i) {
             debugRenderChunk(
-                *global[i],
+                *_globalChunkBuffer[i],
                 mvp,
                 _debugProperties.showChunkBounds,
                 _debugProperties.showChunkAABB
             );
         }
 
-        for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
+        for (int i = 0; i < localCount; ++i) {
             debugRenderChunk(
-                *local[i],
+                *_localChunkBuffer[i],
                 mvp,
                 _debugProperties.showChunkBounds,
                 _debugProperties.showChunkAABB
@@ -1273,11 +1320,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     ZoneScoped
     TracyGpuZone("renderChunkGlobally")
 
-    //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
 
-    const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
+    std::array<LayerGroup*, LayerManager::NumLayerGroups> layerGroups =
         _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
@@ -1841,12 +1887,13 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 
 bool RenderableGlobe::testIfCullable(const Chunk& chunk,
                                      const RenderData& renderData,
-                                     const BoundingHeights& heights) const
+                                     const BoundingHeights& heights,
+                                     const glm::dmat4& mvp) const
 {
     ZoneScoped
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData));
+           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -2326,22 +2373,17 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
-                                          const RenderData& renderData) const
+                                          const RenderData& renderData,
+                                          const glm::dmat4& mvp) const
 {
     ZoneScoped
-
-    // Calculate the MVP matrix
-    const glm::dmat4 viewTransform = glm::dmat4(renderData.camera.combinedViewMatrix());
-    const glm::dmat4 modelViewProjectionTransform = glm::dmat4(
-        renderData.camera.sgctInternal.projectionMatrix()
-    ) * viewTransform * _cachedModelTransform;
 
     const std::array<glm::dvec4, 8>& corners = chunk.corners;
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
     for (size_t i = 0; i < 8; ++i) {
-        const glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
+        const glm::dvec4 cornerClippingSpace = mvp * corners[i];
         const glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
         );
@@ -2479,7 +2521,9 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
     cn.children.fill(nullptr);
 }
 
-bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
+bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
+                                      const glm::dmat4& mvp)
+{
     ZoneScoped
 
     // abock:  I tried turning this into a queue and use iteration, rather than recursion
@@ -2488,7 +2532,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     //         children and then again it self to be processed after the children finish).
     //         In addition, this didn't even improve performance ---  2018-10-04
     if (isLeaf(cn)) {
-        updateChunk(cn, data);
+        ZoneScopedN("leaf")
+        updateChunk(cn, data, mvp);
 
         if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
@@ -2501,15 +2546,16 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         return cn.status == Chunk::Status::WantMerge;
     }
     else {
+        ZoneScopedN("!leaf")
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
-            if (updateChunkTree(*cn.children[i], data)) {
+            if (updateChunkTree(*cn.children[i], data, mvp)) {
                 requestedMergeMask |= (1 << i);
             }
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        updateChunk(cn, data);
+        updateChunk(cn, data, mvp);
 
         if (allChildrenWantsMerge && (cn.status != Chunk::Status::WantSplit)) {
             mergeChunkNode(cn);
@@ -2525,7 +2571,11 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     }
 }
 
-void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
+void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data,
+                                  const glm::dmat4& mvp) const
+{
+    ZoneScoped
+
     const BoundingHeights& heights = boundingHeightsForChunk(chunk, _layerManager);
     chunk.heightTileOK = heights.tileOK;
     chunk.colorTileOK = colorAvailableForChunk(chunk, _layerManager);
@@ -2536,7 +2586,7 @@ void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
         // The flag gets set to false globally after the updateChunkTree calls
     }
 
-    if (testIfCullable(chunk, data, heights)) {
+    if (testIfCullable(chunk, data, heights, mvp)) {
         chunk.isVisible = false;
         chunk.status = Chunk::Status::WantMerge;
     }

@@ -291,7 +291,7 @@ public:
      */
     void removeTag(const std::string& tag);
 
-    //Generate JSON for documentation
+    // Generate JSON for documentation
     std::string generateJson() const override;
 
 

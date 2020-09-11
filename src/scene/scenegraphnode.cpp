@@ -467,12 +467,16 @@ void SceneGraphNode::update(const UpdateData& data) {
         newUpdateData.modelTransform.translation
     );
     glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
+    glm::dmat4 scaling = glm::scale(
+        glm::dmat4(1.0),
+        newUpdateData.modelTransform.scale
+    );
 
     _modelTransformCached = translation * rotation * scaling;
-    _inverseModelTransformCached = glm::inverse(_modelTransformCached);
 
-    if (_renderable && _renderable->isReady()) {
+    if (_renderable && _renderable->isReady() &&
+        (_renderable->isEnabled() || _renderable->shouldUpdateIfDisabled()))
+    {
         _renderable->update(newUpdateData);
     }
 }
@@ -485,17 +489,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
-    RenderData newData = {
-        data.camera,
-        data.time,
-        data.renderBinMask,
-        { _worldPositionCached, _worldRotationCached, _worldScaleCached }
-    };
-
-    if (!isTimeFrameActive(data.time)) {
-        return;
-    }
-
     const bool visible = _renderable && _renderable->isVisible() &&
         _renderable->isReady() && _renderable->isEnabled() &&
         _renderable->matchesRenderBinMask(data.renderBinMask);
@@ -504,8 +497,19 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
+    if (!isTimeFrameActive(data.time)) {
+        return;
+    }
+
     {
         TracyGpuZone("Render")
+
+        RenderData newData = {
+            data.camera,
+            data.time,
+            data.renderBinMask,
+            { _worldPositionCached, _worldRotationCached, _worldScaleCached }
+        };
 
         _renderable->render(newData, tasks);
         if (_computeScreenSpaceValues) {
@@ -765,10 +769,6 @@ const glm::dmat3& SceneGraphNode::worldRotationMatrix() const {
 
 glm::dmat4 SceneGraphNode::modelTransform() const {
     return _modelTransformCached;
-}
-
-glm::dmat4 SceneGraphNode::inverseModelTransform() const {
-    return _inverseModelTransformCached;
 }
 
 glm::dvec3 SceneGraphNode::worldScale() const {

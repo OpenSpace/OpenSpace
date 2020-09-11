@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
@@ -80,7 +81,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
         "HttpSynchronization",
         [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
             if (pool) {
-                void* ptr = pool->alloc(sizeof(HttpSynchronization));
+                void* ptr = pool->allocate(sizeof(HttpSynchronization));
                 return new (ptr) HttpSynchronization(
                     dictionary,
                     _synchronizationRoot,
@@ -101,7 +102,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
         "UrlSynchronization",
         [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
             if (pool) {
-                void* ptr = pool->alloc(sizeof(UrlSynchronization));
+                void* ptr = pool->allocate(sizeof(UrlSynchronization));
                 return new (ptr) UrlSynchronization(
                     dictionary,
                     _synchronizationRoot

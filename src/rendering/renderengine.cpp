@@ -42,6 +42,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/updatestructures.h>
@@ -55,6 +56,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #ifdef GHOUL_USE_DEVIL
@@ -388,6 +390,8 @@ RenderEngine::RenderEngine()
 RenderEngine::~RenderEngine() {} // NOLINT
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
+    ZoneScoped
+
     _rendererImplementation = rendererFromString(renderingMethod);
 
     std::unique_ptr<Renderer> newRenderer = nullptr;
@@ -446,6 +450,22 @@ void RenderEngine::initialize() {
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
+
+    _versionString = OPENSPACE_VERSION_STRING_FULL;
+    if (global::versionChecker.hasLatestVersionInfo()) {
+        VersionChecker::SemanticVersion latest = global::versionChecker.latestVersion();
+
+        VersionChecker::SemanticVersion current{
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH
+        };
+        if (current < latest) {
+            _versionString += fmt::format(
+                " [Available: {}.{}.{}]", latest.major, latest.minor, latest.patch
+            );
+        }
+    }
 }
 
 void RenderEngine::initializeGL() {
@@ -469,10 +489,6 @@ void RenderEngine::initializeGL() {
     setRendererFromString(renderingMethod);
 
 
-
-    // TODO:    Fix the power scaled coordinates in such a way that these
-    //            values can be set to more realistic values
-
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
@@ -481,19 +497,38 @@ void RenderEngine::initializeGL() {
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
 
-    constexpr const float FontSizeFrameinfo = 32.f;
-    _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
-    constexpr const float FontSizeTime = 15.f;
-    _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
-    constexpr const float FontSizeMono = 10.f;
-    _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
-    constexpr const float FontSizeLight = 8.f;
-    _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+    {
+        ZoneScopedN("Font: Mono")
+        TracyGpuZone("Font: Mono")
+        constexpr const float FontSizeFrameinfo = 32.f;
+        _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
+    }
+    {
+        ZoneScopedN("Font: Date")
+        TracyGpuZone("Font: Date")
+        constexpr const float FontSizeTime = 15.f;
+        _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
+    }
+    {
+        ZoneScopedN("Font: Info")
+        TracyGpuZone("Font: Info")
+        constexpr const float FontSizeMono = 10.f;
+        _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
+    }
+    {
+        ZoneScopedN("Font: Log")
+        TracyGpuZone("Font: Log")
+        constexpr const float FontSizeLight = 8.f;
+        _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+    }
 
-    LINFO("Initializing Log");
-    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
-    _log = log.get();
-    ghoul::logging::LogManager::ref().addLog(std::move(log));
+    {
+        ZoneScopedN("Log")
+        LINFO("Initializing Log");
+        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        _log = log.get();
+        ghoul::logging::LogManager::ref().addLog(std::move(log));
+    }
 
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
@@ -916,6 +951,13 @@ RenderEngine::RendererImplementation RenderEngine::rendererImplementation() cons
     return _rendererImplementation;
 }
 
+ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
+    if (_openglStateCache == nullptr) {
+        _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
+    }
+    return *_openglStateCache;
+}
+
 float RenderEngine::globalBlackOutFactor() {
     return _globalBlackOutFactor;
 }
@@ -1084,6 +1126,8 @@ void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
  * Set renderer
  */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
+    ZoneScoped
+
     if (_renderer) {
         _renderer->deinitialize();
     }
@@ -1305,31 +1349,9 @@ void RenderEngine::renderVersionInformation() {
         return;
     }
 
-    std::string versionString = OPENSPACE_VERSION_STRING_FULL;
-
-    if (global::versionChecker.hasLatestVersionInfo()) {
-        VersionChecker::SemanticVersion latestVersion =
-            global::versionChecker.latestVersion();
-
-        VersionChecker::SemanticVersion currentVersion {
-            OPENSPACE_VERSION_MAJOR,
-            OPENSPACE_VERSION_MINOR,
-            OPENSPACE_VERSION_PATCH
-        };
-        if (currentVersion < latestVersion) {
-            versionString += fmt::format(
-                " [Available: {}.{}.{}]",
-                latestVersion.major, latestVersion.minor, latestVersion.patch
-            );
-        }
-    }
-
     using FR = ghoul::fontrendering::FontRenderer;
-    const glm::vec2 versionBox = _fontInfo->boundingBox(versionString);
-
-    const glm::vec2 commitBox = _fontInfo->boundingBox(
-        fmt::format("{}@{}", OPENSPACE_GIT_BRANCH, OPENSPACE_GIT_COMMIT)
-    );
+    const glm::vec2 versionBox = _fontInfo->boundingBox(_versionString);
+    const glm::vec2 commitBox = _fontInfo->boundingBox(OPENSPACE_GIT_FULL);
 
     FR::defaultRenderer().render(
         *_fontInfo,
@@ -1337,13 +1359,13 @@ void RenderEngine::renderVersionInformation() {
             fontResolution().x - versionBox.x - 10.f,
             5.f
         ),
-        versionString,
+        _versionString,
         glm::vec4(0.5, 0.5, 0.5, 1.f)
     );
 
     // If a developer hasn't placed the Git command in the path, this variable will be
     // empty
-    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+    if (!std::string_view(OPENSPACE_GIT_COMMIT).empty()) {
         // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
         // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
         // checking for that is a bit brittle)
@@ -1354,6 +1376,28 @@ void RenderEngine::renderVersionInformation() {
             glm::vec4(0.5, 0.5, 0.5, 1.f)
         );
     }
+
+#ifdef TRACY_ENABLE
+    {
+        // If we have Tracy enabled, we should inform the user about it that the
+        // application will crash after a while if no profiler is attached
+
+        ZoneScopedN("Tracy Information")
+
+        const glm::vec2 tracyBox = _fontInfo->boundingBox("TRACY PROFILING ENABLED");
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x - tracyBox.x - 10.f,
+            versionBox.y + commitBox.y + 5.f
+        );
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            penPosition,
+            "TRACY PROFILING ENABLED",
+            glm::vec4(0.8f, 0.2f, 0.15f, 1.f)
+        );
+    }
+#endif // TRACY_ENABLE
+
 }
 
 void RenderEngine::renderScreenLog() {
@@ -1381,9 +1425,9 @@ void RenderEngine::renderScreenLog() {
     size_t nr = 1;
     const auto now = std::chrono::steady_clock::now();
     for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
-        const ScreenLog::LogEntry* e = &(*it);
+        ZoneScopedN("Entry")
 
-        std::chrono::duration<double> diff = now - e->timeStamp;
+        std::chrono::duration<double> diff = now - it->timeStamp;
 
         float alpha = 1.f;
         std::chrono::duration<double> ttf = ScreenLogTimeToLive - FadeTime;
@@ -1398,54 +1442,64 @@ void RenderEngine::renderScreenLog() {
         if (alpha <= 0.f) {
             break;
         }
-        const std::string_view lvl = ghoul::to_string(e->level);
-        const std::string_view message =
-            std::string_view(e->message).substr(0, MessageLength);
+        std::string_view message = std::string_view(it->message).substr(0, MessageLength);
         nr += std::count(message.begin(), message.end(), '\n');
 
         const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
 
-        std::string str = fmt::format(
-            "{:<15} {}{}",
-            e->timeString,
-            e->category.substr(0, CategoryLength),
-            e->category.length() > CategoryLength ? "..." : ""
-        );
+        std::array<char, 15 + CategoryLength + 3> buf;
+        {
+            std::fill(buf.begin(), buf.end(), char(0));
+            char* end = fmt::format_to(
+                buf.data(),
+                "{:<15} {}{}",
+                it->timeString,
+                std::string_view(it->category).substr(0, CategoryLength),
+                it->category.length() > CategoryLength ? "..." : ""
+            );
+            std::string_view text = std::string_view(buf.data(), end - buf.data());
 
-        RenderFont(
-            *_fontLog,
-            glm::vec2(
-                10.f,
-                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
-            ),
-            str,
-            white
-        );
+            RenderFont(
+                *_fontLog,
+                glm::vec2(
+                    10.f,
+                    _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+                ),
+                text,
+                white
+            );
+        }
 
-        const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
-            switch (level) {
-                case ghoul::logging::LogLevel::Debug:
-                    return glm::vec4(0.f, 1.f, 0.f, alpha);
-                case ghoul::logging::LogLevel::Warning:
-                    return glm::vec4(1.f, 1.f, 0.f, alpha);
-                case ghoul::logging::LogLevel::Error:
-                    return glm::vec4(1.f, 0.f, 0.f, alpha);
-                case ghoul::logging::LogLevel::Fatal:
-                    return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-                default:
-                    return white;
-            }
-        }(e->level);
+        {
+            const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
+                switch (level) {
+                    case ghoul::logging::LogLevel::Debug:
+                        return glm::vec4(0.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Warning:
+                        return glm::vec4(1.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Error:
+                        return glm::vec4(1.f, 0.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Fatal:
+                        return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
+                    default:
+                        return white;
+                }
+            }(it->level);
 
-        RenderFont(
-            *_fontLog,
-            glm::vec2(
-                10 + 30 * _fontLog->pointSize(),
-                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
-            ),
-            fmt::format("({})", lvl),
-            color
-        );
+            const std::string_view lvl = ghoul::to_string(it->level);
+            std::fill(buf.begin(), buf.end(), char(0));
+            char* end = fmt::format_to(buf.data(), "({})", lvl);
+            std::string_view levelText = std::string_view(buf.data(), end - buf.data());
+            RenderFont(
+                *_fontLog,
+                glm::vec2(
+                    10 + 30 * _fontLog->pointSize(),
+                    _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+                ),
+                levelText,
+                color
+            );
+        }
 
         RenderFont(
             *_fontLog,
