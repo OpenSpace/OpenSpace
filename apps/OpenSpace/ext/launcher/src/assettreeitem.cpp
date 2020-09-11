@@ -85,12 +85,24 @@ bool assetTreeItem::setData(int column, const QVariant &value)
     return true;
 }
 
-bool assetTreeItem::isAsset() {
+bool assetTreeItem::isAsset() const {
     return (childCount() == 0);
 }
 
-bool assetTreeItem::isCategory() {
+bool assetTreeItem::isCategory() const {
     return (childCount() > 0);
+}
+
+void assetTreeItem::setExistsInFilesystem(bool fileExists) {
+    _existsInFilesystem = fileExists;
+}
+
+bool assetTreeItem::doesExistInFilesystem() const {
+    return _existsInFilesystem;
+}
+
+QString assetTreeItem::name() const {
+    return QString(data(0).toString());
 }
 
 bool assetTreeItem::insertChildren(int position, int count, int columns)

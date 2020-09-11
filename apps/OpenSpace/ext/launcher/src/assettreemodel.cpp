@@ -25,6 +25,7 @@
 #include "assettreeitem.h"
 #include "assettreemodel.h"
 #include <sstream>
+#include <QColor>
 
 assetTreeModel::assetTreeModel(QString header1, QString header2, QObject* parent)
     : QAbstractItemModel(parent),
@@ -60,7 +61,10 @@ void assetTreeModel::importInsertItem(std::istringstream& iss, assetTreeItem* pa
         if (levelChange == 0) {
             parent->insertChildren(++nChildInsert, 1, 2);
             parent->child(nChildInsert)->setData(0, QString::fromUtf8(elem.line.c_str()));
-            parent->child(nChildInsert)->setData(1, (elem.checked ? Qt::Checked : Qt::Unchecked));
+            bool shouldMakeElemChecked = (elem.checked || !elem.existsInFilesystem);
+            Qt::CheckState check = (shouldMakeElemChecked) ? Qt::Checked : Qt::Unchecked;
+            parent->child(nChildInsert)->setData(1, check);
+            parent->child(nChildInsert)->setExistsInFilesystem(elem.existsInFilesystem);
             continueToNextLine = importGetNextLine(elem, iss);
         }
         else if (levelChange == 1) {
@@ -80,7 +84,9 @@ bool assetTreeModel::importGetNextLine(importElement& elem, std::istringstream& 
         elem.level = -1;
     }
     else {
-        elem.checked = (elem.line.substr(0, 1).compare("1") == 0) ? true : false;
+        elem.checked = (elem.line.substr(0, 1).compare("0") == 0) ? false : true;
+        elem.existsInFilesystem = (elem.line.substr(0, 1).compare("x") == 0) ?
+            false : true;
         elem.line = elem.line.substr(1);
         elem.level = getLevelFromLine(elem.line);
         trimWhitespaceFromLine(elem.line);
@@ -115,19 +121,40 @@ assetTreeItem* assetTreeModel::getItem(const QModelIndex &index) const {
     return rootItem;
 }
 
-bool assetTreeModel::isItemChecked(QModelIndex& index) const {
+bool assetTreeModel::isChecked(QModelIndex& index) const {
     assetTreeItem* item = getItem(index);
     int checked = item->data(1).toInt();
     return (checked == Qt::Checked) ? true : false;
 }
 
-bool assetTreeModel::isItemAsset(QModelIndex& index) const {
+bool assetTreeModel::isAsset(QModelIndex& index) const {
     assetTreeItem* item = getItem(index);
     return item->isAsset();
 }
 
+bool assetTreeModel::inFilesystem(QModelIndex& index) const {
+    assetTreeItem* item = getItem(index);
+    return item->doesExistInFilesystem();
+}
+
 int assetTreeModel::childCount(QModelIndex& index) const {
     return getItem(index)->childCount();
+}
+
+QString assetTreeModel::name(QModelIndex& index) const {
+    return getItem(index)->name();
+}
+
+void assetTreeModel::setName(QModelIndex& index, QString name) {
+    getItem(index)->setData(0, name);
+}
+
+void assetTreeModel::setChecked(QModelIndex& index, bool checked) {
+    getItem(index)->setData(1, checked ? Qt::Checked : Qt::Unchecked);
+}
+
+void assetTreeModel::setExistenceInFilesystem(QModelIndex& index, bool fileExists) {
+    getItem(index)->setExistsInFilesystem(fileExists);
 }
 
 assetTreeItem* assetTreeModel::child(int row) const {
@@ -179,6 +206,10 @@ QModelIndex assetTreeModel::parent(const QModelIndex& index) const {
     return createIndex(parentItem->childNumber(), 0, parentItem);
 }
 
+assetTreeItem* assetTreeModel::assetItem(const QModelIndex &index) {
+    return getItem(index);
+}
+
 int assetTreeModel::rowCount(const QModelIndex& parent) const {
     const assetTreeItem* parentItem = getItem(parent);
     return parentItem ? parentItem->childCount() : 0;
@@ -204,10 +235,20 @@ QVariant assetTreeModel::data(const QModelIndex& index, int role) const {
         }
     }
 
-    if (role != Qt::DisplayRole)
+    if (role == Qt::ForegroundRole) {
+        if (item->doesExistInFilesystem()) {
+            return QVariant(QColor(Qt::black));
+        }
+        else {
+            return QVariant(QColor(Qt::red));
+        }
+    }
+    else if (role == Qt::DisplayRole) {
+        return item->data(index.column());
+    }
+    else {
         return QVariant();
-
-    return item->data(index.column());
+    }
 }
 
 bool assetTreeModel::setData(const QModelIndex& index, const QVariant& value, int role)

@@ -47,8 +47,11 @@ public:
     bool setData(int column, const QVariant &value);
     bool isChecked() const { return _checked; }
     void setChecked( bool set ) { _checked = set; }
-    bool isAsset();
-    bool isCategory();
+    bool isAsset() const;
+    bool isCategory() const;
+    void setExistsInFilesystem(bool fileExists);
+    bool doesExistInFilesystem() const;
+    QString name() const;
     static const int checkboxColumn = 1;
 
 private:
@@ -56,6 +59,7 @@ private:
     QVector<QVariant> _itemData;
     assetTreeItem* _parentItem;
     bool _checked = false;
+    bool _existsInFilesystem = true;
 };
 
 #endif // __OPENSPACE_LAUNCHER___ASSETTREEITEM___H__

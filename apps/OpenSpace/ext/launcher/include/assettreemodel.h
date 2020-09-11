@@ -35,6 +35,7 @@ struct importElement
     std::string line;
     int level = -1;
     bool checked = false;
+    bool existsInFilesystem = true;
 };
 
 class assetTreeModel : public QAbstractItemModel
@@ -53,6 +54,7 @@ public:
     QModelIndex parent(const QModelIndex &index) const override;
     QModelIndex parent(int row, int column,
         const QModelIndex& parent = QModelIndex()) const;
+    assetTreeItem* assetItem(const QModelIndex &index);
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -60,10 +62,15 @@ public:
         int role = Qt::EditRole) override;
     std::vector<std::string> selectedAssets();
     void importModelData(const std::string contents);
-    bool isItemChecked(QModelIndex& index) const;
-    bool isItemAsset(QModelIndex& index) const;
+    bool isChecked(QModelIndex& index) const;
+    bool isAsset(QModelIndex& index) const;
+    bool inFilesystem(QModelIndex& index) const;
     int childCount(QModelIndex& index) const;
     assetTreeItem* child(int row) const;
+    QString name(QModelIndex& index) const;
+    void setName(QModelIndex& index, QString name);
+    void setChecked(QModelIndex& index, bool checked);
+    void setExistenceInFilesystem(QModelIndex& index, bool fileExists);
 
 private:
     std::string headerTitle;
