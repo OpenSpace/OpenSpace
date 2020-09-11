@@ -30,6 +30,8 @@ set(HEADER_FILES
   include/filesystemaccess.h
   include/keybindings.h
   include/launcherwindow.h
+  include/marknodes.h
+  include/meta.h
   include/profileedit.h
   include/ui_addedscripts.h
   include/ui_assets.h
@@ -37,6 +39,8 @@ set(HEADER_FILES
   include/ui_deltatimes.h
   include/ui_keybindings.h
   include/ui_launcherwindow.h
+  include/ui_marknodes.h
+  include/ui_meta.h
   include/ui_profileedit.h
 )
 
@@ -50,6 +54,8 @@ set(SOURCE_FILES
   src/filesystemaccess.cpp
   src/keybindings.cpp
   src/launcherwindow.cpp
+  src/marknodes.cpp
+  src/meta.cpp
   src/profileedit.cpp
 )
 
