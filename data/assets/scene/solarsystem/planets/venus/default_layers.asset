@@ -1,16 +1,16 @@
-local layerHelper = asset.require('util/layer_helper')
-local globeAsset = asset.require('./venus')
-local globeIdentifier = globeAsset.Venus.Identifier
+local colorLayersPath = "./layers/colorlayers"
+local heightLayersPath = "./layers/heightlayers"
 
--- set enabled and fallback layers
-local defaultLayers = asset.require('./layers/default_layers')
+-- Color layers
+asset.require(colorLayersPath .. "/venus_texture")
+local colorLayer = asset.require(colorLayersPath .. "/magellan_mosaic_utah")
 
-local colorLayer = asset.require('./layers/colorlayers/magellan_mosaic_utah').layer
-local heightLayer = asset.require('./layers/heightlayers/magellan').layer
+-- Height layers
+local heightLayer = asset.require(heightLayersPath .. "/magellan")
 
-colorLayer.Enabled = true
-heightLayer.Enabled = true
-
-asset.onInitialize(function ()
-    layerHelper.addLayersToGlobe(globeIdentifier, defaultLayers)
+-- Set enabled layers (temporary solution)
+-- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
+asset.onInitialize(function () 
+    openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
 end)

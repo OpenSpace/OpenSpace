@@ -269,8 +269,9 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     }
 
     //std::string t = Time::ref().currentTimeUTC();
-    std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
-    std::stringstream ss(t);
+    std::string_view t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
+    std::stringstream ss;
+    ss << t;
     std::string token;
 
     std::getline(ss, token, ' ');

@@ -1,3 +1,5 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
 local layer =  {
     Identifier = "GHRSST_L4_MUR_Sea_Surface_Temperature_Temporal",
     Name = "GHRSST L4 MUR Sea Surface Temperature (Temporal)",
@@ -11,5 +13,9 @@ local layer =  {
         "png"
     )
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

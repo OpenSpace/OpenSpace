@@ -66,9 +66,9 @@ local Apollo15 = {
 --         Geometry = {
 --             Type = "MultiModelGeometry",
 -- --            GeometryFile = models .. "/Apollo_Spacecraft.obj"
---             GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj"
+--             GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj",
+    --         ColorTexture = models .. "/gray.png"
 --         },
---         ColorTexture = models .. "/gray.png",
 --         LightSources = LightSources,
 --         DisableFaceCulling = true 
 --     },

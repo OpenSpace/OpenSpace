@@ -40,6 +40,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -604,6 +605,8 @@ bool RenderableLabels::isReady() const {
 }
 
 void RenderableLabels::initialize() {
+    ZoneScoped
+
     bool success = true;// loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading objects labels data.");

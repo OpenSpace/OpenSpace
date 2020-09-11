@@ -38,6 +38,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -187,6 +188,8 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
 }
 
 void DashboardItemVelocity::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     const glm::dvec3 currentPos = global::renderEngine.scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
     const double speedPerFrame = glm::length(dt);
@@ -218,6 +221,8 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemVelocity::size() const {
+    ZoneScoped
+
     const double d = glm::length(1e20);
     std::pair<double, std::string> dist;
     if (_doSimplification) {

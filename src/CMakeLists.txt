@@ -433,6 +433,8 @@ target_include_directories(openspace-core PUBLIC
   ${OPENSPACE_BASE_DIR}/include
   # In order to be able to include module files
   ${OPENSPACE_BASE_DIR}
+  # In order to use the date library
+  ${OPENSPACE_BASE_DIR}/ext/date/include
   # In order to be able to include the module_registration file
   ${CMAKE_BINARY_DIR}/_generated/include
 )

@@ -211,7 +211,10 @@ void GuiSpaceTimeComponent::render() {
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    ImGui::Text("Current Date: %s", global::timeManager.time().UTC().c_str());
+    ImGui::Text(
+        "Current Date: %s",
+        std::string(global::timeManager.time().UTC()).c_str()
+    );
 
     constexpr int BufferSize = 256;
     static char Buffer[BufferSize];
@@ -296,7 +299,7 @@ void GuiSpaceTimeComponent::render() {
 
     const bool nowDay = ImGui::Button("Now");
     if (nowDay) {
-        std::string nowTime = Time::now().UTC();
+        std::string nowTime = std::string(Time::now().UTC());
         // UTC returns a string of the type YYYY MMM DDTHH:mm:ss.xxx
         // setTime doesn't like the T in it and wants a space instead
         nowTime[11] = ' ';
