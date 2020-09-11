@@ -26,12 +26,14 @@ set(HEADER_FILES
   include/assettreeitem.h
   include/assettreemodel.h
   include/camera.h
+  include/deltatimes.h
   include/filesystemaccess.h
   include/launcherwindow.h
   include/profileedit.h
   include/ui_addedscripts.h
   include/ui_assets.h
   include/ui_camera.h
+  include/ui_deltatimes.h
   include/ui_editorwindow.h
   include/ui_launcherwindow.h
 )
@@ -42,6 +44,7 @@ set(SOURCE_FILES
   src/assettreeitem.cpp
   src/assettreemodel.cpp
   src/camera.cpp
+  src/deltatimes.cpp
   src/filesystemaccess.cpp
   src/launcherwindow.cpp
   src/profileedit.cpp
