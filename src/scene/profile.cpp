@@ -497,7 +497,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
 
     // Delta times
     std::vector<double> dts = global::timeManager.deltaTimeSteps();
-    deltaTimes = std::move(dts);
+    _deltaTimes = std::move(dts);
 
     // Camera
 
@@ -673,7 +673,7 @@ std::string Profile::serialize() const {
 
     if (!_deltaTimes.empty()) {
         output += fmt::format("\n{}\n", headerDeltaTimes);
-        for (const double d : deltaTimes) {
+        for (const double d : _deltaTimes) {
             output += fmt::format("{}\n", d);
         }
     }
@@ -903,7 +903,7 @@ Profile::Profile(const std::vector<std::string>& content) {
             case Section::DeltaTimes:
             {
                 const double d = parseDeltaTime(line, lineNum);
-                deltaTimes.push_back(d);
+                _deltaTimes.push_back(d);
                 break;
             }
             case Section::Camera:
@@ -1020,7 +1020,7 @@ std::string Profile::convertToScene() const {
     // Delta Times
     {
         std::string times;
-        for (const double d : deltaTimes) {
+        for (const double d : _deltaTimes) {
             times += fmt::format("{} ,", d);
         }
         output += fmt::format("openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
