@@ -22,18 +22,21 @@ target_include_directories(
 
 set(HEADER_FILES
   include/addedscripts.h
+  include/assets.h
   include/assettreeitem.h
   include/assettreemodel.h
   include/filesystemaccess.h
   include/launcherwindow.h
   include/profileedit.h
   include/ui/addedscripts.h
+  include/ui/assets.h
   include/ui_editorwindow.h
   include/ui_launcherwindow.h
 )
 
 set(SOURCE_FILES
   src/addedscripts.cpp
+  src/assets.cpp
   src/assettreeitem.cpp
   src/assettreemodel.cpp
   src/filesystemaccess.cpp
