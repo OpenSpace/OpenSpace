@@ -23,7 +23,7 @@ target_include_directories(
 set(HEADER_FILES
   assettreeitem.h
   assettreemodel.h
-  editorwindow.h
+  profileedit.h
   ui_editorwindow.h
   filesystemaccess.h
   launcherwindow.h
@@ -33,7 +33,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
   assettreeitem.cpp
   assettreemodel.cpp
-  editorwindow.cpp
+  profileedit.cpp
   filesystemaccess.cpp
   launcherwindow.cpp
 )
