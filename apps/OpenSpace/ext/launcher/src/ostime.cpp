@@ -1,8 +1,9 @@
+#include <openspace/scene/profile.h>
 #include "ostime.h"
 #include "./ui_ostime.h"
 #include <algorithm>
 
-ostime::ostime(OSTime& imported, QWidget *parent)
+ostime::ostime(openspace::Profile::Time& imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::time)
     , _imported(imported)
@@ -12,7 +13,7 @@ ostime::ostime(OSTime& imported, QWidget *parent)
 
     QStringList types { "Absolute", "Relative" };
     ui->combo_type->addItems(types);
-    _initializedAsAbsolute = (_data.type == OSTime::Type::Absolute);
+    _initializedAsAbsolute = (_data.type == openspace::Profile::Time::Type::Absolute);
 
     enableAccordingToType(static_cast<int>(_data.type));
 
@@ -23,11 +24,11 @@ ostime::ostime(OSTime& imported, QWidget *parent)
 }
 
 void ostime::enableAccordingToType(int idx) {
-    OSTime::Type comboIdx = static_cast<OSTime::Type>(idx);
-    bool setFormatForAbsolute = (comboIdx == OSTime::Type::Absolute);
+    openspace::Profile::Time::Type comboIdx = static_cast<openspace::Profile::Time::Type>(idx);
+    bool setFormatForAbsolute = (comboIdx == openspace::Profile::Time::Type::Absolute);
     enableFormatForAbsolute(setFormatForAbsolute);
     ui->combo_type->setCurrentIndex(idx);
-    if (comboIdx == OSTime::Type::Relative) {
+    if (comboIdx == openspace::Profile::Time::Type::Relative) {
         ui->label_relative->setText("<font color='black'>Relative Time:</font>");
         if (_initializedAsAbsolute) {
             ui->line_relative->setText("");
@@ -64,16 +65,16 @@ void ostime::cancel() {
 }
 
 void ostime::approved() {
-    if (ui->combo_type->currentIndex() == static_cast<int>(OSTime::Type::Relative)) {
+    if (ui->combo_type->currentIndex() == static_cast<int>(openspace::Profile::Time::Type::Relative)) {
         if (ui->line_relative->text().length() == 0) {
             ui->label_relative->setText("<font color='red'>Relative Time:</font>");
             return;
         }
-        _imported.type = OSTime::Type::Relative;
+        _imported.type = openspace::Profile::Time::Type::Relative;
         _imported.time = ui->line_relative->text().toUtf8().constData();
     }
     else {
-        _imported.type = OSTime::Type::Absolute;
+        _imported.type = openspace::Profile::Time::Type::Absolute;
         QString res = ui->dateEdit->date().toString("yyyy-MM-dd") + "T" + ui->timeEdit->time().toString();
         _imported.time = res.toUtf8().constData();
     }

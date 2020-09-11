@@ -1,8 +1,9 @@
+#include <openspace/scene/profile.h>
 #include "osmodules.h"
 #include "./ui_osmodules.h"
 #include <qevent.h>
 
-osmodules::osmodules(std::vector<Module>& imported, QWidget *parent)
+osmodules::osmodules(std::vector<openspace::Profile::Module>& imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::osmodules)
     , _imported(imported)
@@ -25,7 +26,7 @@ osmodules::osmodules(std::vector<Module>& imported, QWidget *parent)
     transitionFromEditMode();
 }
 
-QString osmodules::createOneLineSummary(Module m) {
+QString osmodules::createOneLineSummary(openspace::Profile::Module m) {
     QString summary = QString(m.name.c_str());
     bool hasCommandForLoaded = (m.loadedInstruction.length() > 0);
     bool hasCommandForNotLoaded = (m.notLoadedInstruction.length() > 0);
@@ -49,7 +50,7 @@ void osmodules::listItemSelected(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    Module& m = _data[index];
+    openspace::Profile::Module& m = _data[index];
     ui->line_module->setText(QString(m.name.c_str()));
     ui->line_loaded->setText(QString(m.loadedInstruction.c_str()));
     ui->line_notLoaded->setText(QString(m.notLoadedInstruction.c_str()));

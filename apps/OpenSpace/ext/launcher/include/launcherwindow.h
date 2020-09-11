@@ -2,6 +2,7 @@
 #define LAUNCHERWINDOW_H
 
 #include <QMainWindow>
+#include <QString>
 #include "profileedit.h"
 #include "filesystemaccess.h"
 
@@ -19,7 +20,7 @@ public slots:
     void simulateData();
 
 public:
-    LauncherWindow(QWidget *parent = nullptr);
+    LauncherWindow(std::string basePath, QWidget *parent = nullptr);
     ~LauncherWindow();
     void receiveAssets(std::vector<std::string> results);
 
@@ -43,18 +44,19 @@ private:
     filesystemAccess _fileAccess_profiles;
     filesystemAccess _fileAccess_winConfigs;
 
-    Meta _metaData;
-    std::vector<Module> _moduleData;
-    std::vector<Asset> _assetData;
+    openspace::Profile::Meta _metaData;
+    std::vector<openspace::Profile::Module> _moduleData;
+    std::vector<openspace::Profile::Asset> _assetData;
     filesystemAccess _filesystemAccess;
     std::string _reportAssetsInFilesystem;
-    std::vector<Property> _propsData;
-    std::vector<Keybinding> _keybindingsData;
+    std::vector<openspace::Profile::Property> _propsData;
+    std::vector<openspace::Profile::Keybinding> _keybindingsData;
     DeltaTimes _deltaTimesData;
-    OSTime _timeData;
+    openspace::Profile::Time _timeData;
     Camera _cameraData;
     std::vector<std::string> _markNodesData;
     std::string _addedScriptsData;
     ProfileBlock _pData;
+    QString _basePath;
 };
 #endif // LAUNCHERWINDOW_H

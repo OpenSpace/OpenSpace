@@ -1,8 +1,9 @@
+#include <openspace/scene/profile.h>
 #include "properties.h"
 #include "./ui_properties.h"
 #include <qevent.h>
 
-properties::properties(std::vector<Property>& imported, QWidget *parent)
+properties::properties(std::vector<openspace::Profile::Property>& imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::properties)
     , _imported(imported)
@@ -27,12 +28,12 @@ properties::properties(std::vector<Property>& imported, QWidget *parent)
     transitionFromEditMode();
 }
 
-QString properties::createOneLineSummary(Property p) {
+QString properties::createOneLineSummary(openspace::Profile::Property p) {
     QString summary = QString(p.name.c_str());
     summary += " = ";
     summary += QString(p.value.c_str());
     summary += " (SetPropertyValue";
-    if (p.setType == Property::SetType::SetPropertyValueSingle) {
+    if (p.setType == openspace::Profile::Property::SetType::SetPropertyValueSingle) {
         summary += "Single";
     }
     summary += ")";
@@ -43,8 +44,8 @@ void properties::listItemSelected(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    Property& p = _data[index];
-    if (p.setType == Property::SetType::SetPropertyValue) {
+    openspace::Profile::Property& p = _data[index];
+    if (p.setType == openspace::Profile::Property::SetType::SetPropertyValue) {
         ui->combo_command->setCurrentIndex(0);
     }
     else {
@@ -57,7 +58,7 @@ void properties::listItemSelected(void) {
 
 void properties::listItemAdded(void) {
     //Add new line at bottom of props list
-    _data.push_back({Property::SetType::SetPropertyValue, "", ""});
+    _data.push_back({openspace::Profile::Property::SetType::SetPropertyValue, "", ""});
     _propListItems.push_back(new QListWidgetItem("  (Enter details below and click 'Save')"));
     ui->list->addItem(_propListItems.back());
 
@@ -80,10 +81,10 @@ void properties::listItemSave(void) {
     int index = ui->list->row(item);
 
     if (ui->combo_command->currentIndex() == 0) {
-        _data[index].setType = Property::SetType::SetPropertyValue;
+        _data[index].setType = openspace::Profile::Property::SetType::SetPropertyValue;
     }
     else {
-        _data[index].setType = Property::SetType::SetPropertyValueSingle;
+        _data[index].setType = openspace::Profile::Property::SetType::SetPropertyValueSingle;
     }
     _data[index].name = ui->line_property->text().toUtf8().constData();
     _data[index].value = ui->line_value->text().toUtf8().constData();

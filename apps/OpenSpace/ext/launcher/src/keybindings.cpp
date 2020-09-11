@@ -1,9 +1,11 @@
+#include <openspace/scene/profile.h>
+#include <openspace/util/keys.h>
 #include "keybindings.h"
 #include "./ui_keybindings.h"
 #include <qevent.h>
 #include <algorithm>
 
-keybindings::keybindings(std::vector<Keybinding>& imported, QWidget *parent)
+keybindings::keybindings(std::vector<openspace::Profile::Keybinding>& imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::keybindings)
     , _imported(imported)
@@ -18,26 +20,16 @@ keybindings::keybindings(std::vector<Keybinding>& imported, QWidget *parent)
 
     QStringList comboModKeysStringList;
     int modIdx = 0;
-//    for (mit = keyModifierNames.begin(); mit < keyModifierNames.end(); mit++) {
-    for (auto const& m : keyModifierNames) {
+    for (auto const& m : openspace::KeyModifierNames) {
         comboModKeysStringList += QString(m.second.c_str());
         _mapModKeyComboBoxIndexToKeyValue.push_back(modIdx++);
-
-    /*for (int i = static_cast<int>(KeyModifier::NoModifier);
-         i <= static_cast<int>(KeyModifier::Super);
-         ++i)
-    {
-        if (keyModifierNames.find(i) != keyModifierNames.end()) {
-            comboModKeysStringList += QString(keyModifierNames.at(i).c_str());
-            _mapModKeyComboBoxIndexToKeyValue.push_back(i);
-        }*/
     }
     ui->combo_keyMod->addItems(comboModKeysStringList);
 
     QStringList comboKeysStringList;
-    for (int i = 0; i < static_cast<int>(Key::Last); ++i) {
-        if (keyNames.find(i) != keyNames.end()) {
-            comboKeysStringList += QString(keyNames.at(i).c_str());
+    for (int i = 0; i < static_cast<int>(openspace::Key::Last); ++i) {
+        if (openspace::KeyNames.find(i) != openspace::KeyNames.end()) {
+            comboKeysStringList += QString(openspace::KeyNames.at(i).c_str());
             //Create map to relate key combo box to actual integer value defined in Key
             _mapKeyComboBoxIndexToKeyValue.push_back(i);
         }
@@ -54,16 +46,16 @@ keybindings::keybindings(std::vector<Keybinding>& imported, QWidget *parent)
     transitionFromEditMode();
 }
 
-QString keybindings::createOneLineSummary(Keybinding k) {
+QString keybindings::createOneLineSummary(openspace::Profile::Keybinding k) {
     std::string summary;
 
     int keymod = static_cast<int>(k.key.modifier);
-    if (keymod != static_cast<int>(KeyModifier::NoModifier)) {
-        summary += keyModifierNames.at(keymod) + "+";
+    if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
+        summary += openspace::KeyModifierNames.at(keymod) + "+";
     }
     int keyname = static_cast<int>(k.key.key);
 
-    summary += keyNames.at(keyname) + " : ";
+    summary += openspace::KeyNames.at(keyname) + " : ";
     summary += truncateString(k.name) + " (";
     summary += truncateString(k.documentation) + ") @ ";
     summary += truncateString(k.guiPath) + " ";
@@ -103,7 +95,7 @@ void keybindings::listItemSelected(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    Keybinding& k = _data[index];
+    openspace::Profile::Keybinding& k = _data[index];
     ui->combo_keyMod->setCurrentIndex(
         indexInKeyMapping(_mapModKeyComboBoxIndexToKeyValue,
         static_cast<int>(k.key.modifier)));
@@ -133,7 +125,7 @@ int keybindings::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
 void keybindings::listItemAdded(void) {
     //Add new line at bottom of props list
     _data.push_back({
-        {Key::Unknown, KeyModifier::NoModifier},
+        {openspace::Key::Unknown, openspace::KeyModifier::NoModifier},
         "",
         "",
         "",
@@ -168,9 +160,9 @@ void keybindings::listItemSave(void) {
     int index = ui->list->row(item);
 
     int keyModIdx = _mapModKeyComboBoxIndexToKeyValue.at(ui->combo_keyMod->currentIndex());
-    _data[index].key.modifier = static_cast<KeyModifier>(keyModIdx);
+    _data[index].key.modifier = static_cast<openspace::KeyModifier>(keyModIdx);
     int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(ui->combo_key->currentIndex());
-    _data[index].key.key = static_cast<Key>(keyIdx);
+    _data[index].key.key = static_cast<openspace::Key>(keyIdx);
     _data[index].name = ui->line_name->text().toUtf8().constData();
     _data[index].documentation = ui->line_documentation->text().toUtf8().constData();
     _data[index].guiPath = ui->line_guiPath->text().toUtf8().constData();
@@ -213,7 +205,7 @@ void keybindings::listItemCancelSave(void) {
     if (_editModeNewItem) {
         if(_data.back().name.length() == 0 ||
            _data.back().script.length() == 0 ||
-           _data.back().key.key == Key::Unknown)
+           _data.back().key.key == openspace::Key::Unknown)
         {
             listItemRemove();
         }

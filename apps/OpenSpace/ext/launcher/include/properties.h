@@ -11,16 +11,6 @@ class properties;
 }
 QT_END_NAMESPACE
 
-struct Property {
-    enum class SetType {
-        SetPropertyValue,
-        SetPropertyValueSingle
-    };
-    SetType setType;
-    std::string name;
-    std::string value;
-};
-
 class properties : public QDialog
 {
     Q_OBJECT
@@ -35,22 +25,22 @@ public slots:
     void parseSelections();
 
 public:
-    explicit properties(std::vector<Property>& imported, QWidget *parent = nullptr);
+    explicit properties(std::vector<openspace::Profile::Property>& imported, QWidget *parent = nullptr);
     ~properties();
 
 protected:
     //void resizeEvent(QResizeEvent* event);
 
 private:
-    QString createOneLineSummary(Property p);
+    QString createOneLineSummary(openspace::Profile::Property p);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     bool areRequiredFormsFilled();
 
     Ui::properties *ui;
     QWidget* _parent;
-    std::vector<Property>& _imported;
-    std::vector<Property> _data;
+    std::vector<openspace::Profile::Property>& _imported;
+    std::vector<openspace::Profile::Property> _data;
     std::vector<QListWidgetItem*> _propListItems;
     bool _editModeNewItem = false;
 };

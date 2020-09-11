@@ -1,3 +1,4 @@
+#include <openspace/scene/profile.h>
 #include "camera.h"
 #include "./ui_camera.h"
 

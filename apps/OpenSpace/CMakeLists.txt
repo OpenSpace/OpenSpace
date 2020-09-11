@@ -169,5 +169,5 @@ if (OPENSPACE_NVTOOLS_ENABLED)
 endif ()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
-target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
+target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher/include)
 target_link_libraries(OpenSpace profileGUIw)

@@ -11,12 +11,6 @@ class osmodules;
 }
 QT_END_NAMESPACE
 
-struct Module {
-    std::string name;
-    std::string loadedInstruction;
-    std::string notLoadedInstruction;
-};
-
 class osmodules : public QDialog
 {
     Q_OBJECT
@@ -31,21 +25,21 @@ public slots:
     void parseSelections();
 
 public:
-    explicit osmodules(std::vector<Module>& imported, QWidget *parent = nullptr);
+    explicit osmodules(std::vector<openspace::Profile::Module>& imported, QWidget *parent = nullptr);
     ~osmodules();
 
 protected:
     //void resizeEvent(QResizeEvent* event);
 
 private:
-    QString createOneLineSummary(Module m);
+    QString createOneLineSummary(openspace::Profile::Module m);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
 
     Ui::osmodules *ui;
     QWidget* _parent;
-    std::vector<Module>& _imported;
-    std::vector<Module> _data;
+    std::vector<openspace::Profile::Module>& _imported;
+    std::vector<openspace::Profile::Module> _data;
     std::vector<QListWidgetItem*> _modulesListItems;
     bool _editModeNewItem = false;
 };

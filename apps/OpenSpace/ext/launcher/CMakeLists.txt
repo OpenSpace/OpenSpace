@@ -14,7 +14,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 target_include_directories(
   OpenSpace PRIVATE
-  include
   ${Qt5_DIR}/../../../include
   ${Qt5_DIR}/../../../include/QtWidgets
   ${Qt5_DIR}/../../../include/QtCore
@@ -71,6 +70,7 @@ set(SOURCE_FILES
 
 add_library(profileGUIw STATIC ${HEADER_FILES} ${SOURCE_FILES})
 target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/include)
+target_include_directories(profileGUIw PRIVATE include)
 target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/ext/ghoul/include)
 target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/ext/ghoul/ext/glm)
 target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/ext/ghoul/ext/cppformat/include)

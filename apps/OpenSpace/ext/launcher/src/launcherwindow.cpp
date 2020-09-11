@@ -1,3 +1,4 @@
+#include <openspace/scene/profile.h>
 #include "launcherwindow.h"
 #include "profileedit.h"
 #include "./ui_launcherwindow.h"
@@ -6,13 +7,14 @@
 #include <sstream>
 
 
-LauncherWindow::LauncherWindow(QWidget *parent)
+LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::LauncherWindow)
     , _fileAccess_profiles(".profile", {"./"}, true, false)
     , _fileAccess_winConfigs(".xml", {"./"}, true, false)
     , _filesystemAccess(".asset", {"scene", "global", "customization", "examples"},
                         true, true)
+    , _basePath(QString::fromUtf8(basePath.c_str()))
     , _pData({_metaData,
              _moduleData,
              _assetData,
@@ -26,7 +28,8 @@ LauncherWindow::LauncherWindow(QWidget *parent)
              _addedScriptsData})
 {
     ui->setupUi(this);
-    QPixmap pix("../profileGUI/openspace-horizontal-color-transparent.png");
+    QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
+    QPixmap pix(logoPath);
     ui->logolabel->setPixmap(pix.scaled(400, 120, Qt::KeepAspectRatio));
     connect(ui->newButton, SIGNAL(released()), this, SLOT(openWindow_new()));
     connect(ui->editButton, SIGNAL(released()), this, SLOT(openWindow_edit()));
@@ -37,7 +40,7 @@ LauncherWindow::LauncherWindow(QWidget *parent)
 
 void LauncherWindow::populateProfilesList() {
     std::string reportProfiles = _fileAccess_profiles.useQtFileSystemModelToTraverseDir(
-        "/home/gene/Desktop/OpenSpace/data/profiles");
+        _basePath + "/data/profiles");
     std::stringstream instream(reportProfiles);
     std::string iline;
     QStringList profilesListLine;
@@ -49,7 +52,7 @@ void LauncherWindow::populateProfilesList() {
 
 void LauncherWindow::populateWindowConfigsList() {
     std::string reportConfigs = _fileAccess_winConfigs.useQtFileSystemModelToTraverseDir(
-        "/home/gene/Desktop/OpenSpace/config");
+        _basePath + "/config");
     std::stringstream instream(reportConfigs);
     std::string iline;
     QStringList windowConfigsListLine;
@@ -66,7 +69,11 @@ void LauncherWindow::openWindow_new() {
 }
 
 void LauncherWindow::openWindow_edit() {
-    //simulateData();
+    //std::string editProfilePath = _basePath.toUtf8().constData();
+    //editProfilePath += "/data/profiles/";
+    //editProfilePath += ui->comboBoxProfiles->currentText().toUtf8().constData();
+    //editProfilePath += ".profile";
+    //myEditorWindow = new editorwindow(_basePath + "/data/assets", editProfilePath);
     myEditorWindow = new ProfileEdit(_pData);
 
     int selectedProfileIdx = ui->comboBoxProfiles->currentIndex();
@@ -172,62 +179,62 @@ void LauncherWindow::initialize_assets() {
 void LauncherWindow::initialize_properties() {
     _propsData = {
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance",
             "20.0"
         },
         {
-            Property::SetType::SetPropertyValue,
+            openspace::Profile::Property::SetType::SetPropertyValue,
             "Scene.Pluto.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "Scene.Charon.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "Scene.PlutoBarycenterTrail.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance",
             "20.0"
         },
         {
-            Property::SetType::SetPropertyValue,
+            openspace::Profile::Property::SetType::SetPropertyValue,
             "Scene.Pluto.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "Scene.Styx.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "Scene.PlutoBarycenterTrail.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance",
             "20.0"
         },
         {
-            Property::SetType::SetPropertyValue,
+            openspace::Profile::Property::SetType::SetPropertyValue,
             "Scene.Pluto.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "Scene.StyxRenderableTrail.Renderable.Enabled",
             "false"
         },
         {
-            Property::SetType::SetPropertyValueSingle,
+            openspace::Profile::Property::SetType::SetPropertyValueSingle,
             "Scene.PlutoBarycenterTrail.Renderable.Enabled",
             "false"
         },
@@ -237,7 +244,7 @@ void LauncherWindow::initialize_properties() {
 void LauncherWindow::initialize_keybindings() {
     _keybindingsData = {
         {
-            {Key::Equal, KeyModifier::Control},
+            {openspace::Key::Equal, openspace::KeyModifier::Control},
             "Documentation for ctrl+=",
             "Name for the keybinding",
             "/Path/to/keys",
@@ -245,7 +252,7 @@ void LauncherWindow::initialize_keybindings() {
             "openspace.keybindings.local.variable.1"
         },
         {
-            {Key::KeypadAdd, KeyModifier::Shift},
+            {openspace::Key::KeypadAdd, openspace::KeyModifier::Shift},
             "Documentation for shift++",
             "Name for the keybinding",
             "/Path/to/keys",
@@ -253,7 +260,7 @@ void LauncherWindow::initialize_keybindings() {
             "openspace.keybindings.local.variable.2"
         },
         {
-            {Key::Keypad3, KeyModifier::NoModifier},
+            {openspace::Key::Keypad3, openspace::KeyModifier::NoModifier},
             "Documentation for '3'",
             "Name for the keybinding",
             "/Path/to/keys",
@@ -272,7 +279,7 @@ void LauncherWindow::initialize_deltaTimes() {
 }
 
 void LauncherWindow::initialize_time() {
-    _timeData.type = OSTime::Type::Absolute;
+    _timeData.type = openspace::Profile::Time::Type::Absolute;
     _timeData.time = "2011-04-17T21:23:59";
 }
 

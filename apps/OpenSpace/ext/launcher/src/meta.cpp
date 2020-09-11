@@ -1,7 +1,8 @@
+#include <openspace/scene/profile.h>
 #include "meta.h"
 #include "./ui_meta.h"
 
-meta::meta(Meta& imported, QWidget *parent)
+meta::meta(openspace::Profile::Meta& imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::meta)
     , _imported(imported)

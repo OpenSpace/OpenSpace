@@ -10,16 +10,6 @@ class time;
 }
 QT_END_NAMESPACE
 
-struct OSTime {
-    enum class Type {
-        Absolute,
-        Relative
-    };
-
-    Type type;
-    std::string time;
-};
-
 class ostime : public QDialog
 {
     Q_OBJECT
@@ -30,14 +20,14 @@ public slots:
     void approved();
 
 public:
-    explicit ostime(OSTime& imported, QWidget *parent = nullptr);
+    explicit ostime(openspace::Profile::Time& imported, QWidget *parent = nullptr);
     ~ostime();
 private:
     void enableFormatForAbsolute(bool enableAbs);
     Ui::time *ui;
     QWidget* _parent;
-    OSTime& _imported;
-    OSTime _data;
+    openspace::Profile::Time& _imported;
+    openspace::Profile::Time _data;
     bool _initializedAsAbsolute = true;
 };
 

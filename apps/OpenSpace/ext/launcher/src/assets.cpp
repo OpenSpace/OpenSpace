@@ -5,8 +5,9 @@
 #include <QScreen>
 #include <sstream>
 #include <string>
+#include <openspace/scene/profile.h>
 
-assets::assets(std::vector<Asset>& imported, std::string& reportAssets, QWidget *parent)
+assets::assets(std::vector<openspace::Profile::Asset>& imported, std::string& reportAssets, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::assets)
     , _data(imported)
@@ -32,7 +33,7 @@ assets::assets(std::vector<Asset>& imported, std::string& reportAssets, QWidget 
 }
 
 void assets::compareFilesystemWithProfileAssets() {
-    for (Asset a : _data) {
+    for (openspace::Profile::Asset a : _data) {
         findPathMatch(a.path, a.name);
     }
 }
@@ -132,7 +133,7 @@ std::string assets::createTextSummary() {
 void assets::parseSelections() {
     _data.clear();
     for (std::string selected : _assetTreeModel.selectedAssets()) {
-        Asset a;
+        openspace::Profile::Asset a;
         size_t slash = selected.find_last_of('/');
         if (slash == std::string::npos) {
             a.path = "";

@@ -1,3 +1,4 @@
+#include <openspace/scene/profile.h>
 #include "profileedit.h"
 #include "./ui_profileedit.h"
 #include "filesystemaccess.h"
@@ -81,7 +82,7 @@ void ProfileEdit::openModules() {
 
 QString ProfileEdit::summarizeText_modules() {
     QString results = QString("<Configured with %1 modules>\n").arg(_pData._moduleData.size());
-    for (Module m : _pData._moduleData) {
+    for (openspace::Profile::Module m : _pData._moduleData) {
         results += "    " + QString(m.name.c_str());
         if (m.loadedInstruction.size() > 0 && m.notLoadedInstruction.size() > 0) {
             results += "    (has commands for both loaded & non-loaded conditions)";
@@ -105,7 +106,7 @@ void ProfileEdit::openProperties() {
 
 QString ProfileEdit::summarizeText_properties() {
     QString results = QString("<Configured with %1 properties>\n").arg(_pData._propsData.size());
-    for (Property p : _pData._propsData) {
+    for (openspace::Profile::Property p : _pData._propsData) {
         results += "    " + QString(p.name.c_str()) + " = ";
         results += QString(p.value.c_str()) + "\n";
     }
@@ -121,13 +122,13 @@ void ProfileEdit::openKeybindings() {
 QString ProfileEdit::summarizeText_keybindings() {
     QString results =
         QString("<Configured with %1 keybindings>\n").arg(_pData._keybindingsData.size());
-    for (Keybinding k : _pData._keybindingsData) {
+    for (openspace::Profile::Keybinding k : _pData._keybindingsData) {
         results += "    " + QString(k.name.c_str()) + " (";
         int keymod = static_cast<int>(k.key.modifier);
-        if (keymod != static_cast<int>(KeyModifier::NoModifier)) {
-            results += QString(keyModifierNames.at(keymod).c_str()) + "+";
+        if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
+            results += QString(openspace::KeyModifierNames.at(keymod).c_str()) + "+";
         }
-        results += QString(keyNames.at(static_cast<int>(k.key.key)).c_str());
+        results += QString(openspace::KeyNames.at(static_cast<int>(k.key.key)).c_str());
         results += ")\n";
     }
     return results;
@@ -141,7 +142,7 @@ void ProfileEdit::openAssets() {
 
 QString ProfileEdit::summarizeText_assets() {
     QString results = QString("<Configured with %1 assets>\n").arg(_pData._assetData.size());
-    for (Asset a : _pData._assetData) {
+    for (openspace::Profile::Asset a : _pData._assetData) {
         results += "    " + QString(a.path.c_str()) + "/";
         results += QString(a.name.c_str()) + "\n";
     }
@@ -156,10 +157,10 @@ void ProfileEdit::openTime() {
 
 QString ProfileEdit::summarizeText_time() {
     QString results;
-    if (_pData._timeData.type == OSTime::Type::Absolute) {
+    if (_pData._timeData.type == openspace::Profile::Time::Type::Absolute) {
         results = "Absolute time: ";
     }
-    else if (_pData._timeData.type == OSTime::Type::Relative) {
+    else if (_pData._timeData.type == openspace::Profile::Time::Type::Relative) {
         results = "Relative time: ";
     }
     results += QString(_pData._timeData.time.c_str());

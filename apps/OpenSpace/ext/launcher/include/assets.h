@@ -6,17 +6,13 @@
 #include <QListWidgetItem>
 #include "assettreemodel.h"
 #include "filesystemaccess.h"
+#include <openspace/scene/profile.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class assets;
 }
 QT_END_NAMESPACE
-
-struct Asset {
-    std::string path;
-    std::string name;
-};
 
 class assets : public QDialog
 {
@@ -27,7 +23,7 @@ public slots:
     void parseSelections();
 
 public:
-    explicit assets(std::vector<Asset>& imported, std::string& reportAssets,
+    explicit assets(std::vector<openspace::Profile::Asset>& imported, std::string& reportAssets,
         QWidget *parent = nullptr);
     ~assets();
     std::string createTextSummary();
@@ -43,7 +39,7 @@ private:
         std::string dirname, std::string filename);
     Ui::assets *ui;
     QWidget* _parent;
-    std::vector<Asset>& _data;
+    std::vector<openspace::Profile::Asset>& _data;
     assetTreeModel _assetTreeModel;
 };
 
