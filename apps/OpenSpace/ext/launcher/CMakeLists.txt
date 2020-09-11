@@ -32,6 +32,7 @@ set(HEADER_FILES
   include/launcherwindow.h
   include/marknodes.h
   include/meta.h
+  include/osmodules.h
   include/profileedit.h
   include/ui_addedscripts.h
   include/ui_assets.h
@@ -41,6 +42,7 @@ set(HEADER_FILES
   include/ui_launcherwindow.h
   include/ui_marknodes.h
   include/ui_meta.h
+  include/ui_osmodules.h
   include/ui_profileedit.h
 )
 
@@ -56,6 +58,7 @@ set(SOURCE_FILES
   src/launcherwindow.cpp
   src/marknodes.cpp
   src/meta.cpp
+  src/osmodules.cpp
   src/profileedit.cpp
 )
 
