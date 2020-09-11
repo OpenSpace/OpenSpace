@@ -24,7 +24,7 @@ local vrt_folders = {
         -- We recommend using this folder for CTX
         openspace.absPath('${BASE}/../OpenSpaceData/Mars/CTX'),
         -- if not and you have a custom path for CTX layers, enter it below
-        '',
+        'D:/Pessoal/Work/OpenSpaceData/Mars-Gale-Crater',
 
         -- Our provided HiRISE layer
         openspace.absPath('${ASSETS}/scene/solarsystem/planets/mars/map_service_configs/ESRI/HiRISE'),

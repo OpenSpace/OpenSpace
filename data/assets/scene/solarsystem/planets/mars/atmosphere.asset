@@ -20,6 +20,7 @@ local Atmosphere = {
             MieScatteringExtinctionPropCoefficient = 0.23862,
             -- Advanced Atmosphere Mode Enabled
             AdvancedMode = true,
+            UseOnlyAdvancedMie = true,
             Rayleigh = {
                 Coefficients = {
                     -- Wavelengths are given in 10^-9m
@@ -58,8 +59,8 @@ local Atmosphere = {
                     Extinction = { 53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979 }
                 },
                 -- Mie Height scale (atmosphere thickness for constant density) in Km
-                --H_M = 11.1,
-                H_M = 42.01,
+                H_M = 11.1,
+                --H_M = 42.01,
                 -- Mie Phase Function Value (G e [-1.0, 1.0]. 
                 -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
                 G = 0.85,
@@ -76,7 +77,8 @@ local Atmosphere = {
                 Turbidity = 1.6,
                 -- 2 to 6
                 JungeExponent = 4.0,
-                G1    = {0.889, 0.53, 0.71},
+                --G1    = {0.889, 0.53, 0.71},
+                G1    = {0.03, 0.4, 0.67},
                 G2    = {0.094, 0.094, 0.094},
                 Alpha = {0.743, 0.743, 0.743}
             },

@@ -654,6 +654,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _enableAdvancedModeP = true;
         }
 
+        if (atmosphereDictionary.hasKey(UseOnlyAdvancedMieInfo.identifier)) {
+            _useOnlyAdvancedMieP = true;
+        }
+
         // ---- Rayleigh Scattering -----
         ghoul::Dictionary rayleighDictionary;
         success = atmosphereDictionary.getValue(keyRayleigh, rayleighDictionary);

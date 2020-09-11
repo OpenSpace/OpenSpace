@@ -33,7 +33,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-//#define __PERFORMANCE_MEASUREMENTS__
+#define __PERFORMANCE_MEASUREMENTS__
 
 #ifdef __PERFORMANCE_MEASUREMENTS__
 //JCC: Temp property to save the fps to a file

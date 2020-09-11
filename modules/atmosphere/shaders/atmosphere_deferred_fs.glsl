@@ -538,7 +538,7 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
                           vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
     // JCC: Change this function to a impostor texture with gaussian decay color weighted
     // by the sunRadiance, transmittance and irradianceColor (11/03/2017)                          
-    float sunFinalColor = smoothstep(cos(M_PI / 500.0f), cos(M_PI / 900.0f), dot(v, s)) * 
+    float sunFinalColor = smoothstep(cos(M_PI / 900.0f), cos(M_PI / 900.0f), dot(v, s)) * 
                           sunRadiance * (1.0f - irradianceFactor);
 
     return transmittance * sunFinalColor;
