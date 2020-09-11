@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 target_include_directories(
   OpenSpace PRIVATE
+  include
   ${Qt5_DIR}/../../../include
   ${Qt5_DIR}/../../../include/QtWidgets
   ${Qt5_DIR}/../../../include/QtCore
@@ -35,6 +36,7 @@ set(HEADER_FILES
   include/osmodules.h
   include/ostime.h
   include/profileedit.h
+  include/properties.h
   include/ui_addedscripts.h
   include/ui_assets.h
   include/ui_camera.h
@@ -46,6 +48,7 @@ set(HEADER_FILES
   include/ui_osmodules.h
   include/ui_ostime.h
   include/ui_profileedit.h
+  include/ui_properties.h
 )
 
 set(SOURCE_FILES
@@ -63,6 +66,7 @@ set(SOURCE_FILES
   src/osmodules.cpp
   src/ostime.cpp
   src/profileedit.cpp
+  src/properties.cpp
 )
 
 add_library(profileGUIw STATIC ${HEADER_FILES} ${SOURCE_FILES})
