@@ -9,10 +9,10 @@
 #include "keybindings.h"
 #include "assets.h"
 #include "ostime.h"
-#include "addedScripts.h"
-#include "deltaTimes.h"
+#include "addedscripts.h"
+#include "deltatimes.h"
 #include "camera.h"
-#include "markNodes.h"
+#include "marknodes.h"
 #include "ostime.h"
 
 QT_BEGIN_NAMESPACE

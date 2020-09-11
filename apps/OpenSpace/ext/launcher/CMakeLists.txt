@@ -21,21 +21,24 @@ target_include_directories(
 )
 
 set(HEADER_FILES
+  include/addedscripts.h
   include/assettreeitem.h
   include/assettreemodel.h
-  include/profileedit.h
-  include/ui_editorwindow.h
   include/filesystemaccess.h
   include/launcherwindow.h
+  include/profileedit.h
+  include/ui/addedscripts.h
+  include/ui_editorwindow.h
   include/ui_launcherwindow.h
 )
 
 set(SOURCE_FILES
+  src/addedscripts.cpp
   src/assettreeitem.cpp
   src/assettreemodel.cpp
-  src/profileedit.cpp
   src/filesystemaccess.cpp
   src/launcherwindow.cpp
+  src/profileedit.cpp
 )
 
 add_library(profileGUIw STATIC ${HEADER_FILES} ${SOURCE_FILES})
