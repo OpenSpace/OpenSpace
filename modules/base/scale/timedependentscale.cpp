@@ -108,7 +108,7 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
     addProperty(_clampToPositive);
 }
 
-double TimeDependentScale::scaleValue(const UpdateData& data) const {
+glm::dvec3 TimeDependentScale::scaleValue(const UpdateData& data) const {
     if (_cachedReferenceDirty) {
         _cachedReference = Time::convertTime(_referenceDate);
         _cachedReferenceDirty = false;
@@ -118,10 +118,10 @@ double TimeDependentScale::scaleValue(const UpdateData& data) const {
     const double dt = now - _cachedReference;
 
     if (_clampToPositive) {
-        return std::max(0.0, dt) * _speed;
+        return glm::dvec3(std::max(0.0, dt) * _speed);
     }
     else {
-        return dt * _speed;
+        return glm::dvec3(dt * _speed);
     }
 }
 

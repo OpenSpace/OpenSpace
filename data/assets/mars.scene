@@ -1,0 +1,61 @@
+asset.require('./base')
+local sceneHelper = asset.require('util/scene_helper')
+
+local perseveranceAsset = asset.require('scene/solarsystem/missions/perseverance/perseverance')
+local perseveranceShortcuts = asset.require('scene/solarsystem/missions/perseverance/shortcuts')
+
+local insightAsset = asset.require('scene/solarsystem/missions/insight/edl')
+local insightShortcuts = asset.require('scene/solarsystem/missions/insight/shortcuts')
+
+local insightEDLShortcuts = sceneHelper.extractShortcuts({"Insight Height Offset", 
+  "Enable HiRISE",
+  "Insight EDL Time",
+  "Insight EDL NavigationState"},
+  insightShortcuts.Shortcuts)
+
+local insightDisableShortcuts = sceneHelper.extractShortcuts({
+  "Default Height Offset", 
+  "Disable HiRISE"},
+  insightShortcuts.Shortcuts)
+
+local PerseverenceLandedShortcuts = sceneHelper.extractShortcuts({
+  "Perseverance Height Offset", 
+  "Perseverance landed time", 
+  "Enable HiRISE"},
+  perseveranceShortcuts.Shortcuts)
+
+
+local Keybindings = {
+  sceneHelper.createKeyBindFromShortcuts("i",
+    insightEDLShortcuts,
+    "/Missions/Insight",
+    "Set and goto Insight Landing",
+    "Setup scene for insight EDL"
+  ),
+  sceneHelper.createKeyBindFromShortcuts("SHIFT+i",
+    insightDisableShortcuts,
+    "/Missions/Insight",
+    "Unset Insight Landing",
+    "Disable Mars layer settings used for insight EDL"
+  ),
+  sceneHelper.createKeyBindFromShortcuts("p",
+    PerseverenceLandedShortcuts,
+    "/Missions/Perseverance"
+  )
+}
+
+asset.onInitialize(function ()
+  local now = openspace.time.currentWallTime()
+  openspace.time.setTime(now)
+
+  sceneHelper.bindKeys(Keybindings)
+
+  openspace.globebrowsing.goToGeo("Mars", 58.5877, 16.1924, 8000000)
+
+  openspace.markInterestingNodes({ "Mars", insightAsset.Insight.Identifier, "Perseverance" })
+end)
+
+asset.onDeinitialize(function ()
+  sceneHelper.unbindKeys(Keybindings)
+  openspace.removeInterestingNodes({ "Mars", insightAsset.Insight.Identifier})
+end)

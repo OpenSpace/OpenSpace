@@ -22,66 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scenelicense.h>
+#ifndef __OPENSPACE_MODULE_BASE___NONUNIFORMSTATICSCALE___H__
+#define __OPENSPACE_MODULE_BASE___NONUNIFORMSTATICSCALE___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/scene/scale.h>
 
-namespace {
-    constexpr const char* LicenseKeyName = "Name";
-    constexpr const char* LicenseKeyAttribution = "Attribution";
-    constexpr const char* LicenseKeyUrl = "URL";
-    constexpr const char* LicenseKeyLicenseText = "License";
-} // namespace
+#include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
 
-documentation::Documentation SceneLicense::Documentation() {
-    using namespace documentation;
+namespace documentation { struct Documentation; }
 
-    return {
-        "License Information",
-        "core_license",
-        {
-            {
-                LicenseKeyName,
-                new StringVerifier,
-                Optional::No,
-                "A short, descriptive name for the license employed for this node."
-            },
-            {
-                LicenseKeyAttribution,
-                new StringVerifier,
-                Optional::No,
-                "The organization that shall be attributed to the licensed content."
-            },
-            {
-                LicenseKeyUrl,
-                new StringVerifier,
-                Optional::Yes,
-                "The URL pointing to the original license."
-            },
-            {
-                LicenseKeyLicenseText,
-                new StringVerifier,
-                Optional::No,
-                "The full text of the license agreements."
-            }
-        }
-    };
-}
+class NonUniformStaticScale : public Scale {
+public:
+    NonUniformStaticScale();
+    NonUniformStaticScale(const ghoul::Dictionary& dictionary);
+    glm::dvec3 scaleValue(const UpdateData& data) const override;
 
-SceneLicense::SceneLicense(const ghoul::Dictionary& dictionary, std::string m)
-    : module(std::move(m))
-{
-    ghoul_assert(!module.empty(), "Module name must not be empty");
+    static documentation::Documentation Documentation();
 
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "SceneLicense");
-
-    name = dictionary.value<std::string>(LicenseKeyName);
-    attribution = dictionary.value<std::string>(LicenseKeyAttribution);
-    dictionary.getValue(LicenseKeyUrl, url);
-    licenseText = dictionary.value<std::string>(LicenseKeyLicenseText);
-}
+private:
+    properties::DVec3Property _scaleValue;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___NONUNIFORMSTATICSCALE___H__

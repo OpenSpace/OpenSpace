@@ -18,3 +18,12 @@ end)
 asset.onDeinitialize(function ()
     openspace.removeInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
 end)
+
+asset.meta = {
+    Name = "Default scene",
+    Version = "1.0",
+    Description = [[ Bla bla, something something asteroids ]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

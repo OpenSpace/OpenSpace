@@ -57,7 +57,6 @@
 #include <sgct/viewport.h>
 #include <stb_image.h>
 #include <Tracy.hpp>
-#include <TracyOpenGL.hpp>
 #include <chrono>
 #include <ctime>
 
@@ -884,15 +883,6 @@ void setSgctDelegateFunctions() {
 
         sgct::ClusterManager::instance().setUseIgnoreSync(enabled);
     };
-    sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
-        ZoneScoped
-
-        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
-            glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glfwSwapBuffers(window->windowHandle());
-        }
-    };
     sgctDelegate.windowHasResized = []() {
         ZoneScoped
 
@@ -924,26 +914,6 @@ void setSgctDelegateFunctions() {
         ZoneScoped
 
         return sgct::Engine::getTime();
-    };
-    sgctDelegate.mousePosition = []() {
-        ZoneScoped
-
-        double xPos;
-        double yPos;
-        glfwGetCursorPos(currentWindow->windowHandle(), &xPos, &yPos);
-        return glm::vec2(xPos, yPos);
-    };
-    sgctDelegate.mouseButtons = [](int maxNumber) {
-        ZoneScoped
-
-        uint32_t result = 0;
-        for (int i = 0; i < maxNumber; ++i) {
-            bool button = (glfwGetMouseButton(currentWindow->windowHandle(), i) != 0);
-            if (button) {
-                result |= (1 << i);
-            }
-        }
-        return result;
     };
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped
@@ -979,12 +949,6 @@ void setSgctDelegateFunctions() {
                     currentWindow->resolution().y
                 );
         }
-    };
-    sgctDelegate.currentWindowResolution = []() {
-        ZoneScoped
-
-        ivec2 dim = currentWindow->finalFBODimensions();
-        return glm::ivec2(dim.x, dim.y);
     };
     sgctDelegate.currentDrawBufferResolution = []() {
         ZoneScoped
@@ -1023,11 +987,6 @@ void setSgctDelegateFunctions() {
         vec2 scale = currentWindow->scale();
         return glm::vec2(scale.x, scale.y);
     };
-    sgctDelegate.currentNumberOfAaSamples = []() {
-        ZoneScoped
-
-        return currentWindow->numberOfAASamples();
-    };
     sgctDelegate.hasGuiWindow = []() {
         ZoneScoped
 
@@ -1048,21 +1007,6 @@ void setSgctDelegateFunctions() {
 
         return Engine::instance().isMaster();
     };
-    sgctDelegate.isUsingSwapGroups = []() {
-        ZoneScoped
-
-        return Window::isUsingSwapGroups();
-    };
-    sgctDelegate.isSwapGroupMaster = []() {
-        ZoneScoped
-
-        return Window::isSwapGroupMaster();
-    };
-    sgctDelegate.viewProjectionMatrix = []() {
-        ZoneScoped
-
-        return currentModelViewProjectionMatrix;
-    };
     sgctDelegate.modelMatrix = []() {
         ZoneScoped
 
@@ -1073,31 +1017,6 @@ void setSgctDelegateFunctions() {
 
         Engine::instance().setNearAndFarClippingPlanes(nearPlane, farPlane);
     };
-    sgctDelegate.setEyeSeparationDistance = [](float distance) {
-        ZoneScoped
-
-        Engine::instance().setEyeSeparation(distance);
-    };
-    //sgctDelegate.viewportPixelCoordinates = []() {
-    //    ZoneScoped
-
-    //    if (!currentWindow|| !currentViewport) {
-    //        return glm::ivec4(0);
-    //    }
-    //    else {
-    //        const int* data = cur  sgct::Engine::instance()->getCurrentViewportPixelCoords();
-    //        return glm::ivec4(data[0], data[2], data[1], data[3]);
-    //    }
-    //};
-    //sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
-    //    ZoneScoped
-
-    //        
-    //    sgct::Engine::instance()->sendMessageToExternalControl(
-    //        message.data(),
-    //        static_cast<int>(message.size())
-    //    );
-    //};
     sgctDelegate.isFisheyeRendering = []() {
         ZoneScoped
 

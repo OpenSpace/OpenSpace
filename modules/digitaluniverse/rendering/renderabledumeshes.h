@@ -128,6 +128,7 @@ private:
     //properties::OptionProperty _blendMode;
     properties::FloatProperty _textMinSize;
     properties::FloatProperty _textMaxSize;
+    properties::FloatProperty _lineWidth;
 
     // DEBUG:
     properties::OptionProperty _renderOption;

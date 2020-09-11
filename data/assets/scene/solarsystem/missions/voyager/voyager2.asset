@@ -64,7 +64,12 @@ local Voyager2 = {
         Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "VG2_SC_BUS",
-            DestinationFrame = "GALACTIC"
+            DestinationFrame = "GALACTIC",
+            TimeFrame = {
+                Type = "TimeFrameInterval",
+                Start = "1977-AUG-20 16:07:06.535",
+                End = "2027-DEC-27"
+            }
         }
     },
     GUI = {

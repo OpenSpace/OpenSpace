@@ -22,35 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCENELICENSE___H__
-#define __OPENSPACE_CORE___SCENELICENSE___H__
+#include <modules/base/scale/nonuniformstaticscale.h>
 
-#include <string>
-#include <vector>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
-namespace ghoul { class Dictionary; }
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+        "Scale",
+        "Scale",
+        "These values are used as scaling factors for the scene graph node that this "
+        "transformation is attached to relative to its parent."
+    };
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+documentation::Documentation NonUniformStaticScale::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Static Scaling",
+        "base_scale_static",
+        {
+            {
+                ScaleInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::No,
+                ScaleInfo.description
+            }
+        }
+    };
+}
 
-struct SceneLicense {
-    // module must not be empty
-    SceneLicense(const ghoul::Dictionary& dictionary, std::string m);
+glm::dvec3 NonUniformStaticScale::scaleValue(const UpdateData&) const {
+    return _scaleValue;
+}
 
-    std::string module;
+NonUniformStaticScale::NonUniformStaticScale()
+    : _scaleValue(ScaleInfo, glm::dvec3(1.0), glm::dvec3(0.1), glm::dvec3(100.0))
+{
+    addProperty(_scaleValue);
 
-    std::string name;
-    std::string attribution;
-    std::string url;
-    std::string licenseText;
+    _scaleValue.onChange([this]() {
+        requireUpdate();
+    });
+}
 
-    static documentation::Documentation Documentation();
-};
+NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)
+    : NonUniformStaticScale()
+{
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
 
-void writeSceneLicenseDocumentation(const std::vector<SceneLicense>& licenses,
-    const std::string& file, const std::string& type);
+    _scaleValue = dictionary.value<glm::dvec3>(ScaleInfo.identifier);
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___SCENELICENSE___H__

@@ -341,17 +341,9 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w =
-        std::make_unique<SynchronizationWatcher>();
-    SynchronizationWatcher* rawWatcher = w.get();
-
     global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(
-            global::scriptEngine.luaState(),
-            rawWatcher,
-            FileSys.absPath("${ASSETS}")
-        ),
-        std::move(w)
+        global::scriptEngine.luaState(),
+        FileSys.absPath("${ASSETS}")
     );
 
     global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
@@ -419,11 +411,6 @@ void OpenSpaceEngine::initializeGL() {
     //glbinding::Binding::useCurrentContext();
 
     rendering::helper::initialize();
-
-    // clear the screen so the user doesn't have to see old buffer contents left on the
-    // graphics card
-    LDEBUG("Clearing all Windows");
-    global::windowDelegate.clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
@@ -759,15 +746,13 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
     _loadingScreen->postMessage("Synchronizing assets");
 
-    std::vector<std::shared_ptr<const Asset>> allAssets =
-        _assetManager->rootAsset()->subTreeAssets();
+    std::vector<const Asset*> allAssets = _assetManager->rootAsset().subTreeAssets();
 
-    std::unordered_set<std::shared_ptr<ResourceSynchronization>> resourceSyncs;
-    for (const std::shared_ptr<const Asset>& a : allAssets) {
-        std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-            a->ownSynchronizations();
+    std::unordered_set<ResourceSynchronization*> resourceSyncs;
+    for (const Asset* a : allAssets) {
+        std::vector<ResourceSynchronization*> syncs = a->ownSynchronizations();
 
-        for (const std::shared_ptr<ResourceSynchronization>& s : syncs) {
+        for (ResourceSynchronization* s : syncs) {
             ZoneScopedN("Update resource synchronization")
 
             if (s->state() == ResourceSynchronization::State::Syncing) {
@@ -1035,7 +1020,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         _documentationJson += "{\"name\":\"Scene License Information\",";
         _documentationJson += "\"identifier\":\"sceneLicense";
         _documentationJson += "\",\"data\":";
-        _documentationJson += _scene->generateSceneLicenseDocumentationJson();
+        _documentationJson += SceneLicenseWriter().generateJson();
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Properties\",";
         _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
@@ -1050,8 +1035,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         DocEng.addHandlebarTemplates(global::keybindingManager.templatesToRegister());
         //TODO this is in efficaiant, here i am just instaning the class to get
         //at a member variable which is staticly defined. How do i just get that
-        const std::vector<SceneLicense> licenses;
-        SceneLicenseWriter writer(licenses);
+        SceneLicenseWriter writer;
         DocEng.addHandlebarTemplates(writer.templatesToRegister());
         DocEng.addHandlebarTemplates(global::rootPropertyOwner.templatesToRegister());
 
@@ -1378,10 +1362,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
 
     // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing
     if (action == MouseAction::Press) {
-        bool isConsumed = global::renderEngine.mouseActivationCallback(
-            global::windowDelegate.mousePosition()
-        );
-
+        bool isConsumed = global::renderEngine.mouseActivationCallback(_mousePosition);
         if (isConsumed) {
             return;
         }
@@ -1401,6 +1382,8 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 
     global::navigationHandler.mousePositionCallback(x, y);
     global::interactionMonitor.markInteraction();
+
+    _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
@@ -1547,15 +1530,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Returns whether the current OpenSpace instance is the master node of a "
                 "cluster configuration. If this instance is not part of a cluster, this "
                 "function also returns 'true'."
-            },
-            {
-                "clusterId",
-                &luascriptfunctions::clusterId,
-                {},
-                "",
-                "Returns the zero-based identifier for this OpenSpace instance in a "
-                "cluster configuration. If this instance is not part of a cluster, this "
-                "identifier is always 0."
             }
         },
         {

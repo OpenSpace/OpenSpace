@@ -1,0 +1,81 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local kernels = asset.require('./kernels').kernels
+
+local apolloSpiceId = "-908"
+
+
+local LaunchTrail = {
+    Identifier = "Apollo8LaunchTrail",
+    Parent = earth_transforms.EarthIAU.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = apolloSpiceId,
+            Observer = "EARTH",
+            Frame = "IAU_EARTH",
+            Kernels = kernels
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1968 DEC 21 12:51:00",
+        EndTime = "1968 DEC 21 23:23:22",
+        SampleInterval = 30
+    },
+    GUI = {
+        Name = "Apollo 8 Launch Trail",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+local MoonTrail = {
+    Identifier = "Apollo8MoonTrail",
+    Parent = moon_transforms.Moon.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = apolloSpiceId,
+            Observer = "MOON",
+            Frame = "IAU_MOON",
+            Kernels = kernels
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1968 DEC 23",
+        EndTime = "1968 DEC 26",
+        SampleInterval = 30,
+        Enabled = false,
+    },
+    GUI = {
+        Name = "Apollo 8 Moon Trail",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+local EarthBarycenterTrail = {
+    Identifier = "Apollo8EarthBarycenterTrail",
+    Parent = earth_transforms.EarthCenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = apolloSpiceId,
+            Observer = "EARTH",
+            Frame = "GALACTIC",
+            Kernels = kernels
+        },
+        Color = { 0.8, 0.2, 0.2 },
+        StartTime = "1968 DEC 21",
+        EndTime = "1968 DEC 28",
+        SampleInterval = 30,
+        Enabled = true,
+    },
+    GUI = {
+        Name = "Apollo 8 Earth Barycenter Trail",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { LaunchTrail, MoonTrail, EarthBarycenterTrail })

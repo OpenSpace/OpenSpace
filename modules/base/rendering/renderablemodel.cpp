@@ -262,6 +262,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+
     addPropertySubOwner(_lightSourcePropertyOwner);
     addPropertySubOwner(_geometry.get());
 
@@ -278,14 +279,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_rotationVec);
 
     _rotationVec.onChange([this]() {
-        glm::vec3 degreeVector = _rotationVec;
-        glm::vec3 radianVector = glm::vec3(
-            glm::radians(degreeVector.x),
-            glm::radians(degreeVector.y),
-            glm::radians(degreeVector.z)
-        );
-        _modelTransform = glm::mat4_cast(glm::quat(radianVector));
+        _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));
     });
+
+
+    if (dictionary.hasKey(RotationVecInfo.identifier)) {
+        _rotationVec = dictionary.value<glm::vec3>(RotationVecInfo.identifier);
+    }
 }
 
 bool RenderableModel::isReady() const {

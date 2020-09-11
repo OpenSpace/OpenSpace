@@ -14,9 +14,10 @@ asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
 -- Load web gui
-asset.require('util/webgui')
+local webGui = asset.require('util/webgui')
 
 asset.onInitialize(function ()
+    webGui.setCefRoute("onscreen")
     openspace.setDefaultGuiSorting()
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
