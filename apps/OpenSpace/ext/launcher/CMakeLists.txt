@@ -33,6 +33,7 @@ set(HEADER_FILES
   include/marknodes.h
   include/meta.h
   include/osmodules.h
+  include/ostime.h
   include/profileedit.h
   include/ui_addedscripts.h
   include/ui_assets.h
@@ -43,6 +44,7 @@ set(HEADER_FILES
   include/ui_marknodes.h
   include/ui_meta.h
   include/ui_osmodules.h
+  include/ui_ostime.h
   include/ui_profileedit.h
 )
 
@@ -59,6 +61,7 @@ set(SOURCE_FILES
   src/marknodes.cpp
   src/meta.cpp
   src/osmodules.cpp
+  src/ostime.cpp
   src/profileedit.cpp
 )
 
