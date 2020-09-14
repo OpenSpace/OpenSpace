@@ -5,6 +5,7 @@
 #include <QString>
 #include "profileedit.h"
 #include "filesystemaccess.h"
+#include <openspace/scene/profile.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class LauncherWindow; }
@@ -53,10 +54,10 @@ private:
     std::vector<openspace::Profile::Keybinding> _keybindingsData;
     DeltaTimes _deltaTimesData;
     openspace::Profile::Time _timeData;
-    Camera _cameraData;
+    openspace::Profile::CameraType _cameraData;
     std::vector<std::string> _markNodesData;
     std::string _addedScriptsData;
-    ProfileBlock _pData;
+    //ProfileBlock _pData;
     QString _basePath;
 };
 #endif // LAUNCHERWINDOW_H

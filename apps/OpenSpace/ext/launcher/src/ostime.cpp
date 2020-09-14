@@ -3,18 +3,23 @@
 #include "./ui_ostime.h"
 #include <algorithm>
 
-ostime::ostime(openspace::Profile::Time& imported, QWidget *parent)
+ostime::ostime(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::time)
     , _imported(imported)
-    , _data(imported)
 {
     ui->setupUi(this);
 
-    QStringList types { "Absolute", "Relative" };
-    ui->combo_type->addItems(types);
+    if (_imported->time().has_value()) {
+        QStringList types { "Absolute", "Relative" };
+        ui->combo_type->addItems(types);
+	_data = _imported->time().value();
+    }
+    else {
+        _data.type = openspace::Profile::Time::Type::Relative;
+	_data.time = "";
+    }
     _initializedAsAbsolute = (_data.type == openspace::Profile::Time::Type::Absolute);
-
     enableAccordingToType(static_cast<int>(_data.type));
 
     connect(ui->combo_type, SIGNAL(currentIndexChanged(int)), this,
@@ -67,16 +72,23 @@ void ostime::cancel() {
 void ostime::approved() {
     if (ui->combo_type->currentIndex() == static_cast<int>(openspace::Profile::Time::Type::Relative)) {
         if (ui->line_relative->text().length() == 0) {
-            ui->label_relative->setText("<font color='red'>Relative Time:</font>");
-            return;
+            //ui->label_relative->setText("<font color='red'>Relative Time:</font>");
+            //return;
+	    _imported->clearTime();
         }
-        _imported.type = openspace::Profile::Time::Type::Relative;
-        _imported.time = ui->line_relative->text().toUtf8().constData();
+	else {
+	    openspace::Profile::Time t;
+            t.type = openspace::Profile::Time::Type::Relative;
+            t.time = ui->line_relative->text().toUtf8().constData();
+	    _imported->setTime(t);
+	}
     }
     else {
-        _imported.type = openspace::Profile::Time::Type::Absolute;
+        openspace::Profile::Time t;
+        t.type = openspace::Profile::Time::Type::Absolute;
         QString res = ui->dateEdit->date().toString("yyyy-MM-dd") + "T" + ui->timeEdit->time().toString();
-        _imported.time = res.toUtf8().constData();
+        t.time = res.toUtf8().constData();
+        _imported->setTime(t);
     }
     accept();
 }

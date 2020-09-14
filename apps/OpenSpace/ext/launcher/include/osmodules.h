@@ -25,7 +25,7 @@ public slots:
     void parseSelections();
 
 public:
-    explicit osmodules(std::vector<openspace::Profile::Module>& imported, QWidget *parent = nullptr);
+    explicit osmodules(openspace::Profile* imported, QWidget *parent = nullptr);
     ~osmodules();
 
 protected:
@@ -38,7 +38,7 @@ private:
 
     Ui::osmodules *ui;
     QWidget* _parent;
-    std::vector<openspace::Profile::Module>& _imported;
+    openspace::Profile* _imported;
     std::vector<openspace::Profile::Module> _data;
     std::vector<QListWidgetItem*> _modulesListItems;
     bool _editModeNewItem = false;

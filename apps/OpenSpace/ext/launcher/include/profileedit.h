@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "marknodes.h"
 #include "ostime.h"
+#include <openspace/scene/profile.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,7 +22,7 @@ class ProfileEdit;
 }
 QT_END_NAMESPACE
 
-struct ProfileBlock {
+/*struct ProfileBlock {
     openspace::Profile::Meta& _metaData;
     std::vector<openspace::Profile::Module>& _moduleData;
     std::vector<openspace::Profile::Asset>& _assetData;
@@ -30,10 +31,10 @@ struct ProfileBlock {
     std::vector<openspace::Profile::Keybinding>& _keybindingsData;
     DeltaTimes& _deltaTimesData;
     openspace::Profile::Time& _timeData;
-    Camera& _cameraData;
+    openspace::Profile::CameraType& _cameraData;
     std::vector<std::string>& _markNodesData;
     std::string& _addedScriptsData;
-};
+};*/
 
 class ProfileEdit : public QDialog
 {
@@ -52,11 +53,13 @@ public slots:
     void openMarkNodes();
 
 public:
-    explicit ProfileEdit(ProfileBlock imported, QWidget *parent = nullptr);
+    explicit ProfileEdit(std::string filename, std::string reportedAssets, QWidget *parent = nullptr);
     ~ProfileEdit();
-    void setProfileName(QString profileToSet);
+    //void setProfileName(QString profileToSet);
 
 private:
+    void loadProfileFromFile(std::string filename);
+    void initSummaryTextForEachCategory();
     QString summarizeText_meta();
     QString summarizeText_modules();
     QString summarizeText_assets();
@@ -81,7 +84,10 @@ private:
     camera* _camera;
     markNodes* _markNodes;
 
-    ProfileBlock _pData;
+    //ProfileBlock _pData;
+    openspace::Profile* _pData = nullptr;
+    std::vector<std::string> _content;
+    std::string& _reportedAssets;
 };
 
 #endif // PROFILEEDIT_H

@@ -2,11 +2,11 @@
 #include "./ui_deltatimes.h"
 #include <qevent.h>
 
-deltaTimes::deltaTimes(DeltaTimes& imported, QWidget *parent)
+deltaTimes::deltaTimes(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::deltaTimes)
     , _imported(imported)
-    , _data(imported)
+    , _data(imported->deltaTimes())
 {
     ui->setupUi(this);
 
@@ -21,7 +21,7 @@ deltaTimes::deltaTimes(DeltaTimes& imported, QWidget *parent)
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
 }
 
-QString deltaTimes::createSummaryForDeltaTime(size_t idx, int dt, bool forListView) {
+QString deltaTimes::createSummaryForDeltaTime(size_t idx, double dt, bool forListView) {
     std::string s;
     int k = (idx%10 == 9) ? 0 : idx%10 + 1;
     k = (idx == 0) ? 1 : k;
@@ -39,7 +39,7 @@ QString deltaTimes::createSummaryForDeltaTime(size_t idx, int dt, bool forListVi
     }
 
     if (dt != 0) {
-        s += (forListView) ? "\t" + std::to_string(dt) : "";
+        s += (forListView) ? "\t" + std::to_string(static_cast<int>(dt)) : "";
     }
 
     if (forListView) {
@@ -87,7 +87,7 @@ int deltaTimes::lastSelectableItem() {
     }
 }
 
-QString deltaTimes::timeDescription(int value) {
+QString deltaTimes::timeDescription(double value) {
     QString description;
 
     if (value == 0) {
@@ -103,9 +103,9 @@ QString deltaTimes::timeDescription(int value) {
     return checkForTimeDescription(i, value);
 }
 
-QString deltaTimes::checkForTimeDescription(int intervalIndex, int value) {
-    float amount = static_cast<float>(value) /
-        static_cast<float>(_timeIntervals[intervalIndex].secondsPerInterval);
+QString deltaTimes::checkForTimeDescription(int intervalIndex, double value) {
+    double amount = static_cast<double>(value) /
+        static_cast<double>(_timeIntervals[intervalIndex].secondsPerInterval);
     QString description = QString::number(amount, 'g', 2);
     return description += " " + _timeIntervals[intervalIndex].intervalName + "/sec";
 }
@@ -114,7 +114,7 @@ void deltaTimes::saveDeltaTimeValue() {
     QListWidgetItem *item = ui->listWidget->currentItem();
     int index = ui->listWidget->row(item);
     if (isNumericalValue(ui->line_seconds) && index <= lastSelectableItem() + 1) {
-        _data._times.at(index) = ui->line_seconds->text().toInt();
+        _data._times.at(index) = ui->line_seconds->text().toDouble();
         QString summary = createSummaryForDeltaTime(index, _data._times.at(index), true);
         _deltaListItems.at(index)->setText(summary);
     }
@@ -123,7 +123,7 @@ void deltaTimes::saveDeltaTimeValue() {
 bool deltaTimes::isNumericalValue(QLineEdit* le) {
     QString s = le->text();
     bool validConversion = false;
-    s.toInt(&validConversion);
+    s.toDouble(&validConversion);
     return validConversion;
 }
 
@@ -143,7 +143,7 @@ void deltaTimes::clearDeltaTimeValue() {
 }
 
 void deltaTimes::parseSelections() {
-    _imported = _data;
+    _imported->setDeltaTimes(_data._times);
     accept();
 }
 

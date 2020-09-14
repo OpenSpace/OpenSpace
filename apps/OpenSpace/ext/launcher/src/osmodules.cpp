@@ -3,11 +3,11 @@
 #include "./ui_osmodules.h"
 #include <qevent.h>
 
-osmodules::osmodules(std::vector<openspace::Profile::Module>& imported, QWidget *parent)
+osmodules::osmodules(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::osmodules)
     , _imported(imported)
-    , _data(imported)
+    , _data(imported->modules())
 {
     ui->setupUi(this);
 
@@ -140,12 +140,8 @@ void osmodules::editBoxDisabled(bool disabled) {
     ui->button_save->setDisabled(disabled);
 }
 
-//osmodules::save() {
-//
-//}
-
 void osmodules::parseSelections() {
-    _imported = _data;
+    _imported->setModules(_data);
     accept();
 }
 

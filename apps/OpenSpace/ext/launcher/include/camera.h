@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <optional>
+#include <variant>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -13,36 +14,15 @@ class camera;
 }
 QT_END_NAMESPACE
 
-struct CameraNavState {
-    static constexpr const char* Type = "setNavigationState";
-
-    std::string anchor;
-    std::string aim;
-    std::string referenceFrame;
-    std::string position[3];
-    std::string up[3];
-    std::string yaw;
-    std::string pitch;
-};
-
-struct CameraGoToGeo {
-    static constexpr const char* Type = "goToGeo";
-
-    std::string anchor;
-    std::string latitude;
-    std::string longitude;
-    std::string altitude;
-};
-
-struct Camera {
+/*struct Camera {
     enum class Type {
         Nav,
         Geo
     };
     Type type;
-    CameraNavState nav;
-    CameraGoToGeo geo;
-};
+    openspace::Profile::CameraNavState nav;
+    openspace::Profile::CameraGoToGeo geo;
+};*/
 
 class camera: public QDialog
 {
@@ -53,8 +33,12 @@ public slots:
     void approved();
 
 public:
-    explicit camera(Camera& imported, QWidget *parent = nullptr);
+    explicit camera(openspace::Profile* imported, QWidget *parent = nullptr);
     ~camera();
+    enum class cameraTypeTab : int {
+        Nav = 0,
+        Geo
+    };
 
 private:
     bool isNumericalValue(QLineEdit* le);
@@ -65,11 +49,12 @@ private:
         bool& allFormsValid, bool isNumber, bool isRequiredValue);
     void checkFormRange(QLabel* label, QLineEdit* value, const QString& labelTxt,
         float min, float max, bool& allFormsValid, bool isRequiredValue);
+    bool isUpVectorValid();
 
     Ui::camera *ui;
     QWidget* _parent;
-    Camera& _imported;
-    Camera _data;
+    openspace::Profile* _imported;
+    openspace::Profile::CameraType _data;
 };
 
 #endif // CAMERA_H

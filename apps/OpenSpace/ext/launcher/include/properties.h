@@ -25,7 +25,7 @@ public slots:
     void parseSelections();
 
 public:
-    explicit properties(std::vector<openspace::Profile::Property>& imported, QWidget *parent = nullptr);
+    explicit properties(openspace::Profile* imported, QWidget *parent = nullptr);
     ~properties();
 
 protected:
@@ -39,7 +39,7 @@ private:
 
     Ui::properties *ui;
     QWidget* _parent;
-    std::vector<openspace::Profile::Property>& _imported;
+    openspace::Profile* _imported;
     std::vector<openspace::Profile::Property> _data;
     std::vector<QListWidgetItem*> _propListItems;
     bool _editModeNewItem = false;

@@ -7,10 +7,10 @@
 #include <string>
 #include <openspace/scene/profile.h>
 
-assets::assets(std::vector<openspace::Profile::Asset>& imported, std::string& reportAssets, QWidget *parent)
+assets::assets(openspace::Profile* imported, std::string& reportAssets, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::assets)
-    , _data(imported)
+    , _imported(imported)
     , _assetTreeModel(tr("Asset"), tr("Enabled"))
 {
     ui->setupUi(this);
@@ -33,7 +33,7 @@ assets::assets(std::vector<openspace::Profile::Asset>& imported, std::string& re
 }
 
 void assets::compareFilesystemWithProfileAssets() {
-    for (openspace::Profile::Asset a : _data) {
+    for (openspace::Profile::Asset a : _imported->assets()) {
         findPathMatch(a.path, a.name);
     }
 }
@@ -131,7 +131,7 @@ std::string assets::createTextSummary() {
 }
 
 void assets::parseSelections() {
-    _data.clear();
+    _imported->clearAssets();
     for (std::string selected : _assetTreeModel.selectedAssets()) {
         openspace::Profile::Asset a;
         size_t slash = selected.find_last_of('/');
@@ -143,7 +143,7 @@ void assets::parseSelections() {
             a.path = selected.substr(0, slash);
             a.name = selected.substr(slash + 1);
         }
-        _data.push_back(a);
+	_imported->addAsset(a.path + "/" + a.name);
     }
     accept();
 }

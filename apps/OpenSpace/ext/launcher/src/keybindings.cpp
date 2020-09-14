@@ -5,11 +5,11 @@
 #include <qevent.h>
 #include <algorithm>
 
-keybindings::keybindings(std::vector<openspace::Profile::Keybinding>& imported, QWidget *parent)
+keybindings::keybindings(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::keybindings)
     , _imported(imported)
-    , _data(imported)
+    , _data(imported->keybindings())
 {
     ui->setupUi(this);
 
@@ -260,7 +260,7 @@ void keybindings::editBoxDisabled(bool disabled) {
 }
 
 void keybindings::parseSelections() {
-    _imported = _data;
+    _imported->setKeybindings(_data);
     accept();
 }
 

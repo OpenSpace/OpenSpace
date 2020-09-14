@@ -1,14 +1,19 @@
 #include "addedscripts.h"
 #include "./ui_addedscripts.h"
 #include <qevent.h>
+#include <iostream>
+#include <sstream>
 
-addedScripts::addedScripts(std::string& imported, QWidget *parent)
+addedScripts::addedScripts(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::addedScripts)
     , _imported(imported)
 {
     ui->setupUi(this);
-    ui->text_scripts->setText(QString(_imported.c_str()));
+    for (std::string s : _imported->additionalScripts()) {
+        _data += s + "\n";
+    }
+    ui->text_scripts->setText(QString(_data.c_str()));
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseScript()));
 }
@@ -18,7 +23,15 @@ void addedScripts::setScriptText(std::string s) {
 }
 
 void addedScripts::parseScript() {
-    _imported = ui->text_scripts->toPlainText().toUtf8().constData();
+    std::vector<std::string> tmpMultilineStringToVector;
+    std::istringstream iss(ui->text_scripts->toPlainText().toUtf8().constData());
+    while (!iss.eof())
+    {
+        std::string s;
+        getline(iss, s);
+        tmpMultilineStringToVector.push_back(s);
+    }
+    _imported->setAdditionalScripts(tmpMultilineStringToVector);
     accept();
 }
 

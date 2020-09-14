@@ -81,7 +81,7 @@ public:
         buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
         buttonBox->setGeometry(QRect(50, 750, 341, 32));
         buttonBox->setOrientation(Qt::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Save);
         verticalLayoutWidget = new QWidget(ProfileEdit);
         verticalLayoutWidget->setObjectName(QString::fromUtf8("verticalLayoutWidget"));
         verticalLayoutWidget->setGeometry(QRect(10, 60, 381, 671));

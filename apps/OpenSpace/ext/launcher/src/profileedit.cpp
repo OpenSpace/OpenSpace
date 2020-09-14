@@ -3,14 +3,57 @@
 #include "./ui_profileedit.h"
 #include "filesystemaccess.h"
 
+template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-ProfileEdit::ProfileEdit(ProfileBlock imported, QWidget *parent)
+ProfileEdit::ProfileEdit(std::string filename, std::string reportedAssets, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::ProfileEdit)
-    , _pData(imported)
+    , _reportedAssets(reportedAssets)
 {
     ui->setupUi(this);
+    loadProfileFromFile(filename);
 
+    initSummaryTextForEachCategory();
+
+    connect(ui->edit_meta, SIGNAL(clicked()), this, SLOT(openMeta()));
+    connect(ui->edit_properties, SIGNAL(clicked()), this, SLOT(openProperties()));
+    connect(ui->edit_modules, SIGNAL(clicked()), this, SLOT(openModules()));
+    connect(ui->edit_keybindings, SIGNAL(clicked()), this, SLOT(openKeybindings()));
+    connect(ui->edit_assets, SIGNAL(clicked()), this, SLOT(openAssets()));
+    connect(ui->edit_time, SIGNAL(clicked()), this, SLOT(openTime()));
+    connect(ui->edit_additionalscripts, SIGNAL(clicked()), this, SLOT(openAddedScripts()));
+    connect(ui->edit_deltatimes, SIGNAL(clicked()), this, SLOT(openDeltaTimes()));
+    connect(ui->edit_camera, SIGNAL(clicked()), this, SLOT(openCamera()));
+    connect(ui->edit_marknodes, SIGNAL(clicked()), this, SLOT(openMarkNodes()));
+}
+
+ProfileEdit::~ProfileEdit() {
+    delete ui;
+    delete _pData;
+}
+
+void ProfileEdit::loadProfileFromFile(std::string filename) {
+    if (filename.length() > 0) {
+        std::ifstream inFile;
+        try {
+            inFile.open(filename, std::ifstream::in);
+        }
+        catch (const std::ifstream::failure& e) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Exception opening profile file for read: {} ({})",
+                filename, e.what())
+            );
+        }
+        std::string line;
+        while (std::getline(inFile, line)) {
+            _content.push_back(std::move(line));
+        }
+    }
+    _pData = new openspace::Profile(_content);
+}
+
+void ProfileEdit::initSummaryTextForEachCategory() {
     ui->text_meta->setText(summarizeText_meta());
     ui->text_meta->setReadOnly(true);
 
@@ -40,49 +83,115 @@ ProfileEdit::ProfileEdit(ProfileBlock imported, QWidget *parent)
 
     ui->text_additionalscripts->setText(summarizeText_addedScripts());
     ui->text_additionalscripts->setReadOnly(true);
-
-    connect(ui->edit_meta, SIGNAL(clicked()), this, SLOT(openMeta()));
-    connect(ui->edit_properties, SIGNAL(clicked()), this, SLOT(openProperties()));
-    connect(ui->edit_modules, SIGNAL(clicked()), this, SLOT(openModules()));
-    connect(ui->edit_keybindings, SIGNAL(clicked()), this, SLOT(openKeybindings()));
-    connect(ui->edit_assets, SIGNAL(clicked()), this, SLOT(openAssets()));
-    connect(ui->edit_time, SIGNAL(clicked()), this, SLOT(openTime()));
-    connect(ui->edit_additionalscripts, SIGNAL(clicked()), this, SLOT(openAddedScripts()));
-    connect(ui->edit_deltatimes, SIGNAL(clicked()), this, SLOT(openDeltaTimes()));
-    connect(ui->edit_camera, SIGNAL(clicked()), this, SLOT(openCamera()));
-    connect(ui->edit_marknodes, SIGNAL(clicked()), this, SLOT(openMarkNodes()));
 }
 
-void ProfileEdit::setProfileName(QString profileToSet) {
+/*void ProfileEdit::setProfileName(QString profileToSet) {
     ui->line_profile->setText(profileToSet);
-}
+}*/
 
 void ProfileEdit::openMeta() {
-    _meta = new meta(_pData._metaData);
-    _meta->exec();
-    ui->text_meta->setText(summarizeText_meta());
+    if (_pData) {
+       _meta = new meta(_pData);
+       _meta->exec();
+       ui->text_meta->setText(summarizeText_meta());
+    }
+}
+
+void ProfileEdit::openModules() {
+    if (_pData) {
+        _modules = new osmodules(_pData);
+        _modules->exec();
+        ui->text_modules->setText(summarizeText_modules());
+    }
+}
+
+void ProfileEdit::openProperties() {
+    if (_pData) {
+        _properties = new properties(_pData);
+        _properties->exec();
+        ui->text_properties->setText(summarizeText_properties());
+    }
+}
+
+void ProfileEdit::openKeybindings() {
+    if (_pData) {
+        _keybindings = new keybindings(_pData);
+        _keybindings->exec();
+        ui->text_keybindings->setText(summarizeText_keybindings());
+    }
+}
+
+void ProfileEdit::openAssets() {
+    if (_pData) {
+        _assets = new assets(_pData, _reportedAssets);
+        _assets->exec();
+        ui->text_assets->setText(summarizeText_assets());
+    }
+}
+
+void ProfileEdit::openTime() {
+    if (_pData) {
+        _time = new ostime(_pData);
+        _time->exec();
+        ui->text_time->setText(summarizeText_time());
+    }
+}
+
+void ProfileEdit::openDeltaTimes() {
+    if (_pData) {
+        _deltaTimes = new deltaTimes(_pData);
+        _deltaTimes->exec();
+        ui->text_deltatimes->setText(summarizeText_deltaTimes());
+    }
+}
+
+void ProfileEdit::openAddedScripts() {
+    if (_pData) {
+        _addedScripts = new addedScripts(_pData);
+        _addedScripts->exec();
+        ui->text_additionalscripts->setText(summarizeText_addedScripts());
+    }
+}
+
+void ProfileEdit::openCamera() {
+    if (_pData) {
+        _camera = new camera(_pData);
+        _camera->exec();
+        ui->text_camera->setText(summarizeText_camera());
+    }
+}
+
+void ProfileEdit::openMarkNodes() {
+    if (_pData) {
+        _markNodes = new markNodes(_pData);
+        _markNodes->exec();
+        ui->text_marknodes->setText(summarizeText_markNodes());
+    }
 }
 
 QString ProfileEdit::summarizeText_meta() {
-    QString s = QString(_pData._metaData.name.c_str());
-    s += ", " + QString(_pData._metaData.version.c_str());
-    s += ", " + QString(_pData._metaData.description.c_str());
-    s += ", " + QString(_pData._metaData.author.c_str());
-    s += ", " + QString(_pData._metaData.url.c_str());
-    s += ", " + QString(_pData._metaData.license.c_str());
+    if (_pData == nullptr) {
+        return "";
+    }
+    QString s;
+    if (_pData->meta().has_value()) {
+        s += QString(_pData->meta().value().name.c_str());
+        s += ", " + QString(_pData->meta().value().version.c_str());
+        s += ", " + QString(_pData->meta().value().description.c_str());
+        s += ", " + QString(_pData->meta().value().author.c_str());
+        s += ", " + QString(_pData->meta().value().url.c_str());
+        s += ", " + QString(_pData->meta().value().license.c_str());
+    }
 
     return s;
 }
 
-void ProfileEdit::openModules() {
-    _modules = new osmodules(_pData._moduleData);
-    _modules->exec();
-    ui->text_modules->setText(summarizeText_modules());
-}
-
 QString ProfileEdit::summarizeText_modules() {
-    QString results = QString("<Configured with %1 modules>\n").arg(_pData._moduleData.size());
-    for (openspace::Profile::Module m : _pData._moduleData) {
+    if (_pData == nullptr) {
+        return "";
+    }
+    QString results = QString("<Configured with %1 modules>\n").arg(_pData->modules().size());
+    for (openspace::Profile::Module m : _pData->modules()) {
         results += "    " + QString(m.name.c_str());
         if (m.loadedInstruction.size() > 0 && m.notLoadedInstruction.size() > 0) {
             results += "    (has commands for both loaded & non-loaded conditions)";
@@ -98,31 +207,25 @@ QString ProfileEdit::summarizeText_modules() {
     return results;
 }
 
-void ProfileEdit::openProperties() {
-    _properties = new properties(_pData._propsData);
-    _properties->exec();
-    ui->text_properties->setText(summarizeText_properties());
-}
-
 QString ProfileEdit::summarizeText_properties() {
-    QString results = QString("<Configured with %1 properties>\n").arg(_pData._propsData.size());
-    for (openspace::Profile::Property p : _pData._propsData) {
+    if (_pData == nullptr) {
+        return "";
+    }
+    QString results = QString("<Configured with %1 properties>\n").arg(_pData->properties().size());
+    for (openspace::Profile::Property p : _pData->properties()) {
         results += "    " + QString(p.name.c_str()) + " = ";
         results += QString(p.value.c_str()) + "\n";
     }
     return results;
 }
 
-void ProfileEdit::openKeybindings() {
-    _keybindings = new keybindings(_pData._keybindingsData);
-    _keybindings->exec();
-    ui->text_keybindings->setText(summarizeText_keybindings());
-}
-
 QString ProfileEdit::summarizeText_keybindings() {
+    if (_pData == nullptr) {
+        return "";
+    }
     QString results =
-        QString("<Configured with %1 keybindings>\n").arg(_pData._keybindingsData.size());
-    for (openspace::Profile::Keybinding k : _pData._keybindingsData) {
+        QString("<Configured with %1 keybindings>\n").arg(_pData->keybindings().size());
+    for (openspace::Profile::Keybinding k : _pData->keybindings()) {
         results += "    " + QString(k.name.c_str()) + " (";
         int keymod = static_cast<int>(k.key.modifier);
         if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
@@ -134,114 +237,109 @@ QString ProfileEdit::summarizeText_keybindings() {
     return results;
 }
 
-void ProfileEdit::openAssets() {
-    _assets = new assets(_pData._assetData, _pData._reportAssetsInFilesystem);
-    _assets->exec();
-    ui->text_assets->setText(summarizeText_assets());
-}
-
 QString ProfileEdit::summarizeText_assets() {
-    QString results = QString("<Configured with %1 assets>\n").arg(_pData._assetData.size());
-    for (openspace::Profile::Asset a : _pData._assetData) {
+    if (_pData == nullptr) {
+        return "";
+    }
+    QString results = QString("<Configured with %1 assets>\n").arg(_pData->assets().size());
+    for (openspace::Profile::Asset a : _pData->assets()) {
         results += "    " + QString(a.path.c_str()) + "/";
         results += QString(a.name.c_str()) + "\n";
     }
     return results;
 }
 
-void ProfileEdit::openTime() {
-    _time = new ostime(_pData._timeData);
-    _time->exec();
-    ui->text_time->setText(summarizeText_time());
-}
-
 QString ProfileEdit::summarizeText_time() {
+    if (_pData == nullptr) {
+        return "";
+    }
     QString results;
-    if (_pData._timeData.type == openspace::Profile::Time::Type::Absolute) {
-        results = "Absolute time: ";
+    if (_pData->time().has_value()) {
+        if (_pData->time().value().type == openspace::Profile::Time::Type::Absolute) {
+            results = "Absolute time: ";
+        }
+        else if (_pData->time().value().type == openspace::Profile::Time::Type::Relative) {
+            results = "Relative time: ";
+        }
+        results += QString(_pData->time().value().time.c_str());
     }
-    else if (_pData._timeData.type == openspace::Profile::Time::Type::Relative) {
-        results = "Relative time: ";
-    }
-    results += QString(_pData._timeData.time.c_str());
     return results;
-}
-
-void ProfileEdit::openDeltaTimes() {
-    _deltaTimes = new deltaTimes(_pData._deltaTimesData);
-    _deltaTimes->exec();
-    ui->text_deltatimes->setText(summarizeText_deltaTimes());
 }
 
 QString ProfileEdit::summarizeText_deltaTimes() {
+    if (_pData == nullptr) {
+        return "";
+    }
     QString results =
-        QString("<Configured with %1 delta times>\n").arg(_pData._deltaTimesData.size());
-    for (size_t i = 0; i < _pData._deltaTimesData.size(); ++i) {
+        QString("<Configured with %1 delta times>\n").arg(_pData->deltaTimes().size());
+    for (size_t i = 0; i < _pData->deltaTimes().size(); ++i) {
         results += _deltaTimes->createSummaryForDeltaTime(i,
-            _pData._deltaTimesData._times.at(i), false);
-        results += "\t" + QString::number(_pData._deltaTimesData._times.at(i)) + "\n";
+            _pData->deltaTimes().at(i), false);
+        results += "\t" + QString::number(_pData->deltaTimes().at(i)) + "\n";
     }
     return results;
-}
-
-void ProfileEdit::openAddedScripts() {
-    _addedScripts = new addedScripts(_pData._addedScriptsData);
-    _addedScripts->exec();
-    ui->text_additionalscripts->setText(summarizeText_addedScripts());
 }
 
 QString ProfileEdit::summarizeText_addedScripts() {
-    return QString(_pData._addedScriptsData.c_str());
-}
-
-void ProfileEdit::openCamera() {
-    _camera = new camera(_pData._cameraData);
-    _camera->exec();
-    ui->text_camera->setText(summarizeText_camera());
+    if (_pData == nullptr) {
+        return "";
+    }
+    QString result;
+    for (auto s : _pData->additionalScripts()) {
+        result += QString(s.c_str());
+	result += "\n";
+    }
+    return result;
 }
 
 QString ProfileEdit::summarizeText_camera() {
-    QString results;
-    if (_pData._cameraData.type == Camera::Type::Nav) {
-        results = "setNavigationState: ";
-        results += QString(_pData._cameraData.nav.anchor.c_str()) + " ";
-        results += QString(_pData._cameraData.nav.aim.c_str()) + " ";
-        results += QString(_pData._cameraData.nav.referenceFrame.c_str()) + " ";
-        results += "Pos=" + QString(_pData._cameraData.nav.position[0].c_str()) + ",";
-        results += QString(_pData._cameraData.nav.position[1].c_str()) + ",";
-        results += QString(_pData._cameraData.nav.position[2].c_str()) + " ";
-        if (_pData._cameraData.nav.up[0].length() > 0) {
-            results += "Up=" + QString(_pData._cameraData.nav.up[0].c_str()) + ",";
-            results += QString(_pData._cameraData.nav.up[1].c_str()) + ",";
-            results += QString(_pData._cameraData.nav.up[2].c_str()) + " ";
-        }
-        results += "Yaw=" + QString(_pData._cameraData.nav.yaw.c_str()) + " ";
-        results += "Pitch=" + QString(_pData._cameraData.nav.pitch.c_str()) + " ";
+    if (_pData == nullptr) {
+        return "";
     }
-    else if (_pData._cameraData.type == Camera::Type::Geo) {
-        results = "goToGeo: ";
-        results += QString(_pData._cameraData.geo.anchor.c_str()) + " ";
-        results += "Lat=" + QString(_pData._cameraData.geo.latitude.c_str()) + " ";
-        results += "Lon=" + QString(_pData._cameraData.geo.longitude.c_str()) + " ";
-        results += "Alt=" + QString(_pData._cameraData.geo.altitude.c_str()) + " ";
+    QString results;
+    if (_pData->camera().has_value()) {
+        std::visit(overloaded {
+            [&] (const openspace::Profile::CameraNavState& nav) {
+                results = "setNavigationState: ";
+                results += QString(nav.anchor.c_str()) + " ";
+                results += QString(nav.aim.c_str()) + " ";
+                results += QString(nav.referenceFrame.c_str()) + " ";
+                results += "Pos=" + QString::number(nav.position.x) + ",";
+                results += QString::number(nav.position.y) + ",";
+                results += QString::number(nav.position.z) + " ";
+                if (nav.up.has_value()) {
+                    results += "Up=" + QString::number(nav.up.value().x) + ",";
+                    results += QString::number(nav.up.value().y) + ",";
+                    results += QString::number(nav.up.value().z) + " ";
+                }
+                if (nav.yaw.has_value()) {
+                    results += "Yaw=" + QString::number(nav.yaw.value()) + " ";
+                }
+                if (nav.pitch.has_value()) {
+                    results += "Pitch=" + QString::number(nav.pitch.value());
+                }
+            },
+            [&] (const openspace::Profile::CameraGoToGeo& geo) {
+                results = "goToGeo: ";
+                results += QString(geo.anchor.c_str()) + " ";
+                results += "Lat=" + QString::number(geo.latitude) + " ";
+                results += "Lon=" + QString::number(geo.longitude) + " ";
+                if (geo.altitude.has_value()) {
+                    results += "Alt=" + QString::number(geo.altitude.value());
+                }
+            },
+        }, _pData->camera().value());
     }
     return results;
-}
-
-void ProfileEdit::openMarkNodes() {
-    _markNodes = new markNodes(_pData._markNodesData);
-    _markNodes->exec();
-    ui->text_marknodes->setText(summarizeText_markNodes());
 }
 
 QString ProfileEdit::summarizeText_markNodes() {
+    if (_pData == nullptr) {
+        return "";
+    }
     QString results;
-    for (auto s : _pData._markNodesData) {
+    for (auto s : _pData->markNodes()) {
         results += QString(s.c_str()) + "  ";
     }
     return results;
-}
-
-ProfileEdit::~ProfileEdit() {
-    delete ui;
 }

@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QWidget>
 #include <QListWidgetItem>
+#include <openspace/scene/profile.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -22,14 +23,14 @@ public slots:
     void parseSelections();
 
 public:
-    explicit markNodes(std::vector<std::string>& imported, QWidget *parent = nullptr);
+    explicit markNodes(openspace::Profile* imported, QWidget *parent = nullptr);
     ~markNodes();
 
 private:
     Ui::markNodes *ui;
     QWidget* _parent;
     std::vector<QListWidgetItem*> _markedNodesListItems;
-    std::vector<std::string>& _imported;
+    openspace::Profile* _imported;
     std::vector<std::string> _data;
 };
 

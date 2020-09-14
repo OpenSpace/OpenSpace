@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QWidget>
+#include <optional>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,13 +21,13 @@ public slots:
     void approved();
 
 public:
-    explicit ostime(openspace::Profile::Time& imported, QWidget *parent = nullptr);
+    explicit ostime(openspace::Profile* imported, QWidget *parent = nullptr);
     ~ostime();
 private:
     void enableFormatForAbsolute(bool enableAbs);
     Ui::time *ui;
     QWidget* _parent;
-    openspace::Profile::Time& _imported;
+    openspace::Profile* _imported;
     openspace::Profile::Time _data;
     bool _initializedAsAbsolute = true;
 };

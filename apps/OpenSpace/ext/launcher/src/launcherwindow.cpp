@@ -5,7 +5,7 @@
 #include <QPixmap>
 #include "filesystemaccess.h"
 #include <sstream>
-
+#include <iostream>
 
 LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
     : QMainWindow(parent)
@@ -15,7 +15,7 @@ LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
     , _filesystemAccess(".asset", {"scene", "global", "customization", "examples"},
                         true, true)
     , _basePath(QString::fromUtf8(basePath.c_str()))
-    , _pData({_metaData,
+    /*, _pData({_metaData,
              _moduleData,
              _assetData,
              _reportAssetsInFilesystem,
@@ -25,7 +25,7 @@ LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
              _timeData,
              _cameraData,
              _markNodesData,
-             _addedScriptsData})
+             _addedScriptsData})*/
 {
     ui->setupUi(this);
     QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
@@ -34,6 +34,8 @@ LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
     connect(ui->newButton, SIGNAL(released()), this, SLOT(openWindow_new()));
     connect(ui->editButton, SIGNAL(released()), this, SLOT(openWindow_edit()));
     connect(ui->buttonSim, SIGNAL(released()), this, SLOT(simulateData()));
+    _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
+        QString(basePath.c_str()) + "/data/assets");
     populateProfilesList();
     populateWindowConfigsList();
 }
@@ -64,22 +66,18 @@ void LauncherWindow::populateWindowConfigsList() {
 
 void LauncherWindow::openWindow_new() {
     clearData();
-    myEditorWindow = new ProfileEdit(_pData);
+    myEditorWindow = new ProfileEdit("", _reportAssetsInFilesystem);
     myEditorWindow->exec();
 }
 
 void LauncherWindow::openWindow_edit() {
-    //std::string editProfilePath = _basePath.toUtf8().constData();
-    //editProfilePath += "/data/profiles/";
-    //editProfilePath += ui->comboBoxProfiles->currentText().toUtf8().constData();
-    //editProfilePath += ".profile";
-    //myEditorWindow = new editorwindow(_basePath + "/data/assets", editProfilePath);
-    myEditorWindow = new ProfileEdit(_pData);
-
+    std::string editProfilePath = _basePath.toUtf8().constData();
+    editProfilePath += "/data/profiles/";
     int selectedProfileIdx = ui->comboBoxProfiles->currentIndex();
     QString profileToSet = ui->comboBoxProfiles->itemText(selectedProfileIdx);
-    myEditorWindow->setProfileName(profileToSet);
-
+    editProfilePath += profileToSet.toUtf8().constData();
+    editProfilePath += ".profile";
+    myEditorWindow = new ProfileEdit(editProfilePath, _reportAssetsInFilesystem);
     myEditorWindow->exec();
 }
 
@@ -116,9 +114,8 @@ void LauncherWindow::clearData() {
     _keybindingsData.clear();
     _deltaTimesData._times.clear();
     _timeData.time = "";
-    _cameraData.type = Camera::Type::Nav;
-    _cameraData.nav = {"", "", "", {"", "", ""}, {"", "", ""}, "", ""};
-    _cameraData.geo = {"", "", "", ""};
+    openspace::Profile::CameraNavState c = {"", "", "", {0.0, 0.0, 0.0}, std::nullopt, std::nullopt, std::nullopt};
+    _cameraData = c;
     _markNodesData.clear();
     _addedScriptsData = "";
 }
@@ -159,8 +156,7 @@ void LauncherWindow::initialize_modules() {
 }
 
 void LauncherWindow::initialize_assets() {
-    _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
-        "/home/gene/Desktop/OpenSpace/data/assets");
+
 
     _assetData = {
         {"", "base"},
@@ -271,7 +267,7 @@ void LauncherWindow::initialize_keybindings() {
 }
 
 void LauncherWindow::initialize_deltaTimes() {
-    std::vector<int> dt = {1, 2, 5, 10, 30,
+    std::vector<double> dt = {1, 2, 5, 10, 30,
     60, 120, 300, 600, 1800,
     3600, 7200, 10800, 21600, 43200,
      86400, 172800, 345600, 604800};
@@ -284,8 +280,10 @@ void LauncherWindow::initialize_time() {
 }
 
 void LauncherWindow::initialize_camera() {
-    _cameraData.type = Camera::Type::Nav;
-    _cameraData.nav = {"Earth", "Moon", "SUNREF", {"1", "2", "3"}, {"4", "5", "6"}, "180.0", "359.9"};
+    glm::dvec3 p = {1.0, 2.0, 3.0};
+    glm::dvec3 u = {4.0, 5.0, 6.0};
+    openspace::Profile::CameraNavState c = {"Earth", "Moon", "SUNREF", p, u, 180.0, 359.9};
+    _cameraData = c;
 }
 
 void LauncherWindow::initialize_markNodes() {

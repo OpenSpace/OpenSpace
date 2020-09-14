@@ -23,7 +23,7 @@ public slots:
     void parseSelections();
 
 public:
-    explicit assets(std::vector<openspace::Profile::Asset>& imported, std::string& reportAssets,
+    explicit assets(openspace::Profile* imported, std::string& reportAssets,
         QWidget *parent = nullptr);
     ~assets();
     std::string createTextSummary();
@@ -39,7 +39,7 @@ private:
         std::string dirname, std::string filename);
     Ui::assets *ui;
     QWidget* _parent;
-    std::vector<openspace::Profile::Asset>& _data;
+    openspace::Profile* _imported;
     assetTreeModel _assetTreeModel;
 };
 

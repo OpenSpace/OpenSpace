@@ -561,6 +561,10 @@ void Profile::removeAsset(const std::string& path) {
     _assets.erase(it);
 }
 
+void Profile::clearAssets() {
+    _assets.clear();
+}
+
 scripting::LuaLibrary Profile::luaLibrary() {
     return {
         "",
@@ -1144,6 +1148,10 @@ std::optional<Profile::Time> Profile::time() const {
     return _time;
 }
 
+std::vector<double> Profile::deltaTimes() const {
+    return _deltaTimes;
+}
+
 std::optional<Profile::CameraType> Profile::camera() const {
     return _camera;
 }
@@ -1183,6 +1191,10 @@ void Profile::setTime(Time t) {
     _time = t;
 }
 
+void Profile::setDeltaTimes(std::vector<double> dt) {
+    _deltaTimes = dt;
+}
+
 void Profile::setCamera(CameraType c) {
     _camera = c;
 }
@@ -1195,6 +1207,18 @@ void Profile::setMarkNodes(std::vector<std::string>& n) {
 void Profile::setAdditionalScripts(std::vector<std::string>& s) {
     _additionalScripts.clear();
     copy(s.begin(), s.end(), back_inserter(_additionalScripts));
+}
+
+void Profile::clearMeta() {
+    _meta = std::nullopt;
+}
+
+void Profile::clearTime() {
+    _time = std::nullopt;
+}
+
+void Profile::clearCamera() {
+    _camera = std::nullopt;
 }
 
 }  // namespace openspace

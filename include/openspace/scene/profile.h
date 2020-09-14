@@ -134,6 +134,9 @@ public:
     /// Removes an asset
     void removeAsset(const std::string& path);
 
+    /// Removes all assets
+    void clearAssets();
+
     Version version() const;
     std::vector<Module> modules() const;
     std::optional<Meta> meta() const;
@@ -141,9 +144,14 @@ public:
     std::vector<Property> properties() const;
     std::vector<Keybinding> keybindings() const;
     std::optional<Time> time() const;
+    std::vector<double> deltaTimes() const;
     std::optional<CameraType> camera() const;
     std::vector<std::string> markNodes() const;
     std::vector<std::string> additionalScripts() const;
+
+    void clearMeta();
+    void clearTime();
+    void clearCamera();
 
     void setVersion(Version v);
     void setModules(std::vector<Module>& m);
@@ -151,6 +159,7 @@ public:
     void setProperties(std::vector<Property>& p);
     void setKeybindings(std::vector<Keybinding>& k);
     void setTime(Time t);
+    void setDeltaTimes(std::vector<double> dt);
     void setCamera(CameraType c);
     void setMarkNodes(std::vector<std::string>& n);
     void setAdditionalScripts(std::vector<std::string>& s);

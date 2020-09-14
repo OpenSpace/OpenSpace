@@ -4,6 +4,7 @@
 #include <openspace/scene/profile.h>
 #include <QDialog>
 #include <QWidget>
+#include <optional>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,13 +20,14 @@ public slots:
    void save();
 
 public:
-    explicit meta(openspace::Profile::Meta& imported, QWidget *parent = nullptr);
+    explicit meta(openspace::Profile* imported, QWidget *parent = nullptr);
     ~meta();
+    bool areAllEntriesBlank();
 
 private:
     Ui::meta *ui;
     QWidget* _parent;
-    openspace::Profile::Meta& _imported;
+    openspace::Profile* _imported;
 };
 
 #endif // META_H

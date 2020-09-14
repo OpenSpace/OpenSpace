@@ -25,7 +25,7 @@ public slots:
     void parseSelections();
 
 public:
-    explicit keybindings(std::vector<openspace::Profile::Keybinding>& imported, QWidget *parent = nullptr);
+    explicit keybindings(openspace::Profile* imported, QWidget *parent = nullptr);
     ~keybindings();
 
 protected:
@@ -43,7 +43,7 @@ private:
 
     Ui::keybindings *ui;
     QWidget* _parent;
-    std::vector<openspace::Profile::Keybinding>& _imported;
+    openspace::Profile* _imported;
     std::vector<openspace::Profile::Keybinding> _data;
     std::vector<QListWidgetItem*> _keybindingsListItems;
     std::vector<int> _mapModKeyComboBoxIndexToKeyValue;

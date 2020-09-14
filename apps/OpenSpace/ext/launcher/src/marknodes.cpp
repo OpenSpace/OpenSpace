@@ -3,11 +3,11 @@
 #include <qevent.h>
 #include <iterator>
 
-markNodes::markNodes(std::vector<std::string>& imported, QWidget *parent)
+markNodes::markNodes(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::markNodes)
     , _imported(imported)
-    , _data(imported)
+    , _data(imported->markNodes())
 {
     ui->setupUi(this);
 
@@ -67,7 +67,7 @@ void markNodes::listItemRemove(void) {
 }
 
 void markNodes::parseSelections() {
-    _imported = _data;
+    _imported->setMarkNodes(_data);
     accept();
 }
 

@@ -3,11 +3,11 @@
 #include "./ui_properties.h"
 #include <qevent.h>
 
-properties::properties(std::vector<openspace::Profile::Property>& imported, QWidget *parent)
+properties::properties(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::properties)
     , _imported(imported)
-    , _data(imported)
+    , _data(imported->properties())
 {
     ui->setupUi(this);
 
@@ -193,7 +193,7 @@ void properties::editBoxDisabled(bool disabled) {
 }*/
 
 void properties::parseSelections() {
-    _imported = _data;
+    _imported->setProperties(_data);
     accept();
 }
 
