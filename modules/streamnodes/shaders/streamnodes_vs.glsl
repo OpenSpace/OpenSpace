@@ -35,8 +35,8 @@ uniform sampler1D colorTable;
 uniform sampler1D colorTableCMR;
 uniform sampler1D colorTableEarth;
 uniform sampler1D colorTableFlow;
-uniform sampler1D colorTableIlluminance;
-uniform sampler1D colorTableIlluminance2;
+//uniform sampler1D colorTableIlluminance;
+//uniform sampler1D colorTableIlluminance2;
 uniform vec2      colorTableRange;
 
 // Uniforms needed for Particle Flow

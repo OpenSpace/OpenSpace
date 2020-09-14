@@ -21,8 +21,8 @@ local streamnodeColorTable = transferFunctions .. "/stream_nodes.txt"
 local streamnodeColorTableCMR = transferFunctions .. "/CMR.txt"
 local streamnodeColorTableEarth = transferFunctions .. "/stream_nodes_grey_scale.txt"
 local streamnodeColorTableFlow = transferFunctions .. "/stream_nodes_flow.txt"
-local streamnodeColorTableIlluminance = transferFunctions .. "/CMR_illuminance.txt"
-local streamnodeColorTableIlluminance2 = transferFunctions .. "/CMR_illuminance2.txt"
+--local streamnodeColorTableIlluminance = transferFunctions .. "/CMR_illuminance.txt"
+--local streamnodeColorTableIlluminance2 = transferFunctions .. "/CMR_illuminance2.txt"
 
 local streamnodesDirectory = asset.syncedResource({
     Name = "Bastille Day Stream nodes",
@@ -61,8 +61,8 @@ local Streamnodes = {
 	streamnodeColorTableCMR,
 	streamnodeColorTableEarth,
 	streamnodeColorTableFlow,
-	streamnodeColorTableIlluminance,
-	streamnodeColorTableIlluminance2,
+	--streamnodeColorTableIlluminance,
+	--streamnodeColorTableIlluminance2,
         },
         --ColorTableMinMax = {
          --   { 0, 1000000 },
