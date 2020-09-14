@@ -1,0 +1,11 @@
+local dataFolder = "${BASE}/modules/exoplanets"
+return {
+    {
+        Type = "ExoplanetsCsvToBinTask",
+        
+        InputCSV = dataFolder .. "/exoplanets.csv",
+        InputSPECK = "${SYNC}/http/digitaluniverse_exoplanets_speck/1/expl.speck",
+        OutputBIN = dataFolder .. "/exoplanets_data.bin",
+        OutputLUT = dataFolder .. "/lookup.txt"
+    }
+}

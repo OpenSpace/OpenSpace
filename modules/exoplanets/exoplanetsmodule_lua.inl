@@ -130,7 +130,7 @@ int addExoplanetSystem(lua_State* L) {
     const std::string starNameSpeck = getSpeckStarName(starName);
 
     std::ifstream data(
-        absPath("${MODULE_EXOPLANETS}/expl_data.bin"), 
+        absPath("${MODULE_EXOPLANETS}/exoplanets_data.bin"), 
         std::ios::in | std::ios::binary
     );
 
