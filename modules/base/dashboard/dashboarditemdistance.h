@@ -79,6 +79,8 @@ private:
     Component _source;
     Component _destination;
 
+    std::vector<char> _buffer;
+
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 

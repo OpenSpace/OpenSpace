@@ -433,6 +433,8 @@ target_include_directories(openspace-core PUBLIC
   ${OPENSPACE_BASE_DIR}/include
   # In order to be able to include module files
   ${OPENSPACE_BASE_DIR}
+  # In order to use the date library
+  ${OPENSPACE_BASE_DIR}/ext/date/include
   # In order to be able to include the module_registration file
   ${CMAKE_BINARY_DIR}/_generated/include
 )
@@ -451,7 +453,7 @@ configure_file(
 
 if (APPLE)
   find_library(APPKIT_LIBRARY AppKit REQUIRED)
-  target_link_libraries(openspace-core ${APPKIT_LIBRARY})
+  target_link_libraries(openspace-core PUBLIC ${APPKIT_LIBRARY})
 endif ()
 
 set_openspace_compile_settings(openspace-core)

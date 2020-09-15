@@ -55,6 +55,8 @@ private:
     properties::IntProperty _significantDigits;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::string _formatString;
+    std::vector<char> _buffer;
 };
 
 } // namespace openspace

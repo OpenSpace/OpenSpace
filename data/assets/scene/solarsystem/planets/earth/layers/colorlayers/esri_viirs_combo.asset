@@ -1,4 +1,7 @@
 local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+local fallBackLayer = asset.require("./fallbacks/blue_marble").layer
 
 local layer = {
     Identifier = "ESRI_VIIRS_Combo",
@@ -33,6 +36,11 @@ local layer = {
         },
     },
     PadTiles = false,
+    Fallback = fallBackLayer
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

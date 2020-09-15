@@ -28,8 +28,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
-
 #include <ghoul/fmt.h>
+#include <ghoul/misc/profiling.h>
 #include <sstream>
 
 namespace openspace {
@@ -45,6 +45,8 @@ SceneLicenseWriter::SceneLicenseWriter()
 {}
 
 std::string SceneLicenseWriter::generateJson() const {
+    ZoneScoped
+
     std::stringstream json;
     json << "[";
 

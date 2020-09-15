@@ -45,11 +45,10 @@ namespace openspace::globebrowsing::cache {
 
 struct ProviderTileKey {
     TileIndex tileIndex;
-    unsigned int providerID;
+    uint16_t providerID;
 
     bool operator==(const ProviderTileKey& r) const {
-        return (providerID == r.providerID) &&
-            (tileIndex == r.tileIndex);
+        return (providerID == r.providerID) && (tileIndex == r.tileIndex);
     }
 };
 
@@ -85,7 +84,7 @@ struct ProviderTileHasher {
 
 class MemoryAwareTileCache : public properties::PropertyOwner {
 public:
-    MemoryAwareTileCache(int tileCacheSize = 1024);
+    explicit MemoryAwareTileCache(int tileCacheSize = 1024);
 
     void clear();
     void setSizeEstimated(size_t estimatedSize);
@@ -128,7 +127,7 @@ private:
         const TileTextureInitData& tileTextureInitData() const;
 
         /**
-         * \returns the number of textures in this TextureContainer
+         * \return the number of textures in this TextureContainer
          */
         size_t size() const;
 

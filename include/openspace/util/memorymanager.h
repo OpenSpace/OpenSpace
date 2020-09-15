@@ -32,7 +32,10 @@ namespace openspace {
 class MemoryManager {
 public:
     ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
-    ghoul::MemoryPool<10 * 1024, false> TemporaryMemory;
+
+    // This should be replaced with a std::pmr::memory_resource wrapper around our own
+    // Memory pool so that we can get a high-water mark out of it
+    ghoul::MemoryPool<100 * 4096, false> TemporaryMemory;
 };
 
 } // namespace openspace

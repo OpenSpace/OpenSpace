@@ -1,4 +1,5 @@
 local texturesPath = asset.require("./../../mercury_textures").TexturesPath
+local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
 
 local layer = {
     Identifier = "mgsimap_02122015",
@@ -9,5 +10,9 @@ local layer = {
     },
     BlendMode = "Multiply",
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

@@ -656,7 +656,7 @@ int time_interpolateTimeRelative(lua_State* L) {
  * It is returned by calling the Time::currentTime method.
  */
 int time_currentTime(lua_State* L) {
-    lua_pushnumber(L, global::timeManager.time().j2000Seconds());
+    ghoul::lua::push(L, global::timeManager.time().j2000Seconds());
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
@@ -668,7 +668,7 @@ int time_currentTime(lua_State* L) {
  * timezone by calling the Time::UTC method
  */
 int time_currentTimeUTC(lua_State* L) {
-    lua_pushstring(L, global::timeManager.time().UTC().c_str());
+    ghoul::lua::push(L, global::timeManager.time().UTC());
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }

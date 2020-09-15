@@ -1,4 +1,7 @@
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+
+local fallbackLayer = asset.require("./fallbacks/mars_texture").layer
 
 local layer = {
     Identifier = "MOC_WA_Color_LiU",
@@ -7,7 +10,12 @@ local layer = {
     Settings = {
         Gamma = 1.6,
         Multiplier = 1.07
-    }
+    }, 
+    Fallback = fallbackLayer
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

@@ -82,9 +82,9 @@ local Voyager1Main = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-main.obj"
+            GeometryFile = models .. "/voyager-main.obj",
+            ColorTexture = models .. "/voyager-main.jpg"
         },
-        ColorTexture = models .. "/voyager-main.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -101,9 +101,9 @@ local Voyager1Antenna = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-antenna.obj"
+            GeometryFile = models .. "/voyager-antenna.obj",
+            ColorTexture = models .. "/voyager-antenna.png"
         },
-        ColorTexture = models .. "/voyager-antenna.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },

@@ -1,9 +1,14 @@
 local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 local layer = {
     Identifier = "BMNG_Utah",
     Name = "BMNG [Utah]",
     FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms"
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

@@ -1,8 +1,13 @@
 local texturesPath = asset.require("./../../callisto_textures").TexturesPath
+local globeIdentifier = asset.require("./../../callisto").Callisto.Identifier
 
 local layer = {
     Identifier = "Texture",
     FilePath = texturesPath .. "/callisto.jpg",
 }
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
 
 asset.export("layer", layer)

@@ -114,6 +114,8 @@ int LayerGroup::update() {
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+    ZoneScoped
+
     documentation::TestResult res = documentation::testSpecification(
         Layer::Documentation(),
         layerDict

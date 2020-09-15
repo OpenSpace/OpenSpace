@@ -30,7 +30,6 @@
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
-#include <optional>
 
 namespace {
     constexpr const char* EventKey = "event";
@@ -133,15 +132,18 @@ const json TimeTopic::getNextPrevDeltaTimeStepJson() {
 }
 
 void TimeTopic::sendCurrentTime() {
+    ZoneScoped
+
     const json timeJson = {
         { "time", global::timeManager.time().ISO8601() }
     };
-    _connection->sendJson(wrappedPayload(timeJson));
+    const json payload = wrappedPayload(timeJson);
+    _connection->sendJson(payload);
     _lastUpdateTime = std::chrono::system_clock::now();
 }
 
 void TimeTopic::sendFullTimeData() {
-    const std::string currentTime = global::timeManager.time().ISO8601();
+    std::string_view currentTime = global::timeManager.time().ISO8601();
     const double deltaTime = global::timeManager.deltaTime();
     const double targetDeltaTime = global::timeManager.targetDeltaTime();
     const bool isPaused = global::timeManager.isPaused();

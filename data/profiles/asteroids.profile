@@ -14,7 +14,7 @@ scene/solarsystem/sssb/encke-type_comet
 scene/solarsystem/sssb/halley-type_comet	
 scene/solarsystem/sssb/inner_main_belt_asteroid	
 scene/solarsystem/sssb/jupiter_trojan_asteroid	
-scene/solarsystem/sssb/jupiter-family_comet 
+scene/solarsystem/sssb/jupiter-family_comet	
 scene/solarsystem/sssb/main_belt_asteroid	
 scene/solarsystem/sssb/mars-crossing_asteroid	
 scene/solarsystem/sssb/outer_main_belt_asteroid	

@@ -35,11 +35,15 @@
 #include <openspace/properties/triggerproperty.h>
 
 namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class OpenGLStateCache;
+    } // namespace opengl
+
     class Dictionary;
     class SharedMemory;
 } // ghoul
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -76,6 +80,8 @@ public:
 
     const Renderer& renderer() const;
     RendererImplementation rendererImplementation() const;
+
+    ghoul::opengl::OpenGLStateCache& openglStateCache();
 
     void updateShaderPrograms();
     void updateRenderer();
@@ -185,6 +191,8 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
 
+    ghoul::opengl::OpenGLStateCache* _openglStateCache;
+
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
     properties::FloatProperty _verticalLogOffset;
@@ -242,6 +250,8 @@ private:
         glm::ivec4 zoom = glm::ivec4(0);
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
+
+    std::string _versionString;
 };
 
 } // namespace openspace

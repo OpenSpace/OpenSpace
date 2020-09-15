@@ -41,6 +41,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
 #include <string>
@@ -95,31 +96,7 @@ namespace {
     constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
-    const GLenum ColorAttachment0Array[1] = {
-        GL_COLOR_ATTACHMENT0
-    };
-
-    const GLenum ColorAttachment1Array[1] = {
-       GL_COLOR_ATTACHMENT1
-    };
-
-    const GLenum ColorAttachment01Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1
-    };
-
-    const GLenum ColorAttachment03Array[2] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT3
-    };
-
-    const GLenum ColorAttachment012Array[3] = {
-       GL_COLOR_ATTACHMENT0,
-       GL_COLOR_ATTACHMENT1,
-       GL_COLOR_ATTACHMENT2
-    };
-
-    const GLenum ColorAttachment0123Array[4] = {
+    const GLenum ColorAttachmentArray[4] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,
        GL_COLOR_ATTACHMENT2,
@@ -161,6 +138,9 @@ namespace {
 namespace openspace {
 
 void FramebufferRenderer::initialize() {
+    ZoneScoped
+    TracyGpuZone("Rendering initialize");
+
     LDEBUG("Initializing FramebufferRenderer");
 
     HasGLDebugInfo = glbinding::Binding::ObjectLabel.isResolved() &&
@@ -472,11 +452,27 @@ void FramebufferRenderer::initialize() {
     global::raycasterManager.addListener(*this);
     global::deferredcasterManager.addListener(*this);
 
+    // Set Default Rendering OpenGL State
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+
+    glEnable(GL_DEPTH_TEST);
+
     // Default GL State for Blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Save State in Cache
+    global::renderEngine.openglStateCache().loadCurrentGLState();
 }
 
 void FramebufferRenderer::deinitialize() {
+    ZoneScoped
+    TracyGpuZone("Renderer deinitialize")
+
     LINFO("Deinitializing FramebufferRenderer");
 
     glDeleteFramebuffers(1, &_gBuffers.framebuffer);
@@ -521,6 +517,9 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
 }
 
 void FramebufferRenderer::applyTMO(float blackoutFactor) {
+    ZoneScoped
+    TracyGpuZone("applyTMO")
+
     _hdrFilteringProgram->activate();
 
     ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
@@ -795,6 +794,9 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
+    ZoneScoped
+    TracyGpuZone("Renderer updateResolution")
+
     glBindTexture(GL_TEXTURE_2D, _gBuffers.colorTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -981,6 +983,8 @@ void FramebufferRenderer::updateResolution() {
 }
 
 void FramebufferRenderer::updateRaycastData() {
+    ZoneScoped
+
     _raycastData.clear();
     _exitPrograms.clear();
     _raycastPrograms.clear();
@@ -991,6 +995,8 @@ void FramebufferRenderer::updateRaycastData() {
 
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
+        ZoneScopedN("raycaster")
+
         RaycastData data = { nextId++, "Helper" };
 
         const std::string& vsPath = raycaster->boundsVertexShaderPath();
@@ -1105,6 +1111,8 @@ void FramebufferRenderer::updateDeferredcastData() {
 
 
 void FramebufferRenderer::updateHDRAndFiltering() {
+    ZoneScoped
+
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
         absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
@@ -1113,6 +1121,8 @@ void FramebufferRenderer::updateHDRAndFiltering() {
 }
 
 void FramebufferRenderer::updateFXAA() {
+    ZoneScoped
+
     _fxaaProgram = ghoul::opengl::ProgramObject::Build(
         "FXAA Program",
         absPath("${SHADERS}/framebuffer/fxaa.vert"),
@@ -1121,7 +1131,9 @@ void FramebufferRenderer::updateFXAA() {
 }
 
 void FramebufferRenderer::updateDownscaledVolume() {
-    _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
+    ZoneScoped
+        
+        _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
@@ -1130,23 +1142,16 @@ void FramebufferRenderer::updateDownscaledVolume() {
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     ZoneScoped
+    TracyGpuZone("FramebufferRenderer")
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-    {
-        // Set OpenGL default rendering state
-        ZoneScopedN("Setting OpenGL state")
+    GLint viewport[4] = { 0 };
+    global::renderEngine.openglStateCache().viewport(viewport);
 
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-        glEnablei(GL_BLEND, 0);
-        glDisablei(GL_BLEND, 1);
-        glDisablei(GL_BLEND, 2);
+    // Reset Render Pipeline State
+    global::renderEngine.openglStateCache().resetCachedStates();
 
-        glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-
-        glEnable(GL_DEPTH_TEST);
-    }
     _pingPongIndex = 0;
 
     if (!scene || !camera) {
@@ -1158,10 +1163,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         ZoneScopedN("Deferred G-Buffer")
         TracyGpuZone("Deferred G-Buffer")
 
-        glViewport(0, 0, _resolution.x, _resolution.y);
+        GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
+        global::renderEngine.openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-        glDrawBuffers(3, ColorAttachment012Array);
+        glDrawBuffers(3, ColorAttachmentArray);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     Time time = global::timeManager.time();
@@ -1175,25 +1181,31 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     RendererTasks tasks;
 
     {
+        TracyGpuZone("Background")
         GLDebugGroup group("Background");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
         scene->render(data, tasks);
     }
 
     {
+        TracyGpuZone("Opaque")
         GLDebugGroup group("Opaque");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
         scene->render(data, tasks);
     }
 
     {
+        TracyGpuZone("PreDeferredTransparent")
         GLDebugGroup group("PreDeferredTransparent");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::PreDeferredTransparent);
+        data.renderBinMask = static_cast<int>(
+            Renderable::RenderBin::PreDeferredTransparent
+        );
         scene->render(data, tasks);
     }
 
     // Run Volume Tasks
     {
+        TracyGpuZone("Raycaster Tasks")
         GLDebugGroup group("Raycaster Tasks");
         performRaycasterTasks(tasks.raycasterTasks);
 
@@ -1203,27 +1215,32 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
+        TracyGpuZone("Deferred Caster Tasks")
         GLDebugGroup group("Deferred Caster Tasks");
 
         // We use ping pong rendering in order to be able to
         // render to the same final buffer, multiple
         // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-        glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
         performDeferredTasks(tasks.deferredcasterTasks);
     }
     
-    glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+    glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
 
     {
+        TracyGpuZone("PostDeferredTransparent")
         GLDebugGroup group("PostDeferredTransparent");
-        data.renderBinMask = static_cast<int>(Renderable::RenderBin::PostDeferredTransparent);
+        data.renderBinMask = static_cast<int>(
+            Renderable::RenderBin::PostDeferredTransparent
+        );
         scene->render(data, tasks);
     }
 
     {
+        TracyGpuZone("Overlay")
         GLDebugGroup group("Overlay");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
         scene->render(data, tasks);
@@ -1234,11 +1251,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
 
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
     if (_enableFXAA) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
-        glDrawBuffers(1, ColorAttachment0Array);
+        glDrawBuffers(1, ColorAttachmentArray);
         glDisable(GL_BLEND);
 
     }
@@ -1250,12 +1265,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
+        TracyGpuZone("Apply TMO")
         GLDebugGroup group("Apply TMO");
 
         applyTMO(blackoutFactor);
     }
 
     if (_enableFXAA) {
+        TracyGpuZone("Apply FXAA")
         GLDebugGroup group("Apply FXAA");
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
         applyFXAA();
@@ -1266,12 +1283,14 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
     ZoneScoped
 
     for (const RaycasterTask& raycasterTask : tasks) {
+        TracyGpuZone("Raycaster")
+        
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        GLint viewport[4] = { 0 };
+        global::renderEngine.openglStateCache().viewport(viewport);
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1283,12 +1302,14 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         if (raycaster->downscaleRender() < 1.f) {
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
-            glViewport(
+            GLint newVP[4] = {
                 viewport[0],
                 viewport[1],
                 static_cast<GLsizei>(viewport[2] * s),
                 static_cast<GLsizei>(viewport[3] * s)
-            );
+            };
+            global::renderEngine.openglStateCache().setViewportState(newVP);
+
             if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
                 _downscaleVolumeRendering.currentDownscaleFactor = s;
                 updateDownscaleTextures();
@@ -1384,7 +1405,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+            global::renderEngine.openglStateCache().setViewportState(viewport);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
         }
@@ -1397,6 +1418,8 @@ void FramebufferRenderer::performDeferredTasks(
     ZoneScoped
 
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
+        TracyGpuZone("Deferredcaster")
+            
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
         ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
@@ -1410,7 +1433,7 @@ void FramebufferRenderer::performDeferredTasks(
         if (deferredcastProgram) {
             _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
             int fromIndex = _pingPongIndex == 0 ? 1 : 0;
-            glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+            glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
             glDisablei(GL_BLEND, 0);
             glDisablei(GL_BLEND, 1);
 
@@ -1513,6 +1536,8 @@ void FramebufferRenderer::enableFXAA(bool enable) {
 }
 
 void FramebufferRenderer::updateRendererData() {
+    ZoneScoped
+
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("hdrExposure", std::to_string(_hdrExposure));
