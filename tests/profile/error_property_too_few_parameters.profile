@@ -1,5 +1,8 @@
-#Version
-12.13
-
-#Property
-setPropertyValue
+{
+  "version": { "major": 12, "minor": 13 },
+  "properties": [
+    {
+      "type": "setPropertyValue"
+    }
+  ]
+}

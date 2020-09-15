@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
 #include <fstream>
+#include <json/json.hpp>
 
 using namespace openspace;
 
@@ -42,14 +43,12 @@ namespace {
         }
 
         std::ifstream f(absPath(filename));
+        std::string content(
+            (std::istreambuf_iterator<char>(f)),
+            std::istreambuf_iterator<char>()
+        );
 
-        std::vector<std::string> lines;
-        std::string line;
-        while (std::getline(f, line)) {
-            lines.push_back(std::move(line));
-        }
-
-        return Profile(lines);
+        return Profile(content);
     }
 
     std::string loadFile(const std::string& filename) {
@@ -260,91 +259,86 @@ TEST_CASE("Integration Full Test Permutation 1", "[profile]") {
 // Adding assets
 //
 TEST_CASE("Add asset to empty Profile", "[profile]") {
-    std::vector<std::string> originalSource = {
-        "#Version",
-        "10.11"
+    const nlohmann::json OriginalSource = {
+        { "version", { { "major", 10 }, { "minor", 11 } } }
     };
-    Profile p(originalSource);
+    Profile p(OriginalSource.dump());
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    std::vector<std::string> targetSource = originalSource;
-    targetSource.push_back("");
-    targetSource.push_back("#Asset");
-    targetSource.push_back("new-asset\t");
-    std::string targetSerialized(Profile(targetSource).serialize());
+    nlohmann::json targetSource = OriginalSource;
+    targetSource["assets"] = { { "path", "new-asset" } };
+    std::string targetSerialized(Profile(targetSource.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
-    std::vector<std::string> source = {
-        "#Version",
-        "10.11"
+    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
+
+    const nlohmann::json source = {
+        { "version", Version }
     };
-    Profile p(source);
+    Profile p(source.dump());
     p.setIgnoreUpdates(true);
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    std::string targetSerialized(Profile(source).serialize());
+    std::string targetSerialized(Profile(source.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to not-empty Profile", "[profile]") {
-    std::vector<std::string> originalSource = {
-        "#Version",
-        "10.11",
-        "",
-        "#Asset",
-        "old-asset\t"
+    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
+    const nlohmann::json Assets = { { { "path", "old-asset" } } };
+    const nlohmann::json OriginalSource = {
+        { "version", Version },
+        { "assets", Assets }
     };
-    Profile p(originalSource);
+    Profile p(OriginalSource.dump());
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    std::vector<std::string> targetSource = originalSource;
-    targetSource.push_back("new-asset\t");
-    std::string targetSerialized(Profile(targetSource).serialize());
+    nlohmann::json targetSource = OriginalSource;
+    targetSource["assets"].push_back({ "path", "new-asset" });
+    std::string targetSerialized(Profile(targetSource.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
-    std::vector<std::string> source = {
-        "#Version",
-        "10.11",
-        "",
-        "#Asset",
-        "old-asset\t"
+    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
+    const nlohmann::json Assets = { { { "path", "old-asset" } } };
+    const nlohmann::json Source = {
+        { "version", Version },
+        { "assets", Assets }
     };
-    Profile p(source);
+    Profile p(Source.dump());
     p.setIgnoreUpdates(true);
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    std::string targetSerialized(Profile(source).serialize());
+    std::string targetSerialized(Profile(Source.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add duplicate asset", "[profile]") {
-    std::vector<std::string> originalSource = {
-        "#Version",
-        "10.11",
-        "",
-        "#Asset",
-        "old-asset\t"
+    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
+    const nlohmann::json Assets = { { { "path", "old-asset" } } };
+    const nlohmann::json Source = {
+        { "version", Version },
+        { "assets", Assets }
     };
-    Profile p(originalSource);
+    Profile p(Source.dump());
     p.addAsset("new-asset");
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    std::vector<std::string> targetSource = originalSource;
-    targetSource.push_back("new-asset\t");
-    std::string targetSerialized(Profile(targetSource).serialize());
+    nlohmann::json targetSource = Source;
+    targetSource["assets"].push_back({ "path", "new-asset" });
+    std::string targetSerialized(Profile(targetSource.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
@@ -353,56 +347,55 @@ TEST_CASE("Add duplicate asset", "[profile]") {
 // Removing assets
 //
 TEST_CASE("Remove asset", "[profile]") {
-    std::vector<std::string> targetSource = {
-        "#Version",
-        "99.88",
-        "",
-        "#Asset",
-        "asset1\t"
+    const nlohmann::json Version = { { "major", 99 }, { "minor", 88 } };
+    const nlohmann::json Assets = { { { "path", "asset1" } } };
+    const nlohmann::json TargetSource = {
+        { "version", Version },
+        { "assets", Assets }
     };
-    std::vector<std::string> originalSource = targetSource;
-    originalSource.push_back("asset2\t");
 
-    Profile p(originalSource);
+    nlohmann::json originalSource = TargetSource;
+    originalSource["assets"].push_back({ { "path", "asset2" } });
+
+    Profile p(originalSource.dump());
     p.removeAsset("asset2");
     std::string originalSerialized = p.serialize();
 
-    std::string targetSerialized(Profile(targetSource).serialize());
+    std::string targetSerialized(Profile(TargetSource.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Remove asset (ignored)", "[profile]") {
-    std::vector<std::string> source = {
-        "#Version",
-        "99.88",
-        "",
-        "#Asset",
-        "asset1\t",
-        "asset2\t"
+    const nlohmann::json Version = { { "major", 99 }, { "minor", 88 } };
+    const nlohmann::json Assets = { { { "path", "asset1" } } };
+    const nlohmann::json TargetSource = {
+        { "version", Version },
+        { "assets", Assets }
     };
 
-    Profile p(source);
+    nlohmann::json source = TargetSource;
+    source["assets"].push_back({ { "path", "asset2" } });
+
+    Profile p(source.dump());
     p.setIgnoreUpdates(true);
     p.removeAsset("asset2");
     std::string originalSerialized = p.serialize();
 
-    std::string targetSerialized(Profile(source).serialize());
+    std::string targetSerialized(Profile(source.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Removing non-exisiting asset", "[profile]") {
-    std::vector<std::string> source = {
-        "#Version",
-        "66.67",
-        "",
-        "#Asset",
-        "asset1\t",
-        "asset3\t"
+    const nlohmann::json Version = { { "major", 66 }, { "minor", 67 } };
+    const nlohmann::json Assets = { { { "path", "asset1" } }, { { "path", "asset3" } } };
+    const nlohmann::json Source = {
+        { "version", Version },
+        { "assets", Assets }
     };
 
-    Profile p(source);
+    Profile p(Source.dump());
     REQUIRE_THROWS_WITH(
         p.removeAsset("unknown-asset"),
         Catch::Matchers::Contains("Tried to remove non-existing asset 'unknown-asset'")
@@ -410,16 +403,14 @@ TEST_CASE("Removing non-exisiting asset", "[profile]") {
 }
 
 TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
-    std::vector<std::string> source = {
-        "#Version",
-        "66.67",
-        "",
-        "#Asset",
-        "asset1\t",
-        "asset3\t"
+    const nlohmann::json Version = { { "major", 66 }, { "minor", 67 } };
+    const nlohmann::json Assets = { { { "path", "asset1" } }, { { "path", "asset3" } } };
+    const nlohmann::json Source = {
+        { "version", Version },
+        { "assets", Assets }
     };
 
-    Profile p(source);
+    Profile p(Source.dump());
     p.setIgnoreUpdates(true);
     REQUIRE_NOTHROW(p.removeAsset("unknown-asset"));
 }
@@ -446,30 +437,45 @@ TEST_CASE("Save settings to profile", "[profile]") {
     state.yaw = -1.0;
     state.pitch = -2.0;
 
-    std::vector<std::string> baseSource = {
-        "#Version",
-        "1.0"
+    const nlohmann::json BaseSource = {
+        "version", { { "major", 1 }, { "minor", 0 } }
     };
-    Profile p(baseSource);
+    Profile p(BaseSource.dump());
     p.saveCurrentSettingsToProfile(owner, "current-time", state);
     std::string serialized = p.serialize();
 
-    std::vector<std::string> targetSource = baseSource;
-    targetSource.push_back("");
-    targetSource.push_back("#Property");
-    targetSource.push_back("setPropertyValueSingle\tbase.p1\t2.000000");
-    targetSource.push_back("setPropertyValueSingle\tbase.p2\t\"test-string\"");
-    targetSource.push_back("");
-    targetSource.push_back("#Camera");
-    targetSource.push_back(
-        "setNavigationState\tanchor\taim\trefFrame\t1.0, 2.0, 3.0\t4.0, 5.0, 6.0\t"
-        "-1.0\t-2.0"
-    );
-    targetSource.push_back("");
-    targetSource.push_back("#Time");
-    targetSource.push_back("absolute\tcurrent-time");
+    const nlohmann::json Properties = {
+        {
+            { "type", "setPropertyValueSingle" },
+            { "name", "base.p1" },
+            { "value", "2.0" }
+        },
+        {
+            { "type", "setPropertyValueSingle" },
+            { "name", "base.p2" },
+            { "value", "test-string" }
+        }
+    };
+    const nlohmann::json Camera = {
+        { "type", "setNavigationState" },
+        { "anchor", "anchor" },
+        { "aim", "aim" },
+        { "frame", "refFrame" },
+        { "position", { { "x", 1.0 }, { "y", 2.0 }, { "z", 3.0 } } },
+        { "up", { { "x", 4.0 }, { "y", 5.0 }, { "z", 6.0 } } },
+        { "yaw", -1.0 },
+        { "pitch", -2.0 }
+    };
+    const nlohmann::json Time = {
+        { "type", "absolute" } ,
+        { "value", "current-type" }
+    };
+    nlohmann::json targetSource = BaseSource;
+    targetSource["properties"] = Properties;
+    targetSource["camera"] = Camera;
+    targetSource["time"] = Time;
 
-    std::string targetSerialized = Profile(targetSource).serialize();
+    std::string targetSerialized = Profile(targetSource.dump()).serialize();
 
     REQUIRE(serialized == targetSerialized);
 }

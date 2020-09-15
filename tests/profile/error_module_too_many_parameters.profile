@@ -1,5 +1,11 @@
-#Version
-12.13
-
-#Module
-abc-module			
+{
+  "version": { "major": 12, "minor": 13 },
+  "modules": [
+    {
+      "name": "abc-module",
+      "loadedInstruction": "",
+      "notLoadedInstruction": "",
+      "extra_parameter": ""
+    }
+  ]
+}

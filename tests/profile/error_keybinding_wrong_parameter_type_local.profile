@@ -1,5 +1,13 @@
-#Version
-12.13
-
-#Keybinding
-T	T documentation	T name	T Gui-Path	ER	T script
+{
+  "version": { "major": 12, "minor": 13 },
+  "keybindings": [
+    {
+      "key": "T",
+      "documentation": "T documentation",
+      "name": "T name",
+      "gui_path": "T Gui-Path",
+      "is_local": "ER",
+      "script": "T script"
+    }
+  ]
+}

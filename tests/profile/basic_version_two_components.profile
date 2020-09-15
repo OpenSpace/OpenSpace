@@ -1,2 +1,3 @@
-#Version
-100.200
+{
+  "version": { "major": 100, "minor": 200 }
+}

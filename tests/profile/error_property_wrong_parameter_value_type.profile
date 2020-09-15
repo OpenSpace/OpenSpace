@@ -1,5 +1,10 @@
-#Version
-12.13
-
-#Property
-unknown-set-property-command	property_name_1	property_value_1
+{
+  "version": { "major": 12, "minor": 13 },
+  "properties": [
+    {
+      "type": "unknown-set-property-command",
+      "name": "property_name_1",
+      "value": "property_value_1"
+    }
+  ]
+}

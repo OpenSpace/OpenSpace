@@ -1,18 +1,19 @@
-#Version
-12.13
-
-#Meta
-Name	name
-Version	version
-Description	description
-Author	author
-URL	url
-License	license
-
-#Meta
-Name	name
-Version	version
-Description	description
-Author	author
-URL	url
-License	license
+{
+  "version": { "major": 12, "minor": 13 },
+  "meta": {
+    "name": "name",
+    "version": "version",
+    "description": "description",
+    "author": "author",
+    "url": "url",
+    "license": "license"
+  },
+  "meta": {
+    "name": "name",
+    "version": "version",
+    "description": "description",
+    "author": "author",
+    "url": "url",
+    "license": "license"
+  }
+}

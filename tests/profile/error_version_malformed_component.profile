@@ -1,2 +1,3 @@
-#Version
-abcxyz
+{
+  "version": { "major": "abc", "minor": "xyz" }
+}

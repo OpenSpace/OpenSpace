@@ -1,5 +1,6 @@
-#Version
-12.13
-
-#Meta
-Unknown-Type	name
+{
+  "version": { "major": 12, "minor": 13 },
+  "meta": {
+    "unknown-type": "name"
+  }
+}

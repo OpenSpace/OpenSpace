@@ -47,20 +47,20 @@ public:
     };
     struct Module {
         std::string name;
-        std::string loadedInstruction;
-        std::string notLoadedInstruction;
+        std::optional<std::string> loadedInstruction;
+        std::optional<std::string> notLoadedInstruction;
     };
     struct Meta {
-        std::string name;
-        std::string version;
-        std::string description;
-        std::string author;
-        std::string url;
-        std::string license;
+        std::optional<std::string> name;
+        std::optional<std::string> version;
+        std::optional<std::string> description;
+        std::optional<std::string> author;
+        std::optional<std::string> url;
+        std::optional<std::string> license;
     };
     struct Asset {
         std::string path;
-        std::string name;
+        std::optional<std::string> name;
     };
     struct Property {
         enum class SetType {
@@ -87,7 +87,7 @@ public:
         };
 
         Type type;
-        std::string time;
+        std::string value;
     };
     struct CameraNavState {
         static constexpr const char* Type = "setNavigationState";
@@ -111,7 +111,7 @@ public:
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
-    Profile(const std::vector<std::string>& content);
+    explicit Profile(const std::string& content);
     std::string serialize() const;
 
     std::string convertToScene() const;

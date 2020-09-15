@@ -1,7 +1,29 @@
-#Version
-12.13
-
-#Keybinding
-Keykey+F	T documentation	T name	T Gui-Path	true	T script
-U	U documentation	U name	U Gui-Path	false	U script
-CTRL+V	CTRL+V documentation	CTRL+V name	CTRL+V Gui-Path	false	CTRL+V script
+{
+  "version": { "major": 12, "minor": 13 },
+  "keybindings": [
+    {
+        "key": "Keykey+F",
+        "documentation": "T documentation",
+        "name": "T name",
+        "gui_path": "T Gui-Path",
+        "is_local": true,
+        "script": "T script"
+    },
+    {
+        "key": "U",
+        "documentation": "U documentation",
+        "name": "U name",
+        "gui_path": "U Gui-Path",
+        "is_local": false,
+        "script": "U script"
+    },
+    {
+        "key": "CTRL+V",
+        "documentation": "CTRL+V documentation",
+        "name": "CTRL+V name",
+        "gui_path": "UCTRL+V Gui-Path",
+        "is_local": false,
+        "script": "CTRL+V script"
+    }
+  ]
+}

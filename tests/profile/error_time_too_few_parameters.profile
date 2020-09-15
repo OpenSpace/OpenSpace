@@ -1,5 +1,6 @@
-#Version
-12.13
-
-#Time
-absolute
+{
+  "version": { "major": 12, "minor": 13 },
+  "time": {
+    "type": "absolute"
+  }
+}

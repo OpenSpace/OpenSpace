@@ -1,5 +1,8 @@
 {
-  "version": 1.0,
+  "version": {
+    "major": 1,
+    "minor": 0
+  },
   "assets": [
     {
       "path": "base"
@@ -15,7 +18,7 @@
   "properties": [
     {
       "type": "setPropertyValue",
-      "identifier": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites}.Renderable.Enabled",
       "value": "false"
     }
   ],

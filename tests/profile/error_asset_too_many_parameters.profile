@@ -1,5 +1,10 @@
-#Version
-12.13
-
-#Asset
-folder1/folder2/asset	A	B
+{
+  "version": { "major": 12, "minor": 13 },
+  "assets": [
+    {
+      "path": "folder1/folder2/asset",
+      "name": "A",
+      "extra_parameter": "B"
+    }
+  ]
+}

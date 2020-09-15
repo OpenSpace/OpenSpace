@@ -1,53 +1,118 @@
-#Version
-22.21
-
-#Meta
-Name	name
-Version	version
-Description	description
-Author	author
-URL	url
-License	license
-
-#Module
-abc-module		
-def-module		
-ghi-module		
-
-#Asset
-scene/solarsystem/planets/earth/earth	
-scene/solarsystem/planets/earth/satellites/satellites	
-folder1/folder2/asset	
-folder3/folder4/asset2	variable
-folder5/folder6/asset3	
-
-#Property
-setPropertyValue	{earth_satellites}.Renderable.Enabled	false
-setPropertyValue	property_name_1	property_value_1
-setPropertyValue	property_name_2	property_value_2
-setPropertyValue	property_name_3	property_value_3
-setPropertyValueSingle	property_name_4	property_value_5
-setPropertyValueSingle	property_name_4	property_value_5
-setPropertyValueSingle	property_name_4	property_value_5
-
-#Keybinding
-T	T documentation	T name	T Gui-Path	true	T script
-U	U documentation	U name	U Gui-Path	false	U script
-CTRL+V	CTRL+V documentation	CTRL+V name	CTRL+V Gui-Path	false	CTRL+V script
-
-#Time
-relative	-1d
-
-#Camera
-goToGeo	"Earth"	58.5877	16.1924	2.0e+07
-
-#MarkNodes
-Earth
-Mars
-Moon
-Sun
-
-#AdditionalScripts
-script-1
-script-2
-script-3
+{
+  "version": { "major": 22, "minor": 21 },
+  "meta": {
+    "name": "name",
+    "version": "version",
+    "description": "description",
+    "author": "author",
+    "url": "url",
+    "license": "license"
+  },
+  "modules": [
+    {
+      "name": "abc-module"
+    },
+    {
+      "name": "def-module"
+    },
+    {
+      "name": "ghi-module"
+    }
+  ],
+  "assets": [
+    {
+      "path": "scene/solarsystem/planets/earth/earth"
+    },
+    {
+      "path": "scene/solarsystem/planets/earth/satellites/satellites"
+    },
+    {
+      "path": "folder1/folder2/asset"
+    },
+    {
+      "path": "folder3/folder4/asset2",
+      "name": "variable"
+    },
+    {
+      "path": "folder5/folder6/asset3"
+    }
+  ],
+  "properties": [
+    {
+      "type": "setPropertyValue",
+      "name": "{earth_satellites}.Renderable.Enabled",
+      "value": "false"
+    },
+    {
+      "type": "setPropertyValue",
+      "name": "property_name_1",
+      "value": "property_value_1"
+    },
+    {
+      "type": "setPropertyValue",
+      "name": "property_name_2",
+      "value": "property_value_2"
+    },
+    {
+      "type": "setPropertyValue",
+      "name": "property_name_3",
+      "value": "property_value_3"
+    },
+    {
+      "type": "setPropertyValueSingle",
+      "name": "property_name_4",
+      "value": "property_value_4"
+    },
+    {
+      "type": "setPropertyValueSingle",
+      "name": "property_name_5",
+      "value": "property_value_5"
+    },
+    {
+      "type": "setPropertyValueSingle",
+      "name": "property_name_6",
+      "value": "property_value_6"
+    },
+  ],
+  "keybindings": [
+    {
+      "key": "T",
+      "documentation": "T documentation",
+      "name": "T name",
+      "gui_path": "T Gui-Path",
+      "is_local": true,
+      "script": "T script"
+    },
+    {
+      "key": "U",
+      "documentation": "U documentation",
+      "name": "U name",
+      "gui_path": "U Gui-Path",
+      "is_local": false,
+      "script": "U script"
+    },
+    {
+      "key": "CTRL+V",
+      "documentation": "CTRL+V documentation",
+      "name": "CTRL+V name",
+      "gui_path": "CTRL+V Gui-Path",
+      "is_local": false,
+      "script": "CTRL+V script"
+    }
+  ],
+  "time": {
+    "type": "relative",
+    "value": "-1d"
+  },
+  "camera": {
+    "type": "goToGeo",
+    "anchor": "Earth",
+    "latitude": 58.5877,
+    "longitude": 16.1924,
+    "altitude": 2.0e+07
+  },
+  "mark_nodes": [
+    "Earth", "Mars", "Moon", "Sun"
+  ],
+  "additional_scripts": "script-1\nscript-2\nscript-3"
+}

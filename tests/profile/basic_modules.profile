@@ -1,7 +1,14 @@
-#Version
-12.13
-
-#Module
-abc-module		
-def-module		
-ghi-module		
+{
+  "version": { "major": 12, "minor": 13 },
+  "modules": [
+    {
+      "path": "abs-module"
+    },
+    {
+      "path": "def-module"
+    },
+    {
+      "path": "ghi-module"
+    }
+  ]
+}

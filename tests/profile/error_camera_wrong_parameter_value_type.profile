@@ -1,5 +1,6 @@
-#Version
-12.13
-
-#Camera
-ER
+{
+  "version": { "major": 12, "minor": 13 },
+  "camera": {
+    "type": "ER"
+  }
+}

@@ -1,5 +1,8 @@
-#Version
-12.13
-
-#Keybinding
-T
+{
+  "version": { "major": 12, "minor": 13 },
+  "keybindings": [
+    {
+      "key": "T"
+    }
+  ]
+}

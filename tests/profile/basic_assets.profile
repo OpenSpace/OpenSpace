@@ -1,7 +1,15 @@
-#Version
-12.13
-
-#Asset
-folder1/folder2/asset	
-folder3/folder4/asset2	variable
-folder5/folder6/asset3	
+{
+  "version": { "major": 12, "minor": 13 },
+  "assets": [
+    {
+      "path": "folder1/folder2/asset"
+    },
+    {
+      "path": "folder3/folder4/asset2",
+      "name": "variable"
+    },
+    {
+      "path": "folder5/folder6/asset3"
+    }
+  ]
+}
