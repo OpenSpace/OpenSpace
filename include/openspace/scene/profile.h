@@ -58,10 +58,6 @@ public:
         std::optional<std::string> url;
         std::optional<std::string> license;
     };
-    struct Asset {
-        std::string path;
-        std::optional<std::string> name;
-    };
     struct Property {
         enum class SetType {
             SetPropertyValue,
@@ -147,7 +143,7 @@ private:
     Version version = CurrentVersion;
     std::vector<Module> modules;
     std::optional<Meta> meta;
-    std::vector<Asset> assets;
+    std::vector<std::string> assets;
     std::vector<Property> properties;
     std::vector<Keybinding> keybindings;
     std::optional<Time> time;

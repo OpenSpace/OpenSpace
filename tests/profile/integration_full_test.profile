@@ -20,22 +20,11 @@
     }
   ],
   "assets": [
-    {
-      "path": "scene/solarsystem/planets/earth/earth"
-    },
-    {
-      "path": "scene/solarsystem/planets/earth/satellites/satellites"
-    },
-    {
-      "path": "folder1/folder2/asset"
-    },
-    {
-      "path": "folder3/folder4/asset2",
-      "name": "variable"
-    },
-    {
-      "path": "folder5/folder6/asset3"
-    }
+    "scene/solarsystem/planets/earth/earth",
+    "scene/solarsystem/planets/earth/satellites/satellites",
+    "folder1/folder2/asset",
+    "folder3/folder4/asset2",
+    "folder5/folder6/asset3"
   ],
   "properties": [
     {

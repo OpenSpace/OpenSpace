@@ -4,16 +4,9 @@
     "minor": 0
   },
   "assets": [
-    {
-      "path": "base"
-    },
-    {
-      "path": "scene/solarsystem/planets/earth/earth",
-      "name": "earthAsset"
-    },
-    {
-      "path": "scene/solarsystem/planets/earth/satellites/satellites"
-    }
+    "base",
+    "scene/solarsystem/planets/earth/earth",
+    "scene/solarsystem/planets/earth/satellites/satellites"
   ],
   "properties": [
     {
@@ -28,7 +21,7 @@
   },
   "camera": {
     "type": "goToGeo",
-    "anchor": "earthAsset.Earth.Identifier",
+    "anchor": "Earth",
     "latitude": 58.5877,
     "longitude": 16.1924,
     "altitude": 20000000
