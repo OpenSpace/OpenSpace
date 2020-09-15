@@ -35,8 +35,8 @@ uniform sampler1D colorTable;
 uniform sampler1D colorTableCMR;
 uniform sampler1D colorTableEarth;
 uniform sampler1D colorTableFlow;
-uniform sampler1D colorTableIlluminance;
-uniform sampler1D colorTableIlluminance2;
+//uniform sampler1D colorTableIlluminance;
+//uniform sampler1D colorTableIlluminance2;
 uniform vec2      colorTableRange;
 
 // Uniforms needed for Particle Flow
@@ -69,10 +69,11 @@ uniform int     scalingMode;
 uniform int     nodeSkipMethod;
 uniform int     nodeSkip;
 uniform int     nodeSkipDefault;
+uniform int     nodeSkipEarth;
 uniform float   nodeSkipFluxThreshold;
 uniform float   nodeSkipRadiusThreshold;
 uniform float   fluxColorAlpha;
-//uniform float   fluxColorAlphaIlluminance;
+uniform float   fluxColorAlphaIlluminance;
 uniform vec3    earthPos;
 uniform float   distanceThreshold;
 uniform int     activeStreamNumber;
@@ -236,7 +237,8 @@ return false;
 void DecidehowtoshowClosetoEarth(){
         // SizeScaling
     if(enhanceMethod == sizeScaling){
-        vec4 fluxColor = getTransferFunctionColor(colorTable);
+       // vec4 fluxColor = getTransferFunctionColor(colorTable);
+       vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
         vs_color = vec4(fluxColor.xyz, fluxColor.a);
     /*    float tempR = rValue + 0.4; 
         if(tempR > 1.5){
@@ -295,13 +297,23 @@ void CheckdistanceMethod() {
              vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
         }
         if(distance(earthPos, in_position) < distanceThreshold){
+            if(mod(gl_VertexID, nodeSkipEarth) == 0){
             DecidehowtoshowClosetoEarth();
+            }
+            else{
+            vs_color = vec4(0);
+            }
         }
-        /*else{
+        else{
             if(enhanceMethod == illuminance){
                  vs_color.a = fluxColorAlphaIlluminance;
             }
-        }*/
+
+             if(fluxValue < thresholdFlux){
+                    vs_color.a = fluxColorAlpha;  
+              }
+                
+        }
 }
 
 void main() {
@@ -311,7 +323,7 @@ void main() {
     // Checking if we should render the vertex dependent on the vertexindex, 
     // by using modulus.
     
-    if(CheckvertexIndex()){
+    if(CheckvertexIndex() || distance(earthPos, in_position) < distanceThreshold){
     //Filtering by radius and z-axis
     if(rValue > filterLower && rValue < filterUpper){ //if(rValue > filterLower){
         if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
@@ -321,8 +333,8 @@ void main() {
             }
             // We should color it by flux. 
             else{
-                vec4 fluxColor = getTransferFunctionColor(colorTable);
-
+                //vec4 fluxColor = getTransferFunctionColor(colorTable);
+                vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
                 if(fluxValue > thresholdFlux){
                     vs_color = vec4(fluxColor.xyz, fluxColor.a);  
                     gl_PointSize = nodeSizeLargerFlux;

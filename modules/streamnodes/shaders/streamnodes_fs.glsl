@@ -133,11 +133,16 @@ Fragment getFragment() {
         if(vs_closeToEarth > 0.5){
             if(pulsatingAlways || camera_IsCloseEnough > 0.5){
                 if(length(coord) > 0.46){
+                //if length(coord) > 0.32){
+                //if length(coord) > 0.40){
+
+                //frag.color = vec4(1,1,1,1);
                     float speed = 60.f;
                     int modulusResult = int(double(speed) * vs_time) % 60;
                     if(modulusResult > 0 && modulusResult < 30){
                         //frag.color = vec4(1, 1, 1, 1);
                         discard;
+                        //discard;
                     }
                 }
             }
