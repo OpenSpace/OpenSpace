@@ -108,7 +108,7 @@ namespace openspace {
         // Header consists of version (1 char), message type (4 char) & message size (4 char)
         size_t HeaderSize = 9 * sizeof(char);
 
-        // Create basic buffer for receiving first part of messages
+        // Create basic buffer for receiving first part of message
         std::vector<char> headerBuffer(HeaderSize);
         std::vector<char> messageBuffer;
 
@@ -118,7 +118,7 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-        // Read and convert version number
+        // Read and convert version number: Byte 0
         std::string version;
         version.push_back(headerBuffer[0]);
         const uint32_t protocolVersionIn = std::stoi(version);
@@ -133,16 +133,20 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
+
+        // TESTING SENDING MESSAGE 
         std::string header = "O";
         sendMessage(header);
         LERROR(fmt::format("Meddelandet som skickas {}", header));
+        // TESTING SENDING MESSAGE 
 
-        // Read message typ: byte 1-4
+
+        // Read message type: Byte 1-4
         std::string type;
         for(int i = 1; i < 5; i++)
             type.push_back(headerBuffer[i]);
 
-        // Read and convert message size: byte 5-8
+        // Read and convert message size: Byte 5-8
         std::string messageSizeIn;
         for (int i = 5; i < 9; i++)
             messageSizeIn.push_back(headerBuffer[i]);
@@ -155,7 +159,7 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-        // And delegate decoding depending on type
+        // And delegate decoding depending on message type
         if (type == "CONN")
             return Message(MessageType::Connection, messageBuffer);
         else if( type == "ASGN")
@@ -420,7 +424,6 @@ namespace openspace {
         return floatValue;
     }
 
-    // Read Color value
     glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
 
         std::string lengthOfColor; // Not used for now, but sent in message
