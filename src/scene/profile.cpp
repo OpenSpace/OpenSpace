@@ -226,7 +226,9 @@ void from_json(const nlohmann::json& j, Profile::Time& v) {
 void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     j["type"] = Profile::CameraNavState::Type;
     j["anchor"] = v.anchor;
-    j["aim"] = v.aim;
+    if (v.aim.has_value()) {
+        j["aim"] = *v.aim;
+    }
     j["frame"] = v.referenceFrame;
     nlohmann::json p{
         { "x", v.position.x },
@@ -257,8 +259,10 @@ void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     );
 
     j.at("anchor").get_to(v.anchor);
-    j.at("aim").get_to(v.aim);
-    j.at("referenceFrame").get_to(v.referenceFrame);
+    if (j.find("aim") != j.end()) {
+        v.aim = j["aim"].get<std::string>();
+    }
+    j.at("frame").get_to(v.referenceFrame);
     nlohmann::json p = j.at("position");
     p.at("x").get_to(v.position.x);
     p.at("y").get_to(v.position.y);
@@ -847,17 +851,27 @@ scripting::LuaLibrary Profile::luaLibrary() {
 std::string Profile::serialize() const {
     nlohmann::json r;
     r["version"] = version;
-    r["modules"] = modules;
+    if (!modules.empty()) {
+        r["modules"] = modules;
+    }
     if (meta.has_value()) {
         r["meta"] = *meta;
     }
-    r["assets"] = assets;
-    r["properties"] = properties;
-    r["keybindings"] = keybindings;
+    if (!assets.empty()) {
+        r["assets"] = assets;
+    }
+    if (!properties.empty()) {
+        r["properties"] = properties;
+    }
+    if (!keybindings.empty()) {
+        r["keybindings"] = keybindings;
+    }
     if (time.has_value()) {
         r["time"] = *time;
     }
-    r["delta_times"] = deltaTimes;
+    if (!deltaTimes.empty()) {
+        r["delta_times"] = deltaTimes;
+    }
     if (camera.has_value()) {
         r["camera"] = std::visit(
             overloaded {
@@ -871,8 +885,12 @@ std::string Profile::serialize() const {
             *camera
         );
     }
-    r["mark_nodes"] = markNodes;
-    r["additional_scripts"] = additionalScripts;
+    if (!markNodes.empty()) {
+        r["mark_nodes"] = markNodes;
+    }
+    if (!additionalScripts.empty()) {
+        r["additional_scripts"] = additionalScripts;
+    }
 
     return r.dump(2);
 }
@@ -900,8 +918,8 @@ Profile::Profile(const std::string& content) {
         if (profile.find("time") != profile.end()) {
             time = profile.at("time").get<Time>();
         }
-        if (profile.find("deltaTimes") != profile.end()) {
-            profile.at("deltaTimes").get_to(keybindings);
+        if (profile.find("delta_times") != profile.end()) {
+            profile.at("delta_times").get_to(deltaTimes);
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
@@ -916,10 +934,10 @@ Profile::Profile(const std::string& content) {
             }
         }
         if (profile.find("mark_nodes") != profile.end()) {
-            profile.at("mark_nodes") = markNodes;
+            profile.at("mark_nodes").get_to(markNodes);
         }
         if (profile.find("additional_scripts") != profile.end()) {
-            profile.at("additional_scripts") = additionalScripts;
+            profile.at("additional_scripts").get_to(additionalScripts);
         }
     }
     catch (const nlohmann::json::exception& e) {
@@ -1244,8 +1262,8 @@ std::string Profile::convertToScene() const {
                     std::string result;
                     result += "openspace.navigation.setNavigationState({";
                     result += fmt::format("Anchor = {}, ", camera.anchor);
-                    if (!camera.aim.empty()) {
-                        result += fmt::format("Aim = {}, ", camera.aim);
+                    if (camera.aim.has_value()) {
+                        result += fmt::format("Aim = {}, ", *camera.aim);
                     }
                     if (!camera.referenceFrame.empty()) {
                         result += fmt::format("ReferenceFrame = {}, ", camera.referenceFrame);

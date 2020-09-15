@@ -6,3 +6,4 @@
     "latitude": 1.0,
     "longitude": 2.0
   }
+}

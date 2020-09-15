@@ -30,6 +30,6 @@
       "type": "setPropertyValueSingle",
       "name": "property_name_6",
       "value": "property_value_6"
-    },
+    }
   ]
 }

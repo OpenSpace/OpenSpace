@@ -2,13 +2,13 @@
   "version": { "major": 12, "minor": 13 },
   "modules": [
     {
-      "path": "abs-module"
+      "name": "abs-module"
     },
     {
-      "path": "def-module"
+      "name": "def-module"
     },
     {
-      "path": "ghi-module"
+      "name": "ghi-module"
     }
   ]
 }

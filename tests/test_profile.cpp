@@ -71,30 +71,20 @@ TEST_CASE("Minimal", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 //
 // Basic functionality
 //
-TEST_CASE("Basic Version One Component", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/basic_version_one_component.profile";
+TEST_CASE("Basic Version", "[profile]") {
+    constexpr const char* TestFile = "${TESTDIR}/profile/basic_version.profile";
     Profile p = loadProfile(TestFile);
 
     std::string serialized = p.serialize();
-    constexpr const char* contents = "#Version\n100.0\n";
-    REQUIRE(serialized == contents);
-}
+    std::string contents = loadFile(TestFile);
 
-TEST_CASE("Basic Version Two Components", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/basic_version_two_components.profile";
-    Profile p = loadProfile(TestFile);
-
-    std::string serialized = p.serialize();
-    constexpr const char* contents = "#Version\n100.200\n";
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta", "[profile]") {
@@ -104,7 +94,7 @@ TEST_CASE("Basic Meta", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Module", "[profile]") {
@@ -114,7 +104,7 @@ TEST_CASE("Basic Module", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Assets", "[profile]") {
@@ -124,7 +114,7 @@ TEST_CASE("Basic Assets", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Properties", "[profile]") {
@@ -134,7 +124,7 @@ TEST_CASE("Basic Properties", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Keybindings", "[profile]") {
@@ -144,7 +134,7 @@ TEST_CASE("Basic Keybindings", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Time Relative", "[profile]") {
@@ -154,7 +144,7 @@ TEST_CASE("Basic Time Relative", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Time Absolute", "[profile]") {
@@ -164,7 +154,7 @@ TEST_CASE("Basic Time Absolute", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Delta Times", "[profile]") {
@@ -174,7 +164,7 @@ TEST_CASE("Basic Delta Times", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera NavState", "[profile]") {
@@ -184,7 +174,7 @@ TEST_CASE("Basic Camera NavState", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera GoToGeo", "[profile]") {
@@ -194,7 +184,7 @@ TEST_CASE("Basic Camera GoToGeo", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera GoToGeo altitude", "[profile]") {
@@ -205,7 +195,7 @@ TEST_CASE("Basic Camera GoToGeo altitude", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Mark Nodes", "[profile]") {
@@ -215,7 +205,7 @@ TEST_CASE("Basic Mark Nodes", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Additional Scripts", "[profile]") {
@@ -226,7 +216,7 @@ TEST_CASE("Basic Additional Scripts", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 //
@@ -239,46 +229,36 @@ TEST_CASE("Integration Full Test", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(TestFile);
 
-    REQUIRE(serialized == contents);
-}
-
-TEST_CASE("Integration Full Test Permutation 1", "[profile]") {
-    constexpr const char* TestFileOriginal =
-        "${TESTDIR}/profile/integration_full_test_permutation_base.profile";
-    constexpr const char* TestFilePermutation =
-        "${TESTDIR}/profile/integration_full_test_permutation_1.profile";
-    Profile original = loadProfile(TestFileOriginal);
-    Profile permutation = loadProfile(TestFilePermutation);
-
-    std::string originalSerialized = original.serialize();
-    std::string permutationSerialized = permutation.serialize();
-    REQUIRE(originalSerialized == permutationSerialized);
+    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 //
 // Adding assets
 //
 TEST_CASE("Add asset to empty Profile", "[profile]") {
-    const nlohmann::json OriginalSource = {
-        { "version", { { "major", 10 }, { "minor", 11 } } }
-    };
-    Profile p(OriginalSource.dump());
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 10;
+    source["version"]["minor"] = 11;
+
+    Profile p(source.dump());
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    nlohmann::json targetSource = OriginalSource;
-    targetSource["assets"] = { { "path", "new-asset" } };
-    std::string targetSerialized(Profile(targetSource.dump()).serialize());
+    nlohmann::json target = source;
+    target["assets"] = nlohmann::json::array();
+    target["assets"].push_back({ { "path", "new-asset" } });
+    std::string targetSerialized(Profile(target.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
-    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 10;
+    source["version"]["minor"] = 11;
 
-    const nlohmann::json source = {
-        { "version", Version }
-    };
     Profile p(source.dump());
     p.setIgnoreUpdates(true);
     p.addAsset("new-asset");
@@ -290,54 +270,57 @@ TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
 }
 
 TEST_CASE("Add asset to not-empty Profile", "[profile]") {
-    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
-    const nlohmann::json Assets = { { { "path", "old-asset" } } };
-    const nlohmann::json OriginalSource = {
-        { "version", Version },
-        { "assets", Assets }
-    };
-    Profile p(OriginalSource.dump());
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 10;
+    source["version"]["minor"] = 11;
+    source["assets"] = nlohmann::json::array();
+    source["assets"].push_back({ { "path", "old-asset" } });
+
+    Profile p(source.dump());
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    nlohmann::json targetSource = OriginalSource;
-    targetSource["assets"].push_back({ "path", "new-asset" });
-    std::string targetSerialized(Profile(targetSource.dump()).serialize());
+    nlohmann::json target = source;
+    target["assets"].push_back({ { "path", "new-asset" } });
+    std::string targetSerialized(Profile(target.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
-    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
-    const nlohmann::json Assets = { { { "path", "old-asset" } } };
-    const nlohmann::json Source = {
-        { "version", Version },
-        { "assets", Assets }
-    };
-    Profile p(Source.dump());
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 10;
+    source["version"]["minor"] = 11;
+    source["assets"] = nlohmann::json::array();
+    source["assets"].push_back({ { "path", "old-asset" } });
+
+    Profile p(source.dump());
     p.setIgnoreUpdates(true);
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    std::string targetSerialized(Profile(Source.dump()).serialize());
+    std::string targetSerialized(Profile(source.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add duplicate asset", "[profile]") {
-    const nlohmann::json Version = { { "major", 10 }, { "minor", 11 } };
-    const nlohmann::json Assets = { { { "path", "old-asset" } } };
-    const nlohmann::json Source = {
-        { "version", Version },
-        { "assets", Assets }
-    };
-    Profile p(Source.dump());
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 10;
+    source["version"]["minor"] = 11;
+    source["assets"] = nlohmann::json::array();
+    source["assets"].push_back({ { "path", "old-asset" } });
+
+    Profile p(source.dump());
     p.addAsset("new-asset");
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
-    nlohmann::json targetSource = Source;
-    targetSource["assets"].push_back({ "path", "new-asset" });
+    nlohmann::json targetSource = source;
+    targetSource["assets"].push_back({ { "path", "new-asset" } });
     std::string targetSerialized(Profile(targetSource.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
@@ -347,35 +330,36 @@ TEST_CASE("Add duplicate asset", "[profile]") {
 // Removing assets
 //
 TEST_CASE("Remove asset", "[profile]") {
-    const nlohmann::json Version = { { "major", 99 }, { "minor", 88 } };
-    const nlohmann::json Assets = { { { "path", "asset1" } } };
-    const nlohmann::json TargetSource = {
-        { "version", Version },
-        { "assets", Assets }
-    };
+    nlohmann::json target;
+    target["version"] = nlohmann::json::object();
+    target["version"]["major"] = 99;
+    target["version"]["minor"] = 88;
+    target["assets"] = nlohmann::json::array();
+    target["assets"].push_back({ { "path", "asset1" } });
 
-    nlohmann::json originalSource = TargetSource;
-    originalSource["assets"].push_back({ { "path", "asset2" } });
+    nlohmann::json source = target;
+    source["assets"].push_back({ { "path", "asset2" } });
 
-    Profile p(originalSource.dump());
+    Profile p(source.dump());
     p.removeAsset("asset2");
     std::string originalSerialized = p.serialize();
 
-    std::string targetSerialized(Profile(TargetSource.dump()).serialize());
+    std::string targetSerialized(Profile(target.dump()).serialize());
 
     REQUIRE(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Remove asset (ignored)", "[profile]") {
-    const nlohmann::json Version = { { "major", 99 }, { "minor", 88 } };
-    const nlohmann::json Assets = { { { "path", "asset1" } } };
-    const nlohmann::json TargetSource = {
-        { "version", Version },
-        { "assets", Assets }
-    };
+    nlohmann::json target;
+    target["version"] = nlohmann::json::object();
+    target["version"]["major"] = 99;
+    target["version"]["minor"] = 88;
+    target["assets"] = nlohmann::json::array();
+    target["assets"].push_back({ { "path", "asset1" } });
 
-    nlohmann::json source = TargetSource;
+    nlohmann::json source = target;
     source["assets"].push_back({ { "path", "asset2" } });
+
 
     Profile p(source.dump());
     p.setIgnoreUpdates(true);
@@ -388,14 +372,15 @@ TEST_CASE("Remove asset (ignored)", "[profile]") {
 }
 
 TEST_CASE("Removing non-exisiting asset", "[profile]") {
-    const nlohmann::json Version = { { "major", 66 }, { "minor", 67 } };
-    const nlohmann::json Assets = { { { "path", "asset1" } }, { { "path", "asset3" } } };
-    const nlohmann::json Source = {
-        { "version", Version },
-        { "assets", Assets }
-    };
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 66;
+    source["version"]["minor"] = 67;
+    source["assets"] = nlohmann::json::array();
+    source["assets"].push_back({ { "path", "asset1" } });
+    source["assets"].push_back({ { "path", "asset3" } });
 
-    Profile p(Source.dump());
+    Profile p(source.dump());
     REQUIRE_THROWS_WITH(
         p.removeAsset("unknown-asset"),
         Catch::Matchers::Contains("Tried to remove non-existing asset 'unknown-asset'")
@@ -403,14 +388,15 @@ TEST_CASE("Removing non-exisiting asset", "[profile]") {
 }
 
 TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
-    const nlohmann::json Version = { { "major", 66 }, { "minor", 67 } };
-    const nlohmann::json Assets = { { { "path", "asset1" } }, { { "path", "asset3" } } };
-    const nlohmann::json Source = {
-        { "version", Version },
-        { "assets", Assets }
-    };
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 66;
+    source["version"]["minor"] = 67;
+    source["assets"] = nlohmann::json::array();
+    source["assets"].push_back({ { "path", "asset1" } });
+    source["assets"].push_back({ { "path", "asset3" } });
 
-    Profile p(Source.dump());
+    Profile p(source.dump());
     p.setIgnoreUpdates(true);
     REQUIRE_NOTHROW(p.removeAsset("unknown-asset"));
 }
@@ -437,26 +423,27 @@ TEST_CASE("Save settings to profile", "[profile]") {
     state.yaw = -1.0;
     state.pitch = -2.0;
 
-    const nlohmann::json BaseSource = {
-        "version", { { "major", 1 }, { "minor", 0 } }
-    };
-    Profile p(BaseSource.dump());
+    nlohmann::json source;
+    source["version"] = nlohmann::json::object();
+    source["version"]["major"] = 1;
+    source["version"]["minor"] = 0;
+    Profile p(source.dump());
     p.saveCurrentSettingsToProfile(owner, "current-time", state);
     std::string serialized = p.serialize();
 
-    const nlohmann::json Properties = {
-        {
-            { "type", "setPropertyValueSingle" },
-            { "name", "base.p1" },
-            { "value", "2.0" }
-        },
-        {
-            { "type", "setPropertyValueSingle" },
-            { "name", "base.p2" },
-            { "value", "test-string" }
-        }
-    };
-    const nlohmann::json Camera = {
+    nlohmann::json properties = nlohmann::json::array();
+    properties.push_back({
+        { "type", "setPropertyValueSingle" },
+        { "name", "base.p1" },
+        { "value", "2.000000" }
+    });
+    properties.push_back({
+        { "type", "setPropertyValueSingle" },
+        { "name", "base.p2" },
+        { "value", "\"test-string\"" }
+    });
+
+    const nlohmann::json camera = {
         { "type", "setNavigationState" },
         { "anchor", "anchor" },
         { "aim", "aim" },
@@ -466,16 +453,16 @@ TEST_CASE("Save settings to profile", "[profile]") {
         { "yaw", -1.0 },
         { "pitch", -2.0 }
     };
-    const nlohmann::json Time = {
+    const nlohmann::json time = {
         { "type", "absolute" } ,
-        { "value", "current-type" }
+        { "value", "current-time" }
     };
-    nlohmann::json targetSource = BaseSource;
-    targetSource["properties"] = Properties;
-    targetSource["camera"] = Camera;
-    targetSource["time"] = Time;
+    nlohmann::json target = source;
+    target["properties"] = properties;
+    target["camera"] = camera;
+    target["time"] = time;
 
-    std::string targetSerialized = Profile(targetSource.dump()).serialize();
+    std::string targetSerialized = Profile(target.dump()).serialize();
 
     REQUIRE(serialized == targetSerialized);
 }
@@ -483,123 +470,12 @@ TEST_CASE("Save settings to profile", "[profile]") {
 //
 // Error states
 //
-TEST_CASE("Error unrecognized header", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_unrecognized_header.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Invalid section header") &&
-        Catch::Matchers::Contains("#Azzet")
-    );
-}
-
-TEST_CASE("Error missing separator line", "[profile}") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_missing_separator_line.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Sections in profile must be separated by empty lines")
-    );
-}
-
-TEST_CASE("Error version not first header", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_version_not_first.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("First header in the file must be Version") &&
-        Catch::Matchers::Contains("#Asset")
-    );
-}
-
-TEST_CASE("Error two version sections", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_two_version_sections.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Version section can only appear once per profile")
-    );
-}
-
-TEST_CASE("Error two meta sections", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_two_meta_sections.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Meta section can only appear once per profile")
-    );
-}
-
-
-TEST_CASE("Error two camera sections", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_two_camera_sections.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Camera section can only appear once per profile")
-    );
-}
-
-TEST_CASE("Error two time sections", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_two_time_sections.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Time section can only appear once per profile")
-    );
-}
-
 TEST_CASE("Error version malformed component", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error_version_malformed_component.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Error parsing Version. Version number is not a number")
-    );
-}
-
-TEST_CASE("Error version too many components", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_version_too_many_components.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 1-2 version components, got 3")
-    );
-}
-
-TEST_CASE("Error module too few parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_module_too_few_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 3 fields in a Module entry, got 1")
-    );
-}
-
-TEST_CASE("Error module too many parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_module_too_many_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 3 fields in a Module entry, got 4")
-    );
-}
-
-TEST_CASE("Error asset too few parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_asset_too_few_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 2 fields in an Asset entry, got 1")
-    );
-}
-
-TEST_CASE("Error asset too many parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_asset_too_many_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 2 fields in an Asset entry, got 3")
+        Catch::Matchers::Contains("type must be number, but is string")
     );
 }
 
@@ -608,16 +484,7 @@ TEST_CASE("Error property too few parameters", "[profile]") {
         "${TESTDIR}/profile/error_property_too_few_parameters.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 3 fields in Property entry, got 1")
-    );
-}
-
-TEST_CASE("Error property too many parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_property_too_many_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 3 fields in Property entry, got 4")
+        Catch::Matchers::Contains("key 'name' not found")
     );
 }
 
@@ -626,10 +493,7 @@ TEST_CASE("Error property wrong parameter type 'type'", "[profile]") {
         "${TESTDIR}/profile/error_property_wrong_parameter_value_type.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains(
-            "Expected property set type 'setPropertyValue' or "
-            "'setPropertyValueSingle', got 'unknown-set-property-command'"
-        )
+        Catch::Matchers::Contains("Unknown property set type")
     );
 }
 
@@ -638,16 +502,7 @@ TEST_CASE("Error keybinding too few parameters", "[profile]") {
         "${TESTDIR}/profile/error_keybinding_too_few_parameters.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 6 fields in Keybinding entry, got 1")
-    );
-}
-
-TEST_CASE("Error keybinding too many parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_keybinding_too_many_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 6 fields in Keybinding entry, got 7")
+        Catch::Matchers::Contains("key 'documentation' not found")
     );
 }
 
@@ -674,7 +529,7 @@ TEST_CASE("Error keybinding wrong parameter type 'local'", "[profile]") {
         "${TESTDIR}/profile/error_keybinding_wrong_parameter_type_local.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 'false' or 'true' for the local path, got ER")
+        Catch::Matchers::Contains("type must be boolean, but is string")
     );
 }
 
@@ -683,16 +538,7 @@ TEST_CASE("Error time too few parameters", "[profile]") {
         "${TESTDIR}/profile/error_time_too_few_parameters.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 2 fields in Time entry, got 1")
-    );
-}
-
-TEST_CASE("Error time too many parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_time_too_many_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 2 fields in Time entry, got 3")
+        Catch::Matchers::Contains("key 'value' not found")
     );
 }
 
@@ -701,9 +547,7 @@ TEST_CASE("Error time wrong parameter type 'type'", "[profile]") {
         "${TESTDIR}/profile/error_time_wrong_parameter_value_type.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains(
-            "Expected 'absolute' or 'relative' for the type, got ER"
-        )
+        Catch::Matchers::Contains("Unknown time type")
     );
 }
 
@@ -712,9 +556,7 @@ TEST_CASE("Error deltatimes wrong parameter type", "[profile]") {
         "${TESTDIR}/profile/error_deltatimes_wrong_parameter_value_type.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains(
-            "Expected a number for delta time entry, got 'notANumber'" 
-        )
+        Catch::Matchers::Contains("type must be number, but is string")
     );
 }
 
@@ -723,16 +565,7 @@ TEST_CASE("Error camera navigation state too few parameters", "[profile]") {
         "${TESTDIR}/profile/error_camera_navstate_too_few_parameters.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 8 fields in the Camera entry, got 1")
-    );
-}
-
-TEST_CASE("Error camera navigation state too many parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_camera_navstate_too_many_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 8 fields in the Camera entry, got 9")
+        Catch::Matchers::Contains("key 'anchor' not found")
     );
 }
 
@@ -742,7 +575,7 @@ TEST_CASE("Error camera navigation state too few parameters in position", "[prof
         "error_camera_navstate_wrong_parameter_too_few_components_position.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 3 fields for the camera's position, got 2")
+        Catch::Matchers::Contains("key 'z' not found")
     );
 }
 
@@ -762,7 +595,7 @@ TEST_CASE("Error camera navigation state wrong parameter type position", "[profi
         "error_camera_navstate_wrong_parameter_wrong_component_type_position.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Camera's position components must be numbers")
+        Catch::Matchers::Contains("type must be number, but is string")
     );
 }
 
@@ -772,9 +605,7 @@ TEST_CASE("Error camera navigation state too few parameters in up vector", "[pro
         "error_camera_navstate_wrong_parameter_too_few_components_up.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains(
-            "Expected 0 or 3 fields for the camera's up vector, got 2"
-        )
+        Catch::Matchers::Contains("key 'z' not found")
     );
 }
 
@@ -784,7 +615,7 @@ TEST_CASE("Error camera navigation state wrong parameter type up vector", "[prof
         "error_camera_navstate_wrong_parameter_wrong_component_type_up.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Camera's up vector components must be numbers")
+        Catch::Matchers::Contains("type must be number, but is string")
     );
 }
 
@@ -794,7 +625,7 @@ TEST_CASE("Error camera navigation state wrong parameter type up yaw", "[profile
         "error_camera_navstate_wrong_parameter_type_yaw.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Camera's yaw value must be a number")
+        Catch::Matchers::Contains("type must be number, but is string")
     );
 }
 
@@ -804,7 +635,7 @@ TEST_CASE("Error camera navigation state wrong parameter type up pitch", "[profi
         "error_camera_navstate_wrong_parameter_type_pitch.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Camera's pitch value must be a number")
+        Catch::Matchers::Contains("type must be number, but is string")
     );
 }
 
@@ -813,16 +644,7 @@ TEST_CASE("Error camera goToGeo too few parameters", "[profile]") {
         "${TESTDIR}/profile/error_camera_gotogeo_too_few_parameters.profile";
     REQUIRE_THROWS_WITH(
         loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 5 fields in the Camera entry, got 1")
-    );
-}
-
-TEST_CASE("Error camera goToGeo too many parameters", "[profile]") {
-    constexpr const char* TestFile =
-        "${TESTDIR}/profile/error_camera_gotogeo_too_many_parameters.profile";
-    REQUIRE_THROWS_WITH(
-        loadProfile(TestFile),
-        Catch::Matchers::Contains("Expected 5 fields in the Camera entry, got 6")
+        Catch::Matchers::Contains("key 'anchor' not found")
     );
 }
 

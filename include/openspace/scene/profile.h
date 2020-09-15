@@ -93,7 +93,7 @@ public:
         static constexpr const char* Type = "setNavigationState";
 
         std::string anchor;
-        std::string aim;
+        std::optional<std::string> aim;
         std::string referenceFrame;
         glm::dvec3 position;
         std::optional<glm::dvec3> up;

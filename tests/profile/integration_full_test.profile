@@ -72,7 +72,7 @@
       "type": "setPropertyValueSingle",
       "name": "property_name_6",
       "value": "property_value_6"
-    },
+    }
   ],
   "keybindings": [
     {
@@ -114,5 +114,9 @@
   "mark_nodes": [
     "Earth", "Mars", "Moon", "Sun"
   ],
-  "additional_scripts": "script-1\nscript-2\nscript-3"
+  "additional_scripts": [
+    "script-1",
+    "script-2",
+    "script-3"
+  ]
 }
