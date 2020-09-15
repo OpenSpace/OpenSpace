@@ -211,7 +211,7 @@ private:
     // The value of alpha for the flux color mode
     properties::FloatProperty _pFluxColorAlpha;
     // The value of alpha for the flux illuminance color mode
-    //properties::FloatProperty _pFluxColorAlphaIlluminance;
+    properties::FloatProperty _pFluxColorAlphaIlluminance;
     // Group to hold the particle properties
     properties::PropertyOwner _pStreamGroup;
     // Scaling options
@@ -254,6 +254,8 @@ private:
     // The Flux threshold to decide the line between
     //_pDefaultNodeSkip and _pAmountofNodes
     properties::FloatProperty _pFluxNodeskipThreshold;
+    //The nodeskip for values within the range of the radius threshold to Earth
+    properties::IntProperty _pEarthNodeSkip;
     // The Radius threshold to decide the line between 
     //_pDefaultNodeSkip and _pAmountofNodes
     properties::FloatProperty _pRadiusNodeSkipThreshold;

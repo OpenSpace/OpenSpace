@@ -157,6 +157,11 @@ namespace {
         "Every nth node to render default",
         "Show only every nth node outside of skippingmethod"
     };
+    constexpr openspace::properties::Property::PropertyInfo EarthNodeSkipInfo = {
+       "nodeSkipEarth",
+       "Every nth node to render close to Earth",
+       "Show only every nth node outside of skippingmethod"
+    };
     constexpr openspace::properties::Property::PropertyInfo ScalingmethodInfo = {
         "scalingFlux",
         "Scale the flux value with color table",
@@ -182,11 +187,11 @@ namespace {
         "Flux Color Alpha",
         "The value of alpha for the flux color mode."
     };
-    /*constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaIlluminanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaIlluminanceInfo = {
         "fluxColorAlphaIlluminance",
         "Flux Color Alpha for illuminance",
         "The value of alpha for the flux color mode."
-    };*/
+    };
     constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
         "skippingNodesByFlux",
         "Skipping Nodes By Flux",
@@ -410,12 +415,13 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pColorTableRange(colorTableRangeInfo)
     , _pDomainZ(DomainZInfo)
     , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
-    //, _pFluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
+    , _pFluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
     , _pThresholdFlux(ThresholdFluxInfo, 0.f, -50.f, 10.f)
     , _pFilteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
     , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
+    , _pEarthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
     , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
     , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
     , _pEarthdistGroup({ "Earthfocus" })
@@ -1147,7 +1153,7 @@ void RenderableStreamNodes::setupProperties() {
     _pColorGroup.addProperty(_pColorTablePath);
     _pColorGroup.addProperty(_pStreamColor);
     _pColorGroup.addProperty(_pFluxColorAlpha);
-    //_pColorGroup.addProperty(_pFluxColorAlphaIlluminance);
+    _pColorGroup.addProperty(_pFluxColorAlphaIlluminance);
 
     _pStreamGroup.addProperty(_pThresholdFlux);
     _pStreamGroup.addProperty(_pFilteringLower);
@@ -1157,6 +1163,7 @@ void RenderableStreamNodes::setupProperties() {
     _pNodesamountGroup.addProperty(_pNodeskipMethod);
     _pNodesamountGroup.addProperty(_pAmountofNodes);
     _pNodesamountGroup.addProperty(_pDefaultNodeSkip);
+    _pNodesamountGroup.addProperty(_pEarthNodeSkip);
     _pNodesamountGroup.addProperty(_pNodeSize);
     _pNodesamountGroup.addProperty(_pNodeSizeLargerFlux);
     _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
@@ -1340,11 +1347,12 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("domainLimZ", _pDomainZ.value());
     _shaderProgram->setUniform("nodeSkip", _pAmountofNodes);
     _shaderProgram->setUniform("nodeSkipDefault", _pDefaultNodeSkip);
+    _shaderProgram->setUniform("nodeSkipEarth", _pEarthNodeSkip);
     _shaderProgram->setUniform("nodeSkipMethod", _pNodeskipMethod);
     _shaderProgram->setUniform("nodeSkipFluxThreshold", _pFluxNodeskipThreshold);
     _shaderProgram->setUniform("nodeSkipRadiusThreshold", _pRadiusNodeSkipThreshold);
     _shaderProgram->setUniform("fluxColorAlpha", _pFluxColorAlpha);
-    //_shaderProgram->setUniform("fluxColorAlphaIlluminance", _pFluxColorAlphaIlluminance);
+    _shaderProgram->setUniform("fluxColorAlphaIlluminance", _pFluxColorAlphaIlluminance);
     _shaderProgram->setUniform("earthPos", earthPos);
     _shaderProgram->setUniform("distanceThreshold", _pDistanceThreshold);
     _shaderProgram->setUniform("activeStreamNumber", _pActiveStreamNumber);
