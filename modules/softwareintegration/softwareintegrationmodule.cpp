@@ -103,15 +103,6 @@ namespace openspace {
         return _socket.get();
     }
 
-    //Connection
-    bool SoftwareConnection::sendMessage(std::string message) {
-        if (!_socket->put<char>(message.data(), message.size())) {
-            return false;
-        }
-
-        return true;
-    }
-
     // Connection 
     SoftwareConnection::Message SoftwareConnection::receiveMessage() {
         // Header consists of version (1 char), message type (4 char) & message size (4 char)
@@ -142,10 +133,9 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-        //sendMessage(messageBuffer);
-        std::string header = "O";
-        sendMessage(header);
-        LERROR(fmt::format("Meddelandet som skickas {}", header));
+        //std::string header = "O";
+        //sendMessage(header);
+        //LERROR(fmt::format("Meddelandet som skickas {}", header));
 
         // Read message typ: byte 1-4
         std::string type;
@@ -184,6 +174,15 @@ namespace openspace {
             LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));
             return Message(MessageType::Disconnection, messageBuffer);
         }
+    }
+
+    //Connection
+    bool SoftwareConnection::sendMessage(std::string message) {
+        if (!_socket->put<char>(message.data(), message.size())) {
+            return false;
+        }
+
+        return true;
     }
 
     // Server
@@ -351,7 +350,7 @@ namespace openspace {
             float opacity = readFloatValue(message);
 
             // Update opacity of renderable
-            const Renderable* myrenderable = renderable(identifier);
+            const Renderable* myrenderable = renderable("RenderablePointsCloud");
             properties::Property* opacityProperty = myrenderable->property("Opacity");
             opacityProperty->set(opacity);
             break;
@@ -360,8 +359,8 @@ namespace openspace {
             std::string identifier = readIdentifier(message);
             float size = readFloatValue(message);
 
-            // Update color of renderable
-            const Renderable * myrenderable = renderable(identifier);
+            // Update size of renderable
+            const Renderable * myrenderable = renderable("RenderablePointsCloud");
             properties::Property* sizeProperty = myrenderable->property("Size");
             sizeProperty->set(size);
             break;
