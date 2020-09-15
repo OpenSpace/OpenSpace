@@ -22,7 +22,10 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 textureIndex = 2;
 Endtime1 = "2000 JUL 14 19:00:00";
 Starttimescript = "openspace.time.setTime('2000 JUL 14 08:38:27')";
-Endtime2 = "2000 JUL 14 14:00:00";
+StarttimescriptSlowLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
+StarttimescriptFastLoop = "openspace.time.setTime('2000 JUL 14 11:00:00')";
+EndtimeSlowLoop = "2000 JUL 14 11:00:00";
+EndtimeFastLoop = "2000 JUL 14 19:00:00";
 
 --script20 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Sun";
 --script21 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Earth";
@@ -85,7 +88,7 @@ local Keybindings = {
 		    Local = false
 	},
 	{
-	    Key = "Shift+s",
+	    Key = "Shift+q",
 	    Command = 
             "openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
             "openspace.setPropertyValueSingle('Scene.Sun.Renderable.Enabled', false);" ..
@@ -103,31 +106,15 @@ local Keybindings = {
         Local = false
     },
     {
-	Key = "F7",
-		Command = "openspace.scriptScheduler.loadScheduledScript(Endtime2, Starttimescript)",
-		Documentation = "Loop time 08:34- 14:00",
-		Name = "Loop Nodedata time 08:34 - 14:00",
-		GuiPath = "/CCMC/Nodes",
-        Local = false
-    },
-    {
-	Key = "F8",
-        Command = "openspace.scriptScheduler.loadScheduledScript(Endtime1, Starttimescript)",
-        Documentation = "Loop time 08:34- 19:34",
-		Name = "Loop Nodedata time 08:34 - 19:34",
-		GuiPath = "/CCMC/Nodes",
-        Local = false
-    },
-    {
-	Key = "F9",
-        Command = "openspace.scriptScheduler.clear()",
-        Documentation = "Clear scriptScheduler",
+		Key = "F9",
+	    Command = "openspace.scriptScheduler.clear()",
+	    Documentation = "Clear scriptScheduler",
 		Name = "Clear loopscripts",
 		GuiPath = "/CCMC/Nodes",
-        Local = false
+	    Local = false
     },
     {
-	Key = "F10",
+		Key = "F10",
 		Command = "openspace.time.setTime('2000-JUL-14 10:03:00.00')",
 		Documentation = "Restart button for CME",
 		Name = "Restart button to start of CME",
@@ -147,6 +134,30 @@ local Keybindings = {
 	    Name = "Earth and moon without shadow",
 	    GuiPath = "/CCMC/Nodes",
 	    Local = false
+    },
+    {
+		Key = "Shift+s",
+		Command =
+			"openspace.scriptScheduler.clear();" ..
+			"openspace.time.setDeltaTime(240);" ..
+			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",
+		Documentation = "Slow loop: Restarts time and sets delta time to 4 min/ second (240 seconds/ second)",
+		Name = "Restart and sets delta time 4 min/ second",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+		Key = "Shift+f",
+		Command = 
+			"openspace.scriptScheduler.clear();" ..
+			"openspace.time.setDeltaTime(900);" ..
+			"openspace.time.setTime('2000-JUL-14 11:00:00.00');" ..
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeFastLoop, StarttimescriptFastLoop);",
+		Documentation = "Fast loop: Starts from 11:00 and sets delta time to 15 min/ second (900 seconds/ second)",
+		Name = "Starts from 11:00 and sets delta time 15 min/ second",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
     },
     {
         Key = "i",
