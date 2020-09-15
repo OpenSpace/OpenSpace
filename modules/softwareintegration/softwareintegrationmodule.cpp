@@ -133,9 +133,9 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-        //std::string header = "O";
-        //sendMessage(header);
-        //LERROR(fmt::format("Meddelandet som skickas {}", header));
+        std::string header = "O";
+        sendMessage(header);
+        LERROR(fmt::format("Meddelandet som skickas {}", header));
 
         // Read message typ: byte 1-4
         std::string type;
@@ -333,6 +333,7 @@ namespace openspace {
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
             LERROR(fmt::format("Identifier: {}", identifier));
+            
             break;
         }
         case SoftwareConnection::MessageType::Color: {
@@ -340,9 +341,9 @@ namespace openspace {
             glm::vec3 color = readColor(message);
 
             // Update color of renderable
-            const Renderable* myrenderable = renderable("RenderablePointsCloud");
+            const Renderable* myrenderable = renderable(identifier);
             properties::Property* colorProperty = myrenderable->property("Color");
-            colorProperty->set(color);
+            colorProperty->set(color); 
             break;
         }
         case SoftwareConnection::MessageType::Opacity: {
@@ -350,7 +351,7 @@ namespace openspace {
             float opacity = readFloatValue(message);
 
             // Update opacity of renderable
-            const Renderable* myrenderable = renderable("RenderablePointsCloud");
+            const Renderable* myrenderable = renderable(identifier);
             properties::Property* opacityProperty = myrenderable->property("Opacity");
             opacityProperty->set(opacity);
             break;
@@ -360,7 +361,7 @@ namespace openspace {
             float size = readFloatValue(message);
 
             // Update size of renderable
-            const Renderable * myrenderable = renderable("RenderablePointsCloud");
+            const Renderable * myrenderable = renderable(identifier);
             properties::Property* sizeProperty = myrenderable->property("Size");
             sizeProperty->set(size);
             break;
