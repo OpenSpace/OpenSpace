@@ -546,8 +546,8 @@ void RenderableStreamNodes::initializeGL() {
     _transferFunctionCMR = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]));
     _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]));
     _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]));
-    _transferFunctionIlluminance = std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
-    _transferFunctionIlluminance2 = std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
+    //_transferFunctionIlluminance = std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
+    //_transferFunctionIlluminance2 = std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
@@ -1474,7 +1474,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _transferFunctionFlow->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTableFlow", textureUnitFlow);
 
-        ghoul::opengl::TextureUnit textureUnitIlluminance;
+        /*ghoul::opengl::TextureUnit textureUnitIlluminance;
         textureUnitIlluminance.activate();
         _transferFunctionIlluminance->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTableIlluminance", textureUnitIlluminance);
@@ -1482,7 +1482,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         ghoul::opengl::TextureUnit textureUnitIlluminance2;
         textureUnitIlluminance2.activate();
         _transferFunctionIlluminance2->bind(); // Calls update internally
-        _shaderProgram->setUniform("colorTableIlluminance2", textureUnitIlluminance2);
+        _shaderProgram->setUniform("colorTableIlluminance2", textureUnitIlluminance2);*/
     }
 
     const std::vector<glm::vec3>& vertPos = _vertexPositions;

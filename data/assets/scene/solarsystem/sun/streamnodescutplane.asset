@@ -9,55 +9,79 @@ asset.info = {
 
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
-local textures = asset.require('./cutplanes_textures').TexturesPath
 local transforms = asset.require("./transforms")
+local transformssun = asset.require("./heliosphere/mas/bastille_day/transforms")
 
+local TexturesPathEquitorial = asset.syncedResource({
+Type = "HttpSynchronization",
+    Name = "cutplanes_textures",
+    Identifier = "cutplanes_textures",
+    Version = 13
+})
 local TexturesPathMeridial = asset.syncedResource({
     Type = "HttpSynchronization",
     Name = "cutplane_meridial_textures",
     Identifier = "cutplane_meridial_textures",
-    Version = 1
+    Version = 5
 })
 
 local Cutplane = {
     Identifier = "Cutplane",
+    --Parent = transformssun.HNMReferenceFrame.Identifier,
     Parent = transforms.SunIAU.Identifier,
-    Transform = {
-    	Rotation = {
-    		Type = "StaticRotation",
-    		Rotation = {0,0,0}
-    	}
-    },
+    --Transform = {
+    	--Rotation = {
+	   -- Type = "FixedRotation",
+           -- XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
+            --YAxis = {0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0},
+            --ZAxis = {0.0, 0.0, 1.0}
+        --}
+    --},
     Renderable = {
 	    Type = "RenderableTimeVaryingPlaneImageLocal",
-	    Size = 1.5*10^11,
+	    Size = 1.57*10^11,
 	    Enabled = true,
-	    Texture = textures,
+	    Texture = TexturesPathEquitorial, 
 	    BlendMode = "Normal",
 	    Opacity = 1,
 	},
     GUI = {
-        Name = "Cutplane",
+        Name = "Cutplane Equitorial",
         Path = "/Solar System/Heliosphere"
 		},
 };
 
 local Cutplane2 = {
     Identifier = "Cutplane2", 
+    --Parent = transformssun.HNMReferenceFrame.Identifier,
     Parent = transforms.SunIAU.Identifier,
+    Transform = {
+	Rotation = {
+		Type = "StaticRotation",
+		Rotation = {-1.511593, -3.141593, 2.178407}
+		--Rotation = {3.3885050793930199676, 0.8200934716394847802, 2.178407}
+		}
+	--Rotation = {
+	  --  Type = "FixedRotation",
+           -- XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
+           -- YAxis = {0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0},
+            --ZAxis = {0.0, 0.0, 1.0}
+       -- }
+},
     Renderable = {
 	    Type = "RenderableTimeVaryingPlaneImageLocal",
-	    Size = 1.5*10^11,
+	    Size = 1.57*10^11,
+            --Size = 0.78*10^11,
 	    Enabled = true,
 	    Texture = TexturesPathMeridial,
 	    BlendMode = "Normal",
 	    Opacity = 1,
 	},
     GUI = {
-        Name = "Cutplane2",
+        Name = "Cutplane Meridial",
         Path = "/Solar System/Heliosphere"
 		},
 };
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane, Cutplane2 })

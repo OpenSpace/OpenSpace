@@ -162,9 +162,9 @@ private:
     // Transfer function used to color line flow
     std::unique_ptr<TransferFunction> _transferFunctionFlow;
     // Transfer function used to color illuminance for nodes close to the Earth
-    std::unique_ptr<TransferFunction> _transferFunctionIlluminance;
+    //std::unique_ptr<TransferFunction> _transferFunctionIlluminance;
     // Transfer function used to color illuminance for nodes close to the Earth2
-    std::unique_ptr<TransferFunction> _transferFunctionIlluminance2;
+    //std::unique_ptr<TransferFunction> _transferFunctionIlluminance2;
 
     // ------------------------------------ VECTORS ----------------------------------- //
     // Paths to color tables. One for each 'ColorFlux'
