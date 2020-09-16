@@ -80,6 +80,7 @@ public:
     bool sendMessage(std::string message);
     //bool sendMessage(const SoftwareConnection::Message& message);
 
+    void handleProperties(); 
 
     SoftwareConnection::Message receiveMessage();
 

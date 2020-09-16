@@ -45,7 +45,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
+
 #include <functional>
+#include <iomanip>
+#include <sstream>
 
 using namespace std::string_literals;
 
@@ -134,13 +137,8 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-
         // TESTING SENDING MESSAGE 
-        std::string header = "O";
-        sendMessage(header);
-        LERROR(fmt::format("Meddelandet som skickas {}", header));
-        // TESTING SENDING MESSAGE 
-
+        handleProperties();
 
         // Read message type: Byte 1-4
         std::string type;
@@ -188,6 +186,79 @@ namespace openspace {
         }
 
         return true;
+    }
+
+    void SoftwareConnection::handleProperties() {
+
+        std::string messageType;
+        std::string propertyValue; 
+        std::string identifier = "testtesttest";
+
+        std::string subject;
+        std::string lengthOfSubject;
+        std::string lengthOfIdentifier = std::to_string(identifier.length());
+        std::string lengthOfValue;
+        
+        std::string message;
+
+
+        // Update color of renderable
+        /*const Renderable* myrenderable = renderable("RenderablePointsCloud");
+        properties::Property* colorProperty = myrenderable->property("Color");
+          // colorProperty->onChange([&]() {
+        propertyValue = colorProperty->getStringValue();
+        lengthOfValue = std::to_string(propertyValue.length());
+        messageType = "UPCO";
+        subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+        // Format length of subject to always be 4 digits
+        std::ostringstream os;
+        os << std::setfill('0') << std::setw(4) << subject.length();
+        lengthOfSubject = os.str();
+
+        message = messageType + lengthOfSubject + subject;
+
+        sendMessage(message);
+        LERROR(fmt::format("Meddelandet som skickas {}", message));
+           
+
+        // Update opacity of renderable
+        const Renderable* myrenderable = renderable("RenderablePointsCloud");
+        properties::Property* opacityProperty = myrenderable->property("Opacity");
+        //opacityProperty->onChange([&]() {
+        propertyValue = opacityProperty->getStringValue();
+        lengthOfValue = std::to_string(propertyValue.length());
+        messageType = "UPOP";
+        subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+        // Format length of subject to always be 4 digits
+        std::ostringstream os;
+        os << std::setfill('0') << std::setw(4) << subject.length();
+        lengthOfSubject = os.str();
+
+        message = messageType + lengthOfSubject + subject;
+
+        sendMessage(message);
+        LERROR(fmt::format("Meddelandet som skickas {}", message));*/
+
+        // Update size of renderable
+        const Renderable* myrenderable = renderable("RenderablePointsCloud");
+        properties::Property* sizeProperty = myrenderable->property("Size");;
+        //opacityProperty->onChange([&]() {
+        propertyValue = sizeProperty->getStringValue();
+        lengthOfValue = std::to_string(propertyValue.length());
+        messageType = "UPSI";
+        subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+        // Format length of subject to always be 4 digits
+        std::ostringstream os;
+        os << std::setfill('0') << std::setw(4) << subject.length();
+        lengthOfSubject = os.str();
+
+        message = messageType + lengthOfSubject + subject;
+
+        sendMessage(message);
+        LERROR(fmt::format("Meddelandet som skickas {}", message));
     }
 
     // Server
