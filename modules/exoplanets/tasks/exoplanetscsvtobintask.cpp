@@ -41,6 +41,8 @@ namespace {
     const char* KeyOutputLut = "OutputLUT";
 
     constexpr const char* _loggerCat = "CsvToBinTask";
+
+    constexpr const char* TeffBvPath = "${SYNC}/http/exoplanets_data/1/teff_bv.txt";
 } // namespace
 
 namespace openspace::exoplanets {
@@ -667,9 +669,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
             // calculate B-V from Teff if not exsisting
             if (std::isnan(p.BMV)) {
                 if (!std::isnan(teff)) {
-                    std::ifstream teffToBvFile(
-                        absPath("${BASE}/modules/exoplanets/teff_bv.txt")
-                    );
+                    std::ifstream teffToBvFile(absPath(TeffBvPath));
 
                     if (!teffToBvFile.good()) {
                         LERROR(fmt::format("Failed to open teff_bv.txt file"));

@@ -43,6 +43,14 @@ namespace openspace::exoplanets::luascriptfunctions {
 
 constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
+constexpr const char* ExoplanetsDataPath = "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
+constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/1/lookup.txt";
+
+constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
+constexpr const char* DiscTextureFile = "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
+
+constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
+
 std::string getStarColor(float bv, std::ifstream& colormap) {
     const int t = round(((bv + 0.4) / (2.0 + 0.4)) * 255);
     std::string color;
@@ -129,16 +137,13 @@ int addExoplanetSystem(lua_State* L) {
     // If user have given name as in EOD, change it to speck-name
     const std::string starNameSpeck = getSpeckStarName(starName);
 
-    std::ifstream data(
-        absPath("${MODULE_EXOPLANETS}/exoplanets_data.bin"), 
-        std::ios::in | std::ios::binary
-    );
+    std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
 
     if (!data.good()) {
         return ghoul::lua::luaError(L, "Failed to open exoplanets data file");
     }
 
-    std::ifstream lut(absPath("${MODULE_EXOPLANETS}/lookup.txt"));
+    std::ifstream lut(absPath(LookUpTablePath));
     if (!lut.good()) {
         return ghoul::lua::luaError(L, "Failed to open exoplanets look-up table file");
     }
@@ -225,10 +230,7 @@ int addExoplanetSystem(lua_State* L) {
     std::string starGlobeRenderableString = "";
     const float starRadius = p.RSTAR;
     if (!isnan(starRadius)) {
-        std::ifstream colorMap(
-            absPath("${SYNC}/http/stars_colormap/2/colorbv.cmap"), 
-            std::ios::in
-        );
+        std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 
         if (!colorMap.good()) {
             ghoul::lua::luaError(L, "Failed to open colormap data file");
@@ -253,7 +255,7 @@ int addExoplanetSystem(lua_State* L) {
                     "},"
                     "{"
                         "Identifier = 'StarTexture',"
-                        "FilePath = openspace.absPath('${MODULE_EXOPLANETS}/sun.jpg'),"
+                        "FilePath = openspace.absPath('" + StarTextureFile +"'),"
                         "BlendMode = 'Color',"
                         "Enabled = true"
                     "}"
@@ -289,6 +291,7 @@ int addExoplanetSystem(lua_State* L) {
         openspace::scripting::ScriptEngine::RemoteScripting::Yes
     );
 
+    // Planets
     for (size_t i = 0; i < planetSystem.size(); i++) {
         Exoplanet planet = planetSystem[i];
         const std::string planetName = planetNames[i];
@@ -415,7 +418,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Enabled = true,"
                 "Renderable = {"
                     "Type = 'RenderableOrbitdisc',"
-                    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/disc_texture.png'),"
+                    "Texture = openspace.absPath('" + DiscTextureFile + "'),"
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
                     "Eccentricity = " + std::to_string(planet.ECC) + ","
                     "Offset = { " +
