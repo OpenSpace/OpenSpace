@@ -29,9 +29,11 @@
 #include <openspace/properties/propertyowner.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
 #include <json/json.hpp>
+#include <set>
 
 #include "profile_lua.inl"
 
@@ -61,10 +63,9 @@ namespace {
     }
 
     void checkValue(const nlohmann::json& j, const std::string& key,
-        bool (nlohmann::json::*check)() const, std::string_view keyPrefix,
+        bool (nlohmann::json::*checkFunc)() const, std::string_view keyPrefix,
         bool isOptional)
     {
-        // Skip the checking if the message is empty
         if (j.find(key) == j.end()) {
             if (!isOptional) {
                 throw Profile::ParsingError(
@@ -74,20 +75,18 @@ namespace {
             }
         }
         else {
-            (check == &nlohmann::json::is_string);
-
             const nlohmann::json value = j[key];
-            if (!(value.*check)()) {
-                std::string type = [check]() {
-                    if (check == &nlohmann::json::is_string) { return "a string"; }
-                    else if (check == &nlohmann::json::is_number) { return "a number"; }
-                    else if (check == &nlohmann::json::is_object) { return "an object"; }
-                    else if (check == &nlohmann::json::is_array) { return "an array"; }
-                    else if (check == &nlohmann::json::is_boolean) { return "a boolean"; }
+            if (!(value.*checkFunc)()) {
+                std::string type = [](auto c) {
+                    if (c == &nlohmann::json::is_string) { return "a string"; }
+                    else if (c == &nlohmann::json::is_number) { return "a number"; }
+                    else if (c == &nlohmann::json::is_object) { return "an object"; }
+                    else if (c == &nlohmann::json::is_array) { return "an array"; }
+                    else if (c == &nlohmann::json::is_boolean) { return "a boolean"; }
                     else {
                         throw ghoul::MissingCaseException();
                     }
-                }();
+                }(checkFunc);
 
                 throw Profile::ParsingError(
                     Profile::ParsingError::Severity::Error,
@@ -97,6 +96,18 @@ namespace {
         }
     }
 
+    void checkExtraKeys(const nlohmann::json& j, std::string_view prefix,
+                        const std::set<std::string>& allowedKeys)
+    {
+        for (auto& [key, _] : j.items()) {
+            if (allowedKeys.find(key) == allowedKeys.end()) {
+                LINFOC(
+                    "Profile",
+                    fmt::format("Key '{}' not supported in '{}'", key, prefix)
+                );
+            }
+        }
+    }
 } // namespace
 
 void to_json(nlohmann::json& j, const Profile::Version& v) {
@@ -107,6 +118,7 @@ void to_json(nlohmann::json& j, const Profile::Version& v) {
 void from_json(const nlohmann::json& j, Profile::Version& v) {
     checkValue(j, "major", &nlohmann::json::is_number, "version", false);
     checkValue(j, "minor", &nlohmann::json::is_number, "version", false);
+    checkExtraKeys(j, "version", { "major", "minor" });
 
     j["major"].get_to(v.major);
     j["minor"].get_to(v.minor);
@@ -126,6 +138,7 @@ void from_json(const nlohmann::json& j, Profile::Module& v) {
     checkValue(j, "name", &nlohmann::json::is_string, "module", false);
     checkValue(j, "loadedInstruction", &nlohmann::json::is_string, "module", true);
     checkValue(j, "notLoadedInstruction", &nlohmann::json::is_string, "module", true);
+    checkExtraKeys(j, "module", { "name", "loadedInstruction", "notLoadedInstruction" });
 
     j.at("name").get_to(v.name);
     if (j.find("loadedInstruction") != j.end()) {
@@ -164,6 +177,11 @@ void from_json(const nlohmann::json& j, Profile::Meta& v) {
     checkValue(j, "author", &nlohmann::json::is_string, "meta", true);
     checkValue(j, "url", &nlohmann::json::is_string, "meta", true);
     checkValue(j, "license", &nlohmann::json::is_string, "meta", true);
+    checkExtraKeys(
+        j,
+        "meta",
+        { "name", "version", "description", "author", "url", "license" }
+    );
 
     if (j.find("name") != j.end()) {
         v.name = j["name"].get<std::string>();
@@ -224,6 +242,7 @@ void from_json(const nlohmann::json& j, Profile::Property& v) {
     checkValue(j, "type", &nlohmann::json::is_string, "property", false);
     checkValue(j, "name", &nlohmann::json::is_string, "property", false);
     checkValue(j, "value", &nlohmann::json::is_string, "property", false);
+    checkExtraKeys(j, "property", { "type", "name", "value" });
 
     j.at("type").get_to(v.setType);
     j.at("name").get_to(v.name);
@@ -246,6 +265,11 @@ void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
     checkValue(j, "gui_path", &nlohmann::json::is_string, "keybinding", false);
     checkValue(j, "is_local", &nlohmann::json::is_boolean, "keybinding", false);
     checkValue(j, "script", &nlohmann::json::is_string, "keybinding", false);
+    checkExtraKeys(
+        j,
+        "keybinding",
+        { "key", "documentation", "name", "gui_path", "is_local", "script" }
+    );
 
     v.key = stringToKey(j.at("key").get<std::string>());
     j.at("documentation").get_to(v.documentation);
@@ -292,6 +316,7 @@ void to_json(nlohmann::json& j, const Profile::Time& v) {
 void from_json(const nlohmann::json& j, Profile::Time& v) {
     checkValue(j, "type", &nlohmann::json::is_string, "time", false);
     checkValue(j, "value", &nlohmann::json::is_string, "time", false);
+    checkExtraKeys(j, "time", { "type", "value" });
 
     j.at("type").get_to(v.type);
     j.at("value").get_to(v.value);
@@ -339,14 +364,21 @@ void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     checkValue(j["position"], "x", &nlohmann::json::is_number, "camera.position", false);
     checkValue(j["position"], "y", &nlohmann::json::is_number, "camera.position", false);
     checkValue(j["position"], "z", &nlohmann::json::is_number, "camera.position", false);
+    checkExtraKeys(j["position"], "camera.position", { "x", "y", "z" });
     checkValue(j, "up", &nlohmann::json::is_object, "camera", true);
     if (j.find("up") != j.end()) {
         checkValue(j["up"], "x", &nlohmann::json::is_number, "camera.up", false);
         checkValue(j["up"], "y", &nlohmann::json::is_number, "camera.up", false);
         checkValue(j["up"], "z", &nlohmann::json::is_number, "camera.up", false);
+        checkExtraKeys(j["up"], "camera.up", { "x", "y", "z" });
     }
     checkValue(j, "yaw", &nlohmann::json::is_number, "camera", true);
     checkValue(j, "pitch", &nlohmann::json::is_number, "camera", true);
+    checkExtraKeys(
+        j,
+        "camera",
+        { "type", "anchor", "aim", "frame", "position", "up", "yaw", "pitch" }
+    );
 
     j.at("anchor").get_to(v.anchor);
     if (j.find("aim") != j.end()) {
@@ -396,6 +428,11 @@ void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
     checkValue(j, "latitude", &nlohmann::json::is_number, "camera", false);
     checkValue(j, "longitude", &nlohmann::json::is_number, "camera", false);
     checkValue(j, "altitude", &nlohmann::json::is_number, "camera", true);
+    checkExtraKeys(
+        j,
+        "camera",
+        { "type", "anchor", "latitude", "longitude", "altitude" }
+    );
 
     j.at("anchor").get_to(v.anchor);
     j.at("latitude").get_to(v.latitude);
@@ -790,6 +827,5 @@ std::string Profile::convertToScene() const {
 
     return output;
 }
-
 
 }  // namespace openspace
