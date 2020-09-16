@@ -140,6 +140,19 @@ int addExoplanetSystem(lua_State* L) {
     // If user have given name as in EOD, change it to speck-name
     const std::string starNameSpeck = getSpeckStarName(starName);
 
+    const std::string starIdentifier = createIdentifier(starNameSpeck);
+    const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
+
+    SceneGraphNode* existingStarNode =
+        global::renderEngine.scene()->sceneGraphNode(starIdentifier);
+
+    if (existingStarNode) {
+        return ghoul::lua::luaError(
+            L, 
+            "Adding of exoplanet system failed. The system has already been added."
+        );
+    }
+
     std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
 
     if (!data.good()) {
@@ -267,9 +280,6 @@ int addExoplanetSystem(lua_State* L) {
             "}"
         "},";
     }
-
-    const std::string starIdentifier = createIdentifier(starNameSpeck);
-    const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
 
     const std::string starParent = "{"
         "Identifier = '" + starIdentifier + "',"
