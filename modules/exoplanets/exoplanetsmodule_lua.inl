@@ -434,7 +434,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Parent = '" + starIdentifier + "',"
                 "Enabled = true,"
                 "Renderable = {"
-                    "Type = 'RenderableOrbitdisc',"
+                    "Type = 'RenderableOrbitDisc',"
                     "Texture = openspace.absPath('" + DiscTextureFile + "'),"
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
                     "Eccentricity = " + std::to_string(planet.ECC) + ","

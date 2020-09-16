@@ -55,14 +55,15 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             &exoplanets::luascriptfunctions::addExoplanetSystem,
             {},
             "string",
-            "Adds the nodes to the scene graph of the exoplanet system."
+            "Add the exoplanet system specified by the input string, including " 
+            "information about the host star and planets."
         },
         {
             "removeExoplanetSystem",
             &exoplanets::luascriptfunctions::removeExoplanetSystem,
             {},
             "string",
-            "Removes the nodes from the scene graph of the exoplanet system."
+            "Removes the nodes of the specified exoplanet system from the scene graph."
         }
     };
 
@@ -74,7 +75,7 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsCsvToBinTask>("ExoplanetsCsvToBinTask");
-    fRenderable->registerClass<RenderableOrbitdisc>("RenderableOrbitdisc");
+    fRenderable->registerClass<RenderableOrbitDisc>("RenderableOrbitDisc");
 }
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {

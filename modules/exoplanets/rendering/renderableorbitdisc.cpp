@@ -69,15 +69,15 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation RenderableOrbitdisc::Documentation() {
+documentation::Documentation RenderableOrbitDisc::Documentation() {
     using namespace documentation;
     return {
-        "Renderable Orbitdisc",
-        "exoplanets_renderable_orbitdisc",
+        "Renderable Orbit Disc",
+        "exoplanets_renderable_orbit_disc",
         {
             {
                 "Type",
-                new StringEqualVerifier("RenderableOrbitdisc"),
+                new StringEqualVerifier("RenderableOrbitDisc"),
                 Optional::No
             },
             {
@@ -108,7 +108,7 @@ documentation::Documentation RenderableOrbitdisc::Documentation() {
     };
 }
 
-RenderableOrbitdisc::RenderableOrbitdisc(const ghoul::Dictionary& dictionary)
+RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
@@ -127,7 +127,7 @@ RenderableOrbitdisc::RenderableOrbitdisc(const ghoul::Dictionary& dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "RenderableOrbitdisc"
+        "RenderableOrbitDisc"
     );
 
     if (dictionary.hasKey(OffsetInfo.identifier)) {
@@ -158,11 +158,11 @@ RenderableOrbitdisc::RenderableOrbitdisc(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
 }
 
-bool RenderableOrbitdisc::isReady() const {
+bool RenderableOrbitDisc::isReady() const {
     return _shader && _texture;
 }
 
-void RenderableOrbitdisc::initializeGL() {
+void RenderableOrbitDisc::initializeGL() {
     _shader = global::renderEngine.buildRenderProgram(
         "OrbitdiscProgram",
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_vs.glsl"),
@@ -185,7 +185,7 @@ void RenderableOrbitdisc::initializeGL() {
     loadTexture();
 }
 
-void RenderableOrbitdisc::deinitializeGL() {
+void RenderableOrbitDisc::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -199,7 +199,7 @@ void RenderableOrbitdisc::deinitializeGL() {
     _shader = nullptr;
 }
 
-void RenderableOrbitdisc::render(const RenderData& data, RendererTasks&) {
+void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     glm::dmat4 modelTransform =
@@ -239,7 +239,7 @@ void RenderableOrbitdisc::render(const RenderData& data, RendererTasks&) {
     global::renderEngine.openglStateCache().resetPolygonAndClippingState();
 }
 
-void RenderableOrbitdisc::update(const UpdateData& data) {
+void RenderableOrbitDisc::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         _uniformCache.modelViewProjection = _shader->uniformLocation(
@@ -263,14 +263,14 @@ void RenderableOrbitdisc::update(const UpdateData& data) {
     }
 }
 
-void RenderableOrbitdisc::loadTexture() {
+void RenderableOrbitDisc::loadTexture() {
     if (_texturePath.value() != "") {
         std::unique_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 
         if (texture) {
             LDEBUGC(
-                "RenderableOrbitdisc",
+                "RenderableOrbitDisc",
                 fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             _texture = std::move(texture);
@@ -286,7 +286,7 @@ void RenderableOrbitdisc::loadTexture() {
     }
 }
 
-void RenderableOrbitdisc::createPlane() {
+void RenderableOrbitDisc::createPlane() {
     const GLfloat size = _size.value() * (1.0 + _eccentricity.value());
 
     struct VertexData {

@@ -42,9 +42,9 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableOrbitdisc : public Renderable {
+class RenderableOrbitDisc : public Renderable {
 public:
-    RenderableOrbitdisc(const ghoul::Dictionary& dictionary);
+    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

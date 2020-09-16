@@ -740,7 +740,7 @@ documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
                 "Type",
                 new StringEqualVerifier("ExoplanetsCsvToBinTask"),
                 Optional::No,
-                "The type of this task"
+                ""
             },
             {
                 KeyInputCsv,
@@ -752,7 +752,7 @@ documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
                 KeyInputSpeck,
                 new StringAnnotationVerifier("A file path to a speck file"),
                 Optional::No,
-                "The speck file with star location"
+                "The speck file with star locations"
             },
             {
                 KeyOutputBin,
