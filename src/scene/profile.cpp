@@ -38,12 +38,34 @@
 namespace openspace {
 
 namespace {
+    constexpr const char* _loggerCat = "Profile";
+
     struct ProfileParsingError : public ghoul::RuntimeError {
         explicit ProfileParsingError(std::string msg)
             : ghoul::RuntimeError(std::move(msg), "profileFile")
         {}
     };
-}
+    
+    // Helper structs for the visitor pattern of the std::variant
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+    std::vector<properties::Property*> changedProperties(
+                                                      const properties::PropertyOwner& po)
+    {
+        std::vector<properties::Property*> res;
+        for (properties::PropertyOwner* subOwner : po.propertySubOwners()) {
+            std::vector<properties::Property*> ps = changedProperties(*subOwner);
+            res.insert(res.end(), ps.begin(), ps.end());
+        }
+        for (properties::Property* p : po.properties()) {
+            if (p->hasChanged()) {
+                res.push_back(p);
+            }
+        }
+        return res;
+    }
+} // namespace
 
 void to_json(nlohmann::json& j, const Profile::Version& v) {
     j["major"] = v.major;
@@ -250,12 +272,19 @@ void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     }
     j.at("frame").get_to(v.referenceFrame);
     nlohmann::json p = j.at("position");
+    if (!p.is_object()) {
+        throw ProfileParsingError("position must be object");
+    }
     p.at("x").get_to(v.position.x);
     p.at("y").get_to(v.position.y);
     p.at("z").get_to(v.position.z);
 
     if (j.find("up") != j.end()) {
         nlohmann::json u = j.at("up");
+        if (!u.is_object()) {
+            throw ProfileParsingError("up must be object");
+        }
+
         glm::dvec3 up;
         u.at("x").get_to(up.x);
         u.at("y").get_to(up.y);
@@ -297,31 +326,13 @@ void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
     }
 }
 
+std::vector<VerificationResult> verifyProfile(const std::string& content) {
+    using namespace nlohmann;
 
-namespace {
-    constexpr const char* _loggerCat = "Profile";
-    
-    // Helper structs for the visitor pattern of the std::variant
-    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+    json c = json::parse(content);
 
-    std::vector<properties::Property*> changedProperties(
-                                                      const properties::PropertyOwner& po)
-    {
-        std::vector<properties::Property*> res;
-        for (properties::PropertyOwner* subOwner : po.propertySubOwners()) {
-            std::vector<properties::Property*> ps = changedProperties(*subOwner);
-            res.insert(res.end(), ps.begin(), ps.end());
-        }
-        for (properties::Property* p : po.properties()) {
-            if (p->hasChanged()) {
-                res.push_back(p);
-            }
-        }
-        return res;
-    }
-
-} // namespace
+    return {};
+}
 
 void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
                                            std::string currentTime,

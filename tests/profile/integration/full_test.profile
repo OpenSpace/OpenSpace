@@ -9,9 +9,20 @@
     "license": "license"
   },
   "modules": [
-    { "name": "abc-module" },
-    { "name": "def-module" },
-    { "name": "ghi-module" }
+    { "name": "abs-module" },
+    {
+      "name": "def-module",
+      "loadedInstruction": "instr"
+    },
+    {
+      "name": "ghi-module",
+      "notLoadedInstruction": "not_instr"
+    },
+    {
+      "name": "jkl-module",
+      "loadedInstruction": "instr",
+      "notLoadedInstruction": "not_instr"
+    }
   ],
   "assets": [
     "scene/solarsystem/planets/earth/earth",

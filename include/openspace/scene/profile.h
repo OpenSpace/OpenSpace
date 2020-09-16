@@ -105,7 +105,7 @@ public:
         std::optional<double> altitude;
     };
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
-
+  
     Profile() = default;
     explicit Profile(const std::string& content);
     std::string serialize() const;
@@ -154,6 +154,19 @@ private:
 
     bool _ignoreUpdates = false;
 };
+
+struct VerificationResult {
+    enum class Severity {
+        Info = 0,
+        Warning,
+        Error
+    };
+
+    Severity severity;
+    std::string message;
+};
+
+std::vector<VerificationResult> verifyProfile(const std::string& content);
 
 } // namespace openspace
 
