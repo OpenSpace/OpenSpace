@@ -29,6 +29,7 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
@@ -43,11 +44,13 @@ namespace openspace::exoplanets::luascriptfunctions {
 
 constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
-constexpr const char* ExoplanetsDataPath = "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
 constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/1/lookup.txt";
+constexpr const char* ExoplanetsDataPath = 
+    "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
 
 constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
-constexpr const char* DiscTextureFile = "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
+constexpr const char* DiscTextureFile = 
+    "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
 constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
 
@@ -180,7 +183,9 @@ int addExoplanetSystem(lua_State* L) {
     data.close();
     lut.close();
 
-    if (!found || isnan(p.POSITIONX) || isnan(p.A) || isnan(p.PER)) { // || p.BINARY
+    bool notEnoughData = isnan(p.POSITIONX) || isnan(p.A) || isnan(p.PER);
+
+    if (!found || notEnoughData) { 
         return ghoul::lua::luaError(
             L, 
             "No star with that name or not enough data about it."
@@ -197,16 +202,15 @@ int addExoplanetSystem(lua_State* L) {
     const glm::dvec3 starToSunVec = normalize(sunPosition - starPosition);
     const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
 
-    const glm::dmat3 galaxticToCelectialMatrix = SpiceManager::ref().positionTransformMatrix( // galaxtic north in celectial coordinates, or just celectial north?
-        "GALACTIC",
-        "J2000",
-        0.0
-    );
+    const glm::dmat3 galaxticToCelestialMatrix = 
+        SpiceManager::ref().positionTransformMatrix("GALACTIC", "J2000", 0.0);
+
     const glm::dvec3 celestialNorth = normalize(
-        galaxticToCelectialMatrix * galacticNorth
+        galaxticToCelestialMatrix * galacticNorth
     );
 
-    // Earth's north vector projected onto the skyplane, the plane perpendicular to the viewing vector (starToSunVec)
+    // Earth's north vector projected onto the skyplane, the plane perpendicular to the 
+    // viewing vector (starToSunVec)
     const float celestialAngle = dot(celestialNorth, starToSunVec);
     glm::dvec3 northProjected = glm::normalize(
         celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
@@ -265,6 +269,7 @@ int addExoplanetSystem(lua_State* L) {
     }
 
     const std::string starIdentifier = createIdentifier(starNameSpeck);
+    const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
 
     const std::string starParent = "{"
         "Identifier = '" + starIdentifier + "',"
@@ -282,7 +287,7 @@ int addExoplanetSystem(lua_State* L) {
         "},"
         "GUI = {"
             "Name = '" + starNameSpeck + " (Star)',"
-            "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
+            "Path = '" + guiPath + "'"
         "}"
     "}";
 
@@ -312,7 +317,7 @@ int addExoplanetSystem(lua_State* L) {
         std::string sEpoch;
         if (!isnan(planet.TT)) {
             epoch.setTime("JD " + std::to_string(planet.TT));
-            sEpoch = epoch.ISO8601();
+            sEpoch = std::string(epoch.ISO8601()); 
         }
         else {
             sEpoch = "2009-05-19T07:11:34.080";
@@ -346,11 +351,11 @@ int addExoplanetSystem(lua_State* L) {
             "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC 
             "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
             "Inclination = " + std::to_string(planet.I) + "," //I
-            "AscendingNode  = " + std::to_string(planet.BIGOM) + "," //BIGOM
-            "ArgumentOfPeriapsis  = " + std::to_string(planet.OM) + "," //OM
+            "AscendingNode = " + std::to_string(planet.BIGOM) + "," //BIGOM
+            "ArgumentOfPeriapsis = " + std::to_string(planet.OM) + "," //OM
             "MeanAnomaly = 0.0,"
             "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-            "Period = " + std::to_string(period) + ","
+            "Period = " + std::to_string(period) + ""
         "}";
 
         const std::string planetNode = "{"
@@ -365,10 +370,12 @@ int addExoplanetSystem(lua_State* L) {
                 "PerformShading = false,"
                 "Layers = {}"
             "},"
-            "Transform = { Translation = " + planetKeplerTranslation + "},"
+            "Transform = { "
+                "Translation = " + planetKeplerTranslation + ""
+            "},"
             "GUI = {"
                 "Name = '" + planetName + "',"
-                "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
+                "Path = '" + guiPath + "'"
             "}"
         "}";
 
@@ -390,7 +397,7 @@ int addExoplanetSystem(lua_State* L) {
             "},"
             "GUI = {"
                 "Name = '" + planetName + " Trail',"
-                "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
+                "Path = '" + guiPath + "'"
             "}"
         "}";
 
@@ -404,7 +411,7 @@ int addExoplanetSystem(lua_State* L) {
 
         if (hasUpperAUncertainty && hasLowerAUncertainty)
         {
-            // Get the orbit plane that the trail orbit and planet have from the KeplerTranslation
+            // Get the orbit plane of the planet trail orbit from the KeplerTranslation
             const glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
                 planet.I, 
                 planet.BIGOM, 
@@ -424,18 +431,18 @@ int addExoplanetSystem(lua_State* L) {
                     "Offset = { " +
                         std::to_string(planet.ALOWER) + ", " +
                         std::to_string(planet.AUPPER) + 
-                    " }," //min / max extend
+                    "}," //min / max extend
                     "Opacity = 0.3"
                 "},"
                 "Transform = {"
                     "Rotation = {"
                         "Type = 'StaticRotation',"
-                        "Rotation = " + ghoul::to_string(rotation) + ","
+                        "Rotation = " + ghoul::to_string(rotation) + ""
                     "}"
                 "},"
                 "GUI = {"
                     "Name = '" + planetName + " Disc',"
-                    "Path = '" + ExoplanetsGuiPath + starNameSpeck + "',"
+                    "Path = '" + guiPath + "'"
                 "}"
             "}";
 
