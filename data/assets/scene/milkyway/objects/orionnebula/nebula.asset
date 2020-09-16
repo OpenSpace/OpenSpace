@@ -27,7 +27,7 @@ local NebulaHolder = {
             XAxisOrthogonal = true,
             YAxis = "Sun",
             YAxisInverted = false
-        }  
+        }
     },
     GUI = {
         Name = "Orion Nebula",
@@ -51,12 +51,12 @@ local OrionNebulaModel = {
             GeometryFile = sync .. "/orion_nebula.obj",
             ColorTexture = sync .. "/heic0601a_masked.png"
         }},
-        Opacity = 1.0, 
+        Opacity = 1.0,
         DisableFaceCulling = false,
-        SpecularIntensity = 0.0, 
-        AmbientIntensity = 0.45, 
+        SpecularIntensity = 0.0,
+        AmbientIntensity = 0.45,
         DiffuseIntensity = 0.0,
-        RotationVector = {0.000000, 22.300000, 0.000000},
+        RotationVector = { 0.000000, 22.300000, 0.000000 },
         LightSources = LIGHTS;
     },
     GUI = {
@@ -84,10 +84,10 @@ local OrionNebulaShocksModel = {
         }},
         Opacity = 1.0, 
         DisableFaceCulling = false,
-        SpecularIntensity = 0.0, 
-        AmbientIntensity = 0.19, 
+        SpecularIntensity = 0.0,
+        AmbientIntensity = 0.19,
         DiffuseIntensity = 0.4,
-        RotationVector = {0.000000, 22.300000, 0.000000},
+        RotationVector = { 0.000000, 22.300000, 0.000000 },
         LightSources = LIGHTS;
     },
     GUI = {
@@ -115,10 +115,10 @@ local OrionNebulaProplydsModel = {
         }},
         Opacity = 1.0, 
         DisableFaceCulling = false,
-        SpecularIntensity = 0.0, 
-        AmbientIntensity = 1.0, 
+        SpecularIntensity = 0.0,
+        AmbientIntensity = 1.0,
         DiffuseIntensity = 1.0,
-        RotationVector = {0.000000, 22.300000, 0.000000},
+        RotationVector = { 0.000000, 22.300000, 0.000000 },
         LightSources = LIGHTS;
     },
     GUI = {
@@ -138,21 +138,19 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 asset.meta = {
     Name = "Orion Nebula Model",
     Version = "1.0",
-    Description = [[ In the Digital Universe model of the Orion Nebula,
- we depict the ionization front effectively as a terrain, with a flat Hubble 
- image of the nebula mapped on the undulating surface. In
- reality, the ionization front has a slight thickness to it - about a third
- of a light year - but is quite thin compared to the overall size of the
- nebula, which stretches about ten light years from side to side.<br><br>Close into
- the center, we see small teardrop-shaped structures with their
- narrow ends pointing away from the bright star: these are protoplanetary 
-disks, or proplyds, of dense gas and dust surrounding young stars. The larger 
-formations that one sees farther away from the center of the nebula take on a 
-cup-like shape, with the narrow end pointing away from the nebulas center. 
-These enormous structures are bow shocks that delineate the region where 
-highspeed winds from the central star slow from supersonic to subsonic speeds. 
-You can think of an Hii region as a sort of tremendous explosion, taking place 
-over millennia, and the bow shocks are part of the outward rush of material. ]],
+    Description = [[ In the Digital Universe model of the Orion Nebula, we depict the 
+ionization front effectively as a terrain, with a flat Hubble image of the nebula mapped 
+on the undulating surface. In reality, the ionization front has a slight thickness to
+it - about a third of a light year - but is quite thin compared to the overall size of 
+the nebula, which stretches about ten light years from side to side.<br><br>Close into 
+the center, we see small teardrop-shaped structures with their narrow ends pointing away 
+from the bright star: these are protoplanetary disks, or proplyds, of dense gas and dust 
+surrounding young stars. The larger formations that one sees farther away from the center 
+of the nebula take on a cup-like shape, with the narrow end pointing away from the 
+nebulas center. These enormous structures are bow shocks that delineate the region where 
+highspeed winds from the central star slow from supersonic to subsonic speeds. You can 
+think of an HII region as a sort of tremendous explosion, taking place over millennia, 
+and the bow shocks are part of the outward rush of material. ]],
     Author = "AMNH Digital Universe",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "custom"
