@@ -29,6 +29,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
 #include <string>
 #include <variant>
@@ -40,6 +41,14 @@ namespace scripting { struct LuaLibrary; }
 
 class Profile {
 public:
+    struct ParsingError : public ghoul::RuntimeError {
+        enum class Severity { Info, Warning, Error };
+
+        explicit ParsingError(Severity severity, std::string msg);
+
+        Severity severity;
+    };
+
     // Version
     struct Version {
         int major = 0;
@@ -154,19 +163,6 @@ private:
 
     bool _ignoreUpdates = false;
 };
-
-struct VerificationResult {
-    enum class Severity {
-        Info = 0,
-        Warning,
-        Error
-    };
-
-    Severity severity;
-    std::string message;
-};
-
-std::vector<VerificationResult> verifyProfile(const std::string& content);
 
 } // namespace openspace
 
