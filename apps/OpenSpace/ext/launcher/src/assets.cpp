@@ -7,7 +7,7 @@
 #include <string>
 #include <openspace/scene/profile.h>
 
-assets::assets(openspace::Profile* imported, std::string& reportAssets, QWidget *parent)
+assets::assets(openspace::Profile* imported, const std::string reportAssets, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::assets)
     , _imported(imported)

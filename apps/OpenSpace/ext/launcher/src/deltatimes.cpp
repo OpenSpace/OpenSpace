@@ -1,6 +1,7 @@
 #include "deltatimes.h"
 #include "./ui_deltatimes.h"
 #include <qevent.h>
+#include <iostream>
 
 deltaTimes::deltaTimes(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -10,7 +11,7 @@ deltaTimes::deltaTimes(openspace::Profile* imported, QWidget *parent)
 {
     ui->setupUi(this);
 
-    for (size_t d = 0; d < _data.totalSize(); ++d) {
+    for (size_t d = 0; d < _data.size(); ++d) {
         QString summary = createSummaryForDeltaTime(d, _data._times.at(d), true);
         _deltaListItems.push_back(new QListWidgetItem(summary));
         ui->listWidget->addItem(_deltaListItems[d]);
@@ -69,6 +70,9 @@ void deltaTimes::listItemSelected() {
 }
 
 int deltaTimes::lastSelectableItem() {
+    if (_data.size() == 0) {
+        return 0;
+    }
     int i;
     for (i = _data.size() - 1; i >= 0; --i) {
         if (_data._times.at(i) != 0) {
@@ -112,11 +116,19 @@ QString deltaTimes::checkForTimeDescription(int intervalIndex, double value) {
 
 void deltaTimes::saveDeltaTimeValue() {
     QListWidgetItem *item = ui->listWidget->currentItem();
-    int index = ui->listWidget->row(item);
-    if (isNumericalValue(ui->line_seconds) && index <= lastSelectableItem() + 1) {
-        _data._times.at(index) = ui->line_seconds->text().toDouble();
-        QString summary = createSummaryForDeltaTime(index, _data._times.at(index), true);
-        _deltaListItems.at(index)->setText(summary);
+    if (item != nullptr) {
+        int index = ui->listWidget->row(item);
+        if (isNumericalValue(ui->line_seconds) && index <= lastSelectableItem() + 1) {
+            _data._times.at(index) = ui->line_seconds->text().toDouble();
+            QString summary = createSummaryForDeltaTime(index, _data._times.at(index), true);
+            _deltaListItems.at(index)->setText(summary);
+        }
+    }
+    else if (_data.size() == 0) {
+        _data._times.at(0) = ui->line_seconds->text().toDouble();
+        QString summary = createSummaryForDeltaTime(0, _data._times.at(0), true);
+        _deltaListItems.push_back(new QListWidgetItem(summary));
+        ui->listWidget->addItem(_deltaListItems[0]);
     }
 }
 

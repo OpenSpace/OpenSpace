@@ -15,26 +15,13 @@
 #include "marknodes.h"
 #include "ostime.h"
 #include <openspace/scene/profile.h>
+#include <errordialog.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class ProfileEdit;
 }
 QT_END_NAMESPACE
-
-/*struct ProfileBlock {
-    openspace::Profile::Meta& _metaData;
-    std::vector<openspace::Profile::Module>& _moduleData;
-    std::vector<openspace::Profile::Asset>& _assetData;
-    std::string& _reportAssetsInFilesystem;
-    std::vector<openspace::Profile::Property>& _propsData;
-    std::vector<openspace::Profile::Keybinding>& _keybindingsData;
-    DeltaTimes& _deltaTimesData;
-    openspace::Profile::Time& _timeData;
-    openspace::Profile::CameraType& _cameraData;
-    std::vector<std::string>& _markNodesData;
-    std::string& _addedScriptsData;
-};*/
 
 class ProfileEdit : public QDialog
 {
@@ -51,14 +38,17 @@ public slots:
     void openDeltaTimes();
     void openCamera();
     void openMarkNodes();
+    void cancel();
+    void approved();
 
 public:
-    explicit ProfileEdit(std::string filename, std::string reportedAssets, QWidget *parent = nullptr);
+    explicit ProfileEdit(std::string filename, const std::string reportedAssets, QWidget *parent = nullptr);
     ~ProfileEdit();
-    //void setProfileName(QString profileToSet);
+    void setProfileName(QString profileToSet);
 
 private:
-    void loadProfileFromFile(std::string filename);
+    bool loadProfileFromFile(std::string filename);
+    void displayProfileParseErrorDialogThenQuit(std::string msg);
     void initSummaryTextForEachCategory();
     QString summarizeText_meta();
     QString summarizeText_modules();
@@ -73,6 +63,7 @@ private:
 
     Ui::ProfileEdit *ui;
     QWidget* _parent;
+    errordialog* _myDialog;
     meta* _meta;
     properties* _properties;
     osmodules* _modules;
@@ -87,7 +78,7 @@ private:
     //ProfileBlock _pData;
     openspace::Profile* _pData = nullptr;
     std::vector<std::string> _content;
-    std::string& _reportedAssets;
+    const std::string _reportedAssets;
 };
 
 #endif // PROFILEEDIT_H

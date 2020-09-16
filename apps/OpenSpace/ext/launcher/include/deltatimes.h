@@ -25,8 +25,11 @@ struct DeltaTimes {
     std::vector<double> _times;
     DeltaTimes() {
         _times.resize(sizeof(_defaultDeltaTimes)/sizeof(double));
+	zeroValues();
     };
     DeltaTimes(std::vector<double> dt) {
+        _times.resize(sizeof(_defaultDeltaTimes)/sizeof(double));
+	zeroValues();
         _times = dt;
     };
     void loadValues(std::vector<double>& dt) {
@@ -39,7 +42,7 @@ struct DeltaTimes {
         return std::distance(_times.begin(), it);
     };
     size_t totalSize() {
-        return sizeof(_defaultDeltaTimes) / sizeof(double);
+        return (sizeof(_defaultDeltaTimes) / sizeof(double));
     }
     void zeroValues() {
         for (size_t i = 0; i < _times.size(); ++i) {

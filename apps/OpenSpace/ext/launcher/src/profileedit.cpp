@@ -6,7 +6,7 @@
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-ProfileEdit::ProfileEdit(std::string filename, std::string reportedAssets, QWidget *parent)
+ProfileEdit::ProfileEdit(std::string filename, const std::string reportedAssets, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::ProfileEdit)
     , _reportedAssets(reportedAssets)
@@ -15,7 +15,6 @@ ProfileEdit::ProfileEdit(std::string filename, std::string reportedAssets, QWidg
     loadProfileFromFile(filename);
 
     initSummaryTextForEachCategory();
-
     connect(ui->edit_meta, SIGNAL(clicked()), this, SLOT(openMeta()));
     connect(ui->edit_properties, SIGNAL(clicked()), this, SLOT(openProperties()));
     connect(ui->edit_modules, SIGNAL(clicked()), this, SLOT(openModules()));
@@ -26,6 +25,8 @@ ProfileEdit::ProfileEdit(std::string filename, std::string reportedAssets, QWidg
     connect(ui->edit_deltatimes, SIGNAL(clicked()), this, SLOT(openDeltaTimes()));
     connect(ui->edit_camera, SIGNAL(clicked()), this, SLOT(openCamera()));
     connect(ui->edit_marknodes, SIGNAL(clicked()), this, SLOT(openMarkNodes()));
+    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(approved()));
+    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
 }
 
 ProfileEdit::~ProfileEdit() {
@@ -33,7 +34,7 @@ ProfileEdit::~ProfileEdit() {
     delete _pData;
 }
 
-void ProfileEdit::loadProfileFromFile(std::string filename) {
+bool ProfileEdit::loadProfileFromFile(std::string filename) {
     if (filename.length() > 0) {
         std::ifstream inFile;
         try {
@@ -41,16 +42,53 @@ void ProfileEdit::loadProfileFromFile(std::string filename) {
         }
         catch (const std::ifstream::failure& e) {
             throw ghoul::RuntimeError(fmt::format(
-                "Exception opening profile file for read: {} ({})",
-                filename, e.what())
-            );
+                "Exception opening {} profile for read: ({})",
+                filename,
+                e.what()
+            ));
         }
         std::string line;
         while (std::getline(inFile, line)) {
             _content.push_back(std::move(line));
         }
     }
-    _pData = new openspace::Profile(_content);
+    try {
+        _pData = new openspace::Profile(_content);
+    }
+    catch (const ghoul::MissingCaseException& e) {
+        displayProfileParseErrorDialogThenQuit(fmt::format(
+            "Missing case exception in {}: {}",
+            filename,
+            e.what()
+        ));
+        return false;
+    }
+    catch (const openspace::Profile::ParsingError& e) {
+        displayProfileParseErrorDialogThenQuit(fmt::format(
+            "ParsingError exception in {}: {}, {}",
+            filename,
+            e.component,
+            e.message
+        ));
+        return false;
+    }
+    catch (const ghoul::RuntimeError& e) {
+        displayProfileParseErrorDialogThenQuit(fmt::format(
+            "RuntimeError exception in {}, component {}: {}",
+            filename,
+            e.component,
+            e.message
+        ));
+        return false;
+    }
+    return true;
+}
+
+void ProfileEdit::displayProfileParseErrorDialogThenQuit(std::string msg) {
+    //New instance of info dialog window
+    _myDialog = new errordialog(QString(msg.c_str()));
+    _myDialog->exec();
+    cancel();
 }
 
 void ProfileEdit::initSummaryTextForEachCategory() {
@@ -85,9 +123,9 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     ui->text_additionalscripts->setReadOnly(true);
 }
 
-/*void ProfileEdit::setProfileName(QString profileToSet) {
+void ProfileEdit::setProfileName(QString profileToSet) {
     ui->line_profile->setText(profileToSet);
-}*/
+}
 
 void ProfileEdit::openMeta() {
     if (_pData) {
@@ -342,4 +380,12 @@ QString ProfileEdit::summarizeText_markNodes() {
         results += QString(s.c_str()) + "  ";
     }
     return results;
+}
+
+void ProfileEdit::cancel() {
+    reject();
+    rejected();
+}
+
+void ProfileEdit::approved() {
 }

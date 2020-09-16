@@ -15,17 +15,6 @@ LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
     , _filesystemAccess(".asset", {"scene", "global", "customization", "examples"},
                         true, true)
     , _basePath(QString::fromUtf8(basePath.c_str()))
-    /*, _pData({_metaData,
-             _moduleData,
-             _assetData,
-             _reportAssetsInFilesystem,
-             _propsData,
-             _keybindingsData,
-             _deltaTimesData,
-             _timeData,
-             _cameraData,
-             _markNodesData,
-             _addedScriptsData})*/
 {
     ui->setupUi(this);
     QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
@@ -78,6 +67,7 @@ void LauncherWindow::openWindow_edit() {
     editProfilePath += profileToSet.toUtf8().constData();
     editProfilePath += ".profile";
     myEditorWindow = new ProfileEdit(editProfilePath, _reportAssetsInFilesystem);
+    myEditorWindow->setProfileName(profileToSet);
     myEditorWindow->exec();
 }
 

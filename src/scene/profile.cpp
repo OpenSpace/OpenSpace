@@ -54,19 +54,6 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    struct ProfileParsingError : public ghoul::RuntimeError {
-        explicit ProfileParsingError(std::string msg)
-            : ghoul::RuntimeError(std::move(msg), "profileFile")
-        {}
-
-        ProfileParsingError(unsigned int lineNum, std::string msg)
-            : ghoul::RuntimeError(
-                fmt::format("Error @ line {}: {}", lineNum, std::move(msg)),
-                "profileFile"
-            )
-        {}
-    };
-
     std::vector<properties::Property*> changedProperties(
                                                       const properties::PropertyOwner& po)
     {
@@ -111,7 +98,7 @@ namespace {
         if (line == headerMarkNodes) { return Section::MarkNodes; }
         if (line == headerAdditionalScripts) { return Section::AdditionalScripts; }
 
-        throw ProfileParsingError(
+        throw Profile::ParsingError(
             lineNumber,
             fmt::format("Invalid section header: {}", line)
         );
@@ -121,7 +108,7 @@ namespace {
     {
         std::vector<std::string> parts = ghoul::tokenizeString(line, '.');
         if (parts.size() > 2) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 1-2 version components, got {}", parts.size())
             );
@@ -141,7 +128,7 @@ namespace {
             return version;
         }
         catch (const std::invalid_argument&) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 "Error parsing Version. Version number is not a number"
             );
@@ -151,7 +138,7 @@ namespace {
     [[ nodiscard ]] Profile::Module parseModule(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 3) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 3 fields in a Module entry, got {}", fields.size())
             );
@@ -178,7 +165,7 @@ namespace {
     {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() < 2) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 2 fields in a Meta line, got {}", fields.size())
             );
@@ -210,7 +197,7 @@ namespace {
             return { MetaLineType::License, content };
         }
         else {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Unknown meta line type '{}'", type)
             );
@@ -220,7 +207,7 @@ namespace {
     [[ nodiscard ]] Profile::Asset parseAsset(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 2) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 2 fields in an Asset entry, got {}", fields.size())
             );
@@ -235,7 +222,7 @@ namespace {
     [[ nodiscard ]] Profile::Property parseProperty(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 3) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 3 fields in Property entry, got {}", fields.size())
             );
@@ -248,7 +235,7 @@ namespace {
             if (type == "setPropertyValueSingle") {
                 return Profile::Property::SetType::SetPropertyValueSingle;
             }
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format(
                     "Expected property set type 'setPropertyValue' or "
@@ -265,7 +252,7 @@ namespace {
     [[ nodiscard ]] Profile::Keybinding parseKeybinding(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 6) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 6 fields in Keybinding entry, got {}", fields.size())
             );
@@ -275,7 +262,7 @@ namespace {
             kb.key = stringToKey(fields[0]);
         }
         catch (const ghoul::RuntimeError& e) {
-            throw ProfileParsingError(lineNumber, e.what());
+            throw Profile::ParsingError(lineNumber, e.what());
         }
         kb.documentation = fields[1];
         kb.name = fields[2];
@@ -287,7 +274,7 @@ namespace {
             if (local == "true") {
                 return true;
             }
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 'false' or 'true' for the local path, got {}", local)
             );
@@ -299,7 +286,7 @@ namespace {
     [[ nodiscard ]] Profile::Time parseTime(const std::string& line, int lineNumber) {
         std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
         if (fields.size() != 2) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 2 fields in Time entry, got {}", fields.size())
             );
@@ -312,7 +299,7 @@ namespace {
             if (type == "relative") {
                 return Profile::Time::Type::Relative;
             }
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected 'absolute' or 'relative' for the type, got {}", type)
             );
@@ -326,7 +313,7 @@ namespace {
             return std::stod(line);
         }
         catch (const std::invalid_argument&) {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format("Expected a number for delta time entry, got '{}'", line)
             );
@@ -340,7 +327,7 @@ namespace {
         {
             if (type == Profile::CameraNavState::Type) {
                 if (fields.size() != 8) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNumber,
                         fmt::format(
                             "Expected 8 fields in the Camera entry, got {}", fields.size()
@@ -355,7 +342,7 @@ namespace {
 
                 std::vector<std::string> position = ghoul::tokenizeString(fields[4], ' ');
                 if (position.size() != 3) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNumber,
                         fmt::format(
                             "Expected 3 fields for the camera's position, got {}",
@@ -371,7 +358,7 @@ namespace {
                     );
                 }
                 catch (const std::invalid_argument&) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNumber,
                         "Camera's position components must be numbers"
                     );
@@ -379,7 +366,7 @@ namespace {
 
                 std::vector<std::string> up = ghoul::tokenizeString(fields[5], ' ');
                 if (up.size() != 0 && up.size() != 3) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNumber,
                         fmt::format(
                             "Expected 0 or 3 fields for the camera's up vector, got {}",
@@ -396,7 +383,7 @@ namespace {
                         );
                     }
                     catch (const std::invalid_argument&) {
-                        throw ProfileParsingError(
+                        throw Profile::ParsingError(
                             lineNumber,
                             "Camera's up vector components must be numbers"
                         );
@@ -408,7 +395,7 @@ namespace {
                         camera.yaw = std::stod(fields[6]);
                     }
                     catch (const std::invalid_argument&) {
-                        throw ProfileParsingError(
+                        throw Profile::ParsingError(
                             lineNumber,
                             "Camera's yaw value must be a number"
                         );
@@ -420,7 +407,7 @@ namespace {
                         camera.pitch = std::stod(fields[7]);
                     }
                     catch (const std::invalid_argument&) {
-                        throw ProfileParsingError(
+                        throw Profile::ParsingError(
                             lineNumber,
                             "Camera's pitch value must be a number"
                         );
@@ -430,7 +417,7 @@ namespace {
             }
             if (type == Profile::CameraGoToGeo::Type) {
                 if (fields.size() != 5) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNumber,
                         fmt::format(
                             "Expected 5 fields in the Camera entry, got {}", fields.size()
@@ -447,7 +434,7 @@ namespace {
                 }
                 return camera;
             }
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNumber,
                 fmt::format(
                     "Expected 'setNavigationState' or 'goToGeo' for the type, got {}",
@@ -764,7 +751,7 @@ Profile::Profile(const std::vector<std::string>& content) {
         }
 
         if (currentSection != Section::None && line[0] == '#') {
-            throw ProfileParsingError(
+            throw Profile::ParsingError(
                 lineNum,
                 "Sections in profile must be separated by empty lines"
             );
@@ -775,7 +762,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                 currentSection = parseSection(line, lineNum);
 
                 if (!foundVersion && currentSection != Section::Version) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNum,
                         fmt::format(
                             "First header in the file must be Version, but got {}", line
@@ -784,7 +771,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                 }
 
                 if (currentSection == Section::Meta && foundMeta) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNum,
                         "Meta section can only appear once per profile"
                     );
@@ -792,7 +779,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                 break;
             case Section::Version:
                 if (foundVersion) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNum,
                         "Version section can only appear once per profile"
                     );
@@ -811,7 +798,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                 switch (m.first) {
                     case MetaLineType::Name:
                         if (!_meta->name.empty()) {
-                            throw ProfileParsingError(
+                            throw Profile::ParsingError(
                                 lineNum,
                                 "Meta information 'Name' specified twice"
                             );
@@ -820,7 +807,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                         break;
                     case MetaLineType::Version:
                         if (!_meta->version.empty()) {
-                            throw ProfileParsingError(
+                            throw Profile::ParsingError(
                                 lineNum,
                                 "Meta information 'Version' specified twice"
                             );
@@ -829,7 +816,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                         break;
                     case MetaLineType::Description:
                         if (!_meta->description.empty()) {
-                            throw ProfileParsingError(
+                            throw Profile::ParsingError(
                                 lineNum,
                                 "Meta information 'Description' specified twice"
                             );
@@ -838,7 +825,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                         break;
                     case MetaLineType::Author:
                         if (!_meta->author.empty()) {
-                            throw ProfileParsingError(
+                            throw Profile::ParsingError(
                                 lineNum,
                                 "Meta information 'Author' specified twice"
                             );
@@ -847,7 +834,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                         break;
                     case MetaLineType::URL:
                         if (!_meta->url.empty()) {
-                            throw ProfileParsingError(
+                            throw Profile::ParsingError(
                                 lineNum,
                                 "Meta information 'URL' specified twice"
                             );
@@ -856,7 +843,7 @@ Profile::Profile(const std::vector<std::string>& content) {
                         break;
                     case MetaLineType::License:
                         if (!_meta->license.empty()) {
-                            throw ProfileParsingError(
+                            throw Profile::ParsingError(
                                 lineNum,
                                 "Meta information 'License' specified twice"
                             );
@@ -895,7 +882,7 @@ Profile::Profile(const std::vector<std::string>& content) {
             }
             case Section::Time:
                 if (foundTime) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNum,
                         "Time section can only appear once per profile"
                     );
@@ -912,7 +899,7 @@ Profile::Profile(const std::vector<std::string>& content) {
             }
             case Section::Camera:
                 if (foundCamera) {
-                    throw ProfileParsingError(
+                    throw Profile::ParsingError(
                         lineNum,
                         "Camera section can only appear once per profile"
                     );

@@ -23,7 +23,7 @@ public slots:
     void parseSelections();
 
 public:
-    explicit assets(openspace::Profile* imported, std::string& reportAssets,
+    explicit assets(openspace::Profile* imported, const std::string reportAssets,
         QWidget *parent = nullptr);
     ~assets();
     std::string createTextSummary();

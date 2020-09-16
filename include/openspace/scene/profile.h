@@ -109,6 +109,18 @@ public:
         std::optional<double> altitude;
     };
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
+    struct ParsingError : public ghoul::RuntimeError {
+        explicit ParsingError(std::string msg)
+            : ghoul::RuntimeError(std::move(msg), "profileFile")
+        {}
+
+        ParsingError(unsigned int lineNum, std::string msg)
+            : ghoul::RuntimeError(
+                fmt::format("Error @ line {}: {}", lineNum, std::move(msg)),
+                "profileFile"
+            )
+        {}
+    };
 
     Profile() = default;
     Profile(const std::vector<std::string>& content);
