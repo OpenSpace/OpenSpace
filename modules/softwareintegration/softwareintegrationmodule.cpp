@@ -34,6 +34,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/query/query.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -337,6 +338,11 @@ namespace openspace {
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
             LERROR(fmt::format("Identifier: {}", identifier));
+
+            openspace::global::scriptEngine.queueScript(
+                "openspace.removeSceneGraphNode('" + identifier + "');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
             
             break;
         }

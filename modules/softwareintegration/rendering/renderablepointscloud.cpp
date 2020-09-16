@@ -36,6 +36,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 
@@ -223,6 +224,9 @@ namespace openspace {
 
             glBindVertexArray(0);
             _shaderProgram->deactivate();
+
+            // Restores GL State
+            global::renderEngine.openglStateCache().resetBlendState();
         }
     }
 
