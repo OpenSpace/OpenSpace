@@ -393,6 +393,7 @@ namespace openspace {
             //SoftwareConnection prop; 
             //prop.handleProperties(identifier);
 
+
             break;
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
