@@ -24,7 +24,7 @@ SHIFT+i	Undo Insight landing layers setup	Unset Insight layers	/Missions/Insight
 absolute	2018 NOV 26 19:39:03.68
 
 #Camera
-setNavigationState	insightAsset.Insight.Identifier		"Root"	8.430115E0, -1.791710E1, 2.813660E0	0.494659E0,0.357162E0,0.792306E0		
+setNavigationState	insightAsset.Insight.Identifier		"Root"	8.430115E0, -1.791710E1, 2.813660E0	0.494659E0, 0.357162E0, 0.792306E0		
 
 #MarkNodes
 Insight

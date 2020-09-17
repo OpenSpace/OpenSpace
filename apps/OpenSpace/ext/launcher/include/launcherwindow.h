@@ -28,6 +28,8 @@ public:
 private:
     void populateProfilesList();
     void populateWindowConfigsList();
+    bool loadProfileFromFile(openspace::Profile*& p, std::string filename);
+    void displayProfileParseErrorDialogThenQuit(std::string msg);
     void clearData();
     void initialize_meta();
     void initialize_modules();
@@ -42,9 +44,9 @@ private:
 
     Ui::LauncherWindow *ui;
     ProfileEdit* myEditorWindow;
+    errordialog* _myDialog;
     filesystemAccess _fileAccess_profiles;
     filesystemAccess _fileAccess_winConfigs;
-
     openspace::Profile::Meta _metaData;
     std::vector<openspace::Profile::Module> _moduleData;
     std::vector<openspace::Profile::Asset> _assetData;

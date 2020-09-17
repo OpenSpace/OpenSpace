@@ -105,6 +105,10 @@ QString assetTreeItem::name() const {
     return QString(data(0).toString());
 }
 
+QString assetTreeItem::varName() const {
+    return QString(data(2).toString());
+}
+
 bool assetTreeItem::insertChildren(int position, int count, int columns)
 {
     if (position < 0 || position > _childItems.size())

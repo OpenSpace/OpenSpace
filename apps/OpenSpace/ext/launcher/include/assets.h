@@ -21,6 +21,8 @@ class assets : public QDialog
 public slots:
     void cancel();
     void parseSelections();
+    void selected(const QModelIndex&);
+    void setVarName();
 
 public:
     explicit assets(openspace::Profile* imported, const std::string reportAssets,
@@ -34,13 +36,14 @@ protected:
 private:
     void compareFilesystemWithProfileAssets();
     bool traverseToExpandSelectedItems(int nRows, QModelIndex parent);
-    void findPathMatch(std::string& path, std::string& filename);
+    void findPathMatch(std::string& path, std::string& varName);
     void traverseToFindFilesystemMatch(QModelIndex parent, int nRows,
-        std::string dirname, std::string filename);
+        std::string dirname, std::string varName);
     Ui::assets *ui;
     QWidget* _parent;
     openspace::Profile* _imported;
     assetTreeModel _assetTreeModel;
+    QModelIndex _selectedIdx;
 };
 
 #endif // ASSETS_H

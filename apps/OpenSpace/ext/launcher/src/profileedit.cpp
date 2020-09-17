@@ -6,89 +6,32 @@
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-ProfileEdit::ProfileEdit(std::string filename, const std::string reportedAssets, QWidget *parent)
+ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reportedAssets, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::ProfileEdit)
     , _reportedAssets(reportedAssets)
+    , _pData(profile)
 {
     ui->setupUi(this);
-    loadProfileFromFile(filename);
-
-    initSummaryTextForEachCategory();
-    connect(ui->edit_meta, SIGNAL(clicked()), this, SLOT(openMeta()));
-    connect(ui->edit_properties, SIGNAL(clicked()), this, SLOT(openProperties()));
-    connect(ui->edit_modules, SIGNAL(clicked()), this, SLOT(openModules()));
-    connect(ui->edit_keybindings, SIGNAL(clicked()), this, SLOT(openKeybindings()));
-    connect(ui->edit_assets, SIGNAL(clicked()), this, SLOT(openAssets()));
-    connect(ui->edit_time, SIGNAL(clicked()), this, SLOT(openTime()));
-    connect(ui->edit_additionalscripts, SIGNAL(clicked()), this, SLOT(openAddedScripts()));
-    connect(ui->edit_deltatimes, SIGNAL(clicked()), this, SLOT(openDeltaTimes()));
-    connect(ui->edit_camera, SIGNAL(clicked()), this, SLOT(openCamera()));
-    connect(ui->edit_marknodes, SIGNAL(clicked()), this, SLOT(openMarkNodes()));
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(approved()));
-    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
+    if (_pData != nullptr) {
+        initSummaryTextForEachCategory();
+        connect(ui->edit_meta, SIGNAL(clicked()), this, SLOT(openMeta()));
+        connect(ui->edit_properties, SIGNAL(clicked()), this, SLOT(openProperties()));
+        connect(ui->edit_modules, SIGNAL(clicked()), this, SLOT(openModules()));
+        connect(ui->edit_keybindings, SIGNAL(clicked()), this, SLOT(openKeybindings()));
+        connect(ui->edit_assets, SIGNAL(clicked()), this, SLOT(openAssets()));
+        connect(ui->edit_time, SIGNAL(clicked()), this, SLOT(openTime()));
+        connect(ui->edit_additionalscripts, SIGNAL(clicked()), this, SLOT(openAddedScripts()));
+        connect(ui->edit_deltatimes, SIGNAL(clicked()), this, SLOT(openDeltaTimes()));
+        connect(ui->edit_camera, SIGNAL(clicked()), this, SLOT(openCamera()));
+        connect(ui->edit_marknodes, SIGNAL(clicked()), this, SLOT(openMarkNodes()));
+        connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(approved()));
+        connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
+    }
 }
 
 ProfileEdit::~ProfileEdit() {
     delete ui;
-    delete _pData;
-}
-
-bool ProfileEdit::loadProfileFromFile(std::string filename) {
-    if (filename.length() > 0) {
-        std::ifstream inFile;
-        try {
-            inFile.open(filename, std::ifstream::in);
-        }
-        catch (const std::ifstream::failure& e) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Exception opening {} profile for read: ({})",
-                filename,
-                e.what()
-            ));
-        }
-        std::string line;
-        while (std::getline(inFile, line)) {
-            _content.push_back(std::move(line));
-        }
-    }
-    try {
-        _pData = new openspace::Profile(_content);
-    }
-    catch (const ghoul::MissingCaseException& e) {
-        displayProfileParseErrorDialogThenQuit(fmt::format(
-            "Missing case exception in {}: {}",
-            filename,
-            e.what()
-        ));
-        return false;
-    }
-    catch (const openspace::Profile::ParsingError& e) {
-        displayProfileParseErrorDialogThenQuit(fmt::format(
-            "ParsingError exception in {}: {}, {}",
-            filename,
-            e.component,
-            e.message
-        ));
-        return false;
-    }
-    catch (const ghoul::RuntimeError& e) {
-        displayProfileParseErrorDialogThenQuit(fmt::format(
-            "RuntimeError exception in {}, component {}: {}",
-            filename,
-            e.component,
-            e.message
-        ));
-        return false;
-    }
-    return true;
-}
-
-void ProfileEdit::displayProfileParseErrorDialogThenQuit(std::string msg) {
-    //New instance of info dialog window
-    _myDialog = new errordialog(QString(msg.c_str()));
-    _myDialog->exec();
-    cancel();
 }
 
 void ProfileEdit::initSummaryTextForEachCategory() {
@@ -281,7 +224,7 @@ QString ProfileEdit::summarizeText_assets() {
     }
     QString results = QString("<Configured with %1 assets>\n").arg(_pData->assets().size());
     for (openspace::Profile::Asset a : _pData->assets()) {
-        results += "    " + QString(a.path.c_str()) + "/";
+        results += "    " + QString(a.path.c_str()) + "    ";
         results += QString(a.name.c_str()) + "\n";
     }
     return results;
@@ -384,7 +327,6 @@ QString ProfileEdit::summarizeText_markNodes() {
 
 void ProfileEdit::cancel() {
     reject();
-    rejected();
 }
 
 void ProfileEdit::approved() {

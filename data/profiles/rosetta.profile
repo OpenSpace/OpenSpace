@@ -31,7 +31,7 @@ p	Enables or disables the image projection on 67P.	Toggle 67P projection	/Missio
 absolute	2014-08-01T03:05:00.000
 
 #Camera
-setNavigationState	Comet67PAsset.Comet67P.Identifier		"Root"	-7.294781E5 , -6.657894E5, 2.509047E6	0.146529E0, 0.944727E0, 0.293290E0		
+setNavigationState	Comet67PAsset.Comet67P.Identifier		"Root"	-7.294781E5, -6.657894E5, 2.509047E6	0.146529E0, 0.944727E0, 0.293290E0		
 
 #MarkNodes
 67P

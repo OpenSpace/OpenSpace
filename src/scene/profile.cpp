@@ -364,15 +364,24 @@ namespace {
                     );
                 }
 
-                std::vector<std::string> up = ghoul::tokenizeString(fields[5], ' ');
+                std::vector<std::string> up = ghoul::tokenizeString(fields[5], ',');
                 if (up.size() != 0 && up.size() != 3) {
-                    throw Profile::ParsingError(
-                        lineNumber,
-                        fmt::format(
-                            "Expected 0 or 3 fields for the camera's up vector, got {}",
-                            up.size()
-                        )
-                    );
+                    //Fix for tokenizeString returns incorrect up.size() with blank entry
+                    bool emptyFields = true;
+                    for (auto u : up) {
+                        if (u.length() > 0) {
+                            emptyFields = false;
+                        }
+                    }
+                    if (!emptyFields) {
+                        throw Profile::ParsingError(
+                            lineNumber,
+                            fmt::format(
+                                "Expected 0 or 3 fields for camera up vector, got {}",
+                                up.size()
+                            )
+                        );
+                    }
                 }
                 if (up.size() == 3) {
                     try {
@@ -503,7 +512,7 @@ void Profile::setIgnoreUpdates(bool ignoreUpdates) {
     _ignoreUpdates = ignoreUpdates;
 }
 
-void Profile::addAsset(const std::string& path) {
+void Profile::addAsset(const std::string& path, const std::string& varName) {
     ZoneScoped
 
     if (_ignoreUpdates) {
@@ -523,6 +532,7 @@ void Profile::addAsset(const std::string& path) {
 
     Asset a;
     a.path = path;
+    a.name = varName;
     _assets.push_back(std::move(a));
 }
 

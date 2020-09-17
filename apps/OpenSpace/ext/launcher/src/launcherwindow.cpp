@@ -55,8 +55,12 @@ void LauncherWindow::populateWindowConfigsList() {
 
 void LauncherWindow::openWindow_new() {
     clearData();
-    myEditorWindow = new ProfileEdit("", _reportAssetsInFilesystem);
-    myEditorWindow->exec();
+    openspace::Profile* pData = new openspace::Profile();
+    if (pData != nullptr) {
+        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem);
+        myEditorWindow->exec();
+    }
+    delete pData;
 }
 
 void LauncherWindow::openWindow_edit() {
@@ -66,9 +70,71 @@ void LauncherWindow::openWindow_edit() {
     QString profileToSet = ui->comboBoxProfiles->itemText(selectedProfileIdx);
     editProfilePath += profileToSet.toUtf8().constData();
     editProfilePath += ".profile";
-    myEditorWindow = new ProfileEdit(editProfilePath, _reportAssetsInFilesystem);
-    myEditorWindow->setProfileName(profileToSet);
-    myEditorWindow->exec();
+    openspace::Profile* pData;
+    loadProfileFromFile(pData, editProfilePath);
+    if (pData != nullptr) {
+        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem);
+        myEditorWindow->setProfileName(profileToSet);
+        myEditorWindow->exec();
+    }
+    delete pData;
+}
+
+bool LauncherWindow::loadProfileFromFile(openspace::Profile*& p, std::string filename) {
+    std::vector<std::string> content;
+    if (filename.length() > 0) {
+        std::ifstream inFile;
+        try {
+            inFile.open(filename, std::ifstream::in);
+        }
+        catch (const std::ifstream::failure& e) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Exception opening {} profile for read: ({})",
+                filename,
+                e.what()
+            ));
+        }
+        std::string line;
+        while (std::getline(inFile, line)) {
+            content.push_back(std::move(line));
+        }
+    }
+    try {
+        p = new openspace::Profile(content);
+    }
+    catch (const ghoul::MissingCaseException& e) {
+        displayProfileParseErrorDialogThenQuit(fmt::format(
+            "Missing case exception in {}: {}",
+            filename,
+            e.what()
+        ));
+        return false;
+    }
+    catch (const openspace::Profile::ParsingError& e) {
+        displayProfileParseErrorDialogThenQuit(fmt::format(
+            "ParsingError exception in {}: {}, {}",
+            filename,
+            e.component,
+            e.message
+        ));
+        return false;
+    }
+    catch (const ghoul::RuntimeError& e) {
+        displayProfileParseErrorDialogThenQuit(fmt::format(
+            "RuntimeError exception in {}, component {}: {}",
+            filename,
+            e.component,
+            e.message
+        ));
+        return false;
+    }
+    return true;
+}
+
+void LauncherWindow::displayProfileParseErrorDialogThenQuit(std::string msg) {
+    //New instance of info dialog window
+    _myDialog = new errordialog(QString(msg.c_str()));
+    _myDialog->exec();
 }
 
 void LauncherWindow::receiveAssets(std::vector<std::string> results) {

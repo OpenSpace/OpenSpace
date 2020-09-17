@@ -52,6 +52,7 @@ public:
     void setExistsInFilesystem(bool fileExists);
     bool doesExistInFilesystem() const;
     QString name() const;
+    QString varName() const;
     static const int checkboxColumn = 1;
 
 private:

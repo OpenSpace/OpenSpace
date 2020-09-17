@@ -42,13 +42,11 @@ public slots:
     void approved();
 
 public:
-    explicit ProfileEdit(std::string filename, const std::string reportedAssets, QWidget *parent = nullptr);
+    explicit ProfileEdit(openspace::Profile* profile, const std::string reportedAssets, QWidget *parent = nullptr);
     ~ProfileEdit();
     void setProfileName(QString profileToSet);
 
 private:
-    bool loadProfileFromFile(std::string filename);
-    void displayProfileParseErrorDialogThenQuit(std::string msg);
     void initSummaryTextForEachCategory();
     QString summarizeText_meta();
     QString summarizeText_modules();
@@ -63,7 +61,6 @@ private:
 
     Ui::ProfileEdit *ui;
     QWidget* _parent;
-    errordialog* _myDialog;
     meta* _meta;
     properties* _properties;
     osmodules* _modules;
@@ -74,10 +71,7 @@ private:
     deltaTimes* _deltaTimes;
     camera* _camera;
     markNodes* _markNodes;
-
-    //ProfileBlock _pData;
-    openspace::Profile* _pData = nullptr;
-    std::vector<std::string> _content;
+    openspace::Profile* _pData;
     const std::string _reportedAssets;
 };
 

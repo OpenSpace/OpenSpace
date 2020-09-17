@@ -27,15 +27,17 @@
 
 #include <QAbstractItemModel>
 #include "assettreeitem.h"
+#include "openspace/scene/profile.h"
 
 struct importElement
 {
-    importElement(std::string l, int lev, bool chk)
-        : line(l), level(lev), checked(chk) {}
+    importElement(std::string l, int lev, bool chk, std::string vname)
+        : line(l), level(lev), checked(chk), varname(vname) {}
     std::string line;
     int level = -1;
     bool checked = false;
     bool existsInFilesystem = true;
+    std::string varname;
 };
 
 class assetTreeModel : public QAbstractItemModel
@@ -43,7 +45,8 @@ class assetTreeModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit assetTreeModel(QString header1, QString header2, QObject* parent = nullptr);
+    explicit assetTreeModel(QString header1, QString header2, QString header3,
+        QObject* parent = nullptr);
     ~assetTreeModel();
 
     QVariant data(const QModelIndex &index, int role) const override;
@@ -60,7 +63,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value,
         int role = Qt::EditRole) override;
-    std::vector<std::string> selectedAssets();
+    std::vector<openspace::Profile::Asset> selectedAssets();
     void importModelData(const std::string contents);
     bool isChecked(QModelIndex& index) const;
     bool isAsset(QModelIndex& index) const;
@@ -71,12 +74,14 @@ public:
     void setName(QModelIndex& index, QString name);
     void setChecked(QModelIndex& index, bool checked);
     void setExistenceInFilesystem(QModelIndex& index, bool fileExists);
+    QString varName(const QModelIndex& index) const;
+    void setVarName(QModelIndex& index, QString varName);
 
 private:
     std::string headerTitle;
     assetTreeItem *getItem(const QModelIndex &index) const;
     assetTreeItem *rootItem;
-    void parseChildrenForSelected(assetTreeItem* item, std::vector<std::string>& output,
+    void parseChildrenForSelected(assetTreeItem* item, std::vector<openspace::Profile::Asset>& output,
         std::string pathPrefix);
     void importInsertItem(std::istringstream& iss, assetTreeItem* parent,
         importElement& elem, int level);

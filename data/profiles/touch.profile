@@ -18,7 +18,7 @@ setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false
 relative	-1d
 
 #Camera
-setNavigationState	earthAsset.Earth.Identifier			58.5877,16.1924,20000000			
+setNavigationState	earthAsset.Earth.Identifier			58.5877, 16.1924, 20000000			
 
 #MarkNodes
 Earth

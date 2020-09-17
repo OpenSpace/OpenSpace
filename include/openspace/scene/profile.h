@@ -141,7 +141,7 @@ public:
     void setIgnoreUpdates(bool ignoreUpdates);
 
     /// Adds a new asset and checks for duplicates
-    void addAsset(const std::string& path);
+    void addAsset(const std::string& path, const std::string& varName = "");
 
     /// Removes an asset
     void removeAsset(const std::string& path);
