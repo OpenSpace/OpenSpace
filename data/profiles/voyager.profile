@@ -41,7 +41,7 @@ setPropertyValueSingle	Scene.Charon.Renderable.Enabled	false
 setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false
 
 #Time
-absolute	1977 SEP 10 12:00:00
+absolute	1977-09-10T12:00:00
 
 #Camera
 setNavigationState	VoyagerAsset.Voyager_1.Identifier	"Root"		526781518487.171326, 257168309890.072144, -1381125204152.817383			

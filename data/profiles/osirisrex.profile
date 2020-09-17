@@ -37,7 +37,7 @@ Shift+2	Setting the simulation speed to 4320 seconds per realtime second	Set sim
 Shift+3	Setting the simulation speed to 8640 seconds per realtime second	Set sim speed 8640	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(8640)"
 
 #Time
-absolute	2018 10 30 23:00:00.500
+absolute	2018-10-30T23:00:00.500
 
 #Camera
 setNavigationState	OsirisRexAsset.OsirisRex.Identifier			26974590199.661884, 76314608558.908020, -127086452897.101791			

@@ -8,7 +8,7 @@ scene/solarsystem/missions/dawn/dawn	DawnAsset
 scene/solarsystem/missions/dawn/vesta	
 
 #Time
-absolute	2011 AUG 06 00:00:00
+absolute	2011-08-06T00:00:00
 
 #Camera
 setNavigationState	DawnAsset.Dawn.Identifier			526781518487.171326, 257168309890.072144, -1381125204152.817383			

@@ -21,7 +21,7 @@ i	Setup Insight landing layers	Setup Insight layers	/Missions/Insight	false	"ope
 SHIFT+i	Undo Insight landing layers setup	Unset Insight layers	/Missions/Insight	false	"openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', 0); openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', 0); openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', false); openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', false); openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', false); openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Multiplier', 1.0); openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Settings.Gamma', 1.0); openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 1.0);"
 
 #Time
-absolute	2018 NOV 26 19:39:03.68
+absolute	2018-11-26T19:39:03.68
 
 #Camera
 setNavigationState	insightAsset.Insight.Identifier		"Root"	8.430115E0, -1.791710E1, 2.813660E0	0.494659E0, 0.357162E0, 0.792306E0		

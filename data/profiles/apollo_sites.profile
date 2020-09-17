@@ -22,7 +22,7 @@ F11	Setup for A11 site	Setup A11 site	/Missions/Apollo/11	false	"openspace.time.
 F7	Setup for A17 site	Setup A17 site	/Missions/Apollo/17	false	"openspace.time.setTime('1972 DEC 12 19:47:11'); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.BlendMode', 0.000000); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.Enabled', true); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.BlendMode', 0.000000); openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 20.17); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo17LemModel'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil); openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_station7.BlendMode', 0.000000);"
 
 #Time
-absolute	1972 DEC 12 19:47:11
+absolute	1972-12-12T19:47:11
 
 #Camera
 goToGeo	moonAsset.Moon.Identifier	20	-60	15000000

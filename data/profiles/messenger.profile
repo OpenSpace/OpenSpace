@@ -32,7 +32,7 @@ Shift+9	Setting the simulation speed to 7372800 seconds per realtime second	Set 
 Shift+0	Setting the simulation speed to 14745600 seconds per realtime second	Set sim speed 14745600	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(14745600)"
 
 #Time
-absolute	2011 MAY 13 00:05:18
+absolute	2011-05-13T00:05:18
 
 #Camera
 setNavigationState	"Mercury"		"Root"	2.423690E11, 1.979038E11, -2.241483E10	-0.492046E0, 0.666088E0, 0.560551E0		
