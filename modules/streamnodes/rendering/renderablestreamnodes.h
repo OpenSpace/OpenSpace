@@ -59,8 +59,8 @@ private:
     // ------------------------------------- ENUMS -------------------------------------//
     // Used to determine if lines should be colored UNIFORMLY or by Flux Value
     enum class ColorMethod : int {
-        Uniform = 0,
-        ByFluxValue = 1
+        ByFluxValue = 0,
+        Uniform = 1
     };
     enum class GoesEnergyBins : int {
         Emin01 = 0,

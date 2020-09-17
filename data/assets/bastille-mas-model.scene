@@ -63,7 +63,7 @@ local Keybindings = {
 	{
 		Key = "Shift+r",
 		Command =
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.colorMode', 1.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.colorMode', 0.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodes', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlpha', 1.000000);" ..
@@ -104,6 +104,22 @@ local Keybindings = {
         Command = propertyHelper.invert('Scene.MAS_MHD_density.Renderable.Enabled'),
         Documentation = "Toggle volume",
         Local = false
+    },
+    {
+		Key = "F7",
+		Command = "openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop)",
+		Documentation = "Loop time 10:03 - 11:00",
+		Name = "Loop Nodedata time 10:03 - 11:00",
+		GuiPath = "/CCMC/Nodes",
+	    Local = false
+    },
+    {
+		Key = "F8",
+	    Command = "openspace.scriptScheduler.loadScheduledScript(Endtime1, Starttimescript)",
+	    Documentation = "Loop time 08:34- 19:34",
+		Name = "Loop Nodedata time 08:34 - 19:34",
+		GuiPath = "/CCMC/Nodes",
+	    Local = false
     },
     {
 		Key = "F9",

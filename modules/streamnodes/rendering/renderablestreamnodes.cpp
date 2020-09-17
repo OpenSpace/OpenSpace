@@ -1189,8 +1189,8 @@ void RenderableStreamNodes::setupProperties() {
     // --------------------- Add Options to OptionProperties --------------------- //
     _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
     _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
-    _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
     _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
+    _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
 
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
@@ -1799,22 +1799,4 @@ void RenderableStreamNodes::updateVertexStreamNumberBuffer() {
 
     unbindGL();
 }
-/*void RenderableStreamNodes::updateArrow() {
-
-    float positionsForArrow[9] = {
-        -0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f
-    };
-
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _arrow);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), positionsForArrow, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(Arrow);
-    glVertexAttribPointer(Arrow, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    unbindGL();
-}*/
 } // namespace openspace

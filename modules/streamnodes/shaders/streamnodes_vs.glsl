@@ -136,8 +136,8 @@ in vec2 in_st;
 //in vec2 arrow;
 
 // These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
-const int uniformColor     = 0;
-const int colorByFluxValue  = 1;
+const int colorByFluxValue  = 0;
+const int uniformColor     = 1;
 
 const int uniformskip = 0;
 const int fluxSkip = 1;
@@ -327,12 +327,8 @@ void main() {
     //Filtering by radius and z-axis
     if(rValue > filterLower && rValue < filterUpper){ //if(rValue > filterLower){
         if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
-            //Uniform coloring
+            // We should color it by flux
             if(colorMode == 0){
-                vs_color = streamColor;
-            }
-            // We should color it by flux. 
-            else{
                 //vec4 fluxColor = getTransferFunctionColor(colorTable);
                 vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
                 if(fluxValue > thresholdFlux){
@@ -343,6 +339,10 @@ void main() {
                     vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
                     gl_PointSize = nodeSize;
                 }
+            }
+            //Uniform coloring
+            else{
+                vs_color = streamColor;
             }
              CheckdistanceMethod();
         }
