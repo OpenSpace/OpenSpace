@@ -52,8 +52,6 @@
 
 using namespace std::string_literals;
 
-#pragma optimize {"",off}
-
 namespace {
     constexpr const char* _loggerCat = "SoftwareIntegrationModule";
 } // namespace
@@ -137,9 +135,6 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-        // TESTING SENDING MESSAGE 
-        handleProperties();
-
         // Read message type: Byte 1-4
         std::string type;
         for(int i = 1; i < 5; i++)
@@ -188,77 +183,67 @@ namespace openspace {
         return true;
     }
 
-    void SoftwareConnection::handleProperties() {
+    void SoftwareConnection::handleProperties(std::string identifier) {
 
-        std::string messageType;
-        std::string propertyValue; 
-        std::string identifier = "testtesttest";
-
-        std::string subject;
-        std::string lengthOfSubject;
-        std::string lengthOfIdentifier = std::to_string(identifier.length());
-        std::string lengthOfValue;
+        /*std::string message;
         
-        std::string message;
-
+        const Renderable* myRenderable = renderable(identifier);
+        properties::Property* colorProperty = myRenderable->property("Color");
+        properties::Property* opacityProperty = myRenderable->property("Opacity");
+        properties::Property* sizeProperty = myRenderable->property("Size");
 
         // Update color of renderable
-        /*const Renderable* myrenderable = renderable("RenderablePointsCloud");
-        properties::Property* colorProperty = myrenderable->property("Color");
-          // colorProperty->onChange([&]() {
-        propertyValue = colorProperty->getStringValue();
-        lengthOfValue = std::to_string(propertyValue.length());
-        messageType = "UPCO";
-        subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+        //auto onChange = 
+        colorProperty->onChange([&colorProperty, identifier, &message]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string propertyValue = colorProperty->getStringValue();
+            std::string lengthOfValue = std::to_string(propertyValue.length());
+            std::string messageType = "UPCO";
+            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
 
-        // Format length of subject to always be 4 digits
-        std::ostringstream os;
-        os << std::setfill('0') << std::setw(4) << subject.length();
-        lengthOfSubject = os.str();
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
 
-        message = messageType + lengthOfSubject + subject;
+            message = messageType + lengthOfSubject + subject;
+            });
 
         sendMessage(message);
         LERROR(fmt::format("Meddelandet som skickas {}", message));
-           
-
         // Update opacity of renderable
-        const Renderable* myrenderable = renderable("RenderablePointsCloud");
-        properties::Property* opacityProperty = myrenderable->property("Opacity");
-        //opacityProperty->onChange([&]() {
-        propertyValue = opacityProperty->getStringValue();
-        lengthOfValue = std::to_string(propertyValue.length());
-        messageType = "UPOP";
-        subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+        opacityProperty->onChange([&]() {
+            propertyValue = opacityProperty->getStringValue();
+            lengthOfValue = std::to_string(propertyValue.length());
+            messageType = "UPOP";
+            subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
 
-        // Format length of subject to always be 4 digits
-        std::ostringstream os;
-        os << std::setfill('0') << std::setw(4) << subject.length();
-        lengthOfSubject = os.str();
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            lengthOfSubject = os.str();
 
-        message = messageType + lengthOfSubject + subject;
+            message = messageType + lengthOfSubject + subject;
 
-        sendMessage(message);
-        LERROR(fmt::format("Meddelandet som skickas {}", message));*/
+            sendMessage(message);
+            LERROR(fmt::format("Meddelandet som skickas {}", message));
+            });
 
         // Update size of renderable
-        const Renderable* myrenderable = renderable("RenderablePointsCloud");
-        properties::Property* sizeProperty = myrenderable->property("Size");;
-        //opacityProperty->onChange([&]() {
-        propertyValue = sizeProperty->getStringValue();
-        lengthOfValue = std::to_string(propertyValue.length());
-        messageType = "UPSI";
-        subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+        sizeProperty->onChange([&]() {
+            propertyValue = sizeProperty->getStringValue();
+            lengthOfValue = std::to_string(propertyValue.length());
+            messageType = "UPSI";
+            subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
 
-        // Format length of subject to always be 4 digits
-        std::ostringstream os;
-        os << std::setfill('0') << std::setw(4) << subject.length();
-        lengthOfSubject = os.str();
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            lengthOfSubject = os.str();
 
-        message = messageType + lengthOfSubject + subject;
+            message = messageType + lengthOfSubject + subject;
 
-        sendMessage(message);
-        LERROR(fmt::format("Meddelandet som skickas {}", message));
+            sendMessage(message);
+            LERROR(fmt::format("Meddelandet som skickas {}", message));
+            });*/
     }
 
     // Server
@@ -404,6 +389,10 @@ namespace openspace {
                     e.what())
                 );
             }
+
+            //SoftwareConnection prop; 
+            //prop.handleProperties(identifier);
+
             break;
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
@@ -442,7 +431,7 @@ namespace openspace {
             float size = readFloatValue(message);
 
             // Update size of renderable
-            const Renderable * myrenderable = renderable(identifier);
+            const Renderable* myrenderable = renderable(identifier);
             properties::Property* sizeProperty = myrenderable->property("Size");
             sizeProperty->set(size);
             break;
