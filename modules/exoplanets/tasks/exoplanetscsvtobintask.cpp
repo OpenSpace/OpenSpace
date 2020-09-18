@@ -65,56 +65,6 @@ std::string ExoplanetsCsvToBinTask::description() {
         " and write as bin to " + _outputBinPath;
 }
 
-glm::vec3 ExoplanetsCsvToBinTask::starPosition(const std::string& starName) {
-    glm::vec3 position;
-    position[0] = NAN;
-    position[1] = NAN;
-    position[2] = NAN;
-    std::ifstream exoplanetsFile(_inputSpeckPath);
-    if (!exoplanetsFile) {
-        LERROR(fmt::format("Error opening file expl.speck."));
-    }
-
-    std::string line;
-    std::string data; // data
-    std::string name; 
-    while (getline(exoplanetsFile, line)) {
-        bool shouldSkipLine = (
-            line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
-            line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
-        );
-
-        if (shouldSkipLine) {
-            continue;
-        }
-
-        std::istringstream linestream(line);
-        getline(linestream, data, '#');
-        getline(linestream, name);
-        name.erase(0, 1);
-
-        std::string coord;
-        if (name == starName) {
-            std::stringstream dataStream(data);
-            getline(dataStream, coord, ' ');
-            position[0] = std::stof(coord.c_str(), nullptr);
-            getline(dataStream, coord, ' ');
-            position[1] = std::stof(coord.c_str(), nullptr);
-            getline(dataStream, coord, ' ');
-            position[2] = std::stof(coord.c_str(), nullptr);
-            break;
-        }
-    }
-
-    // Apply transformation matrix to pos
-    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
-    glm::vec3 transformedPosition = glm::vec3(
-        _transformationMatrix * glm::dvec4(position, 1.0)
-    );
-
-    return transformedPosition;
-}
-
 void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallback) {
     std::ifstream csvFile(_inputCsvPath);
     if (!csvFile.good()) {
@@ -145,6 +95,18 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
     getline(csvFile, planetRow); // The first line, containing the data names
     LINFOC("CSVTOBIN", fmt::format("Loading {} stars", total));
 
+    auto readFloatData = [](const std::string& data) -> float {
+        return !data.empty() ? std::stof(data.c_str(), nullptr) : NAN;
+    };
+
+    auto readDoubleData = [](const std::string& data) -> double {
+        return !data.empty() ? std::stod(data.c_str(), nullptr) : NAN;
+    };
+
+    auto readIntegerData = [](const std::string& data) -> int {
+        return !data.empty() ? std::stoi(data.c_str(), nullptr) : -1;
+    };
+
     int count = 0;
     std::string data;
     while (getline(csvFile, planetRow)) {
@@ -154,25 +116,17 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         std::istringstream lineStream(planetRow);
 
         getline(lineStream, data, ','); // A
-        if (!data.empty())
-            p.A = std::stof(data.c_str(), nullptr);
-        else
-            p.A = NAN;
+        p.A = readFloatData(data);
+
         getline(lineStream, data, ','); // AUPPER
-        if (!data.empty())
-            p.AUPPER = std::stod(data.c_str(), nullptr);
-        else
-            p.AUPPER = NAN;
+        p.AUPPER = readDoubleData(data);
+
         getline(lineStream, data, ','); // ALOWER
-        if (!data.empty())
-            p.ALOWER = std::stod(data.c_str(), nullptr);
-        else
-            p.ALOWER = NAN;
+        p.ALOWER = readDoubleData(data);
+
         getline(lineStream, data, ','); // UA
-        if (!data.empty())
-            p.UA = std::stod(data.c_str(), nullptr);
-        else
-            p.UA = NAN;
+        p.UA = readDoubleData(data);
+
         getline(lineStream, data, ','); // AREF
         getline(lineStream, data, ','); // AURL
         getline(lineStream, data, ','); // AR
@@ -189,42 +143,31 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // BREF
         getline(lineStream, data, ','); // BURL
         getline(lineStream, data, ','); // BIGOM
-        if (!data.empty())
-            p.BIGOM = std::stof(data.c_str(), nullptr);
-        else
-            p.BIGOM = NAN;
+        p.BIGOM = readFloatData(data);
+
         getline(lineStream, data, ','); // BIGOMUPPER
-        if (!data.empty())
-            p.BIGOMUPPER = std::stof(data.c_str(), nullptr);
-        else
-            p.BIGOMUPPER = NAN;
+        p.BIGOMUPPER = readFloatData(data);
+
         getline(lineStream, data, ','); // BIGOMLOWER
-        if (!data.empty())
-            p.BIGOMLOWER = std::stof(data.c_str(), nullptr);
-        else
-            p.BIGOMLOWER = NAN;
+        p.BIGOMLOWER = readFloatData(data);
+
         getline(lineStream, data, ','); // UBIGOM
-        if (!data.empty())
-            p.UBIGOM = std::stof(data.c_str(), nullptr);
-        else
-            p.UBIGOM = NAN;
+        p.UBIGOM = readFloatData(data);
+
         getline(lineStream, data, ','); // BIGOMREF
         getline(lineStream, data, ','); // BIGOMURL
         getline(lineStream, data, ','); // BINARY
-        if (!data.empty())
-            p.BINARY = std::stoi(data.c_str(), nullptr);
-        else
-            p.BINARY = -1;
+        p.BINARY = static_cast<bool>(readIntegerData(data));
+
         getline(lineStream, data, ','); // BINARYREF
         getline(lineStream, data, ','); // BINARYURL
         getline(lineStream, data, ','); // BMV
-        if (!data.empty())
-            p.BMV = std::stof(data.c_str(), nullptr);
-        else
-            p.BMV = NAN;
+        p.BMV = readFloatData(data);
+
         getline(lineStream, data, ','); // CHI2
         getline(lineStream, data, ','); // COMP
         component = data;
+
         getline(lineStream, data, ','); // DATE
         getline(lineStream, data, ','); // DEC
         getline(lineStream, data, ','); // DEC_STRING
@@ -261,29 +204,17 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // EANAME
         getline(lineStream, data, ','); // EAURL
         getline(lineStream, data, ','); // ECC
-        if (!data.empty())
-            p.ECC = std::stof(data.c_str(), nullptr);
-        else
-            p.ECC = NAN;
+        p.ECC = readFloatData(data);
 
         getline(lineStream, data, ','); // ECCUPPER
-        if (!data.empty())
-            p.ECCUPPER = std::stof(data.c_str(), nullptr);
-        else
-            p.ECCUPPER = NAN;
+        p.ECCLOWER = readFloatData(data);
 
         getline(lineStream, data, ','); // ECCLOWER
-        if (!data.empty())
-            p.ECCLOWER = std::stof(data.c_str(), nullptr);
-        else
-            p.ECCLOWER = NAN;
+        p.ECCLOWER = readFloatData(data);
 
         getline(lineStream, data, ','); // UECC
-        if (!data.empty())
-            p.UECC = std::stof(data.c_str(), nullptr);
-        else
-            p.UECC = NAN;
-
+        p.UECC = readFloatData(data);
+        
         getline(lineStream, data, ','); // ECCREF
         getline(lineStream, data, ','); // ECCURL
         getline(lineStream, data, ','); // EOD
@@ -316,28 +247,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // HIPP
         getline(lineStream, data, ','); // HR
         getline(lineStream, data, ','); // I
-        if (!data.empty())
-            p.I = std::stof(data.c_str(), nullptr);
-        else
-            p.I = NAN;
+        p.I = readFloatData(data);
 
         getline(lineStream, data, ','); // IUPPER
-        if (!data.empty())
-            p.IUPPER = std::stof(data.c_str(), nullptr);
-        else
-            p.IUPPER = NAN;
+        p.IUPPER = readFloatData(data);
 
         getline(lineStream, data, ','); // ILOWER
-        if (!data.empty())
-            p.ILOWER = std::stof(data.c_str(), nullptr);
-        else
-            p.ILOWER = NAN;
-
+        p.ILOWER = readFloatData(data);
+        
         getline(lineStream, data, ','); // UI
-        if (!data.empty())
-            p.UI = std::stof(data.c_str(), nullptr);
-        else
-            p.UI = NAN;
+        p.UI = readFloatData(data);
 
         getline(lineStream, data, ','); // IREF
         getline(lineStream, data, ','); // IURL
@@ -388,34 +307,20 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // MULT
         getline(lineStream, data, ','); // NAME
         getline(lineStream, data, ','); // NCOMP
-        if (!data.empty())
-            p.NCOMP = std::stoi(data.c_str(), nullptr);
-        else
-            p.NCOMP = -1;
+        p.NCOMP = readIntegerData(data);
+
         getline(lineStream, data, ','); // NOBS
         getline(lineStream, data, ','); // OM
-        if (!data.empty())
-            p.OM = std::stof(data.c_str(), nullptr);
-        else
-            p.OM = NAN;
+        p.OM = readFloatData(data);
 
         getline(lineStream, data, ','); // OMUPPER
-        if (!data.empty())
-            p.OMUPPER = std::stof(data.c_str(), nullptr);
-        else
-            p.OMUPPER = NAN;
+        p.OMUPPER = readFloatData(data);
 
         getline(lineStream, data, ','); // OMLOWER
-        if (!data.empty())
-            p.OMLOWER = std::stof(data.c_str(), nullptr);
-        else
-            p.OMLOWER = NAN;
+        p.OMLOWER = readFloatData(data);
 
         getline(lineStream, data, ','); // UOM
-        if (!data.empty())
-            p.UOM = std::stof(data.c_str(), nullptr);
-        else
-            p.UOM = NAN;
+        p.UOM = readFloatData(data);
 
         getline(lineStream, data, ','); // OMREF
         getline(lineStream, data, ','); // OMURL
@@ -427,55 +332,31 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // PARLOWER
         getline(lineStream, data, ','); // UPAR
         getline(lineStream, data, ','); // PER
-        if (!data.empty())
-            p.PER = std::stod(data.c_str(), nullptr);
-        else
-            p.PER = NAN;
+        p.PER = readDoubleData(data);
 
         getline(lineStream, data, ','); // PERUPPER
-        if (!data.empty())
-            p.PERUPPER = std::stof(data.c_str(), nullptr);
-        else
-            p.PERUPPER = NAN;
+        p.PERUPPER = readFloatData(data);
 
         getline(lineStream, data, ','); // PERLOWER
-        if (!data.empty())
-            p.PERLOWER = std::stof(data.c_str(), nullptr);
-        else
-            p.PERLOWER = NAN;
+        p.PERLOWER = readFloatData(data);
 
         getline(lineStream, data, ','); // UPER
-        if (!data.empty())
-            p.UPER = std::stof(data.c_str(), nullptr);
-        else
-            p.UPER = NAN;
+        p.UPER = readFloatData(data);
 
         getline(lineStream, data, ','); // PERREF
         getline(lineStream, data, ','); // PERURL
         getline(lineStream, data, ','); // PLANETDISCMETH
         getline(lineStream, data, ','); // R
-        if (!data.empty())
-            p.R = std::stod(data.c_str(), nullptr);
-        else
-            p.R = NAN;
+        p.R = readDoubleData(data);
 
         getline(lineStream, data, ','); // RUPPER
-        if (!data.empty())
-            p.RUPPER = std::stod(data.c_str(), nullptr);
-        else
-            p.RUPPER = NAN;
+        p.RUPPER = readDoubleData(data);
 
         getline(lineStream, data, ','); // RLOWER
-        if (!data.empty())
-            p.RLOWER = std::stod(data.c_str(), nullptr);
-        else
-            p.RLOWER = NAN;
+        p.RLOWER = readDoubleData(data);
 
         getline(lineStream, data, ','); //UR
-        if (!data.empty())
-            p.UR = std::stod(data.c_str(), nullptr);
-        else
-            p.UR = NAN;
+        p.UR = readDoubleData(data);
 
         getline(lineStream, data, ','); // RREF
         getline(lineStream, data, ','); // RURL
@@ -496,28 +377,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // RRREF
         getline(lineStream, data, ','); // RRURL
         getline(lineStream, data, ','); // RSTAR
-        if (!data.empty())
-            p.RSTAR = std::stof(data.c_str(), nullptr);
-        else
-            p.RSTAR = NAN;
+        p.RSTAR = readFloatData(data);
 
         getline(lineStream, data, ','); // RSTARUPPER
-        if (!data.empty())
-            p.RSTARUPPER = std::stof(data.c_str(), nullptr);
-        else
-            p.RSTARUPPER = NAN;
+        p.RSTARUPPER = readFloatData(data);
 
         getline(lineStream, data, ','); // RSTARLOWER
-        if (!data.empty())
-            p.RSTARLOWER = std::stof(data.c_str(), nullptr);
-        else
-            p.RSTARLOWER = NAN;
+        p.RSTARLOWER = readFloatData(data);
 
         getline(lineStream, data, ','); // URSTAR
-        if (!data.empty())
-            p.URSTAR = std::stof(data.c_str(), nullptr);
-        else
-            p.URSTAR = NAN;
+        p.URSTAR = readFloatData(data);
 
         getline(lineStream, data, ','); // RSTARREF
         getline(lineStream, data, ','); // RSTARURL
@@ -611,11 +480,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // T14REF
         getline(lineStream, data, ','); // T14URL
         getline(lineStream, data, ','); // TEFF
-        float teff;
-        if (!data.empty())
-            teff = std::stof(data.c_str(), nullptr);
-        else
-            teff = NAN;
+        float teff = readFloatData(data);
 
         getline(lineStream, data, ','); // TEFFUPPER
         getline(lineStream, data, ','); // TEFFLOWER
@@ -628,28 +493,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // TRANSITURL
         getline(lineStream, data, ','); // TREND
         getline(lineStream, data, ','); // TT
-        if (!data.empty())
-            p.TT = std::stod(data.c_str(), nullptr);
-        else
-            p.TT = NAN;
+        p.TT = readDoubleData(data);
 
         getline(lineStream, data, ','); // TTUPPER
-        if (!data.empty())
-            p.TTUPPER = std::stof(data.c_str(), nullptr);
-        else
-            p.TTUPPER = NAN;
+        p.TTUPPER = readFloatData(data);
 
         getline(lineStream, data, ','); // TTLOWER
-        if (!data.empty())
-            p.TTLOWER = std::stof(data.c_str(), nullptr);
-        else
-            p.TTLOWER = NAN;
+        p.TTLOWER = readFloatData(data);
 
         getline(lineStream, data, ','); // UTT
-        if (!data.empty())
-            p.UTT = std::stof(data.c_str(), nullptr);
-        else
-            p.UTT = NAN;
+        p.UTT = readFloatData(data);
 
         getline(lineStream, data, ','); // TTREF
         getline(lineStream, data, ','); // TTURL
@@ -663,61 +516,18 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // VSINIREF
         getline(lineStream, data, ','); // VSINIURL
         getline(lineStream, data, ','); // KEPID
-        if (!data.empty())
+        if (!data.empty()) {
             isKeplerObject = true;
+        }
         getline(lineStream, data); // KDE
 
         if (!isKeplerObject) {
             // calculate B-V from Teff if not exsisting
             if (std::isnan(p.BMV)) {
-                if (!std::isnan(teff)) {
-                    std::ifstream teffToBvFile(absPath(TeffBvPath));
-
-                    if (!teffToBvFile.good()) {
-                        LERROR(fmt::format("Failed to open teff_bv.txt file"));
-                        return;
-                    }
-
-                    float BV = 0.f;
-                    float bvUpper = 0.f;
-                    float bvLower = 0.f;
-                    float teffLower, teffUpper;
-                    std::string row, teffString, bvString;
-                    while (getline(teffToBvFile, row)) {
-                        std::istringstream lineStream(row);
-                        getline(lineStream, teffString, ',');
-                        getline(lineStream, bvString);
-
-                        float teffCurrent = std::stof(teffString.c_str(), nullptr);
-                        float bvCurrent = std::stof(bvString.c_str(), nullptr);
-
-                        if (teff > teffCurrent) {
-                            teffLower = teffCurrent;
-                            bvLower = bvCurrent;
-                        }
-                        else {
-                            teffUpper = teffCurrent;
-                            bvUpper = bvCurrent;
-                            if (bvLower == 0.f) {
-                                BV = 2.f;
-                            }
-                            else {
-                                float bvDiff = (bvUpper - bvLower);
-                                float teffDiff = (teffUpper - teffLower);
-                                BV = ((bvDiff * (teff - teffLower)) / teffDiff) + bvLower;
-                            }
-                            break;
-                        }
-                    }
-                    teffToBvFile.close();
-                    p.BMV = BV;
-                }
-                else {
-                    p.BMV = NAN;
-                }
+                p.BMV = bvFromTeff(teff);
             }
 
-            // crate look-up table
+            // create look-up table
             long pos = binFile.tellp();
             planetName = speckStarname + " " + component;
             lutFile << planetName << "," << pos << std::endl;
@@ -726,6 +536,102 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
     }
 
     progressCallback(1.f);
+}
+
+glm::vec3 ExoplanetsCsvToBinTask::starPosition(const std::string& starName) {
+    glm::vec3 position;
+    position[0] = NAN;
+    position[1] = NAN;
+    position[2] = NAN;
+    std::ifstream exoplanetsFile(_inputSpeckPath);
+    if (!exoplanetsFile) {
+        LERROR(fmt::format("Error opening file expl.speck."));
+    }
+
+    std::string line;
+    std::string data; // data
+    std::string name;
+    while (getline(exoplanetsFile, line)) {
+        bool shouldSkipLine = (
+            line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
+            line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
+            );
+
+        if (shouldSkipLine) {
+            continue;
+        }
+
+        std::istringstream linestream(line);
+        getline(linestream, data, '#');
+        getline(linestream, name);
+        name.erase(0, 1);
+
+        std::string coord;
+        if (name == starName) {
+            std::stringstream dataStream(data);
+            getline(dataStream, coord, ' ');
+            position[0] = std::stof(coord.c_str(), nullptr);
+            getline(dataStream, coord, ' ');
+            position[1] = std::stof(coord.c_str(), nullptr);
+            getline(dataStream, coord, ' ');
+            position[2] = std::stof(coord.c_str(), nullptr);
+            break;
+        }
+    }
+
+    // Apply transformation matrix to pos
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+    glm::vec3 transformedPosition = glm::vec3(
+        _transformationMatrix * glm::dvec4(position, 1.0)
+    );
+
+    return transformedPosition;
+}
+
+float ExoplanetsCsvToBinTask::bvFromTeff(const float teff) {
+    if (std::isnan(teff)) {
+        return NAN;
+    }
+
+    std::ifstream teffToBvFile(absPath(TeffBvPath));
+
+    if (!teffToBvFile.good()) {
+        LERROR(fmt::format("Failed to open teff_bv.txt file"));
+        return NAN;
+    }
+
+    float BV = 0.f;
+    float bvUpper = 0.f;
+    float bvLower = 0.f;
+    float teffLower, teffUpper;
+    std::string row, teffString, bvString;
+    while (getline(teffToBvFile, row)) {
+        std::istringstream lineStream(row);
+        getline(lineStream, teffString, ',');
+        getline(lineStream, bvString);
+
+        float teffCurrent = std::stof(teffString.c_str(), nullptr);
+        float bvCurrent = std::stof(bvString.c_str(), nullptr);
+
+        if (teff > teffCurrent) {
+            teffLower = teffCurrent;
+            bvLower = bvCurrent;
+        }
+        else {
+            teffUpper = teffCurrent;
+            bvUpper = bvCurrent;
+            if (bvLower == 0.f) {
+                BV = 2.f;
+            }
+            else {
+                float bvDiff = (bvUpper - bvLower);
+                float teffDiff = (teffUpper - teffLower);
+                BV = ((bvDiff * (teff - teffLower)) / teffDiff) + bvLower;
+            }
+            break;
+        }
+    }
+    return BV;
 }
 
 documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
