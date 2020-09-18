@@ -44,7 +44,7 @@ private:
     std::string _outputBinPath;
     std::string _outputLutPath;
 
-    glm::vec3 getStarPosition(std::string starName);
+    glm::vec3 starPosition(const std::string& starName);
 };
 
 } // namespace openspace::exoplanets

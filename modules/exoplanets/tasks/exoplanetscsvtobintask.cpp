@@ -35,10 +35,10 @@
 #include <fstream>
 
 namespace {
-    const char* KeyInputCsv = "InputCSV";
-    const char* KeyInputSpeck = "InputSPECK";
-    const char* KeyOutputBin = "OutputBIN";
-    const char* KeyOutputLut = "OutputLUT";
+    constexpr const char* KeyInputCsv = "InputCSV";
+    constexpr const char* KeyInputSpeck = "InputSPECK";
+    constexpr const char* KeyOutputBin = "OutputBIN";
+    constexpr const char* KeyOutputLut = "OutputLUT";
 
     constexpr const char* _loggerCat = "CsvToBinTask";
 
@@ -65,7 +65,7 @@ std::string ExoplanetsCsvToBinTask::description() {
         " and write as bin to " + _outputBinPath;
 }
 
-glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName) {
+glm::vec3 ExoplanetsCsvToBinTask::starPosition(const std::string& starName) {
     glm::vec3 position;
     position[0] = NAN;
     position[1] = NAN;
@@ -76,23 +76,26 @@ glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName) {
     }
 
     std::string line;
-    std::string d;
-    std::string n;
-    while (getline(exoplanetsFile, line))
-    {
-        if (line[0] == '#' || line.substr(0, 7) == "datavar" || line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture" || line.empty()) {
+    std::string data; // data
+    std::string name; 
+    while (getline(exoplanetsFile, line)) {
+        bool shouldSkipLine = (
+            line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
+            line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
+        );
+
+        if (shouldSkipLine) {
             continue;
         }
 
         std::istringstream linestream(line);
-        getline(linestream, d, '#');
-        getline(linestream, n);
-        n.erase(0, 1);
+        getline(linestream, data, '#');
+        getline(linestream, name);
+        name.erase(0, 1);
 
         std::string coord;
-        if (n.compare(starName) == 0)
-        {
-            std::stringstream dataStream(d);
+        if (name == starName) {
+            std::stringstream dataStream(data);
             getline(dataStream, coord, ' ');
             position[0] = std::stof(coord.c_str(), nullptr);
             getline(dataStream, coord, ' ');
@@ -109,7 +112,6 @@ glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName) {
         _transformationMatrix * glm::dvec4(position, 1.0)
     );
 
-    exoplanetsFile.close();
     return transformedPosition;
 }
 
@@ -124,7 +126,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
     std::ofstream lutFile(_outputLutPath);
 
     int version = 1;
-    binFile.write((char *)&version, sizeof(int));
+    binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
 
     Exoplanet p;
 
@@ -590,7 +592,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // SPECURL
         getline(lineStream, data, ','); // STAR
         std::string speckStarname = speckStarName(data);
-        glm::vec3 position = getStarPosition(speckStarname);
+        glm::vec3 position = starPosition(speckStarname);
         p.POSITIONX = position[0];
         p.POSITIONY = position[1];
         p.POSITIONZ = position[2];
@@ -719,15 +721,11 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
             long pos = binFile.tellp();
             planetName = speckStarname + " " + component;
             lutFile << planetName << "," << pos << std::endl;
-            binFile.write((char *)&p, sizeof(Exoplanet));
+            binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
         }
     }
 
-    csvFile.close();
-    binFile.close();
-    lutFile.close();
-
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 documentation::Documentation ExoplanetsCsvToBinTask::documentation() {

@@ -33,14 +33,14 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
-#include <thread> 
-#include <chrono>  
+#include <thread>
+#include <chrono>
 
 #include "exoplanetsmodule_lua.inl"
 
 namespace openspace {
 
-const char* _loggerCat = "exoplanets";
+constexpr const char* _loggerCat = "exoplanets";
 
 using namespace exoplanets;
 

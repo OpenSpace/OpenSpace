@@ -56,7 +56,8 @@ namespace {
     static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
-        "This value determines the eccentricity, that is the deviation from a perfect sphere, for this orbit."
+        "This value determines the eccentricity, that is the deviation from a perfect "
+        "sphere, for this orbit."
     };
 
     static const openspace::properties::Property::PropertyInfo OffsetInfo = {

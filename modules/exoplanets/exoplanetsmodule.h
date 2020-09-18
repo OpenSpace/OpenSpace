@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/openspacemodule.h>
+
+#include <openspace/documentation/documentation.h>
 
 namespace openspace {
 
