@@ -56,7 +56,7 @@ constexpr const char* DiscTextureFile =
 constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
 
 std::string starColor(float bv, std::ifstream& colormap) {
-    const int t = round(((bv + 0.4) / (2.0 + 0.4)) * 255);
+    const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * 255));
     std::string color;
     for (int i = 0; i < t + 12; i++) {
         getline(colormap, color);
@@ -97,25 +97,25 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om) {
 glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end) {
     glm::quat rotationQuat;
     glm::dvec3 rotationAxis;
-    const float cosTheta = dot(start, end);
+    const float cosTheta = static_cast<float>(glm::dot(start, end));
     constexpr float Epsilon = 1E-3f;
 
     if (cosTheta < -1.f + Epsilon) {
         // special case when vectors in opposite directions:
         // there is no "ideal" rotation axis
         // So guess one; any will do as long as it's perpendicular to start vector
-        rotationAxis = cross(glm::dvec3(0.0, 0.0, 1.0), start);
+        rotationAxis = glm::cross(glm::dvec3(0.0, 0.0, 1.0), start);
         if (length2(rotationAxis) < 0.01f) {
             // bad luck, they were parallel, try again!
-            rotationAxis = cross(glm::dvec3(1.0, 0.0, 0.0), start);
+            rotationAxis = glm::cross(glm::dvec3(1.0, 0.0, 0.0), start);
         }
 
-        rotationAxis = normalize(rotationAxis);
+        rotationAxis = glm::normalize(rotationAxis);
         rotationQuat = glm::quat(glm::radians(180.f), rotationAxis);
         return glm::dmat3(toMat4(rotationQuat));
     }
 
-    rotationAxis = cross(start, end);
+    rotationAxis = glm::cross(start, end);
 
     const float s = sqrt((1.f + cosTheta) * 2.f);
     const float invs = 1.f / s;
@@ -127,7 +127,7 @@ glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end) {
         rotationAxis.z * invs
     );
 
-    return glm::dmat3(toMat4(rotationQuat));
+    return glm::dmat3(glm::toMat4(rotationQuat));
 }
 
 // Create an identifier without whitespaces
@@ -141,7 +141,7 @@ int addExoplanetSystem(lua_State* L) {
     const std::string starName = luaL_checkstring(L, StringLocation);
 
     // If user have given name as in EOD, change it to speck-name
-    const std::string starNameSpeck = speckStarName(starName);
+    const std::string starNameSpeck = std::string(speckStarName(starName));
 
     const std::string starIdentifier = createIdentifier(starNameSpeck);
     const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
@@ -215,19 +215,22 @@ int addExoplanetSystem(lua_State* L) {
     );
        
     const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
-    const glm::dvec3 starToSunVec = normalize(sunPosition - starPosition);
+    const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
     const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
 
     const glm::dmat3 galaxticToCelestialMatrix = 
         SpiceManager::ref().positionTransformMatrix("GALACTIC", "J2000", 0.0);
 
-    const glm::dvec3 celestialNorth = normalize(
+    const glm::dvec3 celestialNorth = glm::normalize(
         galaxticToCelestialMatrix * galacticNorth
     );
 
     // Earth's north vector projected onto the skyplane, the plane perpendicular to the 
     // viewing vector (starToSunVec)
-    const float celestialAngle = dot(celestialNorth, starToSunVec);
+    const float celestialAngle = static_cast<float>(glm::dot(
+        celestialNorth, 
+        starToSunVec
+    ));
     glm::dvec3 northProjected = glm::normalize(
         celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
     );
@@ -257,7 +260,7 @@ int addExoplanetSystem(lua_State* L) {
         }
 
         const std::string color = starColor(p.bmv, colorMap);
-        const float radiusInMeter = starRadius * distanceconstants::SolarRadius;
+        const float radiusInMeter = starRadius * static_cast<float>(distanceconstants::SolarRadius);
 
         starGlobeRenderableString = "Renderable = {"
             "Type = 'RenderableGlobe',"
@@ -339,22 +342,26 @@ int addExoplanetSystem(lua_State* L) {
         float planetRadius;
         std::string enabled;
 
+        const float astronomicalUnit = static_cast<float>(distanceconstants::AstronomicalUnit);
+        const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
+        const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
+
         if (isnan(planet.r)) {
             if (isnan(planet.rStar)) {
-                planetRadius = planet.a * 0.001f * distanceconstants::AstronomicalUnit;
+                planetRadius = planet.a * 0.001f * astronomicalUnit;
             }
             else {
-                planetRadius = planet.rStar * 0.1f * distanceconstants::SolarRadius;
+                planetRadius = planet.rStar * 0.1f * solarRadius;
             }
             enabled = "false";
         }
         else {
-            planetRadius = planet.r * distanceconstants::JupiterRadius;
+            planetRadius = planet.r * jupiterRadius;
             enabled = "true";
         }
 
         const float period = planet.per * static_cast<float>(SecondsPerDay);
-        const float semiMajorAxisInMeter = planet.a * distanceconstants::AstronomicalUnit;
+        const float semiMajorAxisInMeter = planet.a * astronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
         const std::string planetIdentifier = createIdentifier(planetName);
@@ -471,7 +478,7 @@ int addExoplanetSystem(lua_State* L) {
 int removeExoplanetSystem(lua_State* L) {
     const int StringLocation = -1;
     const std::string starName = luaL_checkstring(L, StringLocation);
-    const std::string starNameSpeck = speckStarName(starName);
+    const std::string starNameSpeck = std::string(speckStarName(starName));
     const std::string starIdentifier = createIdentifier(starNameSpeck);
 
     openspace::global::scriptEngine.queueScript(

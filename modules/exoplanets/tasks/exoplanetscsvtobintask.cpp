@@ -460,7 +460,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // SPECREF
         getline(lineStream, data, ','); // SPECURL
         getline(lineStream, data, ','); // STAR
-        std::string speckStarname = speckStarName(data);
+        std::string speckStarname = std::string(speckStarName(data));
         glm::vec3 position = starPosition(speckStarname);
         p.positionX = position[0];
         p.positionY = position[1];
@@ -528,7 +528,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
             }
 
             // create look-up table
-            long pos = binFile.tellp();
+            long pos = static_cast<long>(binFile.tellp());
             planetName = speckStarname + " " + component;
             lutFile << planetName << "," << pos << std::endl;
             binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));

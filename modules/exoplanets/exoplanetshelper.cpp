@@ -24,9 +24,11 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 
+#include <string_view>
+
 namespace openspace::exoplanets {
 
-std::string speckStarName(std::string csvName) {
+std::string_view speckStarName(std::string_view csvName) {
     if (csvName == "HD 1237") { return "GJ 3021"; }
     if (csvName == "MOA-2009-BLG-387L") { return "MOA 2009-BLG-387L"; }
     if (csvName == "HD 126614 A") { return "HD 126614"; }
@@ -74,7 +76,7 @@ std::string speckStarName(std::string csvName) {
     return csvName;
 }
 
-std::string csvStarName(std::string name) {
+std::string_view csvStarName(std::string_view name) {
     if (name == "GJ 3021") { return "HD 1237"; }
     if (name == "MOA 2009-BLG-387L") { return "MOA-2009-BLG-387L"; }
     if (name == "HD 126614") { return "HD 126614 A"; }
