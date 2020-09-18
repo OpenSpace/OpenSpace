@@ -199,7 +199,7 @@ int addExoplanetSystem(lua_State* L) {
     data.close();
     lut.close();
 
-    bool notEnoughData = isnan(p.POSITIONX) || isnan(p.A) || isnan(p.PER);
+    bool notEnoughData = isnan(p.positionX) || isnan(p.a) || isnan(p.per);
 
     if (!found || notEnoughData) {
         return ghoul::lua::luaError(
@@ -209,9 +209,9 @@ int addExoplanetSystem(lua_State* L) {
     }
 
     const glm::dvec3 starPosition = glm::dvec3(
-        p.POSITIONX * distanceconstants::Parsec,
-        p.POSITIONY * distanceconstants::Parsec,
-        p.POSITIONZ * distanceconstants::Parsec
+        p.positionX * distanceconstants::Parsec,
+        p.positionY * distanceconstants::Parsec,
+        p.positionZ * distanceconstants::Parsec
     );
        
     const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
@@ -248,7 +248,7 @@ int addExoplanetSystem(lua_State* L) {
 
     // Star renderable globe, if we have a radius
     std::string starGlobeRenderableString;
-    const float starRadius = p.RSTAR;
+    const float starRadius = p.rStar;
     if (!isnan(starRadius)) {
         std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 
@@ -256,7 +256,7 @@ int addExoplanetSystem(lua_State* L) {
             ghoul::lua::luaError(L, "Failed to open colormap data file");
         }
 
-        const std::string color = starColor(p.BMV, colorMap);
+        const std::string color = starColor(p.bmv, colorMap);
         const float radiusInMeter = starRadius * distanceconstants::SolarRadius;
 
         starGlobeRenderableString = "Renderable = {"
@@ -314,22 +314,22 @@ int addExoplanetSystem(lua_State* L) {
         Exoplanet planet = planetSystem[i];
         const std::string planetName = planetNames[i];
 
-        if (isnan(planet.ECC)) {
-            planet.ECC = 0.f;
+        if (isnan(planet.ecc)) {
+            planet.ecc = 0.f;
         }
-        if (isnan(planet.I)) {
-            planet.I = 90.f;
+        if (isnan(planet.i)) {
+            planet.i = 90.f;
         }
-        if (isnan(planet.BIGOM)) {
-            planet.BIGOM = 180.f;
+        if (isnan(planet.bigOm)) {
+            planet.bigOm = 180.f;
         }
-        if (isnan(planet.OM)) {
-            planet.OM = 90.f;
+        if (isnan(planet.om)) {
+            planet.om = 90.f;
         }
         Time epoch;
         std::string sEpoch;
-        if (!isnan(planet.TT)) {
-            epoch.setTime("JD " + std::to_string(planet.TT));
+        if (!isnan(planet.tt)) {
+            epoch.setTime("JD " + std::to_string(planet.tt));
             sEpoch = std::string(epoch.ISO8601());
         }
         else {
@@ -339,33 +339,33 @@ int addExoplanetSystem(lua_State* L) {
         float planetRadius;
         std::string enabled;
 
-        if (isnan(planet.R)) {
-            if (isnan(planet.RSTAR)) {
-                planetRadius = planet.A * 0.001f * distanceconstants::AstronomicalUnit;
+        if (isnan(planet.r)) {
+            if (isnan(planet.rStar)) {
+                planetRadius = planet.a * 0.001f * distanceconstants::AstronomicalUnit;
             }
             else {
-                planetRadius = planet.RSTAR * 0.1f * distanceconstants::SolarRadius;
+                planetRadius = planet.rStar * 0.1f * distanceconstants::SolarRadius;
             }
             enabled = "false";
         }
         else {
-            planetRadius = planet.R * distanceconstants::JupiterRadius;
+            planetRadius = planet.r * distanceconstants::JupiterRadius;
             enabled = "true";
         }
 
-        const float period = planet.PER * static_cast<float>(SecondsPerDay);
-        const float semiMajorAxisInMeter = planet.A * distanceconstants::AstronomicalUnit;
+        const float period = planet.per * static_cast<float>(SecondsPerDay);
+        const float semiMajorAxisInMeter = planet.a * distanceconstants::AstronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
         const std::string planetIdentifier = createIdentifier(planetName);
 
         const std::string planetKeplerTranslation = "{"
             "Type = 'KeplerTranslation',"
-            "Eccentricity = " + std::to_string(planet.ECC) + "," //ECC 
+            "Eccentricity = " + std::to_string(planet.ecc) + "," //ECC 
             "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
-            "Inclination = " + std::to_string(planet.I) + "," //I
-            "AscendingNode = " + std::to_string(planet.BIGOM) + "," //BIGOM
-            "ArgumentOfPeriapsis = " + std::to_string(planet.OM) + "," //OM
+            "Inclination = " + std::to_string(planet.i) + "," //I
+            "AscendingNode = " + std::to_string(planet.bigOm) + "," //BIGOM
+            "ArgumentOfPeriapsis = " + std::to_string(planet.om) + "," //OM
             "MeanAnomaly = 0.0,"
             "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
             "Period = " + std::to_string(period) + ""
@@ -403,7 +403,7 @@ int addExoplanetSystem(lua_State* L) {
             "Enabled = true,"
             "Renderable = {"
                 "Type = 'RenderableTrailOrbit',"
-                "Period = " + std::to_string(planet.PER) + ","
+                "Period = " + std::to_string(planet.per) + ","
                 "Resolution = 1000,"
                 "Translation = " + planetKeplerTranslation + ","
                 "Color = { 1, 1, 1 }"
@@ -419,15 +419,15 @@ int addExoplanetSystem(lua_State* L) {
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
 
-        bool hasUpperAUncertainty = !isnan(planet.AUPPER);
-        bool hasLowerAUncertainty = !isnan(planet.ALOWER);
+        bool hasUpperAUncertainty = !isnan(planet.aUpper);
+        bool hasLowerAUncertainty = !isnan(planet.aLower);
 
         if (hasUpperAUncertainty && hasLowerAUncertainty) {
             // Get the orbit plane of the planet trail orbit from the KeplerTranslation
             const glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
-                planet.I,
-                planet.BIGOM,
-                planet.OM
+                planet.i,
+                planet.bigOm,
+                planet.om
             );
             const glm::dmat3 rotation = orbitPlaneRotationMatrix;
 
@@ -439,10 +439,10 @@ int addExoplanetSystem(lua_State* L) {
                     "Type = 'RenderableOrbitDisc',"
                     "Texture = openspace.absPath('" + DiscTextureFile + "'),"
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
-                    "Eccentricity = " + std::to_string(planet.ECC) + ","
+                    "Eccentricity = " + std::to_string(planet.ecc) + ","
                     "Offset = { " +
-                        std::to_string(planet.ALOWER) + ", " +
-                        std::to_string(planet.AUPPER) + 
+                        std::to_string(planet.aLower) + ", " +
+                        std::to_string(planet.aUpper) + 
                     "}," //min / max extend
                     "Opacity = 0.3"
                 "},"

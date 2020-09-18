@@ -116,16 +116,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         std::istringstream lineStream(planetRow);
 
         getline(lineStream, data, ','); // A
-        p.A = readFloatData(data);
+        p.a = readFloatData(data);
 
         getline(lineStream, data, ','); // AUPPER
-        p.AUPPER = readDoubleData(data);
+        p.aUpper = readDoubleData(data);
 
         getline(lineStream, data, ','); // ALOWER
-        p.ALOWER = readDoubleData(data);
+        p.aLower = readDoubleData(data);
 
         getline(lineStream, data, ','); // UA
-        p.UA = readDoubleData(data);
+        p.ua = readDoubleData(data);
 
         getline(lineStream, data, ','); // AREF
         getline(lineStream, data, ','); // AURL
@@ -143,26 +143,26 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // BREF
         getline(lineStream, data, ','); // BURL
         getline(lineStream, data, ','); // BIGOM
-        p.BIGOM = readFloatData(data);
+        p.bigOm = readFloatData(data);
 
         getline(lineStream, data, ','); // BIGOMUPPER
-        p.BIGOMUPPER = readFloatData(data);
+        p.bigOmUpper = readFloatData(data);
 
         getline(lineStream, data, ','); // BIGOMLOWER
-        p.BIGOMLOWER = readFloatData(data);
+        p.bigOmLower = readFloatData(data);
 
         getline(lineStream, data, ','); // UBIGOM
-        p.UBIGOM = readFloatData(data);
+        p.uBigOm = readFloatData(data);
 
         getline(lineStream, data, ','); // BIGOMREF
         getline(lineStream, data, ','); // BIGOMURL
         getline(lineStream, data, ','); // BINARY
-        p.BINARY = static_cast<bool>(readIntegerData(data));
+        p.binary = static_cast<bool>(readIntegerData(data));
 
         getline(lineStream, data, ','); // BINARYREF
         getline(lineStream, data, ','); // BINARYURL
         getline(lineStream, data, ','); // BMV
-        p.BMV = readFloatData(data);
+        p.bmv = readFloatData(data);
 
         getline(lineStream, data, ','); // CHI2
         getline(lineStream, data, ','); // COMP
@@ -204,16 +204,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // EANAME
         getline(lineStream, data, ','); // EAURL
         getline(lineStream, data, ','); // ECC
-        p.ECC = readFloatData(data);
+        p.ecc = readFloatData(data);
 
         getline(lineStream, data, ','); // ECCUPPER
-        p.ECCLOWER = readFloatData(data);
+        p.eccUpper = readFloatData(data);
 
         getline(lineStream, data, ','); // ECCLOWER
-        p.ECCLOWER = readFloatData(data);
+        p.eccLower = readFloatData(data);
 
         getline(lineStream, data, ','); // UECC
-        p.UECC = readFloatData(data);
+        p.uEcc = readFloatData(data);
         
         getline(lineStream, data, ','); // ECCREF
         getline(lineStream, data, ','); // ECCURL
@@ -247,16 +247,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // HIPP
         getline(lineStream, data, ','); // HR
         getline(lineStream, data, ','); // I
-        p.I = readFloatData(data);
+        p.i = readFloatData(data);
 
         getline(lineStream, data, ','); // IUPPER
-        p.IUPPER = readFloatData(data);
+        p.iUpper = readFloatData(data);
 
         getline(lineStream, data, ','); // ILOWER
-        p.ILOWER = readFloatData(data);
+        p.iLower = readFloatData(data);
         
         getline(lineStream, data, ','); // UI
-        p.UI = readFloatData(data);
+        p.ui = readFloatData(data);
 
         getline(lineStream, data, ','); // IREF
         getline(lineStream, data, ','); // IURL
@@ -307,20 +307,20 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // MULT
         getline(lineStream, data, ','); // NAME
         getline(lineStream, data, ','); // NCOMP
-        p.NCOMP = readIntegerData(data);
+        p.nComp = readIntegerData(data);
 
         getline(lineStream, data, ','); // NOBS
         getline(lineStream, data, ','); // OM
-        p.OM = readFloatData(data);
+        p.om = readFloatData(data);
 
         getline(lineStream, data, ','); // OMUPPER
-        p.OMUPPER = readFloatData(data);
+        p.omUpper = readFloatData(data);
 
         getline(lineStream, data, ','); // OMLOWER
-        p.OMLOWER = readFloatData(data);
+        p.omLower = readFloatData(data);
 
         getline(lineStream, data, ','); // UOM
-        p.UOM = readFloatData(data);
+        p.uOm = readFloatData(data);
 
         getline(lineStream, data, ','); // OMREF
         getline(lineStream, data, ','); // OMURL
@@ -332,31 +332,31 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // PARLOWER
         getline(lineStream, data, ','); // UPAR
         getline(lineStream, data, ','); // PER
-        p.PER = readDoubleData(data);
+        p.per = readDoubleData(data);
 
         getline(lineStream, data, ','); // PERUPPER
-        p.PERUPPER = readFloatData(data);
+        p.perUpper = readFloatData(data);
 
         getline(lineStream, data, ','); // PERLOWER
-        p.PERLOWER = readFloatData(data);
+        p.perLower = readFloatData(data);
 
         getline(lineStream, data, ','); // UPER
-        p.UPER = readFloatData(data);
+        p.uPer = readFloatData(data);
 
         getline(lineStream, data, ','); // PERREF
         getline(lineStream, data, ','); // PERURL
         getline(lineStream, data, ','); // PLANETDISCMETH
         getline(lineStream, data, ','); // R
-        p.R = readDoubleData(data);
+        p.r = readDoubleData(data);
 
         getline(lineStream, data, ','); // RUPPER
-        p.RUPPER = readDoubleData(data);
+        p.rUpper = readDoubleData(data);
 
         getline(lineStream, data, ','); // RLOWER
-        p.RLOWER = readDoubleData(data);
+        p.rLower = readDoubleData(data);
 
         getline(lineStream, data, ','); //UR
-        p.UR = readDoubleData(data);
+        p.ur = readDoubleData(data);
 
         getline(lineStream, data, ','); // RREF
         getline(lineStream, data, ','); // RURL
@@ -377,16 +377,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // RRREF
         getline(lineStream, data, ','); // RRURL
         getline(lineStream, data, ','); // RSTAR
-        p.RSTAR = readFloatData(data);
+        p.rStar = readFloatData(data);
 
         getline(lineStream, data, ','); // RSTARUPPER
-        p.RSTARUPPER = readFloatData(data);
+        p.rStarUpper = readFloatData(data);
 
         getline(lineStream, data, ','); // RSTARLOWER
-        p.RSTARLOWER = readFloatData(data);
+        p.rStarLower = readFloatData(data);
 
         getline(lineStream, data, ','); // URSTAR
-        p.URSTAR = readFloatData(data);
+        p.urStar = readFloatData(data);
 
         getline(lineStream, data, ','); // RSTARREF
         getline(lineStream, data, ','); // RSTARURL
@@ -462,9 +462,9 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // STAR
         std::string speckStarname = speckStarName(data);
         glm::vec3 position = starPosition(speckStarname);
-        p.POSITIONX = position[0];
-        p.POSITIONY = position[1];
-        p.POSITIONZ = position[2];
+        p.positionX = position[0];
+        p.positionY = position[1];
+        p.positionZ = position[2];
 
         getline(lineStream, data, ','); // STARDISCMETH
         getline(lineStream, data, ','); // T0
@@ -493,16 +493,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // TRANSITURL
         getline(lineStream, data, ','); // TREND
         getline(lineStream, data, ','); // TT
-        p.TT = readDoubleData(data);
+        p.tt = readDoubleData(data);
 
         getline(lineStream, data, ','); // TTUPPER
-        p.TTUPPER = readFloatData(data);
+        p.ttUpper = readFloatData(data);
 
         getline(lineStream, data, ','); // TTLOWER
-        p.TTLOWER = readFloatData(data);
+        p.ttLower = readFloatData(data);
 
         getline(lineStream, data, ','); // UTT
-        p.UTT = readFloatData(data);
+        p.uTt = readFloatData(data);
 
         getline(lineStream, data, ','); // TTREF
         getline(lineStream, data, ','); // TTURL
@@ -523,8 +523,8 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
         if (!isKeplerObject) {
             // calculate B-V from Teff if not exsisting
-            if (std::isnan(p.BMV)) {
-                p.BMV = bvFromTeff(teff);
+            if (std::isnan(p.bmv)) {
+                p.bmv = bvFromTeff(teff);
             }
 
             // create look-up table
