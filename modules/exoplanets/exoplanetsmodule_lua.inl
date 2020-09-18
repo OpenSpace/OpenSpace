@@ -138,7 +138,7 @@ int addExoplanetSystem(lua_State* L) {
     const std::string starName = luaL_checkstring(L, StringLocation);
 
     // If user have given name as in EOD, change it to speck-name
-    const std::string starNameSpeck = getSpeckStarName(starName);
+    const std::string starNameSpeck = speckStarName(starName);
 
     const std::string starIdentifier = createIdentifier(starNameSpeck);
     const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
@@ -469,7 +469,7 @@ int addExoplanetSystem(lua_State* L) {
 int removeExoplanetSystem(lua_State* L) {
     const int StringLocation = -1;
     const std::string starName = luaL_checkstring(L, StringLocation);
-    const std::string starNameSpeck = getSpeckStarName(starName);
+    const std::string starNameSpeck = speckStarName(starName);
     const std::string starIdentifier = createIdentifier(starNameSpeck);
 
     openspace::global::scriptEngine.queueScript(

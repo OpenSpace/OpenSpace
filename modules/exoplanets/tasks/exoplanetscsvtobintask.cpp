@@ -589,7 +589,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // SPECREF
         getline(lineStream, data, ','); // SPECURL
         getline(lineStream, data, ','); // STAR
-        std::string  speckStarname = getSpeckStarName(data);
+        std::string speckStarname = speckStarName(data);
         glm::vec3 position = getStarPosition(speckStarname);
         p.POSITIONX = position[0];
         p.POSITIONY = position[1];

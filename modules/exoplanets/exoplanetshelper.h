@@ -75,10 +75,10 @@ struct Exoplanet {
 };
 
 // Convert csv-file specific names to the corresponding name in the speck data file
-std::string getSpeckStarName(std::string name);
+std::string speckStarName(std::string name);
 
 // Convert speck-file specific names to the corresponding name in the csv data file
-std::string getCsvStarName(std::string name);
+std::string csvStarName(std::string name);
 
 } // namespace openspace::exoplanets
 
