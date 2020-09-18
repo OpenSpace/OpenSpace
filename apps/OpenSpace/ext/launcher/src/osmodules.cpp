@@ -13,8 +13,7 @@ osmodules::osmodules(openspace::Profile* imported, QWidget *parent)
     ui->setupUi(this);
 
     for (size_t i = 0; i < _data.size(); ++i) {
-        _modulesListItems.push_back(new QListWidgetItem(createOneLineSummary(_data[i])));
-        ui->list->addItem(_modulesListItems[i]);
+        ui->list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
     }
 
     connect(ui->list, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelected()));
@@ -51,21 +50,22 @@ void osmodules::listItemSelected(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    openspace::Profile::Module& m = _data[index];
-    ui->line_module->setText(QString(m.name.c_str()));
-    ui->line_loaded->setText(QString(m.loadedInstruction.c_str()));
-    ui->line_notLoaded->setText(QString(m.notLoadedInstruction.c_str()));
+    if (_data.size() > 0) {
+        openspace::Profile::Module& m = _data[index];
+        ui->line_module->setText(QString(m.name.c_str()));
+        ui->line_loaded->setText(QString(m.loadedInstruction.c_str()));
+        ui->line_notLoaded->setText(QString(m.notLoadedInstruction.c_str()));
+    }
     transitionToEditMode();
 }
 
 void osmodules::listItemAdded(void) {
     //Add new line at bottom of props list
     _data.push_back({"", "", ""});
-    _modulesListItems.push_back(new QListWidgetItem("  (Enter details below and click 'Save')"));
-    ui->list->addItem(_modulesListItems.back());
+    ui->list->addItem(new QListWidgetItem("  (Enter details below and click 'Save')"));
 
     //Scroll down to that blank line highlighted
-    ui->list->setCurrentItem(_modulesListItems.back());
+    ui->list->setCurrentRow(ui->list->count() - 1);
 
     //Blank-out the 2 text fields, set combo box to index 0
     ui->line_module->setText(QString(_data.back().name.c_str()));
@@ -83,11 +83,12 @@ void osmodules::listItemSave(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    _data[index].name = ui->line_module->text().toUtf8().constData();
-    _data[index].loadedInstruction = ui->line_loaded->toPlainText().toUtf8().constData();
-    _data[index].notLoadedInstruction = ui->line_notLoaded->toPlainText().toUtf8().constData();
-
-    _modulesListItems.at(index)->setText(createOneLineSummary(_data[index]));
+    if ( _data.size() > 0) {
+        _data[index].name = ui->line_module->text().toUtf8().constData();
+        _data[index].loadedInstruction = ui->line_loaded->toPlainText().toUtf8().constData();
+        _data[index].notLoadedInstruction = ui->line_notLoaded->toPlainText().toUtf8().constData();
+        ui->list->item(index)->setText(createOneLineSummary(_data[index]));
+    }
     transitionFromEditMode();
     _editModeNewItem = false;
 }
@@ -96,20 +97,26 @@ void osmodules::listItemCancelSave(void) {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
-        if(_data.back().name.length() == 0) {
-            listItemRemove();
+        if (_data.size() > 0) {
+            if(_data.back().name.length() == 0) {
+                listItemRemove();
+            }
         }
     }
     _editModeNewItem = false;
 }
 
 void osmodules::listItemRemove(void) {
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
-
-    ui->list->takeItem(index);
-    _data.erase(_data.begin() + index);
-    _modulesListItems.erase(_modulesListItems.begin() + index);
+    if (ui->list->count() > 0) {
+        int index = ui->list->currentRow();
+        if (index >= 0 && index < ui->list->count()) {
+            delete ui->list->takeItem(index);
+            if (_data.size() > 0) {
+                _data.erase(_data.begin() + index);
+            }
+        }
+    }
+    ui->list->clearSelection();
     transitionFromEditMode();
 }
 
@@ -147,8 +154,8 @@ void osmodules::parseSelections() {
 }
 
 osmodules::~osmodules() {
-    for (auto p : _modulesListItems) {
-        delete p;
+    for (size_t i = 0; i < ui->list->count(); ++i) {
+        delete ui->list->takeItem(i);
     }
     delete ui;
 }

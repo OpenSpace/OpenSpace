@@ -3,6 +3,7 @@
 #include "./ui_properties.h"
 #include <qevent.h>
 #include <QKeyEvent>
+#include <iostream>
 
 properties::properties(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -13,8 +14,7 @@ properties::properties(openspace::Profile* imported, QWidget *parent)
     ui->setupUi(this);
 
     for (size_t i = 0; i < _data.size(); ++i) {
-        _propListItems.push_back(new QListWidgetItem(createOneLineSummary(_data[i])));
-        ui->list->addItem(_propListItems[i]);
+        ui->list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
     }
 
     connect(ui->list, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelected()));
@@ -45,26 +45,27 @@ void properties::listItemSelected(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    openspace::Profile::Property& p = _data[index];
-    if (p.setType == openspace::Profile::Property::SetType::SetPropertyValue) {
-        ui->combo_command->setCurrentIndex(0);
+    if (_data.size() > 0) {
+        openspace::Profile::Property& p = _data[index];
+        if (p.setType == openspace::Profile::Property::SetType::SetPropertyValue) {
+            ui->combo_command->setCurrentIndex(0);
+        }
+        else {
+            ui->combo_command->setCurrentIndex(1);
+        }
+        ui->line_property->setText(QString(p.name.c_str()));
+        ui->line_value->setText(QString(p.value.c_str()));
     }
-    else {
-        ui->combo_command->setCurrentIndex(1);
-    }
-    ui->line_property->setText(QString(p.name.c_str()));
-    ui->line_value->setText(QString(p.value.c_str()));
     transitionToEditMode();
 }
 
 void properties::listItemAdded(void) {
     //Add new line at bottom of props list
     _data.push_back({openspace::Profile::Property::SetType::SetPropertyValue, "", ""});
-    _propListItems.push_back(new QListWidgetItem("  (Enter details below and click 'Save')"));
-    ui->list->addItem(_propListItems.back());
+    ui->list->addItem(new QListWidgetItem("  (Enter details below and click 'Save')"));
 
     //Scroll down to that blank line highlighted
-    ui->list->setCurrentItem(_propListItems.back());
+    ui->list->setCurrentRow(ui->list->count() - 1);
 
     //Blank-out the 2 text fields, set combo box to index 0
     ui->combo_command->setCurrentIndex(0);
@@ -81,16 +82,17 @@ void properties::listItemSave(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    if (ui->combo_command->currentIndex() == 0) {
-        _data[index].setType = openspace::Profile::Property::SetType::SetPropertyValue;
+    if ( _data.size() > 0) {
+        if (ui->combo_command->currentIndex() == 0) {
+            _data[index].setType = openspace::Profile::Property::SetType::SetPropertyValue;
+        }
+        else {
+            _data[index].setType = openspace::Profile::Property::SetType::SetPropertyValueSingle;
+        }
+        _data[index].name = ui->line_property->text().toUtf8().constData();
+        _data[index].value = ui->line_value->text().toUtf8().constData();
+        ui->list->item(index)->setText(createOneLineSummary(_data[index]));
     }
-    else {
-        _data[index].setType = openspace::Profile::Property::SetType::SetPropertyValueSingle;
-    }
-    _data[index].name = ui->line_property->text().toUtf8().constData();
-    _data[index].value = ui->line_value->text().toUtf8().constData();
-
-    _propListItems.at(index)->setText(createOneLineSummary(_data[index]));
     transitionFromEditMode();
     _editModeNewItem = false;
 }
@@ -118,20 +120,26 @@ void properties::listItemCancelSave(void) {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
-        if(_data.back().name.length() == 0 || _data.back().value.length() == 0) {
-            listItemRemove();
+        if (_data.size() > 0) {
+            if (_data.back().name.length() == 0 || _data.back().value.length() == 0) {
+                listItemRemove();
+            }
         }
     }
     _editModeNewItem = false;
 }
 
 void properties::listItemRemove(void) {
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
-
-    ui->list->takeItem(index);
-    _data.erase(_data.begin() + index);
-    _propListItems.erase(_propListItems.begin() + index);
+    if (ui->list->count() > 0) {
+        int index = ui->list->currentRow();
+        if (index >= 0 && index < ui->list->count()) {
+            delete ui->list->takeItem(index);
+            if (_data.size() > 0) {
+                _data.erase(_data.begin() + index);
+            }
+        }
+    }
+    ui->list->clearSelection();
     transitionFromEditMode();
 }
 
@@ -199,8 +207,8 @@ void properties::parseSelections() {
 }
 
 properties::~properties() {
-    for (auto p : _propListItems) {
-        delete p;
+    for (size_t i = 0; i < ui->list->count(); ++i) {
+        delete ui->list->takeItem(i);
     }
     delete ui;
 }

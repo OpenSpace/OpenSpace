@@ -1025,7 +1025,6 @@ int main(int argc, char** argv) {
         global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath
         );
-
         // If the user requested a commandline-based configuration script that should
         // overwrite some of the values, this is the time to do it
         if (!commandlineArguments.configurationOverride.empty()) {
@@ -1066,6 +1065,17 @@ int main(int argc, char** argv) {
 
     global::openSpaceEngine.registerPathTokens();
 
+    //Call profile GUI
+    int ac = 0;
+    QApplication a(ac, nullptr);
+    LauncherWindow w(absPath("${BASE}"), global::configuration.profile);
+    w.show();
+    a.exec();
+    if (!w.wasLaunchSelected()) {
+        exit(EXIT_FAILURE);
+    }
+    global::configuration.profile = w.selectedProfile();
+
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     arguments.insert(arguments.begin(), argv[0]);
@@ -1082,13 +1092,6 @@ int main(int argc, char** argv) {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
-
-    //Call profile GUI
-    int ac = 0;
-    QApplication a(ac, nullptr);
-    LauncherWindow w(absPath("${BASE}"));
-    w.show();
-    a.exec();
 
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);

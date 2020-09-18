@@ -42,7 +42,6 @@ private:
     QWidget* _parent;
     openspace::Profile* _imported;
     std::vector<openspace::Profile::Property> _data;
-    std::vector<QListWidgetItem*> _propListItems;
     bool _editModeNewItem = false;
 };
 

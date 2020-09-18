@@ -15,8 +15,7 @@ keybindings::keybindings(openspace::Profile* imported, QWidget *parent)
     ui->setupUi(this);
 
     for (size_t i = 0; i < _data.size(); ++i) {
-        _keybindingsListItems.push_back(new QListWidgetItem(createOneLineSummary(_data[i])));
-        ui->list->addItem(_keybindingsListItems[i]);
+        ui->list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
     }
 
     QStringList comboModKeysStringList;
@@ -96,21 +95,22 @@ void keybindings::listItemSelected(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    openspace::Profile::Keybinding& k = _data[index];
-    ui->combo_keyMod->setCurrentIndex(
-        indexInKeyMapping(_mapModKeyComboBoxIndexToKeyValue,
-        static_cast<int>(k.key.modifier)));
-    ui->combo_key->setCurrentIndex(
-        indexInKeyMapping(_mapKeyComboBoxIndexToKeyValue,
-        static_cast<int>(k.key.key)));
+    if (_data.size() > 0) {
+        openspace::Profile::Keybinding& k = _data[index];
+        ui->combo_keyMod->setCurrentIndex(
+            indexInKeyMapping(_mapModKeyComboBoxIndexToKeyValue,
+            static_cast<int>(k.key.modifier)));
+        ui->combo_key->setCurrentIndex(
+            indexInKeyMapping(_mapKeyComboBoxIndexToKeyValue,
+            static_cast<int>(k.key.key)));
 
-    //Do key here
-    ui->line_name->setText(QString(k.name.c_str()));
-    ui->line_documentation->setText(QString(k.documentation.c_str()));
-    ui->line_guiPath->setText(QString(k.guiPath.c_str()));
-    ui->text_script->setText(QString(k.script.c_str()));
-    ui->checkBox_local->setChecked(k.isLocal);
-
+        //Do key here
+        ui->line_name->setText(QString(k.name.c_str()));
+        ui->line_documentation->setText(QString(k.documentation.c_str()));
+        ui->line_guiPath->setText(QString(k.guiPath.c_str()));
+        ui->text_script->setText(QString(k.script.c_str()));
+        ui->checkBox_local->setChecked(k.isLocal);
+    }
     transitionToEditMode();
 }
 
@@ -133,11 +133,10 @@ void keybindings::listItemAdded(void) {
         true,
         ""
     });
-    _keybindingsListItems.push_back(new QListWidgetItem("  (Enter details below and click 'Save')"));
-    ui->list->addItem(_keybindingsListItems.back());
+    ui->list->addItem(new QListWidgetItem("  (Enter details below and click 'Save')"));
 
     //Scroll down to that blank line highlighted
-    ui->list->setCurrentItem(_keybindingsListItems.back());
+    ui->list->setCurrentRow(ui->list->count() - 1);
 
     //Blank-out the 2 text fields, set combo box to index 0
     ui->line_name->setText(QString(_data.back().name.c_str()));
@@ -160,17 +159,18 @@ void keybindings::listItemSave(void) {
     QListWidgetItem *item = ui->list->currentItem();
     int index = ui->list->row(item);
 
-    int keyModIdx = _mapModKeyComboBoxIndexToKeyValue.at(ui->combo_keyMod->currentIndex());
-    _data[index].key.modifier = static_cast<openspace::KeyModifier>(keyModIdx);
-    int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(ui->combo_key->currentIndex());
-    _data[index].key.key = static_cast<openspace::Key>(keyIdx);
-    _data[index].name = ui->line_name->text().toUtf8().constData();
-    _data[index].documentation = ui->line_documentation->text().toUtf8().constData();
-    _data[index].guiPath = ui->line_guiPath->text().toUtf8().constData();
-    _data[index].script = ui->text_script->toPlainText().toUtf8().constData();
-    _data[index].isLocal = (ui->checkBox_local->isChecked());
-
-    _keybindingsListItems.at(index)->setText(createOneLineSummary(_data[index]));
+    if (_data.size() > 0) {
+        int keyModIdx = _mapModKeyComboBoxIndexToKeyValue.at(ui->combo_keyMod->currentIndex());
+        _data[index].key.modifier = static_cast<openspace::KeyModifier>(keyModIdx);
+        int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(ui->combo_key->currentIndex());
+        _data[index].key.key = static_cast<openspace::Key>(keyIdx);
+        _data[index].name = ui->line_name->text().toUtf8().constData();
+        _data[index].documentation = ui->line_documentation->text().toUtf8().constData();
+        _data[index].guiPath = ui->line_guiPath->text().toUtf8().constData();
+        _data[index].script = ui->text_script->toPlainText().toUtf8().constData();
+        _data[index].isLocal = (ui->checkBox_local->isChecked());
+        ui->list->item(index)->setText(createOneLineSummary(_data[index]));
+    }
     transitionFromEditMode();
 }
 
@@ -204,24 +204,30 @@ void keybindings::listItemCancelSave(void) {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
-        if(_data.back().name.length() == 0 ||
-           _data.back().script.length() == 0 ||
-           _data.back().key.key == openspace::Key::Unknown)
-        {
-            listItemRemove();
+        if (_data.size() > 0) {
+            if(_data.back().name.length() == 0 ||
+               _data.back().script.length() == 0 ||
+               _data.back().key.key == openspace::Key::Unknown)
+            {
+                listItemRemove();
+            }
         }
     }
     _editModeNewItem = false;
 }
 
 void keybindings::listItemRemove(void) {
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
-
-    ui->list->takeItem(index);
-    _data.erase(_data.begin() + index);
-    _keybindingsListItems.erase(_keybindingsListItems.begin() + index);
-    transitionFromEditMode();
+    if (ui->list->count() > 0) {
+        int index = ui->list->currentRow();
+        if (index >= 0 && index < ui->list->count()) {
+            ui->list->takeItem(index);
+            if (_data.size() > 0) {
+                _data.erase(_data.begin() + index);
+            }
+        }
+        ui->list->clearSelection();
+        transitionFromEditMode();
+    }
 }
 
 void keybindings::transitionToEditMode(void) {
@@ -266,8 +272,8 @@ void keybindings::parseSelections() {
 }
 
 keybindings::~keybindings() {
-    for (auto p : _keybindingsListItems) {
-        delete p;
+    for (size_t i = 0; i < ui->list->count(); ++i) {
+        delete ui->list->takeItem(i);
     }
     delete ui;
 }

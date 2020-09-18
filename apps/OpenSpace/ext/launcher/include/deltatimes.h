@@ -65,7 +65,6 @@ private:
     openspace::Profile* _imported;
     std::vector<int> _data;
     std::vector<std::string> _deltaTimeStrings;
-    std::vector<QListWidgetItem*> _deltaListItems;
 
     std::vector<timeIntervals> _timeIntervals = {
         {0, 31536000, "year"},

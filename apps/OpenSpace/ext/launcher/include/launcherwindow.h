@@ -18,13 +18,17 @@ class LauncherWindow : public QMainWindow
 public slots:
     void openWindow_edit();
     void openWindow_new();
+    void startOpenSpace();
 
 public:
-    LauncherWindow(std::string basePath, QWidget *parent = nullptr);
+    LauncherWindow(std::string basePath, std::string profileName,
+        QWidget *parent = nullptr);
     ~LauncherWindow();
+    bool wasLaunchSelected();
+    std::string selectedProfile();
 
 private:
-    void populateProfilesList();
+    void populateProfilesList(QString preset);
     void populateWindowConfigsList();
     bool loadProfileFromFile(openspace::Profile*& p, std::string filename);
     void saveProfileToFile(const std::string& path, openspace::Profile* p);
@@ -38,5 +42,6 @@ private:
     filesystemAccess _filesystemAccess;
     std::string _reportAssetsInFilesystem;
     QString _basePath;
+    bool _launch = false;
 };
 #endif // LAUNCHERWINDOW_H

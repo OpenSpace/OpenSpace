@@ -8,7 +8,8 @@
 #include <sstream>
 #include <iostream>
 
-LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
+LauncherWindow::LauncherWindow(std::string basePath, std::string profileName,
+                               QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::LauncherWindow)
     , _fileAccess_profiles(".profile", {"./"}, true, false)
@@ -21,15 +22,16 @@ LauncherWindow::LauncherWindow(std::string basePath, QWidget *parent)
     QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
     QPixmap pix(logoPath);
     ui->logolabel->setPixmap(pix.scaled(400, 120, Qt::KeepAspectRatio));
+    connect(ui->qBtn_start, SIGNAL(released()), this, SLOT(startOpenSpace()));
     connect(ui->newButton, SIGNAL(released()), this, SLOT(openWindow_new()));
     connect(ui->editButton, SIGNAL(released()), this, SLOT(openWindow_edit()));
     _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
         QString(basePath.c_str()) + "/data/assets");
-    populateProfilesList();
+    populateProfilesList(QString(profileName.c_str()));
     populateWindowConfigsList();
 }
 
-void LauncherWindow::populateProfilesList() {
+void LauncherWindow::populateProfilesList(QString preset) {
     for (int i = 0; i < ui->comboBoxProfiles->count(); ++i) {
         ui->comboBoxProfiles->removeItem(i);
     }
@@ -41,6 +43,12 @@ void LauncherWindow::populateProfilesList() {
     while (std::getline(instream, iline)) {
         if (ui->comboBoxProfiles->findText(QString(iline.c_str())) == -1) {
             ui->comboBoxProfiles->addItem(iline.c_str());
+        }
+    }
+    if (preset.length() > 0) {
+        int presetMatchIdx = ui->comboBoxProfiles->findText(preset);
+        if (presetMatchIdx != -1) {
+            ui->comboBoxProfiles->setCurrentIndex(presetMatchIdx);
         }
     }
 }
@@ -58,6 +66,7 @@ void LauncherWindow::populateWindowConfigsList() {
 }
 
 void LauncherWindow::openWindow_new() {
+    QString initialProfileSelection = ui->comboBoxProfiles->currentText();
     openspace::Profile* pData = new openspace::Profile();
     if (pData != nullptr) {
         myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem);
@@ -67,13 +76,17 @@ void LauncherWindow::openWindow_new() {
             saveProfilePath += "/data/profiles/";
             saveProfilePath += myEditorWindow->specifiedFilename() + ".profile";
             saveProfileToFile(saveProfilePath, pData);
+            populateProfilesList(QString(myEditorWindow->specifiedFilename().c_str()));
+        }
+        else {
+            populateProfilesList(initialProfileSelection);
         }
         delete pData;
-        populateProfilesList();
     }
 }
 
 void LauncherWindow::openWindow_edit() {
+    QString initialProfileSelection = ui->comboBoxProfiles->currentText();
     std::string profilePath = _basePath.toUtf8().constData();
     profilePath += "/data/profiles/";
     int selectedProfileIdx = ui->comboBoxProfiles->currentIndex();
@@ -89,9 +102,12 @@ void LauncherWindow::openWindow_edit() {
         if (myEditorWindow->wasSaved()) {
             profilePath += myEditorWindow->specifiedFilename() + ".profile";
             saveProfileToFile(profilePath, pData);
+            populateProfilesList(QString(myEditorWindow->specifiedFilename().c_str()));
+        }
+        else {
+            populateProfilesList(initialProfileSelection);
         }
         delete pData;
-        populateProfilesList();
     }
 }
 
@@ -183,4 +199,17 @@ void LauncherWindow::displayErrorDialog(std::string msg) {
 LauncherWindow::~LauncherWindow() {
     delete ui;
     delete myEditorWindow;
+}
+
+bool LauncherWindow::wasLaunchSelected() {
+    return _launch;
+}
+
+std::string LauncherWindow::selectedProfile() {
+    return ui->comboBoxProfiles->currentText().toUtf8().constData();
+}
+
+void LauncherWindow::startOpenSpace() {
+    _launch = true;
+    close();
 }
