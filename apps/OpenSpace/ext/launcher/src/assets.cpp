@@ -3,6 +3,7 @@
 #include <qevent.h>
 #include <QFileSystemModel>
 #include <QScreen>
+#include <QKeyEvent>
 #include <sstream>
 #include <string>
 #include <openspace/scene/profile.h>
@@ -167,4 +168,11 @@ assets::~assets() {
 }
 
 void assets::cancel() {
+}
+
+void assets::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
 }

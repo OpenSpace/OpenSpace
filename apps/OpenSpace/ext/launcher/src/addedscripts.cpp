@@ -3,6 +3,7 @@
 #include <qevent.h>
 #include <iostream>
 #include <sstream>
+#include <QKeyEvent>
 
 addedScripts::addedScripts(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -33,6 +34,13 @@ void addedScripts::parseScript() {
     }
     _imported->setAdditionalScripts(tmpMultilineStringToVector);
     accept();
+}
+
+void addedScripts::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
 }
 
 addedScripts::~addedScripts() { }

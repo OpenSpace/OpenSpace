@@ -12,43 +12,13 @@ class deltaTimes;
 }
 QT_END_NAMESPACE
 
-static const double _defaultDeltaTimes[30] = {
+static const int _defaultDeltaTimes[30] = {
     1, 2, 5, 10, 30,
     60, 120, 300, 600, 1800,
     3600, 7200, 10800, 21600, 43200,
     86400, 172800, 345600, 604800, 1209600,
     2592000, 5184000, 7776000, 15552000, 31536000,
     63072000, 157680000, 315360000, 630720000, 1576800000
-};
-
-struct DeltaTimes {
-    std::vector<double> _times;
-    DeltaTimes() {
-        _times.resize(sizeof(_defaultDeltaTimes)/sizeof(double));
-	zeroValues();
-    };
-    DeltaTimes(std::vector<double> dt) {
-        _times.resize(sizeof(_defaultDeltaTimes)/sizeof(double));
-	zeroValues();
-        _times = dt;
-    };
-    void loadValues(std::vector<double>& dt) {
-        for (size_t i = 0; i < dt.size(); ++i) {
-            _times[i] = dt[i];
-        }
-    }
-    size_t size() {
-        auto it = find(_times.begin(), _times.end(), 0);
-        return std::distance(_times.begin(), it);
-    };
-    size_t totalSize() {
-        return (sizeof(_defaultDeltaTimes) / sizeof(double));
-    }
-    void zeroValues() {
-        for (size_t i = 0; i < _times.size(); ++i) {
-            _times[i] = 0.0;
-        }
-    }
 };
 
 class deltaTimes : public QDialog
@@ -58,20 +28,22 @@ class deltaTimes : public QDialog
 public slots:
     void listItemSelected();
     void saveDeltaTimeValue();
-    void clearDeltaTimeValue();
+    void addDeltaTimeValue();
+    void removeDeltaTimeValue();
     void parseSelections();
 
 public:
     explicit deltaTimes(openspace::Profile* _imported, QWidget *parent = nullptr);
     ~deltaTimes();
     void setDeltaTimes(std::vector<double>& dt);
-    QString createSummaryForDeltaTime(size_t idx, double dt, bool forListView);
+    QString createSummaryForDeltaTime(size_t idx, int dt, bool forListView);
+    void keyPressEvent(QKeyEvent *evt);
     struct timeIntervals {
         int index;
-        double secondsPerInterval;
+        int secondsPerInterval;
         QString intervalName;
     };
-
+    int _maxSize = sizeof(_defaultDeltaTimes) / sizeof(int);
     const int secondsPerYear = 31536000;
     const int secondsPerMonth = 18144000;
     const int secondsPerWeek = 604800;
@@ -80,10 +52,10 @@ public:
     const int secondsPerMinute = 60;
 
 private:
-    QString timeDescription(double value);
+    QString timeDescription(int value);
     bool checkForTimeDescription(QString& description, QString unit,
-        int interval, double value);
-    QString checkForTimeDescription(int intervalIndex, double value);
+        int interval, int value);
+    QString checkForTimeDescription(int intervalIndex, int value);
     int lastSelectableItem();
     bool isNumericalValue(QLineEdit* le);
 
@@ -91,7 +63,7 @@ private:
     QWidget* _parent;
 
     openspace::Profile* _imported;
-    DeltaTimes _data;
+    std::vector<int> _data;
     std::vector<std::string> _deltaTimeStrings;
     std::vector<QListWidgetItem*> _deltaListItems;
 

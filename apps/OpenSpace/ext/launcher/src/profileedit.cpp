@@ -2,6 +2,7 @@
 #include "profileedit.h"
 #include "./ui_profileedit.h"
 #include "filesystemaccess.h"
+#include <QKeyEvent>
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -325,9 +326,36 @@ QString ProfileEdit::summarizeText_markNodes() {
     return results;
 }
 
+bool ProfileEdit::wasSaved() {
+    return _saveSelected;
+}
+
+std::string ProfileEdit::specifiedFilename() {
+    return ui->line_profile->text().toUtf8().constData();
+}
+
 void ProfileEdit::cancel() {
+    _saveSelected = false;
     reject();
 }
 
 void ProfileEdit::approved() {
+    if (ui->line_profile->text().length() > 0) {
+        _saveSelected = true;
+        accept();
+    }
+    else {
+        QString formatText = "<font color='red'>";
+        formatText += ui->label_profile->text();
+        formatText += "</font>";
+        ui->label_profile->setText(formatText);
+    }
 }
+
+void ProfileEdit::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+

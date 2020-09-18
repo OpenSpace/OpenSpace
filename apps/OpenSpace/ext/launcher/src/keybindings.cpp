@@ -4,6 +4,7 @@
 #include "./ui_keybindings.h"
 #include <qevent.h>
 #include <algorithm>
+#include <QKeyEvent>
 
 keybindings::keybindings(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -270,3 +271,11 @@ keybindings::~keybindings() {
     }
     delete ui;
 }
+
+void keybindings::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+

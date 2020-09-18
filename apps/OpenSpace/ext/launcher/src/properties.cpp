@@ -2,6 +2,7 @@
 #include "properties.h"
 #include "./ui_properties.h"
 #include <qevent.h>
+#include <QKeyEvent>
 
 properties::properties(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -203,3 +204,11 @@ properties::~properties() {
     }
     delete ui;
 }
+
+void properties::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+

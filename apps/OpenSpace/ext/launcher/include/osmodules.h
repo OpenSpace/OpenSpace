@@ -27,6 +27,7 @@ public slots:
 public:
     explicit osmodules(openspace::Profile* imported, QWidget *parent = nullptr);
     ~osmodules();
+    void keyPressEvent(QKeyEvent *evt);
 
 protected:
     //void resizeEvent(QResizeEvent* event);

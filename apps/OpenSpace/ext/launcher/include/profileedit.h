@@ -45,6 +45,9 @@ public:
     explicit ProfileEdit(openspace::Profile* profile, const std::string reportedAssets, QWidget *parent = nullptr);
     ~ProfileEdit();
     void setProfileName(QString profileToSet);
+    bool wasSaved();
+    std::string specifiedFilename();
+    void keyPressEvent(QKeyEvent *evt);
 
 private:
     void initSummaryTextForEachCategory();
@@ -73,6 +76,7 @@ private:
     markNodes* _markNodes;
     openspace::Profile* _pData;
     const std::string _reportedAssets;
+    bool _saveSelected = false;
 };
 
 #endif // PROFILEEDIT_H

@@ -35,7 +35,6 @@ public:
     QComboBox *comboBoxWindowConfigs;
     QLabel *labelChoose;
     QLabel *labelOptions;
-    QPushButton *buttonSim;
     QMenuBar *menubar;
     QMenu *menuOpenSpace_Launcher;
     QStatusBar *statusbar;
@@ -89,9 +88,6 @@ public:
         labelOptions->setGeometry(QRect(130, 250, 151, 17));
         labelOptions->setFont(font);
         labelOptions->setTextFormat(Qt::RichText);
-        buttonSim = new QPushButton(centralwidget);
-        buttonSim->setObjectName(QString::fromUtf8("buttonSim"));
-        buttonSim->setGeometry(QRect(210, 500, 89, 25));
         LauncherWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(LauncherWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -121,7 +117,6 @@ public:
         logolabel->setText(QString());
         labelChoose->setText(QCoreApplication::translate("LauncherWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; color:#ffffff;\">Choose Profile</span></p></body></html>", nullptr));
         labelOptions->setText(QCoreApplication::translate("LauncherWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; color:#ffffff;\">Window Options</span></p></body></html>", nullptr));
-        buttonSim->setText(QCoreApplication::translate("LauncherWindow", "simData", nullptr));
         menuOpenSpace_Launcher->setTitle(QCoreApplication::translate("LauncherWindow", "OpenSpace Launcher", nullptr));
     } // retranslateUi
 

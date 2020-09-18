@@ -27,6 +27,7 @@ public slots:
 public:
     explicit keybindings(openspace::Profile* imported, QWidget *parent = nullptr);
     ~keybindings();
+    void keyPressEvent(QKeyEvent *evt);
 
 protected:
     //void resizeEvent(QResizeEvent* event);

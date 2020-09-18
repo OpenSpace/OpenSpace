@@ -23,6 +23,7 @@ public:
     explicit addedScripts(openspace::Profile* imported, QWidget *parent = nullptr);
     ~addedScripts();
     void setScriptText(std::string s);
+    void keyPressEvent(QKeyEvent *evt);
 
 private:
     Ui::addedScripts *ui;

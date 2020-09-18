@@ -2,27 +2,33 @@
 #include "./ui_deltatimes.h"
 #include <qevent.h>
 #include <iostream>
+#include <QKeyEvent>
 
 deltaTimes::deltaTimes(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::deltaTimes)
     , _imported(imported)
-    , _data(imported->deltaTimes())
 {
     ui->setupUi(this);
 
+    _data.clear();
+    for (double dt : imported->deltaTimes()) {
+        _data.push_back(static_cast<int>(dt));
+    }
+
     for (size_t d = 0; d < _data.size(); ++d) {
-        QString summary = createSummaryForDeltaTime(d, _data._times.at(d), true);
+        QString summary = createSummaryForDeltaTime(d, _data.at(d), true);
         _deltaListItems.push_back(new QListWidgetItem(summary));
         ui->listWidget->addItem(_deltaListItems[d]);
     }
     connect(ui->listWidget, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelected()));
     connect(ui->button_save, SIGNAL(clicked()), this, SLOT(saveDeltaTimeValue()));
-    connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(clearDeltaTimeValue()));
+    connect(ui->button_add, SIGNAL(clicked()), this, SLOT(addDeltaTimeValue()));
+    connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(removeDeltaTimeValue()));
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
 }
 
-QString deltaTimes::createSummaryForDeltaTime(size_t idx, double dt, bool forListView) {
+QString deltaTimes::createSummaryForDeltaTime(size_t idx, int dt, bool forListView) {
     std::string s;
     int k = (idx%10 == 9) ? 0 : idx%10 + 1;
     k = (idx == 0) ? 1 : k;
@@ -40,7 +46,7 @@ QString deltaTimes::createSummaryForDeltaTime(size_t idx, double dt, bool forLis
     }
 
     if (dt != 0) {
-        s += (forListView) ? "\t" + std::to_string(static_cast<int>(dt)) : "";
+        s += (forListView) ? "\t" + std::to_string(dt) : "";
     }
 
     if (forListView) {
@@ -54,22 +60,22 @@ void deltaTimes::listItemSelected() {
     QListWidgetItem *item = ui->listWidget->currentItem();
     int index = ui->listWidget->row(item);
 
-    if (index < (static_cast<int>(_data.totalSize()) - 1)) {
-        if (index > lastSelectableItem() + 1) {
-            index = lastSelectableItem() + 1;
-            ui->listWidget->setCurrentRow(index);
-        }
+    if (index < (static_cast<int>(_data.size()) - 1)) {
+        //if (index > lastSelectableItem() + 1) {
+        //    index = lastSelectableItem() + 1;
+        ui->listWidget->setCurrentRow(index);
+        //}
     }
 
     QString labelS = "Set Delta Time for key ";
-    labelS += createSummaryForDeltaTime(index, _data._times.at(index), false);
+    labelS += createSummaryForDeltaTime(index, _data.at(index), false);
     labelS += " :\t";
 
     ui->label_adjust->setText(labelS);
-    ui->line_seconds->setText(QString::number(_data._times.at(index)));
+    ui->line_seconds->setText(QString::number(_data.at(index)));
 }
 
-int deltaTimes::lastSelectableItem() {
+/*int deltaTimes::lastSelectableItem() {
     if (_data.size() == 0) {
         return 0;
     }
@@ -89,9 +95,9 @@ int deltaTimes::lastSelectableItem() {
     else {
         return i + 1;
     }
-}
+}*/
 
-QString deltaTimes::timeDescription(double value) {
+QString deltaTimes::timeDescription(int value) {
     QString description;
 
     if (value == 0) {
@@ -107,28 +113,35 @@ QString deltaTimes::timeDescription(double value) {
     return checkForTimeDescription(i, value);
 }
 
-QString deltaTimes::checkForTimeDescription(int intervalIndex, double value) {
-    double amount = static_cast<double>(value) /
-        static_cast<double>(_timeIntervals[intervalIndex].secondsPerInterval);
+QString deltaTimes::checkForTimeDescription(int intervalIndex, int value) {
+//    double amount = static_cast<double>(value) /
+//        static_cast<double>(_timeIntervals[intervalIndex].secondsPerInterval);
+    int amount = value /_timeIntervals[intervalIndex].secondsPerInterval;
     QString description = QString::number(amount, 'g', 2);
     return description += " " + _timeIntervals[intervalIndex].intervalName + "/sec";
+}
+
+void deltaTimes::addDeltaTimeValue() {
+    if (_data.size() < _maxSize) {
+        if (_data.size() != 0 && _data.back() == 0) {
+            return;
+        }
+        _data.push_back(0);
+        QString summary = createSummaryForDeltaTime(_data.size() - 1, 0, true);
+        _deltaListItems.push_back(new QListWidgetItem(summary));
+        ui->listWidget->addItem(_deltaListItems.back());
+    }
 }
 
 void deltaTimes::saveDeltaTimeValue() {
     QListWidgetItem *item = ui->listWidget->currentItem();
     if (item != nullptr) {
         int index = ui->listWidget->row(item);
-        if (isNumericalValue(ui->line_seconds) && index <= lastSelectableItem() + 1) {
-            _data._times.at(index) = ui->line_seconds->text().toDouble();
-            QString summary = createSummaryForDeltaTime(index, _data._times.at(index), true);
+        if (isNumericalValue(ui->line_seconds) /*&& index <= lastSelectableItem() + 1*/) {
+            _data.at(index) = ui->line_seconds->text().toInt();
+            QString summary = createSummaryForDeltaTime(index, _data.at(index), true);
             _deltaListItems.at(index)->setText(summary);
         }
-    }
-    else if (_data.size() == 0) {
-        _data._times.at(0) = ui->line_seconds->text().toDouble();
-        QString summary = createSummaryForDeltaTime(0, _data._times.at(0), true);
-        _deltaListItems.push_back(new QListWidgetItem(summary));
-        ui->listWidget->addItem(_deltaListItems[0]);
     }
 }
 
@@ -139,23 +152,24 @@ bool deltaTimes::isNumericalValue(QLineEdit* le) {
     return validConversion;
 }
 
-void deltaTimes::clearDeltaTimeValue() {
-    int i;
-    for (i = _data.size() - 1; i >= 0; --i) {
-        if (_data._times.at(i) != 0) {
-            break;
-        }
-    }
-    if (i >= 0) {
-        _data._times.at(i) = 0;
-        QString summary = createSummaryForDeltaTime(i, _data._times.at(i), true);
-        _deltaListItems.at(i)->setText(summary);
-        ui->listWidget->setCurrentRow(i);
-    }
+void deltaTimes::removeDeltaTimeValue() {
+    ui->listWidget->takeItem(_deltaListItems.size() - 1);
+    _data.pop_back();
+    _deltaListItems.pop_back();
 }
 
 void deltaTimes::parseSelections() {
-    _imported->setDeltaTimes(_data._times);
+    int finalNonzeroIndex = _data.size() - 1;
+    for (; finalNonzeroIndex >= 0; --finalNonzeroIndex) {
+        if (_data.at(finalNonzeroIndex) != 0) {
+            break;
+        }
+    }
+    std::vector<double> tempDt;
+    for (size_t i = 0; i < (finalNonzeroIndex + 1); ++i) {
+        tempDt.push_back(static_cast<double>(_data[i]));
+    }
+    _imported->setDeltaTimes(tempDt);
     accept();
 }
 
@@ -164,4 +178,11 @@ deltaTimes::~deltaTimes() {
         delete d;
     }
     delete ui;
+}
+
+void deltaTimes::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
 }

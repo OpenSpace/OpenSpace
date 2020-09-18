@@ -1,6 +1,7 @@
 #include <openspace/scene/profile.h>
 #include "camera.h"
 #include "./ui_camera.h"
+#include <QKeyEvent>
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -252,3 +253,11 @@ bool camera::isUpVectorValid() {
             && isNumericalValue(ui->line_upY)
             && isNumericalValue(ui->line_upZ));
 }
+
+void camera::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+

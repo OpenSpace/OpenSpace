@@ -329,7 +329,7 @@ public:
         line_profile->setFont(font3);
 
         retranslateUi(ProfileEdit);
-        QObject::connect(buttonBox, SIGNAL(accepted()), ProfileEdit, SLOT(accept()));
+        //QObject::connect(buttonBox, SIGNAL(accepted()), ProfileEdit, SLOT(accept()));
         QObject::connect(buttonBox, SIGNAL(rejected()), ProfileEdit, SLOT(reject()));
 
         QMetaObject::connectSlotsByName(ProfileEdit);

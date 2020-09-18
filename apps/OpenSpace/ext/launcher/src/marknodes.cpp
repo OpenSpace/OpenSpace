@@ -2,6 +2,7 @@
 #include "./ui_marknodes.h"
 #include <qevent.h>
 #include <iterator>
+#include <QKeyEvent>
 
 markNodes::markNodes(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -77,3 +78,11 @@ markNodes::~markNodes() {
     }
     delete ui;
 }
+
+void markNodes::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+

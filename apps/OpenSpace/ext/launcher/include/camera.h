@@ -39,6 +39,7 @@ public:
         Nav = 0,
         Geo
     };
+    void keyPressEvent(QKeyEvent *evt);
 
 private:
     bool isNumericalValue(QLineEdit* le);

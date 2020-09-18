@@ -25,6 +25,7 @@ public slots:
 public:
     explicit markNodes(openspace::Profile* imported, QWidget *parent = nullptr);
     ~markNodes();
+    void keyPressEvent(QKeyEvent *evt);
 
 private:
     Ui::markNodes *ui;

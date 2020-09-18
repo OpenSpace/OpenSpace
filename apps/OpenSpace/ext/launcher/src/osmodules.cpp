@@ -2,6 +2,7 @@
 #include "osmodules.h"
 #include "./ui_osmodules.h"
 #include <qevent.h>
+#include <QKeyEvent>
 
 osmodules::osmodules(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -151,3 +152,11 @@ osmodules::~osmodules() {
     }
     delete ui;
 }
+
+void osmodules::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+

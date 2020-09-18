@@ -1,6 +1,8 @@
 #include <openspace/scene/profile.h>
 #include "meta.h"
 #include "./ui_meta.h"
+#include <algorithm>
+#include <QKeyEvent>
 
 meta::meta(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -29,12 +31,21 @@ meta::meta(openspace::Profile* imported, QWidget *parent)
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(save()));
 }
 
+void meta::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+
 void meta::save() {
     if (!areAllEntriesBlank()) {
         openspace::Profile::Meta m;
         m.name = ui->line_name->text().toUtf8().constData();
         m.version = ui->line_version->text().toUtf8().constData();
-        m.description = ui->text_description->toPlainText().toUtf8().constData();
+        std::string desc = ui->text_description->toPlainText().toUtf8().constData();
+        std::replace(desc.begin(), desc.end(), '\n', ' ');
+        m.description = desc;
         m.author = ui->line_author->text().toUtf8().constData();
         m.url = ui->line_url->text().toUtf8().constData();
         m.license = ui->line_license->text().toUtf8().constData();

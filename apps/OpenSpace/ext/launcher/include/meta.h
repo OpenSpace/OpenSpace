@@ -23,6 +23,7 @@ public:
     explicit meta(openspace::Profile* imported, QWidget *parent = nullptr);
     ~meta();
     bool areAllEntriesBlank();
+    void keyPressEvent(QKeyEvent *evt);
 
 private:
     Ui::meta *ui;

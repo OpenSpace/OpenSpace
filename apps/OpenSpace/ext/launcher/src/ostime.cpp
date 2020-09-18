@@ -2,6 +2,7 @@
 #include "ostime.h"
 #include "./ui_ostime.h"
 #include <algorithm>
+#include <QKeyEvent>
 
 ostime::ostime(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -10,14 +11,19 @@ ostime::ostime(openspace::Profile* imported, QWidget *parent)
 {
     ui->setupUi(this);
 
+    QStringList types { "Absolute", "Relative" };
+    ui->combo_type->addItems(types);
     if (_imported->time().has_value()) {
-        QStringList types { "Absolute", "Relative" };
-        ui->combo_type->addItems(types);
-	_data = _imported->time().value();
+        _data = _imported->time().value();
+        if (_data.type == openspace::Profile::Time::Type::Relative) {
+            if (_data.time == "") {
+                _data.time = "now";
+            }
+        }
     }
     else {
         _data.type = openspace::Profile::Time::Type::Relative;
-	_data.time = "";
+        _data.time = "now";
     }
     _initializedAsAbsolute = (_data.type == openspace::Profile::Time::Type::Absolute);
     enableAccordingToType(static_cast<int>(_data.type));
@@ -36,7 +42,7 @@ void ostime::enableAccordingToType(int idx) {
     if (comboIdx == openspace::Profile::Time::Type::Relative) {
         ui->label_relative->setText("<font color='black'>Relative Time:</font>");
         if (_initializedAsAbsolute) {
-            ui->line_relative->setText("");
+            ui->line_relative->setText("now");
         }
         else {
             ui->line_relative->setText(QString(_data.time.c_str()));
@@ -92,3 +98,11 @@ void ostime::approved() {
     }
     accept();
 }
+
+void ostime::keyPressEvent(QKeyEvent *evt)
+{
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+        return;
+    QDialog::keyPressEvent(evt);
+}
+

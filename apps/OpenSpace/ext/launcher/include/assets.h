@@ -29,6 +29,7 @@ public:
         QWidget *parent = nullptr);
     ~assets();
     std::string createTextSummary();
+    void keyPressEvent(QKeyEvent *evt);
 
 protected:
     //void resizeEvent(QResizeEvent* event);

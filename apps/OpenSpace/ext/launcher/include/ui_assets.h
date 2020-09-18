@@ -46,7 +46,7 @@ public:
         QFont font;
         font.setFamily(QString::fromUtf8("Arial"));
         treeView->setFont(font);
-        treeView->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 87, 83);"));
+        //treeView->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 87, 83);"));
         treeView->setAlternatingRowColors(false);
         treeView->setAnimated(false);
         varName = new QPushButton(assets);
