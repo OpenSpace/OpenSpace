@@ -115,13 +115,6 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _shader(nullptr)
-    , _texture(nullptr)
-    , _textureFile(nullptr)
-    , _textureIsDirty(false)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
-    , _planeIsDirty(false)
 {
     using ghoul::filesystem::File;
 
@@ -145,7 +138,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<File>(_texturePath);
 
-    _texturePath.onChange([&]() { loadTexture(); });
+    _texturePath.onChange([&]() { _textureIsDirty = true; });
     addProperty(_texturePath);
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });

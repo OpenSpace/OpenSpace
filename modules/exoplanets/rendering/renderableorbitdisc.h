@@ -65,16 +65,16 @@ private:
     properties::FloatProperty _eccentricity;
     properties::Vec2Property _offset;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
     UniformCache(modelViewProjection, textureOffset, opacity,
          texture, eccentricity, semiMajorAxis) _uniformCache;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
-    bool _textureIsDirty;
-    bool _planeIsDirty;
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    bool _textureIsDirty = false;
+    bool _planeIsDirty = false;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 };
 
 } // namespace openspace
