@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWARECONNECTION___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWARECONNECTION___H__
 
 #include <openspace/network/messagestructures.h>
 #include <ghoul/io/socket/tcpsocket.h>
@@ -68,8 +68,6 @@ public:
     void disconnect();
     ghoul::io::TcpSocket* socket();
     bool sendMessage(std::string message);
-
-    void handleProperties(std::string identifier); 
 
     SoftwareConnection::Message receiveMessage();
 

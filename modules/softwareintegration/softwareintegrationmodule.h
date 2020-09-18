@@ -75,6 +75,7 @@ private:
     std::shared_ptr<Peer> peer(size_t id);
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
+    void handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer);
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;
     std::thread _serverThread;

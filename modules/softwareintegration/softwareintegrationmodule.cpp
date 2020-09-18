@@ -151,6 +151,79 @@ namespace openspace {
         }
     }
 
+    void SoftwareIntegrationModule::handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer) {
+
+        const Renderable* myRenderable = renderable(identifier);
+        properties::Property* colorProperty = myRenderable->property("Color");
+        properties::Property* opacityProperty = myRenderable->property("Opacity");
+        properties::Property* sizeProperty = myRenderable->property("Size");
+
+        // Update color of renderable
+        auto updateColor = [colorProperty, identifier, peer]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string propertyValue = colorProperty->getStringValue();
+            std::string lengthOfValue = std::to_string(propertyValue.length());
+            std::string messageType = "UPCO";
+            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
+
+            std::string message = messageType + lengthOfSubject + subject;
+
+            peer->connection.sendMessage(message);
+
+            LERROR(fmt::format("Meddelandet som skickas {}", message));
+        };
+        colorProperty->onChange(updateColor);
+
+        /*
+
+        // Update opacity of renderable
+        auto updateOpacity = [opacityProperty, identifier]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string propertyValue = opacityProperty->getStringValue();
+            std::string lengthOfValue = std::to_string(propertyValue.length());
+            std::string messageType = "UPOP";
+            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
+
+            std::string message = messageType + lengthOfSubject + subject;
+            SoftwareConnection send;
+            send.sendMessage(message);
+            LERROR(fmt::format("Meddelandet som skickas {}", message));
+            };
+        opacityProperty->onChange(updateOpacity);
+
+        // Update size of renderable
+        auto updateSize = [sizeProperty, identifier]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string propertyValue = sizeProperty->getStringValue();
+            std::string lengthOfValue = std::to_string(propertyValue.length());
+            std::string messageType = "UPSI";
+            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
+
+            std::string message = messageType + lengthOfSubject + subject;
+            SoftwareConnection send;
+            send.sendMessage(message);
+            LERROR(fmt::format("Meddelandet som skickas {}", message));
+            };
+        sizeProperty->onChange(updateSize);
+
+        */
+    }
+
     void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         const size_t peerId = peerMessage.peerId;
         auto it = _peers.find(peerId);
@@ -213,8 +286,7 @@ namespace openspace {
                 );
             }
 
-            SoftwareConnection callback; 
-            callback.handleProperties(identifier);
+            handleProperties(identifier, peer);
 
             break;
         }
