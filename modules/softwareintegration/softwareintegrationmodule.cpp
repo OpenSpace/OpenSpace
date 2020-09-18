@@ -58,22 +58,7 @@ namespace {
 
 namespace openspace {
 
-    const unsigned int SoftwareConnection::ProtocolVersion = 1;
-
     SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
-
-    SoftwareConnection::Message::Message(MessageType type, std::vector<char> content)
-        : type(type)
-        , content(std::move(content))
-    {}
-
-    SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError()
-        : ghoul::RuntimeError("Connection lost", "Connection")
-    {}
-
-    SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
-        : _socket(std::move(socket))
-    {}
 
     void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
         auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -88,165 +73,6 @@ namespace openspace {
 
     }
 
-    // Connection 
-    bool SoftwareConnection::isConnectedOrConnecting() const {
-        return _socket->isConnected() || _socket->isConnecting();
-    }
-
-    // Connection 
-    void SoftwareConnection::disconnect() {
-        if (_socket) {
-            _socket->disconnect();
-        }
-    }
-
-    // Connection 
-    ghoul::io::TcpSocket* SoftwareConnection::socket() {
-        return _socket.get();
-    }
-
-    // Connection 
-    SoftwareConnection::Message SoftwareConnection::receiveMessage() {
-        // Header consists of version (1 char), message type (4 char) & message size (4 char)
-        size_t HeaderSize = 9 * sizeof(char);
-
-        // Create basic buffer for receiving first part of message
-        std::vector<char> headerBuffer(HeaderSize);
-        std::vector<char> messageBuffer;
-
-        // Receive the header data
-        if (!_socket->get(headerBuffer.data(), HeaderSize)) {
-            LERROR("Failed to read header from socket. Disconnecting.");
-            throw SoftwareConnectionLostError();
-        }
-
-        // Read and convert version number: Byte 0
-        std::string version;
-        version.push_back(headerBuffer[0]);
-        const uint32_t protocolVersionIn = std::stoi(version);
-
-        // Make sure that header matches the protocol version
-        if (!(protocolVersionIn == ProtocolVersion)) {
-            LERROR(fmt::format(
-                "Protocol versions do not match. Remote version: {}, Local version: {}",
-                protocolVersionIn,
-                ProtocolVersion
-            ));
-            throw SoftwareConnectionLostError();
-        }
-
-        // Read message type: Byte 1-4
-        std::string type;
-        for(int i = 1; i < 5; i++)
-            type.push_back(headerBuffer[i]);
-
-        // Read and convert message size: Byte 5-8
-        std::string messageSizeIn;
-        for (int i = 5; i < 9; i++)
-            messageSizeIn.push_back(headerBuffer[i]);
-        const size_t messageSize = stoi(messageSizeIn);
-
-        // Receive the message data
-        messageBuffer.resize(messageSize);
-        if (!_socket->get(messageBuffer.data(), messageSize)) {
-            LERROR("Failed to read message from socket. Disconnecting.");
-            throw SoftwareConnectionLostError();
-        }
-
-        // And delegate decoding depending on message type
-        if (type == "CONN")
-            return Message(MessageType::Connection, messageBuffer);
-        else if( type == "ASGN")
-            return Message(MessageType::AddSceneGraphNode, messageBuffer);
-        else if (type == "RSGN")
-            return Message(MessageType::RemoveSceneGraphNode, messageBuffer);
-        else if (type == "UPCO")
-            return Message(MessageType::Color, messageBuffer);
-        else if (type == "UPOP")
-            return Message(MessageType::Opacity, messageBuffer);
-        else if( type == "UPSI")
-            return Message(MessageType::Size, messageBuffer);
-        else if (type == "DISC")
-            return Message(MessageType::Disconnection, messageBuffer);
-        else {
-            LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));
-            return Message(MessageType::Disconnection, messageBuffer);
-        }
-    }
-
-    //Connection
-    bool SoftwareConnection::sendMessage(std::string message) {
-        if (!_socket->put<char>(message.data(), message.size())) {
-            return false;
-        }
-
-        return true;
-    }
-
-    void SoftwareConnection::handleProperties(std::string identifier) {
-
-        /*std::string message;
-        
-        const Renderable* myRenderable = renderable(identifier);
-        properties::Property* colorProperty = myRenderable->property("Color");
-        properties::Property* opacityProperty = myRenderable->property("Opacity");
-        properties::Property* sizeProperty = myRenderable->property("Size");
-
-        // Update color of renderable
-        //auto onChange = 
-        colorProperty->onChange([&colorProperty, identifier, &message]() {
-            std::string lengthOfIdentifier = std::to_string(identifier.length());
-            std::string propertyValue = colorProperty->getStringValue();
-            std::string lengthOfValue = std::to_string(propertyValue.length());
-            std::string messageType = "UPCO";
-            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
-
-            // Format length of subject to always be 4 digits
-            std::ostringstream os;
-            os << std::setfill('0') << std::setw(4) << subject.length();
-            std::string lengthOfSubject = os.str();
-
-            message = messageType + lengthOfSubject + subject;
-            });
-
-        sendMessage(message);
-        LERROR(fmt::format("Meddelandet som skickas {}", message));
-        // Update opacity of renderable
-        opacityProperty->onChange([&]() {
-            propertyValue = opacityProperty->getStringValue();
-            lengthOfValue = std::to_string(propertyValue.length());
-            messageType = "UPOP";
-            subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
-
-            std::ostringstream os;
-            os << std::setfill('0') << std::setw(4) << subject.length();
-            lengthOfSubject = os.str();
-
-            message = messageType + lengthOfSubject + subject;
-
-            sendMessage(message);
-            LERROR(fmt::format("Meddelandet som skickas {}", message));
-            });
-
-        // Update size of renderable
-        sizeProperty->onChange([&]() {
-            propertyValue = sizeProperty->getStringValue();
-            lengthOfValue = std::to_string(propertyValue.length());
-            messageType = "UPSI";
-            subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
-
-            std::ostringstream os;
-            os << std::setfill('0') << std::setw(4) << subject.length();
-            lengthOfSubject = os.str();
-
-            message = messageType + lengthOfSubject + subject;
-
-            sendMessage(message);
-            LERROR(fmt::format("Meddelandet som skickas {}", message));
-            });*/
-    }
-
-    // Server
     void SoftwareIntegrationModule::start(int port)
     {
         _socketServer.listen(port);
@@ -255,13 +81,11 @@ namespace openspace {
         _eventLoopThread = std::thread([this]() { eventLoop(); });
     }
 
-    // Server
     void SoftwareIntegrationModule::stop() {
         _shouldStop = true;
         _socketServer.close();
     }
 
-    // Server
     void SoftwareIntegrationModule::handleNewPeers() {
         while (!_shouldStop) {
             std::unique_ptr<ghoul::io::TcpSocket> socket =
@@ -284,7 +108,6 @@ namespace openspace {
         }
     }
 
-    // Server
     std::shared_ptr<SoftwareIntegrationModule::Peer> SoftwareIntegrationModule::peer(size_t id) {
         std::lock_guard<std::mutex> lock(_peerListMutex);
         auto it = _peers.find(id);
@@ -390,9 +213,8 @@ namespace openspace {
                 );
             }
 
-            //SoftwareConnection prop; 
-            //prop.handleProperties(identifier);
-
+            SoftwareConnection callback; 
+            callback.handleProperties(identifier);
 
             break;
         }
@@ -560,13 +382,11 @@ namespace openspace {
         return name;
     }
 
-    // Server
     bool SoftwareIntegrationModule::isConnected(const Peer& peer) const {
         return peer.status != SoftwareConnection::Status::Connecting &&
             peer.status != SoftwareConnection::Status::Disconnected;
     }
 
-    // Server
     void SoftwareIntegrationModule::disconnect(Peer& peer) {
         if (isConnected(peer)) {
             _nConnections = nConnections() - 1;
