@@ -74,7 +74,7 @@ private:
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
     // Number of states in the sequence
-    size_t _nStates = 95;
+    size_t _nStates = 274;
     bool _isLoadingTexture = false;
 
     properties::StringProperty _texturePath;
@@ -95,6 +95,7 @@ private:
     //std::unique_ptr<ghoul::opengl::Texture> _texture;
     ghoul::opengl::Texture* _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
     std::unique_ptr<Sphere> _sphere;
 
     UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,

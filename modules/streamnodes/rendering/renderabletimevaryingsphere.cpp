@@ -325,6 +325,18 @@ void RenderableTimeVaryingSphere::initializeGL() {
     }
     extractTriggerTimesFromFileNames();
     computeSequenceEndTime();
+    _textureFiles.resize(_sourceFiles.size());
+    for (int i = 0; i < _sourceFiles.size(); ++i) {
+
+       _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(absPath(_sourceFiles[i]));
+
+       _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
+       _textureFiles[i]->uploadTexture();
+       _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+       //_textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+       _textureFiles[i]->purgeFromRAM();
+    }
+
     loadTexture();
 }
 
@@ -602,11 +614,11 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
 }
 void RenderableTimeVaryingSphere::loadTexture() {
     if (_activeTriggerTimeIndex != -1) {
-        ghoul::opengl::Texture* t = _texture;
+       // ghoul::opengl::Texture* t = _texture;
        // std::unique_ptr<ghoul::opengl::Texture> texture =
         //    ghoul::io::TextureReader::ref().loadTexture(_sourceFiles[_activeTriggerTimeIndex]);
-        unsigned int hash = ghoul::hashCRC32File(_sourceFiles[_activeTriggerTimeIndex]);
-
+     //   unsigned int hash = ghoul::hashCRC32File(_sourceFiles[_activeTriggerTimeIndex]);
+        _texture = _textureFiles[_activeTriggerTimeIndex].get();
         /*
         if (texture) {
             LDEBUGC(
@@ -618,6 +630,7 @@ void RenderableTimeVaryingSphere::loadTexture() {
             //_texture = std::move(texture);
             texture->purgeFromRAM();
         }*/
+        /*
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
             [path = _sourceFiles[_activeTriggerTimeIndex]]()->std::unique_ptr<ghoul::opengl::Texture> {
@@ -636,13 +649,16 @@ void RenderableTimeVaryingSphere::loadTexture() {
             return texture;
         }
         );
+        */
 
-        BaseModule::TextureManager.release(t);
 
+       // BaseModule::TextureManager.release(t);
+        /*
         _textureFile = std::make_unique<ghoul::filesystem::File>(_sourceFiles[_activeTriggerTimeIndex]);
         _textureFile->setCallback(
             [&](const ghoul::filesystem::File&) { _sphereIsDirty = true; }
         );
+        */
         _isLoadingTexture = false;
     }
 }
