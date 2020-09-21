@@ -15,12 +15,12 @@ asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-asset.request('scene/milkyway/milkyway/volume')
-asset.request('scene/milkyway/constellations/constellation_art')
-asset.request('scene/milkyway/constellations/constellation_keybinds')
+--asset.request('scene/milkyway/milkyway/volume')
+--asset.request('scene/milkyway/constellations/constellation_art')
+--asset.request('scene/milkyway/constellations/constellation_keybinds')
 
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
-
+--assetHelper.request('scene/digitaluniverse/stars')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')

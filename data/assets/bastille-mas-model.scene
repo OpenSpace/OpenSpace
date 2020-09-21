@@ -24,6 +24,15 @@ Endtime1 = "2000 JUL 14 19:00:00";
 Starttimescript = "openspace.time.setTime('2000 JUL 14 08:38:27')";
 StarttimescriptSlowLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
 StarttimescriptFastLoop = "openspace.time.setTime('2000 JUL 14 11:00:00')";
+Mercuryenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Opacity', 1.00000, 3)";
+Earthenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Opacity', 1.000000, 5)";
+Venusenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Opacity', 1.000000, 10)";
+Mercurydisabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Opacity', 0.00000)";
+Earthdisabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Opacity', 0.00000)";
+Venusdisabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Opacity', 0.00000)";
+starttimeMercury = "2000 JUL 14 10:20:00";
+starttimeVenus = "2000 JUL 14 10:28:00";
+starttimeEarth = "2000 JUL 14 10:40:00";
 EndtimeSlowLoop = "2000 JUL 14 11:00:00";
 EndtimeFastLoop = "2000 JUL 14 19:00:00";
 
@@ -66,19 +75,21 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.colorMode', 0.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodes', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlpha', 1.000000);" ..
+			--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlpha', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 2.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByFlux', 0.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByRadius', 0.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', 0.800000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterLower', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000);"..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');"..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"..
 			"openspace.navigation.loadNavigationState('Sun');"..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5.000000);",
 			--"Todo, fix the last one which is on the z axis"
 			--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.limitsZLower', {--358139527168.969971,953488375808.000000});",
@@ -176,6 +187,44 @@ local Keybindings = {
         Local = false
     },
     {
+		Key = "Shift+t",
+		Command = 
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {0.00000,0.000000}, 10);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.0, 10);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 1.000000, 10);",	
+		Documentation = "transition from nodes to cutplane",
+		Name = "Transition nodevis to cutplane",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+	 {
+		Key = "Shift+c",
+		Command = 
+			"openspace.scriptScheduler.clear();" ..
+			"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Mercurydisabledscript)"..
+			"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Venusdisabledscript)"..
+			"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Earthdisabledscript)"..
+			"openspace.time.setDeltaTime(120);" ..
+			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
+			"openspace.scriptScheduler.loadScheduledScript(starttimeMercury, Mercuryenabledscript);" ..
+			"openspace.scriptScheduler.loadScheduledScript(starttimeVenus, Venusenabledscript);" ..
+			"openspace.scriptScheduler.loadScheduledScript(starttimeEarth, Earthenabledscript);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Opacity', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Opacity', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Opacity', 0.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Enabled', true);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Enabled', true);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Enabled', true);" ..
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",
+
+				
+		Documentation = "transition for the spheres",
+		Name = "Sphereslices",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
         Key = "i",
         Command = [[
             textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');
@@ -216,6 +265,7 @@ asset.onInitialize(function ()
     
     openspace.setPropertyValueSingle('Scene.Sun.Renderable.Enabled', true)
     openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false)
+    --openspace.setPropertyValueSingle("RenderEngine.HorizFieldOfView", 46.910000)
 	
 	openspace.markInterestingNodes({
         "Earth", "Sun", "Moon"
