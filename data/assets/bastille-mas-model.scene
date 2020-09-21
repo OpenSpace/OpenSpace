@@ -178,7 +178,12 @@ local Keybindings = {
 
             "openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.EnableFade', true);" ..
             "openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.LineWidth', 10.000000);" ..
-            "openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.Fade', 3.440000);",
+            "openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.Fade', 3.440000);" ..
+
+            "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Color', {1.000000,1.000000,1.000000});" ..
+            "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.LineWidth', 10.00000);" ..
+            "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Fade', 5.420000);",
+
 	    Documentation = "Appearance change for trails",
 	    Name = "Appearance change for trails",
 	    GuiPath = "/CCMC/Nodes",
