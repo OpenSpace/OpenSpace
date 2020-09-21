@@ -155,6 +155,7 @@ const int colorTables = 1;
 const int sizeAndColor = 2;
 const int illuminance = 3;
 
+const float AUtoMeter = 149597871000.0;
 out vec4    vs_color;
 out float   vs_depth;
 out vec2    vs_st;
@@ -326,7 +327,7 @@ void main() {
     if(CheckvertexIndex() || distance(earthPos, in_position) < distanceThreshold){
     //Filtering by radius and z-axis
     if(rValue > filterLower && rValue < filterUpper){ //if(rValue > filterLower){
-        if(in_position.z > domainLimZ.x && in_position.z < domainLimZ.y){
+        if(in_position.z > (domainLimZ.x * AUtoMeter)  && in_position.z < (domainLimZ.y * AUtoMeter)){
             // We should color it by flux
             if(colorMode == 0){
                 //vec4 fluxColor = getTransferFunctionColor(colorTable);
