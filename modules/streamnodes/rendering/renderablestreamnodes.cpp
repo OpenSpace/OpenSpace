@@ -409,14 +409,14 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
         glm::vec4(1.f))
     , _pStreamGroup({ "Streams" })
     , _pNodesamountGroup({ "NodeGroup" })
-    , _pNodeSize(NodeSizeInfo, 1.f, 1.f, 10.f)
-    , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 1.f, 1.f, 10.f)
+    , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
+    , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
     , _pLineWidth(LineWidthInfo, 4.f, 1.f, 20.f)
     , _pColorTableRange(colorTableRangeInfo)
     , _pDomainZ(DomainZInfo)
-    , _pFluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
+    , _pFluxColorAlpha(FluxColorAlphaInfo, 0.f, 0.f, 1.f)
     , _pFluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
-    , _pThresholdFlux(ThresholdFluxInfo, 0.f, -50.f, 10.f)
+    , _pThresholdFlux(ThresholdFluxInfo, 0.8f, -50.f, 10.f)
     , _pFilteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
@@ -451,9 +451,9 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDrawingHollow(DrawingHollowInfo, false)
     , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _pRadiusPerspectiveEnabled(RadiusPerspectiveEnabledInfo, true)
-    , _pPerspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 6.f, 1.f, 20.f)
+    , _pPerspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 2.67f, 1.f, 20.f)
     , _pMaxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
-    , _pMinNodeSize(MinNodeSizeInfo, 1.f, 1.f, 10.f)
+    , _pMinNodeSize(MinNodeSizeInfo, 2.f, 1.f, 10.f)
     , _pPulseEnabled(pulseEnabledInfo, false)
     , _pGaussianPulseEnabled(gaussianPulseEnabledInfo, false)
     , _pPulseAlways(AlwaysPulseInfo, false)
@@ -516,8 +516,11 @@ void RenderableStreamNodes::setModelDependentConstants() {
     _pColorTableRange.setMaxValue(glm::vec2(limit));
     _pColorTableRange = glm::vec2(-2, 4);
 
-    float limitZMin = -1000000000000;
-    float limitZMax = 1000000000000;
+    //float limitZMin = -1000000000000;
+    float limitZMin = -2.f;
+    //float limitZMax = 1000000000000;
+    //float limitZMax = 1000000000000;
+    float limitZMax = 2.f;
 
     _pDomainZ.setMinValue(glm::vec2(limitZMin));
     _pDomainZ.setMaxValue(glm::vec2(limitZMax));
