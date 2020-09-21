@@ -1,0 +1,41 @@
+asset.info = {
+    Name = "Focus point",
+    Version = "1.0",
+    Description = "Speed of light from sun to earth",
+    Author = "Christian Adamsson, Emilie Ho",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}
+
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
+
+local focusPoint = {
+    Identifier = "focusPoint",
+    Parent = "SunIAU",
+    Transform = {
+        Translation = {
+            -- Type = "StaticTranslation",
+            Type = "GlobeTranslation",
+            -- Position = {4.44531843286E8, 4.89946069886E8, 2.52887479935E8}
+            Globe = "Sun",
+            Longitude = -45,
+            Latitude = 20,
+            Altitude = 102000000
+        }
+    },
+ GUI = {
+        Path = "/Solar System/Heliosphere",
+        Name = "Focus point"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { focusPoint })
+
+-- x = R * cos(lat) * cos(lon)   =>     x = 696340000 * cos(0.31741081375) * cos(0.83395845917) =       444531843.286
+-- y = R * cos(lat) * sin(lon)   =>     y = 696340000 * cos(0.31741081375) * sin(0.83395845917) =       489946069.886
+-- z = R * sin(lat)              =>     z = 696340000 * sin(0.31741081375) =                            217333118.755
+-- Lat = 18.1863        =>       18.1863 * PI/180 = 0.31741081375 rad
+-- Long = 47.7823       =>       18.1863 * PI/180 = 0.83395845917 rad
