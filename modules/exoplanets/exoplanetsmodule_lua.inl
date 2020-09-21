@@ -25,6 +25,8 @@
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
@@ -146,9 +148,7 @@ int addExoplanetSystem(lua_State* L) {
     const std::string starIdentifier = createIdentifier(starNameSpeck);
     const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
 
-    SceneGraphNode* existingStarNode =
-        global::renderEngine.scene()->sceneGraphNode(starIdentifier);
-
+    SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
         return ghoul::lua::luaError(
             L, 
