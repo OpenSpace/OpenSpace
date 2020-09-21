@@ -26,12 +26,16 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/keybindingmanager.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/util/keys.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
+    constexpr const char* _loggerCat = "TimeManager";
+
     // Properties for time interpolation
     // These are used when setting the time from lua time interpolation functions,
     // when called without arguments.
@@ -65,6 +69,8 @@ namespace {
         "The default duration taken to transition to the unpaused state, "
         "when interpolating"
     };
+
+    constexpr const char* DeltaTimeStepsKeybindsGuiPath = "/Delta Time Steps";
 }
 
 namespace openspace {
@@ -412,6 +418,88 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
 
     _deltaTimeSteps = std::move(deltaTimes);
     _deltaTimeStepsChanged = true;
+
+    addDeltaTimesKeybindings();
+}
+
+void TimeManager::addDeltaTimesKeybindings() {
+    constexpr const std::array<Key, 10> Keys = {
+        Key::Num1,
+        Key::Num2,
+        Key::Num3,
+        Key::Num4,
+        Key::Num5,
+        Key::Num6,
+        Key::Num7,
+        Key::Num8,
+        Key::Num9,
+        Key::Num0
+    };
+
+    // Find positive delta time steps
+    std::vector<double> steps;
+    const int nStepsGuess = static_cast<int>(std::floor(_deltaTimeSteps.size() * 0.5f));
+    steps.reserve(nStepsGuess);
+    std::copy_if(
+        _deltaTimeSteps.begin(), 
+        _deltaTimeSteps.end(), 
+        std::back_inserter(steps),
+        [](double value) { return value >= 0.0; }
+    );
+
+    const int nKeys = static_cast<int>(Keys.size());
+    const int nSteps = static_cast<int>(steps.size());
+    const int maxIterations = (nSteps >= nKeys) ? nKeys : nSteps;
+
+    const char* guiPath = DeltaTimeStepsKeybindsGuiPath;
+
+    auto addDeltaTimeKeybind = [&guiPath](Key key, KeyModifier modifier, double step) {
+        const std::string s = fmt::format("{:.0f}", step);
+        global::keybindingManager.bindKeyLocal(
+            key,
+            modifier,
+            "openspace.time.interpolateDeltaTime(" + s + ")",
+            "Setting the simulation speed to " + s + " seconds per realtime second",
+            "Set Simulation Speed: " + s,
+            guiPath
+        );
+    };
+
+    // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL), 
+    // plus inverted version of each time step one using the ALT modifier
+    for (int i = 0; i < maxIterations; ++i) {
+        const Key key = Keys[i];
+        addDeltaTimeKeybind(key, KeyModifier::NoModifier, steps[i]);
+        addDeltaTimeKeybind(key, KeyModifier::Alt, -steps[i]);
+
+        if (nSteps > nKeys) {
+            const int index = nKeys + i;
+            addDeltaTimeKeybind(key, KeyModifier::Shift, steps[index]);
+
+            KeyModifier mod = KeyModifier::Shift | KeyModifier::Alt;
+            addDeltaTimeKeybind(key, mod, -steps[index]);
+        }
+
+        if (nSteps > 2 * nKeys) {
+            const int index = 2 * nKeys + i;
+            addDeltaTimeKeybind(key, KeyModifier::Control, steps[index]);
+
+            KeyModifier mod = KeyModifier::Control | KeyModifier::Alt;
+            addDeltaTimeKeybind(key, mod, -steps[index]);
+        }
+    }
+
+    LINFO("Added keybindings for specified delta time steps.");
+    const int maxKeyBinds = 3 * nKeys;
+    if (nSteps > maxKeyBinds) {
+        LWARNING(fmt::format(
+            "Error settings delta time keys: Too many delta times, so not all could be "
+            "mapped to a key. Total: {} steps, which is {} more than the number of "
+            "available keybindings.",
+            nSteps, 
+            nSteps - maxKeyBinds
+        ));
+    }
 }
 
 size_t TimeManager::nKeyframes() const {

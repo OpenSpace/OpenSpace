@@ -129,6 +129,8 @@ private:
     TimeKeyframeData interpolate(const Keyframe<TimeKeyframeData>& past,
         const Keyframe<TimeKeyframeData>& future, double time);
 
+    void addDeltaTimesKeybindings();
+
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
     SyncData<Time> _integrateFromTime;
