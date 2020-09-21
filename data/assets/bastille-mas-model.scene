@@ -153,12 +153,34 @@ local Keybindings = {
 	    Command = 
             "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.SunFollowingCamera', true);" ..
             "openspace.setPropertyValueSingle('Scene.Moon.Renderable.PerformShading', false);" ..
-            "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.EnableFade', false);" ..
-            "openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Color', {1.000000,1.000000,1.000000});" ..
             "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled', false);" ..
             "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.SunIntensity', 15.000000);",
-	    Documentation = "Sun artificially placed, remove shadow on Earth and Moon and show Moon trail",
+	    Documentation = "Sun artificially placed, remove shadow on Earth and Moon",
 	    Name = "Earth and moon without shadow",
+	    GuiPath = "/CCMC/Nodes",
+	    Local = false
+    },
+    {
+    	Key = "Shift+q",
+	    Command = 
+	        "openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.EnableFade', true);" ..
+            "openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.Color', {0.700000,0.700000,0.700000});" ..
+            "openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.LineWidth', 10.000000)" ..
+            "openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.Fade', 2.270000);" ..
+
+            "openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.EnableFade', true);" ..
+            "openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.LineWidth', 10.000000);" ..
+            "openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.Fade', 2.710000);" ..
+
+            "openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.EnableFade', true);" ..
+            "openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.LineWidth', 10.000000);" ..
+            "openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.Fade', 1.830000);" ..
+
+            "openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.EnableFade', true);" ..
+            "openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.LineWidth', 10.000000);" ..
+            "openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.Fade', 3.440000);",
+	    Documentation = "Appearance change for trails",
+	    Name = "Appearance change for trails",
 	    GuiPath = "/CCMC/Nodes",
 	    Local = false
     },
