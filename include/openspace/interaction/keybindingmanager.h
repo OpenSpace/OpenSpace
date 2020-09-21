@@ -62,6 +62,7 @@ public:
         std::string documentation = "", std::string name = "", std::string guiPath = "");
 
     void removeKeyBinding(const std::string& key);
+    void removeKeyBinding(const KeyWithModifier& key);
 
     std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
         const std::string& key) const;

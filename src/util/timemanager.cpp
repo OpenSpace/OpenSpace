@@ -436,6 +436,13 @@ void TimeManager::addDeltaTimesKeybindings() {
         Key::Num0
     };
 
+    // First, clear any previous keybinds
+    for (const KeyWithModifier& kb : _deltaTimeStepKeybindings) {
+        global::keybindingManager.removeKeyBinding(kb);
+    }
+    _deltaTimeStepKeybindings.clear();
+    _deltaTimeStepKeybindings.reserve(_deltaTimeSteps.size());
+
     // Find positive delta time steps
     std::vector<double> steps;
     const int nStepsGuess = static_cast<int>(std::floor(_deltaTimeSteps.size() * 0.5f));
@@ -453,16 +460,17 @@ void TimeManager::addDeltaTimesKeybindings() {
 
     const char* guiPath = DeltaTimeStepsKeybindsGuiPath;
 
-    auto addDeltaTimeKeybind = [&guiPath](Key key, KeyModifier modifier, double step) {
+    auto addDeltaTimeKeybind = [&guiPath, this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
         global::keybindingManager.bindKeyLocal(
             key,
-            modifier,
+            mod,
             "openspace.time.interpolateDeltaTime(" + s + ")",
             "Setting the simulation speed to " + s + " seconds per realtime second",
             "Set Simulation Speed: " + s,
             guiPath
         );
+        _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
     };
 
     // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL), 

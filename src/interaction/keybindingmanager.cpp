@@ -134,14 +134,17 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCo
 }
 
 void KeybindingManager::removeKeyBinding(const std::string& key) {
-    // Erase-remove idiom does not work for std::multimap so we have to do this on foot
-
     KeyWithModifier k = stringToKey(key);
+    removeKeyBinding(k);
+}
+
+void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
+    // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
     for (auto it = _keyLua.begin(); it != _keyLua.end(); ) {
         // If the current iterator is the key that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)
-        if (it->first == k) {
+        if (it->first == key) {
             it = _keyLua.erase(it);
         }
         else {

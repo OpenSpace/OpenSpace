@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
 #include <openspace/util/syncdata.h>
+#include <openspace/util/keys.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
 #include <functional>
@@ -143,8 +144,9 @@ private:
     double _lastDeltaTime = 0.0;
     double _lastTargetDeltaTime = 0.0;
 
-    std::vector<double> _deltaTimeSteps;
     bool _deltaTimeStepsChanged = false;
+    std::vector<double> _deltaTimeSteps;
+    std::vector<KeyWithModifier> _deltaTimeStepKeybindings;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
     properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
