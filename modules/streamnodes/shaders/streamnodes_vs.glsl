@@ -280,7 +280,7 @@ void CheckdistanceMethod() {
         vs_closeToEarth = 0;
 
        //if(distancevec < maxdist){
-          if(distancevec < distanceThreshold && usingPulse){ 
+          if(distancevec < AUtoMeter * distanceThreshold && usingPulse){ 
                 vs_closeToEarth = 1;
                 gl_PointSize = gl_PointSize * 5;
                 vec4 fluxColor = getTransferFunctionColor(colorTable);
@@ -297,7 +297,7 @@ void CheckdistanceMethod() {
              vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
              vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
         }
-        if(distance(earthPos, in_position) < distanceThreshold){
+        if(distance(earthPos, in_position) < AUtoMeter * distanceThreshold){
             if(mod(gl_VertexID, nodeSkipEarth) == 0){
             DecidehowtoshowClosetoEarth();
             }
