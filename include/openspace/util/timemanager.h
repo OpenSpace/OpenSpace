@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/syncdata.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/time.h>
@@ -33,14 +35,6 @@
 #include <optional>
 #include <utility>
 #include <vector>
-
-#include <deque>
-#include <functional>
-#include <openspace/util/timeline.h>
-#include <openspace/util/time.h>
-#include <openspace/util/syncdata.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
