@@ -202,13 +202,20 @@ int addExoplanetSystem(lua_State* L) {
     data.close();
     lut.close();
 
-    bool notEnoughData = isnan(p.positionX) || isnan(p.a) || isnan(p.per);
-
-    if (!found || notEnoughData) {
+    if (!found) {
         return ghoul::lua::luaError(
             L, 
-            "No star with that name or not enough data about it."
+            "No star with the provided name was found."
         ); 
+    }
+
+    bool notEnoughData = isnan(p.positionX) || isnan(p.a) || isnan(p.per);
+
+    if (notEnoughData) {
+        return ghoul::lua::luaError(
+            L,
+            "Insufficient data available for representing the exoplanet system."
+        );
     }
 
     const glm::dvec3 starPosition = glm::dvec3(
@@ -359,11 +366,11 @@ int addExoplanetSystem(lua_State* L) {
             enabled = "false";
         }
         else {
-            planetRadius = planet.r * jupiterRadius;
+            planetRadius = static_cast<float>(planet.r) * jupiterRadius;
             enabled = "true";
         }
 
-        const float period = planet.per * static_cast<float>(SecondsPerDay);
+        const float period = static_cast<float>(planet.per * SecondsPerDay);
         const float semiMajorAxisInMeter = planet.a * astronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
@@ -371,7 +378,7 @@ int addExoplanetSystem(lua_State* L) {
 
         const std::string planetKeplerTranslation = "{"
             "Type = 'KeplerTranslation',"
-            "Eccentricity = " + std::to_string(planet.ecc) + "," //ECC 
+            "Eccentricity = " + std::to_string(planet.ecc) + "," //ECC
             "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
             "Inclination = " + std::to_string(planet.i) + "," //I
             "AscendingNode = " + std::to_string(planet.bigOm) + "," //BIGOM
