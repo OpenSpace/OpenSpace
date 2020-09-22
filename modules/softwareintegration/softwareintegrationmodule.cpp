@@ -172,17 +172,12 @@ namespace openspace {
             std::string lengthOfSubject = os.str();
 
             std::string message = messageType + lengthOfSubject + subject;
-
             peer->connection.sendMessage(message);
-
-            LERROR(fmt::format("Meddelandet som skickas {}", message));
         };
         colorProperty->onChange(updateColor);
 
-        /*
-
         // Update opacity of renderable
-        auto updateOpacity = [opacityProperty, identifier]() {
+        auto updateOpacity = [opacityProperty, identifier, peer]() {
             std::string lengthOfIdentifier = std::to_string(identifier.length());
             std::string propertyValue = opacityProperty->getStringValue();
             std::string lengthOfValue = std::to_string(propertyValue.length());
@@ -195,14 +190,12 @@ namespace openspace {
             std::string lengthOfSubject = os.str();
 
             std::string message = messageType + lengthOfSubject + subject;
-            SoftwareConnection send;
-            send.sendMessage(message);
-            LERROR(fmt::format("Meddelandet som skickas {}", message));
+            peer->connection.sendMessage(message);
             };
         opacityProperty->onChange(updateOpacity);
 
         // Update size of renderable
-        auto updateSize = [sizeProperty, identifier]() {
+        auto updateSize = [sizeProperty, identifier, peer]() {
             std::string lengthOfIdentifier = std::to_string(identifier.length());
             std::string propertyValue = sizeProperty->getStringValue();
             std::string lengthOfValue = std::to_string(propertyValue.length());
@@ -215,13 +208,9 @@ namespace openspace {
             std::string lengthOfSubject = os.str();
 
             std::string message = messageType + lengthOfSubject + subject;
-            SoftwareConnection send;
-            send.sendMessage(message);
-            LERROR(fmt::format("Meddelandet som skickas {}", message));
+            peer->connection.sendMessage(message);
             };
         sizeProperty->onChange(updateSize);
-
-        */
     }
 
     void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
