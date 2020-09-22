@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -44,6 +45,8 @@
 #include <sstream>
 
 namespace openspace::exoplanets::luascriptfunctions {
+
+constexpr const char* _loggerCat = "ExoplanetsModule";
 
 constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
@@ -485,6 +488,55 @@ int removeExoplanetSystem(lua_State* L) {
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
+
+    return 0;
+}
+
+int listAvailableExoplanetSystems(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::listAvailableExoplanetSystems");
+
+    std::ifstream file(absPath(LookUpTablePath));
+
+    if (!file.good()) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Failed to open file '{}'", LookUpTablePath)
+        );
+    }
+
+    std::vector<std::string> names;
+    // As of 2020 there are about 4000 confirmed exoplanets, so use this number
+    // as a guess for the vector size
+    const int nExoplanetsGuess = 4000;
+    names.reserve(nExoplanetsGuess);
+
+    std::string line;
+    while (getline(file, line)) {
+        std::stringstream ss(line);
+        std::string name;
+        getline(ss, name, ',');
+        // Remove the last two characters, that specify the planet
+        name = name.substr(0, name.size() - 2);
+
+        names.push_back(name);
+    }
+
+    // For easier read, sort by names and remove duplicates
+    std::sort(names.begin(), names.end());
+    names.erase(std::unique(names.begin(), names.end()), names.end());
+
+    std::string output;
+    for (auto it = names.begin(); it != names.end(); ++it) {
+        if (it != names.end()) {
+            output += *it + ", ";
+        }
+    }
+
+    LINFO(fmt::format(
+        "There is data available for the following {} exoplanet systems: {}", 
+        names.size(),
+        output
+    ));
 
     return 0;
 }

@@ -64,6 +64,14 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             {},
             "string",
             "Removes the nodes of the specified exoplanet system from the scene graph."
+        },
+        {
+            "listAvailableExoplanetSystems",
+            &exoplanets::luascriptfunctions::listAvailableExoplanetSystems,
+            {},
+            "",
+            "Prints a list with the names of all exoplanet systems that can be added to "
+            "the scene graph to the OpenSpace Log. "
         }
     };
 
