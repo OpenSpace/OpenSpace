@@ -157,6 +157,7 @@ namespace openspace {
         properties::Property* colorProperty = myRenderable->property("Color");
         properties::Property* opacityProperty = myRenderable->property("Opacity");
         properties::Property* sizeProperty = myRenderable->property("Size");
+        properties::Property* visibilityProperty = myRenderable->property("ToggleVisibility");
 
         // Update color of renderable
         auto updateColor = [colorProperty, identifier, peer]() {
@@ -211,6 +212,30 @@ namespace openspace {
             peer->connection.sendMessage(message);
             };
         sizeProperty->onChange(updateSize);
+
+        // Toggle visibility of renderable
+        auto toggleVisibility = [visibilityProperty, identifier, peer]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string messageType = "TOVI";
+
+            std::string propertyValue;
+            if (visibilityProperty->getStringValue() == "false")
+                propertyValue = "F";
+            else
+                propertyValue = "T";
+
+            std::string subject = lengthOfIdentifier + identifier + propertyValue;
+            // We don't need a lengthOfValue here because it will always be 1 character 
+
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
+            
+            std::string message = messageType + lengthOfSubject + subject;
+            peer->connection.sendMessage(message);
+            };
+        visibilityProperty->onChange(toggleVisibility);
     }
 
     void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
@@ -318,6 +343,20 @@ namespace openspace {
             const Renderable* myrenderable = renderable(identifier);
             properties::Property* sizeProperty = myrenderable->property("Size");
             sizeProperty->set(size);
+            break;
+        }
+        case SoftwareConnection::MessageType::Visibility: {
+            std::string identifier = readIdentifier(message);
+            std::string visibility;
+            visibility.push_back(message[messageOffset]);
+
+            // Update size of renderable
+            const Renderable* myrenderable = renderable(identifier);
+            properties::Property* visibilityProperty = myrenderable->property("ToggleVisibility");
+            if(visibility == "F")
+                visibilityProperty->set(false);
+            else
+                visibilityProperty->set(true);
             break;
         }
         case SoftwareConnection::MessageType::Disconnection: {

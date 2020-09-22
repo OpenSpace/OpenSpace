@@ -45,6 +45,7 @@ public:
         Color,
         Opacity,
         Size,
+        Visibility,
         Disconnection
     };
 

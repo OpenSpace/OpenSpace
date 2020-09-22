@@ -125,6 +125,8 @@ namespace openspace {
             return Message(MessageType::Opacity, messageBuffer);
         else if( type == "UPSI")
             return Message(MessageType::Size, messageBuffer);
+        else if (type == "TOVI")
+            return Message(MessageType::Visibility, messageBuffer);
         else if (type == "DISC")
             return Message(MessageType::Disconnection, messageBuffer);
         else {

@@ -103,6 +103,12 @@ namespace openspace {
                     new DoubleVerifier,
                     Optional::Yes,
                     SizeInfo.description
+                },
+                {
+                    ToggleVisibilityInfo.identifier,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    ToggleVisibilityInfo.description
                 }
             }
         };
