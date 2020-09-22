@@ -259,7 +259,7 @@ int addExoplanetSystem(lua_State* L) {
         std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 
         if (!colorMap.good()) {
-            ghoul::lua::luaError(L, "Failed to open colormap data file");
+            return ghoul::lua::luaError(L, "Failed to open colormap data file");
         }
 
         const std::string color = starColor(p.bmv, colorMap);
@@ -402,6 +402,14 @@ int addExoplanetSystem(lua_State* L) {
             "}"
         "}";
 
+        int trailResolution = 1000;
+
+        // increase the resolution for highly eccentric orbits
+        const float eccentricityThreshold = 0.85f;
+        if (planet.ecc > eccentricityThreshold) {
+            trailResolution *= 2;
+        }
+
         openspace::global::scriptEngine.queueScript(
             "openspace.addSceneGraphNode(" + planetNode + ");",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
@@ -414,7 +422,7 @@ int addExoplanetSystem(lua_State* L) {
             "Renderable = {"
                 "Type = 'RenderableTrailOrbit',"
                 "Period = " + std::to_string(planet.per) + ","
-                "Resolution = 1000,"
+                "Resolution = " + std::to_string(trailResolution) + ","
                 "Translation = " + planetKeplerTranslation + ","
                 "Color = { 1, 1, 1 }"
             "},"
