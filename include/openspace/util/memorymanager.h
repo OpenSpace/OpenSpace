@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___MEMORYMANAGER___H__
 
 #include <ghoul/misc/memorypool.h>
-#include <memory_resource>
 
 namespace openspace {
 

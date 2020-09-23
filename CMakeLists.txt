@@ -148,7 +148,7 @@ if (APPLE)
   find_library(COCOA_LIBRARY Carbon)
   find_library(APP_SERVICES_LIBRARY ApplicationServices)
   mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-  target_link_libraries(openspace-core ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
+  target_link_libraries(openspace-core PUBLIC ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
     ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
   end_dependency()
 endif ()
