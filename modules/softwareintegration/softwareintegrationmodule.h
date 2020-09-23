@@ -27,14 +27,10 @@
 
 #include <modules/softwareintegration/network/softwareconnection.h>
 
-#include <openspace/util/openspacemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/concurrentqueue.h>
-#include <ghoul/glm.h>
+#include <openspace/util/openspacemodule.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
-#include <atomic>
-#include <string>
-#include <unordered_map>
 
 namespace openspace {
 
@@ -49,10 +45,9 @@ public:
     void stop();
     size_t nConnections() const;
 
-    size_t messageOffset = 0;
+    size_t messageOffset = 0; // Byt namn till två size begin & end
 
     std::vector<documentation::Documentation> documentations() const override;
-    scripting::LuaLibrary luaLibrary() const override;
 
 private:
     struct Peer {
@@ -68,31 +63,37 @@ private:
         SoftwareConnection::Message message;
     };
 
+    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalDeinitializeGL() override;
+
     bool isConnected(const Peer& peer) const;
+
     void disconnect(Peer& peer);
+
     void handleNewPeers();
     void eventLoop();
     std::shared_ptr<Peer> peer(size_t id);
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
     void handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer);
+    
+    float readFloatValue(std::vector<char>& message);
+    std::string readIdentifier(std::vector<char>& message);
+    std::string readString(std::vector<char>& message);
+    glm::vec3 readColor(std::vector<char>& message);
+
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;
+
     std::thread _serverThread;
     std::thread _eventLoopThread;
     ghoul::io::TcpSocketServer _socketServer;
     size_t _nextConnectionId = 1;
     std::atomic_bool _shouldStop = false;
+
     std::atomic_size_t _nConnections = 0;
+
     ConcurrentQueue<PeerMessage> _incomingMessages;
-
-    std::string readIdentifier(std::vector<char>& message);
-    float readFloatValue(std::vector<char>& message);
-    glm::vec3 readColor(std::vector<char>& message);
-    std::string readString(std::vector<char>& message);
-
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
 };
 
 } // namespace openspace

@@ -27,7 +27,6 @@
 
 #include <openspace/network/messagestructures.h>
 #include <ghoul/io/socket/tcpsocket.h>
-#include <vector>
 
 namespace openspace {
 
@@ -66,9 +65,9 @@ public:
     SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
     bool isConnectedOrConnecting() const;
+    bool sendMessage(std::string message);
     void disconnect();
     ghoul::io::TcpSocket* socket();
-    bool sendMessage(std::string message);
 
     SoftwareConnection::Message receiveMessage();
 
