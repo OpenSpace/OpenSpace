@@ -214,7 +214,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
         getline(lineStream, data, ','); // UECC
         p.uEcc = readFloatData(data);
-        
+
         getline(lineStream, data, ','); // ECCREF
         getline(lineStream, data, ','); // ECCURL
         getline(lineStream, data, ','); // EOD
@@ -254,7 +254,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
         getline(lineStream, data, ','); // ILOWER
         p.iLower = readFloatData(data);
-        
+
         getline(lineStream, data, ','); // UI
         p.ui = readFloatData(data);
 

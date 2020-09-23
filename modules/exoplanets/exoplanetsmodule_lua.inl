@@ -51,11 +51,11 @@ constexpr const char* _loggerCat = "ExoplanetsModule";
 constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
 constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/1/lookup.txt";
-constexpr const char* ExoplanetsDataPath = 
+constexpr const char* ExoplanetsDataPath =
     "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
 
 constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
-constexpr const char* DiscTextureFile = 
+constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
 constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
@@ -154,7 +154,7 @@ int addExoplanetSystem(lua_State* L) {
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
         return ghoul::lua::luaError(
-            L, 
+            L,
             "Adding of exoplanet system failed. The system has already been added."
         );
     }
@@ -198,15 +198,15 @@ int addExoplanetSystem(lua_State* L) {
             found = true;
         }
     }
-    
+
     data.close();
     lut.close();
 
     if (!found) {
         return ghoul::lua::luaError(
-            L, 
+            L,
             "No star with the provided name was found."
-        ); 
+        );
     }
 
     bool notEnoughData = isnan(p.positionX) || isnan(p.a) || isnan(p.per);
@@ -223,22 +223,22 @@ int addExoplanetSystem(lua_State* L) {
         p.positionY * distanceconstants::Parsec,
         p.positionZ * distanceconstants::Parsec
     );
-       
+
     const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
     const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
     const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
 
-    const glm::dmat3 galaxticToCelestialMatrix = 
+    const glm::dmat3 galaxticToCelestialMatrix =
         SpiceManager::ref().positionTransformMatrix("GALACTIC", "J2000", 0.0);
 
     const glm::dvec3 celestialNorth = glm::normalize(
         galaxticToCelestialMatrix * galacticNorth
     );
 
-    // Earth's north vector projected onto the skyplane, the plane perpendicular to the 
+    // Earth's north vector projected onto the skyplane, the plane perpendicular to the
     // viewing vector (starToSunVec)
     const float celestialAngle = static_cast<float>(glm::dot(
-        celestialNorth, 
+        celestialNorth,
         starToSunVec
     ));
     glm::dvec3 northProjected = glm::normalize(
@@ -299,7 +299,7 @@ int addExoplanetSystem(lua_State* L) {
 
     const std::string starParent = "{"
         "Identifier = '" + starIdentifier + "',"
-        "Parent = 'SolarSystemBarycenter',"  
+        "Parent = 'SolarSystemBarycenter',"
         "" + starGlobeRenderableString + ""
         "Transform = {"
             "Rotation = {"
@@ -467,7 +467,7 @@ int addExoplanetSystem(lua_State* L) {
                     "Eccentricity = " + std::to_string(planet.ecc) + ","
                     "Offset = { " +
                         std::to_string(planet.aLower) + ", " +
-                        std::to_string(planet.aUpper) + 
+                        std::to_string(planet.aUpper) +
                     "}," //min / max extend
                     "Opacity = 0.3"
                 "},"
@@ -548,7 +548,7 @@ int listAvailableExoplanetSystems(lua_State* L) {
     }
 
     LINFO(fmt::format(
-        "There is data available for the following {} exoplanet systems: {}", 
+        "There is data available for the following {} exoplanet systems: {}",
         names.size(),
         output
     ));

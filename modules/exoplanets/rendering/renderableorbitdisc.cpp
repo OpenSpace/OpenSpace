@@ -52,7 +52,7 @@ namespace {
         "Size",
         "This value specifies the semi-major axis of the orbit in meter."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
