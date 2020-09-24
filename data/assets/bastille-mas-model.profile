@@ -2,6 +2,7 @@
 1.0
 
 #Asset
+scene/solarsystem/missions/messenger/mercurymagnetosphere	required
 scene/solarsystem/sun/heliosphere/mas/bastille_day/density_volume	required
 scene/solarsystem/sun/heliosphere/mas/bastille_day/fieldlines	required
 scene/solarsystem/sun/heliosphere/mas/bastille_day/transforms	required

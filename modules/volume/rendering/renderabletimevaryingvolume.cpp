@@ -171,6 +171,12 @@ namespace openspace::volume {
                 Optional::No,
                 "Specifies the number of seconds to show the the last timestep after its "
                 "actual time"
+            },
+            {
+                KeyInvertDataAtZ,
+                new BoolVerifier,
+                Optional::Yes,
+                "Specifies if you want to invert the volume data at it z-axis."
             }
         }
     };
@@ -224,7 +230,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
     }
     _secondsAfter = dictionary.value<float>(KeySecondsAfter);
-    _invertDataAtZ = dictionary.value<bool>(KeyInvertDataAtZ);
+
+    if (dictionary.hasKey(KeyInvertDataAtZ)) {
+        _invertDataAtZ = dictionary.value<bool>(KeyInvertDataAtZ);
+    }
 
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
