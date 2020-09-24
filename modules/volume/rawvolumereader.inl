@@ -24,8 +24,6 @@
 
 #include <ghoul/misc/exception.h>
 #include <fstream>
-#include <ghoul/logging/logmanager.h>
-
 
 namespace openspace::volume {
 
