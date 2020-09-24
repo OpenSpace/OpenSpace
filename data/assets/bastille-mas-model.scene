@@ -243,11 +243,47 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Enabled', true);" ..
 			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Enabled', true);" ..
 			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Enabled', true);" ..
-			"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",
-
-				
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",				
 		Documentation = "transition for the spheres",
 		Name = "Sphereslices",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+		Key = "Shift+e",
+		Command =
+			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 2.350000);" ..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'focusPoint');" ..
+
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', true);",
+
+		Documentation = "Turn off sun glare, increase field line line width, change layer on the Sun to magnetogram 3",
+		Name = "First transition Emilie",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+		Key = "Shift+w",
+		Command =
+			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);" ..
+
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled', true);",
+
+		Documentation = "Turn on sun glare, reset field line line width, change layer on the Sun to Orange",
+		Name = "First transition Emilie",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
