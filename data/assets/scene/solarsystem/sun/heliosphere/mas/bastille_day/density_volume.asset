@@ -9,6 +9,21 @@ local densityDirectory = asset.syncedResource({
     Version = 1
 })
 
+--local mirrorVolumeMatrix = {
+    --1.0, 0.0, 0.0,
+    --0.0, 1.0, 0.0,
+    --0.0, 0.0, 1.0
+
+
+--    -1.0, 0.0, 0.0,
+--    0.0, 1.0, 0.0,
+--    0.0, 0.0, -1.0
+    
+    --0.0, 1.0, 0.0,
+    --1.0, 0.0, 0.0,
+    --0.0, 0.0, 1.0
+--}
+
 local sunRadius = 6.957E8
 
 local densityVolume = {
@@ -21,14 +36,16 @@ local densityVolume = {
         Type = "RenderableTimeVaryingVolume",
         StepSize = 0.004,
         --Enabled = false,
-        --Opacity = 0.3,
+        Opacity = 0.3,
         TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"), --test1
         SourceDirectory = densityDirectory,
         --LowerValueBound = 0,
         --UpperValueBound = 1,
         GridType = "Spherical",
         SecondsBefore = 24*60*60,
-        SecondsAfter = 24*60*60
+        SecondsAfter = 24*60*60,
+        Dimensions = {100, 100, 128},
+        InvertDataAtZ = true
     },
     Transform = {
         Scale = {
@@ -36,13 +53,20 @@ local densityVolume = {
             Scale = sunRadius
         },
         Rotation = {
-            Type = "FixedRotation", --LuaRotation
---            XAxis = {-1.0, 0.0, 0.0}, 
---            YAxis = {0.0, -1.0, 0.0},
+            --Type = "StaticRotation", --LuaRotation
+            --Rotation = mirrorVolumeMatrix
+            Type = "FixedRotation",
+                XAxis = {-1.0, 0.0, 0.0},
+                YAxis = {0.0, 1.0, 0.0},
+                ZAxis = {0.0, 0.0, -1.0}
 
-            XAxis = {0.0, 1.0, 0.0},
-            YAxis = {1.0, 0.0, 0.0},
-            ZAxis = {0.0, 0.0, -1.0}
+            --XAxis = {1.0, 0.0, 0.0},
+            --YAxis = {0.0, 1.0, 0.0},
+            --ZAxis = {0.0, 0.0, -1.0}
+
+            --XAxis = {1.0, 0.0, 0.0},
+            --YAxis = {0.0, 1.0, 0.0},
+            --ZAxis = {0.0, 0.0, -1.0}
 
             --Script = asset.localResource("kernels/carringtonRotation.lua")
         }       

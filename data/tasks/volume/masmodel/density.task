@@ -868,10 +868,10 @@ local switch = {
   end
 }
 
-local length = 60  
+local length = 10  
 local tasks = {}
 
-for i=60,length do
+for i=10,length do
 
   --if i == 102 or i == 104 or i == 105 or i == 106 or i == 107 or i == 108 or i == 114 or i == 116 then
     local f = switch[i]
@@ -886,15 +886,15 @@ for i=60,length do
         Input = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_CDF/mas_merged_step_" .. i .. ".cdf",
         Dimensions = {100, 100, 128},
         Time = timeVariable,
-         MaxValue=1,  -- make sure this works
-         MinValue=0,  -- if it is suppost to be 0 and 1
-         Opacity = 0.3, -- same heres
+        MaxValue=1,  -- make sure this works
+        MinValue=0,  -- if it is suppost to be 0 and 1
+        Opacity = 0.3, -- same heres
         VariableVector = "ur uphi utheta",
         InnerRadialLimit = 1.75,
-        LowerDomainBound = {1, -90, 0}, -- is this correct?
-        UpperDomainBound = {15, 90, 360},
-        RawVolumeOutput = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_raw_TestA/mas_merged_step_" .. i .. ".rawvolume",
-        DictionaryOutput = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_raw_TestA/mas_merged_step_" .. i .. ".dictionary"--,
+        --LowerDomainBound = {1, -90, 0}, -- is this correct?
+        --UpperDomainBound = {15, 90, 360},
+        RawVolumeOutput = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_raw_TestB/mas_merged_step_" .. i .. ".rawvolume",
+        DictionaryOutput = "C:/Users/elono/Documents/OpenSpace/data/bastille_density_raw_TestB/mas_merged_step_" .. i .. ".dictionary"--,
         --VisUnit="amu/cm^3"
     }
   --end

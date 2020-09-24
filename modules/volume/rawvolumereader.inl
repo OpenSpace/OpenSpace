@@ -24,6 +24,8 @@
 
 #include <ghoul/misc/exception.h>
 #include <fstream>
+#include <ghoul/logging/logmanager.h>
+
 
 namespace openspace::volume {
 
@@ -80,9 +82,12 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
 
 
 template <typename VoxelType>
-std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
+std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
     glm::uvec3 dims = dimensions();
     std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
+        dims
+    );
+    std::unique_ptr<RawVolume<VoxelType>> newVolume = std::make_unique<RawVolume<VoxelType>>(
         dims
     );
 
@@ -99,12 +104,29 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
                     sizeof(VoxelType);
 
     file.read(buffer, length);
-
+    
     if (file.fail()) {
         throw ghoul::RuntimeError("Error reading volume file");
     }
+    
+    if (invertZ) {
+        for (int i = 0; i < volume->nCells(); ++i) {
+            const glm::uvec3& coords = volume->indexToCoords(i);
+            glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
 
-    return volume;
+            size_t newIndex = volume->coordsToIndex(newcoords);
+            size_t oldIndex = volume->coordsToIndex(coords);
+
+            newVolume->set(newcoords, volume->get(coords));
+        }
+    }
+    else {
+        return volume;
+    }
+
+
+
+    return newVolume;
 }
 
 } // namespace openspace::volume

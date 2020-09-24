@@ -59,6 +59,7 @@ namespace {
     const char* KeyClipPlanes = "ClipPlanes";
     const char* KeySecondsBefore = "SecondsBefore";
     const char* KeySecondsAfter = "SecondsAfter";
+    const char* KeyInvertDataAtZ = "InvertDataAtZ";
 
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
@@ -190,6 +191,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
+    , _invertDataAtZ(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -222,6 +224,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
     }
     _secondsAfter = dictionary.value<float>(KeySecondsAfter);
+    _invertDataAtZ = dictionary.value<bool>(KeyInvertDataAtZ);
 
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
@@ -269,7 +272,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
             _sourceDirectory, t.baseName
         ) + ".rawvolume";
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
-        t.rawVolume = reader.read();
+        t.rawVolume = reader.read(_invertDataAtZ);
 
         float min = t.metadata.minValue;
         float diff = t.metadata.maxValue - min;

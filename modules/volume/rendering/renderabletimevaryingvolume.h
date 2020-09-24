@@ -103,6 +103,7 @@ private:
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
+    bool _invertDataAtZ;
 
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
