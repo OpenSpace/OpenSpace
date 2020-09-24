@@ -43,6 +43,7 @@ struct Configuration {
     Configuration& operator=(Configuration&&) = default;
 
     std::string windowConfiguration = "${CONFIG}/single.xml";
+    std::string sgctConfigNameInitialized;
     std::string asset;
     std::string profile;
     std::vector<std::string> globalCustomizationScripts;

@@ -8,8 +8,9 @@
 #include <sstream>
 #include <iostream>
 
-LauncherWindow::LauncherWindow(std::string basePath, std::string profileName,
-                               QWidget *parent)
+LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
+                               std::string profileName, bool sgctConfigEnabled,
+                               std::string sgctConfigName, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::LauncherWindow)
     , _fileAccess_profiles(".profile", {"./"}, true, false)
@@ -17,6 +18,8 @@ LauncherWindow::LauncherWindow(std::string basePath, std::string profileName,
     , _filesystemAccess(".asset", {"scene", "global", "customization", "examples"},
                         true, true)
     , _basePath(QString::fromUtf8(basePath.c_str()))
+    , _profileChangeAllowed(profileEnabled)
+    , _sgctConfigChangeAllowed(sgctConfigEnabled)
 {
     ui->setupUi(this);
     QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
@@ -28,7 +31,10 @@ LauncherWindow::LauncherWindow(std::string basePath, std::string profileName,
     _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
         QString(basePath.c_str()) + "/data/assets");
     populateProfilesList(QString(profileName.c_str()));
-    populateWindowConfigsList();
+    ui->comboBoxProfiles->setDisabled(!_profileChangeAllowed);
+    populateWindowConfigsList(QString(sgctConfigName.c_str()));
+    ui->comboBoxWindowConfigs->setDisabled(!_sgctConfigChangeAllowed);
+    _fullyConfiguredViaCliArgs = (!profileEnabled && !sgctConfigEnabled);
 }
 
 void LauncherWindow::populateProfilesList(QString preset) {
@@ -53,7 +59,7 @@ void LauncherWindow::populateProfilesList(QString preset) {
     }
 }
 
-void LauncherWindow::populateWindowConfigsList() {
+void LauncherWindow::populateWindowConfigsList(QString preset) {
     std::string reportConfigs = _fileAccess_winConfigs.useQtFileSystemModelToTraverseDir(
         _basePath + "/config");
     std::stringstream instream(reportConfigs);
@@ -63,6 +69,17 @@ void LauncherWindow::populateWindowConfigsList() {
         windowConfigsListLine << iline.c_str();
     }
     ui->comboBoxWindowConfigs->addItems(windowConfigsListLine);
+    if (preset.length() > 0) {
+        int presetMatchIdx = ui->comboBoxWindowConfigs->findText(preset);
+        if (presetMatchIdx != -1) {
+            ui->comboBoxWindowConfigs->setCurrentIndex(presetMatchIdx);
+        }
+        else {
+            ui->comboBoxWindowConfigs->addItem(preset);
+            ui->comboBoxWindowConfigs->setCurrentIndex(
+                ui->comboBoxWindowConfigs->count() - 1);
+        }
+    }
 }
 
 void LauncherWindow::openWindow_new() {
@@ -205,8 +222,16 @@ bool LauncherWindow::wasLaunchSelected() {
     return _launch;
 }
 
+bool LauncherWindow::isFullyConfiguredFromCliArgs() {
+    return _fullyConfiguredViaCliArgs;
+}
+
 std::string LauncherWindow::selectedProfile() {
     return ui->comboBoxProfiles->currentText().toUtf8().constData();
+}
+
+std::string LauncherWindow::selectedWindowConfig() {
+    return ui->comboBoxWindowConfigs->currentText().toUtf8().constData();
 }
 
 void LauncherWindow::startOpenSpace() {

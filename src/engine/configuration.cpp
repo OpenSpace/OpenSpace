@@ -90,6 +90,8 @@ namespace {
     constexpr const char* KeyShowProgressbar = "ShowProgressbar";
     constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
 
+    constexpr const char* KeySgctConfigNameInitialized = "sgctconfiginitializeString";
+
     template <typename T>
     void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         using namespace openspace::configuration;
@@ -304,6 +306,8 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyModuleConfigurations, c.moduleConfigurations);
     getValue(s, KeyOpenGLDebugContext, c.openGLDebugContext);
     getValue(s, KeyHttpProxy, c.httpProxy);
+
+    getValue(s, KeySgctConfigNameInitialized, c.sgctConfigNameInitialized);
 }
 
 std::string findConfiguration(const std::string& filename) {

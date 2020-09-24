@@ -35,7 +35,7 @@ documentation::Documentation Configuration::Documentation = {
         {
             KeySGCTConfig,
             new StringAnnotationVerifier("A valid SGCT configuration file"),
-            Optional::No,
+            Optional::Yes,
             "The SGCT configuration file that determines the window and view frustum "
             "settings that are being used when OpenSpace is started."
         },

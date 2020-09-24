@@ -21,15 +21,17 @@ public slots:
     void startOpenSpace();
 
 public:
-    LauncherWindow(std::string basePath, std::string profileName,
-        QWidget *parent = nullptr);
+    LauncherWindow(std::string basePath, bool profileEnabled, std::string profileName,
+        bool sgctConfigEnabled, std::string sgctConfigName, QWidget *parent = nullptr);
     ~LauncherWindow();
     bool wasLaunchSelected();
+    bool isFullyConfiguredFromCliArgs();
     std::string selectedProfile();
+    std::string selectedWindowConfig();
 
 private:
     void populateProfilesList(QString preset);
-    void populateWindowConfigsList();
+    void populateWindowConfigsList(QString preset);
     bool loadProfileFromFile(openspace::Profile*& p, std::string filename);
     void saveProfileToFile(const std::string& path, openspace::Profile* p);
     void displayErrorDialog(std::string msg);
@@ -43,5 +45,8 @@ private:
     std::string _reportAssetsInFilesystem;
     QString _basePath;
     bool _launch = false;
+    bool _fullyConfiguredViaCliArgs = false;
+    bool _profileChangeAllowed = true;
+    bool _sgctConfigChangeAllowed = true;
 };
 #endif // LAUNCHERWINDOW_H
