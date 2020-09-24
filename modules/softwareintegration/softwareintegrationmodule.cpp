@@ -27,28 +27,14 @@
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/query/query.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
-#include <ghoul/io/socket/tcpsocket.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
 
-#include <functional>
 #include <iomanip>
-#include <sstream>
 
 using namespace std::string_literals;
 
@@ -66,6 +52,7 @@ namespace openspace {
 
         fRenderable->registerClass<RenderablePointsCloud>("RenderablePointsCloud");
 
+        // Open port
         start(4700);
     }
 
@@ -84,6 +71,21 @@ namespace openspace {
     void SoftwareIntegrationModule::stop() {
         _shouldStop = true;
         _socketServer.close();
+    }
+
+    bool SoftwareIntegrationModule::isConnected(const Peer& peer) const {
+        return peer.status != SoftwareConnection::Status::Connecting &&
+            peer.status != SoftwareConnection::Status::Disconnected;
+    }
+
+    void SoftwareIntegrationModule::disconnect(Peer& peer) {
+        if (isConnected(peer)) {
+            _nConnections = nConnections() - 1;
+        }
+
+        peer.connection.disconnect();
+        peer.thread.join();
+        _peers.erase(peer.id);
     }
 
     void SoftwareIntegrationModule::handleNewPeers() {
@@ -105,6 +107,13 @@ namespace openspace {
             it.first->second->thread = std::thread([this, id]() {
                 handlePeer(id);
             });
+        }
+    }
+
+    void SoftwareIntegrationModule::eventLoop() {
+        while (!_shouldStop) {
+            PeerMessage pm = _incomingMessages.pop();
+            handlePeerMessage(std::move(pm));
         }
     }
 
@@ -144,84 +153,12 @@ namespace openspace {
         }
     }
 
-    void SoftwareIntegrationModule::eventLoop() {
-        while (!_shouldStop) {
-            PeerMessage pm = _incomingMessages.pop();
-            handlePeerMessage(std::move(pm));
-        }
-    }
-
-    void SoftwareIntegrationModule::handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer) {
-
-        const Renderable* myRenderable = renderable(identifier);
-        properties::Property* colorProperty = myRenderable->property("Color");
-        properties::Property* opacityProperty = myRenderable->property("Opacity");
-        properties::Property* sizeProperty = myRenderable->property("Size");
-
-        // Update color of renderable
-        auto updateColor = [colorProperty, identifier, peer]() {
-            std::string lengthOfIdentifier = std::to_string(identifier.length());
-            std::string propertyValue = colorProperty->getStringValue();
-            std::string lengthOfValue = std::to_string(propertyValue.length());
-            std::string messageType = "UPCO";
-            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
-
-            // Format length of subject to always be 4 digits
-            std::ostringstream os;
-            os << std::setfill('0') << std::setw(4) << subject.length();
-            std::string lengthOfSubject = os.str();
-
-            std::string message = messageType + lengthOfSubject + subject;
-            peer->connection.sendMessage(message);
-        };
-        colorProperty->onChange(updateColor);
-
-        // Update opacity of renderable
-        auto updateOpacity = [opacityProperty, identifier, peer]() {
-            std::string lengthOfIdentifier = std::to_string(identifier.length());
-            std::string propertyValue = opacityProperty->getStringValue();
-            std::string lengthOfValue = std::to_string(propertyValue.length());
-            std::string messageType = "UPOP";
-            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
-
-            LERROR(fmt::format("OPACITY MESSAGE: {}", propertyValue));
-            // Format length of subject to always be 4 digits
-            std::ostringstream os;
-            os << std::setfill('0') << std::setw(4) << subject.length();
-            std::string lengthOfSubject = os.str();
-
-            std::string message = messageType + lengthOfSubject + subject;
-            LERROR(fmt::format("OPACITY MESSAGE: {}", message));
-            peer->connection.sendMessage(message);
-            };
-        opacityProperty->onChange(updateOpacity);
-
-        // Update size of renderable
-        auto updateSize = [sizeProperty, identifier, peer]() {
-            std::string lengthOfIdentifier = std::to_string(identifier.length());
-            std::string propertyValue = sizeProperty->getStringValue();
-            std::string lengthOfValue = std::to_string(propertyValue.length());
-            std::string messageType = "UPSI";
-            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
-
-            // Format length of subject to always be 4 digits
-            std::ostringstream os;
-            os << std::setfill('0') << std::setw(4) << subject.length();
-            std::string lengthOfSubject = os.str();
-
-            std::string message = messageType + lengthOfSubject + subject;
-            peer->connection.sendMessage(message);
-            };
-        sizeProperty->onChange(updateSize);
-    }
-
     void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         const size_t peerId = peerMessage.peerId;
         auto it = _peers.find(peerId);
         if (it == _peers.end()) {
             return;
         }
-
         std::shared_ptr<Peer>& peer = it->second;
 
         const SoftwareConnection::MessageType messageType = peerMessage.message.type;
@@ -278,18 +215,16 @@ namespace openspace {
             }
 
             handleProperties(identifier, peer);
-
             break;
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
-            LERROR(fmt::format("Identifier: {}", identifier));
+            LINFO(fmt::format("Scengraph {} removed.", identifier));
 
             openspace::global::scriptEngine.queueScript(
                 "openspace.removeSceneGraphNode('" + identifier + "');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
-            
             break;
         }
         case SoftwareConnection::MessageType::Color: {
@@ -297,8 +232,8 @@ namespace openspace {
             glm::vec3 color = readColor(message);
 
             // Update color of renderable
-            const Renderable* myrenderable = renderable(identifier);
-            properties::Property* colorProperty = myrenderable->property("Color");
+            const Renderable* myRenderable = renderable(identifier);
+            properties::Property* colorProperty = myRenderable->property("Color");
             colorProperty->set(color); 
             break;
         }
@@ -307,8 +242,8 @@ namespace openspace {
             float opacity = readFloatValue(message);
 
             // Update opacity of renderable
-            const Renderable* myrenderable = renderable(identifier);
-            properties::Property* opacityProperty = myrenderable->property("Opacity");
+            const Renderable* myRenderable = renderable(identifier);
+            properties::Property* opacityProperty = myRenderable->property("Opacity");
             opacityProperty->set(opacity);
             break;
         }
@@ -317,9 +252,23 @@ namespace openspace {
             float size = readFloatValue(message);
 
             // Update size of renderable
-            const Renderable* myrenderable = renderable(identifier);
-            properties::Property* sizeProperty = myrenderable->property("Size");
+            const Renderable* myRenderable = renderable(identifier);
+            properties::Property* sizeProperty = myRenderable->property("Size");
             sizeProperty->set(size);
+            break;
+        }
+        case SoftwareConnection::MessageType::Visibility: {
+            std::string identifier = readIdentifier(message);
+            std::string visibility;
+            visibility.push_back(message[messageOffset]);
+
+            // Toggle visibility of renderable
+            const Renderable* myRenderable = renderable(identifier);
+            properties::Property* visibilityProperty = myRenderable->property("ToggleVisibility");
+            if(visibility == "F")
+                visibilityProperty->set(false);
+            else
+                visibilityProperty->set(true);
             break;
         }
         case SoftwareConnection::MessageType::Disconnection: {
@@ -334,33 +283,97 @@ namespace openspace {
         }
     }
 
-    std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message) {
+    void SoftwareIntegrationModule::handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer) {
+        const Renderable* myRenderable = renderable(identifier);
+        properties::Property* colorProperty = myRenderable->property("Color");
+        properties::Property* opacityProperty = myRenderable->property("Opacity");
+        properties::Property* sizeProperty = myRenderable->property("Size");
+        properties::Property* visibilityProperty = myRenderable->property("ToggleVisibility");
 
-        std::string length;
-        length.push_back(message[0]);
-        length.push_back(message[1]);
+        // Update color of renderable
+        auto updateColor = [colorProperty, identifier, peer]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string propertyValue = colorProperty->getStringValue();
+            std::string lengthOfValue = std::to_string(propertyValue.length());
+            std::string messageType = "UPCO";
+            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
 
-        int lengthOfIdentifier = stoi(length);
-        int counter = 0;
-        messageOffset = 2;
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
 
-        std::string identifier;
-        while (counter != lengthOfIdentifier)
-        {
-            identifier.push_back(message[messageOffset]);
-            messageOffset++;
-            counter++;
-        }
+            std::string message = messageType + lengthOfSubject + subject;
+            peer->connection.sendMessage(message);
+        };
+        colorProperty->onChange(updateColor);
 
-        return identifier;
+        // Update opacity of renderable
+        auto updateOpacity = [opacityProperty, identifier, peer]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string propertyValue = opacityProperty->getStringValue();
+            std::string lengthOfValue = std::to_string(propertyValue.length());
+            std::string messageType = "UPOP";
+            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
+
+            std::string message = messageType + lengthOfSubject + subject;
+            peer->connection.sendMessage(message);
+        };
+        opacityProperty->onChange(updateOpacity);
+
+        // Update size of renderable
+        auto updateSize = [sizeProperty, identifier, peer]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string propertyValue = sizeProperty->getStringValue();
+            std::string lengthOfValue = std::to_string(propertyValue.length());
+            std::string messageType = "UPSI";
+            std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
+
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
+
+            std::string message = messageType + lengthOfSubject + subject;
+            peer->connection.sendMessage(message);
+        };
+        sizeProperty->onChange(updateSize);
+
+        // Toggle visibility of renderable
+        auto toggleVisibility = [visibilityProperty, identifier, peer]() {
+            std::string lengthOfIdentifier = std::to_string(identifier.length());
+            std::string messageType = "TOVI";
+
+            std::string propertyValue;
+            if (visibilityProperty->getStringValue() == "false")
+                propertyValue = "F";
+            else
+                propertyValue = "T";
+
+            std::string subject = lengthOfIdentifier + identifier + propertyValue;
+            // We don't need a lengthOfValue here because it will always be 1 character 
+
+            // Format length of subject to always be 4 digits
+            std::ostringstream os;
+            os << std::setfill('0') << std::setw(4) << subject.length();
+            std::string lengthOfSubject = os.str();
+
+            std::string message = messageType + lengthOfSubject + subject;
+            peer->connection.sendMessage(message);
+        };
+        visibilityProperty->onChange(toggleVisibility);
     }
 
     // Read size value or opacity value
     float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
-
         std::string length;
         length.push_back(message[messageOffset]);
-        messageOffset += 1;
+        messageOffset++;
 
         int lengthOfValue = stoi(length);
         std::string value;
@@ -376,61 +389,33 @@ namespace openspace {
         return floatValue;
     }
 
-    glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
+    std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message) {
+        std::string length;
+        length.push_back(message[0]);
+        length.push_back(message[1]);
 
-        std::string lengthOfColor; // Not used for now, but sent in message
-        lengthOfColor.push_back(message[messageOffset]);
-        lengthOfColor.push_back(message[messageOffset + 1]);
-        messageOffset += 2;
+        int lengthOfIdentifier = stoi(length);
+        int counter = 0;
+        messageOffset = 2; // Resets messageOffset
 
-        // Red
-        std::string red;
-        while (message[messageOffset] != ',')
+        std::string identifier;
+        while (counter != lengthOfIdentifier)
         {
-            if (message[messageOffset] == '(')
-                messageOffset++;
-            else {
-                red.push_back(message[messageOffset]);
-                messageOffset++;
-            }
-        }
-
-        // Green
-        std::string green;
-        messageOffset++;
-        while (message[messageOffset] != ',')
-        {
-            green.push_back(message[messageOffset]);
+            identifier.push_back(message[messageOffset]);
             messageOffset++;
+            counter++;
         }
 
-        // Blue
-        std::string blue;
-        messageOffset++;
-        while (message[messageOffset] != ')')
-        {
-            blue.push_back(message[messageOffset]);
-            messageOffset++;
-        }
-        messageOffset++;
-
-        // Convert rgb string to floats
-        float r = std::stof(red);
-        float g = std::stof(green);
-        float b = std::stof(blue);
-
-        glm::vec3 color(r, g, b);
-
-        return color;
+        return identifier;
     }
 
     // Read File path or GUI Name
     std::string SoftwareIntegrationModule::readString(std::vector<char>& message) {
-
         std::string length;
         length.push_back(message[messageOffset]);
-        length.push_back(message[messageOffset + 1]);
-        messageOffset += 2;
+        messageOffset++;
+        length.push_back(message[messageOffset]);
+        messageOffset++;
 
         int lengthOfString = stoi(length);
         std::string name;
@@ -445,19 +430,51 @@ namespace openspace {
         return name;
     }
 
-    bool SoftwareIntegrationModule::isConnected(const Peer& peer) const {
-        return peer.status != SoftwareConnection::Status::Connecting &&
-            peer.status != SoftwareConnection::Status::Disconnected;
-    }
+    glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
+        std::string lengthOfColor; // Not used for now, but sent in message
+        lengthOfColor.push_back(message[messageOffset]);
+        messageOffset++;
+        lengthOfColor.push_back(message[messageOffset]);
+        messageOffset++;
 
-    void SoftwareIntegrationModule::disconnect(Peer& peer) {
-        if (isConnected(peer)) {
-            _nConnections = nConnections() - 1;
+        // Color is sent in format (redValue, greenValue, blueValue)
+        // Therefor, we have to iterate through the message and ignore characters
+        // "( , )" and separate the values in the string
+        std::string red;
+        while (message[messageOffset] != ',')
+        {
+            if (message[messageOffset] == '(')
+                messageOffset++;
+            else {
+                red.push_back(message[messageOffset]);
+                messageOffset++;
+            }
         }
 
-        peer.connection.disconnect();
-        peer.thread.join();
-        _peers.erase(peer.id);
+        std::string green;
+        messageOffset++;
+        while (message[messageOffset] != ',')
+        {
+            green.push_back(message[messageOffset]);
+            messageOffset++;
+        }
+
+        std::string blue;
+        messageOffset++;
+        while (message[messageOffset] != ')')
+        {
+            blue.push_back(message[messageOffset]);
+            messageOffset++;
+        }
+        messageOffset++;
+
+        // Convert red, green, blue strings to floats
+        float r = std::stof(red);
+        float g = std::stof(green);
+        float b = std::stof(blue);
+        glm::vec3 color(r, g, b);
+
+        return color;
     }
 
     size_t SoftwareIntegrationModule::nConnections() const {
@@ -470,13 +487,5 @@ namespace openspace {
         };
     }
 
-    scripting::LuaLibrary SoftwareIntegrationModule::luaLibrary() const {
-        scripting::LuaLibrary res;
-        res.name = "softwareintegration";
-        res.scripts = {
-            absPath("${MODULE_SOFTWAREINTEGRATION}/scripts/network.lua")
-        };
-        return res;
-    }
 } // namespace openspace
 

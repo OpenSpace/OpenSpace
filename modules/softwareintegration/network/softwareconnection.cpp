@@ -25,10 +25,7 @@
 #include <modules/softwareintegration/network/softwareconnection.h>
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
-
-#include <iomanip>
 
 namespace {
     constexpr const char* _loggerCat = "SoftwareConnection";
@@ -44,7 +41,7 @@ namespace openspace {
     {}
 
     SoftwareConnection::SoftwareConnectionLostError::SoftwareConnectionLostError()
-        : ghoul::RuntimeError("Connection lost", "Connection")
+        : ghoul::RuntimeError("Software connection lost", "SoftwareConnection")
     {}
 
     SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
@@ -53,6 +50,14 @@ namespace openspace {
 
     bool SoftwareConnection::isConnectedOrConnecting() const {
         return _socket->isConnected() || _socket->isConnecting();
+    }
+
+    bool SoftwareConnection::sendMessage(std::string message) {
+        if (!_socket->put<char>(message.data(), message.size())) {
+            return false;
+        }
+
+        return true;
     }
 
     void SoftwareConnection::disconnect() {
@@ -125,20 +130,14 @@ namespace openspace {
             return Message(MessageType::Opacity, messageBuffer);
         else if( type == "UPSI")
             return Message(MessageType::Size, messageBuffer);
+        else if (type == "TOVI")
+            return Message(MessageType::Visibility, messageBuffer);
         else if (type == "DISC")
             return Message(MessageType::Disconnection, messageBuffer);
         else {
             LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));
             return Message(MessageType::Disconnection, messageBuffer);
         }
-    }
-
-    bool SoftwareConnection::sendMessage(std::string message) {
-        if (!_socket->put<char>(message.data(), message.size())) {
-            return false;
-        }
-
-        return true;
     }
 
 } // namespace openspace
