@@ -9,7 +9,7 @@ asset.require('util/default_dashboard')
 asset.require('scene/solarsystem/sun/magnetogram_textures')
 asset.require('scene/solarsystem/sun/streamnodeslegend')
 asset.require('scene/solarsystem/sun/streamnodescutplane')
-asset.require('scene/solarsystem/sun/streamnodes_sphere')
+--asset.require('scene/solarsystem/sun/streamnodes_sphere')
 --asset.require('examples/debugcoordinateaxes.asset')
 local suncameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Earthpos');
 local earthcameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/SunPos');
@@ -23,7 +23,7 @@ textureIndex = 2;
 Endtime1 = "2000 JUL 14 19:00:00";
 Starttimescript = "openspace.time.setTime('2000 JUL 14 08:38:27')";
 StarttimescriptSlowLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
-StarttimescriptFastLoop = "openspace.time.setTime('2000 JUL 14 11:00:00')";
+StarttimescriptFastLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
 Mercuryenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Opacity', 1.00000, 3)";
 Earthenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Opacity', 1.000000, 5)";
 Venusenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Opacity', 1.000000, 10)";
@@ -76,6 +76,7 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodes', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);" ..
 			--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlpha', 1.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 1.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 2.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000);" ..
@@ -206,9 +207,9 @@ local Keybindings = {
 		Command = 
 			"openspace.scriptScheduler.clear();" ..
 			"openspace.time.setDeltaTime(900);" ..
-			"openspace.time.setTime('2000-JUL-14 11:00:00.00');" ..
+			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
 			"openspace.scriptScheduler.loadScheduledScript(EndtimeFastLoop, StarttimescriptFastLoop);",
-		Documentation = "Fast loop: Starts from 11:00 and sets delta time to 15 min/ second (900 seconds/ second)",
+		Documentation = "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
 		Name = "Starts from 11:00 and sets delta time 15 min/ second",
 		GuiPath = "/CCMC/Nodes",
         Local = false
@@ -216,12 +217,39 @@ local Keybindings = {
     {
 		Key = "Shift+t",
 		Command = 
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {0.00000,0.000000}, 10);" ..
+			--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {0.00000,0.000000});" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000, 5);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.0, 10);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.0, 6);" ..
 			"openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 1.000000, 10);",	
 		Documentation = "transition from nodes to cutplane",
 		Name = "Transition nodevis to cutplane",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+      {
+		Key = "Shift+n",
+		Command = 
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.2, 10);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkipEarth', 11.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.maxNodeSize', 40.0000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', -1.00000);" ..
+			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true, 5);" ..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 17.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.renderingcircles', true);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.cameraPerspectiveEnabled', true);" ..
+			"openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);" ..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');" ..
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 17.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.20000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.minNodeSize', 3.00000);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 0.000000, 7);",	
+		Documentation = "transition from cutplane to nodes",
+		Name = "Transition cutplane to nodes",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
