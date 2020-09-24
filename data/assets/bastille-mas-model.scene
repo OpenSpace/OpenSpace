@@ -24,6 +24,7 @@ Endtime1 = "2000 JUL 14 19:00:00";
 Starttimescript = "openspace.time.setTime('2000 JUL 14 08:38:27')";
 StarttimescriptSlowLoop = "openspace.time.setTime('2000 JUL 14 10:03:00')";
 StarttimescriptFastLoop = "openspace.time.setTime('2000 JUL 14 11:00:00')";
+StarttimescriptLongLoop = "openspace.time.setTime('2000 JUL 14 09:30:00')";
 Mercuryenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Opacity', 1.00000, 3)";
 Earthenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Opacity', 1.000000, 5)";
 Venusenabledscript = "openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Opacity', 1.000000, 10)";
@@ -35,6 +36,8 @@ starttimeVenus = "2000 JUL 14 10:28:00";
 starttimeEarth = "2000 JUL 14 10:40:00";
 EndtimeSlowLoop = "2000 JUL 14 11:00:00";
 EndtimeFastLoop = "2000 JUL 14 19:00:00";
+EndtimeShortLoop = "2000 JUL 14 10:20:00";
+EndtimeLongLoop = "2000 JUL 14 11:50:00";
 
 --script20 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Sun";
 --script21 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Earth";
@@ -97,18 +100,6 @@ local Keybindings = {
 		    Name = "Reset Streamnodes Vis back",
 		    GuiPath = "/CCMC/Nodes",
 		    Local = false
-	},
-	{
-	    Key = "Shift+q",
-	    Command = 
-            "openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
-            "openspace.setPropertyValueSingle('Scene.Sun.Renderable.Enabled', false);" ..
-            "openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);" ..
-            "openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);",
-	    Documentation = "Resets the subscene for showing the Sun volume rendering + fieldlines",
-	    Name = "Reset MHD back",
-	    GuiPath = "/CCMC/MHD",
-	    Local = false
 	},
     {
         Key = "F6",
@@ -195,21 +186,45 @@ local Keybindings = {
 			"openspace.scriptScheduler.clear();" ..
 			"openspace.time.setDeltaTime(240);" ..
 			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
-			"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",
-		Documentation = "Slow loop: Restarts time and sets delta time to 4 min/ second (240 seconds/ second)",
-		Name = "Restart and sets delta time 4 min/ second",
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);",
+		Documentation = "New loop: Restarts time at 10:03 and stops at 10:20, sets delta time to 4 min/ second (240 seconds/ second)",
+		Name = "Loop 10:03 - 11:00, delta time 4 min/ second",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
     {
-		Key = "Shift+f",
+		Key = "Shift+n",
+		Command = 
+			"openspace.scriptScheduler.clear();" ..
+			"openspace.time.setDeltaTime(240);" ..
+			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);",
+		Documentation = "Fast loop: Starts from 11:00 and sets delta time to 15 min/ second (900 seconds/ second)",
+		Name = "Loop 10:03 - 10:20, delta time 4 min/ second",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+		Key = "Shift+y",
+		Command = 
+			"openspace.scriptScheduler.clear();" ..
+			"openspace.time.setDeltaTime(240);" ..
+			"openspace.time.setTime('2000-JUL-14 09:30:00.00');" ..
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeLongLoop, StarttimescriptLongLoop);",
+		Documentation = "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/ second (240 seconds/ second)",
+		Name = "Loop 09:30 - 11:50, delta time 4 min/ second",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+		Key = "Shift+v",
 		Command = 
 			"openspace.scriptScheduler.clear();" ..
 			"openspace.time.setDeltaTime(900);" ..
 			"openspace.time.setTime('2000-JUL-14 11:00:00.00');" ..
 			"openspace.scriptScheduler.loadScheduledScript(EndtimeFastLoop, StarttimescriptFastLoop);",
 		Documentation = "Fast loop: Starts from 11:00 and sets delta time to 15 min/ second (900 seconds/ second)",
-		Name = "Starts from 11:00 and sets delta time 15 min/ second",
+		Name = "Starts from 11:00, delta time 15 min/ second",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
@@ -253,8 +268,9 @@ local Keybindings = {
 		Key = "Shift+e",
 		Command =
 			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 2.350000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 3.000000);" ..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'focusPoint');" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', true);" ..
 
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);" ..
@@ -263,8 +279,8 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', true);",
 
-		Documentation = "Turn off sun glare, increase field line line width, change layer on the Sun to magnetogram 3",
-		Name = "First transition Emilie",
+		Documentation = "Turn off sun glare, turn on field lines, increase field lines line width, change layer on the Sun to magnetogram 3",
+		Name = "Third transition Emilie",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
@@ -273,6 +289,13 @@ local Keybindings = {
 		Command =
 			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);" ..
+
+			"openspace.setPropertyValueSingle('Scene.Cutplane2.Renderable.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.SpeedofLight.Renderable.Enabled', false);" ..
 
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);" ..
@@ -284,6 +307,27 @@ local Keybindings = {
 
 		Documentation = "Turn on sun glare, reset field line line width, change layer on the Sun to Orange",
 		Name = "First transition Emilie",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+		Key = "Shift+g",
+		Command =
+			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false);",
+		Documentation = "Turn on off glare",
+		Name = "Second transition Emilie",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+     {
+		Key = "Shift+h",
+		Command =
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', true);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 4.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 4.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 0.190000);",
+		Documentation = "Turn on off glare",
+		Name = "Second transition Emilie",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
