@@ -51,17 +51,16 @@ local Cutplane = {
 		},
 };
 
-local Cutplane2 = {
-    Identifier = "Cutplane2", 
-    Parent = transformssun.HNMReferenceFrame.Identifier,
-    --Parent = transforms.SunIAU.Identifier,
-    Transform = {
-	Rotation = {
-		Type = "StaticRotation",
-		--Rotation = {-1.511593, -3.141593, 2.178407}
-		Rotation = {-1.5707965, -3.141593, 0}
-		--Rotation = {3.3885050793930199676, 0.8200934716394847802, 2.178407}
-		}
+--local Cutplane2 = {
+  --  Identifier = "Cutplane2", 
+  --  Parent = transformssun.HNMReferenceFrame.Identifier,
+  --  Transform = {
+	--Rotation = {
+		--Type = "StaticRotation",
+		--Rotation = {-1.5707965, -3.141593, 0}
+		--}
+
+
 	--Rotation = {
 	  --  Type = "FixedRotation",
            -- XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
@@ -86,21 +85,20 @@ local Cutplane2 = {
         --    YAxis = {-0.6333808726275502, -0.7738402097265061, 0},
         --    ZAxis = {0.7738402097265061, -0.6333808726275502, 1}
 	--}
-},
-    Renderable = {
-	    Type = "RenderableTimeVaryingPlaneImageLocal",
-	    Size = 1.57*10^11,
-            --Size = 0.78*10^11,
-	    Enabled = true,
-	    Texture = TexturesPathMeridial,
-	    BlendMode = "Normal",
-	    Opacity = 1,
-	},
-    GUI = {
-        Name = "Cutplane Meridial",
-        Path = "/Solar System/Heliosphere"
-		},
-};
+--},
+    --Renderable = {
+	   -- Type = "RenderableTimeVaryingPlaneImageLocal",
+	   -- Size = 1.57*10^11,
+	   -- Enabled = true,
+	   -- Texture = TexturesPathMeridial,
+	   -- BlendMode = "Normal",
+	   -- Opacity = 1,
+	--},
+    --GUI = {
+        --Name = "Cutplane Meridial",
+       -- Path = "/Solar System/Heliosphere"
+		--},
+--};
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane, Cutplane2})
+--assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane, Cutplane2})
+assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane})

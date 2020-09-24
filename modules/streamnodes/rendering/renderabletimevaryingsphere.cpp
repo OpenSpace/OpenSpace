@@ -349,6 +349,7 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
             global::renderEngine.removeRenderProgram(p);
         }
     );
+    _textureFiles.clear();
     _shader = nullptr;
 }
 

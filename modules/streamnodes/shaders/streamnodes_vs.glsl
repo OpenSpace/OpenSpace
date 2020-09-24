@@ -324,7 +324,7 @@ void main() {
     // Checking if we should render the vertex dependent on the vertexindex, 
     // by using modulus.
     
-    if(CheckvertexIndex() || distance(earthPos, in_position) < distanceThreshold){
+    if(CheckvertexIndex() || distance(earthPos, in_position) < distanceThreshold * AUtoMeter){
     //Filtering by radius and z-axis
     if(rValue > filterLower && rValue < filterUpper){ //if(rValue > filterLower){
         if(in_position.z > (domainLimZ.x * AUtoMeter)  && in_position.z < (domainLimZ.y * AUtoMeter)){
