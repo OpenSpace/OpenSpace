@@ -82,8 +82,8 @@ namespace openspace {
 
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
-        GLuint _vaoID = 0;
-        GLuint _vBufferID = 0;
+        GLuint _vertexArrayObjectID = 0;
+        GLuint _vertexBufferObjectID = 0;
     };
 
 }// namespace openspace

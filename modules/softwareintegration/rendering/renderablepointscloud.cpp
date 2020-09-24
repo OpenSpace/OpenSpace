@@ -116,7 +116,7 @@ namespace openspace {
             glm::vec3(0.f),
             glm::vec3(1.f)
         )
-        , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+        , _opacity(OpacityInfo, 0.5f, 0.f, 1.f)
         , _size(SizeInfo, 1.f, 0.f, 150.f)
         , _toggleVisibility(ToggleVisibilityInfo, true)
     {
@@ -161,8 +161,8 @@ namespace openspace {
     }
 
     void RenderablePointsCloud::initialize() {
-        bool success = loadData();
-        if (!success) {
+        bool isSuccessful = loadData();
+        if (!isSuccessful) {
             throw ghoul::RuntimeError("Error loading data");
         }
     }
@@ -176,11 +176,11 @@ namespace openspace {
     }
 
     void RenderablePointsCloud::deinitializeGL() {
-        glDeleteVertexArrays(1, &_vaoID);
-        _vaoID = 0;
+        glDeleteVertexArrays(1, &_vertexArrayObjectID);
+        _vertexArrayObjectID = 0;
 
-        glDeleteBuffers(1, &_vBufferID);
-        _vBufferID = 0;
+        glDeleteBuffers(1, &_vertexBufferObjectID);
+        _vertexBufferObjectID = 0;
 
         if (_shaderProgram) {
             global::renderEngine.removeRenderProgram(_shaderProgram.get());
@@ -218,7 +218,7 @@ namespace openspace {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
 
-            glBindVertexArray(_vaoID);
+            glBindVertexArray(_vertexArrayObjectID);
             const GLsizei nPoints = static_cast<GLsizei>(_fullData.size() / _nValuesPerPoints);
             glDrawArrays(GL_POINTS, 0, nPoints);
 
@@ -241,17 +241,17 @@ namespace openspace {
 
             int size = static_cast<int>(_slicedData.size());
 
-            if (_vaoID == 0) {
-                glGenVertexArrays(1, &_vaoID);
-                LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vaoID));
+            if (_vertexArrayObjectID == 0) {
+                glGenVertexArrays(1, &_vertexArrayObjectID);
+                LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vertexArrayObjectID));
             }
-            if (_vBufferID == 0) {
-                glGenBuffers(1, &_vBufferID);
-                LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vBufferID));
+            if (_vertexBufferObjectID == 0) {
+                glGenBuffers(1, &_vertexBufferObjectID);
+                LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vertexBufferObjectID));
             }
 
-            glBindVertexArray(_vaoID);
-            glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+            glBindVertexArray(_vertexArrayObjectID);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferObjectID);
             glBufferData(
                 GL_ARRAY_BUFFER,
                 size * sizeof(float),
@@ -259,11 +259,11 @@ namespace openspace {
                 GL_STATIC_DRAW
             );
 
-            GLint positionAttrib = _shaderProgram->attributeLocation("in_position");
+            GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
 
-            glEnableVertexAttribArray(positionAttrib);
+            glEnableVertexAttribArray(positionAttribute);
             glVertexAttribPointer(
-                positionAttrib,
+                positionAttribute,
                 4,
                 GL_FLOAT,
                 GL_FALSE,
@@ -278,17 +278,17 @@ namespace openspace {
     }
 
     bool RenderablePointsCloud::loadData() {
-        bool success = true;
+        bool isSuccessful = true;
         _slicedData.clear();
         _fullData.clear();
 
-        success &= loadSpeckData();
+        isSuccessful &= loadSpeckData();
 
         if (!_hasSpeckFile) {
-            success = true;
+            isSuccessful = true;
         }
 
-        return success;
+        return isSuccessful;
     }
 
     bool RenderablePointsCloud::loadSpeckData() {
@@ -301,7 +301,7 @@ namespace openspace {
             return false;
         };
 
-        bool success = true;
+        bool isSuccessful = true;
         std::string cachedFile = FileSys.cacheManager()->cachedFilename(
             _speckFile,
             ghoul::filesystem::CacheManager::Persistent::Yes
@@ -314,8 +314,8 @@ namespace openspace {
                 cachedFile, _speckFile
             ));
 
-            success = loadCachedFile(cachedFile);
-            if (success) {
+            isSuccessful = loadCachedFile(cachedFile);
+            if (isSuccessful) {
                 return true;
             }
             else {
@@ -329,14 +329,14 @@ namespace openspace {
         }
         LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
 
-        success = readSpeckFile();
-        if (!success) {
+        isSuccessful = readSpeckFile();
+        if (!isSuccessful) {
             return false;
         }
 
         LINFO("Saving cache");
-        success &= saveCachedFile(cachedFile);
-        return success;
+        isSuccessful &= saveCachedFile(cachedFile);
+        return isSuccessful;
     }
 
     bool RenderablePointsCloud::readSpeckFile() {
@@ -452,8 +452,8 @@ namespace openspace {
             nValues * sizeof(_fullData[0])
         );
 
-        bool success = fileStream.good();
-        return success;
+        bool isSuccessful = fileStream.good();
+        return isSuccessful;
     }
 
     bool RenderablePointsCloud::saveCachedFile(const std::string& file) const {

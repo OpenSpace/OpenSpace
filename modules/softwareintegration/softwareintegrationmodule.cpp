@@ -184,12 +184,14 @@ namespace openspace {
             std::string messageType = "UPOP";
             std::string subject = lengthOfIdentifier + identifier + lengthOfValue + propertyValue;
 
+            LERROR(fmt::format("OPACITY MESSAGE: {}", propertyValue));
             // Format length of subject to always be 4 digits
             std::ostringstream os;
             os << std::setfill('0') << std::setw(4) << subject.length();
             std::string lengthOfSubject = os.str();
 
             std::string message = messageType + lengthOfSubject + subject;
+            LERROR(fmt::format("OPACITY MESSAGE: {}", message));
             peer->connection.sendMessage(message);
             };
         opacityProperty->onChange(updateOpacity);
