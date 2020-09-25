@@ -18,4 +18,14 @@ local VenusBarycenter = {
     }
 }
 
+asset.meta = {
+    Name = "Venus Transforms",
+    Version = "1.0",
+    Description = [[ Venus Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter })

@@ -92,18 +92,7 @@ std::string SceneLicenseWriter::generateJson() const {
     }
 
     json << "]";
-
-    std::string jsonString;
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
+    return json.str();
 }
 
 } // namespace openspace

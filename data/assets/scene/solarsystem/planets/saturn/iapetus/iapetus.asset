@@ -16,7 +16,7 @@ local Iapetus = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_IAPETUS",
             DestinationFrame = "GALACTIC"
         }
     },

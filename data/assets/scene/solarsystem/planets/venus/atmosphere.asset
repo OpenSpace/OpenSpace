@@ -61,6 +61,13 @@ local Atmosphere = {
     }
 }
 
-
+asset.meta = {
+    Name = "Venus Atmosphere",
+    Version = "1.0",
+    Description = [[ Atmosphere of Venus.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })

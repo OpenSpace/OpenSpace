@@ -19,3 +19,14 @@ asset.onInitialize(function ()
 end)
 
 asset.export("layer", layer)
+
+asset.meta = {
+    Name = "VIIRS SNPP (Temporal)",
+    Version = "1.0",
+    Description = [[ Temporal coverage: 11 November 2015 - Present. The imagery resolution
+    is 0.25 km, and the temporal resolution is daily.]],
+    Author = "NASA EOSDIS Global Imagery Browse Services",
+    URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
+        "eosdis-components/gibs",
+    License = "NASA"
+}

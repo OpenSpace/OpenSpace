@@ -2,8 +2,6 @@ local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 local labelsPath = asset.require('./earth_globelabels').LabelsPath
 
-asset.require('./trail')
-
 -- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
 local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
 
@@ -22,13 +20,11 @@ local Earth = {
                 -- All radius in meters
                 Radius = 696.3E6
             },
-            --Source2 = { Name = "Monolith", Radius = 0.01E6, },
             Caster1 = { 
                 Name = "Moon",
                 -- All radius in meters
                 Radius = 1.737E6
             }
-            --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
         },
         Labels = {
             Enable = false,
@@ -57,18 +53,6 @@ local Earth = {
 local EarthLabel = {
     Identifier = "EarthLabel",
     Parent = Earth.Identifier,
-    -- Transform = {
-    --     Translation = {
-    --         Type = "SpiceTranslation",
-    --         Target = "EARTH",
-    --         Observer = "EARTH BARYCENTER"
-    --     },
-    --     -- Rotation = {
-    --     --     Type = "SpiceRotation",
-    --     --     SourceFrame = "IAU_MOON",
-    --     --     DestinationFrame = "GALACTIC"
-    --     -- }
-    -- },
     Renderable = {
         Enabled = false,
         Type = "RenderableLabels",
@@ -93,7 +77,6 @@ local EarthLabel = {
         Path = "/Solar System/Planets/Earth"
     }
 }
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Earth, EarthLabel })
 

@@ -44,4 +44,16 @@ local TeslaPosition = {
     }
 }
 
+asset.meta = {
+    Name = "Tesla Roadster",
+    Version = "1.0",
+    Description = [[ Position and Trail of Tesla Roadster from 2018 FEB 8
+        to 2022 FEB 7 00:00:00. Data from JPL Horizons.]],
+    Author = "OpenSpace Team",
+    URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+    License = [[ JPL-authored documents are sponsored by NASA under Contract
+    NAS7-030010. All documents available from this server may be protected
+    under the U.S. and Foreign Copyright Laws.]]
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { TeslaPosition, TeslaRoadsterTrail })

@@ -36,3 +36,12 @@ end)
 asset.onDeinitialize(function ()
   scene_helper.unbindKeys(Keybindings)
 end)
+
+asset.meta = {
+    Name = "Constellation Image Keybinds",
+    Version = "1.0",
+    Description = "Keybinds for fading in and out the constellations",
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT License"
+}

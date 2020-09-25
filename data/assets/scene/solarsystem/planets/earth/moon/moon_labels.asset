@@ -4,4 +4,5 @@ local LabelsPath = asset.syncedResource({
     Identifier = "moon_labels",
     Version = 1
 })
+
 asset.export("LabelsPath", LabelsPath)

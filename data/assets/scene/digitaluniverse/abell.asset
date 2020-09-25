@@ -47,6 +47,23 @@ local object = {
     }
 }
 
-
+asset.meta = {
+    Name = "Abell Galaxy Clusters",
+    Version = "2.0",
+    Description = [[The Abell catalog includes all the nearby, and not so
+        nearby, galaxy clusters. The northern hemisphere survey, published in
+        1958, was compiled by George Abell (1927 - 1983) from the Palomar Sky
+        Survey plates. A subsequent southern hemisphere catalog was published
+        posthumously in 1989. Further analysis by Brent Tully determined their
+        distance and three-dimensional distribution. <br><br> Each point in this
+        data set represents a cluster of tens to hundreds (possibly even
+        thousands) of galaxies, similar to the Virgo or Fornax Clusters.
+        You will notice some points are assigned colors while most are gray.
+        The data set also has an arbitrary cut-off for completeness, resulting
+        in the rectangular shape of the data set.]],
+    Author = "AMNH Digital Universe",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "custom"
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

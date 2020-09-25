@@ -5,4 +5,13 @@ local TexturesPath = asset.syncedResource({
     Version = 4
 })
 
+asset.meta = {
+    Name = "Sun Textures",
+    Version = "4.0",
+    Description = [[ Default Sun textures]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
+
 asset.export("TexturesPath", TexturesPath)

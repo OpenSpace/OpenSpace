@@ -47,3 +47,13 @@ local UranusLabel = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus, UranusLabel })
+
+
+asset.meta = {
+    Name = "Uranus",
+    Version = "1.0",
+    Description = [[ Uranus globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

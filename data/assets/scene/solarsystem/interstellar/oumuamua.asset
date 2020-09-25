@@ -44,4 +44,14 @@ local OumuamuaPosition = {
     }
 }
 
+asset.meta = {
+    Name = "'Oumuamua",
+    Version = "1.0",
+    Description = [[ This asset contains the trail and position of 'Oumuamua from 2014
+        JAN 01 00:00:00 to 2023 JAN 01 00:00:00. Data from JPL Horizons']],
+    Author = "OpenSpace Team",
+    URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+    License = "NASA"
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { OumuamuaPosition, OumuamuaTrail })

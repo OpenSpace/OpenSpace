@@ -101,6 +101,6 @@ asset.meta = {
     Version = "1.0",
     Description = "Artistic images depicting the constellations",
     Author = "James Hedberg",
-    URL = "jameshedberg.com",
+    URL = "http://jameshedberg.com",
     License = "CC-BY"
 }

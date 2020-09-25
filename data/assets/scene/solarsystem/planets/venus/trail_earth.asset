@@ -4,15 +4,15 @@ asset.require("spice/base")
 
 
 
-local VenusTrail = {
-    Identifier = "VenusTrail",
+local VenusTrailEarth = {
+    Identifier = "VenusTrailEarth",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
             Type = "SpiceTranslation",
             Target = "VENUS BARYCENTER",
-            Observer = "SUN"
+            Observer = "EARTH"
         },
         Color = { 1.0, 0.5, 0.2 },
         Period = 224.695,
@@ -20,21 +20,21 @@ local VenusTrail = {
     },
     Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
     GUI = {
-        Name = "Venus Trail",
+        Name = "Venus Trail from Earth",
         Path = "/Solar System/Planets/Venus",
         Hidden = true
     }
 }
 
 asset.meta = {
-    Name = "Venus Trail",
+    Name = "Venus Trail from Earth",
     Version = "1.0",
-    Description = [[ Trail of Venus as observed by the Sun. Data from NASA Spice (see
-        base spice asset)]],
+    Description = [[ Trail of Venus as observed by the Earth. Data from NASA
+        SPICE (see base spice asset)]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license"
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { VenusTrail })
+assetHelper.registerSceneGraphNodesAndExport(asset, { VenusTrailEarth })

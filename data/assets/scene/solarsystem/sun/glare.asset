@@ -31,6 +31,14 @@ local SunGlare = {
     }
 }
 
+asset.meta = {
+    Name = "Sun Glare",
+    Version = "1.0",
+    Description = [[ Sun glare effect. Enabled by default instead of sun orb.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { SunGlare })

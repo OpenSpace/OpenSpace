@@ -8,3 +8,12 @@ local layer = {
 }
 
 asset.export("layer", layer)
+
+asset.meta = {
+    Name = "Blue Marble",
+    Version = "1.0",
+    Description = [[ Earth image from Blue Marble Next Generation ]],
+    Author = "OpenSpace Team",
+    URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+    License = "NASA"
+}

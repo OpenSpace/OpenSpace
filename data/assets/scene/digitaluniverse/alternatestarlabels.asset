@@ -29,6 +29,17 @@ local object = {
     }
 }
 
-
+asset.meta = {
+    Name = "Stars Labels - Alternate",
+    Version = "1.0",
+    Description = [[The main star data identify the accepted IAU star names for
+    the brightest stars. However, astronomers have long cataloged thousands of
+    stars beyond the brightest ones we see. Several attempts over thousands of
+    years to name all the visible stars have led to two main catalogs: Johann
+    Bayer's Catalog from 1603 and John Flamsteed's Catalog published in 1725.]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

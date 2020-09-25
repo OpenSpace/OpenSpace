@@ -41,6 +41,7 @@ namespace {
     constexpr const char* TypeLua = "lua";
     constexpr const char* TypeFactories = "factories";
     constexpr const char* TypeKeyboard = "keyboard";
+    constexpr const char* TypeAsset = "asset";
 } // namespace
 
 namespace openspace {
@@ -60,6 +61,9 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = json::parse(FactoryManager::ref().generateJson());
     }
     else if (requestedType == TypeKeyboard) {
+        response = json::parse(global::keybindingManager.generateJson());
+    }
+    else if (requestedType == TypeAsset) {
         response = json::parse(global::keybindingManager.generateJson());
     }
 

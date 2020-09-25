@@ -10,4 +10,13 @@ asset.onInitialize(function ()
     openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.meta = {
+    Name = "Uranus texture",
+    Version = "1.0",
+    Description = [[ Uranus image texture ]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
+
 asset.export("layer", layer)

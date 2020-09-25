@@ -23,6 +23,14 @@ local SunMarker = {
     }
 }
 
+asset.meta = {
+    Name = "Sun marker",
+    Version = "1.0",
+    Description = [[ Sun marker with name, sized for Solar System view]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { SunMarker })

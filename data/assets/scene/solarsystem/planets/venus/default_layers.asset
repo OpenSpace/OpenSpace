@@ -14,3 +14,13 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
     openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
 end)
+
+asset.meta = {
+    Name = "Default Venus Layers",
+    Version = "1.0",
+    Description = [[ Default Venus layers are: Venus Magellan Mosaic and Venus Magellan
+        DEM]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

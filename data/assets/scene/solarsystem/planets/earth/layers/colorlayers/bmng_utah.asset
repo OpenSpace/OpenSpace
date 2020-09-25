@@ -12,3 +12,13 @@ asset.onInitialize(function ()
 end)
 
 asset.export("layer", layer)
+
+asset.meta = {
+    Name = "Blue Marble Next Generation (Utah)",
+    Version = "1.0",
+    Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
+        Hosted at UU for US access]],
+    Author = "OpenSpace Team",
+    URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+    License = "NASA"
+}

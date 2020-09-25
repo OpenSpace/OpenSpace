@@ -16,4 +16,23 @@ asset.onInitialize(function ()
     openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
+asset.meta = {
+    Name = "Venus Magellan DEM",
+    Version = "1.0",
+    Description = [[ Elevation layer for Venus. The represents the version 2
+        (1997 release) of the Global Topographic Data Record (GTDR-SINUS.3;2).
+        The range to surface is derived by fitting altimeter echoes from the fan-beam
+        altimetry antenna as a function of time to Hagfors' radar backscatter model
+        templates. The ranges are subtracted from the spacecraft radial
+        coordinate (derived from Doppler tracking), yielding measurements of
+        planetary radius. The data are filtered to remove low-frequency errors in
+        the in-plane elements of each spacecraft orbit, and then originally re-sampled
+        into sinusoidal, Mercator, and north and south polar stereographic projections
+        at a resolution of 5 kilometers per pixel (4641 meters per pixel [m]).]],
+    Author = "USGS",
+    URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/RadarProperties" ..
+        "/Venus_Magellan_Topography_Global_4641m_v02",
+    License = "NASA/PDS"
+}
+
 asset.export("layer", layer)

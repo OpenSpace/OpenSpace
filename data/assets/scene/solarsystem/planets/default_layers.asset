@@ -26,3 +26,13 @@ asset.require('./saturn/titan/default_layers')
 asset.require('./uranus/default_layers')
 
 asset.require('./venus/default_layers')
+
+asset.meta = {
+    Name = "Default Solar System Layers",
+    Version = "1.0",
+    Description = [[ Adds default layers for all planets. Remove this asset and include
+        individual layers for planets to customize planet layers]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

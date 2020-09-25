@@ -48,3 +48,11 @@ local object = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+asset.meta = {
+    Name = "Brown Dwarfs",
+    Version = "5.3",
+    Description = [[Brown dwarf catalog, including L, T, and Y dwarfs.]],
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "custom"
+}

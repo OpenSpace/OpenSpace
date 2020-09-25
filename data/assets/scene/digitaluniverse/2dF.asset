@@ -39,6 +39,25 @@ local object = {
     }
 }
 
-
+asset.meta = {
+    Name = "2dF Galaxies",
+    Version = "2.0",
+    Description = [[ The Two-degree Field (2dF) Survey was a project designed
+        to map portions of the extragalactic universe. The 2dF instrument was
+        mounted on the 3.9-meter (12.8-foot) Anglo-Australian Telescope (AAT),
+        located 450 km (280 miles) northwest of Sydney. The telescope has a
+        two-degree field of view on the sky, enabling large parts of the sky to
+        be observed at one time. For each pointing of the telescope, the
+        instrument can acquire up to 400 spectra simultaneously via optical
+        fibers that feed into two spectrographs. Each spectrograph sees light
+        that is between 350 nm and 800 nm, spanning the visible spectrum.
+        <br><br> The 2dF survey has three main components: the North Galactic
+        Pole strip, the South Galactic Pole strip, and the random fields that
+        surround the South Galactic Pole strip. The galaxy survey is composed
+        of about 230,000 galaxies with brightness and redshift measurements. ]],
+    Author = "AMNH Digital Universe",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

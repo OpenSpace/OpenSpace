@@ -15,3 +15,13 @@ asset.onInitialize(function ()
 end)
 
 asset.export("layer", layer)
+
+asset.meta = {
+    Name = "Earth at Night 2012",
+    Version = "1.0",
+    Description = [[ The lights of cities and villages trace the outlines of civilization
+        in this global view. ]],
+    Author = "OpenSpace Team",
+    URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
+    License = "NASA"
+}
