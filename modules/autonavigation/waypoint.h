@@ -36,7 +36,7 @@ struct CameraPose {
     glm::dquat rotation;
 };
 
-// The waypoint node is the anchor or target node. 
+// The waypoint node is the anchor or target node.
 struct WaypointNodeDetails {
     WaypointNodeDetails() = default;
     WaypointNodeDetails(const std::string nodeIdentifier);
@@ -58,7 +58,7 @@ struct Waypoint {
 
     glm::dvec3 position() const;
     glm::dquat rotation() const;
-    SceneGraphNode* node() const; 
+    SceneGraphNode* node() const;
 
     CameraPose pose;
     WaypointNodeDetails nodeDetails;

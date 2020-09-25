@@ -30,7 +30,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <vector>
 #include <cmath>
-#include <algorithm> 
+#include <algorithm>
 
 namespace openspace::autonavigation::helpers {
 
@@ -48,7 +48,7 @@ namespace openspace::autonavigation::helpers {
 
 namespace openspace::autonavigation::interpolation {
 
-    // TODO: make all these into template functions. 
+    // TODO: make all these into template functions.
     // Alternatively, add cubicBezier interpolation in ghoul and only use
     // ghoul's interpolator methods
 
@@ -67,7 +67,7 @@ namespace openspace::autonavigation::interpolation {
     glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3>& points,
         const std::vector<double>& tKnots);
 
-    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points, 
+    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points,
         const std::vector<double>& tKnots);
 
 } // namespace

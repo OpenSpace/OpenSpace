@@ -60,7 +60,7 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
     }
 
     if (dictionary.hasValue<ghoul::Dictionary>(KeyStopDetails)) {
-        ghoul::Dictionary stopDictionary = 
+        ghoul::Dictionary stopDictionary =
             dictionary.value<ghoul::Dictionary>(KeyStopDetails);
 
         if (stopDictionary.hasValue<double>(KeyDuration)) {
@@ -75,7 +75,7 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
 
 Instruction::~Instruction() {}
 
-TargetNodeInstruction::TargetNodeInstruction(const ghoul::Dictionary& dictionary) 
+TargetNodeInstruction::TargetNodeInstruction(const ghoul::Dictionary& dictionary)
     : Instruction(dictionary)
 {
     if (!dictionary.hasValue<std::string>(KeyTarget)) {
@@ -108,7 +108,7 @@ std::vector<Waypoint> TargetNodeInstruction::getWaypoints() const {
 
     glm::dvec3 targetPos;
     if (position.has_value()) {
-        // note that the anchor and reference frame is our targetnode. 
+        // note that the anchor and reference frame is our targetnode.
         // The position in instruction is given is relative coordinates.
         targetPos = targetNode->worldPosition() +
             targetNode->worldRotationMatrix() * position.value();

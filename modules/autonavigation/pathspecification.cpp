@@ -53,11 +53,11 @@ PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
         "Path Specification"
     );
 
-    ghoul::Dictionary instructions = 
-        dictionary.value<ghoul::Dictionary>(KeyInstructions); 
+    ghoul::Dictionary instructions =
+        dictionary.value<ghoul::Dictionary>(KeyInstructions);
 
     for (size_t i = 1; i <= instructions.size(); ++i) {
-        ghoul::Dictionary insDict = 
+        ghoul::Dictionary insDict =
             instructions.value<ghoul::Dictionary>(std::to_string(i));
 
         if (!insDict.hasValue<std::string>(KeyType)) {
@@ -151,9 +151,9 @@ documentation::Documentation PathSpecification::Documentation() {
 }
 
 // create correct type of instruction and present and throw error with useful
-// error message if we failed. 
+// error message if we failed.
 void PathSpecification::tryReadInstruction(int index, std::string type,
-                                           ghoul::Dictionary& dictionary) 
+                                           ghoul::Dictionary& dictionary)
 {
     if (type == KeyTypeTargetNode) {
         try {
@@ -176,7 +176,7 @@ void PathSpecification::tryReadInstruction(int index, std::string type,
     }
     else {
         throw ghoul::RuntimeError(fmt::format(
-            "Failed reading instruction {}: Uknown instruction type '{}'", 
+            "Failed reading instruction {}: Uknown instruction type '{}'",
             index, type)
         );
     }

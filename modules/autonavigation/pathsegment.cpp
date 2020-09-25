@@ -43,8 +43,8 @@ namespace {
 
 namespace openspace::autonavigation {
 
-PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type, 
-						 std::optional<double> duration)
+PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
+                         std::optional<double> duration)
     : _start(start), _end(end), _curveType(type)
 {
     initCurve();
@@ -87,7 +87,7 @@ CameraPose PathSegment::traversePath(double dt) {
 
     AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    const int nrSteps = handler.nrSimulationStepsPerFrame(); 
+    const int nrSteps = handler.nrSimulationStepsPerFrame();
 
     // compute displacement along the path during this frame
     double displacement = 0.0;
@@ -100,11 +100,6 @@ CameraPose PathSegment::traversePath(double dt) {
 
     _traveledDistance += displacement;
     double relativeDisplacement = _traveledDistance / pathLength();
-
-    // TEST: 
-    //LINFO("-----------------------------------");
-    //LINFO(fmt::format("relativeDisplacement = {}", relativeDisplacement));
-    //LINFO(fmt::format("progressedTime = {}", _progressedTime));
 
     _progressedTime += dt;
 
@@ -134,7 +129,7 @@ CameraPose PathSegment::interpolatedPose(double u) const {
 void PathSegment::initCurve() {
     _curve.reset();
 
-    switch (_curveType) 
+    switch (_curveType)
     {
     case CurveType::AvoidCollision:
         _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
@@ -160,7 +155,7 @@ void PathSegment::initCurve() {
     case CurveType::Linear:
         _curve = std::make_unique<LinearCurve>(_start, _end);
         _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
-            _start.rotation(), 
+            _start.rotation(),
             _end.rotation()
         );
         _speedFunction = std::make_unique<QuinticDampenedSpeed>();

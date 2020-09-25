@@ -115,9 +115,9 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _defaultStopBehavior(DefaultStopBehaviorInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _relevantNodeTags(RelevantNodeTagsInfo)
-    , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.0f, -90.0f, 90.0f)
+    , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.f, -90.f, 90.f)
     , _nrSimulationSteps(NumberSimulationStepsInfo, 5, 2 , 10)
-    , _speedScale(SpeedScaleInfo, 1.0f, 0.01f, 2.0f) 
+    , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
 {
     addPropertySubOwner(_atNodeNavigator);
 
@@ -125,7 +125,7 @@ AutoNavigationHandler::AutoNavigationHandler()
         { CurveType::AvoidCollision, "AvoidCollision" },
         { CurveType::Bezier3, "Bezier3" },
         { CurveType::Linear, "Linear" },
-        { CurveType::ZoomOutOverview, "ZoomOutOverview"} 
+        { CurveType::ZoomOutOverview, "ZoomOutOverview"}
     });
     addProperty(_defaultCurveOption);
 
@@ -166,7 +166,7 @@ const SceneGraphNode* AutoNavigationHandler::anchor() const {
 
 bool AutoNavigationHandler::hasFinished() const {
     unsigned int lastIndex = (unsigned int)_pathSegments.size() - 1;
-    return _currentSegmentIndex > lastIndex; 
+    return _currentSegmentIndex > lastIndex;
 }
 
 const std::vector<SceneGraphNode*>& AutoNavigationHandler::relevantNodes() const {
@@ -188,7 +188,9 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
         // for testing, apply at node behavior when idle
         if (_applyStopBehaviorWhenIdle) {
             if (_atNodeNavigator.behavior() != _defaultStopBehavior.value()) {
-                _atNodeNavigator.setBehavior(AtNodeNavigator::Behavior(_defaultStopBehavior.value()));
+                _atNodeNavigator.setBehavior(
+                    AtNodeNavigator::Behavior(_defaultStopBehavior.value())
+                );
             }
             _atNodeNavigator.updateCamera(deltaTime);
         }
@@ -246,7 +248,7 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 
     if (spec.stopAtTargetsSpecified()) {
         _stopAtTargetsPerDefault = spec.stopAtTargets();
-        LINFO("Property for stop at targets per default was overridden by path specification.");    
+        LINFO("Property for stop at targets per default was overridden by path specification.");
     }
 
     const int nrInstructions = (int)spec.instructions()->size();
@@ -289,7 +291,7 @@ void AutoNavigationHandler::startPath() {
     }
 
     ghoul_assert(
-        _stops.size() == (_pathSegments.size() - 1), 
+        _stops.size() == (_pathSegments.size() - 1),
         "Must have exactly one stop entry between every segment."
     );
 
@@ -393,7 +395,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurveViewDirections(int nPerSe
             glm::dquat orientation = p->interpolatedPose(u).rotation;
             glm::dvec3 direction = glm::normalize(orientation * glm::dvec3(0.0, 0.0, -1.0));
             viewDirections.push_back(direction);
-        } 
+        }
         glm::dquat orientation = p->interpolatedPose(1.0).rotation;
         glm::dvec3 direction = glm::normalize(orientation * glm::dvec3(0.0, 0.0, -1.0));
         viewDirections.push_back(direction);
@@ -463,7 +465,7 @@ void AutoNavigationHandler::pauseAtTarget(int i) {
 
     bool hasDuration = _activeStop->duration.has_value();
 
-    std::string infoString = hasDuration ? 
+    std::string infoString = hasDuration ?
         fmt::format("{} seconds", _activeStop->duration.value()) : "until continued";
 
     LINFO(fmt::format("Paused path at target {} / {} ({})",
@@ -501,7 +503,8 @@ void AutoNavigationHandler::addSegment(Instruction* ins, int index) {
         }
         else {
             LWARNING(fmt::format(
-                "No path segment was created from instruction {}. No waypoints could be created.",
+                "No path segment was created from instruction {}. "
+                "No waypoints could be created.",
                 index
             ));
             return;
@@ -513,9 +516,9 @@ void AutoNavigationHandler::addSegment(Instruction* ins, int index) {
     }
 
     _pathSegments.push_back(std::make_unique<PathSegment>(
-        lastWayPoint(), 
+        lastWayPoint(),
         waypointToAdd,
-        CurveType(curveType), 
+        CurveType(curveType),
         ins->duration
     ));
 }
@@ -532,7 +535,7 @@ void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
         stopEntry.duration = ins->stopDuration;
 
         std::string anchorIdentifier = lastWayPoint().nodeDetails.identifier;
-        stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value()); 
+        stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value());
 
         if (ins->stopBehavior.has_value()) {
             std::string behaviorString = ins->stopBehavior.value();
@@ -544,8 +547,8 @@ void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
             using Option = properties::OptionProperty::Option;
             std::vector<Option> options = _defaultStopBehavior.options();
             std::vector<Option>::iterator foundIt = std::find_if(
-                options.begin(), 
-                options.end(), 
+                options.begin(),
+                options.end(),
                 [&](Option& o) { return o.description == behaviorString; }
             );
 
@@ -569,7 +572,7 @@ SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* 
     glm::dvec3 nodePosition = node->worldPosition();
     std::string nodeId = node->identifier();
 
-    const float proximityRadiusFactor = 3.0f;
+    const float proximityRadiusFactor = 3.f;
 
     for (SceneGraphNode* n : _relevantNodes) {
         if (n->identifier() == nodeId)
@@ -580,19 +583,19 @@ SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* 
         glm::dvec3 positionModelCoords = invModelTransform * glm::dvec4(nodePosition, 1.0);
 
         bool isClose = helpers::isPointInsideSphere(
-            positionModelCoords, 
-            glm::dvec3(0.0, 0.0, 0.0), 
+            positionModelCoords,
+            glm::dvec3(0.0, 0.0, 0.0),
             proximityRadius
         );
 
-        if (isClose) 
+        if (isClose)
             return n;
     }
 
     return nullptr;
 }
 
-// OBS! The desired default waypoint may vary between curve types. 
+// OBS! The desired default waypoint may vary between curve types.
 // TODO: let the curves update the default position if no exact position is required
 Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstruction* ins) {
     SceneGraphNode* targetNode = sceneGraphNode(ins->nodeIdentifier);
@@ -610,7 +613,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
         // If the node is close to another node in the scene, make sure that the
         // position is set to minimize risk of collision
         stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
-    } 
+    }
     else {
         // Go to a point that is being lit up by the sun, slightly offsetted from sun direction
         glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
@@ -618,7 +621,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
         glm::dvec3 targetToPrev = prevPos - nodePos;
         glm::dvec3 targetToSun = sunPos - nodePos;
         glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
-        const double angle = (double)glm::radians((-1.0f)*_defaultPositionOffsetAngle);
+        const double angle = (double)glm::radians((-1.f)*_defaultPositionOffsetAngle);
         glm::dquat offsetRotation = angleAxis(angle, axis);
 
         stepDirection = glm::normalize(offsetRotation * targetToSun);
@@ -647,12 +650,17 @@ std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
 
     const std::vector<std::string> relevantTags = _relevantNodeTags;
 
-    if (allNodes.empty() || relevantTags.empty()) 
+    if (allNodes.empty() || relevantTags.empty())
         return std::vector<SceneGraphNode*>{};
 
     auto isRelevant = [&](const SceneGraphNode* node) {
         const std::vector<std::string> tags = node->tags();
-        auto result = std::find_first_of(relevantTags.begin(), relevantTags.end(), tags.begin(), tags.end());
+        auto result = std::find_first_of(
+            relevantTags.begin(),
+            relevantTags.end(),
+            tags.begin(),
+            tags.end()
+        );
 
         // does not match any tags => not interesting
         if (result == relevantTags.end()) {
@@ -663,7 +671,12 @@ std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
     };
 
     std::vector<SceneGraphNode*> resultingNodes{};
-    std::copy_if(allNodes.begin(), allNodes.end(), std::back_inserter(resultingNodes), isRelevant);
+    std::copy_if(
+        allNodes.begin(),
+        allNodes.end(),
+        std::back_inserter(resultingNodes),
+        isRelevant
+    );
 
     return resultingNodes;
 }

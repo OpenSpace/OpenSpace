@@ -44,7 +44,7 @@ namespace {
 
 namespace openspace::autonavigation {
 
-// Go far out to get a view of both tagets, aimed to match lookAt orientation 
+// Go far out to get a view of both tagets, aimed to match lookAt orientation
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
     glm::dvec3 startNodePos = start.node()->worldPosition();
     glm::dvec3 endNodePos = end.node()->worldPosition();
@@ -70,11 +70,11 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
     // Zoom out
     if (startNode != endNode) {
-        // TODO: set a smarter orthogonal direction 
+        // TODO: set a smarter orthogonal direction
         glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
         glm::dvec3 orthogonalDirction = normalize(startNodeToStartPos - parallell);
-        
-        glm::dvec3 extraKnot = startNodePos + 0.5 * startNodeToEndNode 
+
+        glm::dvec3 extraKnot = startNodePos + 0.5 * startNodeToEndNode
             + 1.5 * glm::length(startNodeToEndNode) * orthogonalDirction;
 
         _points.push_back(extraKnot - 0.2 * startNodeToEndNode);

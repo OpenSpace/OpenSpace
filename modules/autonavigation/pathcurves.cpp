@@ -57,11 +57,11 @@ glm::dvec3 PathCurve::positionAt(double relativeLength) {
 // Returns curve parameter in range [0, 1]
 double PathCurve::curveParameter(double s) {
     if (s <= Epsilon) return 0.0;
-    if (s >= _totalLength) return 1.0; 
+    if (s >= _totalLength) return 1.0;
 
     unsigned int segmentIndex;
     for (segmentIndex = 1; segmentIndex < _nrSegments; ++segmentIndex) {
-        if (s <= _lengthSums[segmentIndex]) 
+        if (s <= _lengthSums[segmentIndex])
             break;
     }
 
@@ -73,22 +73,22 @@ double PathCurve::curveParameter(double s) {
     const double uMax = _parameterIntervals[segmentIndex];
     double u = uMin + (uMax - uMin) * (segmentS / segmentLength);
 
-    const int nrIterations = 40; 
+    const int nrIterations = 40;
 
     // initialize root bounding limits for bisection
     double lower = uMin;
     double upper = uMax;
 
     for (int i = 0; i < nrIterations; ++i) {
-        double F = arcLength(uMin, u) - segmentS; 
+        double F = arcLength(uMin, u) - segmentS;
 
         const double tolerance = 0.1; // meters. Note that distances are very large
         if (std::abs(F) <= tolerance) {
             return u;
         }
 
-        // generate a candidate for Newton's method        
-        double dfdu = approximatedDerivative(u, Epsilon); // > 0                            
+        // generate a candidate for Newton's method
+        double dfdu = approximatedDerivative(u, Epsilon); // > 0
         double uCandidate = u - F / dfdu;
 
         // update root-bounding interval and test candidate
@@ -96,7 +96,7 @@ double PathCurve::curveParameter(double s) {
             upper = u;
             u = (uCandidate <= lower) ? (upper + lower) / 2.0 : uCandidate;
         }
-        else { // F < 0 => lower <= u < candidate 
+        else { // F < 0 => lower <= u < candidate
             lower = u;
             u = (uCandidate >= upper) ? (upper + lower) / 2.0 : uCandidate;
         }

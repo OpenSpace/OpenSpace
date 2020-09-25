@@ -85,7 +85,7 @@ namespace openspace::autonavigation::luascriptfunctions {
 
         PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
 
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>(); 
+        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         handler.createPath(spec);
 
@@ -226,7 +226,7 @@ namespace openspace::autonavigation::luascriptfunctions {
             ghoul::lua::push(L, 3, v.y);
             lua_rawset(L, -4);
             ghoul::lua::push(L, 4, v.z);
-            lua_rawset(L, -4);            
+            lua_rawset(L, -4);
         };
 
         lua_newtable(L);

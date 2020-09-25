@@ -41,8 +41,8 @@ protected:
     // must be called by each subclass after initialization
     void initIntegratedSum();
 
-    // store the sum of the function over the duration of the segment, 
-    // so we don't need to recompue it every time we access the speed 
+    // store the sum of the function over the duration of the segment,
+    // so we don't need to recompue it every time we access the speed
     double _integratedSum = 0.0;
 };
 
@@ -50,7 +50,7 @@ class SexticDampenedSpeed : public SpeedFunction {
 public:
     SexticDampenedSpeed();
     double value(double t) const override;
-}; 
+};
 
 class QuinticDampenedSpeed : public SpeedFunction {
 public:

@@ -36,7 +36,7 @@ namespace openspace::autonavigation {
 
 class PathSegment {
 public:
-    PathSegment(Waypoint start, Waypoint end, CurveType type, 
+    PathSegment(Waypoint start, Waypoint end, CurveType type,
         std::optional<double> duration = std::nullopt);
 
     ~PathSegment() = default;
@@ -50,29 +50,29 @@ public:
     const double duration() const;
     const double pathLength() const;
 
-    const std::vector<glm::dvec3> getControlPoints() const; // TODO: remove this debugging function
+    const std::vector<glm::dvec3> getControlPoints() const; // debugging
 
     CameraPose traversePath(double dt);
     std::string getCurrentAnchor() const;
     bool hasReachedEnd() const;
 
     double speedAtTime(double time) const;
-    CameraPose interpolatedPose(double u) const; 
+    CameraPose interpolatedPose(double u) const;
 
-private: 
+private:
     void initCurve();
 
     Waypoint _start;
     Waypoint _end;
     double _duration;
-    CurveType _curveType; 
+    CurveType _curveType;
 
     std::unique_ptr<SpeedFunction> _speedFunction;
     std::unique_ptr<RotationInterpolator> _rotationInterpolator;
     std::unique_ptr<PathCurve> _curve;
 
     // Playback variables
-    double _traveledDistance = 0.0; 
+    double _traveledDistance = 0.0;
     double _progressedTime = 0.0; // Time since playback started
 };
 

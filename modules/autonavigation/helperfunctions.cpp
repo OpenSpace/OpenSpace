@@ -54,9 +54,9 @@ namespace openspace::autonavigation::helpers {
        p = p1 + mu2 (p2 - p1)
        Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
     */
-    bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 sc, double r, 
+    bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 sc, double r,
                                                          glm::dvec3& intersectionPoint)
-    {   
+    {
         long double a, b, c;
         glm::dvec3 dp = p2 - p1;
 
@@ -166,8 +166,8 @@ namespace openspace::autonavigation::interpolation {
     }
 
     // uniform if tKnots are equally spaced, or else non uniform
-    glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3>& points, 
-                                                  const std::vector<double>& tKnots) 
+    glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3>& points,
+                                                  const std::vector<double>& tKnots)
     {
         ghoul_assert(points.size() > 4, "Minimum of four control points needed for interpolation!");
         ghoul_assert((points.size() - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
@@ -193,7 +193,7 @@ namespace openspace::autonavigation::interpolation {
             points[idx + 2], points[idx + 3]);
     }
 
-    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points, 
+    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points,
                                              const std::vector<double>& tKnots)
     {
         ghoul_assert(points.size() == tKnots.size(), "Must have equal number of points and times!");

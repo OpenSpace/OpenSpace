@@ -61,7 +61,7 @@ protected:
     double arcLength(double limit = 1.0);
     double arcLength(double lowerLimit, double upperLimit);
 
-    std::vector<glm::dvec3> _points; 
+    std::vector<glm::dvec3> _points;
     unsigned int _nrSegments;
 
     std::vector<double> _parameterIntervals;

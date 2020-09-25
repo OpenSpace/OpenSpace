@@ -50,13 +50,13 @@ glm::dquat EasedSlerpInterpolator::interpolate(double u) {
     return glm::slerp(_start, _end, uScaled);
 }
 
-LookAtRotator::LookAtRotator(glm::dquat start, glm::dquat end, 
-                                       glm::dvec3 startLookAtPos, 
-                                       glm::dvec3 endLookAtPos, 
+LookAtRotator::LookAtRotator(glm::dquat start, glm::dquat end,
+                                       glm::dvec3 startLookAtPos,
+                                       glm::dvec3 endLookAtPos,
                                        PathCurve* path)
     : RotationInterpolator(start, end),
-    _startLookAtPos(startLookAtPos), 
-    _endLookAtPos(endLookAtPos), 
+    _startLookAtPos(startLookAtPos),
+    _endLookAtPos(endLookAtPos),
     _path(path)
 {}
 
@@ -116,7 +116,7 @@ glm::dquat LookAtInterpolator::interpolate(double u) {
     }
 
     // handle up vector
-    glm::dvec3 startUp = _start * glm::dvec3(0.0, 1.0, 0.0); 
+    glm::dvec3 startUp = _start * glm::dvec3(0.0, 1.0, 0.0);
     glm::dvec3 endUp = _end * glm::dvec3(0.0, 1.0, 0.0);
 
     double uUp = ghoul::cubicEaseInOut(u);

@@ -28,7 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/logging/logmanager.h> 
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "AutoNavigationModule";
@@ -43,7 +43,7 @@ namespace {
 
 namespace openspace {
 
-AutoNavigationModule::AutoNavigationModule() 
+AutoNavigationModule::AutoNavigationModule()
     : OpenSpaceModule(Name),
     _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
 {
@@ -99,21 +99,21 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             &autonavigation::luascriptfunctions::generatePath,
             {},
             "table",
-            "Generate the path as described by the lua table input argument. TODO: Describe how a path instruction is defined?. " 
+            "Generate the path as described by the lua table input argument. TODO: Describe how a path instruction is defined?. "
         },
         {
             "generatePathFromFile",
             &autonavigation::luascriptfunctions::generatePathFromFile,
             {},
             "string",
-            "Read an input file with lua instructions and use those to generate a camera path. TODO: Describe how a path instruction is defined?. " 
+            "Read an input file with lua instructions and use those to generate a camera path. TODO: Describe how a path instruction is defined?. "
         },
         {
             "getPathPositions",
             &autonavigation::luascriptfunctions::getPathPositions,
             {},
             "number",
-            "FOR DEBUG. Sample positions along the path. The input argument is the number of samples per path segment. " 
+            "FOR DEBUG. Sample positions along the path. The input argument is the number of samples per path segment. "
         },
         {
             "getPathOrientations",
@@ -137,15 +137,13 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             "FOR DEBUG. Get control point positions from all pathsegments"
         }
     };
-    return res;  
+    return res;
 }
 
 void AutoNavigationModule::internalInitialize(const ghoul::Dictionary&) {
     global::callback::preSync.emplace_back([this]() {
         _autoNavigationHandler.updateCamera(global::windowDelegate.deltaTime());
     });
-
-    // TODO: register other classes (that are Factory created) and used in this module, if any
 }
 
 } // namespace openspace

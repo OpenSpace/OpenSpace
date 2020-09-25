@@ -97,7 +97,7 @@ private:
     std::vector<StopDetails> _stops; // 1 between every segment
 
     AtNodeNavigator _atNodeNavigator; // responsible for navigation during stops
-    StopDetails* _activeStop = nullptr; 
+    StopDetails* _activeStop = nullptr;
     double _progressedTimeInStop = 0.0;
 
     bool _isPlaying = false;
@@ -110,7 +110,7 @@ private:
     properties::BoolProperty _stopAtTargetsPerDefault;
     properties::OptionProperty _defaultStopBehavior;
 
-    // for testing pause behaviors. 
+    // for testing pause behaviors.
     // TODO: remove later, if it causes problems with regular navigation
     properties::BoolProperty _applyStopBehaviorWhenIdle;
 
@@ -119,7 +119,7 @@ private:
     properties::FloatProperty _defaultPositionOffsetAngle;
     properties::IntProperty _nrSimulationSteps;
 
-    properties::FloatProperty _speedScale; 
+    properties::FloatProperty _speedScale;
 };
 
 } // namespace openspace::autonavigation
