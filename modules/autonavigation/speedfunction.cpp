@@ -26,6 +26,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/easing.h>
+#include <algorithm>
 
 namespace {
     constexpr const char* _loggerCat = "SpeedFunction";
