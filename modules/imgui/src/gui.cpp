@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -190,16 +189,13 @@ GUI::GUI()
 
 GUI::~GUI() {} // NOLINT
 
-void GUI::initialize() {
-
-}
+void GUI::initialize() {}
 
 void GUI::deinitialize() {
     ImGui::Shutdown();
 
-    int nWindows = global::windowDelegate.nWindows();
-    for (int i = 0; i < nWindows; ++i) {
-        ImGui::DestroyContext(_contexts[i]);
+    for (ImGuiContext* ctx : _contexts) {
+        ImGui::DestroyContext(ctx);
     }
 
     for (GuiComponent* comp : _components) {
@@ -446,12 +442,6 @@ void GUI::endFrame() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    _performance.setEnabled(global::performanceManager.isEnabled());
-
-    if (_performance.isEnabled()) {
-        _performance.render();
-    }
-
     if (_isEnabled) {
         render();
 
@@ -464,8 +454,7 @@ void GUI::endFrame() {
 
     ImGui::Render();
 
-    const bool shouldRender = _performance.isEnabled() || _isEnabled;
-    if (!shouldRender) {
+    if (!_isEnabled) {
         return;
     }
 

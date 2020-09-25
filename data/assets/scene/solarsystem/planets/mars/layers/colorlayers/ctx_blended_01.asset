@@ -1,0 +1,19 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+
+local layer = {
+    Identifier = "CTX_blended_01",
+    Name = "CTX Blended beta01",
+    FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
+    BlendMode = "Color",
+    Settings = {
+        Gamma = 2.14,
+        Multiplier = 1.54
+    }
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

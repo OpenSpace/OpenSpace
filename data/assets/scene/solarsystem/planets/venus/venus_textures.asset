@@ -1,0 +1,7 @@
+local TexturesPath = asset.syncedResource({
+    Name = "Venus Textures",
+    Type = "HttpSynchronization",
+    Identifier = "venus_textures",
+    Version = 1
+})
+asset.export("TexturesPath", TexturesPath)

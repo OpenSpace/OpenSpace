@@ -1,0 +1,13 @@
+local texturesPath = asset.require("./../../enceladus_textures").TexturesPath
+local globeIdentifier = asset.require("./../../enceladus").Enceladus.Identifier
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/enceladus.jpg",
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

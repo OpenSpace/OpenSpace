@@ -37,6 +37,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -352,6 +353,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     addProperty(_destination.nodeName);
 
     _font = global::fontManager.font(_fontName, _fontSize);
+    _buffer.resize(128);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
@@ -391,6 +393,8 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 }
 
 void DashboardItemAngle::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
     std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
     std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(_destination);
@@ -398,16 +402,16 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
     const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
     const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
 
+    std::fill(_buffer.begin(), _buffer.end(), 0);
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
         penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Could not compute angle at {} between {} and {}",
-                sourceInfo.second, destinationInfo.second, referenceInfo.second
-            )
+        char* end = fmt::format_to(
+            _buffer.data(),
+            "Could not compute angle at {} between {} and {}",
+            sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
+        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, text);
     }
     else {
         const double angle = glm::degrees(
@@ -415,24 +419,22 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         );
 
         penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Angle at {} between {} and {}: {} degrees",
-                sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
-            )
+        char* end = fmt::format_to(
+            _buffer.data(),
+            "Angle at {} between {} and {}: {} degrees",
+            sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
         );
+        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, text);
     }
 }
 
 glm::vec2 DashboardItemAngle::size() const {
+    ZoneScoped
+
     constexpr const double Angle = 120;
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        "Angle: " + std::to_string(Angle)
-    ).boundingBox;
+    return _font->boundingBox("Angle: " + std::to_string(Angle));
 }
 
 } // namespace openspace

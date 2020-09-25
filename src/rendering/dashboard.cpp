@@ -27,6 +27,7 @@
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 
 #include "dashboard_lua.inl"
 
@@ -127,6 +128,8 @@ void Dashboard::clearDashboardItems() {
 }
 
 void Dashboard::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     if (!_isEnabled) {
         return;
     }

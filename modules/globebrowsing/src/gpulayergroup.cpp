@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 
 namespace openspace::globebrowsing {
@@ -34,6 +35,8 @@ namespace openspace::globebrowsing {
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
+    ZoneScoped
+
     ghoul_assert(
         layerGroup.activeLayers().size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size!"
@@ -76,7 +79,8 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                 );
                 for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); ++j) {
                     GPULayer::GPUChunkTile& t = _gpuActiveLayers[i].gpuChunkTiles[j];
-                    const ChunkTile& ct = ctp[j];
+                    ghoul_assert(ctp[j].has_value(), "Wrong ChunkTiles number in pile");
+                    const ChunkTile& ct = *ctp[j];
 
                     t.texUnit.activate();
                     if (ct.tile.texture) {

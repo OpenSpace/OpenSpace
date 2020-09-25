@@ -43,7 +43,11 @@
 #include <ghoul/misc/boolean.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
+#else
+#define GLFW_INCLUDE_NONE
+#endif
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
@@ -78,14 +82,6 @@
 #include "SpoutLibrary.h"
 #endif // OPENSPACE_HAS_SPOUT
 
-#ifdef OPENSPACE_HAS_VTUNE
-#include <ittnotify.h>
-
-// If this is set to 'true', it will disable all frame markers in this file and expect
-// you to place them in the code you actually want to inspect
-constexpr const bool EnableDetailedVtune = false;
-#endif // OPENSPACE_HAS_VTUNE
-
 #ifdef OPENSPACE_HAS_NVTOOLS
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
@@ -109,26 +105,6 @@ glm::mat4 currentModelMatrix;
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
 #endif
-
-#ifdef OPENSPACE_HAS_VTUNE
-
-struct {
-    __itt_domain* init;
-    __itt_domain* preSync;
-    __itt_domain* postSyncPreDraw;
-    __itt_domain* render;
-    __itt_domain* draw2D;
-    __itt_domain* postDraw;
-    __itt_domain* keyboard;
-    __itt_domain* mouseButton;
-    __itt_domain* mousePos;
-    __itt_domain* mouseScroll;
-    __itt_domain* character;
-    __itt_domain* encode;
-    __itt_domain* decode;
-} _vTune;
-
-#endif // OPENSPACE_HAS_VTUNE
 
 //
 //  SPOUT-support
@@ -238,11 +214,6 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 void mainInitFunc(GLFWwindow*) {
     ZoneScoped
 
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.init, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainInitFunc(begin)");
 
     LDEBUG("Initializing OpenSpace Engine started");
@@ -349,7 +320,6 @@ void mainInitFunc(GLFWwindow*) {
     //
     //  Screenshots
     //
-
     std::string screenshotPath = "${SCREENSHOTS}";
     if (global::configuration.shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
@@ -368,23 +338,12 @@ void mainInitFunc(GLFWwindow*) {
 
 
     LTRACE("main::mainInitFunc(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.init, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
 void mainPreSyncFunc() {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.preSync, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainPreSyncFunc(begin)");
 
     try {
@@ -471,11 +430,6 @@ void mainPreSyncFunc() {
     }
 
     LTRACE("main::mainPreSyncFunc(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.preSync, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
@@ -483,11 +437,6 @@ void mainPreSyncFunc() {
 void mainPostSyncPreDrawFunc() {
     ZoneScoped
 
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.postSyncPreDraw, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 #ifdef OPENSPACE_HAS_NVTOOLS
     nvtxRangePush("postSyncPreDraw");
 #endif // OPENSPACE_HAS_NVTOOLS
@@ -507,23 +456,13 @@ void mainPostSyncPreDrawFunc() {
 #ifdef OPENSPACE_HAS_NVTOOLS
     nvtxRangePop();
 #endif // OPENSPACE_HAS_NVTOOLS
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.postSyncPreDraw, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
-void mainRenderFunc(const RenderData& data) {
+void mainRenderFunc(const sgct::RenderData& data) {
     ZoneScoped
 
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.render, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 #ifdef OPENSPACE_HAS_NVTOOLS
     nvtxRangePush("render");
 #endif // OPENSPACE_HAS_NVTOOLS
@@ -582,23 +521,12 @@ void mainRenderFunc(const RenderData& data) {
 #ifdef OPENSPACE_HAS_NVTOOLS
     nvtxRangePop();
 #endif // OPENSPACE_HAS_NVTOOLS
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.render, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
-void mainDraw2DFunc(const RenderData& data) {
+void mainDraw2DFunc(const sgct::RenderData& data) {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.draw2D, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainDraw2DFunc(begin)");
 
     currentWindow = &data.window;
@@ -618,23 +546,12 @@ void mainDraw2DFunc(const RenderData& data) {
     glDisable(GL_DEPTH_TEST);
 
     LTRACE("main::mainDraw2DFunc(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.draw2D, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
 void mainPostDrawFunc() {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.postDraw, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainPostDrawFunc(begin)");
 
 #ifdef OPENVR_SUPPORT
@@ -675,11 +592,6 @@ void mainPostDrawFunc() {
 #endif // OPENSPACE_HAS_SPOUT
 
     LTRACE("main::mainPostDrawFunc(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.postDraw, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
@@ -688,12 +600,6 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
                           int)
 {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.keyboard, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainKeyboardCallback(begin)");
 
     const openspace::Key k = openspace::Key(key);
@@ -702,11 +608,6 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
     global::openSpaceEngine.keyboardCallback(k, m, a);
 
     LTRACE("main::mainKeyboardCallback(begin)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.keyboard, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
@@ -715,12 +616,6 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
                              sgct::Action action)
 {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.mouseButton, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainMouseButtonCallback(begin)");
 
     const openspace::MouseButton k = openspace::MouseButton(key);
@@ -729,53 +624,24 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
     global::openSpaceEngine.mouseButtonCallback(k, a, m);
 
     LTRACE("main::mainMouseButtonCallback(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.mouseButton, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
 void mainMousePosCallback(double x, double y) {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.mousePos, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
-
     global::openSpaceEngine.mousePositionCallback(x, y);
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.mousePos, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
 void mainMouseScrollCallback(double posX, double posY) {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.mouseScroll, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainMouseScrollCallback(begin");
 
     global::openSpaceEngine.mouseScrollWheelCallback(posX, posY);
 
     LTRACE("main::mainMouseScrollCallback(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.mouseScroll, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
@@ -783,43 +649,19 @@ void mainMouseScrollCallback(double posX, double posY) {
 void mainCharCallback(unsigned int codepoint, int modifiers) {
     ZoneScoped
 
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.character, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
-
     const KeyModifier m = KeyModifier(modifiers);
     global::openSpaceEngine.charCallback(codepoint, m);
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.character, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
 std::vector<std::byte> mainEncodeFun() {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.encode, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainEncodeFun(begin)");
 
     std::vector<std::byte> data = global::openSpaceEngine.encode();
 
     LTRACE("main::mainEncodeFun(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.encode, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
-
     return data;
 }
 
@@ -827,43 +669,30 @@ std::vector<std::byte> mainEncodeFun() {
 
 void mainDecodeFun(const std::vector<std::byte>& data, unsigned int) {
     ZoneScoped
-
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_begin_v3(_vTune.decode, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainDecodeFun(begin)");
 
     global::openSpaceEngine.decode(data);
 
     LTRACE("main::mainDecodeFun(end)");
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        __itt_frame_end_v3(_vTune.decode, nullptr);
-    }
-#endif // OPENSPACE_HAS_VTUNE
 }
 
 
 
-void mainLogCallback(Log::Level level, const char* message) {
+void mainLogCallback(Log::Level level, std::string_view message) {
     ZoneScoped
 
-    std::string msg = message;
-    // Remove the trailing \n that is passed along
     switch (level) {
         case Log::Level::Debug:
-            LDEBUGC("SGCT", msg);
+            LDEBUGC("SGCT", message);
             break;
         case Log::Level::Info:
-            LINFOC("SGCT", msg);
+            LINFOC("SGCT", message);
             break;
         case Log::Level::Warning:
-            LWARNINGC("SGCT", msg);
+            LWARNINGC("SGCT", message);
             break;
         case Log::Level::Error:
-            LERRORC("SGCT", msg);
+            LERRORC("SGCT", message);
             break;
 }
 
@@ -1099,25 +928,6 @@ int main(int argc, char** argv) {
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
 
-#ifdef OPENSPACE_HAS_VTUNE
-    if (EnableDetailedVtune) {
-        _vTune.init = __itt_domain_create("init");
-        _vTune.preSync = __itt_domain_create("preSync");
-        _vTune.postSyncPreDraw = __itt_domain_create("postSyncPreDraw");
-        _vTune.render = __itt_domain_create("render");
-        _vTune.draw2D = __itt_domain_create("draw2D");
-        _vTune.postDraw = __itt_domain_create("postDraw");
-        _vTune.keyboard = __itt_domain_create("keyboard");
-        _vTune.mouseButton = __itt_domain_create("mouseButton");
-        _vTune.mousePos = __itt_domain_create("mousePos");
-        _vTune.mouseScroll = __itt_domain_create("mouseScroll");
-        _vTune.character = __itt_domain_create("character");
-        _vTune.encode = __itt_domain_create("encode");
-        _vTune.decode = __itt_domain_create("decode");
-    }
-#endif // OPENSPACE_HAS_VTUNE
-
-
     // Initialize the LogManager and add the console log as this will be used every time
     // and we need a fall back if something goes wrong between here and when we add the
     // logs from the configuration file. If the user requested as specific loglevel in the
@@ -1263,6 +1073,7 @@ int main(int argc, char** argv) {
     
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
+    Log::instance().setShowLogLevel(false);
     Log::instance().setLogCallback(mainLogCallback);
 
 #ifdef __APPLE__
@@ -1294,15 +1105,15 @@ int main(int argc, char** argv) {
         Engine::create(cluster, callbacks, config);
     }
     catch (const std::runtime_error& e) {
-        LFATAL("main", e.what());
+        LFATALC("main", e.what());
         Engine::destroy();
         global::openSpaceEngine.deinitialize();
         ghoul::deinitialize();
     }
     catch (...) {
-        Engine::destroy();
         global::openSpaceEngine.deinitialize();
         ghoul::deinitialize();
+        Engine::destroy();
         throw;
     }
 

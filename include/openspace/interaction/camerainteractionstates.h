@@ -68,7 +68,6 @@ protected:
         DelayedVariable<glm::dvec2, double> velocity;
     };
 
-
     double _sensitivity = 0.0;
 
     InteractionState _globalRotationState;

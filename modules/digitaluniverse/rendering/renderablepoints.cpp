@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -70,13 +71,6 @@ namespace {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
@@ -132,12 +126,6 @@ documentation::Documentation RenderablePoints::Documentation() {
                 SpriteTextureInfo.description
             },
             {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
-            },
-            {
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -157,7 +145,6 @@ documentation::Documentation RenderablePoints::Documentation() {
 
 RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _pointColor(
         ColorInfo,
@@ -172,6 +159,9 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderablePoints"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     _speckFile = absPath(dictionary.value<std::string>(KeyFile));
 
@@ -233,13 +223,6 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
         _hasColorMapFile = true;
     }
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
-
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
             dictionary.value<double>(ScaleFactorInfo.identifier)
@@ -253,6 +236,8 @@ bool RenderablePoints::isReady() const {
 }
 
 void RenderablePoints::initialize() {
+    ZoneScoped
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -260,6 +245,8 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
+    ZoneScoped
+
     // OBS:  The ProgramObject name is later used to release the program as well, so the
     //       name parameter to requestProgramObject and the first parameter to
     //       buildRenderProgram has to be the same or an assertion will be thrown at the
@@ -322,7 +309,7 @@ void RenderablePoints::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.sides, 4);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     if (_hasSpriteTexture) {

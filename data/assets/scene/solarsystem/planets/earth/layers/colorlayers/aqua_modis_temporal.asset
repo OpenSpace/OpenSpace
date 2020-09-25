@@ -1,0 +1,21 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+local layer = {
+    Identifier = "Aqua_Modis_Temporal",
+    Name = "Aqua Modis (Temporal)",
+    Type = "TemporalTileLayer",
+    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+        "MODIS_Aqua_CorrectedReflectance_TrueColor",
+        "2002-07-04",
+        "Yesterday",
+        "1d",
+        "250m",
+        "jpg"
+    )
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

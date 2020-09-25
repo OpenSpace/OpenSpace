@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <cpl_conv.h>
 #include <gdal.h>
 
@@ -106,6 +107,8 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         1                                           // Step: One MB
     )
 {
+    ZoneScoped
+
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);
 

@@ -1,0 +1,15 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+
+local layer = {
+    Identifier = "Mola",
+    Name = "Mola Elevation",
+    FilePath = mapServiceConfigs .. "/Mars_MGS_MOLA_DEM.wms",
+    TilePixelSize = 90
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export("layer", layer)

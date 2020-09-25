@@ -46,7 +46,7 @@ public:
 private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
-    std::unique_ptr<TimeFrame> _timeFrame;
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
 };
 
 } // namespace openspace

@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/glm.h>
 #include <sstream>
 
@@ -114,7 +115,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCo
     if (isShift && isKeypad) {
         LWARNINGC(
             "bindKey",
-            "Windows does not support binding keys to Shift + Keyboard as it will "
+            "Windows does not support binding keys to Shift + Keypad as it will "
             "internally convert these into Home, End, etc, keys."
         );
     }
@@ -170,6 +171,8 @@ KeybindingManager::keyBindings() const
 }
 
 std::string KeybindingManager::generateJson() const {
+    ZoneScoped
+
     std::stringstream json;
     json << "[";
     bool first = true;

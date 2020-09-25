@@ -50,6 +50,14 @@ namespace {
     constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNum = "LineNumber";
 
+    // Fragile! Keep in sync with documentation
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+        { "Background", openspace::Renderable::RenderBin::Background },
+        { "Opaque", openspace::Renderable::RenderBin::Opaque },
+        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
+        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
+    };
+
     constexpr const std::array<int, 36> LeapYears = {
         1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
@@ -150,6 +158,13 @@ namespace {
         "RenderSizeInfo",
         "Size of Render Block",
         "Number of objects to render sequentially from StartRenderIdx"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
+        "RenderBinMode",
+        "RenderBin Mode",
+        "Determines if the trails will be rendered after all other elements, including"
+        "atmospheres if needed."
     };
 
     // Count the number of full days since the beginning of 2000 to the beginning of
@@ -345,8 +360,8 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     : Renderable(dict)
-    , _path(PathInfo)
     , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
+    , _path(PathInfo)
     , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
@@ -400,7 +415,14 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
-    setRenderBin(Renderable::RenderBin::Overlay);
+    if (dict.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
+        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+            dict.value<std::string>(RenderBinModeInfo.identifier)
+        );
+        setRenderBin(cfgRenderBin);
+    } else {
+        setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+    }
 }
 
 void RenderableOrbitalKepler::initializeGL() {
@@ -524,8 +546,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             glm::dvec3 position = _keplerTranslator.position({
                 {},
                 Time(timeOffset + orbit.epoch),
-                Time(0.0),
-                false
+                Time(0.0)
             });
 
             _vertexBufferData[vertexBufIdx].x = static_cast<float>(position.x);

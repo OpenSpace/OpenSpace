@@ -1,167 +1,11 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('./mars_globelabels').LabelsPath
-
-
-
-local textures = asset.syncedResource({
-    Name = "Mars Textures",
-    Type = "HttpSynchronization",
-    Identifier = "mars_textures",
-    Version = 1
-})
 
 -- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
 local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
-
-local mapServiceConfigs = asset.localResource("map_service_configs")
-
-local color_layers = {
-    {
-        Identifier = "MOC_WA_Color_Utah",
-        Name = "MOC WA Color [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/Mars_Color.wms",
-        Enabled = true,
-        Fallback =  {
-            Identifier = "Mars_Texture",
-            Name = "Mars Texture",
-            FilePath = textures .. "/mars.jpg",
-            Enabled = true
-        },
-        Settings = {
-            Gamma = 1.6,
-            Multiplier = 1.07
-        }
-    },
-    {
-        Identifier = "MOC_WA_Color_LiU",
-        Name = "MOC WA Color [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/Color.wms",
-        Fallback =  {
-            Identifier = "Mars_Texture",
-            Name = "Mars Texture",
-            FilePath = textures .. "/mars.jpg",
-            Enabled = true
-        },
-        Settings = {
-            Gamma = 1.6,
-            Multiplier = 1.07
-        }
-    },
-    {
-        Identifier = "Viking_MDIM_Utah",
-        Name = "Viking MDIM [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/Mdim.wms"
-    },
-    {
-        Identifier = "Viking_MDIM_Sweden",
-        Name = "Viking MDIM [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/MDIM.wms"
-    },
-    {
-        Identifier = "MOLA_Pseudo_Color_Utah",
-        Name = "MOLA Pseudo Color [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/Mola_PseudoColor.wms"
-    },
-    {
-        Identifier = "MOLA_Pseudo_Color_Sweden",
-        Name = "MOLA Pseudo Color [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/Mola_PseudoColor.wms"
-    },
-    {
-        Identifier = "MOLA_HRSC_Utah",
-        Name = "MOLA HRSC [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/Mola_HRSC.wms"
-    },
-    {
-        Identifier = "MOLA_HRSC_Sweden",
-        Name = "MOLA HRSC [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/Mola_HRSC.wms"
-    },
-    {
-        Identifier = "Themis_IR_Day_Utah",
-        Name = "Themis IR Day [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Day.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "Themis_IR_Day_Sweden",
-        Name = "Themis IR Day [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/Themis_IR_Day.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "Themis_IR_Night_Utah",
-        Name = "Themis IR Night [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Night.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "Themis_IR_Night_Sweden",
-        Name = "Themis IR Night [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/Themis_IR_Night.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "CTX_Mosaic_Utah",
-        Name = "CTX Mosaic [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "CTX_Mosaic_Sweden",
-        Name = "CTX Mosaic [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "CTX_blended_01",
-        Name = "CTX Blended beta01",
-        FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
-        BlendMode = "Color",
-        Settings = {
-            Gamma = 2.14,
-            Multiplier = 1.54
-        }
-    }
-}
-
-local overlay_layers = {
-    {
-        Identifier = "Indices",
-        Type = "TileIndexTileLayer"
-    },
-    {
-        Identifier = "Size_Reference",
-        Name = "Size Reference",
-        Type = "SizeReferenceTileLayer",
-        Radii = marsRadii
-    }
-}
-
-local height_layers = {
-    {
-        Identifier = "Mola",
-        Name = "Mola Elevation",
-        FilePath = mapServiceConfigs .. "/Mars_MGS_MOLA_DEM.wms",
-        TilePixelSize = 90
-    },
-    {
-        Identifier = "Mola_Europe",
-        Name = "Mola Elevation [Europe]",
-        FilePath = mapServiceConfigs .. "/LiU/Mola_Elevation.wms",
-        TilePixelSize = 90
-    },
-    {
-        Identifier = "Mola_Utah",
-        Name = "Mola Elevation [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/Mola_Elevation.wms",
-        Enabled = true,
-        TilePixelSize = 90
-    }
-}
 
 local Mars = {
     Identifier = "Mars",
@@ -177,11 +21,7 @@ local Mars = {
         Type = "RenderableGlobe",
         Radii = marsRadii,
         SegmentsPerPatch = 90,
-        Layers = {
-            ColorLayers = color_layers,
-            Overlays = overlay_layers,
-            HeightLayers = height_layers
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/mars.labels",
@@ -196,7 +36,7 @@ local Mars = {
             FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },

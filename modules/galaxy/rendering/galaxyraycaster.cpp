@@ -27,6 +27,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
@@ -49,6 +50,8 @@ GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
 {}
 
 void GalaxyRaycaster::initialize() {
+    ZoneScoped
+
     _boundingBox.initialize();
 }
 

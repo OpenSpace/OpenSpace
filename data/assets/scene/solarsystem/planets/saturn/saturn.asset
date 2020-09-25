@@ -1,9 +1,7 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
-
-
+asset.require('./trail')
 
 local textures = asset.syncedResource({
     Type = "HttpSynchronization",
@@ -26,15 +24,7 @@ local Saturn = {
         Type = "RenderableGlobe",
         Radii = { 60268000, 60268000, 54364000 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/saturn.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Rings = {
             Texture = textures .. "/saturn_rings.png",
             Size = 140445000,

@@ -28,22 +28,19 @@
 
 layout(location = 0) in vec4 in_point_position;
 
-out vec4 vs_color;
+out vec3 vs_color;
 out vec4 vs_positionScreenSpace;
 
 uniform mat4 modelViewProjectionTransform;
-uniform vec4 objectVelocity;
 
-uniform uint nVertices;
-uniform vec4 shadowColor;
-
+uniform vec3 shadowColor;
 
 void main() {
     if (mod(gl_VertexID,2) == 0.0) {
         vs_color = shadowColor;
     }
     else {
-        vs_color = vec4(0.0);
+        vs_color = vec3(0.0);
     }
     
     // Transform the damn psc to homogenous coordinate

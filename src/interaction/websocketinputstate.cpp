@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/stringconversion.h>
 #include <algorithm>
@@ -71,31 +72,3 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
 }
 
 } // namespace openspace::interaction
-
-namespace ghoul {
-
-template <>
-std::string to_string(const openspace::interaction::WebsocketAction& action) {
-    switch (action) {
-        case openspace::interaction::WebsocketAction::Idle:    return "Idle";
-        case openspace::interaction::WebsocketAction::Press:   return "Press";
-        case openspace::interaction::WebsocketAction::Repeat:  return "Repeat";
-        case openspace::interaction::WebsocketAction::Release: return "Release";
-        default:                                              return "";
-    }
-}
-
-template <>
-openspace::interaction::WebsocketAction from_string(const std::string& string) {
-    static const std::map<std::string, openspace::interaction::WebsocketAction> Map = {
-        { "Idle",    openspace::interaction::WebsocketAction::Idle },
-        { "Press",   openspace::interaction::WebsocketAction::Press },
-        { "Repeat",  openspace::interaction::WebsocketAction::Repeat },
-        { "Release", openspace::interaction::WebsocketAction::Release }
-    };
-
-    return Map.at(string);
-
-}
-
-} // namespace ghoul

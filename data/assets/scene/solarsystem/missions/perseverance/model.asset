@@ -49,7 +49,8 @@ local PerseveranceModel = {
     Parent = Perseverance.Identifier,
     GUI = {
         Name = "Perseverance Model",
-        Path = "/Solar System/Missions/Perseverance"
+        Path = "/Solar System/Missions/Perseverance",
+        Hidden = true,
     }
 }
 
@@ -62,17 +63,18 @@ local Body = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_BODY_new_1.obj"
+          GeometryFile = models .. "/MSL_BODY_new_1.obj",
+          ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
         PerformShading = false,
-        GUI = {
-            Name = "Perseverance Model Body",
-            Hidden = false,
-            Path = "/Solar System/Missions/Perseverance/Model"
-        }
+    },
+    GUI = {
+        Name = "Perseverance Model Body",
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true,
     }
+
 }
 
 local Body_detail = {
@@ -83,16 +85,16 @@ local Body_detail = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_BODY_new_1_new_detail.obj"
+          GeometryFile = models .. "/MSL_BODY_new_1_new_detail.obj",
+          ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
         PerformShading = false,
-        GUI = {
-            Name = "Body Detail",
-            Hidden = true,
-            Path = "/Solar System/Missions/Perseverance/Model"
-        }
+    },
+    GUI = {
+        Name = "Body Detail",
+        Hidden = true,
+        Path = "/Solar System/Missions/Perseverance/Model"
     }
 }
 
@@ -104,15 +106,15 @@ local Body_staticParts_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_BODY_new_2.obj"
+          GeometryFile = models .. "/MSL_BODY_new_2.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -124,15 +126,15 @@ local Body_staticParts_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_BODY_new_3.obj"
+          GeometryFile = models .. "/MSL_BODY_new_3.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -144,15 +146,15 @@ local Body_staticParts_3 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_BODY_new_4.obj"
+          GeometryFile = models .. "/MSL_BODY_new_4.obj",
+          ColorTexture = textures .. "/tex_04.png"
         },
-        ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -164,15 +166,15 @@ local Body_staticParts_4 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_BODY_new_5.obj"
+          GeometryFile = models .. "/MSL_BODY_new_5.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -184,15 +186,15 @@ local Body_staticParts_5 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_BODY_new_A0.obj"
+          GeometryFile = models .. "/MSL_BODY_new_A0.obj",
+          ColorTexture = textures .. "/parts_AO.png"
         },
-        ColorTexture = textures .. "/parts_AO.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -205,15 +207,15 @@ local RA_Shoulder_AZ = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_new.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_new.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -225,15 +227,15 @@ local RA_Shoulder_AZ_detail_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_detail_1.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_detail_1.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -245,15 +247,15 @@ local RA_Shoulder_AZ_detail_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_detail_2.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_detail_2.obj",
+          ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -266,15 +268,15 @@ local RA_Shoulder_EL_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_1.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_1.obj",
+          ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -287,15 +289,15 @@ local RA_Shoulder_EL_detail_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_detail_1.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_detail_1.obj",
+          ColorTexture = textures .. "/tex_04.png"
         },
-        ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -307,15 +309,15 @@ local RA_Shoulder_EL_detail_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_detail_2.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_detail_2.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -329,15 +331,15 @@ local RA_Shoulder_EL_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_2.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_EL_2.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -350,15 +352,15 @@ local RA_Elbow_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MSL_RA_ELBOW_1.obj"
+            GeometryFile = models .. "/MSL_RA_ELBOW_1.obj",
+            ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -370,15 +372,15 @@ local RA_Elbow_detail_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MSL_RA_ELBOW_detail_1.obj"
+            GeometryFile = models .. "/MSL_RA_ELBOW_detail_1.obj",
+            ColorTexture = textures .. "/tex_04.png",
         },
-        ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -390,15 +392,15 @@ local RA_Elbow_detail_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MSL_RA_ELBOW_detail_2.obj"
+            GeometryFile = models .. "/MSL_RA_ELBOW_detail_2.obj",
+            ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -411,15 +413,15 @@ local RA_Elbow_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MSL_RA_ELBOW_2.obj"
+            GeometryFile = models .. "/MSL_RA_ELBOW_2.obj",
+            ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -433,15 +435,15 @@ local RA_Wrist = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_TURRET_new_1.obj"
+          GeometryFile = models .. "/MSL_RA_TURRET_new_1.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -453,15 +455,15 @@ local RA_Wrist_details = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_TURRET_new_1_details.obj"
+          GeometryFile = models .. "/MSL_RA_TURRET_new_1_details.obj",
+          ColorTexture = textures .. "/tex_01.png"
         },
-        ColorTexture = textures .. "/tex_01.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -474,15 +476,15 @@ local RA_Turret = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_TURRET_new_2.obj"
+          GeometryFile = models .. "/MSL_RA_TURRET_new_2.obj",
+          ColorTexture = textures .. "/tex_04.png"
         },
-        ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -495,15 +497,15 @@ local RA_Turret_details_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_TURRET_new_2_detail_1.obj"
+          GeometryFile = models .. "/MSL_RA_TURRET_new_2_detail_1.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -515,15 +517,15 @@ local RA_Turret_details_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_TURRET_new_2_detail_2.obj"
+          GeometryFile = models .. "/MSL_RA_TURRET_new_2_detail_2.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -536,16 +538,15 @@ local RSM_root = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RSM_ROOT.obj"
-
+          GeometryFile = models .. "/MSL_RSM_ROOT.obj",
+          ColorTexture = textures .. "/tex_04.png"
         },
-        ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -557,15 +558,15 @@ local RSM_AZ = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RSM_AZ.obj"
+          GeometryFile = models .. "/MSL_RSM_AZ.obj",
+          ColorTexture = textures .. "/tex_04.png"
         },
-        ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -577,15 +578,15 @@ local RSM_EL = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RSM_EL.obj"
+          GeometryFile = models .. "/MSL_RSM_EL.obj",
+          ColorTexture = textures .. "/tex_04.png"
         },
-        ColorTexture = textures .. "/tex_04.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -598,15 +599,15 @@ local HGA_AZ = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_HGA_AZ_0ANGLE.obj"
+          GeometryFile = models .. "/MSL_HGA_AZ_0ANGLE.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -618,15 +619,15 @@ local HGA_EL = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_HGA_EL.obj"
+          GeometryFile = models .. "/MSL_HGA_EL.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -639,15 +640,15 @@ local SAM_Cover_1 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_SAM_FIXED_COVER_1.obj"
+          GeometryFile = models .. "/MSL_SAM_FIXED_COVER_1.obj",
+          ColorTexture = textures .. "/MSLTextureTest.png"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -659,15 +660,15 @@ local SAM_Cover_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_SAM_FIXED_COVER_2.obj"
+          GeometryFile = models .. "/MSL_SAM_FIXED_COVER_2.obj",
+          ColorTexture = textures .. "/MSLTextureTest.png"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -679,15 +680,15 @@ local CHEMIN_Bottom = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_CHEMIN.obj"
+          GeometryFile = models .. "/MSL_CHEMIN.obj",
+          ColorTexture = textures .. "/MSLTextureTest.png"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -700,15 +701,15 @@ local Wheel_Base = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_BASE.obj"
+          GeometryFile = models .. "/MSL_WHEEL_BASE.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 local Wheel_Base_2 = {
@@ -719,15 +720,15 @@ local Wheel_Base_2 = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_BASE_2.obj"
+          GeometryFile = models .. "/MSL_WHEEL_BASE_2.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -740,15 +741,15 @@ local Wheel_Leg_1_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1_L.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -760,15 +761,15 @@ local Wheel_Leg_1A_L_detail = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1A_L_detail.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1A_L_detail.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -780,15 +781,15 @@ local Wheel_Leg_1B_L_detail = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1B_L_detail.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1B_L_detail.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -800,15 +801,15 @@ local Wheel_Leg_2_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_2_L_new.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_2_L_new.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -820,15 +821,15 @@ local Wheel_Wrist_F_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -840,15 +841,15 @@ local Wheel_Wrist_hub_F_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_F_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_F_L.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -860,15 +861,15 @@ local Wheel_F_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_L.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -880,15 +881,15 @@ local Wheel_C_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_L.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -900,15 +901,15 @@ local Wheel_Wrist_B_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_B_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_B_L.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -920,15 +921,16 @@ local Wheel_Wrist_hub_B_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_B_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_B_L.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
         PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+    },
+    GUI = {
+        Name = "Perseverance Wheel Wrist hub B L",
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -940,15 +942,15 @@ local Wheel_B_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_L.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -961,15 +963,15 @@ local Wheel_Leg_1_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1_R.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -981,15 +983,15 @@ local Wheel_Leg_1A_R_detail = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1A_R_detail.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1A_R_detail.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1001,15 +1003,15 @@ local Wheel_Leg_1B_R_detail = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1B_R_detail.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1B_R_detail.obj",
+          ColorTexture = textures .. "/tex_05.png"
         },
-        ColorTexture = textures .. "/tex_05.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1021,15 +1023,15 @@ local Wheel_Leg_2_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_2_R_new.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_2_R_new.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1041,16 +1043,16 @@ local Wheel_Wrist_F_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_F_R.obj"
-          --GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_F_R.obj",
+          --GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1062,15 +1064,15 @@ local Wheel_Wrist_hub_F_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_F_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_F_R.obj",
+          ColorTexture = textures .. "/tex_02.png",
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1082,15 +1084,15 @@ local Wheel_F_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_R.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1102,15 +1104,15 @@ local Wheel_C_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_R.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1122,15 +1124,15 @@ local Wheel_Wrist_B_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_1A_B_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_1A_B_R.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1142,15 +1144,15 @@ local Wheel_Wrist_hub_B_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_B_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_B_R.obj",
+          ColorTexture = textures .. "/tex_02.png"
         },
-        ColorTexture = textures .. "/tex_02.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
@@ -1162,15 +1164,15 @@ local Wheel_B_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_R.obj",
+          ColorTexture = textures .. "/tex_03.png"
         },
-        ColorTexture = textures .. "/tex_03.png",
         LightSources = LightSources,
-        PerformShading = false,
-        GUI = {
-            Path = "/Solar System/Missions/Perseverance/Model",
-            Hidden = true
-        }
+        PerformShading = false
+    },
+    GUI = {
+        Path = "/Solar System/Missions/Perseverance/Model",
+        Hidden = true
     }
 }
 
