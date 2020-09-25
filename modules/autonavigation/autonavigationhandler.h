@@ -77,7 +77,7 @@ private:
 
     void applyStopBehaviour(double deltaTime);
 
-    void addSegment(Instruction* ins, int index);
+    void addSegment(const Instruction* ins, int index);
     void addStopDetails(const Instruction* ins);
 
     SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
