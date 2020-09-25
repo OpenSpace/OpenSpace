@@ -404,8 +404,8 @@ void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
     std::vector<double> negatives;
     negatives.reserve(deltaTimes.size());
     std::transform(
-        deltaTimes.begin(), 
-        deltaTimes.end(), 
+        deltaTimes.begin(),
+        deltaTimes.end(),
         std::back_inserter(negatives),
         [](double d) { return -d; }
     );
@@ -448,8 +448,8 @@ void TimeManager::addDeltaTimesKeybindings() {
     const int nStepsGuess = static_cast<int>(std::floor(_deltaTimeSteps.size() * 0.5f));
     steps.reserve(nStepsGuess);
     std::copy_if(
-        _deltaTimeSteps.begin(), 
-        _deltaTimeSteps.end(), 
+        _deltaTimeSteps.begin(),
+        _deltaTimeSteps.end(),
         std::back_inserter(steps),
         [](double value) { return value >= 0.0; }
     );
@@ -473,7 +473,7 @@ void TimeManager::addDeltaTimesKeybindings() {
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
     };
 
-    // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL), 
+    // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL),
     // plus inverted version of each time step one using the ALT modifier
     for (int i = 0; i < maxIterations; ++i) {
         const Key key = Keys[i];
@@ -504,7 +504,7 @@ void TimeManager::addDeltaTimesKeybindings() {
             "Error settings delta time keys: Too many delta times, so not all could be "
             "mapped to a key. Total: {} steps, which is {} more than the number of "
             "available keybindings.",
-            nSteps, 
+            nSteps,
             nSteps - maxKeyBinds
         ));
     }
@@ -543,7 +543,7 @@ TimeManager::CallbackHandle TimeManager::addDeltaTimeChangeCallback(TimeChangeCa
     return handle;
 }
 
-TimeManager::CallbackHandle 
+TimeManager::CallbackHandle
 TimeManager::addDeltaTimeStepsChangeCallback(TimeChangeCallback cb)
 {
     CallbackHandle handle = _nextCallbackHandle++;
@@ -770,7 +770,7 @@ void TimeManager::setPreviousDeltaTimeStep() {
 }
 
 void TimeManager::interpolateNextDeltaTimeStep(double durationSeconds) {
-    if (!hasNextDeltaTimeStep()) 
+    if (!hasNextDeltaTimeStep())
         return;
 
     double nextDeltaTime = nextDeltaTimeStep().value();
