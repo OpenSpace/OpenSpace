@@ -926,7 +926,9 @@ void setSgctDelegateFunctions() {
     };
 }
 
-void analyzeCommandLineArgsForSettings(int& argc, char** argv, bool& sgct, bool& profile) {
+void analyzeCommandLineArgsForSettings(int& argc, char** argv, bool& sgct, bool& profile,
+                                       std::string& sgctFunctionName)
+{
     bool haveCliConfigFlag = false;
     for (int i = 1; i < argc; ++i) {
         std::string a = argv[i];
@@ -935,7 +937,14 @@ void analyzeCommandLineArgsForSettings(int& argc, char** argv, bool& sgct, bool&
         }
         else if (haveCliConfigFlag) {
             a.erase(remove_if(a.begin(), a.end(), isspace), a.end());
-            if (a.find("SGCTConfig=") != std::string::npos) {
+            const std::string sgctAssignment = "SGCTConfig=";
+            size_t findSgct = a.find(sgctAssignment);
+            size_t findBracket = a.find("}");
+            if (findSgct != std::string::npos) {
+                if (findBracket != std::string::npos) {
+                    sgctFunctionName = a.substr(findSgct + sgctAssignment.length(),
+                        findBracket - findSgct);
+                }
                 sgct = true;
             }
             if (a.find("Profile=") != std::string::npos) {
@@ -946,13 +955,16 @@ void analyzeCommandLineArgsForSettings(int& argc, char** argv, bool& sgct, bool&
 }
 
 std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
-                                        const std::string xmlExt, bool haveCliSGCTConfig)
+                                        const std::string xmlExt, bool haveCliSGCTConfig,
+                                        const std::string& sgctFunctionName)
 {
     const std::string labelFromCli = " (from CLI)";
     std::string preset;
-    bool sgctConfigFileSpecifiedByLuaFunction = (global::configuration.sgctConfigNameInitialized.length() > 0);
+    bool sgctConfigFileSpecifiedByLuaFunction
+        = (global::configuration.sgctConfigNameInitialized.length() > 0);
     if (haveCliSGCTConfig) {
-        preset = global::configuration.windowConfiguration;
+        preset = (sgctFunctionName.length() > 0) ? sgctFunctionName
+            : global::configuration.windowConfiguration;
         preset += labelFromCli;
     }
     else if (sgctConfigFileSpecifiedByLuaFunction) {
@@ -976,19 +988,23 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
     return preset;
 }
 
-std::string getSelectedSgctProfileFromLauncher(LauncherWindow* lw, bool haveCliSGCTConfig,
+std::string getSelectedSgctProfileFromLauncher(LauncherWindow* lw, bool hasCliSGCTConfig,
                                                std::string windowConfiguration,
                                                const std::string& labelFromCfgFile,
                                                const std::string& xmlExt)
 {
     std::string config = windowConfiguration;
-    if (!haveCliSGCTConfig) {
+    if (!hasCliSGCTConfig) {
         if (lw != nullptr) {
             config = lw->selectedWindowConfig();
         }
         if (config.find(labelFromCfgFile) != std::string::npos) {
-            config = config.substr(0,
-                    config.length() - labelFromCfgFile.length());
+            if (config.find("sgct.config") == std::string::npos) {
+                config = config.substr(0, config.length() - labelFromCfgFile.length());
+            }
+            else {
+                config = windowConfiguration;
+            }
         }
         else {
             config = "${CONFIG}/" + config + xmlExt;
@@ -1139,13 +1155,15 @@ int main(int argc, char** argv) {
 
     bool haveCliSGCTConfig = false;
     bool haveCliProfile = false;
-    analyzeCommandLineArgsForSettings(argc, argv, haveCliSGCTConfig, haveCliProfile);
+    std::string sgctFunctionName;
+    analyzeCommandLineArgsForSettings(argc, argv, haveCliSGCTConfig, haveCliProfile,
+        sgctFunctionName);
 
     //Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
     const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(labelFromCfgFile, xmlExt,
-        haveCliSGCTConfig);
+        haveCliSGCTConfig, sgctFunctionName);
 
     QApplication* qaobj = nullptr;
     LauncherWindow* launchwin = nullptr;
@@ -1288,8 +1306,8 @@ int main(int argc, char** argv) {
     }
 #endif // OPENSPACE_HAS_SPOUT
 
-    delete qaobj;
     delete launchwin;
+    delete qaobj;
 
     ghoul::deinitialize();
     exit(EXIT_SUCCESS);
