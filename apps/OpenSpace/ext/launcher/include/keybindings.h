@@ -41,6 +41,7 @@ private:
     std::string truncateString(std::string& s);
     void replaceChars(std::string& src, const std::string& from,
         const std::string& to);
+    bool isLineEmpty(int index);
 
     Ui::keybindings *ui;
     QWidget* _parent;
@@ -50,6 +51,14 @@ private:
     std::vector<int> _mapModKeyComboBoxIndexToKeyValue;
     std::vector<int> _mapKeyComboBoxIndexToKeyValue;
     bool _editModeNewItem = false;
+    const openspace::Profile::Keybinding kBlank = {
+        {openspace::Key::Unknown, openspace::KeyModifier::NoModifier},
+        "",
+        "",
+        "",
+        true,
+        ""
+    };
 };
 
 #endif // KEYBINDINGS_H

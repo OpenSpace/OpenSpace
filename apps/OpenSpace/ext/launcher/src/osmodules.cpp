@@ -77,11 +77,11 @@ void osmodules::listItemAdded(void) {
         //Special case where list is "empty" but really has one line that is blank.
         // This is done because QListWidget does not seem to like having its sole
         // remaining item being removed.
-        _data.at(0) = {"", "", ""};
+        _data.at(0) = kBlank;
         ui->list->item(0)->setText("  (Enter details below & click 'Save')");
     }
     else {
-        _data.push_back({"", "", ""});
+        _data.push_back(kBlank);
         ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
     }
 
@@ -134,7 +134,7 @@ void osmodules::listItemRemove(void) {
         if (ui->list->count() == 1) {
             //Special case where last remaining item is being removed (QListWidget does
             // not like the final item being removed so instead clear it & leave it)
-            _data.at(0) = {"", "", ""};
+            _data.at(0) = kBlank;
             ui->list->item(0)->setText("");
         }
         else {

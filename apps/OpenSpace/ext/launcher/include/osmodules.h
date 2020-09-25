@@ -43,6 +43,7 @@ private:
     openspace::Profile* _imported;
     std::vector<openspace::Profile::Module> _data;
     bool _editModeNewItem = false;
+    const openspace::Profile::Module kBlank = {"", "", ""};
 };
 
 #endif // OSMODULES_H
