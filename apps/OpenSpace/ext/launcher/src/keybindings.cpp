@@ -43,6 +43,7 @@ keybindings::keybindings(openspace::Profile* imported, QWidget *parent)
     connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(listItemRemove()));
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
 
+    ui->text_script->setTabChangesFocus(true);
     transitionFromEditMode();
 }
 

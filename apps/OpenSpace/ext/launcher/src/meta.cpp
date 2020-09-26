@@ -28,6 +28,7 @@ meta::meta(openspace::Profile* imported, QWidget *parent)
         ui->line_license->setText("");
     }
 
+    ui->text_description->setTabChangesFocus(true);
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(save()));
 }
 

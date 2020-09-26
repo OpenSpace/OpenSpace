@@ -19,6 +19,10 @@ ostime::ostime(openspace::Profile* imported, QWidget *parent)
             if (_data.time == "") {
                 _data.time = "now";
             }
+            ui->line_relative->setSelection(0, ui->line_relative->text().length());
+        }
+        else {
+            ui->dateEdit->setSelectedSection(QDateTimeEdit::YearSection);
         }
     }
     else {
@@ -47,6 +51,7 @@ void ostime::enableAccordingToType(int idx) {
         else {
             ui->line_relative->setText(QString(_data.time.c_str()));
         }
+        ui->line_relative->setFocus(Qt::OtherFocusReason);
     }
     else {
         ui->label_relative->setText("<font color='gray'>Relative Time:</font>");
@@ -56,6 +61,7 @@ void ostime::enableAccordingToType(int idx) {
         ui->dateEdit->setDate(QDate::fromString(importDate, Qt::DateFormat::ISODate));
         ui->timeEdit->setTime(QTime::fromString(importTime));
         ui->line_relative->setText("");
+        ui->dateEdit->setFocus(Qt::OtherFocusReason);
     }
 }
 

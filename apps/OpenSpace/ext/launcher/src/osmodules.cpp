@@ -23,6 +23,8 @@ osmodules::osmodules(openspace::Profile* imported, QWidget *parent)
     connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(listItemRemove()));
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
 
+    ui->line_loaded->setTabChangesFocus(true);
+    ui->line_notLoaded->setTabChangesFocus(true);
     transitionFromEditMode();
 }
 
