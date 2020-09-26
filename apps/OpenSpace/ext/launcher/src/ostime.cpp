@@ -22,7 +22,7 @@ ostime::ostime(openspace::Profile* imported, QWidget *parent)
             ui->line_relative->setSelection(0, ui->line_relative->text().length());
         }
         else {
-            ui->dateEdit->setSelectedSection(QDateTimeEdit::YearSection);
+            ui->dateTimeEdit->setSelectedSection(QDateTimeEdit::YearSection);
         }
     }
     else {
@@ -58,17 +58,16 @@ void ostime::enableAccordingToType(int idx) {
         size_t tIdx = _data.time.find_first_of('T', 0);
         QString importDate = QString(_data.time.substr(0, tIdx).c_str());
         QString importTime = QString(_data.time.substr(tIdx + 1).c_str());
-        ui->dateEdit->setDate(QDate::fromString(importDate, Qt::DateFormat::ISODate));
-        ui->timeEdit->setTime(QTime::fromString(importTime));
+        ui->dateTimeEdit->setDate(QDate::fromString(importDate, Qt::DateFormat::ISODate));
+        ui->dateTimeEdit->setTime(QTime::fromString(importTime));
         ui->line_relative->setText("");
-        ui->dateEdit->setFocus(Qt::OtherFocusReason);
+        ui->dateTimeEdit->setFocus(Qt::OtherFocusReason);
     }
 }
 
 void ostime::enableFormatForAbsolute(bool enableAbs) {
     ui->label_absolete->setEnabled(enableAbs);
-    ui->dateEdit->setEnabled(enableAbs);
-    ui->timeEdit->setEnabled(enableAbs);
+    ui->dateTimeEdit->setEnabled(enableAbs);
     ui->label_relative->setEnabled(!enableAbs);
     ui->line_relative->setEnabled(!enableAbs);
 }
@@ -98,17 +97,9 @@ void ostime::approved() {
     else {
         openspace::Profile::Time t;
         t.type = openspace::Profile::Time::Type::Absolute;
-        QString res = ui->dateEdit->date().toString("yyyy-MM-dd") + "T" + ui->timeEdit->time().toString();
+        QString res = ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "T" + ui->dateTimeEdit->time().toString();
         t.time = res.toUtf8().constData();
         _imported->setTime(t);
     }
     accept();
 }
-
-void ostime::keyPressEvent(QKeyEvent *evt)
-{
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
-        return;
-    QDialog::keyPressEvent(evt);
-}
-

@@ -30,9 +30,8 @@ public:
     QLineEdit *line_relative;
     QComboBox *combo_type;
     QLabel *label_type;
-    QDateEdit *dateEdit;
-    QTimeEdit *timeEdit;
     QLabel *label_absolete;
+    QDateTimeEdit *dateTimeEdit;
 
     void setupUi(QDialog *time)
     {
@@ -62,22 +61,15 @@ public:
         label_type->setObjectName(QString::fromUtf8("label_type"));
         label_type->setGeometry(QRect(20, 20, 91, 17));
         label_type->setFont(font);
-        dateEdit = new QDateEdit(time);
-        dateEdit->setObjectName(QString::fromUtf8("dateEdit"));
-        dateEdit->setGeometry(QRect(140, 80, 131, 31));
-        dateEdit->setFont(font);
-        timeEdit = new QTimeEdit(time);
-        timeEdit->setObjectName(QString::fromUtf8("timeEdit"));
-        timeEdit->setGeometry(QRect(290, 80, 131, 31));
-        timeEdit->setFont(font);
-        timeEdit->setMaximumDate(QDate(2000, 1, 1));
-        timeEdit->setMinimumDate(QDate(2000, 1, 1));
-        timeEdit->setCurrentSection(QDateTimeEdit::HourSection);
-        timeEdit->setTimeSpec(Qt::UTC);
         label_absolete = new QLabel(time);
         label_absolete->setObjectName(QString::fromUtf8("label_absolete"));
         label_absolete->setGeometry(QRect(20, 88, 111, 17));
         label_absolete->setFont(font);
+        dateTimeEdit = new QDateTimeEdit(time);
+        dateTimeEdit->setObjectName(QString::fromUtf8("dateTimeEdit"));
+        dateTimeEdit->setGeometry(QRect(140, 80, 201, 31));
+        dateTimeEdit->setFont(font);
+        dateTimeEdit->setMinimumDate(QDate(100,1,1));
 
         retranslateUi(time);
         //QObject::connect(buttonBox, SIGNAL(accepted()), time, SLOT(accept()));
@@ -97,9 +89,8 @@ public:
         combo_type->setToolTip(QCoreApplication::translate("time", "<html><head/><body><p>Types: Absolute defined time or Relative to actual time</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_type->setText(QCoreApplication::translate("time", "Time Type", nullptr));
-        dateEdit->setDisplayFormat(QCoreApplication::translate("time", "yyyy-MM-dd", nullptr));
-        timeEdit->setDisplayFormat(QCoreApplication::translate("time", "hh:mm:ss", nullptr));
         label_absolete->setText(QCoreApplication::translate("time", "Absolute UTC:", nullptr));
+        dateTimeEdit->setDisplayFormat(QCoreApplication::translate("time", "yyyy-MM-dd  T  hh:mm:ss", nullptr));
     } // retranslateUi
 
 };

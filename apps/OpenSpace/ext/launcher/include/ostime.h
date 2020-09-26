@@ -19,7 +19,6 @@ public slots:
     void enableAccordingToType(int);
     void cancel();
     void approved();
-    void keyPressEvent(QKeyEvent *evt);
 
 public:
     explicit ostime(openspace::Profile* imported, QWidget *parent = nullptr);
