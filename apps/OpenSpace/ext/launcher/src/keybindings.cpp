@@ -146,7 +146,7 @@ void keybindings::listItemAdded(void) {
      }
      else {
         _data.push_back(kBlank);
-        ui->list->addItem(new QListWidgetItem("  (Enter details below and click 'Save')"));
+        ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
      }
 
     //Scroll down to that blank line highlighted

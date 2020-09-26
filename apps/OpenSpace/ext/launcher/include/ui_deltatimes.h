@@ -28,6 +28,7 @@ public:
     QListWidget *listWidget;
     QLabel *label_adjust;
     QPushButton *button_save;
+    QPushButton *button_cancel;
     QPushButton *button_add;
     QPushButton *button_remove;
     QLineEdit *line_seconds;
@@ -61,6 +62,9 @@ public:
         button_save = new QPushButton(deltaTimes);
         button_save->setObjectName(QString::fromUtf8("button_save"));
         button_save->setGeometry(QRect(20, 354, 71, 25));
+        button_cancel = new QPushButton(deltaTimes);
+        button_cancel->setObjectName(QString::fromUtf8("button_cancel"));
+        button_cancel->setGeometry(QRect(120, 354, 71, 25));
         button_add = new QPushButton(deltaTimes);
         button_add->setObjectName(QString::fromUtf8("button_add"));
         button_add->setGeometry(QRect(20, 230, 151, 25));
@@ -83,8 +87,9 @@ public:
     {
         deltaTimes->setWindowTitle(QCoreApplication::translate("deltaTimes", "Delta Time Steps", nullptr));
         label_module->setText(QCoreApplication::translate("deltaTimes", "Delta Times", nullptr));
-        label_adjust->setText(QCoreApplication::translate("deltaTimes", "Set Delta Time for key", nullptr));
+        label_adjust->setText(QCoreApplication::translate("deltaTimes", "Set Delta Time", nullptr));
         button_save->setText(QCoreApplication::translate("deltaTimes", "Save", nullptr));
+        button_cancel->setText(QCoreApplication::translate("deltaTimes", "Cancel", nullptr));
         button_add->setText(QCoreApplication::translate("deltaTimes", "Add New Entry", nullptr));
         button_remove->setText(QCoreApplication::translate("deltaTimes", "Remove Last Entry", nullptr));
     } // retranslateUi

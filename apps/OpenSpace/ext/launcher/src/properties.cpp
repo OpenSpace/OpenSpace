@@ -59,10 +59,31 @@ void properties::listItemSelected(void) {
     transitionToEditMode();
 }
 
+bool properties::isLineEmpty(int index) {
+    bool isEmpty = true;
+    if (ui->list->item(index)->text().compare("") != 0) {
+        isEmpty = false;
+    }
+    if ((_data.size() > 0) && (_data.at(0).name.compare("") != 0)) {
+        isEmpty = false;
+    }
+    return isEmpty;
+}
+
 void properties::listItemAdded(void) {
-    //Add new line at bottom of props list
-    _data.push_back({openspace::Profile::Property::SetType::SetPropertyValue, "", ""});
-    ui->list->addItem(new QListWidgetItem("  (Enter details below and click 'Save')"));
+    int currentListSize = ui->list->count();
+
+     if ((currentListSize == 1) && (isLineEmpty(0))) {
+         //Special case where list is "empty" but really has one line that is blank.
+         // This is done because QListWidget does not seem to like having its sole
+         // remaining item being removed.
+         _data.at(0) = kBlank;
+         ui->list->item(0)->setText("  (Enter details below & click 'Save')");
+     }
+     else {
+         _data.push_back(kBlank);
+         ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+     }
 
     //Scroll down to that blank line highlighted
     ui->list->setCurrentRow(ui->list->count() - 1);
@@ -131,11 +152,19 @@ void properties::listItemCancelSave(void) {
 
 void properties::listItemRemove(void) {
     if (ui->list->count() > 0) {
-        int index = ui->list->currentRow();
-        if (index >= 0 && index < ui->list->count()) {
-            delete ui->list->takeItem(index);
-            if (_data.size() > 0) {
-                _data.erase(_data.begin() + index);
+        if (ui->list->count() == 1) {
+            //Special case where last remaining item is being removed (QListWidget does
+            // not like the final item being removed so instead clear it & leave it)
+            _data.at(0) = kBlank;
+            ui->list->item(0)->setText("");
+        }
+        else {
+            int index = ui->list->currentRow();
+            if (index >= 0 && index < ui->list->count()) {
+                delete ui->list->takeItem(index);
+                if (_data.size() > 0) {
+                    _data.erase(_data.begin() + index);
+                }
             }
         }
     }
@@ -147,6 +176,9 @@ void properties::transitionToEditMode(void) {
     ui->list->setDisabled(true);
     ui->button_add->setDisabled(true);
     ui->button_remove->setDisabled(true);
+    ui->button_cancel->setDisabled(true);
+    ui->button_save->setDisabled(true);
+    ui->buttonBox->setDisabled(true);
 
     editBoxDisabled(false);
 }
@@ -155,6 +187,9 @@ void properties::transitionFromEditMode(void) {
     ui->list->setDisabled(false);
     ui->button_add->setDisabled(false);
     ui->button_remove->setDisabled(false);
+    ui->button_cancel->setDisabled(false);
+    ui->button_save->setDisabled(false);
+    ui->buttonBox->setDisabled(false);
 
     editBoxDisabled(true);
     ui->label_property->setText("<font color='black'>Property</font>");
@@ -202,6 +237,10 @@ void properties::editBoxDisabled(bool disabled) {
 }*/
 
 void properties::parseSelections() {
+    //Handle case with only one remaining but empty line
+    if ((_data.size() == 1) && (_data.at(0).name.compare("") == 0)) {
+        _data.clear();
+    }
     _imported->setProperties(_data);
     accept();
 }

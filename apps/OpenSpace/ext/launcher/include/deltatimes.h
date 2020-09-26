@@ -28,6 +28,7 @@ class deltaTimes : public QDialog
 public slots:
     void listItemSelected();
     void saveDeltaTimeValue();
+    void cancelDeltaTimeValue();
     void addDeltaTimeValue();
     void removeDeltaTimeValue();
     void parseSelections();
@@ -38,6 +39,10 @@ public:
     void setDeltaTimes(std::vector<double>& dt);
     QString createSummaryForDeltaTime(size_t idx, int dt, bool forListView);
     void keyPressEvent(QKeyEvent *evt);
+    void transitionToEditMode();
+    void transitionFromEditMode();
+    void editBoxDisabled(bool disabled);
+
     struct timeIntervals {
         int index;
         int secondsPerInterval;
@@ -55,9 +60,11 @@ private:
     QString timeDescription(int value);
     bool checkForTimeDescription(QString& description, QString unit,
         int interval, int value);
+    QString createTextLabelForKey(int index);
     QString checkForTimeDescription(int intervalIndex, int value);
     int lastSelectableItem();
     bool isNumericalValue(QLineEdit* le);
+    bool isLineEmpty(int index);
 
     Ui::deltaTimes *ui;
     QWidget* _parent;
@@ -65,6 +72,7 @@ private:
     openspace::Profile* _imported;
     std::vector<int> _data;
     std::vector<std::string> _deltaTimeStrings;
+    bool _editModeNewItem = false;
 
     std::vector<timeIntervals> _timeIntervals = {
         {0, 31536000, "year"},

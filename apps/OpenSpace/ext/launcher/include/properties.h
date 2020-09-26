@@ -37,12 +37,15 @@ private:
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     bool areRequiredFormsFilled();
+    bool isLineEmpty(int index);
 
     Ui::properties *ui;
     QWidget* _parent;
     openspace::Profile* _imported;
     std::vector<openspace::Profile::Property> _data;
     bool _editModeNewItem = false;
+    const openspace::Profile::Property kBlank
+        = {openspace::Profile::Property::SetType::SetPropertyValue, "", ""};
 };
 
 #endif // PROPERTIES_H
