@@ -81,8 +81,12 @@ markNodes::~markNodes() {
 
 void markNodes::keyPressEvent(QKeyEvent *evt)
 {
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
-        return;
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
+        if (ui->line_node->text().length() > 0 && ui->line_node->hasFocus()) {
+            listItemAdded();
+            return;
+        }
+    }
     QDialog::keyPressEvent(evt);
 }
 

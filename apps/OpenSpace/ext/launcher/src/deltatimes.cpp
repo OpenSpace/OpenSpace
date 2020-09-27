@@ -77,6 +77,7 @@ void deltaTimes::listItemSelected() {
             ui->line_seconds->setText(QString::number(_data.at(index)));
         }
     }
+    _editModeNewItem = true;
     transitionToEditMode();
 }
 
@@ -275,6 +276,11 @@ void deltaTimes::keyPressEvent(QKeyEvent *evt)
         }
         return;
     }
-
+    else if(evt->key() == Qt::Key_Escape) {
+        if (_editModeNewItem) {
+            cancelDeltaTimeValue();
+        }
+        return;
+    }
     QDialog::keyPressEvent(evt);
 }

@@ -45,11 +45,13 @@ public:
             LauncherWindow->setObjectName(QString::fromUtf8("LauncherWindow"));
         LauncherWindow->resize(473, 576);
         LauncherWindow->setAutoFillBackground(false);
-        LauncherWindow->setStyleSheet(QString::fromUtf8("background: rgb(46, 52, 54);\n"
-"\n"
-"QPushButton {\n"
-"  background: rgb(186, 189, 182);\n"
-"}"));
+        LauncherWindow->setStyleSheet(QString::fromUtf8(
+            "background: rgb(46, 52, 54);\n"
+            "\n"
+            "QPushButton {\n"
+            "  background: rgb(186, 189, 182);\n"
+            "}")
+        );
         centralwidget = new QWidget(LauncherWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         newButton = new QPushButton(centralwidget);
@@ -71,7 +73,7 @@ public:
         editButton->setStyleSheet(QString::fromUtf8("background: rgb(186, 189, 182)"));
         logolabel = new QLabel(centralwidget);
         logolabel->setObjectName(QString::fromUtf8("logolabel"));
-        logolabel->setGeometry(QRect(40, 10, 400, 120));
+        logolabel->setGeometry(QRect(20, -20, 580, 200));
         comboBoxProfiles = new QComboBox(centralwidget);
         comboBoxProfiles->setObjectName(QString::fromUtf8("comboBoxProfiles"));
         comboBoxProfiles->setGeometry(QRect(130, 180, 240, 50));
@@ -110,14 +112,14 @@ public:
 
     void retranslateUi(QMainWindow *LauncherWindow)
     {
-        LauncherWindow->setWindowTitle(QCoreApplication::translate("LauncherWindow", "LauncherWindow", nullptr));
+        LauncherWindow->setWindowTitle(QCoreApplication::translate("LauncherWindow", "OpenSpace Launcher", nullptr));
         newButton->setText(QCoreApplication::translate("LauncherWindow", "New Profile", nullptr));
         qBtn_start->setText(QCoreApplication::translate("LauncherWindow", "Start OpenSpace", nullptr));
         editButton->setText(QCoreApplication::translate("LauncherWindow", "Edit Profile", nullptr));
         logolabel->setText(QString());
         labelChoose->setText(QCoreApplication::translate("LauncherWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; color:#ffffff;\">Choose Profile</span></p></body></html>", nullptr));
         labelOptions->setText(QCoreApplication::translate("LauncherWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; color:#ffffff;\">Window Options</span></p></body></html>", nullptr));
-        menuOpenSpace_Launcher->setTitle(QCoreApplication::translate("LauncherWindow", "OpenSpace Launcher", nullptr));
+        menuOpenSpace_Launcher->setTitle(QCoreApplication::translate("LauncherWindow", "", nullptr));
     } // retranslateUi
 
 };

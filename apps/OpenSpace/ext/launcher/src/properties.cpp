@@ -262,7 +262,7 @@ void properties::keyPressEvent(QKeyEvent *evt)
         }
         return;
     }
-     else if(evt->key() == Qt::Key_Escape) {
+    else if(evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             listItemCancelSave();
         }

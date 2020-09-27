@@ -14,16 +14,6 @@ class camera;
 }
 QT_END_NAMESPACE
 
-/*struct Camera {
-    enum class Type {
-        Nav,
-        Geo
-    };
-    Type type;
-    openspace::Profile::CameraNavState nav;
-    openspace::Profile::CameraGoToGeo geo;
-};*/
-
 class camera: public QDialog
 {
     Q_OBJECT
@@ -31,6 +21,7 @@ class camera: public QDialog
 public slots:
     void cancel();
     void approved();
+    void tabSelect(int);
 
 public:
     explicit camera(openspace::Profile* imported, QWidget *parent = nullptr);

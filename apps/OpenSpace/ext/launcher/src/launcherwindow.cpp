@@ -27,7 +27,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     ui->setupUi(this);
     QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
     QPixmap pix(logoPath);
-    ui->logolabel->setPixmap(pix.scaled(400, 120, Qt::KeepAspectRatio));
+    ui->logolabel->setPixmap(pix.scaled(600, 240, Qt::KeepAspectRatio));
     connect(ui->qBtn_start, SIGNAL(released()), this, SLOT(startOpenSpace()));
     connect(ui->newButton, SIGNAL(released()), this, SLOT(openWindow_new()));
     connect(ui->editButton, SIGNAL(released()), this, SLOT(openWindow_edit()));

@@ -156,11 +156,12 @@ void keybindings::listItemAdded(void) {
     //Blank-out the 2 text fields, set combo box to index 0
     ui->line_name->setText(QString(_data.back().name.c_str()));
     ui->line_documentation->setText(QString(_data.back().documentation.c_str()));
-    ui->line_guiPath->setText(QString(_data.back().guiPath.c_str()));
+    ui->line_guiPath->setText(QString("/"));
     ui->text_script->setText(QString(_data.back().script.c_str()));
 
     ui->combo_keyMod->setCurrentIndex(static_cast<int>(_data.back().key.modifier));
     ui->combo_key->setCurrentIndex(static_cast<int>(_data.back().key.key));
+    ui->combo_keyMod->setFocus(Qt::OtherFocusReason);
 
     ui->checkBox_local->setChecked(false);
     _editModeNewItem = true;
@@ -315,6 +316,12 @@ void keybindings::keyPressEvent(QKeyEvent *evt)
 {
     if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
         return;
+    else if(evt->key() == Qt::Key_Escape) {
+        if (_editModeNewItem) {
+            listItemCancelSave();
+        }
+        return;
+    }
     QDialog::keyPressEvent(evt);
 }
 

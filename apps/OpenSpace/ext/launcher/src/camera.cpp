@@ -46,6 +46,7 @@ camera::camera(openspace::Profile* imported, QWidget *parent)
                 else {
                     ui->line_pitch->setText("");
                 }
+                tabSelect(0);
             },
             [&] (const openspace::Profile::CameraGoToGeo& geo) {
                 ui->tabWidget->setCurrentIndex(static_cast<int>(cameraTypeTab::Geo));
@@ -58,6 +59,7 @@ camera::camera(openspace::Profile* imported, QWidget *parent)
                 else {
                     ui->line_altitude->setText("");
                 }
+                tabSelect(1);
             }
         }, _data);
     }
@@ -82,6 +84,7 @@ camera::camera(openspace::Profile* imported, QWidget *parent)
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(approved()));
     connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
+    connect(ui->tabWidget, SIGNAL(tabBarClicked(int)), this, SLOT(tabSelect(int)));
 }
 
 bool camera::isNumericalValue(QLineEdit* le) {
@@ -254,10 +257,17 @@ bool camera::isUpVectorValid() {
             && isNumericalValue(ui->line_upZ));
 }
 
+void camera::tabSelect(int tabIndex) {
+    if (tabIndex == 0) {
+        ui->line_anchorNav->setFocus(Qt::OtherFocusReason);
+    }
+    else if (tabIndex == 1) {
+        ui->line_anchorGeo->setFocus(Qt::OtherFocusReason);
+    }
+}
+
 void camera::keyPressEvent(QKeyEvent *evt)
 {
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
-        return;
     QDialog::keyPressEvent(evt);
 }
 
