@@ -51,13 +51,13 @@ public:
         treeView->setAnimated(false);
         varName = new QPushButton(assets);
         varName->setObjectName(QString::fromUtf8("varName"));
-        varName->setGeometry(QRect(130, 430, 121, 25));
+        varName->setGeometry(QRect(380, 390, 121, 25));
         lineEdit = new QLineEdit(assets);
         lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
-        lineEdit->setGeometry(QRect(130, 390, 261, 25));
+        lineEdit->setGeometry(QRect(160, 390, 181, 25));
         label = new QLabel(assets);
         label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(30, 390, 71, 61));
+        label->setGeometry(QRect(30, 390, 141, 31));
         QFont font1;
         font1.setFamily(QString::fromUtf8("Arial"));
         font1.setPointSize(12);
@@ -78,7 +78,7 @@ public:
         treeView->setToolTip(QCoreApplication::translate("assets", "<html><head/><body><p>Expand arrow entries to browse assets in this OpenSpace installation. Enable checkbox to include an asset. Those assets highlighted in red are present in the profile but do not exist in this OpenSpace installation.</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         varName->setText(QCoreApplication::translate("assets", "Modify Name", nullptr));
-        label->setText(QCoreApplication::translate("assets", "Optional variable name", nullptr));
+        label->setText(QCoreApplication::translate("assets", "Variable Name", nullptr));
     } // retranslateUi
 
 };

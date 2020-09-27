@@ -92,6 +92,7 @@ void properties::listItemAdded(void) {
     ui->combo_command->setCurrentIndex(0);
     ui->line_property->setText(QString(_data.back().name.c_str()));
     ui->line_value->setText(QString(_data.back().value.c_str()));
+    ui->combo_command->setFocus(Qt::OtherFocusReason);
     _editModeNewItem = true;
 }
 
@@ -152,23 +153,24 @@ void properties::listItemCancelSave(void) {
 
 void properties::listItemRemove(void) {
     if (ui->list->count() > 0) {
-        if (ui->list->count() == 1) {
-            //Special case where last remaining item is being removed (QListWidget does
-            // not like the final item being removed so instead clear it & leave it)
-            _data.at(0) = kBlank;
-            ui->list->item(0)->setText("");
-        }
-        else {
-            int index = ui->list->currentRow();
-            if (index >= 0 && index < ui->list->count()) {
-                delete ui->list->takeItem(index);
-                if (_data.size() > 0) {
-                    _data.erase(_data.begin() + index);
+        if (ui->list->currentRow() >= 0 && ui->list->currentRow() < ui->list->count()) {
+            if (ui->list->count() == 1) {
+                //Special case where last remaining item is being removed (QListWidget does
+                // not like the final item being removed so instead clear it & leave it)
+                _data.at(0) = kBlank;
+                ui->list->item(0)->setText("");
+            }
+            else {
+                int index = ui->list->currentRow();
+                if (index >= 0 && index < ui->list->count()) {
+                    delete ui->list->takeItem(index);
+                    if (_data.size() > 0) {
+                        _data.erase(_data.begin() + index);
+                    }
                 }
             }
         }
     }
-    ui->list->clearSelection();
     transitionFromEditMode();
 }
 
@@ -254,8 +256,18 @@ properties::~properties() {
 
 void properties::keyPressEvent(QKeyEvent *evt)
 {
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
+        if (_editModeNewItem) {
+            listItemSave();
+        }
         return;
+    }
+     else if(evt->key() == Qt::Key_Escape) {
+        if (_editModeNewItem) {
+            listItemCancelSave();
+        }
+        return;
+    }
     QDialog::keyPressEvent(evt);
 }
 

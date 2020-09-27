@@ -269,12 +269,11 @@ void deltaTimes::keyPressEvent(QKeyEvent *evt)
     if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_editModeNewItem) {
             saveDeltaTimeValue();
-            return;
         }
         else {
             addDeltaTimeValue();
-            return;
         }
+        return;
     }
 
     QDialog::keyPressEvent(evt);

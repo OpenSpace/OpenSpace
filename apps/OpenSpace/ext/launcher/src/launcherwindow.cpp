@@ -17,7 +17,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     , ui(new Ui::LauncherWindow)
     , _fileAccess_profiles(".profile", {"./"}, true, false)
     , _fileAccess_winConfigs(".xml", {"./"}, true, false)
-    , _filesystemAccess(".asset", {"scene", "global", "customization", "examples"},
+    , _filesystemAccess(".asset", {"scene", "global", "customization", "examples", "util"},
                         true, true)
     , _basePath(QString::fromUtf8(basePath.c_str()))
     , _profileChangeAllowed(profileEnabled)
