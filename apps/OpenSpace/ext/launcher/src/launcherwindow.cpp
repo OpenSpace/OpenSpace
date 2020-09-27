@@ -5,12 +5,14 @@
 #include <QPixmap>
 #include <QKeyEvent>
 #include "filesystemaccess.h"
+#include <openspace/engine/configuration.h>
 #include <sstream>
 #include <iostream>
 
 LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
-                               std::string profileName, bool sgctConfigEnabled,
-                               std::string sgctConfigName, QWidget *parent)
+                               openspace::configuration::Configuration& globalConfig,
+                               bool sgctConfigEnabled, std::string sgctConfigName,
+                               QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::LauncherWindow)
     , _fileAccess_profiles(".profile", {"./"}, true, false)
@@ -20,6 +22,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     , _basePath(QString::fromUtf8(basePath.c_str()))
     , _profileChangeAllowed(profileEnabled)
     , _sgctConfigChangeAllowed(sgctConfigEnabled)
+    , _globalConfig(globalConfig)
 {
     ui->setupUi(this);
     QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
@@ -30,7 +33,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     connect(ui->editButton, SIGNAL(released()), this, SLOT(openWindow_edit()));
     _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
         QString(basePath.c_str()) + "/data/assets");
-    populateProfilesList(QString(profileName.c_str()));
+    populateProfilesList(QString(globalConfig.profile.c_str()));
     ui->comboBoxProfiles->setDisabled(!_profileChangeAllowed);
     populateWindowConfigsList(QString(sgctConfigName.c_str()));
     ui->comboBoxWindowConfigs->setDisabled(!_sgctConfigChangeAllowed);
@@ -86,7 +89,8 @@ void LauncherWindow::openWindow_new() {
     QString initialProfileSelection = ui->comboBoxProfiles->currentText();
     openspace::Profile* pData = new openspace::Profile();
     if (pData != nullptr) {
-        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem);
+        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem,
+            _globalConfig.profilesReadOnly);
         myEditorWindow->exec();
         if (myEditorWindow->wasSaved()) {
             std::string saveProfilePath = _basePath.toUtf8().constData();
@@ -113,7 +117,8 @@ void LauncherWindow::openWindow_edit() {
     openspace::Profile* pData;
     bool validFile = loadProfileFromFile(pData, editProfilePath);
     if (pData != nullptr && validFile) {
-        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem);
+        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem,
+            _globalConfig.profilesReadOnly);
         myEditorWindow->setProfileName(profileToSet);
         myEditorWindow->exec();
         if (myEditorWindow->wasSaved()) {

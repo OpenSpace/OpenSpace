@@ -1174,7 +1174,7 @@ int main(int argc, char** argv) {
         int qac = 0;
         qaobj = new QApplication(qac, nullptr);
         launchwin = new LauncherWindow(absPath("${BASE}"), !haveCliProfile,
-            global::configuration.profile, !haveCliSGCTConfig, windowCfgPreset);
+            global::configuration, !haveCliSGCTConfig, windowCfgPreset);
         launchwin->show();
         qaobj->exec();
 

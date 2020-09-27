@@ -6,6 +6,7 @@
 #include "profileedit.h"
 #include "filesystemaccess.h"
 #include <openspace/scene/profile.h>
+#include <openspace/engine/globals.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class LauncherWindow; }
@@ -21,8 +22,9 @@ public slots:
     void startOpenSpace();
 
 public:
-    LauncherWindow(std::string basePath, bool profileEnabled, std::string profileName,
-        bool sgctConfigEnabled, std::string sgctConfigName, QWidget *parent = nullptr);
+    LauncherWindow(std::string basePath, bool profileEnabled,
+        openspace::configuration::Configuration& globalConfig, bool sgctConfigEnabled,
+        std::string sgctConfigName, QWidget *parent = nullptr);
     ~LauncherWindow();
     bool wasLaunchSelected();
     bool isFullyConfiguredFromCliArgs();
@@ -43,6 +45,7 @@ private:
     filesystemAccess _fileAccess_winConfigs;
     filesystemAccess _filesystemAccess;
     std::string _reportAssetsInFilesystem;
+    openspace::configuration::Configuration& _globalConfig;
     QString _basePath;
     bool _launch = false;
     bool _fullyConfiguredViaCliArgs = false;

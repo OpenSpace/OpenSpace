@@ -42,7 +42,8 @@ public slots:
     void approved();
 
 public:
-    explicit ProfileEdit(openspace::Profile* profile, const std::string reportedAssets, QWidget *parent = nullptr);
+    explicit ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
+        std::vector<std::string>& profilesReadOnly, QWidget *parent = nullptr);
     ~ProfileEdit();
     void setProfileName(QString profileToSet);
     bool wasSaved();
@@ -62,6 +63,7 @@ private:
     QString summarizeText_markNodes();
     QString summarizeText_addedScripts();
     void labelText(openspace::Profile* pData, int size, QString title, QLabel* pLabel);
+    bool isReadOnly(std::string profileToSave);
 
     Ui::ProfileEdit *ui;
     QWidget* _parent;
@@ -78,6 +80,7 @@ private:
     openspace::Profile* _pData;
     const std::string _reportedAssets;
     bool _saveSelected = false;
+    std::vector<std::string> _profilesReadOnly;
 };
 
 #endif // PROFILEEDIT_H

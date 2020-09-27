@@ -7,11 +7,13 @@
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reportedAssets, QWidget *parent)
+ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
+                         std::vector<std::string>& profilesReadOnly, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::ProfileEdit)
     , _reportedAssets(reportedAssets)
     , _pData(profile)
+    , _profilesReadOnly(profilesReadOnly)
 {
     ui->setupUi(this);
     if (_pData != nullptr) {
@@ -368,8 +370,14 @@ void ProfileEdit::cancel() {
     reject();
 }
 
+bool ProfileEdit::isReadOnly(std::string profileToSave) {
+    auto it = std::find(_profilesReadOnly.begin(), _profilesReadOnly.end(), profileToSave);
+    return !(it == _profilesReadOnly.end());
+}
+
 void ProfileEdit::approved() {
-    if (ui->line_profile->text().length() > 0) {
+    QString profileName = ui->line_profile->text();
+    if ((profileName.length() > 0) && !isReadOnly(profileName.toUtf8().constData())) {
         _saveSelected = true;
         accept();
     }
