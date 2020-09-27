@@ -96,7 +96,7 @@ public:
         frame_meta->setFrameShadow(QFrame::Plain);
         label_meta = new QLabel(frame_meta);
         label_meta->setObjectName(QString::fromUtf8("label_meta"));
-        label_meta->setGeometry(QRect(4, 0, 111, 17));
+        label_meta->setGeometry(QRect(4, 0, 220, 17));
         QFont font;
         font.setFamily(QString::fromUtf8("Arial"));
         label_meta->setFont(font);
@@ -123,7 +123,7 @@ public:
         frame_modules->setFrameShadow(QFrame::Plain);
         label_modules = new QLabel(frame_modules);
         label_modules->setObjectName(QString::fromUtf8("label_modules"));
-        label_modules->setGeometry(QRect(4, 0, 111, 17));
+        label_modules->setGeometry(QRect(4, 0, 220, 17));
         label_modules->setFont(font);
         edit_modules = new QPushButton(frame_modules);
         edit_modules->setObjectName(QString::fromUtf8("edit_modules"));
@@ -145,7 +145,7 @@ public:
         frame_assets->setFrameShadow(QFrame::Plain);
         label_assets = new QLabel(frame_assets);
         label_assets->setObjectName(QString::fromUtf8("label_assets"));
-        label_assets->setGeometry(QRect(4, 0, 111, 17));
+        label_assets->setGeometry(QRect(4, 0, 220, 17));
         label_assets->setFont(font);
         edit_assets = new QPushButton(frame_assets);
         edit_assets->setObjectName(QString::fromUtf8("edit_assets"));
@@ -167,7 +167,7 @@ public:
         frame_properties->setFrameShadow(QFrame::Plain);
         label_properties = new QLabel(frame_properties);
         label_properties->setObjectName(QString::fromUtf8("label_properties"));
-        label_properties->setGeometry(QRect(4, 0, 111, 17));
+        label_properties->setGeometry(QRect(4, 0, 220, 17));
         label_properties->setFont(font);
         edit_properties = new QPushButton(frame_properties);
         edit_properties->setObjectName(QString::fromUtf8("edit_properties"));
@@ -189,7 +189,7 @@ public:
         frame_keybindings->setFrameShadow(QFrame::Plain);
         label_keybindings = new QLabel(frame_keybindings);
         label_keybindings->setObjectName(QString::fromUtf8("label_keybindings"));
-        label_keybindings->setGeometry(QRect(4, 0, 111, 17));
+        label_keybindings->setGeometry(QRect(4, 0, 220, 17));
         label_keybindings->setFont(font);
         edit_keybindings = new QPushButton(frame_keybindings);
         edit_keybindings->setObjectName(QString::fromUtf8("edit_keybindings"));
@@ -211,7 +211,7 @@ public:
         frame_time->setFrameShadow(QFrame::Plain);
         label_time = new QLabel(frame_time);
         label_time->setObjectName(QString::fromUtf8("label_time"));
-        label_time->setGeometry(QRect(4, 0, 111, 17));
+        label_time->setGeometry(QRect(4, 0, 220, 17));
         label_time->setFont(font);
         edit_time = new QPushButton(frame_time);
         edit_time->setObjectName(QString::fromUtf8("edit_time"));
@@ -233,7 +233,7 @@ public:
         frame_deltatimes->setFrameShadow(QFrame::Plain);
         label_deltatimes = new QLabel(frame_deltatimes);
         label_deltatimes->setObjectName(QString::fromUtf8("label_deltatimes"));
-        label_deltatimes->setGeometry(QRect(4, 0, 111, 17));
+        label_deltatimes->setGeometry(QRect(4, 0, 220, 17));
         label_deltatimes->setFont(font);
         edit_deltatimes = new QPushButton(frame_deltatimes);
         edit_deltatimes->setObjectName(QString::fromUtf8("edit_deltatimes"));
@@ -255,7 +255,7 @@ public:
         frame_camera->setFrameShadow(QFrame::Plain);
         label_camera = new QLabel(frame_camera);
         label_camera->setObjectName(QString::fromUtf8("label_camera"));
-        label_camera->setGeometry(QRect(4, 0, 111, 17));
+        label_camera->setGeometry(QRect(4, 0, 220, 17));
         label_camera->setFont(font);
         edit_camera = new QPushButton(frame_camera);
         edit_camera->setObjectName(QString::fromUtf8("edit_camera"));
@@ -277,7 +277,7 @@ public:
         frame_marknodes->setFrameShadow(QFrame::Plain);
         label_marknodes = new QLabel(frame_marknodes);
         label_marknodes->setObjectName(QString::fromUtf8("label_marknodes"));
-        label_marknodes->setGeometry(QRect(4, 0, 181, 17));
+        label_marknodes->setGeometry(QRect(4, 0, 220, 17));
         label_marknodes->setFont(font);
         edit_marknodes = new QPushButton(frame_marknodes);
         edit_marknodes->setObjectName(QString::fromUtf8("edit_marknodes"));
@@ -299,7 +299,7 @@ public:
         frame_additionalscripts->setFrameShadow(QFrame::Plain);
         label_additionalscripts = new QLabel(frame_additionalscripts);
         label_additionalscripts->setObjectName(QString::fromUtf8("label_additionalscripts"));
-        label_additionalscripts->setGeometry(QRect(4, 0, 171, 17));
+        label_additionalscripts->setGeometry(QRect(4, 0, 220, 17));
         label_additionalscripts->setFont(font);
         edit_additionalscripts = new QPushButton(frame_additionalscripts);
         edit_additionalscripts->setObjectName(QString::fromUtf8("edit_additionalscripts"));

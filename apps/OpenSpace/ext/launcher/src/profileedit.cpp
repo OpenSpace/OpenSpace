@@ -39,27 +39,33 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     ui->text_meta->setText(summarizeText_meta());
     ui->text_meta->setReadOnly(true);
 
+    labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
     ui->text_modules->setText(summarizeText_modules());
     ui->text_modules->setReadOnly(true);
 
+    labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
     ui->text_assets->setText(summarizeText_assets());
     ui->text_assets->setReadOnly(true);
 
+    labelText(_pData, _pData->properties().size(), "Properties", ui->label_properties);
     ui->text_properties->setText(summarizeText_properties());
     ui->text_properties->setReadOnly(true);
 
+    labelText(_pData, _pData->keybindings().size(), "Keybindings", ui->label_keybindings);
     ui->text_keybindings->setText(summarizeText_keybindings());
     ui->text_keybindings->setReadOnly(true);
 
     ui->text_time->setText(summarizeText_time());
     ui->text_time->setReadOnly(true);
 
+    labelText(_pData, _pData->deltaTimes().size(), "Delta Times", ui->label_deltatimes);
     ui->text_deltatimes->setText(summarizeText_deltaTimes());
     ui->text_deltatimes->setReadOnly(true);
 
     ui->text_camera->setText(summarizeText_camera());
     ui->text_camera->setReadOnly(true);
 
+    labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes", ui->label_marknodes);
     ui->text_marknodes->setText(summarizeText_markNodes());
     ui->text_marknodes->setReadOnly(true);
 
@@ -83,6 +89,7 @@ void ProfileEdit::openModules() {
     if (_pData) {
         _modules = new osmodules(_pData);
         _modules->exec();
+        labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
         ui->text_modules->setText(summarizeText_modules());
     }
 }
@@ -91,6 +98,7 @@ void ProfileEdit::openProperties() {
     if (_pData) {
         _properties = new properties(_pData);
         _properties->exec();
+        labelText(_pData, _pData->properties().size(), "Properties", ui->label_properties);
         ui->text_properties->setText(summarizeText_properties());
     }
 }
@@ -99,6 +107,7 @@ void ProfileEdit::openKeybindings() {
     if (_pData) {
         _keybindings = new keybindings(_pData);
         _keybindings->exec();
+        labelText(_pData, _pData->keybindings().size(), "Keybindings", ui->label_keybindings);
         ui->text_keybindings->setText(summarizeText_keybindings());
     }
 }
@@ -107,6 +116,7 @@ void ProfileEdit::openAssets() {
     if (_pData) {
         _assets = new assets(_pData, _reportedAssets);
         _assets->exec();
+        labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
         ui->text_assets->setText(summarizeText_assets());
     }
 }
@@ -123,6 +133,7 @@ void ProfileEdit::openDeltaTimes() {
     if (_pData) {
         _deltaTimes = new deltaTimes(_pData);
         _deltaTimes->exec();
+        labelText(_pData, _pData->deltaTimes().size(), "Delta Times", ui->label_deltatimes);
         ui->text_deltatimes->setText(summarizeText_deltaTimes());
     }
 }
@@ -147,6 +158,7 @@ void ProfileEdit::openMarkNodes() {
     if (_pData) {
         _markNodes = new markNodes(_pData);
         _markNodes->exec();
+        labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes", ui->label_marknodes);
         ui->text_marknodes->setText(summarizeText_markNodes());
     }
 }
@@ -168,21 +180,40 @@ QString ProfileEdit::summarizeText_meta() {
     return s;
 }
 
+void ProfileEdit::labelText(openspace::Profile* pData, int size, QString title,
+                            QLabel* pLabel)
+{
+    if (pData == nullptr) {
+        return;
+    }
+    QString label;
+    if (size > 0) {
+        label = "<html><head/><body><p><span style=\" font-weight:600;\">" + title + " ("
+            + QString::number(size) + ")</span></p></body></html>";
+    }
+    else {
+        label = "<html><head/><body><p><span style=\" font-weight:600;\">" + title
+            + "</span></p></body></html>";
+    }
+    QByteArray qba = label.toLocal8Bit();
+    pLabel->setText(QCoreApplication::translate("ProfileEdit", qba.data(), nullptr));
+}
+
 QString ProfileEdit::summarizeText_modules() {
     if (_pData == nullptr) {
         return "";
     }
-    QString results = QString("<Configured with %1 modules>\n").arg(_pData->modules().size());
+    QString results;
     for (openspace::Profile::Module m : _pData->modules()) {
-        results += "    " + QString(m.name.c_str());
+        results += QString(m.name.c_str());
         if (m.loadedInstruction.size() > 0 && m.notLoadedInstruction.size() > 0) {
-            results += "    (has commands for both loaded & non-loaded conditions)";
+            results += "(has commands for both loaded & non-loaded conditions)";
         }
         else if (m.loadedInstruction.size() > 0) {
-            results += "    (has command for loaded condition)";
+            results += "(has command for loaded condition)";
         }
         else if (m.notLoadedInstruction.size() > 0) {
-            results += "    (has command for non-loaded condition)";
+            results += "(has command for non-loaded condition)";
         }
         results += "\n";
     }
@@ -193,9 +224,9 @@ QString ProfileEdit::summarizeText_properties() {
     if (_pData == nullptr) {
         return "";
     }
-    QString results = QString("<Configured with %1 properties>\n").arg(_pData->properties().size());
+    QString results;
     for (openspace::Profile::Property p : _pData->properties()) {
-        results += "    " + QString(p.name.c_str()) + " = ";
+        results += QString(p.name.c_str()) + " = ";
         results += QString(p.value.c_str()) + "\n";
     }
     return results;
@@ -205,10 +236,9 @@ QString ProfileEdit::summarizeText_keybindings() {
     if (_pData == nullptr) {
         return "";
     }
-    QString results =
-        QString("<Configured with %1 keybindings>\n").arg(_pData->keybindings().size());
+    QString results;
     for (openspace::Profile::Keybinding k : _pData->keybindings()) {
-        results += "    " + QString(k.name.c_str()) + " (";
+        results += QString(k.name.c_str()) + " (";
         int keymod = static_cast<int>(k.key.modifier);
         if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
             results += QString(openspace::KeyModifierNames.at(keymod).c_str()) + "+";
@@ -223,9 +253,9 @@ QString ProfileEdit::summarizeText_assets() {
     if (_pData == nullptr) {
         return "";
     }
-    QString results = QString("<Configured with %1 assets>\n").arg(_pData->assets().size());
+    QString results;
     for (openspace::Profile::Asset a : _pData->assets()) {
-        results += "    " + QString(a.path.c_str()) + "    ";
+        results += QString(a.path.c_str()) + "    ";
         results += QString(a.name.c_str()) + "\n";
     }
     return results;
@@ -252,8 +282,7 @@ QString ProfileEdit::summarizeText_deltaTimes() {
     if (_pData == nullptr) {
         return "";
     }
-    QString results =
-        QString("<Configured with %1 delta times>\n").arg(_pData->deltaTimes().size());
+    QString results;
     for (size_t i = 0; i < _pData->deltaTimes().size(); ++i) {
         results += _deltaTimes->createSummaryForDeltaTime(i,
             _pData->deltaTimes().at(i), false);

@@ -61,6 +61,7 @@ private:
     QString summarizeText_camera();
     QString summarizeText_markNodes();
     QString summarizeText_addedScripts();
+    void labelText(openspace::Profile* pData, int size, QString title, QLabel* pLabel);
 
     Ui::ProfileEdit *ui;
     QWidget* _parent;
