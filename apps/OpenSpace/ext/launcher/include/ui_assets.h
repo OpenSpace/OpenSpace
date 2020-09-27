@@ -73,7 +73,7 @@ public:
 
     void retranslateUi(QDialog *assets)
     {
-        assets->setWindowTitle(QCoreApplication::translate("assets", "Dialog", nullptr));
+        assets->setWindowTitle(QCoreApplication::translate("assets", "Select assets to include", nullptr));
 #if QT_CONFIG(tooltip)
         treeView->setToolTip(QCoreApplication::translate("assets", "<html><head/><body><p>Expand arrow entries to browse assets in this OpenSpace installation. Enable checkbox to include an asset. Those assets highlighted in red are present in the profile but do not exist in this OpenSpace installation.</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)

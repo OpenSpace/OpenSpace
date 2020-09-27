@@ -12,7 +12,7 @@ assets::assets(openspace::Profile* imported, const std::string reportAssets, QWi
     : QDialog(parent)
     , ui(new Ui::assets)
     , _imported(imported)
-    , _assetTreeModel(tr("Asset"), tr("Enabled"), tr("Var Name"))
+    , _assetTreeModel(tr("Asset"), tr("Enabled"), tr("Variable Name"))
 {
     ui->setupUi(this);
 

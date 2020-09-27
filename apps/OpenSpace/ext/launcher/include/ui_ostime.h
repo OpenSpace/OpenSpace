@@ -83,7 +83,7 @@ public:
         time->setWindowTitle(QCoreApplication::translate("time", "Time", nullptr));
         label_relative->setText(QCoreApplication::translate("time", "Relative Time:", nullptr));
 #if QT_CONFIG(tooltip)
-        line_relative->setToolTip(QCoreApplication::translate("time", "<html><head/><body><p>String for relative time to actual (e.g. &quot;-1d&quot; for back 1 day)</p></body></html>", nullptr));
+        line_relative->setToolTip(QCoreApplication::translate("time", "<html><head/><body><p>String for relative time from actual (e.g. &quot;-1d&quot; for back 1 day, &quot;now&quot; for current time, &quot;+2w&quot; for forward 2 weeks)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
         combo_type->setToolTip(QCoreApplication::translate("time", "<html><head/><body><p>Types: Absolute defined time or Relative to actual time</p></body></html>", nullptr));

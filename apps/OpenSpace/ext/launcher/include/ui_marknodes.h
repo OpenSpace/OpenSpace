@@ -88,7 +88,7 @@ public:
 #if QT_CONFIG(tooltip)
         line_node->setToolTip(QCoreApplication::translate("markNodes", "<html><head/><body><p>Name of scenegraph node to add to list of &quot;interesting&quot; nodes</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
-        button_add->setText(QCoreApplication::translate("markNodes", "Add New", nullptr));
+        button_add->setText(QCoreApplication::translate("markNodes", "Add", nullptr));
     } // retranslateUi
 
 };
