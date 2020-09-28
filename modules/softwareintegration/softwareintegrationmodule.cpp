@@ -169,6 +169,16 @@ namespace openspace {
             LINFO(fmt::format("OpenSpace has connected with {} through socket.", software));
             break;
         } 
+        case SoftwareConnection::MessageType::ReadBinaryData: {
+            std::string binarydata(message.begin(), message.end());
+            LERROR(fmt::format("Binary data recieved {}", binarydata));
+
+            std::vector<float> xCoordinates = readData(message);
+            std::vector<float> yCoordinates = readData(message);
+            std::vector<float> zCoordinates = readData(message);
+
+            break;
+        }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
@@ -387,6 +397,36 @@ namespace openspace {
         float floatValue = std::stof(value);
 
         return floatValue;
+    }
+
+    std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& message) {
+        std::string length;
+        for(int i = 0; i <= 8; i++)
+         length.push_back(message[i]);
+
+        int lengthOfData = stoi(length);
+        int counter = 0;
+        messageOffset = 9; // Resets messageOffset
+
+        std::vector< float > data;
+        std::string value;
+
+        while (counter != lengthOfData)
+        {
+            while (message[messageOffset] != ',')
+            {
+                value.push_back(message[messageOffset]);
+                messageOffset++;
+                counter++;
+            }
+            float dataValue = stof(value);
+            data.push_back(dataValue);
+            value = "";
+            messageOffset++;
+            counter++;
+        }
+
+        return data;
     }
 
     std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message) {

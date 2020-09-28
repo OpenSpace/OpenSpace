@@ -45,7 +45,7 @@ public:
     void stop();
     size_t nConnections() const;
 
-    size_t messageOffset = 0; // Byt namn till två size begin & end
+    size_t messageOffset = 0;
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -78,6 +78,7 @@ private:
     void handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer);
     
     float readFloatValue(std::vector<char>& message);
+    std::vector<float> readData(std::vector<char>& message);
     std::string readIdentifier(std::vector<char>& message);
     std::string readString(std::vector<char>& message);
     glm::vec3 readColor(std::vector<char>& message);

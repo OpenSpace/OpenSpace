@@ -71,8 +71,8 @@ namespace openspace {
     }
 
     SoftwareConnection::Message SoftwareConnection::receiveMessage() {
-        // Header consists of version (1 char), message type (4 char) & message size (4 char)
-        size_t HeaderSize = 9 * sizeof(char);
+        // Header consists of version (1 char), message type (4 char) & message size (9 char)
+        size_t HeaderSize = 14 * sizeof(char);
 
         // Create basic buffer for receiving first part of message
         std::vector<char> headerBuffer(HeaderSize);
@@ -101,12 +101,12 @@ namespace openspace {
 
         // Read message type: Byte 1-4
         std::string type;
-        for(int i = 1; i < 5; i++)
+        for(int i = 1; i <= 4; i++)
             type.push_back(headerBuffer[i]);
 
-        // Read and convert message size: Byte 5-8
+        // Read and convert message size: Byte 5-13
         std::string messageSizeIn;
-        for (int i = 5; i < 9; i++)
+        for (int i = 5; i <= 13; i++)
             messageSizeIn.push_back(headerBuffer[i]);
         const size_t messageSize = stoi(messageSizeIn);
 
@@ -120,6 +120,8 @@ namespace openspace {
         // And delegate decoding depending on message type
         if (type == "CONN")
             return Message(MessageType::Connection, messageBuffer);
+        if (type == "DATA")
+            return Message(MessageType::ReadBinaryData, messageBuffer);
         else if( type == "ASGN")
             return Message(MessageType::AddSceneGraphNode, messageBuffer);
         else if (type == "RSGN")
