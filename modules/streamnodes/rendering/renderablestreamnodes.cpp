@@ -619,7 +619,14 @@ void RenderableStreamNodes::loadNodeData() {
     
 
     if (shouldreadBinariesDirectly) {
-        bool success = loadBinaryfilesDirectly("");
+        bool success = false;
+        if(_shouldloademin03directly){
+        success = loadBinaryfilesDirectly("_emin03");
+        _pGoesEnergyBins = 1;
+        }
+        else {
+            success = loadBinaryfilesDirectly("");
+        }
         if(success) return;
     }
     std::string _file = "StreamnodesCachePositionv3";

@@ -114,6 +114,7 @@ private:
     bool shouldwritecacheforemin03 = false;
     //Used for reading directly from sync-folder
     bool shouldreadBinariesDirectly = true;
+    bool _shouldloademin03directly = true;
 
     // --------------------------------- NUMERICALS ----------------------------------- //
     // Active index of _states. If(==-1)=>no state available for current time. Always the

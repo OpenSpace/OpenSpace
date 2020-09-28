@@ -34,7 +34,7 @@ starttimeMercury = "2000 JUL 14 10:20:00";
 starttimeVenus = "2000 JUL 14 10:28:00";
 starttimeEarth = "2000 JUL 14 10:40:00";
 EndtimeSlowLoop = "2000 JUL 14 11:00:00";
-EndtimeFastLoop = "2000 JUL 14 19:00:00";
+EndtimeFastLoop = "2000 JUL 14 12:00:00";
 EndtimeShortLoop = "2000 JUL 14 10:20:00";
 EndtimeLongLoop = "2000 JUL 14 11:50:00";
 
@@ -186,20 +186,20 @@ local Keybindings = {
 			"openspace.scriptScheduler.clear();" ..
 			"openspace.time.setDeltaTime(240);" ..
 			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
-			"openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);",
-		Documentation = "New loop: Restarts time at 10:03 and stops at 10:20, sets delta time to 4 min/ second (240 seconds/ second)",
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",
+		Documentation = "New loop: Restarts time at 10:03 and stops at 11:00, delta time to 4 min/ second (240 seconds/ second)",
 		Name = "Loop 10:03 - 11:00, delta time 4 min/ second",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
     {
-		Key = "Shift+n",
+		Key = "Shift+m",
 		Command = 
 			"openspace.scriptScheduler.clear();" ..
 			"openspace.time.setDeltaTime(240);" ..
 			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
 			"openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);",
-		Documentation = "Fast loop: Starts from 11:00 and sets delta time to 15 min/ second (900 seconds/ second)",
+		Documentation = "New loop: Restarts time at 10:03 and stops at 10:20, sets delta time to 4 min/ second (240 seconds/ second)",
 		Name = "Loop 10:03 - 10:20, delta time 4 min/ second",
 		GuiPath = "/CCMC/Nodes",
         Local = false
@@ -222,9 +222,20 @@ local Keybindings = {
 			"openspace.scriptScheduler.clear();" ..
 			"openspace.time.setDeltaTime(900);" ..
 			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
-			"openspace.scriptScheduler.loadScheduledScript(EndtimeFastLoop, StarttimescriptFastLoop);",
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeFastLoop, StarttimescriptSlowLoop);",
 		Documentation = "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
 		Name = "Starts from 10:03, delta time 15 min/ second",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
+		Key = "Shift+b",
+		Command = 
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5, 5);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', -1);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000, 10);",	
+		Documentation = "transition when zooming out nodes+cutplane, nmbr 12",
+		Name = "Transition zooming out nodes + cutplane",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
@@ -232,6 +243,7 @@ local Keybindings = {
 		Key = "Shift+t",
 		Command = 
 			--"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {0.00000,0.000000});" ..
+			"openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', true);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000, 5);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.0, 6);" ..
@@ -246,11 +258,11 @@ local Keybindings = {
 		Command = 
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.2, 10);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 1, 5);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkipEarth', 11.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.maxNodeSize', 40.0000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', -1.00000);" ..
-			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true, 5);" ..
+			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 17.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.renderingcircles', true);" ..
@@ -259,7 +271,7 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');" ..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 17.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.20000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.20000, 10);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.minNodeSize', 3.00000);" ..
 			"openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 0.000000, 7);",	
 		Documentation = "transition from cutplane to nodes",
@@ -270,22 +282,22 @@ local Keybindings = {
 	 {
 		Key = "Shift+c",
 		Command = 
-			"openspace.scriptScheduler.clear();" ..
-			"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Mercurydisabledscript)"..
-			"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Venusdisabledscript)"..
-			"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Earthdisabledscript)"..
-			"openspace.time.setDeltaTime(120);" ..
-			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
-			"openspace.scriptScheduler.loadScheduledScript(starttimeMercury, Mercuryenabledscript);" ..
-			"openspace.scriptScheduler.loadScheduledScript(starttimeVenus, Venusenabledscript);" ..
-			"openspace.scriptScheduler.loadScheduledScript(starttimeEarth, Earthenabledscript);" ..
-			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Opacity', 0.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Opacity', 0.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Opacity', 0.000000);" ..
-			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Enabled', true);" ..
-			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Enabled', true);" ..
-			"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Enabled', true);" ..
-			"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",				
+			"openspace.scriptScheduler.clear();",
+			--"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Mercurydisabledscript)"..
+			--"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Venusdisabledscript)"..
+			--"openspace.scriptScheduler.loadScheduledScript('2000-JUL-14 10:03:00.00', Earthdisabledscript)"..
+			--"openspace.time.setDeltaTime(120);" ..
+			--"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
+			--"openspace.scriptScheduler.loadScheduledScript(starttimeMercury, Mercuryenabledscript);" ..
+			--"openspace.scriptScheduler.loadScheduledScript(starttimeVenus, Venusenabledscript);" ..
+			--"openspace.scriptScheduler.loadScheduledScript(starttimeEarth, Earthenabledscript);" ..
+			--"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Opacity', 0.000000);" ..
+			--"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Opacity', 0.000000);" ..
+			--"openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Opacity', 0.000000);" ..
+			--"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_mercury.Renderable.Enabled', true);" ..
+			--"openspace.setPropertyValueSingle('Scene.Cutplane_sphere.Renderable.Enabled', true);" ..
+			--"openspace.setPropertyValueSingle('Scene.Cutplane_sphere_venus.Renderable.Enabled', true);" ..
+			--"openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);",				
 		Documentation = "transition for the spheres",
 		Name = "Sphereslices",
 		GuiPath = "/CCMC/Nodes",
@@ -317,7 +329,7 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);" ..
 
-			"openspace.setPropertyValueSingle('Scene.Cutplane2.Renderable.Enabled', false);" ..
+			--"openspace.setPropertyValueSingle('Scene.Cutplane2.Renderable.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);" ..
