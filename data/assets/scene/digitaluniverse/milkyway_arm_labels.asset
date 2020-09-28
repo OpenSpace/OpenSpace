@@ -1,0 +1,53 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local planeTextures = asset.syncedResource({
+    Name = "Milky Way Plane Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_milkyway_textures",
+    Version = 2
+})
+
+local planeSpeck = asset.syncedResource({
+    Name = "Milky Way Plane Speck",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_milkyway_speck",
+    Version = 1
+})
+
+local plane = {
+    Identifier = "MilkyWayGalaxyArmLabelsImage",
+    Parent = "Root",
+    Renderable = {
+        Type = "RenderablePlanesCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Opacity = 0.99,
+        ScaleFactor = 2.8,
+        File = planeSpeck .. "/galaxyArmLabels.speck",
+        TexturePath = planeTextures,
+        Luminosity = "size",
+        ScaleLuminosity = 1.0,
+        FadeInDistances = { 3000.0, 50000.0 },
+        PlaneMinSize = 5.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "Milky Way Spiral Arm Labels",
+        Path = "/Universe/Galaxies"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
+
+
+asset.meta = {
+    Name = "Milky Way Spiral Arm Labels",
+    Version = "1.0",
+    Description = [[ This image contains labels for the Milky Way’s spiral arms. We label
+        them in this manner ("hard coding" the labels into an image rather than having
+        native labels) so that they can retain their size, shape, and location as they
+        overlay the galaxy. (Description from AMNH Digital Universe)]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}
