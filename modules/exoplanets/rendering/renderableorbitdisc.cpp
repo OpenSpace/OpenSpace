@@ -258,7 +258,7 @@ void RenderableOrbitDisc::update(const UpdateData& data) {
 }
 
 void RenderableOrbitDisc::loadTexture() {
-    if (_texturePath.value() != "") {
+    if (!_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 
@@ -281,7 +281,7 @@ void RenderableOrbitDisc::loadTexture() {
 }
 
 void RenderableOrbitDisc::createPlane() {
-    const GLfloat size = _size.value() * (1.0 + _eccentricity.value());
+    const GLfloat size = _size * (1.f + _eccentricity);
 
     struct VertexData {
         GLfloat x;

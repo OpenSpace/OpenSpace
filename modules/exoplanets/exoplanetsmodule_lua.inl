@@ -44,9 +44,11 @@
 #include <iostream>
 #include <sstream>
 
-namespace openspace::exoplanets::luascriptfunctions {
+namespace {
+    constexpr const char* _loggerCat = "ExoplanetsModule";
+} // namespace
 
-constexpr const char* _loggerCat = "ExoplanetsModule";
+namespace openspace::exoplanets::luascriptfunctions {
 
 constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 

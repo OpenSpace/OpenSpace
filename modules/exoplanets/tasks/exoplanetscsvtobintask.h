@@ -43,11 +43,12 @@ private:
     std::string _inputSpeckPath;
     std::string _outputBinPath;
     std::string _outputLutPath;
+    std::string _teffToBvFilePath;
 
     glm::vec3 starPosition(const std::string& starName);
 
     // Compute b-v color from teff value using a conversion file
-    float bvFromTeff(const float teff);
+    float bvFromTeff(float teff);
 };
 
 } // namespace openspace::exoplanets

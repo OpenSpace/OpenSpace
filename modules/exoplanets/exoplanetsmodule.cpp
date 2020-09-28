@@ -40,8 +40,6 @@
 
 namespace openspace {
 
-constexpr const char* _loggerCat = "exoplanets";
-
 using namespace exoplanets;
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
@@ -55,7 +53,7 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             &exoplanets::luascriptfunctions::addExoplanetSystem,
             {},
             "string",
-            "Add the exoplanet system specified by the input string, including " 
+            "Add the exoplanet system specified by the input string, including "
             "information about the host star and planets."
         },
         {

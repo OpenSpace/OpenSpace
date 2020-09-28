@@ -39,7 +39,7 @@ const float Epsilon = 0.0000001;
 
 // Compute semi minor axis from major axis, a, and eccentricity, e
 float semiMinorAxis(float a, float e) {
-    return a * sqrt(1.0 - pow(e, 2.0));
+    return a * sqrt(1.0 - e * e);
 }
 
 // If returned value <= 1, the point is insdie or on the ellipse specified by the input:
@@ -57,18 +57,18 @@ Fragment getFragment() {
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
     float AUpper = semiMajorAxis;
-    float BUpper = semiMinorAxis(AUpper, eccentricity); 
+    float BUpper = semiMinorAxis(AUpper, eccentricity);
     float CUpper = sqrt(AUpper*AUpper - BUpper*BUpper);
-    float outerApoapsisDistance = AUpper * (1 + eccentricity); 
+    float outerApoapsisDistance = AUpper * (1 + eccentricity);
 
     float ALower = AUpper - AstronomicalUnit * (textureOffset.x + textureOffset.y);
     float BLower = semiMinorAxis(ALower, eccentricity);
     float CLower = sqrt(ALower*ALower - BLower*BLower);
-    float innerApoapsisDistance = ALower * (1 + eccentricity); 
+    float innerApoapsisDistance = ALower * (1 + eccentricity);
 
     // Normalize based on outer apoapsis distance (size of plane)
     float AU_n = AUpper / outerApoapsisDistance;
-    float BU_n = BUpper / outerApoapsisDistance; 
+    float BU_n = BUpper / outerApoapsisDistance;
     float CU_n = CUpper / outerApoapsisDistance;
     float AL_n = ALower / outerApoapsisDistance;
     float BL_n = BLower / outerApoapsisDistance;
@@ -77,11 +77,11 @@ Fragment getFragment() {
     if (eccentricity <= Epsilon) {
         CU_n = 0.0;
         CL_n = 0.0;
-    }  
+    }
 
-    float outer = ellipseTest(st, AU_n, BU_n, -CU_n); 
+    float outer = ellipseTest(st, AU_n, BU_n, -CU_n);
     float inner = ellipseTest(st, AL_n, BL_n, -CL_n);
-    if (outer > 1.0 || inner < 1.0) { 
+    if (outer > 1.0 || inner < 1.0) {
         // point is outside outer ellipse or inside inner eliipse
         discard;
     }
@@ -96,7 +96,7 @@ Fragment getFragment() {
     float third = (pow(BU_n * CU_n, 2.0) - pow(AU_n * BU_n, 2.0)) / denominator;
 
     float scale = first + sqrt(second - third);
-    
+
     vec2 max = dir * scale;
     vec2 min = max * (innerApoapsisDistance / outerApoapsisDistance);
 

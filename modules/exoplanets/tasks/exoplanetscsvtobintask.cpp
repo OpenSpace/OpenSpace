@@ -32,6 +32,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <charconv>
 #include <fstream>
 
 namespace {
@@ -39,10 +40,9 @@ namespace {
     constexpr const char* KeyInputSpeck = "InputSPECK";
     constexpr const char* KeyOutputBin = "OutputBIN";
     constexpr const char* KeyOutputLut = "OutputLUT";
+    constexpr const char* KeyTeffToBv = "TeffToBvFile";
 
     constexpr const char* _loggerCat = "CsvToBinTask";
-
-    constexpr const char* TeffBvPath = "${SYNC}/http/exoplanets_data/1/teff_bv.txt";
 } // namespace
 
 namespace openspace::exoplanets {
@@ -58,11 +58,15 @@ ExoplanetsCsvToBinTask::ExoplanetsCsvToBinTask(const ghoul::Dictionary& dictiona
     _inputSpeckPath = absPath(dictionary.value<std::string>(KeyInputSpeck));
     _outputBinPath = absPath(dictionary.value<std::string>(KeyOutputBin));
     _outputLutPath = absPath(dictionary.value<std::string>(KeyOutputLut));
+    _teffToBvFilePath = absPath(dictionary.value<std::string>(KeyTeffToBv));
 }
 
 std::string ExoplanetsCsvToBinTask::description() {
-    return "Extract metadata from csv-file " + _inputCsvPath +
-        " and write as bin to " + _outputBinPath;
+    return fmt::format(
+        "Extract metadata from csv-file '{}' and write as bin to '{}'",
+        _inputCsvPath,
+        _outputBinPath
+    );
 }
 
 void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallback) {
@@ -78,14 +82,9 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
     int version = 1;
     binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
 
-    Exoplanet p;
-
-    std::string planetName;
-    std::string component;
     std::string planetRow;
     getline(csvFile, planetRow); // The first line, containing the data names
 
-    bool isKeplerObject = false;
     int total = 0;
     while (getline(csvFile, planetRow)) {
         ++total;
@@ -95,20 +94,36 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
     getline(csvFile, planetRow); // The first line, containing the data names
     LINFOC("CSVTOBIN", fmt::format("Loading {} stars", total));
 
-    auto readFloatData = [](const std::string& data) -> float {
-        return !data.empty() ? std::stof(data.c_str(), nullptr) : NAN;
+    auto readFloatData = [](const std::string& str) -> float {
+        float result;
+        auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+        if (ec == std::errc()) {
+            return result;
+        }
+        return NAN;
     };
 
-    auto readDoubleData = [](const std::string& data) -> double {
-        return !data.empty() ? std::stod(data.c_str(), nullptr) : NAN;
+    auto readDoubleData = [](const std::string& str) -> double {
+        double result;
+        auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+        if (ec == std::errc()) {
+            return result;
+        }
+        return NAN;
     };
 
-    auto readIntegerData = [](const std::string& data) -> int {
-        return !data.empty() ? std::stoi(data.c_str(), nullptr) : -1;
+    auto readIntegerData = [](const std::string& str) -> int {
+        int result;
+        auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+        if (ec == std::errc()) {
+            return result;
+        }
+        return -1;
     };
 
-    int count = 0;
+    Exoplanet p;
     std::string data;
+    int count = 0;
     while (getline(csvFile, planetRow)) {
         ++count;
         progressCallback(static_cast<float>(count) / static_cast<float>(total));
@@ -166,7 +181,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
         getline(lineStream, data, ','); // CHI2
         getline(lineStream, data, ','); // COMP
-        component = data;
+        std::string component = data;
 
         getline(lineStream, data, ','); // DATE
         getline(lineStream, data, ','); // DEC
@@ -516,6 +531,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
         getline(lineStream, data, ','); // VSINIREF
         getline(lineStream, data, ','); // VSINIURL
         getline(lineStream, data, ','); // KEPID
+        bool isKeplerObject = false;
         if (!data.empty()) {
             isKeplerObject = true;
         }
@@ -529,7 +545,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
             // create look-up table
             long pos = static_cast<long>(binFile.tellp());
-            planetName = speckStarname + " " + component;
+            std::string planetName = speckStarname + " " + component;
             lutFile << planetName << "," << pos << std::endl;
             binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
         }
@@ -539,28 +555,26 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 }
 
 glm::vec3 ExoplanetsCsvToBinTask::starPosition(const std::string& starName) {
-    glm::vec3 position;
-    position[0] = NAN;
-    position[1] = NAN;
-    position[2] = NAN;
     std::ifstream exoplanetsFile(_inputSpeckPath);
     if (!exoplanetsFile) {
-        LERROR(fmt::format("Error opening file expl.speck."));
+        LERROR(fmt::format("Error opening file expl.speck"));
     }
 
+    glm::vec3 position{ NAN };
     std::string line;
-    std::string data; // data
-    std::string name;
+
     while (getline(exoplanetsFile, line)) {
         bool shouldSkipLine = (
             line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
             line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
-            );
+        );
 
         if (shouldSkipLine) {
             continue;
         }
 
+        std::string data;
+        std::string name;
         std::istringstream linestream(line);
         getline(linestream, data, '#');
         getline(linestream, name);
@@ -588,19 +602,18 @@ glm::vec3 ExoplanetsCsvToBinTask::starPosition(const std::string& starName) {
     return transformedPosition;
 }
 
-float ExoplanetsCsvToBinTask::bvFromTeff(const float teff) {
+float ExoplanetsCsvToBinTask::bvFromTeff(float teff) {
     if (std::isnan(teff)) {
         return NAN;
     }
 
-    std::ifstream teffToBvFile(absPath(TeffBvPath));
-
+    std::ifstream teffToBvFile(_teffToBvFilePath);
     if (!teffToBvFile.good()) {
         LERROR(fmt::format("Failed to open teff_bv.txt file"));
         return NAN;
     }
 
-    float BV = 0.f;
+    float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
     float teffLower, teffUpper;
@@ -621,17 +634,17 @@ float ExoplanetsCsvToBinTask::bvFromTeff(const float teff) {
             teffUpper = teffCurrent;
             bvUpper = bvCurrent;
             if (bvLower == 0.f) {
-                BV = 2.f;
+                bv = 2.f;
             }
             else {
                 float bvDiff = (bvUpper - bvLower);
                 float teffDiff = (teffUpper - teffLower);
-                BV = ((bvDiff * (teff - teffLower)) / teffDiff) + bvLower;
+                bv = ((bvDiff * (teff - teffLower)) / teffDiff) + bvLower;
             }
             break;
         }
     }
-    return BV;
+    return bv;
 }
 
 documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
@@ -669,6 +682,12 @@ documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "The txt file to write look-up table into"
+            },
+            {
+                KeyTeffToBv,
+                new StringAnnotationVerifier("A valid filepath"),
+                Optional::No,
+                "The path to the teff to a bv conversion file"
             }
         }
     };
