@@ -127,6 +127,7 @@ void LauncherWindow::openWindow_new() {
         else {
             populateProfilesList(initialProfileSelection);
         }
+        delete myEditorWindow;
         delete pData;
     }
 }
@@ -154,6 +155,7 @@ void LauncherWindow::openWindow_edit() {
         else {
             populateProfilesList(initialProfileSelection);
         }
+        delete myEditorWindow;
         delete pData;
     }
 }
@@ -241,11 +243,12 @@ void LauncherWindow::displayErrorDialog(std::string msg) {
     //New instance of info dialog window
     _myDialog = new errordialog(QString(msg.c_str()));
     _myDialog->exec();
+    delete _myDialog;
 }
 
 LauncherWindow::~LauncherWindow() {
-    delete ui;
     delete myEditorWindow;
+    delete ui;
 }
 
 bool LauncherWindow::wasLaunchSelected() {

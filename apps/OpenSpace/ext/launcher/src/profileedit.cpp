@@ -111,6 +111,7 @@ void ProfileEdit::openMeta() {
        _meta = new meta(_pData);
        _meta->exec();
        ui->text_meta->setText(summarizeText_meta());
+       delete _meta;
     }
 }
 
@@ -120,6 +121,7 @@ void ProfileEdit::openModules() {
         _modules->exec();
         labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
         ui->text_modules->setText(summarizeText_modules());
+        delete _modules;
     }
 }
 
@@ -131,6 +133,7 @@ void ProfileEdit::openProperties() {
             ui->label_properties
         );
         ui->text_properties->setText(summarizeText_properties());
+        delete _properties;
     }
 }
 
@@ -142,6 +145,7 @@ void ProfileEdit::openKeybindings() {
             ui->label_keybindings
         );
         ui->text_keybindings->setText(summarizeText_keybindings());
+        delete _keybindings;
     }
 }
 
@@ -151,6 +155,7 @@ void ProfileEdit::openAssets() {
         _assets->exec();
         labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
         ui->text_assets->setText(summarizeText_assets());
+        delete _assets;
     }
 }
 
@@ -159,6 +164,7 @@ void ProfileEdit::openTime() {
         _time = new ostime(_pData);
         _time->exec();
         ui->text_time->setText(summarizeText_time());
+        delete _time;
     }
 }
 
@@ -170,6 +176,7 @@ void ProfileEdit::openDeltaTimes() {
             ui->label_deltatimes
         );
         ui->text_deltatimes->setText(summarizeText_deltaTimes());
+        delete _deltaTimes;
     }
 }
 
@@ -178,6 +185,7 @@ void ProfileEdit::openAddedScripts() {
         _addedScripts = new addedScripts(_pData);
         _addedScripts->exec();
         ui->text_additionalscripts->setText(summarizeText_addedScripts());
+        delete _addedScripts;
     }
 }
 
@@ -186,6 +194,7 @@ void ProfileEdit::openCamera() {
         _camera = new camera(_pData);
         _camera->exec();
         ui->text_camera->setText(summarizeText_camera());
+        delete _camera;
     }
 }
 
@@ -197,6 +206,7 @@ void ProfileEdit::openMarkNodes() {
             ui->label_marknodes
         );
         ui->text_marknodes->setText(summarizeText_markNodes());
+        delete _markNodes;
     }
 }
 
