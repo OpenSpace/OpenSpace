@@ -63,7 +63,8 @@ void filesystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
         if (fileInfo.isDir()) {
             if (level != 0 || (level == 0 && isApprovedPath(res))) {
                 dirNames.push_back(res);
-                parseChildDirElements(fileInfo, (space + " "), level + 1, dirNames, output);
+                parseChildDirElements(fileInfo, (space + " "), level + 1, dirNames,
+                    output);
             }
         }
         else {

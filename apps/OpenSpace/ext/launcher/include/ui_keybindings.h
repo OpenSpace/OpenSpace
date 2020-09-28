@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'keybindings.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_KEYBINDINGS_H
 #define UI_KEYBINDINGS_H
@@ -165,18 +181,30 @@ public:
 
     void retranslateUi(QDialog *keybindings)
     {
-        keybindings->setWindowTitle(QCoreApplication::translate("keybindings", "Assign Keybindings", nullptr));
-        button_add->setText(QCoreApplication::translate("keybindings", "Add New", nullptr));
-        button_remove->setText(QCoreApplication::translate("keybindings", "Remove", nullptr));
-        label_keyMod->setText(QCoreApplication::translate("keybindings", "Key Modifier", nullptr));
-        label_name->setText(QCoreApplication::translate("keybindings", "Name", nullptr));
-        label_documentation->setText(QCoreApplication::translate("keybindings", "Documentation", nullptr));
-        label_guiPath->setText(QCoreApplication::translate("keybindings", "GUI Path", nullptr));
-        checkBox_local->setText(QCoreApplication::translate("keybindings", "Local", nullptr));
-        label_script->setText(QCoreApplication::translate("keybindings", "Script", nullptr));
-        button_cancel->setText(QCoreApplication::translate("keybindings", "Cancel", nullptr));
-        button_save->setText(QCoreApplication::translate("keybindings", "Save", nullptr));
-        label_key->setText(QCoreApplication::translate("keybindings", "Key", nullptr));
+        keybindings->setWindowTitle(QCoreApplication::translate("keybindings",
+            "Assign Keybindings", nullptr));
+        button_add->setText(QCoreApplication::translate("keybindings",
+            "Add New", nullptr));
+        button_remove->setText(QCoreApplication::translate("keybindings",
+            "Remove", nullptr));
+        label_keyMod->setText(QCoreApplication::translate("keybindings",
+            "Key Modifier", nullptr));
+        label_name->setText(QCoreApplication::translate("keybindings",
+            "Name", nullptr));
+        label_documentation->setText(QCoreApplication::translate("keybindings",
+            "Documentation", nullptr));
+        label_guiPath->setText(QCoreApplication::translate("keybindings",
+            "GUI Path", nullptr));
+        checkBox_local->setText(QCoreApplication::translate("keybindings",
+            "Local", nullptr));
+        label_script->setText(QCoreApplication::translate("keybindings",
+            "Script", nullptr));
+        button_cancel->setText(QCoreApplication::translate("keybindings",
+            "Cancel", nullptr));
+        button_save->setText(QCoreApplication::translate("keybindings",
+            "Save", nullptr));
+        label_key->setText(QCoreApplication::translate("keybindings",
+            "Key", nullptr));
     } // retranslateUi
 
 };

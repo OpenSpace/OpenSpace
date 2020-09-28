@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'deltaTimes.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_DELTATIMES_H
 #define UI_DELTATIMES_H
@@ -85,13 +101,20 @@ public:
 
     void retranslateUi(QDialog *deltaTimes)
     {
-        deltaTimes->setWindowTitle(QCoreApplication::translate("deltaTimes", "Delta Time Steps", nullptr));
-        label_module->setText(QCoreApplication::translate("deltaTimes", "Delta Times", nullptr));
-        label_adjust->setText(QCoreApplication::translate("deltaTimes", "Set Delta Time", nullptr));
-        button_save->setText(QCoreApplication::translate("deltaTimes", "Save", nullptr));
-        button_cancel->setText(QCoreApplication::translate("deltaTimes", "Cancel", nullptr));
-        button_add->setText(QCoreApplication::translate("deltaTimes", "Add New Entry", nullptr));
-        button_remove->setText(QCoreApplication::translate("deltaTimes", "Remove Last Entry", nullptr));
+        deltaTimes->setWindowTitle(QCoreApplication::translate("deltaTimes",
+            "Delta Time Steps", nullptr));
+        label_module->setText(QCoreApplication::translate("deltaTimes",
+            "Delta Times", nullptr));
+        label_adjust->setText(QCoreApplication::translate("deltaTimes",
+            "Set Delta Time", nullptr));
+        button_save->setText(QCoreApplication::translate("deltaTimes",
+            "Save", nullptr));
+        button_cancel->setText(QCoreApplication::translate("deltaTimes",
+            "Cancel", nullptr));
+        button_add->setText(QCoreApplication::translate("deltaTimes",
+            "Add New Entry", nullptr));
+        button_remove->setText(QCoreApplication::translate("deltaTimes",
+            "Remove Last Entry", nullptr));
     } // retranslateUi
 
 };

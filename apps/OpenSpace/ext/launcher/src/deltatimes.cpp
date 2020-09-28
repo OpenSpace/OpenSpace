@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include "deltatimes.h"
 #include "./ui_deltatimes.h"
 #include <qevent.h>
@@ -20,7 +44,8 @@ deltaTimes::deltaTimes(openspace::Profile* imported, QWidget *parent)
         QString summary = createSummaryForDeltaTime(d, _data.at(d), true);
         ui->listWidget->addItem(new QListWidgetItem(summary));
     }
-    connect(ui->listWidget, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelected()));
+    connect(ui->listWidget, SIGNAL(itemSelectionChanged()), this,
+        SLOT(listItemSelected()));
     connect(ui->button_save, SIGNAL(clicked()), this, SLOT(saveDeltaTimeValue()));
     connect(ui->button_cancel, SIGNAL(clicked()), this, SLOT(cancelDeltaTimeValue()));
     connect(ui->button_add, SIGNAL(clicked()), this, SLOT(addDeltaTimeValue()));
@@ -105,8 +130,6 @@ QString deltaTimes::timeDescription(int value) {
 }
 
 QString deltaTimes::checkForTimeDescription(int intervalIndex, int value) {
-//    double amount = static_cast<double>(value) /
-//        static_cast<double>(_timeIntervals[intervalIndex].secondsPerInterval);
     int amount = value /_timeIntervals[intervalIndex].secondsPerInterval;
     QString description = QString::number(amount, 'g', 2);
     return description += " " + _timeIntervals[intervalIndex].intervalName + "/sec";
@@ -155,18 +178,22 @@ void deltaTimes::saveDeltaTimeValue() {
                 int value = ui->line_seconds->text().toInt();
                 if (value != 0) {
                     _data.at(index) = value;
-                    QString summary = createSummaryForDeltaTime(index, _data.at(index), true);
+                    QString summary = createSummaryForDeltaTime(index, _data.at(index),
+                        true);
                     ui->listWidget->item(index)->setText(summary);
-                    ui->label_adjust->setText("<font color='black'>" + createTextLabelForKey(index) + "</font>");
+                    ui->label_adjust->setText("<font color='black'>" +
+                        createTextLabelForKey(index) + "</font>");
                     transitionFromEditMode();
                     _editModeNewItem = false;
                 }
                 else {
-                    ui->label_adjust->setText("<font color='red'>" + createTextLabelForKey(index) + "</font>");
+                    ui->label_adjust->setText("<font color='red'>" +
+                        createTextLabelForKey(index) + "</font>");
                 }
             }
             else {
-                ui->label_adjust->setText("<font color='red'>" + createTextLabelForKey(index) + "</font>");
+                ui->label_adjust->setText("<font color='red'>" +
+                    createTextLabelForKey(index) + "</font>");
             }
         }
     }

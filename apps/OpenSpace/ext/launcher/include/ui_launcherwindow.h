@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'launcherwindow.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_LAUNCHERWINDOW_H
 #define UI_LAUNCHERWINDOW_H
@@ -96,7 +112,8 @@ public:
         menubar->setEnabled(false);
         menubar->setGeometry(QRect(0, 0, 473, 22));
         menuOpenSpace_Launcher = new QMenu(menubar);
-        menuOpenSpace_Launcher->setObjectName(QString::fromUtf8("menuOpenSpace_Launcher"));
+        menuOpenSpace_Launcher->setObjectName(QString::fromUtf8(
+            "menuOpenSpace_Launcher"));
         LauncherWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(LauncherWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
@@ -112,14 +129,23 @@ public:
 
     void retranslateUi(QMainWindow *LauncherWindow)
     {
-        LauncherWindow->setWindowTitle(QCoreApplication::translate("LauncherWindow", "OpenSpace Launcher", nullptr));
-        newButton->setText(QCoreApplication::translate("LauncherWindow", "New Profile", nullptr));
-        qBtn_start->setText(QCoreApplication::translate("LauncherWindow", "Start OpenSpace", nullptr));
-        editButton->setText(QCoreApplication::translate("LauncherWindow", "Edit Profile", nullptr));
+        LauncherWindow->setWindowTitle(QCoreApplication::translate("LauncherWindow",
+            "OpenSpace Launcher", nullptr));
+        newButton->setText(QCoreApplication::translate("LauncherWindow",
+            "New Profile", nullptr));
+        qBtn_start->setText(QCoreApplication::translate("LauncherWindow",
+            "Start OpenSpace", nullptr));
+        editButton->setText(QCoreApplication::translate("LauncherWindow",
+            "Edit Profile", nullptr));
         logolabel->setText(QString());
-        labelChoose->setText(QCoreApplication::translate("LauncherWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; color:#ffffff;\">Choose Profile</span></p></body></html>", nullptr));
-        labelOptions->setText(QCoreApplication::translate("LauncherWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; color:#ffffff;\">Window Options</span></p></body></html>", nullptr));
-        menuOpenSpace_Launcher->setTitle(QCoreApplication::translate("LauncherWindow", "", nullptr));
+        labelChoose->setText(QCoreApplication::translate("LauncherWindow",
+            "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; "
+            "color:#ffffff;\">Choose Profile</span></p></body></html>", nullptr));
+        labelOptions->setText(QCoreApplication::translate("LauncherWindow",
+            "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600; "
+            "color:#ffffff;\">Window Options</span></p></body></html>", nullptr));
+        menuOpenSpace_Launcher->setTitle(QCoreApplication::translate("LauncherWindow",
+            "", nullptr));
     } // retranslateUi
 
 };

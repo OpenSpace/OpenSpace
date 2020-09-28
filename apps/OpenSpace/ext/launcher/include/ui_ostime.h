@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'ostime.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_OSTIME_H
 #define UI_OSTIME_H
@@ -81,16 +97,24 @@ public:
     void retranslateUi(QDialog *time)
     {
         time->setWindowTitle(QCoreApplication::translate("time", "Time", nullptr));
-        label_relative->setText(QCoreApplication::translate("time", "Relative Time:", nullptr));
+        label_relative->setText(QCoreApplication::translate("time", "Relative Time:",
+            nullptr));
 #if QT_CONFIG(tooltip)
-        line_relative->setToolTip(QCoreApplication::translate("time", "<html><head/><body><p>String for relative time from actual (e.g. &quot;-1d&quot; for back 1 day, &quot;now&quot; for current time, &quot;+2w&quot; for forward 2 weeks)</p></body></html>", nullptr));
+        line_relative->setToolTip(QCoreApplication::translate("time", "<html><head/>"
+            "<body><p>String for relative time from actual (e.g. &quot;-1d&quot; for "
+            "back 1 day, &quot;now&quot; for current time, &quot;+2w&quot; for forward "
+            "2 weeks)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
-        combo_type->setToolTip(QCoreApplication::translate("time", "<html><head/><body><p>Types: Absolute defined time or Relative to actual time</p></body></html>", nullptr));
+        combo_type->setToolTip(QCoreApplication::translate("time", "<html><head/><body>"
+            "<p>Types: Absolute fixed time or Relative to actual time</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
         label_type->setText(QCoreApplication::translate("time", "Time Type", nullptr));
-        label_absolete->setText(QCoreApplication::translate("time", "Absolute UTC:", nullptr));
-        dateTimeEdit->setDisplayFormat(QCoreApplication::translate("time", "yyyy-MM-dd  T  hh:mm:ss", nullptr));
+        label_absolete->setText(QCoreApplication::translate("time", "Absolute UTC:",
+            nullptr));
+        dateTimeEdit->setDisplayFormat(QCoreApplication::translate("time",
+            "yyyy-MM-dd  T  hh:mm:ss", nullptr));
     } // retranslateUi
 
 };

@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'profileedit.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_PROFILEEDIT_H
 #define UI_PROFILEEDIT_H
@@ -292,23 +308,28 @@ public:
         verticalLayout->addWidget(frame_marknodes);
 
         frame_additionalscripts = new QFrame(verticalLayoutWidget);
-        frame_additionalscripts->setObjectName(QString::fromUtf8("frame_additionalscripts"));
+        frame_additionalscripts->setObjectName(QString::fromUtf8(
+            "frame_additionalscripts"));
         frame_additionalscripts->setEnabled(true);
         frame_additionalscripts->setMaximumSize(QSize(444, 56));
         frame_additionalscripts->setFrameShape(QFrame::StyledPanel);
         frame_additionalscripts->setFrameShadow(QFrame::Plain);
         label_additionalscripts = new QLabel(frame_additionalscripts);
-        label_additionalscripts->setObjectName(QString::fromUtf8("label_additionalscripts"));
+        label_additionalscripts->setObjectName(QString::fromUtf8(
+            "label_additionalscripts"));
         label_additionalscripts->setGeometry(QRect(4, 0, 220, 17));
         label_additionalscripts->setFont(font);
         edit_additionalscripts = new QPushButton(frame_additionalscripts);
-        edit_additionalscripts->setObjectName(QString::fromUtf8("edit_additionalscripts"));
+        edit_additionalscripts->setObjectName(QString::fromUtf8(
+            "edit_additionalscripts"));
         edit_additionalscripts->setGeometry(QRect(328, 20, 41, 25));
         text_additionalscripts = new QTextEdit(frame_additionalscripts);
-        text_additionalscripts->setObjectName(QString::fromUtf8("text_additionalscripts"));
+        text_additionalscripts->setObjectName(QString::fromUtf8(
+            "text_additionalscripts"));
         text_additionalscripts->setGeometry(QRect(10, 18, 311, 35));
         text_additionalscripts->setFont(font1);
-        text_additionalscripts->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        text_additionalscripts->setHorizontalScrollBarPolicy(
+            Qt::ScrollBarAlwaysOff);
         text_additionalscripts->setLineWrapMode(QTextEdit::NoWrap);
 
         verticalLayout->addWidget(frame_additionalscripts);
@@ -337,30 +358,61 @@ public:
 
     void retranslateUi(QDialog *ProfileEdit)
     {
-        ProfileEdit->setWindowTitle(QCoreApplication::translate("ProfileEdit", "Profile Editor", nullptr));
-        label_meta->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Meta</span></p></body></html>", nullptr));
+        ProfileEdit->setWindowTitle(QCoreApplication::translate("ProfileEdit",
+            "Profile Editor", nullptr));
+        label_meta->setText(QCoreApplication::translate("ProfileEdit",
+            "<html><head/><body><p><span style=\" font-weight:600;\">Meta</span></p>"
+            "</body></html>", nullptr));
         edit_meta->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_modules->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Modules</span></p></body></html>", nullptr));
-        edit_modules->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_assets->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Assets</span></p></body></html>", nullptr));
-        edit_assets->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_properties->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Properties</span></p></body></html>", nullptr));
-        edit_properties->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_keybindings->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Keybindings</span></p></body></html>", nullptr));
-        edit_keybindings->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_time->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Time</span></p></body></html>", nullptr));
+        label_modules->setText(QCoreApplication::translate("ProfileEdit", "<html>"
+            "<head/><body><p><span style=\" font-weight:600;\">Modules</span></p>"
+            "</body></html>", nullptr));
+        edit_modules->setText(QCoreApplication::translate("ProfileEdit", "Edit",
+            nullptr));
+        label_assets->setText(QCoreApplication::translate("ProfileEdit",
+            "<html><head/><body><p><span style=\" font-weight:600;\">Assets</span>"
+            "</p></body></html>", nullptr));
+        edit_assets->setText(QCoreApplication::translate("ProfileEdit",
+            "Edit", nullptr));
+        label_properties->setText(QCoreApplication::translate("ProfileEdit",
+            "<html><head/><body><p><span style=\" font-weight:600;\">Properties"
+            "</span></p></body></html>", nullptr));
+        edit_properties->setText(QCoreApplication::translate("ProfileEdit", "Edit",
+            nullptr));
+        label_keybindings->setText(QCoreApplication::translate("ProfileEdit",
+            "<html><head/><body><p><span style=\" font-weight:600;\">Keybindings</span>"
+            "</p></body></html>", nullptr));
+        edit_keybindings->setText(QCoreApplication::translate("ProfileEdit", "Edit",
+            nullptr));
+        label_time->setText(QCoreApplication::translate("ProfileEdit",
+            "<html><head/><body><p><span style=\" font-weight:600;\">Time</span></p>"
+            "</body></html>", nullptr));
         edit_time->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_deltatimes->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Delta Times</span></p></body></html>", nullptr));
-        edit_deltatimes->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_camera->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Camera</span></p></body></html>", nullptr));
+        label_deltatimes->setText(QCoreApplication::translate("ProfileEdit", "<html>"
+            "<head/><body><p><span style=\" font-weight:600;\">Delta Times</span></p>"
+            "</body></html>", nullptr));
+        edit_deltatimes->setText(QCoreApplication::translate("ProfileEdit", "Edit",
+            nullptr));
+        label_camera->setText(QCoreApplication::translate("ProfileEdit", "<html><head/>"
+            "<body><p><span style=\" font-weight:600;\">Camera</span></p></body></html>",
+            nullptr));
         edit_camera->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_marknodes->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Mark Interesting Nodes</span></p></body></html>", nullptr));
-        edit_marknodes->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_additionalscripts->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Additional Scripts</span></p></body></html>", nullptr));
-        edit_additionalscripts->setText(QCoreApplication::translate("ProfileEdit", "Edit", nullptr));
-        label_profile->setText(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p><span style=\" font-weight:600;\">Profile Name:</span></p></body></html>", nullptr));
+        label_marknodes->setText(QCoreApplication::translate("ProfileEdit", "<html>"
+            "<head/><body><p><span style=\" font-weight:600;\">Mark Interesting Nodes"
+            "</span></p></body></html>", nullptr));
+        edit_marknodes->setText(QCoreApplication::translate("ProfileEdit", "Edit",
+            nullptr));
+        label_additionalscripts->setText(QCoreApplication::translate("ProfileEdit",
+            "<html><head/><body><p><span style=\" font-weight:600;\">Additional Scripts"
+            "</span></p></body></html>", nullptr));
+        edit_additionalscripts->setText(QCoreApplication::translate("ProfileEdit",
+            "Edit", nullptr));
+        label_profile->setText(QCoreApplication::translate("ProfileEdit", "<html><head/>"
+            "<body><p><span style=\" font-weight:600;\">Profile Name:</span></p></body>"
+            "</html>", nullptr));
 #if QT_CONFIG(tooltip)
-        line_profile->setToolTip(QCoreApplication::translate("ProfileEdit", "<html><head/><body><p>Name of profile filename</p></body></html>", nullptr));
+        line_profile->setToolTip(QCoreApplication::translate("ProfileEdit",
+            "<html><head/><body><p>Name of profile filename</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
     } // retranslateUi
 

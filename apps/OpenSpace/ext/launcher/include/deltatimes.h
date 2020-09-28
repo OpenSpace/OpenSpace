@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #ifndef DELTATIMES_H
 #define DELTATIMES_H
 
@@ -34,13 +58,59 @@ public slots:
     void parseSelections();
 
 public:
-    explicit deltaTimes(openspace::Profile* _imported, QWidget *parent = nullptr);
+    /**
+     * Constructor for deltaTimes class
+     *
+     * \param imported The #openspace::Profile object containing all data of the
+     *                 new or imported profile.
+     * \param parent Pointer to parent Qt widget (optional)
+     */
+     explicit deltaTimes(openspace::Profile* _imported, QWidget *parent = nullptr);
+
+     /**
+       * Destructor for addedScripts class
+       */
     ~deltaTimes();
+
+    /**
+     * Sets the full list of delta times (called when importing data)
+     *
+     * \param dt vector of delta time values
+     */
     void setDeltaTimes(std::vector<double>& dt);
+
+    /**
+     * Returns a text summary of the delta time list for display purposes
+     *
+     * \param idx index in dt list
+     * \param dt the value in sec/sec
+     * \param forListView true if this summary is for the Qt list view, false if
+     *                    it is used for a different display mode
+     */
     QString createSummaryForDeltaTime(size_t idx, int dt, bool forListView);
+
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
     void keyPressEvent(QKeyEvent *evt);
+
+    /**
+     * Called to transition to editing a particular dt value (gui settings)
+     */
     void transitionToEditMode();
+
+    /**
+     * Called to transition from editing a particular dt value (gui settings)
+     */
     void transitionFromEditMode();
+
+    /**
+     * Called to enable/disable edit GUI elements
+     *
+     * \param disabled sets bool condition for enabling/disabling edit elements
+     */
     void editBoxDisabled(bool disabled);
 
     struct timeIntervals {

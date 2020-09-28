@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #ifndef PROFILEEDIT_H
 #define PROFILEEDIT_H
 
@@ -42,12 +66,53 @@ public slots:
     void approved();
 
 public:
+    /**
+     * Constructor for ProfileEdit class
+     *
+     * \param imported The #openspace::Profile object containing all data of the
+     *                 new or imported profile.
+     * \param reportedAssets string list of assets reported by filesystemAccess class
+     * \param profilesReadOnly vector list of profile names that are read-only and must
+     *                         not be overwritten
+     * \param parent Pointer to parent Qt widget (optional)
+     */
     explicit ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
         std::vector<std::string>& profilesReadOnly, QWidget *parent = nullptr);
+
+    /**
+     * Destructor for ProfileEdit class
+     */
     ~ProfileEdit();
+
+    /**
+     * Sets the profile name in top save/edit window. This can be changed by user in
+     * order to save to a different file.
+     *
+     * \param profileToSet name of the profile to set to
+     */
     void setProfileName(QString profileToSet);
+
+
+    /**
+     * Gets the status of the save when the window is closed; was the file saved?
+     *
+     * \return true if the file was saved (false if cancel)
+     */
     bool wasSaved();
+
+    /**
+     * Gets the profile name from the top save/edit window. This can be changed by user in
+     * order to save to a different file.
+     *
+     * \return the profile name
+     */
     std::string specifiedFilename();
+
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
     void keyPressEvent(QKeyEvent *evt);
 
 private:

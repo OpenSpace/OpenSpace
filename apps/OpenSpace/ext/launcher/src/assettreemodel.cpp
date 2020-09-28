@@ -302,7 +302,7 @@ std::vector<openspace::Profile::Asset> assetTreeModel::selectedAssets() {
 }
 
 void assetTreeModel::parseChildrenForSelected(assetTreeItem* item,
-                                            std::vector<openspace::Profile::Asset>& output,
+                                           std::vector<openspace::Profile::Asset>& output,
                                               std::string pathPrefix)
 {
     std::string itemName = item->data(0).toString().toUtf8().constData();

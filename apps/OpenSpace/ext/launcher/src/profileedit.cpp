@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include <openspace/scene/profile.h>
 #include "profileedit.h"
 #include "./ui_profileedit.h"
@@ -24,7 +48,8 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
         connect(ui->edit_keybindings, SIGNAL(clicked()), this, SLOT(openKeybindings()));
         connect(ui->edit_assets, SIGNAL(clicked()), this, SLOT(openAssets()));
         connect(ui->edit_time, SIGNAL(clicked()), this, SLOT(openTime()));
-        connect(ui->edit_additionalscripts, SIGNAL(clicked()), this, SLOT(openAddedScripts()));
+        connect(ui->edit_additionalscripts, SIGNAL(clicked()), this,
+            SLOT(openAddedScripts()));
         connect(ui->edit_deltatimes, SIGNAL(clicked()), this, SLOT(openDeltaTimes()));
         connect(ui->edit_camera, SIGNAL(clicked()), this, SLOT(openCamera()));
         connect(ui->edit_marknodes, SIGNAL(clicked()), this, SLOT(openMarkNodes()));
@@ -67,7 +92,9 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     ui->text_camera->setText(summarizeText_camera());
     ui->text_camera->setReadOnly(true);
 
-    labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes", ui->label_marknodes);
+    labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
+        ui->label_marknodes
+    );
     ui->text_marknodes->setText(summarizeText_markNodes());
     ui->text_marknodes->setReadOnly(true);
 
@@ -100,7 +127,9 @@ void ProfileEdit::openProperties() {
     if (_pData) {
         _properties = new properties(_pData);
         _properties->exec();
-        labelText(_pData, _pData->properties().size(), "Properties", ui->label_properties);
+        labelText(_pData, _pData->properties().size(), "Properties",
+            ui->label_properties
+        );
         ui->text_properties->setText(summarizeText_properties());
     }
 }
@@ -109,7 +138,9 @@ void ProfileEdit::openKeybindings() {
     if (_pData) {
         _keybindings = new keybindings(_pData);
         _keybindings->exec();
-        labelText(_pData, _pData->keybindings().size(), "Keybindings", ui->label_keybindings);
+        labelText(_pData, _pData->keybindings().size(), "Keybindings",
+            ui->label_keybindings
+        );
         ui->text_keybindings->setText(summarizeText_keybindings());
     }
 }
@@ -135,7 +166,9 @@ void ProfileEdit::openDeltaTimes() {
     if (_pData) {
         _deltaTimes = new deltaTimes(_pData);
         _deltaTimes->exec();
-        labelText(_pData, _pData->deltaTimes().size(), "Delta Times", ui->label_deltatimes);
+        labelText(_pData, _pData->deltaTimes().size(), "Delta Times",
+            ui->label_deltatimes
+        );
         ui->text_deltatimes->setText(summarizeText_deltaTimes());
     }
 }
@@ -160,7 +193,9 @@ void ProfileEdit::openMarkNodes() {
     if (_pData) {
         _markNodes = new markNodes(_pData);
         _markNodes->exec();
-        labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes", ui->label_marknodes);
+        labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
+            ui->label_marknodes
+        );
         ui->text_marknodes->setText(summarizeText_markNodes());
     }
 }
@@ -272,7 +307,9 @@ QString ProfileEdit::summarizeText_time() {
         if (_pData->time().value().type == openspace::Profile::Time::Type::Absolute) {
             results = "Absolute time: ";
         }
-        else if (_pData->time().value().type == openspace::Profile::Time::Type::Relative) {
+        else if (_pData->time().value().type
+                 == openspace::Profile::Time::Type::Relative)
+        {
             results = "Relative time: ";
         }
         results += QString(_pData->time().value().time.c_str());
@@ -370,8 +407,8 @@ void ProfileEdit::cancel() {
     reject();
 }
 
-bool ProfileEdit::isReadOnly(std::string profileToSave) {
-    auto it = std::find(_profilesReadOnly.begin(), _profilesReadOnly.end(), profileToSave);
+bool ProfileEdit::isReadOnly(std::string profileSave) {
+    auto it = std::find(_profilesReadOnly.begin(), _profilesReadOnly.end(), profileSave);
     return !(it == _profilesReadOnly.end());
 }
 

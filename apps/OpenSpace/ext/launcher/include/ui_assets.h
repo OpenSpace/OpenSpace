@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'assets.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_ASSETS_H
 #define UI_ASSETS_H
@@ -46,7 +62,6 @@ public:
         QFont font;
         font.setFamily(QString::fromUtf8("Arial"));
         treeView->setFont(font);
-        //treeView->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 87, 83);"));
         treeView->setAlternatingRowColors(false);
         treeView->setAnimated(false);
         varName = new QPushButton(assets);
@@ -73,9 +88,14 @@ public:
 
     void retranslateUi(QDialog *assets)
     {
-        assets->setWindowTitle(QCoreApplication::translate("assets", "Select assets to include", nullptr));
+        assets->setWindowTitle(QCoreApplication::translate("assets",
+            "Select assets to include", nullptr));
 #if QT_CONFIG(tooltip)
-        treeView->setToolTip(QCoreApplication::translate("assets", "<html><head/><body><p>Expand arrow entries to browse assets in this OpenSpace installation. Enable checkbox to include an asset. Those assets highlighted in red are present in the profile but do not exist in this OpenSpace installation.</p></body></html>", nullptr));
+        treeView->setToolTip(QCoreApplication::translate("assets", "<html><head/><body>"
+            "<p>Expand arrow entries to browse assets in this OpenSpace installation. "
+            "Enable checkbox to include an asset. Those assets highlighted in red are "
+            "present in the profile but do not exist in this OpenSpace installation."
+            "</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         varName->setText(QCoreApplication::translate("assets", "Modify Name", nullptr));
         label->setText(QCoreApplication::translate("assets", "Variable Name", nullptr));

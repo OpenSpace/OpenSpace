@@ -22,14 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-/********************************************************************************
-** Form generated from reading UI file 'editorwindow.ui'
-**
-** Created by: Qt User Interface Compiler version 5.12.2
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
-
 #ifndef __OPENSPACE_LAUNCHER_UI__EDITORWINDOW___H__
 #define __OPENSPACE_LAUNCHER_UI__EDITORWINDOW___H__
 

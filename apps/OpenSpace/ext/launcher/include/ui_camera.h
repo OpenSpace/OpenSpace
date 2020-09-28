@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'camera.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_CAMERA_H
 #define UI_CAMERA_H
@@ -223,74 +239,106 @@ public:
 
     void retranslateUi(QDialog *camera)
     {
-        camera->setWindowTitle(QCoreApplication::translate("camera", "Set Camera Position", nullptr));
-        label_anchorNav->setText(QCoreApplication::translate("camera", "Anchor:", nullptr));
+        camera->setWindowTitle(QCoreApplication::translate("camera",
+            "Set Camera Position", nullptr));
+        label_anchorNav->setText(QCoreApplication::translate("camera",
+            "Anchor:", nullptr));
 #if QT_CONFIG(tooltip)
-        line_anchorNav->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>Anchor camera to this node</p></body></html>", nullptr));
+        line_anchorNav->setToolTip(QCoreApplication::translate("camera",
+            "<html><head/><body><p>Anchor camera to this node</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(whatsthis)
         line_anchorNav->setWhatsThis(QString());
 #endif // QT_CONFIG(whatsthis)
         label_aim->setText(QCoreApplication::translate("camera", "Aim:", nullptr));
 #if QT_CONFIG(tooltip)
-        line_aim->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] If specified, camera will be aimed at this node while keeping the anchor node in the same view location</p></body></html>", nullptr));
+        line_aim->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>[OPTIONAL] If specified, camera will be aimed at this node while keeping"
+            " the anchor node in the same view location</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
-        label_referenceFrame->setText(QCoreApplication::translate("camera", "Reference Frame:", nullptr));
+        label_referenceFrame->setText(QCoreApplication::translate("camera",
+            "Reference Frame:", nullptr));
 #if QT_CONFIG(tooltip)
-        line_referenceFrame->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] Camera location in reference to this frame</p></body></html>", nullptr));
+        line_referenceFrame->setToolTip(QCoreApplication::translate("camera",
+            "<html><head/><body><p>[OPTIONAL] Camera location in reference to this frame"
+            "</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_pos->setText(QCoreApplication::translate("camera", "Position:", nullptr));
         label_posX->setText(QCoreApplication::translate("camera", "X", nullptr));
 #if QT_CONFIG(tooltip)
-        line_posX->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>Camera position vector (x)</p></body></html>", nullptr));
+        line_posX->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>Camera position vector (x)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_posY->setText(QCoreApplication::translate("camera", "Y", nullptr));
 #if QT_CONFIG(tooltip)
-        line_posY->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>Camera position vector (y)</p></body></html>", nullptr));
+        line_posY->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>Camera position vector (y)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_posZ->setText(QCoreApplication::translate("camera", "Z", nullptr));
 #if QT_CONFIG(tooltip)
-        line_posZ->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>Camera position vector (z)</p></body></html>", nullptr));
+        line_posZ->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>Camera position vector (z)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_up->setText(QCoreApplication::translate("camera", "Up:", nullptr));
         label_upX->setText(QCoreApplication::translate("camera", "X", nullptr));
 #if QT_CONFIG(tooltip)
-        line_upX->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] Camera up vector (x)</p></body></html>", nullptr));
+        line_upX->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>[OPTIONAL] Camera up vector (x)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_upY->setText(QCoreApplication::translate("camera", "Y", nullptr));
 #if QT_CONFIG(tooltip)
-        line_upY->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] Camera up vector (y)</p></body></html>", nullptr));
+        line_upY->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>[OPTIONAL] Camera up vector (y)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_upZ->setText(QCoreApplication::translate("camera", "Z", nullptr));
 #if QT_CONFIG(tooltip)
-        line_upZ->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] Camera up vector (z)</p></body></html>", nullptr));
+        line_upZ->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>[OPTIONAL] Camera up vector (z)</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         label_yaw->setText(QCoreApplication::translate("camera", "Yaw angle:", nullptr));
 #if QT_CONFIG(tooltip)
-        line_yaw->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] yaw angle +/- 360 degrees</p></body></html>", nullptr));
+        line_yaw->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>[OPTIONAL] yaw angle +/- 360 degrees</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
-        label_pitch->setText(QCoreApplication::translate("camera", "Pitch angle:", nullptr));
+        label_pitch->setText(QCoreApplication::translate("camera", "Pitch angle:",
+            nullptr));
 #if QT_CONFIG(tooltip)
-        line_pitch->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] pitch angle +/- 360 degrees</p></body></html>", nullptr));
+        line_pitch->setToolTip(QCoreApplication::translate("camera", "<html><head/>"
+            "<body><p>[OPTIONAL] pitch angle +/- 360 degrees</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
-        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("camera", "setNavigationState", nullptr));
-        label_anchorGeo->setText(QCoreApplication::translate("camera", "Anchor:", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate(
+            "camera", "setNavigationState", nullptr));
+        label_anchorGeo->setText(QCoreApplication::translate("camera", "Anchor:",
+            nullptr));
 #if QT_CONFIG(tooltip)
-        line_anchorGeo->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>Anchor camera to this globe (planet/moon)</p></body></html>", nullptr));
+        line_anchorGeo->setToolTip(QCoreApplication::translate("camera", "<html><head/>"
+            "<body><p>Anchor camera to this globe (planet/moon)</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
         label_lat->setText(QCoreApplication::translate("camera", "Latitude:", nullptr));
 #if QT_CONFIG(tooltip)
-        line_lat->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>Latitude of camera focus point (+/- 90 degrees)</p></body></html>", nullptr));
+        line_lat->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>Latitude of camera focus point (+/- 90 degrees)</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
-        label_long->setText(QCoreApplication::translate("camera", "Longitude:", nullptr));
+        label_long->setText(QCoreApplication::translate("camera", "Longitude:",
+            nullptr));
 #if QT_CONFIG(tooltip)
-        line_long->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>Longitude of camera focus point (+/- 180 degrees)</p></body></html>", nullptr));
+        line_long->setToolTip(QCoreApplication::translate("camera", "<html><head/><body>"
+            "<p>Longitude of camera focus point (+/- 180 degrees)</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
-        label_altitude->setText(QCoreApplication::translate("camera", "Altitude:", nullptr));
+        label_altitude->setText(QCoreApplication::translate("camera", "Altitude:",
+            nullptr));
 #if QT_CONFIG(tooltip)
-        line_altitude->setToolTip(QCoreApplication::translate("camera", "<html><head/><body><p>[OPTIONAL] Altitude of camera (meters)</p></body></html>", nullptr));
+        line_altitude->setToolTip(QCoreApplication::translate("camera", "<html><head/>"
+            "<body><p>[OPTIONAL] Altitude of camera (meters)</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("camera", "goToGeo", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate(
+            "camera", "goToGeo", nullptr));
     } // retranslateUi
 
 };

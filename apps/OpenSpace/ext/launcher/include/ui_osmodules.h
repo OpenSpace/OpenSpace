@@ -1,10 +1,26 @@
-/********************************************************************************
-** Form generated from reading UI file 'osmodules.ui'
-**
-** Created by: Qt User Interface Compiler version 5.15.0
-**
-** WARNING! All changes made in this file will be lost when recompiling UI file!
-********************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #ifndef UI_OSMODULES_H
 #define UI_OSMODULES_H
@@ -124,28 +140,46 @@ public:
 
     void retranslateUi(QDialog *osmodules)
     {
-        osmodules->setWindowTitle(QCoreApplication::translate("osmodules", "Modules", nullptr));
-        button_add->setText(QCoreApplication::translate("osmodules", "Add New", nullptr));
-        button_remove->setText(QCoreApplication::translate("osmodules", "Remove", nullptr));
-        label_module->setText(QCoreApplication::translate("osmodules", "Module", nullptr));
-        label_loaded->setText(QCoreApplication::translate("osmodules", "Command if Module is Loaded", nullptr));
-        label_notLoaded->setText(QCoreApplication::translate("osmodules", "Command if Module is NOT Loaded", nullptr));
+        osmodules->setWindowTitle(QCoreApplication::translate("osmodules", "Modules",
+            nullptr));
+        button_add->setText(QCoreApplication::translate("osmodules", "Add New",
+            nullptr));
+        button_remove->setText(QCoreApplication::translate("osmodules", "Remove",
+            nullptr));
+        label_module->setText(QCoreApplication::translate("osmodules", "Module",
+            nullptr));
+        label_loaded->setText(QCoreApplication::translate("osmodules",
+            "Command if Module is Loaded", nullptr));
+        label_notLoaded->setText(QCoreApplication::translate("osmodules",
+            "Command if Module is NOT Loaded", nullptr));
 #if QT_CONFIG(tooltip)
-        line_module->setToolTip(QCoreApplication::translate("osmodules", "<html><head/><body><p>Name of OpenSpace module related to this profile</p></body></html>", nullptr));
+        line_module->setToolTip(QCoreApplication::translate("osmodules", "<html><head/>"
+            "<body><p>Name of OpenSpace module related to this profile</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
-        button_cancel->setToolTip(QCoreApplication::translate("osmodules", "<html><head/><body><p>Cancel adding this module to the above list</p></body></html>", nullptr));
+        button_cancel->setToolTip(QCoreApplication::translate("osmodules", "<html><head/>"
+            "<body><p>Cancel adding this module to the above list</p></body></html>",
+            nullptr));
 #endif // QT_CONFIG(tooltip)
-        button_cancel->setText(QCoreApplication::translate("osmodules", "Cancel", nullptr));
+        button_cancel->setText(QCoreApplication::translate("osmodules", "Cancel",
+            nullptr));
 #if QT_CONFIG(tooltip)
-        button_save->setToolTip(QCoreApplication::translate("osmodules", "<html><head/><body><p>Save module changes to the above list</p></body></html>", nullptr));
+        button_save->setToolTip(QCoreApplication::translate("osmodules", "<html><head/>"
+            "<body><p>Save module changes to the above list</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         button_save->setText(QCoreApplication::translate("osmodules", "Save", nullptr));
 #if QT_CONFIG(tooltip)
-        line_loaded->setToolTip(QCoreApplication::translate("osmodules", "<html><head/><body><p>[OPTIONAL] Lua command(s) to execute if the module is present in the OpenSpace application</p></body></html>", nullptr));
+        line_loaded->setToolTip(QCoreApplication::translate("osmodules", "<html><head/>"
+            "<body><p>[OPTIONAL] Lua command(s) to execute if the module is present in "
+            "the OpenSpace application</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
-        line_notLoaded->setToolTip(QCoreApplication::translate("osmodules", "<html><head/><body><p>[OPTIONAL] Lua command(s) to execute if the module is <span style=\" font-style:italic;\">not </span>present in the OpenSpace application (for example steps to account for a missing module)</p></body></html>", nullptr));
+        line_notLoaded->setToolTip(QCoreApplication::translate("osmodules", "<html>"
+            "<head/><body><p>[OPTIONAL] Lua command(s) to execute if the module is "
+            "<span style=\" font-style:italic;\">not </span>present in the OpenSpace "
+            "application (for example steps to account for a missing module)</p></body>"
+            "</html>", nullptr));
 #endif // QT_CONFIG(tooltip)
     } // retranslateUi
 

@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include <openspace/scene/profile.h>
 #include "ostime.h"
 #include "./ui_ostime.h"
@@ -39,7 +63,8 @@ ostime::ostime(openspace::Profile* imported, QWidget *parent)
 }
 
 void ostime::enableAccordingToType(int idx) {
-    openspace::Profile::Time::Type comboIdx = static_cast<openspace::Profile::Time::Type>(idx);
+    openspace::Profile::Time::Type comboIdx =
+        static_cast<openspace::Profile::Time::Type>(idx);
     bool setFormatForAbsolute = (comboIdx == openspace::Profile::Time::Type::Absolute);
     enableFormatForAbsolute(setFormatForAbsolute);
     ui->combo_type->setCurrentIndex(idx);
@@ -81,23 +106,24 @@ void ostime::cancel() {
 }
 
 void ostime::approved() {
-    if (ui->combo_type->currentIndex() == static_cast<int>(openspace::Profile::Time::Type::Relative)) {
+    if (ui->combo_type->currentIndex()
+        == static_cast<int>(openspace::Profile::Time::Type::Relative))
+    {
         if (ui->line_relative->text().length() == 0) {
-            //ui->label_relative->setText("<font color='red'>Relative Time:</font>");
-            //return;
-	    _imported->clearTime();
+            _imported->clearTime();
         }
-	else {
-	    openspace::Profile::Time t;
+        else {
+            openspace::Profile::Time t;
             t.type = openspace::Profile::Time::Type::Relative;
             t.time = ui->line_relative->text().toUtf8().constData();
-	    _imported->setTime(t);
-	}
+            _imported->setTime(t);
+        }
     }
     else {
         openspace::Profile::Time t;
         t.type = openspace::Profile::Time::Type::Absolute;
-        QString res = ui->dateTimeEdit->date().toString("yyyy-MM-dd") + "T" + ui->dateTimeEdit->time().toString();
+        QString res = ui->dateTimeEdit->date().toString("yyyy-MM-dd") +
+            "T" + ui->dateTimeEdit->time().toString();
         t.time = res.toUtf8().constData();
         _imported->setTime(t);
     }
