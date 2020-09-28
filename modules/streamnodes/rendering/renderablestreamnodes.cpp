@@ -416,7 +416,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     , _pDomainZ(DomainZInfo)
     , _pFluxColorAlpha(FluxColorAlphaInfo, 0.f, 0.f, 1.f)
     , _pFluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
-    , _pThresholdFlux(ThresholdFluxInfo, 0.8f, -50.f, 10.f)
+    , _pThresholdFlux(ThresholdFluxInfo, -1.5f, -50.f, 10.f)
     , _pFilteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)

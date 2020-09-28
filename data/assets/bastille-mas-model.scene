@@ -16,6 +16,8 @@ local earthcameraState = asset.require('scene/solarsystem/sun/heliosphere/mas/ba
 local sunAsset = asset.require('scene/solarsystem/sun/sun');    --heliosphere/mas/bastille_day/
 --local streamnodesAsset = asset.require('scene/solarsystem/sun/heliosphere/mas/bastille_day/streamnodes');
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
+asset.require('scene/solarsystem/planets/earth/satellites/satellites')
+asset.require('scene/solarsystem/planets/earth/satellites/misc/iss')
 
 -- must be >0
 -- the textureIndex variable is used to select a texture from a list of textures 
@@ -91,7 +93,7 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');"..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"..
-			"openspace.navigation.loadNavigationState('Sun');"..
+			--"openspace.navigation.loadNavigationState('Sun');"..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5.000000);",
 			--"Todo, fix the last one which is on the z axis"
@@ -233,6 +235,7 @@ local Keybindings = {
 		Command = 
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5, 5);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', -1);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000, 10);",	
 		Documentation = "transition when zooming out nodes+cutplane, nmbr 12",
 		Name = "Transition zooming out nodes + cutplane",
@@ -401,7 +404,7 @@ local Keybindings = {
 }
 
 asset.onInitialize(function ()
-    openspace.time.setTime("2000 JUL 14 08:33:37.100")
+    openspace.time.setTime("2000 JUL 14 08:42:00.100")
 
     sceneHelper.bindKeys(Keybindings)
 
@@ -425,6 +428,23 @@ asset.onInitialize(function ()
 	openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'MAS_MHD_StreamNodes')
 	openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
 	openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+	openspace.setPropertyValueSingle("Dashboard.Date.Enabled", true)
+	openspace.setPropertyValueSingle("Dashboard.Distance.Enabled", false)
+	openspace.setPropertyValueSingle("Dashboard.Framerate.Enabled", false)
+	openspace.setPropertyValueSingle("Dashboard.GlobeLocation.Enabled", false)
+	openspace.setPropertyValueSingle("Dashboard.ParallelConnection.Enabled", false)
+	openspace.setPropertyValueSingle("RenderEngine.ShowLog", false)
+	openspace.setPropertyValueSingle("RenderEngine.ShowVersion", false)
+	openspace.setPropertyValueSingle("RenderEngine.ShowCamera", false)
+	openspace.setPropertyValueSingle("Dashboard.Date.FontName", 'Light')
+	openspace.setPropertyValueSingle("Scene.geo.Renderable.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.gps-ops.Renderable.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.stations.Renderable.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.tle-new.Renderable.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.visual.Renderable.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", false)
+	openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true)
+
 end)
 
 asset.onDeinitialize(function ()

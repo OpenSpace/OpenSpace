@@ -111,17 +111,34 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
     penPosition.y -= _font->height();
+    std::string timestring = global::timeManager.time().UTC();
+   
+    std::replace(timestring.begin(), timestring.end(), 'T', ' ');
+    timestring.replace(timestring.begin() + 20, timestring.end(), "");
+    double deltatime = global::timeManager.deltaTime();
+    std::string DeltaStringEnd = "";
+    if (deltatime > 60) {
+        deltatime = deltatime / 60;
+        DeltaStringEnd = " MINUTES / SECOND";
+    }
+    else {
+        DeltaStringEnd = " SECONDS / SECOND";
+    }
+    timestring += '\n';
+    timestring += std::to_string(int(deltatime)) + DeltaStringEnd;
+
     RenderFont(
         *_font,
         penPosition,
-        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
+        fmt::format("{}", timestring)
     );
 }
 
 glm::vec2 DashboardItemDate::size() const {
+    
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
+        fmt::format("{} UTC", global::timeManager.time().UTC())
     ).boundingBox;
 }
 
