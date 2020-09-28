@@ -103,3 +103,13 @@ local Atmosphere = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+
+
+asset.meta = {
+    Name = "Earth Atmosphere",
+    Version = "1.0",
+    Description = [[ Atmosphere of Earth.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

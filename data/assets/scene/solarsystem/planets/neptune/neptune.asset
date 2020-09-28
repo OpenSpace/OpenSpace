@@ -47,3 +47,13 @@ local NeptuneLabel = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })
+
+
+asset.meta = {
+    Name = "Neptune",
+    Version = "1.0",
+    Description = [[ Neptune globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

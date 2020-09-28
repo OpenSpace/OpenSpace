@@ -23,5 +23,14 @@ local EarthMarker = {
 }
 
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { EarthMarker })
+
+
+asset.meta = {
+    Name = "Earth marker",
+    Version = "1.0",
+    Description = [[ Earth marker with name, sized for Solar System view]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

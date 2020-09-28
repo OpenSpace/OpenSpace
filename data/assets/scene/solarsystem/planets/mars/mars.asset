@@ -73,3 +73,13 @@ local MarsLabel = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mars, MarsLabel })
+
+
+asset.meta = {
+    Name = "Mars",
+    Version = "1.0",
+    Description = [[ Mars globe, and main globe label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

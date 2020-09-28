@@ -51,3 +51,13 @@ local Titan = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+
+
+asset.meta = {
+    Name = "Titan",
+    Version = "1.0",
+    Description = [[ Titan globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

@@ -49,3 +49,14 @@ local StyxTrail = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Styx, StyxTrail })
+
+
+asset.meta = {
+    Name = "Styx",
+    Version = "1.0",
+    Description = [[ Globe and trail for Pluto's moon Styx. Data from
+    NASA Spice (see base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

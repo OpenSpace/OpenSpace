@@ -20,3 +20,13 @@ local MercuryBarycenter = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryBarycenter })
+
+
+asset.meta = {
+    Name = "Mercury Transforms",
+    Version = "1.0",
+    Description = [[ Mercury Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

@@ -63,3 +63,13 @@ local SaturnLabel = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })
+
+
+asset.meta = {
+    Name = "Saturn",
+    Version = "1.0",
+    Description = [[ Saturn globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

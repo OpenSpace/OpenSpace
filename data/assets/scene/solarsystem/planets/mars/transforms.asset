@@ -20,3 +20,13 @@ local MarsBarycenter = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { MarsBarycenter })
+
+
+asset.meta = {
+    Name = "Mars Transforms",
+    Version = "1.0",
+    Description = [[ Mars Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

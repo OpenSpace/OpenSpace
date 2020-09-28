@@ -2,15 +2,7 @@ local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
 asset.require('./trail')
-
-
-
--- local textures = asset.syncedResource({
---     Name = "Hyperion textures",
---     Type = "HttpSynchronization",
---     Identifier = "hyperion_textures",
---     Version = 1
--- })
+local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Hyperion = {
     Identifier = "Hyperion",
@@ -32,14 +24,22 @@ local Hyperion = {
         Type = "RenderableGlobe",
         Radii = { 360200, 266000, 205400},
         SegmentsPerPatch = 64,
-        Layers = {
-            -- ColorLayers = {
-            --     {
-            --         Name = "Hyperion Texture",
-            --         FilePath = textures .. "/hyperion.jpg",
-            --         Enabled = true
-            --     }
-            -- }
+        Layers = {},
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/hyperion.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 14.0,
+            LabelsSize = 8.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 500000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
@@ -51,3 +51,13 @@ local Hyperion = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Hyperion })
+
+
+asset.meta = {
+    Name = "Hyperion",
+    Version = "1.0",
+    Description = [[ Hyperion globe with labels]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

@@ -70,3 +70,15 @@ assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(irregularProgradeMoons)
 )
+
+
+asset.meta = {
+    Name = "Neptune Irregular Prograde Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Neptune' irregular prograde
+        moons: Halimede, Psamathe and Neso. Blank globes and SPICE trails are generated for
+        each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

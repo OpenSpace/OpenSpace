@@ -53,3 +53,13 @@ local Ganymede = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Ganymede })
+
+
+asset.meta = {
+    Name = "Ganymede",
+    Version = "1.0",
+    Description = [[ Ganymede globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

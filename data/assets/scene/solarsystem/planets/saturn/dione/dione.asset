@@ -51,3 +51,13 @@ local Dione = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Dione })
+
+
+asset.meta = {
+    Name = "Dione",
+    Version = "1.0",
+    Description = [[ Dione globe with labels]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

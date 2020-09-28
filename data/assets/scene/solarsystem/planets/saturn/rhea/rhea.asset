@@ -16,7 +16,7 @@ local Rhea = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_RHEA",
             DestinationFrame = "GALACTIC"
         }
     },
@@ -51,3 +51,13 @@ local Rhea = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Rhea })
+
+
+asset.meta = {
+    Name = "Rhea",
+    Version = "1.0",
+    Description = [[ Rhea globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

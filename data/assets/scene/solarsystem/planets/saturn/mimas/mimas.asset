@@ -51,3 +51,13 @@ local Mimas = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mimas })
+
+
+asset.meta = {
+    Name = "Mimas",
+    Version = "1.0",
+    Description = [[ Mimas globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

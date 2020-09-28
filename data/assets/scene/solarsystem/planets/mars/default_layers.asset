@@ -31,6 +31,20 @@ asset.require(overlaysPath .. "/size_reference")
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers." ..
+        colorLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers." ..
+        heightLayer.layer.Identifier .. ".Enabled", true)
 end)
+
+
+asset.meta = {
+    Name = "Default Mars Layers",
+    Version = "1.0",
+    Description = [[ Default Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo
+        Color, MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, and CTX Blended
+        beta01]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

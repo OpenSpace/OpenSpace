@@ -47,3 +47,13 @@ local JupiterLabel = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter, JupiterLabel })
+
+
+asset.meta = {
+    Name = "Jupiter",
+    Version = "1.0",
+    Description = [[ Jupiter globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
