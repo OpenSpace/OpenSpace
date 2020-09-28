@@ -46,6 +46,9 @@ uniform float opacity = 1.0;
 const vec3 SpecularAlbedo = vec3(1.0);
 
 Fragment getFragment() {
+    if (opacity == 0.0)
+        discard;
+
     vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
 
     Fragment frag;
@@ -84,7 +87,11 @@ Fragment getFragment() {
         frag.color.rgb = diffuseAlbedo;
     }
 
-    frag.color.a        = opacity;
+    frag.color.a        = opacity * length(frag.color.rgb)/3.0 * 1.0;
+
+    if (frag.color.a < 0.1)
+        discard;
+
     frag.depth          = vs_screenSpaceDepth;
     frag.gPosition      = vs_positionCameraSpace;
     frag.gNormal        = vec4(vs_normalViewSpace, 0.0);

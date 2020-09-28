@@ -22,6 +22,7 @@ asset.require('scene/solarsystem/dwarf_planets/pluto/charon/default_layers')
 asset.require('scene/milkyway/milkyway/volume')
 asset.require('scene/milkyway/constellations/constellation_art')
 asset.require('scene/milkyway/constellations/constellation_keybinds')
+asset.require('scene/milkyway/objects/orionnebula/orionnebula')
 
 assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')
 

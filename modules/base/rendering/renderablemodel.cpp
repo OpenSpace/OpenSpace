@@ -37,6 +37,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
@@ -45,6 +46,13 @@
 namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
+
+    constexpr const int DefaultBlending = 0;
+    constexpr const int AdditiveBlending = 1;
+    constexpr const int GLSuggestionBlending = 2;
+    constexpr const int PointsAndLinesBlending = 3;
+    constexpr const int PolygonBlending = 4;
+    constexpr const int ColorAddingBlending = 5;
 
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
@@ -101,6 +109,18 @@ namespace {
         "LightSources",
         "Light Sources",
         "A list of light sources that this model should accept light from."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
+        "DisableDepthTest",
+        "Disable Depth Test",
+        "Disable Depth Testing for the Model."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
+        "BledingOption",
+        "Blending Options",
+        "Debug option for blending colors."
     };
 } // namespace
 
@@ -196,6 +216,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
+    , _disableDepthTest(DisableDepthTestInfo, false)
+    , _blendingFuncOption(BlendingOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -254,7 +276,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 
     addPropertySubOwner(_lightSourcePropertyOwner);
-
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
@@ -271,6 +292,17 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(RotationVecInfo.identifier)) {
         _rotationVec = dictionary.value<glm::vec3>(RotationVecInfo.identifier);
     }
+
+    addProperty(_disableDepthTest);
+
+    _blendingFuncOption.addOption(DefaultBlending, "Default");
+    _blendingFuncOption.addOption(AdditiveBlending, "Additive");
+    _blendingFuncOption.addOption(GLSuggestionBlending, "OpenGL Suggestion");
+    _blendingFuncOption.addOption(PointsAndLinesBlending, "Points and Lines");
+    _blendingFuncOption.addOption(PolygonBlending, "Polygon");
+    _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
+
+    addProperty(_blendingFuncOption);
 }
 
 bool RenderableModel::isReady() const {
@@ -391,6 +423,32 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
+    glEnablei(GL_BLEND, 0);
+    switch (_blendingFuncOption) {
+    case DefaultBlending:
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+    case AdditiveBlending:
+        glBlendFunc(GL_ONE, GL_ONE);
+        break;
+    case GLSuggestionBlending:
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+    case PointsAndLinesBlending:
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+    case PolygonBlending:
+        glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+        break;
+    case ColorAddingBlending:
+        glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+        break;
+    };
+
+    if (_disableDepthTest) {
+        glDisable(GL_DEPTH_TEST);
+    }
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _program->setUniform(_uniformCache.texture, unit);
@@ -401,6 +459,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
+    }
+
+    global::renderEngine.openglStateCache().resetBlendState();
+
+    if (_disableDepthTest) {
+        glEnable(GL_DEPTH_TEST);
     }
 
     _program->deactivate();

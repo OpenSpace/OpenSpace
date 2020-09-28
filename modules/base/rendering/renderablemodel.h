@@ -26,7 +26,8 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
-
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -78,6 +79,9 @@ private:
     properties::BoolProperty _disableFaceCulling;
     properties::DMat4Property _modelTransform;
     properties::Vec3Property _rotationVec;
+
+    properties::BoolProperty _disableDepthTest;
+    properties::OptionProperty _blendingFuncOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
