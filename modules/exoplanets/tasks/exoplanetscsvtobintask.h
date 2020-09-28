@@ -22,19 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DISTANCECONSTANTS___H__
-#define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
 
-namespace openspace::distanceconstants {
-    constexpr double EarthRadius = 6371;
-    constexpr double JupiterRadius = 7.1492E7;
-    constexpr double SolarRadius = 6.95700E8;
-    constexpr double LightYear = 9.4607304725808E15;
-    constexpr double LightMonth = LightYear / 12;
-    constexpr double LightDay = LightYear / 365;
-    constexpr double LightHour = LightDay / 24;
-    constexpr double AstronomicalUnit = 1.495978707E11;
-    constexpr double Parsec = 3.0856776E16;
-} // openspace::distanceconstants
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/task.h>
+#include <string>
 
-#endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+namespace openspace::exoplanets {
+
+class ExoplanetsCsvToBinTask : public Task {
+public:
+    ExoplanetsCsvToBinTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+
+private:
+    std::string _inputCsvPath;
+    std::string _inputSpeckPath;
+    std::string _outputBinPath;
+    std::string _outputLutPath;
+    std::string _teffToBvFilePath;
+
+    glm::vec3 starPosition(const std::string& starName);
+
+    // Compute b-v color from teff value using a conversion file
+    float bvFromTeff(float teff);
+};
+
+} // namespace openspace::exoplanets
+
+#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
