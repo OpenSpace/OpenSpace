@@ -9,6 +9,21 @@ local densityDirectory = asset.syncedResource({
     Version = 1
 })
 
+--local mirrorVolumeMatrix = {
+    --1.0, 0.0, 0.0,
+    --0.0, 1.0, 0.0,
+    --0.0, 0.0, 1.0
+
+
+--    -1.0, 0.0, 0.0,
+--    0.0, 1.0, 0.0,
+--    0.0, 0.0, -1.0
+    
+    --0.0, 1.0, 0.0,
+    --1.0, 0.0, 0.0,
+    --0.0, 0.0, 1.0
+--}
+
 local sunRadius = 6.957E8
 
 local densityVolume = {
@@ -28,7 +43,9 @@ local densityVolume = {
         --UpperValueBound = 1,
         GridType = "Spherical",
         SecondsBefore = 24*60*60,
-        SecondsAfter = 24*60*60
+        SecondsAfter = 24*60*60,
+        Dimensions = {100, 100, 128},
+        InvertDataAtZ = true
     },
     Transform = {
         Scale = {
@@ -36,13 +53,20 @@ local densityVolume = {
             Scale = sunRadius
         },
         Rotation = {
-            Type = "FixedRotation", --LuaRotation
---            XAxis = {-1.0, 0.0, 0.0}, 
---            YAxis = {0.0, -1.0, 0.0},
+            --Type = "StaticRotation", --LuaRotation
+            --Rotation = mirrorVolumeMatrix
+            Type = "FixedRotation",
+                XAxis = {-1.0, 0.0, 0.0},
+                YAxis = {0.0, 1.0, 0.0},
+                ZAxis = {0.0, 0.0, -1.0}
 
-            XAxis = {0.0, 1.0, 0.0},
-            YAxis = {1.0, 0.0, 0.0},
-            ZAxis = {0.0, 0.0, -1.0}
+            --XAxis = {1.0, 0.0, 0.0},
+            --YAxis = {0.0, 1.0, 0.0},
+            --ZAxis = {0.0, 0.0, -1.0}
+
+            --XAxis = {1.0, 0.0, 0.0},
+            --YAxis = {0.0, 1.0, 0.0},
+            --ZAxis = {0.0, 0.0, -1.0}
 
             --Script = asset.localResource("kernels/carringtonRotation.lua")
         }       

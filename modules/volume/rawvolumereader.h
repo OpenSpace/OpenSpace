@@ -31,29 +31,29 @@
 
 namespace openspace::volume {
 
-template <typename T> class RawVolume;
+    template <typename T> class RawVolume;
 
-template <typename Type>
-class RawVolumeReader {
-public:
-    using VoxelType = Type;
+    template <typename Type>
+    class RawVolumeReader {
+    public:
+        using VoxelType = Type;
 
-    RawVolumeReader(const std::string& path, const glm::uvec3& dimensions);
+        RawVolumeReader(const std::string& path, const glm::uvec3& dimensions);
 
-    glm::uvec3 dimensions() const;
-    std::string path() const;
-    void setPath(const std::string& path);
-    void setDimensions(const glm::uvec3& dimensions);
-    //VoxelType get(const glm::ivec3& coordinates) const; // TODO: Implement this
-    //VoxelType get(const size_t index) const; // TODO: Implement this
-    std::unique_ptr<RawVolume<VoxelType>> read();
+        glm::uvec3 dimensions() const;
+        std::string path() const;
+        void setPath(const std::string& path);
+        void setDimensions(const glm::uvec3& dimensions);
+        //VoxelType get(const glm::ivec3& coordinates) const; // TODO: Implement this
+        //VoxelType get(const size_t index) const; // TODO: Implement this
+        std::unique_ptr<RawVolume<VoxelType>> read(bool invertZ = false);
 
-private:
-    size_t coordsToIndex(const glm::uvec3& cartesian) const;
-    glm::uvec3 indexToCoords(size_t linear) const;
-    glm::uvec3 _dimensions;
-    std::string _path;
-};
+    private:
+        size_t coordsToIndex(const glm::uvec3& cartesian) const;
+        glm::uvec3 indexToCoords(size_t linear) const;
+        glm::uvec3 _dimensions;
+        std::string _path;
+    };
 
 } // namespace openspace::volume
 
