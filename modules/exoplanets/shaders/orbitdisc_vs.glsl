@@ -22,19 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DISTANCECONSTANTS___H__
-#define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+#version __CONTEXT__
 
-namespace openspace::distanceconstants {
-    constexpr double EarthRadius = 6371;
-    constexpr double JupiterRadius = 7.1492E7;
-    constexpr double SolarRadius = 6.95700E8;
-    constexpr double LightYear = 9.4607304725808E15;
-    constexpr double LightMonth = LightYear / 12;
-    constexpr double LightDay = LightYear / 365;
-    constexpr double LightHour = LightDay / 24;
-    constexpr double AstronomicalUnit = 1.495978707E11;
-    constexpr double Parsec = 3.0856776E16;
-} // openspace::distanceconstants
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_st;
+
+out vec2 vs_st;
+out vec4 vs_position;
+
+uniform mat4 modelViewProjectionTransform;
+
+void main() {
+    vs_st = in_st;
+    vs_position = z_normalization(
+        modelViewProjectionTransform * vec4(in_position, 0.0, 1.0)
+    );
+
+    gl_Position = vs_position;
+}
