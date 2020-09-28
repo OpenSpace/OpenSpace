@@ -28,6 +28,7 @@ asset.require('examples/pointscloud')
 --- TESTELITEST ---
 
 assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')
+
 assetHelper.requireAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
