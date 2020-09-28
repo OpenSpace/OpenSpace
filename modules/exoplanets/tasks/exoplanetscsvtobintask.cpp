@@ -687,7 +687,7 @@ documentation::Documentation ExoplanetsCsvToBinTask::documentation() {
                 KeyTeffToBv,
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
-                "The path to the teff to a bv conversion file"
+                "The path to a teff to bv conversion file"
             }
         }
     };

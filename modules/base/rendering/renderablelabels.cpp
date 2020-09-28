@@ -207,12 +207,6 @@ documentation::Documentation RenderableLabels::Documentation() {
                 LabelColorInfo.description,
             },
             {
-                LabelColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                LabelColorInfo.description,
-            },
-            {
                 LabelTextInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
@@ -397,7 +391,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     _labelColor.setViewOption(properties::Property::ViewOptions::Color);
     if (dictionary.hasKey(LabelColorInfo.identifier)) {
-        _labelColor = dictionary.value<glm::vec4>(LabelColorInfo.identifier);
+        _labelColor = dictionary.value<glm::vec3>(LabelColorInfo.identifier);
     }
     addProperty(_labelColor);
 
