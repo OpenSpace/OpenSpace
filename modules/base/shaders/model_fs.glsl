@@ -34,6 +34,7 @@ uniform float diffuseIntensity = 1.0;
 uniform float specularIntensity = 1.0;
 
 uniform bool performShading = true;
+uniform bool opacityBlending = false;
 
 uniform sampler2D texture1;
 
@@ -87,7 +88,12 @@ Fragment getFragment() {
         frag.color.rgb = diffuseAlbedo;
     }
 
-    frag.color.a        = opacity * length(frag.color.rgb)/3.0 * 1.0;
+    if (opacityBlending) {
+        //frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
+        frag.color.a = opacity * ( max(max(frag.color.r, frag.color.g), frag.color.b) );
+    } else {
+        frag.color.a = opacity;
+    }
 
     if (frag.color.a < 0.1)
         discard;

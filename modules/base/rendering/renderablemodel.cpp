@@ -54,11 +54,20 @@ namespace {
     constexpr const int PolygonBlending = 4;
     constexpr const int ColorAddingBlending = 5;
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    std::map<std::string, int> BlendingMapping = {
+        {"Default", DefaultBlending},
+        {"Additive", AdditiveBlending},
+        {"OpenGL Suggestion", GLSuggestionBlending},
+        {"Points and Lines", PointsAndLinesBlending},
+        {"Polygon", PolygonBlending},
+        {"Color Adding", ColorAddingBlending}
+    };
+
+    constexpr const std::array<const char*, 13> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "crippedModelViewTransform", "projectionTransform", 
         "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
-        "specularIntensity"
+        "specularIntensity", "opacityBlending"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
@@ -121,6 +130,12 @@ namespace {
         "BledingOption",
         "Blending Options",
         "Debug option for blending colors."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
+        "EnableOpacityBlending",
+        "Enable Opacity Blending",
+        "Enable Opacity Blending."
     };
 } // namespace
 
@@ -197,7 +212,25 @@ documentation::Documentation RenderableModel::Documentation() {
                 }),
                 Optional::Yes,
                 LightSourcesInfo.description
-            }
+            },
+            {
+                DisableDepthTestInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableDepthTestInfo.description
+            },
+            {
+                BlendingOptionInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                BlendingOptionInfo.description
+            },
+            {
+                EnableOpacityBlendingInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                EnableOpacityBlendingInfo.description
+            },
         }
     };
 }
@@ -216,6 +249,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
+    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _disableDepthTest(DisableDepthTestInfo, false)
     , _blendingFuncOption(BlendingOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
@@ -257,6 +291,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
 
+    if (dictionary.hasKey(DisableDepthTestInfo.identifier)) {
+        _disableDepthTest = dictionary.value<bool>(DisableDepthTestInfo.identifier);
+    }
+
     if (dictionary.hasKey(DisableFaceCullingInfo.identifier)) {
         _disableFaceCulling = dictionary.value<bool>(DisableFaceCullingInfo.identifier);
     }
@@ -274,13 +312,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-
     addPropertySubOwner(_lightSourcePropertyOwner);
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
     addProperty(_disableFaceCulling);
+    addProperty(_disableDepthTest);
     addProperty(_modelTransform);
     addProperty(_rotationVec);
 
@@ -293,8 +331,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _rotationVec = dictionary.value<glm::vec3>(RotationVecInfo.identifier);
     }
 
-    addProperty(_disableDepthTest);
-
     _blendingFuncOption.addOption(DefaultBlending, "Default");
     _blendingFuncOption.addOption(AdditiveBlending, "Additive");
     _blendingFuncOption.addOption(GLSuggestionBlending, "OpenGL Suggestion");
@@ -303,6 +339,17 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
 
     addProperty(_blendingFuncOption);
+
+    if (dictionary.hasKey(BlendingOptionInfo.identifier)) {
+        const std::string blendingOpt(dictionary.value<std::string>(BlendingOptionInfo.identifier));
+        _blendingFuncOption.set(BlendingMapping[blendingOpt]);
+    }
+
+    if (dictionary.hasKey(DisableDepthTestInfo.identifier)) {
+        _enableOpacityBlending = dictionary.value<bool>(EnableOpacityBlendingInfo.identifier);
+    }
+
+    addProperty(_enableOpacityBlending);
 }
 
 bool RenderableModel::isReady() const {
@@ -418,6 +465,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
     _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
     _program->setUniform(_uniformCache.performShading, _performShading);
+    _program->setUniform(_uniformCache.opacityBlending, _enableOpacityBlending);
 
     if (_disableFaceCulling) {
         glDisable(GL_CULL_FACE);
