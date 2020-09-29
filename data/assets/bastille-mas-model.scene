@@ -463,7 +463,10 @@ asset.onInitialize(function ()
 	openspace.setPropertyValueSingle("Scene.visual.Renderable.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true)
+	openspace.setPropertyValueSingle("Scene.ISS_trail.Renderable.Enabled", false)
 	
+	openspace.clearKey('g')
+	openspace.clearKey('b')
 
 end)
 
