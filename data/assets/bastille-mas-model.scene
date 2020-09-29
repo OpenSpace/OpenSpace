@@ -18,6 +18,7 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun');    --heliosphere/ma
 assetHelper.requestAll(asset, 'scene/solarsystem/sun/heliosphere')
 asset.require('scene/solarsystem/planets/earth/satellites/satellites')
 asset.require('scene/solarsystem/planets/earth/satellites/misc/iss')
+asset.require('scene/solarsystem/planets/earth/magnetosphere')
 
 -- must be >0
 -- the textureIndex variable is used to select a texture from a list of textures 
@@ -37,7 +38,7 @@ starttimeVenus = "2000 JUL 14 10:28:00";
 starttimeEarth = "2000 JUL 14 10:40:00";
 EndtimeSlowLoop = "2000 JUL 14 11:00:00";
 EndtimeFastLoop = "2000 JUL 14 12:00:00";
-EndtimeShortLoop = "2000 JUL 14 10:16:00";
+EndtimeShortLoop = "2000 JUL 14 10:20:00";
 EndtimeLongLoop = "2000 JUL 14 11:50:00";
 
 --script20 = "scene/solarsystem/sun/heliosphere/mas/bastille_day/Camerapositions/Sun";
@@ -198,23 +199,11 @@ local Keybindings = {
 		Key = "Shift+m",
 		Command = 
 			"openspace.scriptScheduler.clear();" ..
-			"openspace.time.setDeltaTime(120);" ..
-			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
-			"openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);",
-		Documentation = "New loop: Restarts time at 10:03 and stops at 10:16, sets delta time to 2 min/ second (120 seconds/ second)",
-		Name = "Loop 10:03 - 10:16, delta time 2 min/ second",
-		GuiPath = "/CCMC/Nodes",
-        Local = false
-    },
-    {
-		Key = "Shift+d",
-		Command = 
-			"openspace.scriptScheduler.clear();" ..
 			"openspace.time.setDeltaTime(240);" ..
 			"openspace.time.setTime('2000-JUL-14 10:03:00.00');" ..
-			"openspace.scriptScheduler.loadScheduledScript(starttimeEarth, StarttimescriptSlowLoop);",
-		Documentation = "New loop: Restarts time at 10:03 and stops at 10:40, sets delta time to 4 min/ second (240 seconds/ second)",
-		Name = "Loop 10:03 - 10:40, delta time 4 min/ second",
+			"openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);",
+		Documentation = "New loop: Restarts time at 10:03 and stops at 10:20, sets delta time to 4 min/ second (240 seconds/ second)",
+		Name = "Loop 10:03 - 10:20, delta time 4 min/ second",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
@@ -322,7 +311,7 @@ local Keybindings = {
 		Key = "Shift+e",
 		Command =
 			"openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 4.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 3.000000);" ..
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'focusPoint');" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', true);" ..
 
@@ -351,6 +340,12 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.SpeedofLight.Renderable.Enabled', false);" ..
 
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Enabled', false);" ..
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.maskingEnabled', true);" ..
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingQuantity', 5.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMinLimit', '0');" ..
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMaxLimit', '0.5');" ..
+
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', false);" ..
@@ -377,8 +372,8 @@ local Keybindings = {
 		Key = "Shift+h",
 		Command =
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', true);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 5.200000);" ..
-			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 5.200000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 4.000000);" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 4.000000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 0.190000);",
 		Documentation = "Turn on off glare",
 		Name = "Second transition Emilie",
@@ -456,6 +451,7 @@ asset.onInitialize(function ()
 	openspace.setPropertyValueSingle("Scene.visual.Renderable.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled", false)
 	openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery.Enabled", true)
+	
 
 end)
 
