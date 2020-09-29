@@ -32,6 +32,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -151,6 +152,8 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     if (_propertyIsDirty) {
         _property = openspace::property(_propertyUri);
         _propertyIsDirty = false;
@@ -166,10 +169,9 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemPropertyValue::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        _displayString.value()
-    ).boundingBox;
+    ZoneScoped
+
+    return _font->boundingBox(_displayString.value());
 }
 
 } // namespace openspace

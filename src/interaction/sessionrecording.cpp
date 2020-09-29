@@ -39,12 +39,21 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <iomanip>
 
 namespace {
     constexpr const char* _loggerCat = "SessionRecording";
+
+    constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
+        "RenderInfo",
+        "Render Playback Information",
+        "If enabled, information about a currently played back session "
+        "recording is rendering to screen"
+    };
 
     constexpr const bool UsingTimeKeyframes = false;
     const std::string FileHeaderTitle = "OpenSpace_record/playback";
@@ -101,7 +110,10 @@ namespace openspace::interaction {
 
 SessionRecording::SessionRecording()
     : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
-{}
+    , _renderPlaybackInformation(RenderPlaybackInfo, false)
+{
+    addProperty(_renderPlaybackInformation);
+}
 
 SessionRecording::~SessionRecording() {} // NOLINT
 
@@ -613,6 +625,28 @@ void SessionRecording::preSynchronization() {
         }
     }
     _lastState = _state;
+}
+
+void SessionRecording::render() {
+    ZoneScoped
+
+    if (!(_renderPlaybackInformation && isPlayingBack())) {
+        return;
+    }
+
+
+    constexpr const char* FontName = "Mono";
+    constexpr const float FontSizeFrameinfo = 32.f;
+    std::shared_ptr<ghoul::fontrendering::Font> font =
+        global::fontManager.font(FontName, FontSizeFrameinfo);
+
+    glm::vec2 res = global::renderEngine.fontResolution();
+    glm::vec2 penPosition = glm::vec2(
+        res.x / 2 - 150.f,
+        res.y / 4
+    );
+    std::string text = std::to_string(currentTime());
+    ghoul::fontrendering::RenderFont(*font, penPosition, text, glm::vec4(1.f));
 }
 
 bool SessionRecording::isRecording() const {

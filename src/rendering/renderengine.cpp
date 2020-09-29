@@ -32,8 +32,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/performance/performancemanager.h>
-#include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -44,6 +42,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/updatestructures.h>
@@ -57,6 +56,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #ifdef GHOUL_USE_DEVIL
@@ -257,7 +257,6 @@ namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine" })
-    , _doPerformanceMeasurements(PerformanceInfo)
     , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
     , _showLog(ShowLogInfo, true)
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
@@ -297,11 +296,6 @@ RenderEngine::RenderEngine()
         glm::vec3(glm::pi<float>())
     )
 {
-    _doPerformanceMeasurements.onChange([this](){
-        global::performanceManager.setEnabled(_doPerformanceMeasurements);
-    });
-    addProperty(_doPerformanceMeasurements);
-
     addProperty(_showOverlayOnSlaves);
     addProperty(_showLog);
     addProperty(_verticalLogOffset);
@@ -396,6 +390,8 @@ RenderEngine::RenderEngine()
 RenderEngine::~RenderEngine() {} // NOLINT
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
+    ZoneScoped
+
     _rendererImplementation = rendererFromString(renderingMethod);
 
     std::unique_ptr<Renderer> newRenderer = nullptr;
@@ -454,6 +450,22 @@ void RenderEngine::initialize() {
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
+
+    _versionString = OPENSPACE_VERSION_STRING_FULL;
+    if (global::versionChecker.hasLatestVersionInfo()) {
+        VersionChecker::SemanticVersion latest = global::versionChecker.latestVersion();
+
+        VersionChecker::SemanticVersion current{
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH
+        };
+        if (current < latest) {
+            _versionString += fmt::format(
+                " [Available: {}.{}.{}]", latest.major, latest.minor, latest.patch
+            );
+        }
+    }
 }
 
 void RenderEngine::initializeGL() {
@@ -477,10 +489,6 @@ void RenderEngine::initializeGL() {
     setRendererFromString(renderingMethod);
 
 
-
-    // TODO:    Fix the power scaled coordinates in such a way that these
-    //            values can be set to more realistic values
-
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
@@ -489,19 +497,38 @@ void RenderEngine::initializeGL() {
     // initialized window
     _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
 
-    constexpr const float FontSizeFrameinfo = 32.f;
-    _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
-    constexpr const float FontSizeTime = 15.f;
-    _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
-    constexpr const float FontSizeMono = 10.f;
-    _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
-    constexpr const float FontSizeLight = 8.f;
-    _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+    {
+        ZoneScopedN("Font: Mono")
+        TracyGpuZone("Font: Mono")
+        constexpr const float FontSizeFrameinfo = 32.f;
+        _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
+    }
+    {
+        ZoneScopedN("Font: Date")
+        TracyGpuZone("Font: Date")
+        constexpr const float FontSizeTime = 15.f;
+        _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
+    }
+    {
+        ZoneScopedN("Font: Info")
+        TracyGpuZone("Font: Info")
+        constexpr const float FontSizeMono = 10.f;
+        _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
+    }
+    {
+        ZoneScopedN("Font: Log")
+        TracyGpuZone("Font: Log")
+        constexpr const float FontSizeLight = 8.f;
+        _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+    }
 
-    LINFO("Initializing Log");
-    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
-    _log = log.get();
-    ghoul::logging::LogManager::ref().addLog(std::move(log));
+    {
+        ZoneScopedN("Log")
+        LINFO("Initializing Log");
+        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        _log = log.get();
+        ghoul::logging::LogManager::ref().addLog(std::move(log));
+    }
 
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
@@ -528,8 +555,7 @@ void RenderEngine::updateScene() {
     _scene->update({
         TransformData{ glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
         currentTime,
-        integrateFromTime,
-        _doPerformanceMeasurements
+        integrateFromTime
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -804,14 +830,10 @@ void RenderEngine::renderEndscreen() {
     glViewport(0, 0, res.x, res.y);
 
     using FR = ghoul::fontrendering::FontRenderer;
-    using BBox = FR::BoundingBoxInformation;
-    BBox size = FR::defaultRenderer().boundingBox(
-        *_fontDate,
-        "Shutting down"
-    );
+    const glm::vec2 size = _fontDate->boundingBox("Shutting down");
     glm::vec2 penPosition = glm::vec2(
-        fontResolution().x / 2 - size.boundingBox.x / 2,
-        fontResolution().y / 2 - size.boundingBox.y / 2
+        fontResolution().x / 2 - size.x / 2,
+        fontResolution().y / 2 - size.y / 2
     );
     RenderFont(*_fontDate, penPosition, "Shutting down");
 }
@@ -821,15 +843,13 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     timer = std::max(timer, 0.f);
 
-    using BBox = ghoul::fontrendering::FontRenderer::BoundingBoxInformation;
-    BBox size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_fontDate,
+    const glm::vec2 size = _fontDate->boundingBox(
         fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
 
     glm::vec2 penPosition = glm::vec2(
-        fontResolution().x - size.boundingBox.x - 10,
-        fontResolution().y - size.boundingBox.y
+        fontResolution().x - size.x - 10,
+        fontResolution().y - size.y
     );
 
     RenderFont(
@@ -851,13 +871,6 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
 void RenderEngine::renderDashboard() {
     ZoneScoped
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "Main Dashboard::render"
-        );
-    }
 
     glm::vec2 dashboardStart = global::dashboard.getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
@@ -887,12 +900,6 @@ void RenderEngine::postDraw() {
     ZoneScoped
 
     ++_frameNumber;
-
-    if (global::performanceManager.isEnabled()) {
-        global::performanceManager.storeScenePerformanceMeasurements(
-            scene()->allSceneGraphNodes()
-        );
-    }
 
 #ifdef OPENSPACE_WITH_INSTRUMENTATION
     if (_saveFrameInformation) {
@@ -942,6 +949,13 @@ const Renderer& RenderEngine::renderer() const {
 
 RenderEngine::RendererImplementation RenderEngine::rendererImplementation() const {
     return _rendererImplementation;
+}
+
+ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
+    if (_openglStateCache == nullptr) {
+        _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
+    }
+    return *_openglStateCache;
 }
 
 float RenderEngine::globalBlackOutFactor() {
@@ -1112,6 +1126,8 @@ void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
  * Set renderer
  */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
+    ZoneScoped
+
     if (_renderer) {
         _renderer->deinitialize();
     }
@@ -1268,13 +1284,9 @@ void RenderEngine::renderCameraInformation() {
     const glm::vec4 EnabledColor  = glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
     const glm::vec4 DisabledColor = glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
 
-    using FR = ghoul::fontrendering::FontRenderer;
-    const FR::BoundingBoxInformation rotationBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Rotation"
-    );
+    const glm::vec2 rotationBox = _fontInfo->boundingBox("Rotation");
 
-    float penPosY = fontResolution().y - rotationBox.boundingBox.y;
+    float penPosY = fontResolution().y - rotationBox.y;
 
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
@@ -1282,53 +1294,49 @@ void RenderEngine::renderCameraInformation() {
     const interaction::OrbitalNavigator& nav =
         global::navigationHandler.orbitalNavigator();
 
+    using FR = ghoul::fontrendering::FontRenderer;
+    
     _cameraButtonLocations.rotation = {
-        fontResolution().x - rotationBox.boundingBox.x - XSeparation,
+        fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,
-        rotationBox.boundingBox.x,
-        rotationBox.boundingBox.y
+        rotationBox.x,
+        rotationBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - rotationBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - rotationBox.x - XSeparation, penPosY),
         "Rotation",
         nav.hasRotationalFriction() ? EnabledColor : DisabledColor
     );
-    penPosY -= rotationBox.boundingBox.y + YSeparation;
+    penPosY -= rotationBox.y + YSeparation;
 
-    FR::BoundingBoxInformation zoomBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Zoom"
-    );
+    const glm::vec2 zoomBox = _fontInfo->boundingBox("Zoom");
 
     _cameraButtonLocations.zoom = {
-        fontResolution().x - zoomBox.boundingBox.x - XSeparation,
+        fontResolution().x - zoomBox.x - XSeparation,
         fontResolution().y - penPosY,
-        zoomBox.boundingBox.x,
-        zoomBox.boundingBox.y
+        zoomBox.x,
+        zoomBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - zoomBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - zoomBox.x - XSeparation, penPosY),
         "Zoom",
         nav.hasZoomFriction() ? EnabledColor : DisabledColor
     );
-    penPosY -= zoomBox.boundingBox.y + YSeparation;
+    penPosY -= zoomBox.y + YSeparation;
 
-    FR::BoundingBoxInformation rollBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Roll"
-    );
+    const glm::vec2 rollBox = _fontInfo->boundingBox("Roll");
 
     _cameraButtonLocations.roll = {
-        fontResolution().x - rollBox.boundingBox.x - XSeparation,
+        fontResolution().x - rollBox.x - XSeparation,
         fontResolution().y - penPosY,
-        rollBox.boundingBox.x,
-        rollBox.boundingBox.y
+        rollBox.x,
+        rollBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - rollBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - rollBox.x - XSeparation, penPosY),
         "Roll",
         nav.hasRollFriction() ? EnabledColor : DisabledColor
     );
@@ -1341,62 +1349,55 @@ void RenderEngine::renderVersionInformation() {
         return;
     }
 
-    std::string versionString = OPENSPACE_VERSION_STRING_FULL;
-
-    if (global::versionChecker.hasLatestVersionInfo()) {
-        VersionChecker::SemanticVersion latestVersion =
-            global::versionChecker.latestVersion();
-
-        VersionChecker::SemanticVersion currentVersion {
-            OPENSPACE_VERSION_MAJOR,
-            OPENSPACE_VERSION_MINOR,
-            OPENSPACE_VERSION_PATCH
-        };
-        if (currentVersion < latestVersion) {
-            versionString += fmt::format(
-                " [Available: {}.{}.{}]",
-                latestVersion.major, latestVersion.minor, latestVersion.patch
-            );
-        }
-    }
-
     using FR = ghoul::fontrendering::FontRenderer;
-    const FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        versionString
-    );
-
-    const FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        fmt::format("{}@{}", OPENSPACE_GIT_BRANCH, OPENSPACE_GIT_COMMIT)
-    );
+    const glm::vec2 versionBox = _fontInfo->boundingBox(_versionString);
+    const glm::vec2 commitBox = _fontInfo->boundingBox(OPENSPACE_GIT_FULL);
 
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(
-            fontResolution().x - versionBox.boundingBox.x - 10.f,
+            fontResolution().x - versionBox.x - 10.f,
             5.f
         ),
-        versionString,
+        _versionString,
         glm::vec4(0.5, 0.5, 0.5, 1.f)
     );
 
     // If a developer hasn't placed the Git command in the path, this variable will be
     // empty
-    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+    if (!std::string_view(OPENSPACE_GIT_COMMIT).empty()) {
         // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
         // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
         // checking for that is a bit brittle)
         FR::defaultRenderer().render(
             *_fontInfo,
-            glm::vec2(
-                fontResolution().x - commitBox.boundingBox.x - 10.f,
-                versionBox.boundingBox.y + 5.f
-            ),
+            glm::vec2(fontResolution().x - commitBox.x - 10.f, versionBox.y + 5.f),
             OPENSPACE_GIT_FULL,
             glm::vec4(0.5, 0.5, 0.5, 1.f)
         );
     }
+
+#ifdef TRACY_ENABLE
+    {
+        // If we have Tracy enabled, we should inform the user about it that the
+        // application will crash after a while if no profiler is attached
+
+        ZoneScopedN("Tracy Information")
+
+        const glm::vec2 tracyBox = _fontInfo->boundingBox("TRACY PROFILING ENABLED");
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x - tracyBox.x - 10.f,
+            versionBox.y + commitBox.y + 5.f
+        );
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            penPosition,
+            "TRACY PROFILING ENABLED",
+            glm::vec4(0.8f, 0.2f, 0.15f, 1.f)
+        );
+    }
+#endif // TRACY_ENABLE
+
 }
 
 void RenderEngine::renderScreenLog() {
@@ -1424,9 +1425,9 @@ void RenderEngine::renderScreenLog() {
     size_t nr = 1;
     const auto now = std::chrono::steady_clock::now();
     for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
-        const ScreenLog::LogEntry* e = &(*it);
+        ZoneScopedN("Entry")
 
-        std::chrono::duration<double> diff = now - e->timeStamp;
+        std::chrono::duration<double> diff = now - it->timeStamp;
 
         float alpha = 1.f;
         std::chrono::duration<double> ttf = ScreenLogTimeToLive - FadeTime;
@@ -1441,56 +1442,64 @@ void RenderEngine::renderScreenLog() {
         if (alpha <= 0.f) {
             break;
         }
-
-        const std::string lvl = "(" + ghoul::to_string(e->level) + ")";
-        const std::string& message = e->message.substr(0, MessageLength);
+        std::string_view message = std::string_view(it->message).substr(0, MessageLength);
         nr += std::count(message.begin(), message.end(), '\n');
 
         const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
 
-        RenderFont(
-            *_fontLog,
-            glm::vec2(
-                10.f,
-                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
-            ),
-            fmt::format(
+        std::array<char, 15 + CategoryLength + 3> buf;
+        {
+            std::fill(buf.begin(), buf.end(), char(0));
+            char* end = fmt::format_to(
+                buf.data(),
                 "{:<15} {}{}",
-                e->timeString,
-                e->category.substr(0, CategoryLength),
-                e->category.length() > CategoryLength ? "..." : ""
-            ),
-            white
-        );
+                it->timeString,
+                std::string_view(it->category).substr(0, CategoryLength),
+                it->category.length() > CategoryLength ? "..." : ""
+            );
+            std::string_view text = std::string_view(buf.data(), end - buf.data());
 
-        glm::vec4 color = glm::vec4(0.f);
-        switch (e->level) {
-            case ghoul::logging::LogLevel::Debug:
-                color = glm::vec4(0.f, 1.f, 0.f, alpha);
-                break;
-            case ghoul::logging::LogLevel::Warning:
-                color = glm::vec4(1.f, 1.f, 0.f, alpha);
-                break;
-            case ghoul::logging::LogLevel::Error:
-                color = glm::vec4(1.f, 0.f, 0.f, alpha);
-                break;
-            case ghoul::logging::LogLevel::Fatal:
-                color = glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-                break;
-            default:
-                color = white;
-                break;
+            RenderFont(
+                *_fontLog,
+                glm::vec2(
+                    10.f,
+                    _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+                ),
+                text,
+                white
+            );
         }
 
-        RenderFont(
-            *_fontLog,
-            glm::vec2(
-                10 + 30 * _fontLog->pointSize(),
-                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
-            ),
-            lvl,
-            color
-        );
+        {
+            const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
+                switch (level) {
+                    case ghoul::logging::LogLevel::Debug:
+                        return glm::vec4(0.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Warning:
+                        return glm::vec4(1.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Error:
+                        return glm::vec4(1.f, 0.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Fatal:
+                        return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
+                    default:
+                        return white;
+                }
+            }(it->level);
+
+            const std::string_view lvl = ghoul::to_string(it->level);
+            std::fill(buf.begin(), buf.end(), char(0));
+            char* end = fmt::format_to(buf.data(), "({})", lvl);
+            std::string_view levelText = std::string_view(buf.data(), end - buf.data());
+            RenderFont(
+                *_fontLog,
+                glm::vec2(
+                    10 + 30 * _fontLog->pointSize(),
+                    _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+                ),
+                levelText,
+                color
+            );
+        }
 
         RenderFont(
             *_fontLog,

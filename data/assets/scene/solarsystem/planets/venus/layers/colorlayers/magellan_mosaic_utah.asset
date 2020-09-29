@@ -1,0 +1,18 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../venus").Venus.Identifier
+
+local layer = {
+    Identifier = "Magellan_Mosaic_Utah",
+    Name = "Magellan Mosaic [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.vrt",
+    BlendMode = "Color",
+    Settings = {
+        Gamma = 2.0
+    }
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

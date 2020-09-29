@@ -27,6 +27,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/misc.h>
 #include <algorithm>
 #include <vector>
@@ -82,11 +83,13 @@ KeyWithModifier stringToKey(std::string str) {
     std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
 
     // default is unknown
-    Key k = Key::Unknown;
     const auto itKey = KeyMapping.find(tokens.back());
-    if (itKey != KeyMapping.end()) {
-        k = itKey->second;
+    if (itKey == KeyMapping.cend()) {
+        throw ghoul::RuntimeError(
+            fmt::format("Could not find key for '{}'", tokens.back())
+        );
     }
+    Key k = itKey->second;
 
 
     KeyModifier m = KeyModifier::NoModifier;
@@ -102,7 +105,7 @@ KeyWithModifier stringToKey(std::string str) {
                 );
             }
             else {
-                LERROR(fmt::format("Unknown modifier key '{}'", s));
+                throw ghoul::RuntimeError(fmt::format("Unknown modifier key '{}'", s));
             }
         }
     );

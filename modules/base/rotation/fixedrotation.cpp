@@ -31,6 +31,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <string>
 
 namespace {
@@ -444,6 +445,8 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
 }
 
 bool FixedRotation::initialize() {
+    ZoneScoped
+
     // We need to do this in the initialize and not the constructor as the scene graph
     // nodes referenced in the dictionary might not exist yet at construction time. At
     // initialization time, however, we know that they already have been created

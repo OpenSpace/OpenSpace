@@ -1,0 +1,10 @@
+local texturesPath = asset.require("./../../../earth_textures").TexturesPath
+local globeIdentifier = asset.require("./../../../earth").Earth.Identifier
+
+local layer = {
+    Identifier = "Blue_Marble",
+    Name = "Blue Marble",
+    FilePath = texturesPath .. "/earth_bluemarble.jpg",
+}
+
+asset.export("layer", layer)

@@ -1,0 +1,15 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+
+local layer = {
+    Identifier = "Themis_IR_Day_Utah",
+    Name = "Themis IR Day [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Day.wms",
+    BlendMode = "Color"
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

@@ -1,3 +1,4 @@
+local constellationsCSV = asset.localResource('constellation_data.csv')
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local images = asset.syncedResource({

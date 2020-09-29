@@ -27,6 +27,8 @@
 
 namespace openspace::distanceconstants {
     constexpr double EarthRadius = 6371;
+    constexpr double JupiterRadius = 7.1492E7;
+    constexpr double SolarRadius = 6.95700E8;
     constexpr double LightYear = 9.4607304725808E15;
     constexpr double LightMonth = LightYear / 12;
     constexpr double LightDay = LightYear / 365;

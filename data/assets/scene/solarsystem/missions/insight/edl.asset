@@ -169,9 +169,9 @@ local Insight_Entry_CapsuleA = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_cruise_cone .. "/cruise_insight_doubleside2_newcapsule_diffuse.obj"
+            GeometryFile = models_cruise_cone .. "/cruise_insight_doubleside2_newcapsule_diffuse.obj",
+            ColorTexture = models_cruise_cone .. "/insight_newcapsule_diffuse.jpg"
         },
-        ColorTexture = models_cruise_cone .. "/insight_newcapsule_diffuse.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -194,9 +194,9 @@ local Insight_Entry_Capsule_Ring = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_cruise_cone .. "/insight_cruise_cone_ring_foil_gold.obj"
+            GeometryFile = models_cruise_cone .. "/insight_cruise_cone_ring_foil_gold.obj",
+            ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png"
         },
-        ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -219,9 +219,9 @@ local Insight_Entry_Capsule_Plugs = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_cruise_cone .. "/insight_cruise_cone_capsule_diffuse.obj"
+            GeometryFile = models_cruise_cone .. "/insight_cruise_cone_capsule_diffuse.obj",
+            ColorTexture = models_cruise_cone .. "/insight_capsule_diffuse.png"
         },
-        ColorTexture = models_cruise_cone .. "/insight_capsule_diffuse.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -244,9 +244,9 @@ local Insight_Entry_Heatshield = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_cruise_cone .. "/insight_cruise_heatshield_foil_gold.obj"
+            GeometryFile = models_cruise_cone .. "/insight_cruise_heatshield_foil_gold.obj",
+            ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png"
         },
-        ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -269,9 +269,9 @@ local Insight_Parachute_0 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_chutes .. "/insight_chute_frame01_diff1.obj"
+            GeometryFile = models_chutes .. "/insight_chute_frame01_diff1.obj",
+            ColorTexture = models_chutes .. "/chute_diff.png"
         },
-        ColorTexture = models_chutes .. "/chute_diff.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -294,9 +294,9 @@ local Insight_Parachute_Cords_0 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_chutes .. "/insight_chute_frame01_cords1.obj"
+            GeometryFile = models_chutes .. "/insight_chute_frame01_cords1.obj",
+            ColorTexture = models_chutes .. "/foil_gold_ramp.png"
         },
-        ColorTexture = models_chutes .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -319,9 +319,9 @@ local Insight_Parachute_20 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_chutes .. "/insight_chute_frame20_diff1.obj"
+            GeometryFile = models_chutes .. "/insight_chute_frame20_diff1.obj",
+            ColorTexture = models_chutes .. "/chute_diff.png"
         },
-        ColorTexture = models_chutes .. "/chute_diff.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -344,9 +344,9 @@ local Insight_Parachute_Cords_20 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_chutes .. "/insight_chute_frame20_cords1.obj"
+            GeometryFile = models_chutes .. "/insight_chute_frame20_cords1.obj",
+            ColorTexture = models_chutes .. "/foil_gold_ramp.png"
         },
-        ColorTexture = models_chutes .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -369,9 +369,9 @@ local Insight_Parachute_40 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_chutes .. "/chute_doubleside_frame40_diff.obj"
+            GeometryFile = models_chutes .. "/chute_doubleside_frame40_diff.obj",
+            ColorTexture = models_chutes .. "/chute_diff.png"
         },
-        ColorTexture = models_chutes .. "/chute_diff.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -394,9 +394,9 @@ local Insight_Parachute_Cords_40 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_chutes .. "/insight_chute_frame40_cords1.obj"
+            GeometryFile = models_chutes .. "/insight_chute_frame40_cords1.obj",
+            ColorTexture = models_chutes .. "/foil_gold_ramp.png"
         },
-        ColorTexture = models_chutes .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -419,9 +419,9 @@ local Insight_Lander_A001 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO01.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO01.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_01.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -444,9 +444,9 @@ local Insight_Lander_A002 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO02.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO02.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_02.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_02.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -469,9 +469,9 @@ local Insight_Lander_A003 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO03.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO03.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_03.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_03.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -494,9 +494,9 @@ local Insight_Lander_A004 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO04.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO04.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_04.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_04.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -519,9 +519,9 @@ local Insight_Lander_A005 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO05.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO05.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_05.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_05.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -544,9 +544,9 @@ local Insight_Lander_A006 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO06.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO06.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_06.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_06.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -569,9 +569,9 @@ local Insight_Lander_A007 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO07.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO07.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_07.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_07.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -594,9 +594,9 @@ local Insight_Lander_A008 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO08.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_AO08.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_08.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_AO_08.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -619,9 +619,9 @@ local Insight_Lander_foil1 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_foil1.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_foil1.obj",
+            ColorTexture = models_lander_lander_deck .. "/foil_silver_ramp.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/foil_silver_ramp.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -644,9 +644,9 @@ local Insight_Lander_Tex01 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_tex01.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_tex01.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_tex_01.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_tex_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -669,9 +669,9 @@ local Insight_Lander_Tex02 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_tex02.obj"
+            GeometryFile = models_lander_lander_deck .. "/insight_lander_deck_tex02.obj",
+            ColorTexture = models_lander_lander_deck .. "/InSIGHT_tex_02.jpg"
         },
-        ColorTexture = models_lander_lander_deck .. "/InSIGHT_tex_02.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -694,9 +694,9 @@ local Insight_Legs_Stowed_tex = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_legs_stow .. "/insight_lander_legs_stow_tex01.obj"
+            GeometryFile = models_lander_legs_stow .. "/insight_lander_legs_stow_tex01.obj",
+            ColorTexture = models_lander_legs_stow .. "/InSIGHT_tex_01.jpg"
         },
-        ColorTexture = models_lander_legs_stow .. "/InSIGHT_tex_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -719,9 +719,9 @@ local Insight_Legs_Stowed_AO06 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_legs_stow .. "/insight_lander_legs_stow_AO06.obj"
+            GeometryFile = models_lander_legs_stow .. "/insight_lander_legs_stow_AO06.obj",
+            ColorTexture = models_lander_legs_stow .. "/InSIGHT_AO_06.jpg"
         },
-        ColorTexture = models_lander_legs_stow .. "/InSIGHT_AO_06.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -744,9 +744,9 @@ local Insight_Legs_Deployed_tex = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_legs_deploy .. "/insight_lander_legs_deploy_tex01.obj"
+            GeometryFile = models_lander_legs_deploy .. "/insight_lander_legs_deploy_tex01.obj",
+            ColorTexture = models_lander_legs_deploy .. "/InSIGHT_tex_01.jpg"
         },
-        ColorTexture = models_lander_legs_deploy .. "/InSIGHT_tex_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -769,9 +769,9 @@ local Insight_Legs_Deployed_AO06 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_legs_deploy .. "/insight_lander_legs_deploy_AO06.obj"
+            GeometryFile = models_lander_legs_deploy .. "/insight_lander_legs_deploy_AO06.obj",
+            ColorTexture = models_lander_legs_deploy .. "/InSIGHT_AO_06.jpg"
         },
-        ColorTexture = models_lander_legs_deploy .. "/InSIGHT_AO_06.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -794,9 +794,9 @@ local Insight_Panels_Stowed_tex = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_panels_stow .. "/insight_lander_panels_stow_tex01.obj"
+            GeometryFile = models_lander_panels_stow .. "/insight_lander_panels_stow_tex01.obj",
+            ColorTexture = models_lander_panels_stow .. "/InSIGHT_tex_01.jpg"
         },
-        ColorTexture = models_lander_panels_stow .. "/InSIGHT_tex_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -819,9 +819,9 @@ local Insight_Panels_Stowed_tex2 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_panels_stow .. "/insight_lander_panels_stow_tex02.obj"
+            GeometryFile = models_lander_panels_stow .. "/insight_lander_panels_stow_tex02.obj",
+            ColorTexture = models_lander_panels_stow .. "/InSIGHT_tex_02.jpg"
         },
-        ColorTexture = models_lander_panels_stow .. "/InSIGHT_tex_02.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -844,9 +844,9 @@ local Insight_Panels_Stowed_AO01 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_panels_stow .. "/insight_lander_panels_stow_AO01.obj"
+            GeometryFile = models_lander_panels_stow .. "/insight_lander_panels_stow_AO01.obj",
+            ColorTexture = models_lander_panels_stow .. "/InSIGHT_AO_01.jpg"
         },
-        ColorTexture = models_lander_panels_stow .. "/InSIGHT_AO_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -869,9 +869,9 @@ local Insight_Panels_Deployed_tex = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_panels_deploy .. "/insight_lander_panels_deploy_tex01.obj"
+            GeometryFile = models_lander_panels_deploy .. "/insight_lander_panels_deploy_tex01.obj",
+            ColorTexture = models_lander_panels_deploy .. "/InSIGHT_tex_01.jpg"
         },
-        ColorTexture = models_lander_panels_deploy .. "/InSIGHT_tex_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -894,9 +894,9 @@ local Insight_Panels_Deployed_tex2 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_panels_deploy .. "/insight_lander_panels_deploy_tex02.obj"
+            GeometryFile = models_lander_panels_deploy .. "/insight_lander_panels_deploy_tex02.obj",
+            ColorTexture = models_lander_panels_deploy .. "/InSIGHT_tex_02.jpg"
         },
-        ColorTexture = models_lander_panels_deploy .. "/InSIGHT_tex_02.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -919,9 +919,9 @@ local Insight_Panels_Deployed_AO06 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models_lander_panels_deploy .. "/insight_lander_panels_deploy_AO01.obj"
+            GeometryFile = models_lander_panels_deploy .. "/insight_lander_panels_deploy_AO01.obj",
+            ColorTexture = models_lander_panels_deploy .. "/InSIGHT_AO_01.jpg"
         },
-        ColorTexture = models_lander_panels_deploy .. "/InSIGHT_AO_01.jpg",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },

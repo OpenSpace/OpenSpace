@@ -36,6 +36,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -164,13 +165,6 @@ namespace {
         "Shape Texture to be convolved",
         "The path to the texture that should be used as the base shape for the stars."
     };*/
-
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all stars."
-    };
 
     // PSF
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
@@ -431,10 +425,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(-10.f, -10.f),
         glm::vec2(10.f, 10.f)
     )
-    , _fixedColor(FixedColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _psfMethodOption(
         PSFMethodOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -477,6 +470,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableStars"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     _speckFile = absPath(dictionary.value<std::string>(KeyFile));
     _speckFile.onChange([&]() { _speckFileIsDirty = true; });
@@ -604,13 +600,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         _pointSpreadFunctionTextureIsDirty = true;
     });
     _userProvidedTextureOwner.addProperty(_pointSpreadFunctionTexturePath);
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    _parametersOwner.addProperty(_alphaValue);
 
     _psfMethodOption.addOption(PsfMethodSpencer, "Spencer's Function");
     _psfMethodOption.addOption(PsfMethodMoffat, "Moffat's Function");
@@ -823,23 +812,8 @@ void RenderableStars::renderPSFToTexture() {
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-
-    // Saving current OpenGL state
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+//    GLint m_viewport[4];
+//    global::renderEngine.openglStateCache().viewPort(m_viewport);
 
     // Creates the FBO for the calculations
     GLuint psfFBO;
@@ -941,8 +915,7 @@ void RenderableStars::renderPSFToTexture() {
     //glDeleteFramebuffers(1, &convolveFBO);
 
     // Restores OpenGL blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB,  blendSrcAlpha, blendDestAlpha);
+    global::renderEngine.openglStateCache().resetBlendState();
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
@@ -1020,10 +993,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         const double funcValue = a * distCamera + b;
         fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
 
-        _program->setUniform(_uniformCache.alphaValue, _alphaValue * fadeInVariable);
+        _program->setUniform(_uniformCache.alphaValue, _opacity * fadeInVariable);
     }
     else {
-        _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+        _program->setUniform(_uniformCache.alphaValue, _opacity);
     }
 
     ghoul::opengl::TextureUnit psfUnit;

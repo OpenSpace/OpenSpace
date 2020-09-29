@@ -1,0 +1,26 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local PARSEC_CONSTANT = 3.0856776E16;
+
+local NebulaPosition = {
+    Identifier = "NebulaPosition",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {
+                -329.915 * PARSEC_CONSTANT,
+                -183.153 * PARSEC_CONSTANT,
+                -132.706 * PARSEC_CONSTANT
+            }
+        },
+    },
+    GUI = {
+        Name = "Orion Nebula Position",
+        Path = "/Milky Way/Objects",
+        Hidden = true
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { NebulaPosition })

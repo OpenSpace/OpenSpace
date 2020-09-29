@@ -219,10 +219,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::initializeGL.emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(
-            _tileCacheSizeMB
-        );
-        addPropertySubOwner(*_tileCache);
+        _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
+        addPropertySubOwner(_tileCache.get());
 
         tileprovider::initializeDefaultTile();
 
@@ -521,7 +519,9 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         );
         return;
     }
-    const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(
+        globeSceneGraphNode->modelTransform()
+    );
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
@@ -551,7 +551,9 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
         LERROR("Error when going to Geodetic2");
     }
 
-    const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(
+        globeSceneGraphNode->modelTransform()
+    );
 
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));

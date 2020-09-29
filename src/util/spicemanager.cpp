@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
@@ -41,29 +42,6 @@ namespace {
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
     // as the maximum message length
     constexpr const unsigned SpiceErrorBufferSize = 1841;
-
-    // This method checks if one of the previous SPICE methods has failed. If it has, an
-    // exception with the SPICE error message is thrown
-    // If an error occurred, true is returned, otherwise, false
-    bool throwOnSpiceError(const std::string& errorMessage) {
-        SpiceBoolean failed = failed_c();
-        if (openspace::SpiceManager::ref().exceptionHandling()) {
-            if (failed) {
-                char buffer[SpiceErrorBufferSize];
-                getmsg_c("LONG", SpiceErrorBufferSize, buffer);
-                reset_c();
-                throw openspace::SpiceManager::SpiceException(
-                    errorMessage + ": " + buffer
-                );
-            }
-            else {
-                return false;
-            }
-        }
-        else {
-            return failed;
-        }
-    }
 
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
         using SM = openspace::SpiceManager;
@@ -82,7 +60,7 @@ namespace {
             default:                            throw ghoul::MissingCaseException();
         }
     }
-}
+} // namespace
 
 #include "spicemanager_lua.inl"
 
@@ -206,6 +184,18 @@ SpiceManager& SpiceManager::ref() {
     return *_instance;
 }
 
+// This method checks if one of the previous SPICE methods has failed. If it has, an
+// exception with the SPICE error message is thrown
+// If an error occurred, true is returned, otherwise, false
+void throwSpiceError(const std::string& errorMessage) {
+    if (openspace::SpiceManager::ref().exceptionHandling()) {
+        char buffer[SpiceErrorBufferSize];
+        getmsg_c("LONG", SpiceErrorBufferSize, buffer);
+        reset_c();
+        throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
+    }
+}
+
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
@@ -250,7 +240,9 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     // Reset the current directory to the previous one
     FileSys.setCurrentDirectory(currentDirectory);
 
-    throwOnSpiceError("Kernel loading");
+    if (failed_c()) {
+        throwSpiceError("Kernel loading");
+    }
 
     std::string fileExtension = ghoul::filesystem::File(
         path,
@@ -426,7 +418,11 @@ void getValueInternal(const std::string& body, const std::string& value, int siz
     SpiceInt n;
     bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
 
-    throwOnSpiceError(fmt::format("Error getting value '{}' for body '{}'", value, body));
+    if (failed_c()) {
+        throwSpiceError(
+            fmt::format("Error getting value '{}' for body '{}'", value, body)
+        );
+    }
 }
 
 void SpiceManager::getValue(const std::string& body, const std::string& value,
@@ -467,36 +463,27 @@ double SpiceManager::spacecraftClockToET(const std::string& craft, double craftT
     int craftId = naifId(craft);
     double et;
     sct2e_c(craftId, craftTicks, &et);
-    throwOnSpiceError(fmt::format(
-        "Error transforming spacecraft clock of '{}' at time {}", craft, craftTicks
-    ));
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error transforming spacecraft clock of '{}' at time {}", craft, craftTicks
+        ));
+    }
     return et;
 }
 
 double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const {
     ghoul_assert(!timeString.empty(), "Empty timeString");
 
-    double et;
-    str2et_c(timeString.c_str(), &et);
-    throwOnSpiceError(fmt::format("Error converting date '{}'", timeString));
-    return et;
+    return ephemerisTimeFromDate(timeString.c_str());
 }
 
-std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
-                                                    const std::string& formatString) const
-{
-    ghoul_assert(!formatString.empty(), "Format is empty");
-
-    constexpr const int BufferSize = 256;
-    SpiceChar buffer[BufferSize];
-    timout_c(ephemerisTime, formatString.c_str(), BufferSize - 1, buffer);
-    throwOnSpiceError(
-        fmt::format("Error converting ephemeris time '{}' to date with format '{}'",
-            ephemerisTime, formatString
-        )
-    );
-
-    return std::string(buffer);
+double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
+    double et;
+    str2et_c(timeString, &et);
+    if (failed_c()) {
+        throwSpiceError(fmt::format("Error converting date '{}'", timeString));
+    }
+    return et;
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
@@ -535,10 +522,12 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             glm::value_ptr(position),
             &lightTime
         );
-        throwOnSpiceError(fmt::format(
-            "Error getting position from '{}' to '{}' in reference frame '{}' at time {}",
-            target, observer, referenceFrame, ephemerisTime
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error getting position from '{}' to '{}' in frame '{}' at time {}",
+                target, observer, referenceFrame, ephemerisTime
+            ));
+        }
         return position;
     }
     else if (targetHasCoverage) {
@@ -598,11 +587,13 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(transform))
     );
 
-    throwOnSpiceError(
-        fmt::format("Error converting from frame '{}' to frame '{}' at time '{}'",
-            from, to, ephemerisTime
-        )
-    );
+    if (failed_c()) {
+        throwSpiceError(
+            fmt::format("Error converting from frame '{}' to frame '{}' at time '{}'",
+                from, to, ephemerisTime
+            )
+        );
+    }
 
     // The rox-major, column-major order are switched in GLM and SPICE, so we have to
     // transpose the matrix before we can return it
@@ -645,11 +636,13 @@ SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
     );
     result.interceptFound = (found == SPICETRUE);
 
-    throwOnSpiceError(fmt::format(
-        "Error retrieving surface intercept on target '{}' viewed from observer '{}' in "
-        "reference frame '{}' at time '{}'",
-        target, observer, referenceFrame, ephemerisTime
-    ));
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error retrieving surface intercept on target '{}' viewed from observer '{}' "
+            "in reference frame '{}' at time '{}'",
+            target, observer, referenceFrame, ephemerisTime
+        ));
+    }
 
     return result;
 }
@@ -679,10 +672,12 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
         &visible
     );
 
-    throwOnSpiceError(fmt::format(
-        "Checking if target '{}' is in view of instrument '{}' failed",
-        target, instrument
-    ));
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Checking if target '{}' is in view of instrument '{}' failed",
+            target, instrument
+        ));
+    }
 
     return visible == SPICETRUE;
 }
@@ -712,11 +707,13 @@ SpiceManager::TargetStateResult SpiceManager::targetState(const std::string& tar
         &result.lightTime
     );
 
-    throwOnSpiceError(fmt::format(
-        "Error retrieving state of target '{}' viewed from observer '{}' in reference "
-        "frame '{}' at time '{}'",
-        target, observer, referenceFrame, ephemerisTime
-    ));
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error retrieving state of target '{}' viewed from observer '{}' in "
+            "reference frame '{}' at time '{}'",
+            target, observer, referenceFrame, ephemerisTime
+        ));
+    }
 
     memmove(glm::value_ptr(result.position), buffer, sizeof(double) * 3);
     memmove(glm::value_ptr(result.velocity), buffer + 3, sizeof(double) * 3);
@@ -738,11 +735,13 @@ SpiceManager::TransformMatrix SpiceManager::stateTransformMatrix(
         ephemerisTime,
         reinterpret_cast<double(*)[6]>(m.data())
     );
-    throwOnSpiceError(fmt::format(
-        "Error retrieved state transform matrix from frame '{}' to frame '{}' at time "
-        "'{}'",
-        sourceFrame, destinationFrame, ephemerisTime
-    ));
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error retrieved state transform matrix from frame '{}' to frame '{}' at "
+            "time '{}'",
+            sourceFrame, destinationFrame, ephemerisTime
+        ));
+    }
     return m;
 }
 
@@ -761,7 +760,9 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
     );
 
-    throwOnSpiceError("");
+    if (failed_c()) {
+        throwSpiceError("");
+    }
     SpiceBoolean success = !(failed_c());
     reset_c();
     if (!success) {
@@ -792,11 +793,13 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
         ephemerisTimeTo,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
     );
-    throwOnSpiceError(fmt::format(
-        "Error retrieving position transform matrix from '{}' at time '{}' to frame '{}' "
-        "at time '{}'",
-        sourceFrame, ephemerisTimeFrom, destinationFrame, ephemerisTimeTo
-    ));
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error retrieving position transform matrix from '{}' at time '{}' to frame "
+            "'{}' at time '{}'",
+            sourceFrame, ephemerisTimeFrom, destinationFrame, ephemerisTimeTo
+        ));
+    }
     return glm::transpose(result);
 }
 
@@ -828,10 +831,10 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
         boundsArr                               // the bounds
     );
 
-    bool failed = throwOnSpiceError(fmt::format(
-        "Error getting field-of-view parameters for instrument '{}'", instrument
-    ));
-    if (failed) {
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error getting field-of-view parameters for instrument '{}'", instrument
+        ));
         return res;
     }
 
@@ -887,11 +890,13 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
         glm::value_ptr(res.observerPosition),
         reinterpret_cast<double(*)[3]>(res.terminatorPoints.data())
     );
-    throwOnSpiceError(fmt::format(
-        "Error getting terminator ellipse for target '{}' from observer '{}' in frame "
-        "'{}' with light source '{}' at time '{}'",
-        target, observer, frame, lightSource, ephemerisTime
-    ));
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error getting terminator ellipse for target '{}' from observer '{}' in "
+            "frame '{}' with light source '{}' at time '{}'",
+            target, observer, frame, lightSource, ephemerisTime
+        ));
+    }
     return res;
 }
 
@@ -914,7 +919,9 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     SPICEDOUBLE_CELL(cover, WinSiz);
 
     ckobj_c(path.c_str(), &ids);
-    throwOnSpiceError("Error finding Ck Coverage");
+    if (failed_c()) {
+        throwSpiceError("Error finding Ck Coverage");
+    }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
         const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
@@ -927,7 +934,9 @@ void SpiceManager::findCkCoverage(const std::string& path) {
 
         scard_c(0, &cover);
         ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
-        throwOnSpiceError("Error finding Ck Coverage");
+        if (failed_c()) {
+            throwSpiceError("Error finding Ck Coverage");
+        }
 
         // Get the number of intervals in the coverage window.
         const SpiceInt numberOfIntervals = wncard_c(&cover);
@@ -936,7 +945,9 @@ void SpiceManager::findCkCoverage(const std::string& path) {
             // Get the endpoints of the jth interval.
             SpiceDouble b, e;
             wnfetd_c(&cover, j, &b, &e);
-            throwOnSpiceError("Error finding Ck Coverage");
+            if (failed_c()) {
+                throwSpiceError("Error finding Ck Coverage");
+            }
 
             _ckCoverageTimes[frame].insert(e);
             _ckCoverageTimes[frame].insert(b);
@@ -964,7 +975,9 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     SPICEDOUBLE_CELL(cover, WinSiz);
 
     spkobj_c(path.c_str(), &ids);
-    throwOnSpiceError("Error finding Spk ID for coverage");
+    if (failed_c()) {
+        throwSpiceError("Error finding Spk ID for coverage");
+    }
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
         const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
@@ -977,7 +990,9 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
 
         scard_c(0, &cover);
         spkcov_c(path.c_str(), obj, &cover);
-        throwOnSpiceError("Error finding Spk coverage");
+        if (failed_c()) {
+            throwSpiceError("Error finding Spk coverage");
+        }
 
         // Get the number of intervals in the coverage window.
         const SpiceInt numberOfIntervals = wncard_c(&cover);
@@ -986,7 +1001,9 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
             //Get the endpoints of the jth interval.
             SpiceDouble b, e;
             wnfetd_c(&cover, j, &b, &e);
-            throwOnSpiceError("Error finding Spk coverage");
+            if (failed_c()) {
+                throwSpiceError("Error finding Spk coverage");
+            }
 
             // insert all into coverage time set, the windows could be merged @AA
             _spkCoverageTimes[obj].insert(e);
@@ -1003,6 +1020,8 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
                                               double ephemerisTime,
                                               double& lightTime) const
 {
+    ZoneScoped
+
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");
     ghoul_assert(!referenceFrame.empty(), "Reference frame must not be empty");
@@ -1039,10 +1058,13 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             glm::value_ptr(pos),
             &lightTime
         );
-        throwOnSpiceError(fmt::format(
-            "Error estimating position for target '{}' with observer '{}' in frame '{}'",
-            target, observer, referenceFrame
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error estimating position for '{}' with observer '{}' in frame '{}'",
+                target, observer, referenceFrame
+            ));
+        }
+
     }
     else if (coveredTimes.upper_bound(ephemerisTime) == coveredTimes.end()) {
         // coverage earlier, fetch last position
@@ -1055,10 +1077,12 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             glm::value_ptr(pos),
             &lightTime
         );
-        throwOnSpiceError(fmt::format(
-            "Error estimating position for target '{}' with observer '{}' in frame '{}'",
-            target, observer, referenceFrame
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error estimating position for '{}' with observer '{}' in frame '{}'",
+                target, observer, referenceFrame
+            ));
+        }
     }
     else {
         // coverage both earlier and later, interpolate these positions
@@ -1088,10 +1112,12 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             &ltLater
         );
 
-        throwOnSpiceError(fmt::format(
-            "Error estimating position for target '{}' with observer '{}' in frame '{}'",
-            target, observer, referenceFrame
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error estimating position for '{}' with observer '{}' in frame '{}'",
+                target, observer, referenceFrame
+            ));
+        }
 
         // linear interpolation
         const double t = (ephemerisTime - timeEarlier) / (timeLater - timeEarlier);
@@ -1132,10 +1158,12 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             *(coveredTimes.begin()),
             reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
         );
-        throwOnSpiceError(fmt::format(
-            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
-            fromFrame, toFrame, time
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error estimating transform matrix from '{}' to from '{}' at time '{}'",
+                fromFrame, toFrame, time
+            ));
+        }
     }
     else if (coveredTimes.upper_bound(time) == coveredTimes.end()) {
         // coverage earlier, fetch last transform
@@ -1145,10 +1173,12 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             *(coveredTimes.rbegin()),
             reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
         );
-        throwOnSpiceError(fmt::format(
-            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
-            fromFrame, toFrame, time
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error estimating transform matrix from frame '{}' to '{}' at time '{}'",
+                fromFrame, toFrame, time
+            ));
+        }
     }
     else {
         // coverage both earlier and later, interpolate these transformations
@@ -1162,10 +1192,12 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             earlier,
             reinterpret_cast<double(*)[3]>(glm::value_ptr(earlierTransform))
         );
-        throwOnSpiceError(fmt::format(
-            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
-            fromFrame, toFrame, time
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error estimating transform matrix from frame '{}' to '{}' at time '{}'",
+                fromFrame, toFrame, time
+            ));
+        }
 
         glm::dmat3 laterTransform = glm::dmat3(1.0);
         pxform_c(
@@ -1174,10 +1206,12 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             later,
             reinterpret_cast<double(*)[3]>(glm::value_ptr(laterTransform))
         );
-        throwOnSpiceError(fmt::format(
-            "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
-            fromFrame, toFrame, time
-        ));
+        if (failed_c()) {
+            throwSpiceError(fmt::format(
+                "Error estimating transform matrix from frame '{}' to '{}' at time '{}'",
+                fromFrame, toFrame, time
+            ));
+        }
 
         const double t = (time - earlier) / (later - earlier);
         result = earlierTransform * (1.0 - t) + laterTransform * t;

@@ -127,6 +127,15 @@ window.onload = function () {
       }
     }
 
+    if (documentation[i].identifier == "sceneLicense") {
+      for (var j = 0; j < documentation[i].data.length; j++) {
+        var escaped = documentation[i].data[j].description.replace(
+          /\\n/g, ""
+        );
+        documentation[i].data[j].description = escaped;
+      }
+    }
+
   }
 
   currentDocumentation = documentation[3];

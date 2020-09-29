@@ -63,8 +63,8 @@ std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
     std::string geometryType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
-    std::unique_ptr<PlanetGeometry> result = factory->create(geometryType, dictionary);
-    return result;
+    PlanetGeometry* result = factory->create(geometryType, dictionary);
+    return std::unique_ptr<PlanetGeometry>(result);
 }
 
 PlanetGeometry::PlanetGeometry() : properties::PropertyOwner({ "PlanetGeometry" }) {}

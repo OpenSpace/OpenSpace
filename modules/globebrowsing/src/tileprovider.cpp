@@ -32,8 +32,10 @@
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
@@ -41,13 +43,14 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <fstream>
 #include "cpl_minixml.h"
 
 namespace ghoul {
     template <>
-    openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
-        from_string(const std::string& string)
+    constexpr openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
+        from_string(std::string_view string)
     {
         using namespace openspace::globebrowsing::tileprovider;
         if (string == "YYYY-MM-DD") {
@@ -66,7 +69,7 @@ namespace ghoul {
             return TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm;
         }
         else {
-            throw ghoul::RuntimeError("Unknown timeformat " + string);
+            throw ghoul::RuntimeError("Unknown timeformat '" + std::string(string) + "'");
         }
     }
 } // namespace ghoul
@@ -77,7 +80,7 @@ namespace openspace::globebrowsing::tileprovider {
 namespace {
 
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-Tile DefaultTile = Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 
 constexpr const char* KeyFilePath = "FilePath";
 
@@ -209,9 +212,9 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
-        GLint viewport[4];
+        //GLint viewport[4];
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        //glGetIntegerv(GL_VIEWPORT, viewport);
 
         // Render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, t.fbo);
@@ -232,7 +235,8 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         t.fontRenderer->render(*t.font, t.textPosition, t.text, t.textColor);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        global::renderEngine.openglStateCache().resetViewportState();
+        //glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         t.tileCache->put(key, t.initData.hashKey, tile);
@@ -273,34 +277,46 @@ TileProvider* levelProvider(TileProviderByLevel& t, int level) {
 // TemporalTileProvider
 //
 
-std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t) {
+// Buffer needs at least 22 characters space
+int timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t, char* buffer)
+{
+    ZoneScoped
+
+    std::memset(buffer, 0, 22);
+    const double time = t.j2000Seconds();
+
     switch (type) {
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DD:
-            return t.ISO8601().substr(0, 10);
+        {
+            constexpr const char Format[] = "YYYY-MM-DD";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
+        }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss: {
-            std::string ts = t.ISO8601().substr(0, 19);
-
-            // YYYY_MM_DDThh_mm_ss -> YYYYMMDD_hhmmss
-            ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
-            ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
-            replace(ts.begin(), ts.end(), 'T', '_');
-            return ts;
+            constexpr const char Format[] = "YYYYMMDD_HRMNSC";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
         }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm: {
-            std::string ts = t.ISO8601().substr(0, 16);
-
-            // YYYY_MM_DDThh_mm -> YYYYMMDD_hhmm
-            ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
-            ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
-            replace(ts.begin(), ts.end(), 'T', '_');
-            return ts;
+            constexpr const char Format[] = "YYYYMMDD_HRMN";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
         }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ:
-            return t.ISO8601().substr(0, 19) + "Z";
+        {
+            constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SCZ";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
+        }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ: {
-            std::string timeString = t.ISO8601().substr(0, 19) + "Z";
-            replace(timeString.begin(), timeString.end(), ':', '_');
-            return timeString;
+            constexpr const char Format[] = "YYYY-MM-DDTHR_MN_SCZ";
+            constexpr const int Size = sizeof(Format);
+            SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
+            return Size - 1;
         }
         default:
             throw ghoul::MissingCaseException();
@@ -308,7 +324,7 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
 }
 
 std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
-                                             const TemporalTileProvider::TimeKey& timekey)
+                                               std::string_view timekey)
 {
     ZoneScoped
 
@@ -337,12 +353,12 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
     return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 
-TileProvider* getTileProvider(TemporalTileProvider& t,
-                              const TemporalTileProvider::TimeKey& timekey)
-{
+TileProvider* getTileProvider(TemporalTileProvider& t, std::string_view timekey) {
     ZoneScoped
 
-    const auto it = t.tileProviderMap.find(timekey);
+    // @TODO (abock, 2020-08-20) This std::string creation can be removed once we switch
+    // to C++20 thanks to P0919R2
+    const auto it = t.tileProviderMap.find(std::string(timekey));
     if (it != t.tileProviderMap.end()) {
         return it->second.get();
     }
@@ -351,7 +367,7 @@ TileProvider* getTileProvider(TemporalTileProvider& t,
         initialize(*tileProvider);
 
         TileProvider* res = tileProvider.get();
-        t.tileProviderMap[timekey] = std::move(tileProvider);
+        t.tileProviderMap[std::string(timekey)] = std::move(tileProvider);
         return res;
     }
 }
@@ -361,9 +377,10 @@ TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
 
     Time tCopy(time);
     if (t.timeQuantizer.quantize(tCopy, true)) {
-        TemporalTileProvider::TimeKey timeKey = timeStringify(t.timeFormat, tCopy);
+        char Buffer[22];
+        const int size = timeStringify(t.timeFormat, tCopy, Buffer);
         try {
-            return getTileProvider(t, timeKey);
+            return getTileProvider(t, std::string_view(Buffer, size));
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC("TemporalTileProvider", e.message);
@@ -421,7 +438,10 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
 
     try {
-        t.timeQuantizer.setStartEndRange(start.ISO8601(), end.ISO8601());
+        t.timeQuantizer.setStartEndRange(
+            std::string(start.ISO8601()),
+            std::string(end.ISO8601())
+        );
         t.timeQuantizer.setResolution(timeResolution);
     }
     catch (const ghoul::RuntimeError& e) {
@@ -519,8 +539,8 @@ std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTyp
 
     const char* type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
-    std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
-    return result;
+    TileProvider* result = factory->create(type, dictionary);
+    return std::unique_ptr<TileProvider>(result);
 }
 
 TileProvider::TileProvider() : properties::PropertyOwner({ "tileProvider" }) {}
@@ -822,6 +842,13 @@ bool initialize(TileProvider& tp) {
 
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
+    if (TileProvider::NumTileProviders > std::numeric_limits<uint16_t>::max()) {
+        LERRORC(
+            "TileProvider",
+            "Number of tile providers exceeds 65535. Something will break soon"
+        );
+        TileProvider::NumTileProviders = 0;
+    }
     tp.uniqueIdentifier = TileProvider::NumTileProviders++;
     if (TileProvider::NumTileProviders == std::numeric_limits<unsigned int>::max()) {
         --TileProvider::NumTileProviders;
@@ -915,29 +942,32 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
 
     switch (tp.type) {
         case Type::DefaultTileProvider: {
+            ZoneScopedN("Type::DefaultTileProvider")
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
                 if (tileIndex.level > maxLevel(t)) {
-                    return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
+                    return Tile { nullptr, std::nullopt, Tile::Status::OutOfRange };
                 }
                 const cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
-                const Tile tile = t.tileCache->get(key);
-
+                Tile tile = t.tileCache->get(key);
                 if (!tile.texture) {
+                    //TracyMessage("Enqueuing tile", 32);
                     t.asyncTextureDataProvider->enqueueTileIO(tileIndex);
                 }
 
                 return tile;
             }
             else {
-                return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+                return Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
             }
         }
         case Type::SingleImageTileProvider: {
+            ZoneScopedN("Type::SingleImageTileProvider")
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
             return t.tile;
         }
         case Type::SizeReferenceTileProvider: {
+            ZoneScopedN("Type::SizeReferenceTileProvider")
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
 
             const GeodeticPatch patch(tileIndex);
@@ -978,6 +1008,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             return tile(t, tileIndex);
         }
         case Type::TileIndexTileProvider: {
+            ZoneScopedN("Type::TileIndexTileProvider")
             TileIndexTileProvider& t = static_cast<TileIndexTileProvider&>(tp);
             t.text = fmt::format(
                 "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
@@ -992,12 +1023,14 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             return tile(t, tileIndex);
         }
         case Type::ByIndexTileProvider: {
+            ZoneScopedN("Type::ByIndexTileProvider")
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
             const auto it = t.tileProviderMap.find(tileIndex.hashKey());
             const bool hasProvider = it != t.tileProviderMap.end();
             return hasProvider ? tile(*it->second, tileIndex) : Tile();
         }
         case Type::ByLevelTileProvider: {
+            ZoneScopedN("Type::ByLevelTileProvider")
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             TileProvider* provider = levelProvider(t, tileIndex.level);
             if (provider) {
@@ -1008,6 +1041,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             }
         }
         case Type::TemporalTileProvider: {
+            ZoneScopedN("Type::TemporalTileProvider")
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
                 ensureUpdated(t);
@@ -1293,8 +1327,6 @@ void reset(TileProvider& tp) {
 
 
 int maxLevel(TileProvider& tp) {
-    ZoneScoped
-
     switch (tp.type) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
@@ -1403,7 +1435,7 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
         maxParents--;
     }
     if (maxParents < 0) {
-        return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
+        return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
     }
 
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
@@ -1412,16 +1444,16 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
         Tile t = tile(tp, tileIndex);
         if (t.status != Tile::Status::OK) {
             if (--maxParents < 0) {
-                return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
+                return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
             }
             ascendToParent(tileIndex, uvTransform);
         }
         else {
-            return ChunkTile{ std::move(t), uvTransform, TileDepthTransform() };
+            return ChunkTile { std::move(t), uvTransform, TileDepthTransform() };
         }
     }
 
-    return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
+    return ChunkTile { Tile(), uvTransform, TileDepthTransform() };
 }
 
 
@@ -1435,22 +1467,25 @@ ChunkTilePile chunkTilePile(TileProvider& tp, TileIndex tileIndex, int pileSize)
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
 
-    ChunkTilePile chunkTilePile(pileSize);
+    ChunkTilePile chunkTilePile;
+    std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
     for (int i = 0; i < pileSize; ++i) {
         chunkTilePile[i] = chunkTile(tp, tileIndex, i);
-        if (chunkTilePile[i].tile.status == Tile::Status::Unavailable) {
-            if (i > 0) {
+        if (chunkTilePile[i]->tile.status == Tile::Status::Unavailable) {
+            if (i == 0) {
                 // First iteration
-                chunkTilePile[i].tile = chunkTilePile[i - 1].tile;
-                chunkTilePile[i].uvTransform.uvOffset =
-                    chunkTilePile[i - 1].uvTransform.uvOffset;
-                chunkTilePile[i].uvTransform.uvScale =
-                    chunkTilePile[i - 1].uvTransform.uvScale;
+                chunkTilePile[i]->tile = DefaultTile;
+                chunkTilePile[i]->uvTransform.uvOffset = { 0.f, 0.f };
+                chunkTilePile[i]->uvTransform.uvScale = { 1.f, 1.f };
             }
             else {
-                chunkTilePile[i].tile = DefaultTile;
-                chunkTilePile[i].uvTransform.uvOffset = { 0.f, 0.f };
-                chunkTilePile[i].uvTransform.uvScale = { 1.f, 1.f };
+                // We are iterating through the array one-by-one, so we are guaranteed
+                // that for tile 'i', tile 'i-1' already was initializated
+                chunkTilePile[i]->tile = chunkTilePile[i - 1]->tile;
+                chunkTilePile[i]->uvTransform.uvOffset =
+                    chunkTilePile[i - 1]->uvTransform.uvOffset;
+                chunkTilePile[i]->uvTransform.uvScale =
+                    chunkTilePile[i - 1]->uvTransform.uvScale;
             }
         }
     }

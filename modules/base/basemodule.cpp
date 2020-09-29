@@ -33,16 +33,18 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
-#include <modules/base/rendering/renderableboxgrid.h>
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
+#include <modules/base/rendering/grids/renderableboxgrid.h>
+#include <modules/base/rendering/grids/renderablegrid.h>
+#include <modules/base/rendering/grids/renderableradialgrid.h>
+#include <modules/base/rendering/grids/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderablelabels.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphere.h>
-#include <modules/base/rendering/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
@@ -125,11 +127,13 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
+    fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabels>("RenderableLabels");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
+    fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
@@ -195,11 +199,14 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemVelocity::Documentation(),
 
         RenderableBoxGrid::Documentation(),
+        RenderableGrid::Documentation(),
         RenderableLabels::Documentation(),
         RenderableModel::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
+        RenderableRadialGrid::Documentation(),
         RenderableSphere::Documentation(),
+        RenderableSphericalGrid::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
 

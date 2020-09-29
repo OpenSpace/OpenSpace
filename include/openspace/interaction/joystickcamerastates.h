@@ -106,12 +106,46 @@ private:
 namespace ghoul {
 
 template <>
-std::string to_string(
-    const openspace::interaction::JoystickCameraStates::AxisType& value);
+inline std::string to_string(
+                      const openspace::interaction::JoystickCameraStates::AxisType& value)
+{
+    using T = openspace::interaction::JoystickCameraStates::AxisType;
+    switch (value) {
+        case T::None:        return "None";
+        case T::OrbitX:      return "Orbit X";
+        case T::OrbitY:      return "Orbit Y";
+        case T::ZoomIn:      return "Zoom In";
+        case T::ZoomOut:     return "Zoom Out";
+        case T::LocalRollX:  return "LocalRoll X";
+        case T::LocalRollY:  return "LocalRoll Y";
+        case T::GlobalRollX: return "GlobalRoll X";
+        case T::GlobalRollY: return "GlobalRoll Y";
+        case T::PanX:        return "Pan X";
+        case T::PanY:        return "Pan Y";
+        default:             return "";
+        }
+}
 
 template <>
-openspace::interaction::JoystickCameraStates::AxisType
-from_string(const std::string& string);
+constexpr openspace::interaction::JoystickCameraStates::AxisType
+from_string(std::string_view string)
+{
+    using T = openspace::interaction::JoystickCameraStates::AxisType;
+
+    if (string == "None") { return T::None; }
+    if (string == "Orbit X") { return T::OrbitX; }
+    if (string == "Orbit Y") { return T::OrbitY; }
+    if (string == "Zoom In") { return T::ZoomIn; }
+    if (string == "Zoom Out") { return T::ZoomOut; }
+    if (string == "LocalRoll X") { return T::LocalRollX; }
+    if (string == "LocalRoll Y") { return T::LocalRollY; }
+    if (string == "GlobalRoll X") { return T::GlobalRollX; }
+    if (string == "GlobalRoll Y") { return T::GlobalRollY; }
+    if (string == "Pan X") { return T::PanX; }
+    if (string == "Pan Y") { return T::PanY; }
+
+    throw RuntimeError("Unkonwn axis type '" + std::string(string) + "'");
+}
 
 } // namespace ghoul
 

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING__BASICTYPES___H__
 
 #include <ghoul/glm.h>
+#include <array>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -95,9 +96,15 @@ struct TileDepthTransform {
 
 
 struct TileMetaData {
-    std::vector<float> maxValues;
-    std::vector<float> minValues;
-    std::vector<bool> hasMissingData;
+    // 4 => the number of rasters, which has a maximum of 4 for RGBA images, we don't
+    // currently support images with arbitrary number of color channels and I don't know
+    // if GDAL does either.  The std::vector here causes a dynamic memory allocation every
+    // time we return a Tile (which contains a TileMetaData as a member variable
+
+    std::array<float, 4> maxValues;
+    std::array<float, 4> minValues;
+    std::array<bool, 4> hasMissingData;
+    uint8_t nValues;
 };
 
 
@@ -161,7 +168,11 @@ struct ChunkTile {
 
 
 
-using ChunkTilePile = std::vector<ChunkTile>;
+//using ChunkTilePile = std::vector<ChunkTile>;
+// The ChunkTilePile either contains 1 or 3 ChunkTile, depending on if layer-blending is
+// enabled. If it is enabled, we need the two adjacent levels, if it is not enabled, only
+// the current layer is needed
+using ChunkTilePile = std::array<std::optional<ChunkTile>, 3>;
 
 } // namespace openspace::globebrowsing
 

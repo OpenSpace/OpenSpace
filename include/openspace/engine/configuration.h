@@ -91,6 +91,7 @@ struct Configuration {
     glm::dvec3 screenSpaceRotation = glm::dvec3(0.0);
     glm::dvec3 masterRotation = glm::dvec3(0.0);
     bool isConsoleDisabled = false;
+    bool usingProfile = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 

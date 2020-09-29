@@ -91,6 +91,22 @@ VertexObjects& gVertexObjectsConstructor();
 static Shaders& shaders = detail::gShadersConstructor();
 static VertexObjects& vertexObjects = detail::gVertexObjectsConstructor();
 
+struct Vertex {
+    GLfloat xyz[3];
+    GLfloat uv[2];
+    GLfloat rgba[4];
+};
+
+struct VertexXYZ {
+    GLfloat xyz[3];
+};
+
+VertexXYZ convertToXYZ(const Vertex& v);
+
+std::vector<VertexXYZ> convert(std::vector<Vertex> v);
+
+std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors = glm::vec4(1.f));
+
 } // namespace openspace::rendering::helper
 
 #endif // __OPENSPACE_CORE___HELPER___H__
