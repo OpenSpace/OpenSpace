@@ -34,6 +34,7 @@ add_executable(
   test_lrucache.cpp
   test_luaconversions.cpp
   test_optionproperty.cpp
+  test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
   test_spicemanager.cpp
@@ -47,7 +48,7 @@ add_executable(
 set_openspace_compile_settings(OpenSpaceTest)
 
 target_include_directories(OpenSpaceTest PUBLIC
-"${GHOUL_BASE_DIR}/ext/catch2/single_include"
+    "${GHOUL_BASE_DIR}/ext/catch2/single_include"
 )
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
 target_link_libraries(OpenSpaceTest openspace-core)

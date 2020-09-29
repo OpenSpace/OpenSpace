@@ -599,19 +599,12 @@ void LuaConsole::update() {
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
-    const size_t nLines = std::min(
-        static_cast<size_t>(_historyLength),
-        _commandsHistory.size()
-    );
-    const FontRenderer::BoundingBoxInformation& bbox =
-        FontRenderer::defaultRenderer().boundingBox(
-            *_historyFont,
-            std::string(nLines, '\n')
-        );
+
+    const float height = _historyFont->height() * (_commandsHistory.size() + 1);
 
     // Update the full height and the target height.
     // Add the height of the entry line and space for a separator.
-    _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
+    _fullHeight = (height + EntryFontSize + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
     // The first frame is going to be finished in approx 10 us, which causes a floating
@@ -629,7 +622,7 @@ void LuaConsole::update() {
 
     _currentHeight += static_cast<float>(dHeight);
 
-    _currentHeight = std::max(0.0f, _currentHeight);
+    _currentHeight = std::max(0.f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
 }
 
@@ -683,10 +676,8 @@ void LuaConsole::render() {
         using namespace ghoul::fontrendering;
 
         // Compute the current width of the string and console prefix.
-        const float currentWidth = FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "> " + currentCommand
-        ).boundingBox.x + inputLocation.x;
+        const float currentWidth =
+            _font->boundingBox("> " + currentCommand).x + inputLocation.x;
 
         // Compute the overflow in pixels
         const float overflow = currentWidth - res.x * 0.995f;
@@ -696,7 +687,7 @@ void LuaConsole::render() {
 
         // Since the overflow is positive, at least one character needs to be removed.
         const size_t nCharsOverflow = static_cast<size_t>(std::min(
-            std::max(1.f, overflow / _font->glyph('m')->width()),
+            std::max(1.f, overflow / _font->glyph('m')->width),
             static_cast<float>(currentCommand.size())
         ));
 
@@ -792,13 +783,8 @@ void LuaConsole::render() {
             res.y - _currentHeight + EntryFontSize
         );
 
-        const FontRenderer::BoundingBoxInformation bbox =
-            FontRenderer::defaultRenderer().boundingBox(*_font, text);
-
-        return glm::vec2(
-            loc.x + res.x - bbox.boundingBox.x - 10.f,
-            loc.y
-        );
+        const glm::vec2 bbox = _font->boundingBox(text);
+        return glm::vec2(loc.x + res.x - bbox.x - 10.f, loc.y);
     };
 
     if (_remoteScripting) {

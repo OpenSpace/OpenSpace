@@ -44,6 +44,8 @@ namespace openspace::globebrowsing::luascriptfunctions {
  * Adds a layer to the specified globe.
  */
 int addLayer(lua_State* L) {
+    ZoneScoped
+
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::addLayer");
 
     // String arguments
@@ -329,7 +331,7 @@ int getGeoPositionForCamera(lua_State* L) {
     const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
     const SceneGraphNode* anchor =
         global::navigationHandler.orbitalNavigator().anchorNode();
-    const glm::dmat4 inverseModelTransform = anchor->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(anchor->modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(

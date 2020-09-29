@@ -47,6 +47,7 @@ public:
     explicit RenderableGalaxy(const ghoul::Dictionary& dictionary);
     virtual ~RenderableGalaxy() = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;
@@ -110,6 +111,9 @@ private:
     GLuint _pointsVao = 0;
     GLuint _positionVbo = 0;
     GLuint _colorVbo = 0;
+
+    std::vector<glm::vec3> _pointPositionsCache;
+    std::vector<glm::vec3> _pointColorsCache;
 };
 
 } // namespace openspace

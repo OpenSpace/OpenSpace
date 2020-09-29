@@ -27,6 +27,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/exception.h>
+#include <cmath>
 #include <utility>
 
 #include <cmath>
@@ -224,50 +226,3 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(int button) const {
 
 
 } // namespace openspace::interaction
-
-namespace ghoul {
-
-template <>
-std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& value)
-{
-    using T = openspace::interaction::JoystickCameraStates::AxisType;
-    switch (value) {
-        case T::None:        return "None";
-        case T::OrbitX:      return "Orbit X";
-        case T::OrbitY:      return "Orbit Y";
-        case T::ZoomIn:      return "Zoom In";
-        case T::ZoomOut:     return "Zoom Out";
-        case T::LocalRollX:  return "LocalRoll X";
-        case T::LocalRollY:  return "LocalRoll Y";
-        case T::GlobalRollX: return "GlobalRoll X";
-        case T::GlobalRollY: return "GlobalRoll Y";
-        case T::PanX:        return "Pan X";
-        case T::PanY:        return "Pan Y";
-        default:             return "";
-    }
-}
-
-template <>
-openspace::interaction::JoystickCameraStates::AxisType from_string(
-                                                                const std::string& string)
-{
-    using T = openspace::interaction::JoystickCameraStates::AxisType;
-
-    static const std::map<std::string, T> Map = {
-        { "None",         T::None },
-        { "Orbit X",      T::OrbitX },
-        { "Orbit Y",      T::OrbitY },
-        { "Zoom In",      T::ZoomIn },
-        { "Zoom Out",     T::ZoomOut },
-        { "LocalRoll X",  T::LocalRollX },
-        { "LocalRoll Y",  T::LocalRollY },
-        { "GlobalRoll X", T::GlobalRollX },
-        { "GlobalRoll Y", T::GlobalRollY },
-        { "Pan X",        T::PanX },
-        { "Pan Y",        T::PanY }
-    };
-
-    return Map.at(string);
-}
-
-} // namespace ghoul

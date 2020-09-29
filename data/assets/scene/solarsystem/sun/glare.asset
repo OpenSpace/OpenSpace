@@ -16,7 +16,7 @@ local SunGlare = {
         Texture = textures .. "/halo.png",
         BlendMode = "Additive",
         Opacity = 0.65,
-        RenderableType = "Transparency"
+        RenderableType = "PreDeferredTransparency"
     },
     Transform = {
         Translation = {

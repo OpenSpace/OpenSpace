@@ -1,0 +1,13 @@
+local texturesPath = asset.require("./../../io_textures").TexturesPath
+local globeIdentifier = asset.require("./../../io").Io.Identifier
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/io.jpg",
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

@@ -31,7 +31,7 @@ local vrt_folders = {
         -- We recommend using this folder for HiRISE
         openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
         -- if not and you have a custom path for HiRISE layers, enter it below
-        '',
+        ''
     },
     Moon = {
         -- Add folders here whose contents will be automatically added to the Moon globe
@@ -58,10 +58,12 @@ asset.onInitialize(function ()
     -- Add local patches described at the top of this file
     for obj, list in pairs(vrt_folders) do
         for _, dir in pairs(list) do
-            openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+            if (dir ~= '') then
+                openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
 
-            if CreateFocusNodes then
-                openspace.globebrowsing.addFocusNodesFromDirectory(dir, obj)
+                if CreateFocusNodes then
+                    openspace.globebrowsing.addFocusNodesFromDirectory(dir, obj)
+                end
             end
         end
     end

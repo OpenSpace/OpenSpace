@@ -1,0 +1,14 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+
+local layer = {
+    Identifier = "Messenger_MDR_Utah",
+    Name = "Messenger MDR [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MessengerMDR.wms",
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

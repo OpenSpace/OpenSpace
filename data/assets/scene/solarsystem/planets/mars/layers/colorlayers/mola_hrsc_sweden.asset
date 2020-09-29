@@ -1,0 +1,14 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+
+local layer = {
+    Identifier = "MOLA_HRSC_Sweden",
+    Name = "MOLA HRSC [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Mola_HRSC.wms"
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

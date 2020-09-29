@@ -40,6 +40,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -55,29 +56,29 @@
 namespace {
     static const char* _loggerCat = "RenderableAtmosphere";
 
-    const char* KeyShadowGroup  = "ShadowGroup";
-    const char* KeyShadowSource = "Source";
-    const char* KeyShadowCaster = "Caster";
+    constexpr const char* KeyShadowGroup  = "ShadowGroup";
+    constexpr const char* KeyShadowSource = "Source";
+    constexpr const char* KeyShadowCaster = "Caster";
 
-    const char* keyAtmosphere               = "Atmosphere";
-    const char* keyAtmosphereRadius         = "AtmosphereRadius";
-    const char* keyPlanetRadius             = "PlanetRadius";
-    const char* keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    const char* keyRayleigh                 = "Rayleigh";
-    const char* keyRayleighHeightScale      = "H_R";
-    const char* keyOzone                    = "Ozone";
-    const char* keyOzoneHeightScale         = "H_O";
-    const char* keyMie                      = "Mie";
-    const char* keyMieHeightScale           = "H_M";
-    const char* keyMiePhaseConstant         = "G";
-    const char* keyImage                    = "Image";
-    const char* keyToneMappingOp            = "ToneMapping";
-    const char* keyATMDebug                 = "Debug";
-    const char* keyTextureScale             = "PreCalculatedTextureScale";
-    const char* keySaveTextures             = "SaveCalculatedTextures";
+    constexpr const char* keyAtmosphere               = "Atmosphere";
+    constexpr const char* keyAtmosphereRadius         = "AtmosphereRadius";
+    constexpr const char* keyPlanetRadius             = "PlanetRadius";
+    constexpr const char* keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
+    constexpr const char* keyRayleigh                 = "Rayleigh";
+    constexpr const char* keyRayleighHeightScale      = "H_R";
+    constexpr const char* keyOzone                    = "Ozone";
+    constexpr const char* keyOzoneHeightScale         = "H_O";
+    constexpr const char* keyMie                      = "Mie";
+    constexpr const char* keyMieHeightScale           = "H_M";
+    constexpr const char* keyMiePhaseConstant         = "G";
+    constexpr const char* keyImage                    = "Image";
+    constexpr const char* keyToneMappingOp            = "ToneMapping";
+    constexpr const char* keyATMDebug                 = "Debug";
+    constexpr const char* keyTextureScale             = "PreCalculatedTextureScale";
+    constexpr const char* keySaveTextures             = "SaveCalculatedTextures";
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
-        "atmmosphereHeight",
+        "atmosphereHeight",
         "Atmosphere Height (KM)",
         "The thickness of the atmosphere in Km"
     };
@@ -715,6 +716,8 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
+    ZoneScoped
+
     if (_atmosphereEnabled) {
         DeferredcasterTask task{ _deferredcaster.get(), data };
         renderTask.deferredcasterTasks.push_back(task);

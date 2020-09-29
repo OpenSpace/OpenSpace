@@ -34,9 +34,9 @@ local Example_Fixed_Height = {
         Body = "NEW HORIZONS",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/NewHorizonsCleanModel.obj"
-        }, 
-        ColorTexture = textures .. "/NHTexture.jpg",
+            GeometryFile = models .. "/NewHorizonsCleanModel.obj",
+            ColorTexture = textures .. "/NHTexture.jpg"
+        }
     },
     GUI = {
         Path = "/Example"
@@ -59,9 +59,9 @@ local Example_Adaptive_Height = {
         Body = "NEW HORIZONS",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/NewHorizonsCleanModel.obj"
-        }, 
-        ColorTexture = textures .. "/NHTexture.jpg",
+            GeometryFile = models .. "/NewHorizonsCleanModel.obj",
+            ColorTexture = textures .. "/NHTexture.jpg"
+        }
     },
     GUI = {
         Path = "/Example"

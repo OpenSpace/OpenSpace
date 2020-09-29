@@ -49,8 +49,9 @@ namespace {
     };
 } // namespace
 
-// @TODO:  This clas is not properly working anymore and needs to be substantially
-//         rewritten
+// @TODO:  This class is not properly working anymore and needs to be substantially
+//         rewritten. When doing so, make sure that any color property uses three
+//         values, not four. The opacity should be handled separately
 
 namespace openspace {
 

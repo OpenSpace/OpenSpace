@@ -70,9 +70,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
   ${OPENSPACE_BASE_DIR}/src/network/parallelserver.cpp
-  ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
-  ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
-  ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -152,6 +149,8 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/lightsource.cpp
+  ${OPENSPACE_BASE_DIR}/src/scene/profile.cpp
+  ${OPENSPACE_BASE_DIR}/src/scene/profile_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
@@ -251,9 +250,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemeasurement.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -341,6 +337,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/lightsource.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/scene/profile.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
@@ -367,6 +364,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/job.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
@@ -435,6 +433,8 @@ target_include_directories(openspace-core PUBLIC
   ${OPENSPACE_BASE_DIR}/include
   # In order to be able to include module files
   ${OPENSPACE_BASE_DIR}
+  # In order to use the date library
+  ${OPENSPACE_BASE_DIR}/ext/date/include
   # In order to be able to include the module_registration file
   ${CMAKE_BINARY_DIR}/_generated/include
 )
@@ -453,7 +453,7 @@ configure_file(
 
 if (APPLE)
   find_library(APPKIT_LIBRARY AppKit REQUIRED)
-  target_link_libraries(openspace-core ${APPKIT_LIBRARY})
+  target_link_libraries(openspace-core PUBLIC ${APPKIT_LIBRARY})
 endif ()
 
 set_openspace_compile_settings(openspace-core)

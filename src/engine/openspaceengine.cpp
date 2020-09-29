@@ -41,8 +41,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/performance/performancemeasurement.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/helper.h>
@@ -51,6 +49,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -63,6 +62,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
@@ -83,12 +83,9 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
+#include <future>
 #include <numeric>
 #include <sstream>
-
-#if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
-#include <vld.h>
-#endif
 
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
@@ -99,8 +96,6 @@
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const int CacheVersion = 1;
-    constexpr const char* ProfileToSceneConverter
-                                         = "${BASE}/scripts/convert_profile_to_scene.lua";
 
 } // namespace
 
@@ -264,11 +259,9 @@ void OpenSpaceEngine::initialize() {
 #endif // WIN32
 
 #ifndef GHOUL_LOGGING_ENABLE_TRACE
-    LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
-
     if (level == ghoul::logging::LogLevel::Trace) {
         LWARNING(
-            "Desired logging level is set to 'Trace' but application was " <<
+            "Desired logging level is set to 'Trace' but application was "
             "compiled without Trace support"
         );
     }
@@ -300,44 +293,51 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration.profile.empty()) {
-        LINFO(
-            fmt::format("Run Lua script to convert {}.profile to scene",
-            global::configuration.profile)
-        );
-        ghoul::lua::LuaState lState;
+        std::string inputProfilePath = absPath("${PROFILES}");
+        std::string outputScenePath = absPath("${TEMPORARY}");
+        std::string inputProfile = inputProfilePath + "/" + global::configuration.profile
+            + ".profile";
+        std::string outputAsset = outputScenePath + "/" + global::configuration.profile
+            + ".asset";
 
-        // We can't use the absPath function here because we pass the path into the Lua
-        // function, which requires additional escaping
-        std::string inputProfilePath = generateFilePath("${ASSETS}");
-        std::string outputScenePath = generateFilePath("${TEMPORARY}");
+        if (!FileSys.fileExists(inputProfile)) {
+            LERROR(fmt::format(
+                "Could not load profile '{}': File does not exist", inputProfile)
+            );
+        }
+        else {
+            // Load the profile
+            std::ifstream inFile;
+            try {
+                inFile.open(inputProfile, std::ifstream::in);
+            }
+            catch (const std::ifstream::failure& e) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Exception opening profile file for read: {} ({})",
+                    inputProfile, e.what())
+                );
+            }
 
-        std::string setProfileFilenameInLuaState = fmt::format(R"(
-            openspace = {{}}
-            openspace.profile = {{}}
-            function openspace.profile.getFilename()
-              return "{}.profile"
-            end
-            function openspace.profile.getProfileInputPath()
-              return "{}"
-            end
-            function openspace.profile.getSceneOutputPath()
-              return "{}"
-            end
-            )",
-            global::configuration.profile,
-            inputProfilePath,
-            outputScenePath
-        );
+            std::vector<std::string> content;
+            std::string line;
+            while (std::getline(inFile, line)) {
+                content.push_back(std::move(line));
+            }
 
-        ghoul::lua::runScript(lState, setProfileFilenameInLuaState);
-        ghoul::lua::runScriptFile(lState, absPath(ProfileToSceneConverter));
+            global::profile = Profile(content);
 
+            // Then save the profile to a scene so that we can load it with the
+            // existing infrastructure
+            std::ofstream scene(outputAsset);
+            std::string sceneContent = global::profile.convertToScene();
+            scene << sceneContent;
 
-        // Set asset name to that of the profile because a new scene file will be
-        // created with that name, and also because the profile name will override
-        // an asset name if both are provided.
-        global::configuration.asset =
-            absPath("${TEMPORARY}/") + global::configuration.profile;
+            // Set asset name to that of the profile because a new scene file will be
+            // created with that name, and also because the profile name will override
+            // an asset name if both are provided.
+            global::configuration.asset = outputAsset;
+            global::configuration.usingProfile = true;
+        }
     }
 
     // Set up asset loader
@@ -707,8 +707,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (global::configuration.useMultithreadedInitialization) {
-        unsigned int nAvailableThreads = std::thread::hardware_concurrency();
-        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads - 1;
+        unsigned int nAvailableThreads = std::min(
+            std::thread::hardware_concurrency() - 1,
+            4u
+        );
+        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads;
         sceneInitializer = std::make_unique<MultiThreadedSceneInitializer>(nThreads);
     }
     else {
@@ -850,7 +853,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     runGlobalCustomizationScripts();
 
-    writeSceneDocumentation();
+    _writeDocumentationTask = std::async(&OpenSpaceEngine::writeSceneDocumentation, this);
 
     LTRACE("OpenSpaceEngine::loadSingleAsset(end)");
 }
@@ -994,10 +997,7 @@ void OpenSpaceEngine::loadFonts() {
     }
 
     try {
-        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-        if (!initSuccess) {
-            LERROR("Error initializing default font renderer");
-        }
+        ghoul::fontrendering::FontRenderer::initialize();
     }
     catch (const ghoul::RuntimeError& err) {
         LERRORC(err.component, err.message);
@@ -1011,6 +1011,18 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
     std::string path = global::configuration.documentation.path;
     if (!path.empty()) {
+        std::future<std::string> root = std::async(
+            &properties::PropertyOwner::generateJson,
+            &global::rootPropertyOwner
+        );
+        
+        std::future<std::string> scene = std::async(
+            &properties::PropertyOwner::generateJson,
+            _scene.get()
+        );
+
+
+
         path = absPath(path) + "/";
         _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
         _documentationJson += global::keybindingManager.jsonName() + "\",";
@@ -1024,11 +1036,11 @@ void OpenSpaceEngine::writeSceneDocumentation() {
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Properties\",";
         _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
-        _documentationJson += "\",\"data\":" + global::rootPropertyOwner.generateJson();
+        _documentationJson += "\",\"data\":" + root.get();
         _documentationJson += "},";
         _documentationJson += "{\"name\":\"Scene Graph Information\",";
         _documentationJson += "\"identifier\":\"propertylist";
-        _documentationJson += "\",\"data\":" + _scene->generateJson();
+        _documentationJson += "\",\"data\":" + scene.get();
         _documentationJson += "}";
 
         //add templates for the jsons we just registered
@@ -1051,23 +1063,21 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
 void OpenSpaceEngine::preSynchronization() {
     ZoneScoped
+    TracyGpuZone("preSynchronization")
 
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
-    //std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::preSynchronization"
-        );
-    }
-
     FileSys.triggerFilesystemEvents();
+
+    // Reset the temporary, frame-based storage
+    global::memoryManager.TemporaryMemory.reset();
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
+        global::profile.setIgnoreUpdates(true);
         loadSingleAsset(_scheduledAssetPathToLoad);
+        global::profile.setIgnoreUpdates(false);
+        resetPropertyChangeFlagsOfSubowners(&global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
     }
@@ -1123,15 +1133,8 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     ZoneScoped
-
+    TracyGpuZone("postSynchronizationPreDraw")
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::postSynchronizationPreDraw"
-        );
-    }
 
     bool master = global::windowDelegate.isMaster();
     global::syncEngine.postSynchronization(SyncEngine::IsMaster(master));
@@ -1156,10 +1159,19 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     const bool updated = _assetManager->update();
     if (updated) {
-        writeSceneDocumentation();
+        if (_writeDocumentationTask.valid()) {
+            // If there still is a documentation creation task the previous frame, we need
+            // to wait for it to finish first, or else we might write to the same file
+            _writeDocumentationTask.wait();
+        }
+        _writeDocumentationTask = std::async(
+            &OpenSpaceEngine::writeSceneDocumentation, this
+        );
     }
 
-    global::renderEngine.updateScene();
+    if (!global::windowDelegate.isMaster()) {
+        global::renderEngine.updateScene();
+    }
     global::renderEngine.updateRenderer();
     global::renderEngine.updateScreenSpaceRenderables();
     global::renderEngine.updateShaderPrograms();
@@ -1200,15 +1212,8 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
                              const glm::mat4& projectionMatrix)
 {
     ZoneScoped
-
+    TracyGpuZone("Render")
     LTRACE("OpenSpaceEngine::render(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::render"
-        );
-    }
 
     const bool isGuiWindow =
         global::windowDelegate.hasGuiWindow() ?
@@ -1232,15 +1237,8 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
 void OpenSpaceEngine::drawOverlays() {
     ZoneScoped
-
+    TracyGpuZone("Draw2D")
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::drawOverlays"
-        );
-    }
 
     const bool isGuiWindow =
         global::windowDelegate.hasGuiWindow() ?
@@ -1250,6 +1248,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine.renderOverlays(_shutdown);
         global::luaConsole.render();
+        global::sessionRecording.render();
     }
 
     for (const std::function<void()>& func : global::callback::draw2D) {
@@ -1263,15 +1262,8 @@ void OpenSpaceEngine::drawOverlays() {
 
 void OpenSpaceEngine::postDraw() {
     ZoneScoped
-
+    TracyGpuZone("postDraw")
     LTRACE("OpenSpaceEngine::postDraw(begin)");
-
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::postDraw"
-        );
-    }
 
     global::renderEngine.postDraw();
 
@@ -1283,10 +1275,32 @@ void OpenSpaceEngine::postDraw() {
 
     if (_isFirstRenderingFirstFrame) {
         global::windowDelegate.setSynchronization(true);
+        resetPropertyChangeFlags();
         _isFirstRenderingFirstFrame = false;
     }
 
+    global::memoryManager.PersistentMemory.housekeeping();
+
     LTRACE("OpenSpaceEngine::postDraw(end)");
+}
+
+void OpenSpaceEngine::resetPropertyChangeFlags() {
+    ZoneScoped
+
+    std::vector<SceneGraphNode*> nodes =
+            global::renderEngine.scene()->allSceneGraphNodes();
+    for (SceneGraphNode* n : nodes) {
+        resetPropertyChangeFlagsOfSubowners(n);
+    }
+}
+
+void OpenSpaceEngine::resetPropertyChangeFlagsOfSubowners(properties::PropertyOwner* po) {
+    for (properties::PropertyOwner* subOwner : po->propertySubOwners()) {
+        resetPropertyChangeFlagsOfSubowners(subOwner);
+    }
+    for (properties::Property* p : po->properties()) {
+        p->resetToUnchanged();
+    }
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {

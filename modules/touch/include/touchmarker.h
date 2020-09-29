@@ -58,12 +58,12 @@ private:
 
     properties::BoolProperty _visible;
     properties::FloatProperty _radiusSize;
-    properties::FloatProperty _transparency;
+    properties::FloatProperty _opacity;
     properties::FloatProperty _thickness;
     properties::Vec3Property _color;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(radius, transparency, thickness, color) _uniformCache;
+    UniformCache(radius, opacity, thickness, color) _uniformCache;
 
     std::vector<GLfloat> _vertexData;
     GLuint _quad = 0;

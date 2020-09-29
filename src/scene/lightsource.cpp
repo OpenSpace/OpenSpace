@@ -91,12 +91,12 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     const std::string timeFrameType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<LightSource>();
-    std::unique_ptr<LightSource> result = factory->create(timeFrameType, dictionary);
-
+    LightSource* source = factory->create(timeFrameType, dictionary);
+    
     const std::string identifier = dictionary.value<std::string>(KeyIdentifier);
-    result->setIdentifier(identifier);
+    source->setIdentifier(identifier);
 
-    return result;
+    return std::unique_ptr<LightSource>(source);
 }
 
 LightSource::LightSource()

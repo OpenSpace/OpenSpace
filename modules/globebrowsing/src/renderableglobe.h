@@ -160,7 +160,7 @@ private:
      * allows culling of the <code>Chunk</code>s in question.
      */
     bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
-        const BoundingHeights& heights) const;
+        const BoundingHeights& heights, const glm::dmat4& mvp) const;
 
     /**
      * Gets the desired level which can be used to determine if a chunk should split
@@ -222,7 +222,7 @@ private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
         bool renderBounds, bool renderAABB) const;
 
-    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData, const glm::dmat4& mvp) const;
     bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights) const;
 
@@ -245,8 +245,8 @@ private:
 
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
-    bool updateChunkTree(Chunk& cn, const RenderData& data);
-    void updateChunk(Chunk& chunk, const RenderData& data) const;
+    bool updateChunkTree(Chunk& cn, const RenderData& data, const glm::dmat4& mvp);
+    void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
     Ellipsoid _ellipsoid;
@@ -257,6 +257,11 @@ private:
     glm::dmat4 _cachedInverseModelTransform = glm::dmat4(1.0);
 
     ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
+
+    std::vector<const Chunk*> _globalChunkBuffer;
+    std::vector<const Chunk*> _localChunkBuffer;
+    std::vector<const Chunk*> _traversalMemory;
+
 
     Chunk _leftRoot;  // Covers all negative longitudes
     Chunk _rightRoot; // Covers all positive longitudes
@@ -284,6 +289,7 @@ private:
     bool _chunkCornersDirty = true;
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
+    bool _layerManagerDirty = true;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;

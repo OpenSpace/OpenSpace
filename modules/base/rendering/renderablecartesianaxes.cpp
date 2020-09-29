@@ -32,6 +32,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -67,19 +68,19 @@ documentation::Documentation RenderableCartesianAxes::Documentation() {
         {
             {
                 XColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 XColorInfo.description
             },
             {
                 YColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 YColorInfo.description
             },
             {
                 ZColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 ZColorInfo.description
             }
@@ -93,21 +94,21 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     , _program(nullptr)
     , _xColor(
         XColorInfo,
-        glm::vec4(0.f, 0.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(1.f, 0.f, 0.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _yColor(
         YColorInfo,
-        glm::vec4(0.f, 1.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(0.f, 1.f, 0.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
     , _zColor(
         ZColorInfo,
-        glm::vec4(0.f, 0.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
+        glm::vec3(0.f, 0.f, 1.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
     )
 {
     documentation::testSpecificationAndThrow(
@@ -117,19 +118,19 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     );
 
     if (dictionary.hasKey(XColorInfo.identifier)) {
-        _xColor = dictionary.value<glm::vec4>(XColorInfo.identifier);
+        _xColor = dictionary.value<glm::vec3>(XColorInfo.identifier);
     }
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
 
     if (dictionary.hasKey(XColorInfo.identifier)) {
-        _yColor = dictionary.value<glm::vec4>(YColorInfo.identifier);
+        _yColor = dictionary.value<glm::vec3>(YColorInfo.identifier);
     }
     _yColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_yColor);
 
     if (dictionary.hasKey(ZColorInfo.identifier)) {
-        _zColor = dictionary.value<glm::vec4>(ZColorInfo.identifier);
+        _zColor = dictionary.value<glm::vec3>(ZColorInfo.identifier);
     }
     _zColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_zColor);
@@ -233,21 +234,6 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->setUniform("yColor", _yColor);
     _program->setUniform("zColor", _zColor);
 
-    // Saves current state:
-    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
-    GLfloat currentLineWidth;
-    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
-
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
-        blendDestRGB, blendSrcAlpha, blendSrcRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
@@ -261,15 +247,8 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->deactivate();
 
     // Restores GL State
-    glLineWidth(currentLineWidth);
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    if (!isBlendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-    if (!isLineSmoothEnabled) {
-        glDisable(GL_LINE_SMOOTH);
-    }
+    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine.openglStateCache().resetLineState();
 }
 
 } // namespace openspace

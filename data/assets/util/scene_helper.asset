@@ -9,7 +9,6 @@ local bindKeys = function(t, ignoreWarning)
 
         local currentKey = openspace.getKeyBinding(k.Key)
         if (next(currentKey) ~= nil) and (not ignoreWarning) then
-
             openspace.printWarning('New keybind for "' .. k.Key .. '" is added, but a previous keybind already existed. If you want to silence this warning, pass "true", to this call to bindKeys')
         end
 

@@ -1,0 +1,54 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local scale = 3E11  
+
+local radialGrid = {
+    Identifier = "ExampleRadialGrid",
+    Parent = "Root",
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = scale
+        }
+    },
+    Renderable = {
+        Type = "RenderableRadialGrid",
+        Opacity = 0.8,
+        GridColor = {0.6, 1.0, 0.7},
+        LineWidth = 3.0,
+        GridSegments = {3, 4},
+        InnerRadius = 0.2,
+        Enabled = false
+    },
+    GUI = {
+        Name = "Example Radial Grid",
+        Path = "/Examples/Grids"
+    }
+}
+
+local planarGrid = {
+    Identifier = "ExampleGrid",
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = scale
+        }
+    },
+    Renderable = {
+        Type = "RenderableGrid",
+        GridColor = {0.0, 1.0, 0.8},
+        LineWidth = 2.0,
+        Segments = {5, 10},
+        Size = {1, 2},
+        Enabled = false
+    },
+    GUI = {
+        Name = "Example Grid",
+        Path = "/Examples/Grids"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+    radialGrid, 
+    planarGrid 
+})

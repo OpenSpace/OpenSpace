@@ -1,0 +1,10 @@
+local colorLayersPath = "./layers/colorlayers"
+
+colorLayer = asset.require(colorLayersPath .. "/titan_texture")
+local colorLayer = asset.require(colorLayersPath .. "/cassini_iss_global_mosaic_4km_liu")
+
+-- Set enabled layers (temporary solution)
+-- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
+asset.onInitialize(function () 
+    openspace.setPropertyValueSingle("Scene.Titan.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
+end)

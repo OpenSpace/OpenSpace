@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyKernels = "Kernels";
@@ -114,19 +115,13 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     : _target(TargetInfo)
     , _observer(ObserverInfo)
     , _frame(FrameInfo, DefaultReferenceFrame)
+    , _cachedFrame(DefaultReferenceFrame)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
         "SpiceTranslation"
     );
-
-    _target = dictionary.value<std::string>(TargetInfo.identifier);
-    _observer = dictionary.value<std::string>(ObserverInfo.identifier);
-
-    if (dictionary.hasKey(FrameInfo.identifier)) {
-        _frame = dictionary.value<std::string>(FrameInfo.identifier);
-    }
 
     auto loadKernel = [](const std::string& kernel) {
         if (!FileSys.fileExists(kernel)) {
@@ -156,31 +151,45 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         }
     }
 
-    auto update = [this](){
+    _target.onChange([this]() {
+        _cachedTarget = _target;
         requireUpdate();
         notifyObservers();
-    };
-
-    _target.onChange(update);
+    });
     addProperty(_target);
 
-    _observer.onChange(update);
+    _observer.onChange([this]() {
+        _cachedObserver = _observer;
+        requireUpdate();
+        notifyObservers();
+    });
     addProperty(_observer);
 
-    _frame.onChange(update);
+    _frame.onChange([this]() {
+        _cachedFrame = _frame;
+        requireUpdate();
+        notifyObservers();
+    });
     addProperty(_frame);
+
+    _target = dictionary.value<std::string>(TargetInfo.identifier);
+    _observer = dictionary.value<std::string>(ObserverInfo.identifier);
+
+    if (dictionary.hasKey(FrameInfo.identifier)) {
+        _frame = dictionary.value<std::string>(FrameInfo.identifier);
+    }
 }
 
 glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
     double lightTime = 0.0;
     return SpiceManager::ref().targetPosition(
-        _target,
-        _observer,
-        _frame,
+        _cachedTarget,
+        _cachedObserver,
+        _cachedFrame,
         {},
         data.time.j2000Seconds(),
         lightTime
-    ) * glm::pow(10.0, 3.0);
+    ) * 1000.0;
 }
 
 } // namespace openspace

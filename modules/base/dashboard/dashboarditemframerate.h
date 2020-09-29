@@ -68,6 +68,7 @@ private:
     double _minDeltaTimeCache = 1.0;
     double _maxDeltaTimeCache = -1.0;
     bool _shouldClearCache = true;
+    mutable std::vector<char> _buffer;
 };
 
 } // openspace

@@ -33,6 +33,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 #include <stack>
 
 namespace {
@@ -129,6 +130,8 @@ DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
 }
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     if (!global::missionManager.hasCurrentMission()) {
         return;
     }
@@ -245,6 +248,8 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemMission::size() const {
+    ZoneScoped
+
     // @TODO fix this up ---abock
     return { 0.f, 0.f };
 }

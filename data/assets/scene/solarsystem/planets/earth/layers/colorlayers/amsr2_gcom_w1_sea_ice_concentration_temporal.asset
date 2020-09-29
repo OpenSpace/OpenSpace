@@ -1,0 +1,21 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+local layer = {
+    Identifier = "AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal",
+    Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
+    Type = "TemporalTileLayer",
+    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+        "AMSRU2_Sea_Ice_Concentration_12km",
+        "2012-05-08",
+        "Yesterday",
+        "1d",
+        "2km",
+        "png"
+    )
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
