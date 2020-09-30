@@ -119,13 +119,15 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     std::string DeltaStringEnd = "";
     if (deltatime > 60) {
         deltatime = deltatime / 60;
-        DeltaStringEnd = " MINUTES / SECOND";
+        DeltaStringEnd = " MINUTES / SECOND"; 
     }
     else {
         DeltaStringEnd = " SECONDS / SECOND";
     }
-    timestring += '\n';
-    timestring += std::to_string(int(deltatime)) + DeltaStringEnd;
+    if (deltatime != 0) {
+        timestring += '\n';
+        timestring += std::to_string(int(deltatime)) + DeltaStringEnd;
+    }
 
     RenderFont(
         *_font,

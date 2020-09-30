@@ -48,14 +48,18 @@ local Keybindings = {
     {
         Key = "F2",
         Name = "Show Flux Value Legend",
-        Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);",
+        Command =
+        	"openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Alpha', 0.000000);" ..
+        	"openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Alpha', 1.000000, 4);" ..
+        	"openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);",
 		Documentation = "Show the legend image",
         Local = true
     },
     {
         Key = "F3",
         Name = "Show Flux Value Legend",
-        Command = "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', false);",
+        Command = 
+        	"openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Alpha', 0.000000, 2);",
 		Documentation = "Hides the legend image",
         Local = true
     },
@@ -380,7 +384,20 @@ local Keybindings = {
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
-     {
+    {
+		Key = "Shift+a",
+		Command =
+			--"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Enabled', true);" ..
+			propertyHelper.invert('Scene.Earths_Magnetosphere.Renderable.Enabled') ..
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.lineWidth', 1.500000);" ..
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.00000});" ..
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.50000}, 5);",
+		Documentation = "Transition Magnetosphere",
+		Name = "Transition Magnetosphere",
+		GuiPath = "/CCMC/Nodes",
+        Local = false
+    },
+    {
 		Key = "Shift+h",
 		Command =
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', true);" ..
@@ -388,7 +405,7 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 5.200000);" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 0.190000);",
 		Documentation = "Turn on off glare",
-		Name = "Second transition Emilie",
+		Name = "Last transition Emilie",
 		GuiPath = "/CCMC/Nodes",
         Local = false
     },
