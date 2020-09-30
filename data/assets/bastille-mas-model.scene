@@ -331,6 +331,9 @@ local Keybindings = {
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'focusPoint');" ..
 			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', true);" ..
 
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.000000});" ..
+			"openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.500000}, 6);" ..
+
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);" ..
 			"openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);" ..
@@ -391,7 +394,7 @@ local Keybindings = {
 			propertyHelper.invert('Scene.Earths_Magnetosphere.Renderable.Enabled') ..
 			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.lineWidth', 1.500000);" ..
 			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.00000});" ..
-			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.50000}, 5);",
+			"openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.50000}, 8);",
 		Documentation = "Transition Magnetosphere",
 		Name = "Transition Magnetosphere",
 		GuiPath = "/CCMC/Nodes",
